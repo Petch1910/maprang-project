@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+// --- CONFIGURATION ---
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- USER MODELS ---
+
+model User {
+  id              String      @id @db.Uuid
+  email           String      @unique
+  username        String?     @unique
+  role            Role        @default(USER)
+  tokenBalance    Int         @default(1000)
+  characters      Character[]
+  chats           Chat[]
+  favorites       Favorite[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// --- AI CHARACTER MODELS ---
+
+model Character {
+  id              String      @id @default(uuid()) @db.Uuid
+  name            String
+  avatarUrl       String?
+  description     String?     @db.Text
+  systemPrompt    String      @db.Text
+  greeting        String?     @db.Text
+  exampleDialog   String?     @db.Text
+  visibility      Visibility  @default(PRIVATE)
+  tags            String[]    
+  viewCount       Int         @default(0)
+  chatCount       Int         @default(0)
+  creatorId       String      @db.Uuid
+  creator         User        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  chats           Chat[]
+  favoritedBy     Favorite[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([visibility, createdAt(desc)])
+  @@index([visibility, chatCount(desc)])
+}
+
+enum Visibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
+}
+
+// --- CHAT & MESSAGE MODELS ---
+
+model Chat {
+  id              String      @id @default(uuid()) @db.Uuid
+  title           String?     
+  summary         String?     @db.Text
+  isArchived      Boolean     @default(false)
+  userId          String      @db.Uuid
+  characterId     String      @db.Uuid
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  character       Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  messages        Message[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([userId, isArchived, updatedAt(desc)])
+}
+
+model Message {
+  id              String      @id @default(cuid())
+  role            MessageRole
+  content         String      @db.Text
+  tokenUsed       Int?        @default(0)
+  isEdited        Boolean     @default(false)
+  chatId          String      @db.Uuid
+  chat            Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([chatId, id(asc)])
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+// --- INTERACTION MODELS ---
+
+model Favorite {
+  id              String      @id @default(uuid()) @db.Uuid
+  userId          String      @db.Uuid
+  characterId     String      @db.Uuid
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  character       Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+
+  @@unique([userId, characterId])
+  @@index([userId])
+}

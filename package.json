@@ -1,0 +1,20 @@
+{
+  "name": "maprang-project",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@elysiajs/eden": "^1.4.9",
+    "ai": "^6.0.174",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^1.14.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  }
+}
