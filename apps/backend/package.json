@@ -3,17 +3,25 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch index.ts"
+    "dev": "bun --watch index.ts",
+    "start": "bun index.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit",
+    "env:check": "bun src/env.check.ts",
+    "deploy:check": "bunx prisma validate && bunx tsc --noEmit && bun test"
   },
   "prisma": {
     "seed": "bun seed.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",
+    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "dotenv": "^17.4.2",
     "elysia": "^1.4.28",
-    "elysia-rate-limit": "^4.6.1"
+    "elysia-rate-limit": "^4.6.1",
+    "openai": "^6.35.0",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

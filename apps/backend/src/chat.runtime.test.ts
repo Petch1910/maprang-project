@@ -1,0 +1,67 @@
+import { describe, expect, test } from 'bun:test'
+import { updateRuntimeState } from './chat.service'
+
+describe('chat runtime state', () => {
+  test('persists emotional momentum and relationship timeline from user pressure', () => {
+    const runtime = updateRuntimeState({
+      previousMemory: null,
+      previousSceneState: null,
+      previousRelationshipState: null,
+      character: null,
+      userMessage: 'I trust you with this secret',
+      reply: 'I will hold that carefully.',
+    })
+
+    expect(runtime.memory.turnCount).toBe(1)
+    expect(runtime.memory.emotionalMomentum.direction).toBe('warming')
+    expect(runtime.memory.relationshipTimeline.at(-1)?.label).toBe('vulnerability')
+    expect(runtime.relationshipState.affinity).toBeGreaterThan(0)
+    expect(runtime.relationshipState.trust).toBeGreaterThan(0)
+  })
+
+  test('applies scene outcome delta when an active scene resolves', () => {
+    const runtime = updateRuntimeState({
+      previousMemory: { turnCount: 1 },
+      previousSceneState: {
+        mode: 'scene',
+        activeScene: {
+          code: 'soft_confession_available',
+          title: 'Soft confession',
+          objective: 'Open up carefully.',
+          startedAtTurn: 1,
+          exitAfterTurns: 4,
+        },
+        pendingEvents: [],
+        sceneOutcomes: [],
+        eventCooldowns: {},
+        consumedEvents: [],
+        declinedEvents: [],
+      },
+      previousRelationshipState: {
+        affinity: 60,
+        trust: 60,
+        intimacy: 30,
+        dominance: 0,
+        fear: 0,
+        respect: 20,
+        status: 'close',
+        tier: 'warm',
+        tone: 'gentle',
+        arcStage: 'opening',
+        events: [],
+        constraints: [],
+        multipliers: {},
+        timeline: [],
+      },
+      character: null,
+      userMessage: '/scene accept soft_confession_available',
+      reply: 'I am glad you stayed with me in that moment.',
+    })
+
+    expect(runtime.sceneState.mode).toBe('sandbox')
+    expect(runtime.sceneState.sceneOutcomes.at(-1)?.outcome).toBe('accepted')
+    expect(runtime.relationshipState.affinity).toBeGreaterThan(60)
+    expect(runtime.relationshipState.trust).toBeGreaterThan(60)
+    expect(runtime.memory.relationshipTimeline.at(-1)?.type).toBe('scene')
+  })
+})

@@ -3,6 +3,14 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "backend:check": "cd apps/backend && bun run deploy:check",
+    "frontend:check": "cd apps/frontend && bun run deploy:check",
+    "secrets:check": "bun scripts/check-secrets.ts",
+    "smoke:local": "bun scripts/local-smoke.ts",
+    "smoke:chat": "bun scripts/live-chat-smoke.ts",
+    "qa:local": "bun run secrets:check && bun run backend:check && bun run frontend:check && bun run smoke:local && bun run smoke:chat"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

@@ -1,61 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
-// --- CONFIGURATION ---
+datasource db {
+  provider = "postgresql"
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-}
-
-// --- USER MODELS ---
-
-model User {
-  id              String      @id @db.Uuid
-  email           String      @unique
-  username        String?     @unique
-  role            Role        @default(USER)
-  tokenBalance    Int         @default(1000)
-  characters      Character[]
-  chats           Chat[]
-  favorites       Favorite[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-}
-
 enum Role {
   USER
   ADMIN
-}
-
-// --- AI CHARACTER MODELS ---
-
-model Character {
-  id              String      @id @default(uuid()) @db.Uuid
-  name            String
-  avatarUrl       String?
-  description     String?     @db.Text
-  systemPrompt    String      @db.Text
-  greeting        String?     @db.Text
-  exampleDialog   String?     @db.Text
-  visibility      Visibility  @default(PRIVATE)
-  tags            String[]    
-  viewCount       Int         @default(0)
-  chatCount       Int         @default(0)
-  creatorId       String      @db.Uuid
-  creator         User        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  chats           Chat[]
-  favoritedBy     Favorite[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@index([visibility, createdAt(desc)])
-  @@index([visibility, chatCount(desc)])
 }
 
 enum Visibility {
@@ -64,36 +17,12 @@ enum Visibility {
   PRIVATE
 }
 
-// --- CHAT & MESSAGE MODELS ---
-
-model Chat {
-  id              String      @id @default(uuid()) @db.Uuid
-  title           String?     
-  summary         String?     @db.Text
-  isArchived      Boolean     @default(false)
-  userId          String      @db.Uuid
-  characterId     String      @db.Uuid
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  character       Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  messages        Message[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@index([userId, isArchived, updatedAt(desc)])
-}
-
-model Message {
-  id              String      @id @default(cuid())
-  role            MessageRole
-  content         String      @db.Text
-  tokenUsed       Int?        @default(0)
-  isEdited        Boolean     @default(false)
-  chatId          String      @db.Uuid
-  chat            Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@index([chatId, id(asc)])
+enum CharacterStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  REJECTED
+  ARCHIVED
 }
 
 enum MessageRole {
@@ -102,16 +31,195 @@ enum MessageRole {
   system
 }
 
-// --- INTERACTION MODELS ---
+model User {
+  id           String  @id @db.Uuid
+  email        String  @unique
+  username     String? @unique
+  role         Role    @default(USER)
+  tokenBalance Int     @default(1000)
+
+  characters Character[]
+  chats      Chat[]
+  favorites  Favorite[]
+  usages     Usage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
+model Character {
+  id        String  @id @default(uuid()) @db.Uuid
+  sourceKey String? @unique
+
+  name        String
+  avatarUrl   String?
+  tagline     String?
+  description String? @db.Text
+  biography   String? @db.Text
+  scenario    String? @db.Text
+  greeting    String? @db.Text
+  exampleDialog String? @db.Text
+
+  systemPrompt    String  @db.Text
+  compactPrompt   String? @db.Text
+  characterAnchor String? @db.Text
+  constraints     String? @db.Text
+  promptVersion   Int     @default(1)
+
+  status       CharacterStatus @default(DRAFT)
+  visibility   Visibility      @default(PRIVATE)
+  qualityScore Int             @default(0)
+  qualityNotes Json?
+  publishedAt  DateTime?
+
+  viewCount Int @default(0)
+  chatCount Int @default(0)
+
+  creatorId String @db.Uuid
+  creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  chats       Chat[]
+  favoritedBy Favorite[]
+  tags        CharacterTag[]
+  loreEntries LoreEntry[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([status, visibility, deletedAt, createdAt(sort: Desc)])
+  @@index([status, visibility, deletedAt, chatCount(sort: Desc)])
+  @@index([creatorId])
+}
+
+model Tag {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  characters CharacterTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CharacterTag {
+  characterId String @db.Uuid
+  tagId       String @db.Uuid
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([characterId, tagId])
+  @@index([tagId])
+}
+
+model Chat {
+  id      String  @id @default(uuid()) @db.Uuid
+  title   String?
+  summary String? @db.Text
+
+  memory            Json?
+  sceneState        Json?
+  relationshipState Json?
+
+  isArchived Boolean @default(false)
+
+  userId      String @db.Uuid
+  characterId String @db.Uuid
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  lastMessageAt DateTime  @default(now())
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId, isArchived, lastMessageAt(sort: Desc)])
+  @@index([characterId, lastMessageAt(sort: Desc)])
+  @@index([deletedAt])
+}
+
+model Message {
+  id      String      @id @default(cuid())
+  role    MessageRole
+  content String      @db.Text
+
+  promptTokens     Int?
+  completionTokens Int?
+  totalTokens      Int?
+  tokenUsed        Int      @default(0)
+  modelUsed        String?
+  cost             Decimal? @db.Decimal(10, 6)
+  metadata         Json?
+  isEdited         Boolean  @default(false)
+
+  chatId String @db.Uuid
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([chatId, createdAt(sort: Asc)])
+  @@index([deletedAt])
+}
+
+model LoreEntry {
+  id          String @id @default(uuid()) @db.Uuid
+  characterId String @db.Uuid
+
+  keyword        String
+  aliases        String[]
+  content        String @db.Text
+  priority       Int    @default(0)
+  hierarchyLevel Int    @default(0)
+  parentLoreId   String? @db.Uuid
+
+  character  Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  parentLore LoreEntry?  @relation("LoreHierarchy", fields: [parentLoreId], references: [id])
+  children   LoreEntry[] @relation("LoreHierarchy")
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([characterId, keyword])
+  @@index([characterId, priority])
+  @@index([deletedAt])
+}
 
 model Favorite {
-  id              String      @id @default(uuid()) @db.Uuid
-  userId          String      @db.Uuid
-  characterId     String      @db.Uuid
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  character       Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  createdAt       DateTime    @default(now())
+  id          String @id @default(uuid()) @db.Uuid
+  userId      String @db.Uuid
+  characterId String @db.Uuid
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@unique([userId, characterId])
   @@index([userId])
+  @@index([characterId])
+}
+
+model Usage {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+
+  tokens    Int
+  cost      Decimal? @db.Decimal(10, 6)
+  modelName String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
 }

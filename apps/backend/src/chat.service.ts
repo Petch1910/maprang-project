@@ -1,0 +1,897 @@
+import { MessageRole, type PrismaClient } from '@prisma/client'
+import OpenAI from 'openai'
+import type { ChatCompletion } from 'openai/resources/chat/completions'
+import { loadCharacter, publicCharacter, type CharacterWithTags } from './character.service'
+import {
+  defaultCharacterId,
+  defaultSystemPrompt,
+  defaultUserId,
+  maxInputChars,
+  minTokenBalanceForChat,
+  modelInputCostPer1M,
+  modelName,
+  modelOutputCostPer1M,
+} from './config'
+import { buildContextPrompt, loadRelevantLore } from './context.service'
+import { getPrisma } from './db'
+import {
+  applyRelationshipDelta,
+  buildRelationshipPrompt,
+  coerceRelationshipState,
+  updateRelationshipState,
+  type RelationshipState,
+} from './relationship.engine'
+import {
+  buildScenePrompt as runtimeBuildScenePrompt,
+  messageSignals as runtimeMessageSignals,
+  momentumRelationshipDelta as runtimeMomentumRelationshipDelta,
+  outcomeRelationshipDelta as runtimeOutcomeRelationshipDelta,
+  updateEmotionalMomentum as runtimeUpdateEmotionalMomentum,
+  updateSceneState as runtimeUpdateSceneState,
+  type ActiveScene,
+  type EmotionalMomentum,
+  type SceneEvent,
+  type SceneOutcome,
+} from './scene.runtime'
+
+const openai = new OpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
+})
+
+type ChatRole = 'system' | 'user' | 'assistant'
+type ChatMessage = { role: ChatRole; content: string }
+type Prisma = PrismaClient
+
+export type SendChatInput = {
+  message: string
+  characterId?: string
+  chatId?: string
+  userId?: string
+  history?: ChatMessage[]
+}
+
+type CompletionUsage = {
+  promptTokens: number
+  completionTokens: number
+  totalTokens: number
+  cost: number
+}
+
+type PersistResult = {
+  chatId: string
+  tokenBalance: number | null
+  memory: ChatRuntimeState
+}
+
+type ChatRuntimeState = {
+  memory: {
+    summary: string
+    facts: string[]
+    relationshipTimeline: RelationshipTimelineEntry[]
+    emotionalMomentum: EmotionalMomentum
+    turnCount: number
+    updatedAt: string
+  }
+  sceneState: {
+    currentScene: string
+    lastUserIntent: string
+    mode: 'sandbox' | 'scene'
+    pendingEvents: SceneEvent[]
+    activeScene: ActiveScene | null
+    sceneOutcomes: SceneOutcome[]
+    eventCooldowns: Record<string, number>
+    consumedEvents: string[]
+    declinedEvents: string[]
+    updatedAt: string
+  }
+  relationshipState: RelationshipState
+}
+
+type RelationshipTimelineEntry = {
+  turn: number
+  type: 'message' | 'scene' | 'event'
+  label: string
+  summary: string
+  createdAt: string
+}
+
+type StreamEvent =
+  | { type: 'delta'; content: string }
+  | {
+      type: 'done'
+      chatId: string | null
+      usage: CompletionUsage & {
+        modelName: string
+        contextLoreCount: number
+        tokenBalance: number | null
+        cost: number
+      }
+      memory?: ChatRuntimeState
+    }
+  | { type: 'error'; message: string; chatId: string | null }
+
+function normalizeHistory(history?: ChatMessage[]) {
+  return (history ?? [])
+    .filter((message) => message.role !== 'system')
+    .filter((message) => message.content.trim().length > 0)
+    .slice(-12)
+}
+
+function usageFromCompletion(completion: ChatCompletion): CompletionUsage {
+  const promptTokens = completion.usage?.prompt_tokens ?? 0
+  const completionTokens = completion.usage?.completion_tokens ?? 0
+  const totalTokens = completion.usage?.total_tokens ?? promptTokens + completionTokens
+
+  return { promptTokens, completionTokens, totalTokens, cost: calculateCost(promptTokens, completionTokens) }
+}
+
+function fallbackUsage(): CompletionUsage {
+  return {
+    promptTokens: 0,
+    completionTokens: 0,
+    totalTokens: 0,
+    cost: 0,
+  }
+}
+
+function calculateCost(promptTokens: number, completionTokens: number) {
+  return Number(
+    ((promptTokens / 1_000_000) * modelInputCostPer1M + (completionTokens / 1_000_000) * modelOutputCostPer1M).toFixed(
+      6,
+    ),
+  )
+}
+
+function validateChatInput(message: string) {
+  if (message.trim().length > maxInputChars) {
+    return `Message is too long. Please shorten it to ${maxInputChars.toLocaleString()} characters or less.`
+  }
+
+  return null
+}
+
+function encodeStreamEvent(event: StreamEvent) {
+  return `data: ${JSON.stringify(event)}\n\n`
+}
+
+async function loadTokenBalance(prisma: Prisma, userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { tokenBalance: true },
+  })
+
+  return user?.tokenBalance ?? null
+}
+
+async function loadRuntimeContext(character: CharacterWithTags | null, userMessage: string, chatId?: string) {
+  const prisma = getPrisma()
+  if (!prisma || !chatId) {
+    const relationship = coerceRelationshipState(null, character)
+    return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(defaultSceneState(relationship, userMessage, 0))]
+      .filter(Boolean)
+      .join('\n\n')
+  }
+
+  const chat = await prisma.chat.findFirst({
+    where: {
+      id: chatId,
+      deletedAt: null,
+    },
+    select: {
+      memory: true,
+      sceneState: true,
+      relationshipState: true,
+    },
+  })
+
+  if (!chat) {
+    const relationship = coerceRelationshipState(null, character)
+    return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(defaultSceneState(relationship, userMessage, 0))]
+      .filter(Boolean)
+      .join('\n\n')
+  }
+
+  const memory = asRecord(chat.memory)
+  const sceneState = asRecord(chat.sceneState)
+  const relationshipState = coerceRelationshipState(chat.relationshipState, character)
+  const turnCount = typeof memory.turnCount === 'number' ? memory.turnCount : 0
+  const projectedScene = runtimeUpdateSceneState({
+    previousSceneState: sceneState,
+    relationship: relationshipState,
+    userMessage,
+    turnCount,
+  })
+  const facts = asStringArray(memory.facts).slice(-4)
+  const momentum = asRecord(memory.emotionalMomentum)
+  const timeline = (Array.isArray(memory.relationshipTimeline) ? memory.relationshipTimeline : [])
+    .filter((entry): entry is RelationshipTimelineEntry => entry && typeof entry === 'object')
+    .slice(-4)
+  const lines = [
+    typeof memory.summary === 'string' && memory.summary ? `Memory summary: ${memory.summary}` : '',
+    facts.length > 0 ? `Known user facts: ${facts.join(' | ')}` : '',
+    typeof momentum.direction === 'string' ? `Emotional momentum: ${momentum.direction}` : '',
+    timeline.length > 0 ? `Relationship timeline: ${timeline.map((entry) => entry.summary).join(' | ')}` : '',
+    typeof sceneState.lastUserIntent === 'string' ? `Previous intent: ${sceneState.lastUserIntent}` : '',
+    buildRelationshipPrompt(relationshipState),
+    runtimeBuildScenePrompt(projectedScene),
+  ].filter(Boolean)
+
+  return lines.length > 0 ? `Runtime memory:\n${lines.join('\n')}` : ''
+}
+
+async function buildMessages(
+  character: CharacterWithTags | null,
+  userMessage: string,
+  history?: ChatMessage[],
+  chatId?: string,
+) {
+  const loreEntries = character ? await loadRelevantLore(character.id, userMessage) : []
+  const runtimeContext = await loadRuntimeContext(character, userMessage, chatId)
+  const systemPrompt = [character ? buildContextPrompt(character, loreEntries) : defaultSystemPrompt, runtimeContext]
+    .filter(Boolean)
+    .join('\n\n')
+
+  return {
+    loreEntries,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...normalizeHistory(history),
+      { role: 'user', content: userMessage },
+    ] satisfies ChatMessage[],
+  }
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+}
+
+function asStringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+}
+
+function clip(value: string, maxLength: number) {
+  const normalized = value.replace(/\s+/g, ' ').trim()
+  return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}...` : normalized
+}
+
+function defaultSceneState(relationship: RelationshipState, userMessage: string, turnCount: number): ChatRuntimeState['sceneState'] {
+  return runtimeUpdateSceneState({
+    previousSceneState: null,
+    relationship,
+    userMessage,
+    turnCount,
+  })
+}
+
+function buildRelationshipTimeline({
+  previousTimeline,
+  userMessage,
+  relationship,
+  sceneState,
+  turnCount,
+  now,
+}: {
+  previousTimeline: unknown
+  userMessage: string
+  relationship: RelationshipState
+  sceneState: ChatRuntimeState['sceneState']
+  turnCount: number
+  now: string
+}) {
+  const timeline = (Array.isArray(previousTimeline) ? previousTimeline : []).filter(
+    (entry): entry is RelationshipTimelineEntry =>
+      entry &&
+      typeof entry === 'object' &&
+      typeof (entry as RelationshipTimelineEntry).label === 'string' &&
+      typeof (entry as RelationshipTimelineEntry).summary === 'string',
+  )
+  const signals = runtimeMessageSignals(userMessage)
+  const latestOutcome = sceneState.sceneOutcomes.at(-1)
+  const entries: RelationshipTimelineEntry[] = []
+
+  if (signals.vulnerable) {
+    entries.push({
+      turn: turnCount,
+      type: 'message',
+      label: 'vulnerability',
+      summary: `User shared vulnerability while relationship is ${relationship.status}/${relationship.tone}.`,
+      createdAt: now,
+    })
+  }
+
+  if (signals.threatening || signals.negative) {
+    entries.push({
+      turn: turnCount,
+      type: 'message',
+      label: signals.threatening ? 'threatening-pressure' : 'negative-pressure',
+      summary: `User pressure affected trust/fear while relationship is ${relationship.status}.`,
+      createdAt: now,
+    })
+  }
+
+  if (latestOutcome?.turn === turnCount) {
+    entries.push({
+      turn: turnCount,
+      type: 'scene',
+      label: latestOutcome.outcome,
+      summary: `${latestOutcome.title} ended as ${latestOutcome.outcome}.`,
+      createdAt: now,
+    })
+  }
+
+  return [...timeline, ...entries].slice(-20)
+}
+
+export function updateRuntimeState({
+  previousMemory,
+  previousSceneState,
+  previousRelationshipState,
+  character,
+  userMessage,
+  reply,
+}: {
+  previousMemory: unknown
+  previousSceneState: unknown
+  previousRelationshipState: unknown
+  character: CharacterWithTags | null
+  userMessage: string
+  reply: string
+}): ChatRuntimeState {
+  const now = new Date().toISOString()
+  const memory = asRecord(previousMemory)
+  const sceneState = asRecord(previousSceneState)
+  const relationshipState = asRecord(previousRelationshipState)
+  const facts = asStringArray(memory.facts)
+  const nextFact = clip(userMessage, 120)
+  const nextFacts = nextFact ? [...facts.filter((fact) => fact !== nextFact), nextFact].slice(-8) : facts.slice(-8)
+  const turnCount = typeof memory.turnCount === 'number' ? memory.turnCount + 1 : 1
+  const previousSummary = typeof memory.summary === 'string' ? memory.summary : ''
+  const summarySeed = [previousSummary, `User: ${clip(userMessage, 90)}`, `AI: ${clip(reply, 90)}`]
+    .filter(Boolean)
+    .join(' | ')
+
+  const relationship = updateRelationshipState({
+    previous: relationshipState,
+    character,
+    userMessage,
+  })
+  const emotionalMomentum = runtimeUpdateEmotionalMomentum(memory.emotionalMomentum, userMessage, now)
+  const momentumAdjustedRelationship = applyRelationshipDelta(
+    relationship,
+    runtimeMomentumRelationshipDelta(emotionalMomentum),
+    `momentum_${emotionalMomentum.direction}`,
+  )
+  const nextSceneState = runtimeUpdateSceneState({
+    previousSceneState: sceneState,
+    relationship: momentumAdjustedRelationship,
+    userMessage,
+    turnCount,
+  })
+  const previousOutcomes = (Array.isArray(sceneState.sceneOutcomes) ? sceneState.sceneOutcomes : []).length
+  const latestOutcome = nextSceneState.sceneOutcomes.at(-1)
+  const adjustedRelationship =
+    latestOutcome && nextSceneState.sceneOutcomes.length > previousOutcomes
+      ? applyRelationshipDelta(
+          momentumAdjustedRelationship,
+          runtimeOutcomeRelationshipDelta(latestOutcome),
+          `scene_${latestOutcome.outcome}`,
+        )
+      : momentumAdjustedRelationship
+  const timeline = buildRelationshipTimeline({
+    previousTimeline: memory.relationshipTimeline,
+    userMessage,
+    relationship: adjustedRelationship,
+    sceneState: nextSceneState,
+    turnCount,
+    now,
+  })
+
+  return {
+    memory: {
+      summary: clip(summarySeed, 480),
+      facts: nextFacts,
+      relationshipTimeline: timeline,
+      emotionalMomentum,
+      turnCount,
+      updatedAt: now,
+    },
+    sceneState: nextSceneState,
+    relationshipState: adjustedRelationship,
+  }
+}
+
+async function findOrCreateChat({
+  prisma,
+  chatId,
+  characterId,
+  userId,
+  title,
+}: {
+  prisma: Prisma
+  chatId?: string
+  characterId: string
+  userId: string
+  title: string
+}) {
+  if (chatId) {
+    const existing = await prisma.chat.findFirst({
+      where: {
+        id: chatId,
+        userId,
+        characterId,
+        deletedAt: null,
+      },
+    })
+
+    if (existing) {
+      return prisma.chat.update({
+        where: { id: existing.id },
+        data: {
+          lastMessageAt: new Date(),
+          isArchived: false,
+        },
+      })
+    }
+  }
+
+  return prisma.chat.create({
+    data: {
+      title: title.slice(0, 80),
+      userId,
+      characterId,
+      lastMessageAt: new Date(),
+    },
+  })
+}
+
+async function persistChatTurn({
+  prisma,
+  chatId,
+  character,
+  userId,
+  userMessage,
+  reply,
+  usage,
+  loreKeywords,
+}: {
+  prisma: Prisma
+  chatId?: string
+  character: CharacterWithTags
+  userId: string
+  userMessage: string
+  reply: string
+  usage: CompletionUsage
+  loreKeywords: string[]
+}): Promise<PersistResult> {
+  const chat = await findOrCreateChat({
+    prisma,
+    chatId,
+    characterId: character.id,
+    userId,
+    title: userMessage,
+  })
+
+  await prisma.message.createMany({
+    data: [
+      {
+        chatId: chat.id,
+        role: MessageRole.user,
+        content: userMessage,
+        tokenUsed: usage.promptTokens,
+        promptTokens: usage.promptTokens,
+        totalTokens: usage.promptTokens,
+        modelUsed: modelName,
+        cost: 0,
+        metadata: {
+          contextLoreCount: loreKeywords.length,
+        },
+      },
+      {
+        chatId: chat.id,
+        role: MessageRole.assistant,
+        content: reply,
+        tokenUsed: usage.completionTokens,
+        completionTokens: usage.completionTokens,
+        totalTokens: usage.completionTokens,
+        modelUsed: modelName,
+        cost: usage.cost,
+        metadata: {
+          modelName,
+          totalTokens: usage.totalTokens,
+          contextLoreCount: loreKeywords.length,
+          contextLoreKeywords: loreKeywords,
+        },
+      },
+    ],
+  })
+
+  const runtimeState = updateRuntimeState({
+    previousMemory: chat.memory,
+    previousSceneState: chat.sceneState,
+    previousRelationshipState: chat.relationshipState,
+    character,
+    userMessage,
+    reply,
+  })
+
+  await prisma.chat.update({
+    where: { id: chat.id },
+    data: {
+      memory: runtimeState.memory,
+      sceneState: runtimeState.sceneState,
+      relationshipState: runtimeState.relationshipState,
+    },
+  })
+
+  await prisma.character.update({
+    where: { id: character.id },
+    data: {
+      chatCount: { increment: 1 },
+    },
+  })
+
+  let tokenBalance: number | null = null
+  if (usage.totalTokens > 0) {
+    await prisma.usage.create({
+      data: {
+        userId,
+        tokens: usage.totalTokens,
+        cost: usage.cost,
+        modelName,
+      },
+    })
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        tokenBalance: { decrement: usage.totalTokens },
+      },
+      select: { tokenBalance: true },
+    })
+    tokenBalance = updatedUser.tokenBalance
+  } else {
+    tokenBalance = await loadTokenBalance(prisma, userId)
+  }
+
+  return {
+    chatId: chat.id,
+    tokenBalance,
+    memory: runtimeState,
+  }
+}
+
+export async function listChats(userId = defaultUserId) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const chats = await prisma.chat.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+      isArchived: false,
+    },
+    orderBy: {
+      lastMessageAt: 'desc',
+    },
+    take: 30,
+    include: {
+      character: true,
+      messages: {
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+  })
+
+  return chats.map((chat) => ({
+    id: chat.id,
+    title: chat.title || 'New chat',
+    characterId: chat.characterId,
+    characterName: chat.character.name,
+    lastMessageAt: chat.lastMessageAt,
+    createdAt: chat.createdAt,
+    preview: chat.messages[0]?.content ?? '',
+  }))
+}
+
+export async function sendChat(input: SendChatInput) {
+  const activeCharacterId = input.characterId || defaultCharacterId
+  const activeUserId = input.userId || defaultUserId
+  const prisma = getPrisma()
+  const validationError = validateChatInput(input.message)
+
+  if (validationError) {
+    return {
+      reply: validationError,
+      chatId: input.chatId ?? null,
+      usage: {
+        ...fallbackUsage(),
+        modelName,
+        contextLoreCount: 0,
+        tokenBalance: prisma ? await loadTokenBalance(prisma, activeUserId) : null,
+      },
+    }
+  }
+
+  if (!process.env.OPENROUTER_API_KEY) {
+    return {
+      reply: `Backend is running, but OPENROUTER_API_KEY is not configured. Your message was: "${input.message}"`,
+      chatId: input.chatId ?? null,
+    }
+  }
+
+  const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
+  if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
+    return {
+      reply: 'This account is out of tokens. Please add quota before continuing.',
+      chatId: input.chatId ?? null,
+      usage: {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        modelName,
+        contextLoreCount: 0,
+        tokenBalance,
+      },
+    }
+  }
+
+  const character = await loadCharacter(activeCharacterId)
+  const { loreEntries, messages } = await buildMessages(character, input.message, input.history, input.chatId)
+
+  const completion = await openai.chat.completions.create({
+    model: modelName,
+    messages,
+  })
+
+  const reply = completion.choices[0]?.message?.content?.trim() || 'มะปรางคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
+  const usage = usageFromCompletion(completion)
+  const loreKeywords = loreEntries.map((entry) => entry.keyword)
+  const persistResult =
+    prisma && character
+      ? await persistChatTurn({
+          prisma,
+          chatId: input.chatId,
+          character,
+          userId: activeUserId,
+          userMessage: input.message,
+          reply,
+          usage,
+          loreKeywords,
+        })
+      : {
+          chatId: input.chatId ?? null,
+          tokenBalance: null,
+          memory: updateRuntimeState({
+            previousMemory: null,
+            previousSceneState: null,
+            previousRelationshipState: null,
+            character,
+            userMessage: input.message,
+            reply,
+          }),
+        }
+
+  return {
+    reply,
+    chatId: persistResult.chatId,
+    memory: persistResult.memory,
+    usage: {
+      ...usage,
+      modelName,
+      contextLoreCount: loreKeywords.length,
+      tokenBalance: persistResult.tokenBalance,
+    },
+  }
+}
+
+export function streamChat(input: SendChatInput) {
+  const encoder = new TextEncoder()
+
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (event: StreamEvent) => controller.enqueue(encoder.encode(encodeStreamEvent(event)))
+      const activeCharacterId = input.characterId || defaultCharacterId
+      const activeUserId = input.userId || defaultUserId
+      const prisma = getPrisma()
+      const validationError = validateChatInput(input.message)
+
+      try {
+        if (validationError) {
+          send({ type: 'delta', content: validationError })
+          send({
+            type: 'done',
+            chatId: input.chatId ?? null,
+            usage: {
+              ...fallbackUsage(),
+              modelName,
+              contextLoreCount: 0,
+              tokenBalance: prisma ? await loadTokenBalance(prisma, activeUserId) : null,
+            },
+          })
+          return
+        }
+
+        if (!process.env.OPENROUTER_API_KEY) {
+          const reply = `Backend is running, but OPENROUTER_API_KEY is not configured. Your message was: "${input.message}"`
+          send({ type: 'delta', content: reply })
+          send({
+            type: 'done',
+            chatId: input.chatId ?? null,
+            usage: {
+              ...fallbackUsage(),
+              modelName,
+              contextLoreCount: 0,
+              tokenBalance: prisma ? await loadTokenBalance(prisma, activeUserId) : null,
+            },
+          })
+          return
+        }
+
+        const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
+        if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
+          const reply = 'This account is out of tokens. Please add quota before continuing.'
+          send({ type: 'delta', content: reply })
+          send({
+            type: 'done',
+            chatId: input.chatId ?? null,
+            usage: {
+              ...fallbackUsage(),
+              modelName,
+              contextLoreCount: 0,
+              tokenBalance,
+            },
+          })
+          return
+        }
+
+        const character = await loadCharacter(activeCharacterId)
+        const { loreEntries, messages } = await buildMessages(character, input.message, input.history, input.chatId)
+        const loreKeywords = loreEntries.map((entry) => entry.keyword)
+        const stream = await openai.chat.completions.create({
+          model: modelName,
+          messages,
+          stream: true,
+          stream_options: {
+            include_usage: true,
+          },
+        })
+
+        let reply = ''
+        let usage = fallbackUsage()
+
+        for await (const chunk of stream) {
+          const delta = chunk.choices[0]?.delta?.content ?? ''
+          if (delta) {
+            reply += delta
+            send({ type: 'delta', content: delta })
+          }
+
+          if (chunk.usage) {
+            usage = {
+              promptTokens: chunk.usage.prompt_tokens ?? 0,
+              completionTokens: chunk.usage.completion_tokens ?? 0,
+              totalTokens: chunk.usage.total_tokens ?? 0,
+              cost: calculateCost(chunk.usage.prompt_tokens ?? 0, chunk.usage.completion_tokens ?? 0),
+            }
+          }
+        }
+
+        const trimmedReply = reply.trim() || 'มะปรางคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
+        const persistResult =
+          prisma && character
+            ? await persistChatTurn({
+                prisma,
+                chatId: input.chatId,
+                character,
+                userId: activeUserId,
+                userMessage: input.message,
+                reply: trimmedReply,
+                usage,
+                loreKeywords,
+              })
+            : {
+                chatId: input.chatId ?? null,
+                tokenBalance: null,
+                memory: updateRuntimeState({
+                  previousMemory: null,
+                  previousSceneState: null,
+                  previousRelationshipState: null,
+                  character,
+                  userMessage: input.message,
+                  reply: trimmedReply,
+                }),
+              }
+
+        send({
+          type: 'done',
+          chatId: persistResult.chatId,
+          usage: {
+            ...usage,
+            modelName,
+            contextLoreCount: loreKeywords.length,
+            tokenBalance: persistResult.tokenBalance,
+          },
+          memory: persistResult.memory,
+        })
+      } catch (error) {
+        console.error('Chat stream error:', error)
+        send({
+          type: 'error',
+          message: 'ระบบ AI มีปัญหาชั่วคราว ลองใหม่อีกครั้งนะคะ',
+          chatId: input.chatId ?? null,
+        })
+      } finally {
+        controller.close()
+      }
+    },
+  })
+}
+
+export async function loadChatMessages(chatId: string, userId = defaultUserId) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const chat = await prisma.chat.findFirst({
+    where: {
+      id: chatId,
+      userId,
+      deletedAt: null,
+    },
+    include: {
+      messages: {
+        where: {
+          deletedAt: null,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+      character: {
+        include: {
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!chat) return null
+
+  return {
+    id: chat.id,
+    title: chat.title,
+    memory: chat.memory,
+    sceneState: chat.sceneState,
+    relationshipState: chat.relationshipState,
+    character: publicCharacter(chat.character),
+    messages: chat.messages.map((message) => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      tokenUsed: message.tokenUsed,
+      createdAt: message.createdAt,
+    })),
+  }
+}
+
+export async function archiveChat(chatId: string, userId = defaultUserId) {
+  const prisma = getPrisma()
+  if (!prisma) return false
+
+  const result = await prisma.chat.updateMany({
+    where: { id: chatId, userId, deletedAt: null },
+    data: {
+      isArchived: true,
+      deletedAt: new Date(),
+    },
+  })
+
+  return result.count > 0
+}
