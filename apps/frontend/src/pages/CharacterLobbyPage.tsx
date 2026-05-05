@@ -1,0 +1,70 @@
+import { useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+
+const seeds = [
+  { id: 'stranger', label: 'Stranger', tone: 'Cautious but open', color: 'bg-blue-600' },
+  { id: 'ally', label: 'Trusted Ally', tone: 'Warm, familiar, cooperative', color: 'bg-emerald-600' },
+  { id: 'rival', label: 'Rival', tone: 'Sharp, tense, emotionally charged', color: 'bg-rose-600' },
+  { id: 'crush', label: 'Secret Crush', tone: 'Soft tension, shy affection', color: 'bg-fuchsia-600' },
+]
+
+export function CharacterLobbyPage() {
+  const { characterId } = useParams()
+  const [seed, setSeed] = useState(seeds[0])
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-sm">
+        <div className="h-40 bg-linear-to-br from-blue-200 via-fuchsia-100 to-amber-100 sm:h-60" />
+        <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:p-8">
+          <div className="-mt-20 space-y-4">
+            <div className="aspect-square rounded-3xl border-4 border-white bg-linear-to-br from-slate-200 to-blue-100 shadow-xl" />
+            <div className="flex gap-2">
+              <button className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700">Report</button>
+              <button className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700">Share</button>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <p className="text-xs font-black tracking-[0.2em] text-slate-400 uppercase">Character Lobby</p>
+              <h1 className="mt-2 text-3xl font-black">Maprang</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                A Thai-first AI companion designed for relationship-aware roleplay, planning, emotional scenes, and warm conversation.
+              </p>
+              <p className="mt-2 text-xs font-bold text-slate-400">Character ID: {characterId}</p>
+            </div>
+
+            <section className="rounded-2xl border border-slate-900/10 bg-slate-50 p-4">
+              <h2 className="text-lg font-black">Relationship Contract</h2>
+              <p className="mt-1 text-sm text-slate-500">Choose the starting emotional route before the first message.</p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {seeds.map((item) => (
+                  <button
+                    className={`rounded-2xl border p-4 text-left transition ${
+                      seed.id === item.id ? 'border-blue-500 bg-white shadow-md' : 'border-slate-900/10 bg-white/60'
+                    }`}
+                    key={item.id}
+                    onClick={() => setSeed(item)}
+                    type="button"
+                  >
+                    <p className="font-black">{item.label}</p>
+                    <p className="mt-1 text-sm text-slate-500">{item.tone}</p>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 rounded-2xl bg-white p-4">
+                <p className="text-sm font-black text-slate-500">Preview mood</p>
+                <p className="mt-1 text-lg font-black">{seed.tone}</p>
+              </div>
+            </section>
+
+            <Link className={`block min-h-12 rounded-2xl px-5 py-3 text-center font-black text-white ${seed.color}`} to={`/chat?characterId=${characterId}&relationship_seed=${seed.id}`}>
+              Start chat as {seed.label}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
