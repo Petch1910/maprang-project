@@ -1,4 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
+import charactersReducer from './slices/charactersSlice'
+import chatsReducer from './slices/chatsSlice'
 import contentReducer, { hydrateContent } from './slices/contentSlice'
 import draftsReducer, { hydrateDrafts } from './slices/draftsSlice'
 import eventsReducer from './slices/eventsSlice'
@@ -24,6 +26,8 @@ const persistedState = (() => {
 
 export const store = configureStore({
   reducer: {
+    characters: charactersReducer,
+    chats: chatsReducer,
     content: contentReducer,
     drafts: draftsReducer,
     events: eventsReducer,

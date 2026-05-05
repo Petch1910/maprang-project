@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/charactersSlice'
 
 const seeds = [
   { id: 'stranger', label: 'Stranger', tone: 'Cautious but open', color: 'bg-blue-600' },
@@ -9,8 +11,18 @@ const seeds = [
 ]
 
 export function CharacterLobbyPage() {
+  const dispatch = useAppDispatch()
   const { characterId } = useParams()
+  const characters = useAppSelector(selectExploreCharacters)
   const [seed, setSeed] = useState(seeds[0])
+  const character = useMemo(
+    () => characters.find((item) => item.id === characterId) ?? characters[0] ?? null,
+    [characterId, characters],
+  )
+
+  useEffect(() => {
+    if (characters.length === 0) dispatch(loadExploreCharacters())
+  }, [characters.length, dispatch])
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -28,11 +40,20 @@ export function CharacterLobbyPage() {
           <div className="space-y-6">
             <div>
               <p className="text-xs font-black tracking-[0.2em] text-slate-400 uppercase">Character Lobby</p>
-              <h1 className="mt-2 text-3xl font-black">Maprang</h1>
+              <h1 className="mt-2 text-3xl font-black">{character?.name ?? 'Character'}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                A Thai-first AI companion designed for relationship-aware roleplay, planning, emotional scenes, and warm conversation.
+                {character?.biography ||
+                  character?.description ||
+                  'Choose a relationship contract before starting this route.'}
               </p>
               <p className="mt-2 text-xs font-bold text-slate-400">Character ID: {characterId}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {(character?.tags ?? []).map((tag) => (
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600" key={tag}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <section className="rounded-2xl border border-slate-900/10 bg-slate-50 p-4">

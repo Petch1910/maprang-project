@@ -1,36 +1,41 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { loadChatSummaries, selectChatSummaries, selectChatsLoading } from '../store/slices/chatsSlice'
+import {
+  loadExploreCharacters,
+  selectCharactersError,
+  selectCharactersLoading,
+  selectExploreCharacters,
+} from '../store/slices/charactersSlice'
 import { selectContentSettings, setAdultStatus, setShowMature } from '../store/slices/contentSlice'
 
-const featuredCharacters = [
-  {
-    id: 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
-    name: 'Maprang',
-    tagline: 'Warm Thai-first companion with relationship-aware scenes.',
-    badges: ['Relationship Ready', 'Scene Event', 'Slow Burn'],
-    chats: 12840,
-  },
-  {
-    id: 'narin-demo',
-    name: 'Narin',
-    tagline: 'Guarded rival energy, sharp banter, high tension route.',
-    badges: ['Rival Route', 'Mature Mood'],
-    chats: 7420,
-  },
-  {
-    id: 'sora-demo',
-    name: 'Sora',
-    tagline: 'Fantasy guide for emotional adventure and hidden lore.',
-    badges: ['Fantasy', 'Shared Lore'],
-    chats: 5210,
-  },
-]
-
 const categories = ['Anime', 'Fantasy', 'Romance', 'Dark Romance', 'Slice of Life', 'Drama', 'Mentor', 'Rival']
+
+function characterBadges(tags: string[]) {
+  const badges = new Set<string>()
+  if (tags.some((tag) => ['slow-burn', 'trust-building', 'mentor'].includes(tag))) badges.add('Relationship Ready')
+  if (tags.some((tag) => ['slow-burn', 'rival', 'hostile'].includes(tag))) badges.add('Scene Event')
+  if (tags.includes('slow-burn')) badges.add('Slow Burn')
+  if (badges.size === 0) badges.add('Roleplay Ready')
+  return [...badges].slice(0, 3)
+}
 
 export function ExplorePage() {
   const dispatch = useAppDispatch()
   const content = useAppSelector(selectContentSettings)
+  const characters = useAppSelector(selectExploreCharacters)
+  const chats = useAppSelector(selectChatSummaries)
+  const isCharactersLoading = useAppSelector(selectCharactersLoading)
+  const isChatsLoading = useAppSelector(selectChatsLoading)
+  const charactersError = useAppSelector(selectCharactersError)
+
+  useEffect(() => {
+    dispatch(loadExploreCharacters())
+    dispatch(loadChatSummaries())
+  }, [dispatch])
+
+  const heroCharacterId = characters[0]?.id ?? 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
@@ -42,8 +47,8 @@ export function ExplorePage() {
             Explore characters, continue pending scenes, and choose relationship contracts before the first message.
           </p>
           <div className="flex flex-wrap gap-2">
-            <Link className="rounded-full bg-white px-4 py-2 text-sm font-black text-blue-700" to="/characters/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d">
-              Start with Maprang
+            <Link className="rounded-full bg-white px-4 py-2 text-sm font-black text-blue-700" to={`/characters/${heroCharacterId}`}>
+              Start exploring
             </Link>
             <Link className="rounded-full border border-white/40 px-4 py-2 text-sm font-black text-white" to="/chats">
               Continue chatting
@@ -86,12 +91,23 @@ export function ExplorePage() {
           </Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          {['Maprang [warm]', 'Narin [tense]'].map((title) => (
-            <Link className="rounded-2xl border border-blue-600/15 bg-blue-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md" key={title} to="/chat">
-              <p className="text-sm font-black text-blue-700">{title}</p>
-              <p className="mt-1 text-sm text-slate-600">A scene event is almost ready.</p>
-            </Link>
-          ))}
+          {isChatsLoading &&
+            [1, 2].map((item) => <div className="h-24 animate-pulse rounded-2xl bg-blue-100" key={item} />)}
+
+          {!isChatsLoading &&
+            chats.slice(0, 4).map((chat) => (
+              <Link className="rounded-2xl border border-blue-600/15 bg-blue-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md" key={chat.id} to={`/chat/${chat.id}`}>
+                <p className="text-sm font-black text-blue-700">{chat.title || chat.characterName}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-600">{chat.preview || 'Relationship status will appear here next.'}</p>
+                <p className="mt-2 text-xs font-black text-blue-500">Continue with {chat.characterName}</p>
+              </Link>
+            ))}
+
+          {!isChatsLoading && chats.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-900/15 bg-white p-4 text-sm text-slate-500">
+              No saved chats yet. Pick a character below to start your first route.
+            </div>
+          )}
         </div>
       </section>
 
@@ -103,26 +119,38 @@ export function ExplorePage() {
         ))}
       </section>
 
+      {charactersError && (
+        <section className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">
+          Could not load live characters. Check backend connection and try again.
+        </section>
+      )}
+
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        {featuredCharacters.map((character) => (
-          <Link className="overflow-hidden rounded-2xl border border-slate-900/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={character.id} to={`/characters/${character.id}`}>
-            <div className="aspect-[4/3] bg-linear-to-br from-slate-200 via-blue-100 to-amber-100" />
-            <div className="space-y-3 p-3 sm:p-4">
-              <div>
-                <h3 className="truncate text-base font-black">{character.name}</h3>
-                <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{character.tagline}</p>
+        {isCharactersLoading &&
+          [1, 2, 3, 4, 5, 6].map((item) => <div className="h-72 animate-pulse rounded-2xl bg-slate-200" key={item} />)}
+
+        {!isCharactersLoading &&
+          characters.map((character) => (
+            <Link className="overflow-hidden rounded-2xl border border-slate-900/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={character.id} to={`/characters/${character.id}`}>
+              <div className="aspect-[4/3] overflow-hidden bg-linear-to-br from-slate-200 via-blue-100 to-amber-100">
+                {character.avatarUrl && <img alt="" className="h-full w-full object-cover" src={character.avatarUrl} />}
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {character.badges.map((badge) => (
-                  <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600" key={badge}>
-                    {badge}
-                  </span>
-                ))}
+              <div className="space-y-3 p-3 sm:p-4">
+                <div>
+                  <h3 className="truncate text-base font-black">{character.name}</h3>
+                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{character.tagline || character.description}</p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {characterBadges(character.tags).map((badge) => (
+                    <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600" key={badge}>
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs font-black text-slate-400">{character.chatCount.toLocaleString()} chats</p>
               </div>
-              <p className="text-xs font-black text-slate-400">{character.chats.toLocaleString()} chats</p>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
       </section>
     </div>
   )

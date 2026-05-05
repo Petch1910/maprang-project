@@ -1,5 +1,6 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
+import { fetchUsageSummary } from '../../lib/api'
 
 type WalletState = {
   tokenBalance: number
@@ -13,6 +14,11 @@ const initialState: WalletState = {
   isLoading: false,
 }
 
+export const loadWalletSummary = createAsyncThunk('wallet/loadSummary', async () => {
+  const data = await fetchUsageSummary()
+  return data.user.tokenBalance
+})
+
 const walletSlice = createSlice({
   name: 'wallet',
   initialState,
@@ -23,6 +29,19 @@ const walletSlice = createSlice({
     setWalletLoading(state, action: PayloadAction<boolean>) {
       state.isLoading = action.payload
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loadWalletSummary.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(loadWalletSummary.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.tokenBalance = action.payload
+      })
+      .addCase(loadWalletSummary.rejected, (state) => {
+        state.isLoading = false
+      })
   },
 })
 

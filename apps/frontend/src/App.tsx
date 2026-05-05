@@ -1,15 +1,23 @@
+import { lazy, Suspense, useEffect } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { Bell, Compass, MessageCircle, PlusCircle, UserRound } from 'lucide-react'
-import { useAppSelector } from './store/hooks'
+import { useAppDispatch, useAppSelector } from './store/hooks'
 import { selectEventCount } from './store/slices/eventsSlice'
-import { selectTokenBalance } from './store/slices/walletSlice'
-import { ChatRoomPage } from './pages/ChatRoomPage'
-import { CharacterLobbyPage } from './pages/CharacterLobbyPage'
-import { CreatorStudioPage } from './pages/CreatorStudioPage'
-import { EventsInboxPage } from './pages/EventsInboxPage'
-import { ExplorePage } from './pages/ExplorePage'
-import { MyChatsPage } from './pages/MyChatsPage'
-import { ProfilePage } from './pages/ProfilePage'
+import { loadWalletSummary, selectTokenBalance } from './store/slices/walletSlice'
+
+const ChatRoomPage = lazy(() => import('./pages/ChatRoomPage').then((module) => ({ default: module.ChatRoomPage })))
+const CharacterLobbyPage = lazy(() =>
+  import('./pages/CharacterLobbyPage').then((module) => ({ default: module.CharacterLobbyPage })),
+)
+const CreatorStudioPage = lazy(() =>
+  import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage })),
+)
+const EventsInboxPage = lazy(() =>
+  import('./pages/EventsInboxPage').then((module) => ({ default: module.EventsInboxPage })),
+)
+const ExplorePage = lazy(() => import('./pages/ExplorePage').then((module) => ({ default: module.ExplorePage })))
+const MyChatsPage = lazy(() => import('./pages/MyChatsPage').then((module) => ({ default: module.MyChatsPage })))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
 
 const navItems = [
   { to: '/', label: 'Explore', icon: Compass },
@@ -20,8 +28,13 @@ const navItems = [
 ]
 
 function App() {
+  const dispatch = useAppDispatch()
   const tokenBalance = useAppSelector(selectTokenBalance)
   const eventCount = useAppSelector(selectEventCount)
+
+  useEffect(() => {
+    dispatch(loadWalletSummary())
+  }, [dispatch])
 
   return (
     <div className="min-h-svh bg-slate-50 text-slate-950">
@@ -83,15 +96,17 @@ function App() {
         </nav>
 
         <section className="min-w-0 pb-24 md:pb-0">
-          <Routes>
-            <Route element={<ExplorePage />} path="/" />
-            <Route element={<CharacterLobbyPage />} path="/characters/:characterId" />
-            <Route element={<ChatRoomPage />} path="/chat/:chatId?" />
-            <Route element={<MyChatsPage />} path="/chats" />
-            <Route element={<CreatorStudioPage />} path="/create" />
-            <Route element={<EventsInboxPage />} path="/events" />
-            <Route element={<ProfilePage />} path="/profile" />
-          </Routes>
+          <Suspense fallback={<div className="p-6"><div className="h-40 animate-pulse rounded-2xl bg-slate-200" /></div>}>
+            <Routes>
+              <Route element={<ExplorePage />} path="/" />
+              <Route element={<CharacterLobbyPage />} path="/characters/:characterId" />
+              <Route element={<ChatRoomPage />} path="/chat/:chatId?" />
+              <Route element={<MyChatsPage />} path="/chats" />
+              <Route element={<CreatorStudioPage />} path="/create" />
+              <Route element={<EventsInboxPage />} path="/events" />
+              <Route element={<ProfilePage />} path="/profile" />
+            </Routes>
+          </Suspense>
         </section>
       </div>
 
