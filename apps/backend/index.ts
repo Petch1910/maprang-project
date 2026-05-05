@@ -10,7 +10,7 @@ import { loreRoutes } from './src/lore.routes'
 import { rateLimitKey, routeRateLimitMax } from './src/security'
 import { uploadRoutes } from './src/upload.routes'
 import { userRoutes } from './src/user.routes'
-import { allowedOrigins } from './src/config'
+import { allowedOrigins, serverHost, serverPort } from './src/config'
 import { logRuntimeEnvStatus } from './src/env'
 
 logRuntimeEnvStatus()
@@ -47,8 +47,11 @@ export const app = new Elysia()
   .use(characterRoutes)
   .use(loreRoutes)
   .use(chatRoutes)
-  .listen(3000)
+  .listen({
+    hostname: serverHost,
+    port: serverPort,
+  })
 
-console.log('Server is running at http://localhost:3000')
+console.log(`Server is running at http://${serverHost}:${serverPort}`)
 
 export type App = typeof app

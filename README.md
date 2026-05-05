@@ -56,6 +56,7 @@ Backend health: `http://127.0.0.1:3000/health`
 ## Production Checklist
 
 - Follow `PRODUCTION_SETUP.md` for the full production env and Supabase setup.
+- Use `DEPLOY_RENDER.md` for the recommended first hosting path.
 - Set backend env from `apps/backend/.env.production.example`.
 - Set frontend env from `apps/frontend/.env.production.example`.
 - Set `VITE_API_BASE_URL` to the deployed backend URL.

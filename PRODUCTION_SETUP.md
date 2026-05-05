@@ -67,6 +67,8 @@ Current implementation stores stable backend avatar URLs such as `/uploads/avata
 
 ## Deployment Order
 
+Recommended first hosting path: follow `DEPLOY_RENDER.md`.
+
 1. Provision production Postgres.
 2. Add backend env values.
 3. Run database migrations:

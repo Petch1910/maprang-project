@@ -1,5 +1,7 @@
 export const defaultUserId = '550e8400-e29b-41d4-a716-446655440000'
 export const defaultCharacterId = 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
+export const serverHost = process.env.HOST || '0.0.0.0'
+export const serverPort = Number(process.env.PORT ?? 3000)
 export const modelName = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001'
 export const modelInputCostPer1M = Number(process.env.MODEL_INPUT_COST_PER_1M ?? 0)
 export const modelOutputCostPer1M = Number(process.env.MODEL_OUTPUT_COST_PER_1M ?? 0)
@@ -21,4 +23,4 @@ const requestedStorageProvider =
 export const storageProvider =
   requestedStorageProvider ?? (process.env.NODE_ENV === 'production' && supabaseStorageConfigured ? 'supabase' : 'local')
 export const defaultSystemPrompt =
-  'คุณคือมะปราง AI ผู้ช่วยภาษาไทยที่คุยง่าย ใจดี ช่วยคิดงาน สรุปเนื้อหา วางแผน และตอบอย่างสุภาพเป็นธรรมชาติ หากข้อมูลไม่พอให้ถามกลับสั้น ๆ และอย่าแต่งข้อมูลที่ไม่แน่ใจ'
+  'You are Maprang, a Thai-first AI companion. Be warm, concise, practical, and honest. Help the user think, plan, summarize, write, and solve problems. If information is missing, ask a short clarifying question. Do not invent facts you are unsure about.'
