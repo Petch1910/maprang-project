@@ -1,4 +1,5 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { updateContentSettings } from '../../lib/api'
 import type { RootState } from '../store'
 
 export type ContentRating = 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
@@ -17,12 +18,26 @@ const initialState: ContentState = {
   maxRating: 'teen_romance',
 }
 
+export const saveContentSettings = createAsyncThunk(
+  'content/saveSettings',
+  async (input: { isAdult: boolean; maxRating?: ContentRating }) => {
+    const data = await updateContentSettings(input)
+    return data.contentSettings
+  },
+)
+
 const contentSlice = createSlice({
   name: 'content',
   initialState,
   reducers: {
     hydrateContent(_state, action: PayloadAction<ContentState>) {
       return action.payload
+    },
+    applyContentSettings(state, action: PayloadAction<{ isAdult: boolean; maxRating: ContentRating }>) {
+      state.isAdult = action.payload.isAdult
+      state.ageGateAnswered = true
+      state.showMature = action.payload.isAdult ? state.showMature : false
+      state.maxRating = action.payload.maxRating
     },
     setAdultStatus(state, action: PayloadAction<boolean>) {
       state.isAdult = action.payload
@@ -34,8 +49,16 @@ const contentSlice = createSlice({
       state.showMature = state.isAdult && action.payload
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(saveContentSettings.fulfilled, (state, action) => {
+      state.isAdult = action.payload.isAdult
+      state.ageGateAnswered = true
+      state.showMature = action.payload.isAdult ? state.showMature : false
+      state.maxRating = action.payload.maxRating
+    })
+  },
 })
 
-export const { hydrateContent, setAdultStatus, setShowMature } = contentSlice.actions
+export const { applyContentSettings, hydrateContent, setAdultStatus, setShowMature } = contentSlice.actions
 export const selectContentSettings = (state: RootState) => state.content
 export default contentSlice.reducer

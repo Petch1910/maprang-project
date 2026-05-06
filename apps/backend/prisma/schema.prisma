@@ -64,6 +64,8 @@ model User {
   username     String? @unique
   role         Role    @default(USER)
   tokenBalance Int     @default(1000)
+  contentMaxRating String @default("teen_romance")
+  adultVerifiedAt DateTime?
 
   characters Character[]
   chats      Chat[]

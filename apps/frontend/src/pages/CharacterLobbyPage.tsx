@@ -5,7 +5,7 @@ import { createReport } from '../lib/api'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/charactersSlice'
-import { selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
+import { saveContentSettings, selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
 
 const seeds = [
   { id: 'stranger', label: 'คนแปลกหน้า', tone: 'ระวังตัว แต่ยังเปิดใจ', color: 'bg-blue-600' },
@@ -109,7 +109,10 @@ export function CharacterLobbyPage() {
                 </p>
                 <button
                   className="mt-3 min-h-10 rounded-full bg-amber-900 px-4 text-sm font-black text-white"
-                  onClick={() => dispatch(setAdultStatus(true))}
+                  onClick={() => {
+                    dispatch(setAdultStatus(true))
+                    dispatch(saveContentSettings({ isAdult: true, maxRating: 'restricted_18' }))
+                  }}
                   type="button"
                 >
                   เปิดโหมดผู้ใหญ่

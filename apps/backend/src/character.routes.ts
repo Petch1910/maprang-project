@@ -1,6 +1,7 @@
 import { CharacterStatus, type Visibility } from '@prisma/client'
 import { Elysia, t } from 'elysia'
 import { defaultUserId } from './config'
+import { clampMaxRating, normalizeMaxRating } from './content-rating'
 import { requireDatabase } from './db'
 import {
   createCharacter,
@@ -22,6 +23,7 @@ import {
   validateRelationshipTags,
 } from './relationship.engine'
 import { canAccessOwnerResource, isAdminRequest, requestUserId, resolveRequestUserId } from './security'
+import { effectiveMaxRatingForUser } from './user.service'
 
 const visibilitySchema = t.Union([t.Literal('PUBLIC'), t.Literal('UNLISTED'), t.Literal('PRIVATE')])
 const statusSchema = t.Union([
@@ -98,6 +100,11 @@ export const characterRoutes = new Elysia()
     async ({ query, request }) => {
       const admin = isAdminRequest(request)
       const viewerUserId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : '__anonymous__'
+      const requestedMaxRating = normalizeMaxRating(query.maxRating)
+      const maxRating =
+        admin || viewerUserId === '__anonymous__'
+          ? clampMaxRating(requestedMaxRating, admin ? 'restricted_18' : 'teen_romance')
+          : await effectiveMaxRatingForUser(viewerUserId, requestedMaxRating)
 
       return {
         characters: await searchCharacters({
@@ -110,7 +117,7 @@ export const characterRoutes = new Elysia()
           visibility: query.visibility as Visibility | undefined,
           sort: query.sort,
           favoriteOnly: query.favoriteOnly,
-          maxRating: query.maxRating,
+          maxRating,
           limit: query.limit,
         }),
       }

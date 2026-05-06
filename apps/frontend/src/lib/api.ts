@@ -290,6 +290,7 @@ export type UsageSummary = {
     tokenBalance: number
     role: 'USER' | 'ADMIN'
   }
+  contentSettings?: ContentSettings
   usage: {
     totalTokens: number
     requestCount: number
@@ -311,6 +312,12 @@ export type UsageSummary = {
       createdAt: string
     }>
   }
+}
+
+export type ContentSettings = {
+  isAdult: boolean
+  maxRating: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
+  adultVerifiedAt: string | null
 }
 
 export type AdminSummary = {
@@ -416,6 +423,17 @@ export async function fetchHealthStatus() {
 
 export async function fetchUsageSummary() {
   return requestJson<UsageSummary>('/me/usage')
+}
+
+export async function fetchContentSettings() {
+  return requestJson<{ contentSettings: ContentSettings }>('/me/content-settings')
+}
+
+export async function updateContentSettings(input: { isAdult: boolean; maxRating?: ContentSettings['maxRating'] }) {
+  return requestJson<{ contentSettings: ContentSettings }>('/me/content-settings', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
 }
 
 export async function fetchAdminSummary() {

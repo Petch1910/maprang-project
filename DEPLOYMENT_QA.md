@@ -168,6 +168,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 - Confirm a different user cannot edit another user's character without admin access.
 - Confirm admin summary loads only when admin access is configured.
 - Open Wallet and confirm token transaction history shows chat debits and admin adjustments.
+- Select adult/general content mode and confirm `/me/content-settings` persists the server-side rating cap.
 
 ## Release Notes Template
 

@@ -1,12 +1,18 @@
-import { Elysia } from 'elysia'
+import { Elysia, t } from 'elysia'
 import { defaultUserId } from './config'
 import { requireDatabase } from './db'
 import { resolveRequestUserId } from './security'
-import { loadUsageSummary } from './user.service'
+import { loadContentSettings, loadUsageSummary, updateContentSettings } from './user.service'
 
-export const userRoutes = new Elysia().get(
-  '/me/usage',
-  async ({ request, set }) => {
+const contentRatingSchema = t.Union([
+  t.Literal('general'),
+  t.Literal('teen_romance'),
+  t.Literal('mature_18'),
+  t.Literal('restricted_18'),
+])
+
+export const userRoutes = new Elysia()
+  .get('/me/usage', async ({ request, set }) => {
     const prisma = requireDatabase(set)
     if (!prisma) return { error: 'database_not_configured', message: 'ยังไม่ได้ตั้งค่า DATABASE_URL' }
 
@@ -17,5 +23,37 @@ export const userRoutes = new Elysia().get(
     }
 
     return summary
-  },
-)
+  })
+  .get('/me/content-settings', async ({ request, set }) => {
+    const prisma = requireDatabase(set)
+    if (!prisma) return { error: 'database_not_configured', message: 'ยังไม่ได้ตั้งค่า DATABASE_URL' }
+
+    const contentSettings = await loadContentSettings(await resolveRequestUserId(request, defaultUserId))
+    if (!contentSettings) {
+      set.status = 404
+      return { error: 'user_not_found', message: 'ไม่พบผู้ใช้นี้' }
+    }
+
+    return { contentSettings }
+  })
+  .patch(
+    '/me/content-settings',
+    async ({ body, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured', message: 'ยังไม่ได้ตั้งค่า DATABASE_URL' }
+
+      const contentSettings = await updateContentSettings(await resolveRequestUserId(request, defaultUserId), body)
+      if (!contentSettings) {
+        set.status = 404
+        return { error: 'user_not_found', message: 'ไม่พบผู้ใช้นี้' }
+      }
+
+      return { contentSettings }
+    },
+    {
+      body: t.Object({
+        isAdult: t.Boolean(),
+        maxRating: t.Optional(contentRatingSchema),
+      }),
+    },
+  )

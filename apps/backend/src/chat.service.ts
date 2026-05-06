@@ -24,6 +24,7 @@ import {
   updateRelationshipState,
   type RelationshipState,
 } from './relationship.engine'
+import { effectiveMaxRatingForUser } from './user.service'
 import {
   buildScenePrompt as runtimeBuildScenePrompt,
   messageSignals as runtimeMessageSignals,
@@ -781,7 +782,8 @@ export async function sendChat(input: SendChatInput) {
     }
   }
 
-  const ratingError = chatRatingError(character, input.maxRating)
+  const effectiveMaxRating = prisma ? await effectiveMaxRatingForUser(activeUserId, input.maxRating) : normalizeMaxRating(input.maxRating)
+  const ratingError = chatRatingError(character, effectiveMaxRating)
   if (ratingError) {
     return {
       reply: ratingError,
@@ -928,7 +930,8 @@ export function streamChat(input: SendChatInput) {
           return
         }
 
-        const ratingError = chatRatingError(character, input.maxRating)
+        const effectiveMaxRating = prisma ? await effectiveMaxRatingForUser(activeUserId, input.maxRating) : normalizeMaxRating(input.maxRating)
+        const ratingError = chatRatingError(character, effectiveMaxRating)
         if (ratingError) {
           send({ type: 'delta', content: ratingError })
           send({

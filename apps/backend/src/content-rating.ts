@@ -27,3 +27,8 @@ export function normalizeMaxRating(value?: string): ContentRating {
   if (value === 'general' || value === 'teen_romance' || value === 'mature_18' || value === 'restricted_18') return value
   return 'teen_romance'
 }
+
+export function clampMaxRating(requested: ContentRating | undefined, allowed: ContentRating) {
+  const normalized = normalizeMaxRating(requested)
+  return ratingAllowed(normalized, allowed) ? normalized : allowed
+}

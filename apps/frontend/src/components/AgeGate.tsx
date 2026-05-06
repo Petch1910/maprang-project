@@ -1,10 +1,15 @@
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
+import { saveContentSettings, selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
 
 export function AgeGate() {
   const dispatch = useAppDispatch()
   const content = useAppSelector(selectContentSettings)
   if (content.ageGateAnswered) return null
+
+  const chooseMode = (isAdult: boolean) => {
+    dispatch(setAdultStatus(isAdult))
+    dispatch(saveContentSettings({ isAdult, maxRating: isAdult ? 'restricted_18' : 'teen_romance' }))
+  }
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4 backdrop-blur-sm">
@@ -17,7 +22,7 @@ export function AgeGate() {
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <button
             className="min-h-16 rounded-lg border border-slate-900/10 bg-slate-50 px-4 text-left transition hover:bg-white"
-            onClick={() => dispatch(setAdultStatus(false))}
+            onClick={() => chooseMode(false)}
             type="button"
           >
             <span className="block text-sm font-black text-slate-900">โหมดทั่วไป</span>
@@ -25,7 +30,7 @@ export function AgeGate() {
           </button>
           <button
             className="min-h-16 rounded-lg bg-slate-950 px-4 text-left text-white transition hover:bg-slate-800"
-            onClick={() => dispatch(setAdultStatus(true))}
+            onClick={() => chooseMode(true)}
             type="button"
           >
             <span className="block text-sm font-black">โหมดผู้ใหญ่</span>
