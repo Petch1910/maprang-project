@@ -92,6 +92,10 @@ Expected result:
 The same deploy checks also run in GitHub Actions through `.github/workflows/ci.yml`.
 CI also runs a seeded local backend smoke test and builds the backend and frontend Docker images without pushing them.
 
+For deployed environments, use the manual GitHub Actions workflow `Production Smoke`.
+Set repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN` or `SMOKE_USER_ID`.
+The optional `run_chat` input also verifies the live AI provider path and uses provider credits.
+
 ## Required Production Environment
 
 Use `PRODUCTION_SETUP.md` as the source of truth for production env values and Supabase setup.

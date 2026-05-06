@@ -12,6 +12,7 @@ const requiredFiles = [
   'DEPLOY_RENDER.md',
   'DEPLOYMENT_QA.md',
   'PRODUCTION_SETUP.md',
+  '.github/workflows/production-smoke.yml',
   'apps/backend/Dockerfile',
   'apps/backend/.env.production.example',
   'apps/backend/prisma/schema.prisma',
@@ -100,6 +101,17 @@ const checks: Check[] = [
       const render = await readRepoFile('DEPLOY_RENDER.md')
       requireIncludes(setup, ['bunx prisma migrate deploy', 'SMOKE_API_BASE_URL', 'SUPABASE_STORAGE_ACCESS=signed', '/ready'], 'PRODUCTION_SETUP.md')
       requireIncludes(render, ['Health check path: `/ready`', 'bunx prisma migrate deploy', 'SUPABASE_STORAGE_ACCESS=signed'], 'DEPLOY_RENDER.md')
+    },
+  },
+  {
+    name: 'production smoke workflow is available',
+    run: async () => {
+      const workflow = await readRepoFile('.github/workflows/production-smoke.yml')
+      requireIncludes(
+        workflow,
+        ['workflow_dispatch', 'SMOKE_API_BASE_URL', 'bun run smoke:ready', 'bun run smoke:local'],
+        '.github/workflows/production-smoke.yml',
+      )
     },
   },
 ]

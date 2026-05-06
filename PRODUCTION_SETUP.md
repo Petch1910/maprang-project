@@ -127,6 +127,10 @@ Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless
 
 10. Complete manual QA from `DEPLOYMENT_QA.md`.
 
+You can also run the manual GitHub Actions workflow `Production Smoke` after each deploy.
+Configure repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN` or `SMOKE_USER_ID`.
+Turn on `run_chat` only when you want to spend a small amount of provider credit to verify the live AI path.
+
 ## Production Readiness Notes
 
 - Latest migrations include reports and admin audit logs. Always run `bunx prisma migrate deploy` before exposing the backend.

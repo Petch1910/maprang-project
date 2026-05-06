@@ -1,0 +1,40 @@
+name: Production Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: Backend URL to test. Falls back to repository secret SMOKE_API_BASE_URL.
+        required: false
+        type: string
+      run_chat:
+        description: Also run live AI chat smoke. This uses provider credits.
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      SMOKE_API_BASE_URL: ${{ inputs.api_base_url || secrets.SMOKE_API_BASE_URL }}
+      SMOKE_ACCESS_TOKEN: ${{ secrets.SMOKE_ACCESS_TOKEN }}
+      SMOKE_USER_ID: ${{ secrets.SMOKE_USER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Validate smoke configuration
+        run: |
+          if [ -z "$SMOKE_API_BASE_URL" ]; then
+            echo "Set workflow input api_base_url or repository secret SMOKE_API_BASE_URL."
+            exit 1
+          fi
+          if [ -z "$SMOKE_ACCESS_TOKEN" ] && [ -z "$SMOKE_USER_ID" ]; then
+            echo "Set repository secret SMOKE_ACCESS_TOKEN or SMOKE_USER_ID."
+            exit 1
+          fi
+      - run: bun run smoke:doctor
+      - run: bun run smoke:ready
+      - run: bun run smoke:local
+      - if: ${{ inputs.run_chat }}
+        run: bun run smoke:chat
