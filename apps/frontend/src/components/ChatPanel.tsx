@@ -1,4 +1,6 @@
 import type { RefObject } from 'react'
+import { Archive, BookOpen, CalendarDays, ChevronDown, Flag, Heart, Image, Menu, MessageSquare, Music, Settings, Share2, UserRound } from 'lucide-react'
+import heroImage from '../assets/hero.png'
 import type { Character, ChatMessage, ChatResponse, ChatRuntimeState } from '../lib/api'
 import { starterPrompts } from '../lib/chat'
 import { Composer } from './Composer'
@@ -25,36 +27,6 @@ type ChatPanelProps = {
   onSendMessage: (message?: string) => void
 }
 
-function UsageStrip({ usage }: { usage: ChatUsage | null }) {
-  if (!usage) return null
-  const balance = usage.tokenBalance
-  const isLowBalance = typeof balance === 'number' && balance <= 5
-
-  return (
-    <div
-      className={`flex flex-wrap items-center gap-2 border-b px-4 py-2 text-xs font-bold sm:px-8 ${
-        isLowBalance
-          ? 'border-amber-300/60 bg-amber-50 text-amber-900'
-          : 'border-slate-900/10 bg-white/45 text-slate-500'
-      }`}
-    >
-      <span>ใช้ไป {usage.totalTokens.toLocaleString()} โทเคน</span>
-      {typeof balance === 'number' && <span>คงเหลือ {balance.toLocaleString()}</span>}
-      {isLowBalance && (
-        <span className="rounded-full bg-amber-200/70 px-2 py-1 text-amber-950">
-          โทเคนใกล้หมดแล้ว ใช้เทิร์นถัดไปอย่างระวัง
-        </span>
-      )}
-      {usage.contextLoreCount !== undefined && <span>lore {usage.contextLoreCount}</span>}
-      {usage.cost !== undefined && usage.cost > 0 && <span>${usage.cost.toFixed(6)}</span>}
-    </div>
-  )
-}
-
-function metricWidth(value: number) {
-  return `${Math.max(0, Math.min(100, Math.abs(value)))}%`
-}
-
 function relationshipLabel(status?: string) {
   const labels: Record<string, string> = {
     RIVAL: 'คู่แข่ง',
@@ -66,186 +38,173 @@ function relationshipLabel(status?: string) {
   return status ? labels[status] ?? status.toLowerCase() : 'เริ่มต้น'
 }
 
-function RelationshipTopBar({
-  runtimeState,
-  character,
-}: {
-  runtimeState: ChatRuntimeState | null
-  character: Character
-}) {
+function usageLabel(usage: ChatUsage | null) {
+  if (!usage) return 'ยังไม่มีการใช้โทเคนในรอบนี้'
+  const balance = typeof usage.tokenBalance === 'number' ? ` เหลือ ${usage.tokenBalance.toLocaleString()}` : ''
+  return `ใช้ ${usage.totalTokens.toLocaleString()} โทเคน${balance}`
+}
+
+function RoleCard({ character, runtimeState }: { character: Character; runtimeState: ChatRuntimeState | null }) {
   const relationship = runtimeState?.relationshipState
-  const momentum = runtimeState?.memory.emotionalMomentum
-  const stats = relationship
-    ? [
-        ['ความผูกพัน', relationship.affinity, 'bg-rose-500'],
-        ['ความไว้ใจ', relationship.trust, 'bg-sky-500'],
-        ['ความใกล้ชิด', relationship.intimacy, 'bg-violet-500'],
-        ['ความเคารพ', relationship.respect, 'bg-emerald-500'],
-      ]
-    : []
+  const lines = [
+    ['ชื่อ', character.name],
+    ['สถานะ', relationshipLabel(relationship?.status)],
+    ['โทน', relationship?.tone ?? 'sandbox'],
+    ['เส้นทาง', relationship?.route ?? 'general'],
+    ['ฉากปัจจุบัน', runtimeState?.sceneState.activeScene?.title ?? runtimeState?.sceneState.currentScene ?? 'ยังไม่มีฉาก'],
+    ['บทบาท', character.scenario || character.tagline || character.description || 'เลือกจุดเริ่มต้น แล้วเริ่มคุยเพื่อให้ระบบความสัมพันธ์ค่อยๆ เปิดฉากตามเงื่อนไข'],
+  ]
 
   return (
-    <div className="border-b border-slate-900/10 bg-white/70 px-4 py-3 backdrop-blur-xl sm:px-8">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
-          <p className="m-0 text-xs font-extrabold tracking-widest text-slate-500 uppercase">ความสัมพันธ์</p>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <span className="text-base font-extrabold text-slate-950 sm:text-lg">
-              {character.name} / {relationshipLabel(relationship?.status)}
-            </span>
-            {relationship?.tier && (
-              <span className="rounded-full border border-slate-900/10 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-600">
-                {relationship.tier}
-              </span>
-            )}
-            {relationship?.tone && (
-              <span className="rounded-full border border-orange-200 bg-orange-50 px-2 py-1 text-xs font-bold text-orange-800">
-                โทน {relationship.tone}
-              </span>
-            )}
-            {momentum?.direction && (
-              <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-bold text-blue-800">
-                โมเมนตัม {momentum.direction}
-              </span>
-            )}
-          </div>
-        </div>
+    <section className="mx-auto w-full max-w-2xl rounded-md border border-white/18 bg-black/28 p-5 text-sm leading-7 text-white shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-md">
+      <h2 className="mb-3 text-base font-black">บทบาท:</h2>
+      <div className="space-y-1.5">
+        {lines.map(([label, value]) => (
+          <p className="m-0 whitespace-pre-wrap break-words" key={label}>
+            <span className="font-black">{label}: </span>
+            <span>{value}</span>
+          </p>
+        ))}
+      </div>
+    </section>
+  )
+}
 
-        {stats.length > 0 && (
-          <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[430px]">
-            {stats.map(([label, value, color]) => (
-              <div key={label} className="min-w-0 rounded-lg border border-slate-900/10 bg-white px-3 py-2">
-                <div className="flex items-center justify-between gap-2 text-xs font-bold text-slate-500">
-                  <span>{label}</span>
-                  <span>{value}</span>
-                </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <div className={`h-full rounded-full ${color}`} style={{ width: metricWidth(value as number) }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+function SceneBar({
+  runtimeState,
+  isLoading,
+  onSceneAction,
+}: {
+  runtimeState: ChatRuntimeState | null
+  isLoading: boolean
+  onSceneAction: ChatPanelProps['onSceneAction']
+}) {
+  if (!runtimeState) return null
+  const scene = runtimeState.sceneState
+  const activeScene = scene.activeScene
+  const pendingEvent = scene.pendingEvents.find((event) => event.status === 'pending') ?? scene.pendingEvents[0]
+
+  if (activeScene) {
+    return (
+      <div className="mx-auto w-full max-w-2xl rounded-md border border-white/15 bg-slate-950/72 p-4 text-white backdrop-blur-xl">
+        <p className="m-0 text-xs font-black tracking-widest text-white/45 uppercase">Scene Mode</p>
+        <h3 className="m-0 mt-1 font-black">{activeScene.title}</h3>
+        <p className="m-0 mt-1 text-sm text-white/70">{activeScene.objective}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button className="min-h-9 rounded-md bg-emerald-400 px-3 text-sm font-black text-emerald-950" disabled={isLoading} onClick={() => onSceneAction('accept')} type="button">
+            ยอมรับ
+          </button>
+          <button className="min-h-9 rounded-md bg-white/12 px-3 text-sm font-black text-white" disabled={isLoading} onClick={() => onSceneAction('resolve')} type="button">
+            จบฉาก
+          </button>
+          <button className="min-h-9 rounded-md bg-rose-400 px-3 text-sm font-black text-rose-950" disabled={isLoading} onClick={() => onSceneAction('reject')} type="button">
+            ปฏิเสธ
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!pendingEvent) return null
+  return (
+    <div className="mx-auto w-full max-w-2xl rounded-md border border-amber-300/35 bg-amber-400/14 p-4 text-amber-50 backdrop-blur-xl">
+      <p className="m-0 text-xs font-black tracking-widest uppercase">ฉากสำคัญพร้อมแล้ว</p>
+      <h3 className="m-0 mt-1 font-black">{pendingEvent.title}</h3>
+      <p className="m-0 mt-1 text-sm text-amber-50/75">{pendingEvent.prompt}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button className="min-h-9 rounded-md bg-amber-300 px-3 text-sm font-black text-amber-950" disabled={isLoading} onClick={() => onSceneAction('enter', pendingEvent.code)} type="button">
+          เข้าสู่ฉาก
+        </button>
+        <button className="min-h-9 rounded-md bg-white/10 px-3 text-sm font-black text-white" disabled={isLoading} onClick={() => onSceneAction('hold', pendingEvent.code)} type="button">
+          เก็บไว้ก่อน
+        </button>
       </div>
     </div>
   )
 }
 
-function SceneRuntimePanel({
-  runtimeState,
-  onSceneAction,
-  isLoading,
-}: {
-  runtimeState: ChatRuntimeState | null
-  onSceneAction: (
-    action: 'enter' | 'hold' | 'decline' | 'exit' | 'resolve' | 'accept' | 'reject',
-    code?: string,
-  ) => void
-  isLoading: boolean
-}) {
-  if (!runtimeState) return null
-
-  const scene = runtimeState.sceneState
-  const pendingEvent = scene.pendingEvents.find((event) => event.status === 'pending') ?? scene.pendingEvents[0]
-  const activeScene = scene.activeScene
+function RightRail({ character, runtimeState, usage }: { character: Character; runtimeState: ChatRuntimeState | null; usage: ChatUsage | null }) {
+  const relationship = runtimeState?.relationshipState
+  const menuItems = [
+    ['บทบาท', UserRound],
+    ['สถานการณ์', BookOpen],
+    ['นิสัยตัวละคร', Archive],
+    ['ตัวละครสนับสนุน', MessageSquare],
+    ['อีโมจิตัวละคร', Heart],
+    ['รูปภาพและวิดีโอ', Image],
+    ['โหมดอ่าน', BookOpen],
+    ['คำที่ไม่ต้องการ', Flag],
+    ['โมเดลของใจ', Settings],
+  ] as const
 
   return (
-    <div className="border-b border-slate-900/10 bg-white/55 px-4 py-3 sm:px-8">
-      {activeScene ? (
-        <div className="rounded-lg border border-slate-900/15 bg-slate-950 px-4 py-3 text-white shadow-[0_20px_60px_rgba(15,23,42,0.20)]">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="m-0 text-xs font-extrabold tracking-widest text-slate-400 uppercase">โหมดฉาก</p>
-              <h3 className="m-0 mt-1 truncate text-base font-extrabold">{activeScene.title}</h3>
-              <p className="m-0 mt-1 text-sm leading-relaxed text-slate-300">{activeScene.objective}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                className="min-h-10 rounded-full bg-emerald-400 px-3 text-sm font-extrabold text-emerald-950 transition hover:bg-emerald-300 disabled:opacity-60"
-                disabled={isLoading}
-                onClick={() => onSceneAction('accept')}
-                type="button"
-              >
-                ยอมรับ
-              </button>
-              <button
-                className="min-h-10 rounded-full bg-sky-400 px-3 text-sm font-extrabold text-sky-950 transition hover:bg-sky-300 disabled:opacity-60"
-                disabled={isLoading}
-                onClick={() => onSceneAction('resolve')}
-                type="button"
-              >
-                จบฉาก
-              </button>
-              <button
-                className="min-h-10 rounded-full bg-rose-400 px-3 text-sm font-extrabold text-rose-950 transition hover:bg-rose-300 disabled:opacity-60"
-                disabled={isLoading}
-                onClick={() => onSceneAction('reject')}
-                type="button"
-              >
-                ปฏิเสธ
-              </button>
-              <button
-                className="min-h-10 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-extrabold text-white transition hover:bg-white/15 disabled:opacity-60"
-                disabled={isLoading}
-                onClick={() => onSceneAction('exit')}
-                type="button"
-              >
-                ออก
-              </button>
-            </div>
-          </div>
+    <aside className="hidden min-h-0 border-l border-white/10 bg-[#151518]/96 p-4 text-white lg:flex lg:flex-col">
+      <div className="flex items-start gap-3">
+        <img
+          alt=""
+          className="size-12 rounded-full object-cover ring-1 ring-white/12"
+          src={character.avatarUrl || heroImage}
+        />
+        <div className="min-w-0">
+          <h2 className="m-0 truncate text-sm font-black">{character.name}</h2>
+          <p className="m-0 mt-1 truncate text-xs font-bold text-white/55">ผู้สร้าง @Maprang</p>
         </div>
-      ) : pendingEvent && scene.mode === 'sandbox' ? (
-        <div className="rounded-lg border border-amber-300/70 bg-amber-50 px-4 py-3 text-amber-950">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="m-0 text-xs font-extrabold tracking-widest uppercase">ฉากพร้อมแล้ว</p>
-              <h3 className="m-0 mt-1 text-base font-extrabold">{pendingEvent.title}</h3>
-              <p className="m-0 mt-1 text-sm leading-relaxed text-amber-900">{pendingEvent.prompt}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                className="min-h-10 rounded-full bg-amber-900 px-3 text-sm font-extrabold text-white transition hover:bg-amber-800 disabled:opacity-60"
-                disabled={isLoading}
-                onClick={() => onSceneAction('enter', pendingEvent.code)}
-                type="button"
-              >
-                เข้าฉาก
-              </button>
-              <button
-                className="min-h-10 rounded-full border border-amber-300 bg-white/70 px-3 text-sm font-extrabold text-amber-950 transition hover:bg-white disabled:opacity-60"
-                disabled={isLoading}
-                onClick={() => onSceneAction('hold', pendingEvent.code)}
-                type="button"
-              >
-                เก็บไว้ก่อน
-              </button>
-              <button
-                className="min-h-10 rounded-full border border-rose-300 bg-rose-50 px-3 text-sm font-extrabold text-rose-800 transition hover:bg-rose-100 disabled:opacity-60"
-                disabled={isLoading}
-                onClick={() => onSceneAction('decline', pendingEvent.code)}
-                type="button"
-              >
-                ข้าม
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
-          <span>โหมดอิสระ</span>
-          <span>เทิร์น {runtimeState.memory.turnCount.toLocaleString()}</span>
-          <span>เจตนา {scene.lastUserIntent}</span>
-        </div>
-      )}
-    </div>
-  )
-}
+      </div>
 
-function SceneBackdrop({ runtimeState }: { runtimeState: ChatRuntimeState | null }) {
-  if (runtimeState?.sceneState.mode !== 'scene') return null
-  return (
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(15,23,42,0.10)_58%,rgba(15,23,42,0.34)_100%)]" />
+      <p className="mt-4 line-clamp-3 text-sm leading-6 text-white/55">
+        {character.greeting || character.tagline || character.description || 'เริ่มบทสนทนา แล้วให้ระบบ relationship ค่อยๆ เปิดฉากตามอารมณ์ของเรื่อง'}
+      </p>
+
+      <button className="mt-4 min-h-9 rounded-md border border-white/10 bg-white/5 text-sm font-black text-white" type="button">
+        <Music className="mr-2 inline" size={16} />
+        เพลงประกอบ
+      </button>
+
+      <div className="mt-4 grid grid-cols-5 gap-1 text-center text-[11px] font-bold text-white/55">
+        {[
+          ['ไลก์', Heart],
+          ['โปรไฟล์', UserRound],
+          ['แชร์', Share2],
+          ['แจ้ง', Flag],
+          ['แชทอื่น', MessageSquare],
+        ].map(([label, Icon]) => (
+          <button className="grid min-h-12 place-items-center rounded-md hover:bg-white/6" key={label as string} type="button">
+            <Icon size={17} />
+            <span>{label as string}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-3">
+        <p className="m-0 text-xs font-black text-white/45">โหมดความสัมพันธ์</p>
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <span className="text-sm font-black">{relationshipLabel(relationship?.status)}</span>
+          <span className="rounded-full bg-white/12 px-2 py-1 text-xs font-bold text-white/70">{relationship?.tier ?? 'sandbox'}</span>
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-white/45">
+        <span className="flex items-center gap-1"><CalendarDays size={14} /> วันนี้</span>
+        <span>{usageLabel(usage)}</span>
+      </div>
+
+      <button className="mt-4 min-h-10 rounded-md bg-white/12 text-sm font-black text-white hover:bg-white/16" type="button">
+        แชทใหม่
+      </button>
+
+      <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
+        <p className="mb-2 text-xs font-black text-white/35">ตั้งค่าตัวละคร</p>
+        {menuItems.map(([label, Icon]) => (
+          <button className="flex min-h-10 w-full items-center justify-between border-b border-white/6 text-left text-sm font-bold text-white/78" key={label} type="button">
+            <span className="flex items-center gap-2">
+              <Icon size={16} />
+              {label}
+            </span>
+            <ChevronDown className="-rotate-90 text-white/35" size={15} />
+          </button>
+        ))}
+      </div>
+    </aside>
   )
 }
 
@@ -264,82 +223,81 @@ export function ChatPanel({
   onSceneAction,
   onSendMessage,
 }: ChatPanelProps) {
+  const backdropUrl = character.avatarUrl || heroImage
   const isSceneMode = runtimeState?.sceneState.mode === 'scene'
+  const visibleMessages = chatLog.filter((chat) => chat.role !== 'system')
 
   return (
-    <section
-      className={`relative grid min-h-svh min-w-0 grid-rows-[auto_auto_auto_auto_1fr_auto_auto] overflow-hidden transition-colors duration-300 ${
-        isSceneMode ? 'bg-slate-950/5' : ''
-      }`}
-    >
-      <header className="flex items-center justify-between gap-4 border-b border-slate-900/10 bg-white/60 px-4 py-4 backdrop-blur-xl sm:px-8 sm:py-5">
-        <div className="flex min-w-0 items-center gap-3">
+    <section className="grid min-h-svh min-w-0 grid-cols-1 overflow-hidden bg-[#101012] lg:grid-cols-[minmax(0,1fr)_288px]">
+      <div
+        className={`relative grid min-h-0 grid-rows-[auto_1fr_auto] overflow-hidden transition duration-300 ${isSceneMode ? 'shadow-[inset_0_0_0_9999px_rgba(0,0,0,0.20)]' : ''}`}
+        style={{
+          backgroundImage: `linear-gradient(90deg,rgba(14,14,16,0.74),rgba(14,14,16,0.34) 48%,rgba(14,14,16,0.76)), linear-gradient(180deg,rgba(0,0,0,0.28),rgba(0,0,0,0.74)), url(${backdropUrl})`,
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+        }}
+      >
+        <header className="relative z-10 flex min-h-24 items-start justify-center px-4 py-4">
           <button
-            className="grid size-10 place-items-center rounded-lg border border-slate-900/10 bg-white text-xs font-extrabold text-slate-700 shadow-sm md:hidden"
+            className="absolute left-4 top-4 grid size-10 place-items-center rounded-md border border-white/10 bg-black/35 text-white backdrop-blur-md md:hidden"
             onClick={onOpenMenu}
             title="เปิดเมนู"
             type="button"
           >
-            เมนู
+            <Menu size={19} />
           </button>
-          <div className="min-w-0">
-            <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">พร้อมแชท</p>
-            <h2 className="m-0 truncate text-xl font-bold tracking-normal sm:text-2xl">คุยกับ {character.name}</h2>
+          <div className="min-w-0 text-center">
+            <img alt="" className="mx-auto size-16 rounded-full object-cover ring-2 ring-white/20" src={character.avatarUrl || heroImage} />
+            <h1 className="mt-2 truncate text-base font-black text-white">{character.name}</h1>
+            <p className="mx-auto mt-1 max-w-xl truncate text-sm text-white/55">{character.greeting || character.tagline || 'เริ่มบทสนทนาในโหมด sandbox'}</p>
+            <p className="mt-1 text-xs text-white/40">{chatId ? 'แชทที่บันทึกไว้' : 'แชทใหม่'} | ผู้สร้าง @Maprang</p>
+          </div>
+        </header>
+
+        <div className="relative z-10 min-h-0 overflow-y-auto px-4 pb-28 pt-4">
+          <div className="mx-auto flex min-h-full max-w-5xl flex-col gap-4">
+            <RoleCard character={character} runtimeState={runtimeState} />
+            <SceneBar isLoading={isLoading} onSceneAction={onSceneAction} runtimeState={runtimeState} />
+
+            {visibleMessages.length > 1 && (
+              <div className="mt-auto flex flex-col gap-4 pt-8">
+                {visibleMessages.map((chat) => (
+                  <MessageBubble chat={chat} isReporting={isLoading} key={chat.id} onReport={onReportMessage} />
+                ))}
+                {isLoading && visibleMessages.at(-1)?.role !== 'assistant' && (
+                  <p className="self-start rounded-md border border-white/10 bg-black/35 px-4 py-3 text-sm text-white/55 backdrop-blur-md">
+                    กำลังพิมพ์...
+                  </p>
+                )}
+              </div>
+            )}
+            <div ref={chatEndRef} />
           </div>
         </div>
-        <div className="inline-flex min-h-9 flex-none items-center gap-2 rounded-full border border-green-500/25 bg-green-500/10 px-3 text-sm font-extrabold text-green-700">
-          <span className="size-2 rounded-full bg-green-500" />
-          {chatId ? 'บันทึกแล้ว' : 'ออนไลน์'}
-        </div>
-      </header>
 
-      <RelationshipTopBar character={character} runtimeState={runtimeState} />
-      <UsageStrip usage={lastUsage} />
-      <SceneRuntimePanel isLoading={isLoading} onSceneAction={onSceneAction} runtimeState={runtimeState} />
-
-      <div
-        className={`relative flex flex-col gap-4 overflow-y-auto px-4 py-6 transition-all duration-300 sm:px-8 sm:py-8 ${
-          isSceneMode ? 'bg-slate-950/5' : ''
-        }`}
-      >
-        <SceneBackdrop runtimeState={runtimeState} />
-        {chatLog.map((chat) => (
-          <MessageBubble chat={chat} isReporting={isLoading} key={chat.id} onReport={onReportMessage} />
-        ))}
-
-        {isLoading && chatLog.at(-1)?.role !== 'assistant' && (
-          <article className="relative grid max-w-[min(760px,92%)] grid-cols-[40px_minmax(0,auto)] items-end gap-3 self-start">
-            <div className="grid size-10 place-items-center rounded-full bg-orange-100 text-xs font-extrabold text-orange-900">
-              AI
-            </div>
-            <p className="m-0 rounded-[18px] bg-white px-4 py-3.5 leading-relaxed text-slate-500 shadow-[0_16px_44px_rgba(61,79,112,0.10)]">
-              มะปรางกำลังพิมพ์...
-            </p>
-          </article>
-        )}
-
-        <div ref={chatEndRef} />
-      </div>
-
-      <div className="flex gap-2.5 overflow-x-auto px-4 pb-4 sm:px-8">
-        {starterPrompts.map((prompt) => (
-          <button
-            className="min-h-10 flex-none rounded-full border border-slate-900/10 bg-white/80 px-3.5 text-sm text-slate-700 transition hover:bg-white disabled:opacity-60"
-            key={prompt}
-            onClick={() => onSendMessage(prompt)}
-            disabled={isLoading}
-          >
-            {prompt}
+        <div className="relative z-20 border-t border-white/10 bg-black/30 pt-2 backdrop-blur-xl">
+          <button className="absolute right-5 top-[-56px] grid size-10 place-items-center rounded-full bg-white text-slate-950 shadow-lg" type="button">
+            <ChevronDown size={20} />
           </button>
-        ))}
+          <div className="mx-auto flex max-w-5xl gap-2 overflow-x-auto px-4 pb-2">
+            {starterPrompts.slice(0, 4).map((prompt) => (
+              <button
+                className="min-h-9 flex-none rounded-md bg-white/8 px-3 text-xs font-bold text-white/70 transition hover:bg-white/12 disabled:opacity-50"
+                disabled={isLoading}
+                key={prompt}
+                onClick={() => onSendMessage(prompt)}
+                type="button"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+          <Composer disabled={isLoading} message={message} onMessageChange={onMessageChange} onSubmit={() => onSendMessage()} />
+          <p className="m-0 pb-2 text-center text-[11px] font-bold text-white/30">อย่าลืม: ทุกสิ่งที่ตัวละครพูดเป็นการแต่งเรื่อง</p>
+        </div>
       </div>
 
-      <Composer
-        disabled={isLoading}
-        message={message}
-        onMessageChange={onMessageChange}
-        onSubmit={() => onSendMessage()}
-      />
+      <RightRail character={character} runtimeState={runtimeState} usage={lastUsage} />
     </section>
   )
 }

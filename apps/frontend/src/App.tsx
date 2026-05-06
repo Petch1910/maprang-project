@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { NavLink, Route, Routes } from 'react-router-dom'
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { Bell, Coins, Compass, MessageCircle, PlusCircle, ShieldCheck, UserRound } from 'lucide-react'
 import { AgeGate } from './components/AgeGate'
 import { useAppDispatch, useAppSelector } from './store/hooks'
@@ -37,13 +37,40 @@ const utilityNavItems = [{ to: '/wallet', label: 'กระเป๋าโทเ
 
 function App() {
   const dispatch = useAppDispatch()
+  const location = useLocation()
   const tokenBalance = useAppSelector(selectTokenBalance)
   const eventCount = useAppSelector(selectPendingSceneCount)
+  const isChatRoute = location.pathname.startsWith('/chat')
 
   useEffect(() => {
     dispatch(loadWalletSummary())
     dispatch(loadChatSummaries())
   }, [dispatch])
+
+  const appRoutes = (
+    <Suspense fallback={<div className="p-6"><div className="h-40 animate-pulse rounded-2xl bg-slate-200" /></div>}>
+      <Routes>
+        <Route element={<ExplorePage />} path="/" />
+        <Route element={<CharacterLobbyPage />} path="/characters/:characterId" />
+        <Route element={<ChatRoomPage />} path="/chat/:chatId?" />
+        <Route element={<MyChatsPage />} path="/chats" />
+        <Route element={<CreatorStudioPage />} path="/create" />
+        <Route element={<EventsInboxPage />} path="/events" />
+        <Route element={<AdminModerationPage />} path="/moderation" />
+        <Route element={<ProfilePage />} path="/profile" />
+        <Route element={<WalletPage />} path="/wallet" />
+      </Routes>
+    </Suspense>
+  )
+
+  if (isChatRoute) {
+    return (
+      <div className="min-h-svh bg-[#101012] text-white">
+        <AgeGate />
+        {appRoutes}
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-svh bg-slate-50 text-slate-950">
@@ -144,19 +171,7 @@ function App() {
         </nav>
 
         <section className="min-w-0 pb-24 md:pb-0">
-          <Suspense fallback={<div className="p-6"><div className="h-40 animate-pulse rounded-2xl bg-slate-200" /></div>}>
-            <Routes>
-              <Route element={<ExplorePage />} path="/" />
-              <Route element={<CharacterLobbyPage />} path="/characters/:characterId" />
-              <Route element={<ChatRoomPage />} path="/chat/:chatId?" />
-              <Route element={<MyChatsPage />} path="/chats" />
-              <Route element={<CreatorStudioPage />} path="/create" />
-              <Route element={<EventsInboxPage />} path="/events" />
-              <Route element={<AdminModerationPage />} path="/moderation" />
-              <Route element={<ProfilePage />} path="/profile" />
-              <Route element={<WalletPage />} path="/wallet" />
-            </Routes>
-          </Suspense>
+          {appRoutes}
         </section>
       </div>
 

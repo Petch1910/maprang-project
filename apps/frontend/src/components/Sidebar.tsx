@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+import { Compass, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-react'
 import type {
   AdminSummary as AdminSummaryData,
   Character,
@@ -10,14 +12,6 @@ import type {
   LoreInput,
 } from '../lib/api'
 import { formatTime } from '../lib/chat'
-import { AdminSummary } from './AdminSummary'
-import { AuthPanel } from './AuthPanel'
-import { CharacterCreateForm } from './CharacterCreateForm'
-import { CharacterList } from './CharacterList'
-import { CharacterManager } from './CharacterManager'
-import { LoreManager } from './LoreManager'
-import { RelationshipExplainability } from './RelationshipExplainability'
-import { SystemStatus } from './SystemStatus'
 
 type SidebarProps = {
   character: Character
@@ -60,14 +54,13 @@ export function Sidebar(props: SidebarProps) {
   return (
     <>
       <div
-        className={`fixed inset-0 z-30 bg-slate-950/35 backdrop-blur-sm transition md:hidden ${
+        className={`fixed inset-0 z-30 bg-black/65 backdrop-blur-sm transition md:hidden ${
           props.isMobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
         onClick={props.onCloseMobile}
       />
-
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[min(92vw,360px)] min-h-0 flex-col gap-6 overflow-y-auto border-r border-slate-900/10 bg-white/95 p-5 shadow-2xl backdrop-blur-xl transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:bg-white/70 md:p-7 md:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[min(92vw,246px)] min-h-0 flex-col border-r border-white/10 bg-[#151518] p-2.5 text-white shadow-2xl transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:shadow-none ${
           props.isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -77,197 +70,124 @@ export function Sidebar(props: SidebarProps) {
   )
 }
 
+function Avatar({ src, name }: { src: string | null; name: string }) {
+  return src ? (
+    <img alt="" className="size-8 rounded-full object-cover" src={src} />
+  ) : (
+    <span className="grid size-8 place-items-center rounded-full bg-white/12 text-xs font-black">{name.slice(0, 1)}</span>
+  )
+}
+
 function SidebarContent({
   character,
-  adminSummary,
   characters,
   chatHistory,
   chatId,
-  runtimeState,
   connectionNote,
-  healthStatus,
   isHistoryLoading,
-  isLoreLoading,
-  isSavingCharacter,
-  isSavingLore,
-  loreEntries,
   onArchiveChat,
-  onAuthChanged,
   onCloseMobile,
-  onCreateCharacter,
-  onCreateLore,
-  onDeleteCharacter,
-  onDeleteLore,
-  onDuplicateCharacter,
-  onFilterCharacters,
-  onFavoriteCharacter,
   onLoadChatHistory,
-  onLoadHealth,
-  onLoadAdminSummary,
-  onLoadLore,
   onOpenChat,
-  onResetCharacterPrompt,
-  onSaveCharacter,
   onSelectCharacter,
   onStartNewChat,
-  onUpdateLore,
 }: SidebarProps) {
-  const handleStartNewChat = () => {
-    onStartNewChat()
-    onCloseMobile()
-  }
+  const pinnedCharacters = characters.slice(0, 8)
 
-  const handleSelectCharacter = (nextCharacter: Character) => {
-    onSelectCharacter(nextCharacter)
-    onCloseMobile()
-  }
-
-  const handleOpenChat = (id: string) => {
+  const openChat = (id: string) => {
     onOpenChat(id)
     onCloseMobile()
   }
 
+  const selectCharacter = (nextCharacter: Character) => {
+    onSelectCharacter(nextCharacter)
+    onCloseMobile()
+  }
+
   return (
-    <>
-      <div className="flex items-center justify-between gap-3.5">
-        <div className="flex min-w-0 items-center gap-3.5">
-          <div className="grid size-13 flex-none place-items-center rounded-2xl bg-linear-to-br from-amber-400 to-rose-500 text-2xl font-extrabold text-white shadow-[0_16px_36px_rgba(255,120,60,0.32)]">
-            M
-          </div>
-          <div className="min-w-0">
-            <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Maprang Project</p>
-            <h1 className="truncate text-3xl leading-none font-bold tracking-normal">Maprang AI</h1>
-          </div>
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <section className="relative overflow-hidden rounded-md border border-white/8 bg-[linear-gradient(135deg,rgba(91,57,255,0.55),rgba(255,138,41,0.50))] p-3">
+        <p className="m-0 text-sm font-black">ดูดวงไพ่ทาโรต์ประจำวัน</p>
+        <p className="m-0 mt-1 line-clamp-2 text-xs leading-5 text-white/70">ไม่ว่าจะเป็นความรัก งาน หรือความสัมพันธ์ของคุณ</p>
+        <div className="mt-2 flex gap-1">
+          <span className="size-1.5 rounded-full bg-white" />
+          <span className="size-1.5 rounded-full bg-white/40" />
+          <span className="size-1.5 rounded-full bg-white/40" />
         </div>
-        <button
-          className="grid size-9 place-items-center rounded-xl border border-slate-900/10 bg-white text-lg font-bold text-slate-600 md:hidden"
-          onClick={onCloseMobile}
-          type="button"
-        >
-          x
+      </section>
+
+      <Link className="flex min-h-9 items-center justify-center gap-2 rounded-md bg-white/10 text-sm font-black text-white hover:bg-white/14" to="/">
+        <Compass size={16} />
+        ไปหน้าหลัก
+      </Link>
+
+      <button className="flex min-h-9 items-center justify-center gap-2 rounded-md bg-white text-sm font-black text-slate-950" onClick={onStartNewChat} type="button">
+        <Plus size={16} />
+        สร้างต่อจากตัวละครนี้
+      </button>
+
+      <div className="mt-2 flex items-center justify-between border-b border-white/10 pb-2">
+        <button className="text-sm font-black text-white" type="button">แชทส่วนตัว</button>
+        <button className="text-sm font-black text-white/55" type="button">จักรวาล [ทดลอง]</button>
+      </div>
+
+      <div className="grid grid-cols-[minmax(0,1fr)_36px] gap-2">
+        <label className="flex min-h-10 items-center gap-2 rounded-full bg-white/6 px-3 text-white/45">
+          <Search size={16} />
+          <span className="truncate text-sm">ค้นหาแชท</span>
+        </label>
+        <button className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60" onClick={onLoadChatHistory} type="button">
+          <Trash2 size={16} />
         </button>
       </div>
 
-      <SystemStatus healthStatus={healthStatus} onRefresh={onLoadHealth} />
-
-      <AuthPanel onAuthChanged={onAuthChanged} />
-
-      <AdminSummary summary={adminSummary} onRefresh={onLoadAdminSummary} />
-
-      <button
-        className="min-h-12 w-full rounded-xl border-0 bg-blue-600 font-extrabold text-white shadow-[0_14px_28px_rgba(31,111,235,0.25)] transition hover:bg-blue-700"
-        onClick={handleStartNewChat}
-      >
-        แชทใหม่
-      </button>
-
-      <div className="grid grid-cols-[54px_minmax(0,1fr)] gap-3.5 rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
-        <div className="grid size-[54px] place-items-center rounded-2xl bg-orange-100 font-extrabold text-orange-900">
-          AI
-        </div>
-        <div className="min-w-0">
-          <h2 className="m-0 truncate text-lg font-bold tracking-normal">{character.name}</h2>
-          <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-slate-500">
-            {character.tagline || character.description}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-400">
-            <span>{(character.favoriteCount ?? 0).toLocaleString()} ถูกใจ</span>
-            <span>{(character.viewCount ?? 0).toLocaleString()} เข้าชม</span>
-            <span>{character.chatCount.toLocaleString()} แชท</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {character.tags.map((tag) => (
-          <span
-            className="rounded-full border border-blue-600/20 bg-blue-600/10 px-2.5 py-2 text-[13px] font-bold text-blue-600"
-            key={tag}
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      <RelationshipExplainability runtimeState={runtimeState} tags={character.tags} />
-
-      <CharacterCreateForm isSaving={isSavingCharacter} onCreate={onCreateCharacter} />
-
-      <CharacterList
-        characters={characters}
-        selectedCharacterId={character.id}
-        onFilterCharacters={onFilterCharacters}
-        onFavoriteCharacter={onFavoriteCharacter}
-        onSelectCharacter={handleSelectCharacter}
-      />
-
-      <CharacterManager
-        character={character}
-        isSaving={isSavingCharacter}
-        onDelete={onDeleteCharacter}
-        onDuplicate={onDuplicateCharacter}
-        onResetPrompt={onResetCharacterPrompt}
-        onSave={onSaveCharacter}
-      />
-
-      <LoreManager
-        character={character}
-        isLoading={isLoreLoading}
-        isSaving={isSavingLore}
-        loreEntries={loreEntries}
-        onCreate={onCreateLore}
-        onDelete={onDeleteLore}
-        onLoad={onLoadLore}
-        onUpdate={onUpdateLore}
-      />
-
-      <section className="flex min-h-0 flex-col gap-2.5">
-        <div className="flex items-center justify-between gap-2.5">
-          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">ประวัติแชท</p>
-          <button
-            className="min-h-7 rounded-full border border-slate-900/10 bg-white/80 px-3 text-xs font-bold text-slate-700"
-            onClick={onLoadChatHistory}
-            disabled={isHistoryLoading}
-          >
-            รีเฟรช
-          </button>
+      <section className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <p className="mb-2 mt-3 text-xs font-black text-amber-300">ปักหมุด</p>
+        <div className="space-y-1">
+          {pinnedCharacters.map((item) => (
+            <button
+              className={`grid min-h-10 w-full grid-cols-[32px_minmax(0,1fr)_24px] items-center gap-2 rounded-md px-1.5 text-left hover:bg-white/6 ${
+                item.id === character.id ? 'bg-white/8' : ''
+              }`}
+              key={item.id}
+              onClick={() => selectCharacter(item)}
+              type="button"
+            >
+              <Avatar name={item.name} src={item.avatarUrl} />
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-black text-white">{item.name}</span>
+                <span className="block truncate text-[11px] text-white/45">{item.tagline || item.description || 'พร้อมเริ่มแชท'}</span>
+              </span>
+              <MoreHorizontal className="text-white/45" size={17} />
+            </button>
+          ))}
         </div>
 
-        <div className="flex min-h-30 flex-col gap-2 overflow-y-auto pr-0.5">
+        <p className="mb-2 mt-4 text-xs font-black text-white/30">วันนี้</p>
+        <div className="space-y-1">
           {chatHistory.length === 0 && (
-            <p className="m-0 rounded-lg border border-dashed border-slate-900/15 bg-white/60 p-3.5 text-sm leading-relaxed text-slate-500">
+            <p className="rounded-md border border-white/8 bg-white/5 p-3 text-xs leading-5 text-white/45">
               {isHistoryLoading ? 'กำลังโหลด...' : 'ยังไม่มีแชทที่บันทึกไว้'}
             </p>
           )}
-
           {chatHistory.map((chat) => (
             <div
-              className={`grid grid-cols-[minmax(0,1fr)_32px] items-stretch overflow-hidden rounded-lg border bg-white/75 ${
-                chat.id === chatId ? 'border-blue-500/40 bg-blue-50' : 'border-slate-900/10'
-              }`}
+              className={`grid grid-cols-[minmax(0,1fr)_28px] rounded-md ${chat.id === chatId ? 'bg-white/10' : 'hover:bg-white/6'}`}
               key={chat.id}
             >
-              <button
-                className="flex min-w-0 flex-col gap-1 border-0 bg-transparent px-3 py-2.5 text-left"
-                onClick={() => handleOpenChat(chat.id)}
-              >
-                <strong className="truncate text-[13px] text-slate-900">{chat.title}</strong>
-                <span className="truncate text-xs text-slate-500">{chat.preview || chat.characterName}</span>
-                <small className="truncate text-[11px] text-slate-400">{formatTime(chat.lastMessageAt)}</small>
+              <button className="min-w-0 px-2 py-2 text-left" onClick={() => openChat(chat.id)} type="button">
+                <span className="block truncate text-sm font-black text-white">{chat.title || chat.characterName}</span>
+                <span className="block truncate text-[11px] text-white/42">{chat.preview || formatTime(chat.lastMessageAt)}</span>
               </button>
-              <button
-                className="border-0 border-l border-slate-900/10 bg-transparent text-xl text-slate-400 transition hover:bg-red-50 hover:text-red-600"
-                onClick={() => onArchiveChat(chat.id)}
-                title="เก็บแชท"
-              >
-                x
+              <button className="grid place-items-center text-white/35 hover:text-rose-300" onClick={() => onArchiveChat(chat.id)} title="เก็บแชท" type="button">
+                <MoreHorizontal size={17} />
               </button>
             </div>
           ))}
         </div>
       </section>
 
-      <p className="m-0 text-[13px] leading-relaxed text-slate-500">{connectionNote}</p>
-    </>
+      <p className="m-0 border-t border-white/10 pt-2 text-[11px] leading-5 text-white/35">{connectionNote}</p>
+    </div>
   )
 }

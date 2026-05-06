@@ -20,15 +20,15 @@ export function MessageBubble({ chat, isReporting = false, onReport }: MessageBu
     >
       <div
         className={`grid size-10 place-items-center rounded-full text-xs font-extrabold ${
-          isUser ? 'col-start-2 row-start-1 bg-slate-900 text-white' : 'bg-orange-100 text-orange-900'
+          isUser ? 'col-start-2 row-start-1 bg-white text-slate-950' : 'bg-white/15 text-white ring-1 ring-white/15'
         }`}
       >
         {isUser ? 'คุณ' : 'AI'}
       </div>
 
       <div
-        className={`min-w-0 rounded-[18px] px-4 py-3.5 leading-relaxed shadow-[0_16px_44px_rgba(61,79,112,0.10)] ${
-          isUser ? 'col-start-1 row-start-1 bg-blue-600 text-white' : 'bg-white text-slate-700'
+        className={`min-w-0 rounded-[18px] px-4 py-3.5 leading-relaxed shadow-[0_16px_44px_rgba(0,0,0,0.22)] ${
+          isUser ? 'col-start-1 row-start-1 bg-white text-slate-950' : 'border border-white/10 bg-black/35 text-white backdrop-blur-md'
         } ${isUser ? '' : 'markdown-body'}`}
       >
         {isUser ? (
@@ -36,15 +36,15 @@ export function MessageBubble({ chat, isReporting = false, onReport }: MessageBu
         ) : chat.content.trim() ? (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{chat.content}</ReactMarkdown>
         ) : (
-          <p className="m-0 text-slate-400">มะปรางกำลังพิมพ์...</p>
+          <p className="m-0 text-white/55">กำลังพิมพ์...</p>
         )}
         {canReport && (
           <div className={`mt-3 flex ${isUser ? 'justify-end' : 'justify-start'}`}>
             <button
               className={`min-h-8 rounded-full border px-2.5 text-xs font-extrabold transition disabled:opacity-60 ${
                 isUser
-                  ? 'border-white/30 bg-white/10 text-white hover:bg-white/15'
-                  : 'border-slate-900/10 bg-slate-50 text-slate-500 hover:bg-slate-100'
+                  ? 'border-slate-900/15 bg-slate-900/5 text-slate-600 hover:bg-slate-900/10'
+                  : 'border-white/10 bg-white/5 text-white/55 hover:bg-white/10'
               }`}
               disabled={isReporting}
               onClick={() => onReport?.(chat)}

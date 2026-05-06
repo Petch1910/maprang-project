@@ -721,7 +721,7 @@ export function WorkspacePage() {
   }
 
   return (
-    <main className="grid min-h-svh grid-cols-1 bg-[radial-gradient(circle_at_top_left,rgba(255,177,79,0.24),transparent_32rem),linear-gradient(135deg,#fbfcff_0%,#eef4ff_45%,#fff8ef_100%)] text-slate-900 md:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
+    <main className="grid min-h-svh grid-cols-1 overflow-hidden bg-[#111113] text-white md:grid-cols-[246px_minmax(0,1fr)]">
       <Sidebar
         character={character}
         adminSummary={adminSummary}
