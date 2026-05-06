@@ -71,6 +71,47 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run deploy:check
 
+  smoke-local:
+    runs-on: ubuntu-latest
+    needs: backend
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: maprang_local
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U admin -d maprang_local"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://admin:password123@localhost:5432/maprang_local
+      OPENROUTER_API_KEY: ci-placeholder-key
+      CORS_ORIGINS: http://localhost:5173
+      STORAGE_PROVIDER: local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: cd apps/backend && bun install --frozen-lockfile
+      - run: cd apps/backend && bunx prisma generate
+      - run: cd apps/backend && bunx prisma migrate deploy
+      - run: cd apps/backend && bun prisma/seed.ts
+      - name: Run seeded local smoke tests
+        run: |
+          cd apps/backend
+          bun run start &
+          backend_pid=$!
+          trap 'kill $backend_pid 2>/dev/null || true' EXIT
+          cd ../..
+          sleep 5
+          bun run smoke:doctor
+          bun run smoke:local
+
   docker-build:
     runs-on: ubuntu-latest
     needs: predeploy

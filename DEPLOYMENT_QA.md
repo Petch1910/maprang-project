@@ -82,8 +82,8 @@ Expected result:
 - Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
 - Live chat smoke confirms backend-to-OpenRouter chat, chat persistence, and usage accounting.
 
-The same checks also run in GitHub Actions through `.github/workflows/ci.yml`.
-CI also builds the backend and frontend Docker images without pushing them.
+The same deploy checks also run in GitHub Actions through `.github/workflows/ci.yml`.
+CI also runs a seeded local backend smoke test and builds the backend and frontend Docker images without pushing them.
 
 ## Required Production Environment
 
