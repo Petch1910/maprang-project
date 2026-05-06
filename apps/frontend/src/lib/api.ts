@@ -570,6 +570,7 @@ export async function sendChatMessage(input: {
   chatId: string | null
   relationshipSeed?: string
   userPersona?: string
+  maxRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
   history: Array<{ role: 'user' | 'assistant'; content: string }>
 }) {
   return requestJson<ChatResponse>('/chat', {
@@ -585,6 +586,7 @@ export async function streamChatMessage(
     chatId: string | null
     relationshipSeed?: string
     userPersona?: string
+    maxRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
     history: Array<{ role: 'user' | 'assistant'; content: string }>
   },
   onEvent: (event: ChatStreamEvent) => void,

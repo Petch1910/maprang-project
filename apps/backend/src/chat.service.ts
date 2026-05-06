@@ -12,6 +12,7 @@ import {
   modelName,
   modelOutputCostPer1M,
 } from './config'
+import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentRating } from './content-rating'
 import { buildContextPrompt, loadRelevantLore } from './context.service'
 import { getPrisma } from './db'
 import {
@@ -51,6 +52,7 @@ export type SendChatInput = {
   chatId?: string
   relationshipSeed?: string
   userPersona?: string
+  maxRating?: ContentRating
   userId?: string
   history?: ChatMessage[]
 }
@@ -295,6 +297,17 @@ function relationshipFromSeed(character: CharacterWithTags | null, seedId?: stri
   if (seedTags.length === 0) return coerceRelationshipState(null, character)
 
   return buildRelationshipSeedFromTags([...new Set([...characterTags, ...seedTags])])
+}
+
+function characterContentRating(character: CharacterWithTags | null) {
+  return contentRatingFromTags((character?.tags ?? []).map((item) => item.tag.name))
+}
+
+function chatRatingError(character: CharacterWithTags | null, maxRating?: ContentRating) {
+  const rating = characterContentRating(character)
+  const allowed = normalizeMaxRating(maxRating)
+  if (ratingAllowed(rating, allowed)) return null
+  return `This character is rated ${rating}. Enable a higher content mode before starting this chat.`
 }
 
 function clip(value: string, maxLength: number) {
@@ -694,6 +707,19 @@ export async function sendChat(input: SendChatInput) {
   }
 
   const character = await loadCharacter(activeCharacterId)
+  const ratingError = chatRatingError(character, input.maxRating)
+  if (ratingError) {
+    return {
+      reply: ratingError,
+      chatId: input.chatId ?? null,
+      usage: {
+        ...fallbackUsage(),
+        modelName,
+        contextLoreCount: 0,
+        tokenBalance,
+      },
+    }
+  }
   const { loreEntries, messages } = await buildMessages(
     character,
     input.message,
@@ -708,7 +734,7 @@ export async function sendChat(input: SendChatInput) {
     messages,
   })
 
-  const reply = completion.choices[0]?.message?.content?.trim() || 'มะปรางยังคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
+  const reply = completion.choices[0]?.message?.content?.trim() || 'Maprang could not produce a reply yet. Please try asking again.'
   const usage = usageFromCompletion(completion)
   const loreKeywords = loreEntries.map((entry) => entry.keyword)
   const persistResult =
@@ -812,6 +838,21 @@ export function streamChat(input: SendChatInput) {
         }
 
         const character = await loadCharacter(activeCharacterId)
+        const ratingError = chatRatingError(character, input.maxRating)
+        if (ratingError) {
+          send({ type: 'delta', content: ratingError })
+          send({
+            type: 'done',
+            chatId: input.chatId ?? null,
+            usage: {
+              ...fallbackUsage(),
+              modelName,
+              contextLoreCount: 0,
+              tokenBalance,
+            },
+          })
+          return
+        }
         const { loreEntries, messages } = await buildMessages(
           character,
           input.message,
@@ -850,7 +891,7 @@ export function streamChat(input: SendChatInput) {
           }
         }
 
-        const trimmedReply = reply.trim() || 'มะปรางยังคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
+        const trimmedReply = reply.trim() || 'Maprang could not produce a reply yet. Please try asking again.'
         const persistResult =
           prisma && character
             ? await persistChatTurn({
@@ -893,7 +934,7 @@ export function streamChat(input: SendChatInput) {
         console.error('Chat stream error:', error)
         send({
           type: 'error',
-          message: 'ระบบ AI มีปัญหาชั่วคราว ลองใหม่อีกครั้งนะคะ',
+          message: 'The AI service is temporarily unavailable. Please try again.',
           chatId: input.chatId ?? null,
         })
       } finally {

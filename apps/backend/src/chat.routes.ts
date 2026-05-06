@@ -9,6 +9,14 @@ const chatBody = t.Object({
   chatId: t.Optional(t.String()),
   relationshipSeed: t.Optional(t.String()),
   userPersona: t.Optional(t.String()),
+  maxRating: t.Optional(
+    t.Union([
+      t.Literal('general'),
+      t.Literal('teen_romance'),
+      t.Literal('mature_18'),
+      t.Literal('restricted_18'),
+    ]),
+  ),
   userId: t.Optional(t.String()),
   history: t.Optional(
     t.Array(

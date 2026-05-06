@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { updateRuntimeState } from './chat.service'
+import { contentRatingFromTags, ratingAllowed } from './content-rating'
 
 describe('chat runtime state', () => {
   test('persists emotional momentum and relationship timeline from user pressure', () => {
@@ -79,5 +80,14 @@ describe('chat runtime state', () => {
     expect(runtime.relationshipState.affinity).toBeGreaterThan(60)
     expect(runtime.relationshipState.trust).toBeGreaterThan(60)
     expect(runtime.memory.relationshipTimeline.at(-1)?.type).toBe('scene')
+  })
+})
+
+describe('chat content rating guard', () => {
+  test('blocks chat when character rating exceeds selected max rating', () => {
+    const rating = contentRatingFromTags(['nc'])
+
+    expect(rating).toBe('restricted_18')
+    expect(ratingAllowed(rating, 'teen_romance')).toBe(false)
   })
 })
