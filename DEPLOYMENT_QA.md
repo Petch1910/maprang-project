@@ -158,6 +158,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 - Confirm per-event cooldown prevents immediate repeat events.
 - Confirm a different user cannot edit another user's character without admin access.
 - Confirm admin summary loads only when admin access is configured.
+- Open Wallet and confirm token transaction history shows chat debits and admin adjustments.
 
 ## Release Notes Template
 

@@ -89,7 +89,7 @@ const checks: Check[] = [
     name: 'required migrations are present',
     run: async () => {
       const migrations = await readdir(join(root, 'apps/backend/prisma/migrations'))
-      const required = ['20260506113000_reports', '20260506123000_admin_audit_logs']
+      const required = ['20260506113000_reports', '20260506123000_admin_audit_logs', '20260506160000_token_transactions']
       const missing = required.filter((name) => !migrations.includes(name))
       if (missing.length > 0) throw new Error(`missing migration(s): ${missing.join(', ')}`)
     },

@@ -133,7 +133,7 @@ Turn on `run_chat` only when you want to spend a small amount of provider credit
 
 ## Production Readiness Notes
 
-- Latest migrations include reports and admin audit logs. Always run `bunx prisma migrate deploy` before exposing the backend.
+- Latest migrations include reports, admin audit logs, and wallet token transactions. Always run `bunx prisma migrate deploy` before exposing the backend.
 - Admin actions now write audit logs for report status changes, hidden characters, archived messages, and manual token adjustments.
-- Payment is not connected yet. Use Wallet admin token adjustment only for beta/manual grants until a transaction ledger and payment provider are added.
+- Payment is not connected yet. Use Wallet admin token adjustment only for beta/manual grants until a payment provider is added.
 - Production smoke tests require either a real Supabase access token or a known UUID user id accepted by the backend environment.

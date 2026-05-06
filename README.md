@@ -1,6 +1,6 @@
 # Maprang Project
 
-AI character chat platform with relationship state, scene events, creator tools, usage tracking, and production-ready auth/storage hooks.
+AI character chat platform with relationship state, scene events, creator tools, usage tracking, wallet ledger, and production-ready auth/storage hooks.
 
 ## Local Setup
 

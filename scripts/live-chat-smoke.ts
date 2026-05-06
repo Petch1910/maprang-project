@@ -52,6 +52,27 @@ if (chat.reply.includes('temporarily unavailable')) {
 if (!chat.chatId) throw new Error('Live chat did not create a chat id')
 if (!chat.usage?.totalTokens) throw new Error('Live chat did not return token usage')
 
+const wallet = await readJson<{
+  wallet?: {
+    transactions?: Array<{
+      id: string
+      type: string
+      amount: number
+      balanceAfter: number
+    }>
+  }
+}>('/me/usage', {
+  headers: smokeAuthHeaders(),
+})
+
+const chatDebit = wallet.wallet?.transactions?.find(
+  (transaction) => transaction.type === 'CHAT_USAGE' && transaction.amount === -chat.usage!.totalTokens,
+)
+
+if (!chatDebit) {
+  throw new Error('Live chat returned token usage, but no matching CHAT_USAGE wallet transaction was found')
+}
+
 console.log(
   JSON.stringify(
     {
@@ -60,6 +81,8 @@ console.log(
       character: maprang.name,
       model: chat.usage.modelName ?? health.model?.name ?? null,
       totalTokens: chat.usage.totalTokens,
+      walletTransactionId: chatDebit.id,
+      balanceAfter: chatDebit.balanceAfter,
       replyPreview: chat.reply.slice(0, 120),
     },
     null,

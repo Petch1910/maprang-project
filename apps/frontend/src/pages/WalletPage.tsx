@@ -24,6 +24,17 @@ function errorMessage(error: unknown) {
   return 'โหลดข้อมูลโทเคนไม่ได้'
 }
 
+function transactionLabel(type: NonNullable<UsageSummary['wallet']>['transactions'][number]['type']) {
+  const labels: Record<NonNullable<UsageSummary['wallet']>['transactions'][number]['type'], string> = {
+    CHAT_USAGE: 'ใช้แชท AI',
+    ADMIN_ADJUSTMENT: 'ผู้ดูแลปรับยอด',
+    PROMOTION: 'โปรโมชัน',
+    PURCHASE: 'เติมโทเคน',
+    REFUND: 'คืนโทเคน',
+  }
+  return labels[type]
+}
+
 export function WalletPage() {
   const dispatch = useAppDispatch()
   const [summary, setSummary] = useState<UsageSummary | null>(null)
@@ -57,7 +68,19 @@ export function WalletPage() {
     setIsAdjusting(true)
     try {
       const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'manual_beta_grant' : 'manual_admin_debit')
-      setSummary((prev) => (prev ? { ...prev, user: data.user } : prev))
+      setSummary((prev) =>
+        prev
+          ? {
+              ...prev,
+              user: data.user,
+              wallet: {
+                transactions: data.transaction
+                  ? [data.transaction, ...(prev.wallet?.transactions ?? [])].slice(0, 20)
+                  : (prev.wallet?.transactions ?? []),
+              },
+            }
+          : prev,
+      )
       dispatch(setTokenBalance(data.user.tokenBalance))
       setNote(`${amount > 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(amount).toLocaleString()} โทเคนแล้ว`)
     } catch (error) {
@@ -158,6 +181,45 @@ export function WalletPage() {
             </button>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-900/10 bg-white shadow-sm">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-900/10 p-4">
+          <div>
+            <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
+              <ReceiptText size={17} />
+              ประวัติธุรกรรมโทเคน
+            </p>
+            <p className="m-0 mt-1 text-xs font-bold text-slate-400">รายการเพิ่ม/หักยอดที่ใช้ตรวจสอบ wallet ได้ย้อนหลัง</p>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="p-5 text-sm font-bold text-slate-500">กำลังโหลดธุรกรรม...</div>
+        ) : !summary || !summary.wallet?.transactions.length ? (
+          <div className="p-5 text-sm font-bold text-slate-500">ยังไม่มีธุรกรรมโทเคน</div>
+        ) : (
+          <div className="divide-y divide-slate-900/10">
+            {summary.wallet.transactions.map((item) => (
+              <article className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={item.id}>
+                <div className="min-w-0">
+                  <p className="m-0 truncate text-sm font-black text-slate-950">{transactionLabel(item.type)}</p>
+                  <p className="m-0 mt-1 truncate text-xs font-bold text-slate-400">
+                    {formatDate(item.createdAt)} / คงเหลือ {item.balanceAfter.toLocaleString()} โทเคน
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-black ${
+                    item.amount >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                  }`}
+                >
+                  {item.amount >= 0 ? '+' : ''}
+                  {item.amount.toLocaleString()}
+                </span>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-slate-900/10 bg-white shadow-sm">

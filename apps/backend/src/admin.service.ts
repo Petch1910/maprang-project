@@ -1,4 +1,4 @@
-import { AdminAuditAction, CharacterStatus } from '@prisma/client'
+import { AdminAuditAction, CharacterStatus, TokenTransactionType } from '@prisma/client'
 import { createAdminAuditLog } from './audit.service'
 import { getPrisma } from './db'
 
@@ -116,6 +116,28 @@ export async function adjustUserTokenBalance(userId: string, amount: number, act
       select: { id: true, email: true, username: true, role: true, tokenBalance: true },
     })
 
+    const transaction = await tx.tokenTransaction.create({
+      data: {
+        userId,
+        type: TokenTransactionType.ADMIN_ADJUSTMENT,
+        amount,
+        balanceAfter: nextBalance,
+        reason: reason?.trim() || null,
+        metadata: {
+          actorUserId,
+          previousBalance: user.tokenBalance,
+        },
+      },
+      select: {
+        id: true,
+        type: true,
+        amount: true,
+        balanceAfter: true,
+        reason: true,
+        createdAt: true,
+      },
+    })
+
     await createAdminAuditLog(
       {
         action: AdminAuditAction.TOKEN_ADJUSTMENT,
@@ -132,6 +154,6 @@ export async function adjustUserTokenBalance(userId: string, amount: number, act
       tx,
     )
 
-    return { user: updatedUser, adjustment: amount }
+    return { user: updatedUser, adjustment: amount, transaction }
   })
 }

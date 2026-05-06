@@ -300,6 +300,16 @@ export type UsageSummary = {
       createdAt: string
     }>
   }
+  wallet?: {
+    transactions: Array<{
+      id: string
+      type: 'CHAT_USAGE' | 'ADMIN_ADJUSTMENT' | 'PROMOTION' | 'PURCHASE' | 'REFUND'
+      amount: number
+      balanceAfter: number
+      reason: string | null
+      createdAt: string
+    }>
+  }
 }
 
 export type AdminSummary = {
@@ -667,6 +677,7 @@ export async function adjustAdminUserTokens(userId: string, amount: number, reas
   return requestJson<{
     user: UsageSummary['user']
     adjustment: number
+    transaction?: NonNullable<UsageSummary['wallet']>['transactions'][number]
   }>(`/admin/users/${userId}/tokens`, {
     method: 'PATCH',
     body: JSON.stringify({ amount, reason }),

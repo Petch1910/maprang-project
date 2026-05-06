@@ -1,4 +1,4 @@
-import { MessageRole, type PrismaClient } from '@prisma/client'
+import { MessageRole, TokenTransactionType, type PrismaClient } from '@prisma/client'
 import OpenAI from 'openai'
 import type { ChatCompletion } from 'openai/resources/chat/completions'
 import { loadCharacter, publicCharacter, type CharacterWithTags } from './character.service'
@@ -605,7 +605,7 @@ async function persistChatTurn({
 
   let tokenBalance: number | null = null
   if (usage.totalTokens > 0) {
-    await prisma.usage.create({
+    const usageRecord = await prisma.usage.create({
       data: {
         userId,
         tokens: usage.totalTokens,
@@ -622,6 +622,25 @@ async function persistChatTurn({
       select: { tokenBalance: true },
     })
     tokenBalance = updatedUser.tokenBalance
+
+    await prisma.tokenTransaction.create({
+      data: {
+        userId,
+        usageId: usageRecord.id,
+        type: TokenTransactionType.CHAT_USAGE,
+        amount: -usage.totalTokens,
+        balanceAfter: updatedUser.tokenBalance,
+        reason: 'chat_usage',
+        metadata: {
+          chatId: chat.id,
+          characterId: character.id,
+          modelName,
+          promptTokens: usage.promptTokens,
+          completionTokens: usage.completionTokens,
+          cost: usage.cost,
+        },
+      },
+    })
   } else {
     tokenBalance = await loadTokenBalance(prisma, userId)
   }

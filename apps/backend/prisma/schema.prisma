@@ -50,6 +50,14 @@ enum AdminAuditAction {
   TOKEN_ADJUSTMENT
 }
 
+enum TokenTransactionType {
+  CHAT_USAGE
+  ADMIN_ADJUSTMENT
+  PROMOTION
+  PURCHASE
+  REFUND
+}
+
 model User {
   id           String  @id @db.Uuid
   email        String  @unique
@@ -63,6 +71,7 @@ model User {
   usages     Usage[]
   reports    Report[]
   adminAuditLogs AdminAuditLog[]
+  tokenTransactions TokenTransaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -241,10 +250,30 @@ model Usage {
   modelName String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenTransaction TokenTransaction?
 
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt(sort: Desc)])
+}
+
+model TokenTransaction {
+  id           String               @id @default(uuid()) @db.Uuid
+  userId       String               @db.Uuid
+  usageId      String?              @unique @db.Uuid
+  type         TokenTransactionType
+  amount       Int
+  balanceAfter Int
+  reason       String?
+  metadata     Json?
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usage Usage? @relation(fields: [usageId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([type, createdAt(sort: Desc)])
 }
 
 model Report {
