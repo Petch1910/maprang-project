@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { parseTags } from '../lib/tagAnalysis'
 import { previewRelationship, type RelationshipPreview } from '../lib/api'
+import { parseTags } from '../lib/tagAnalysis'
 
 export function RelationshipPreviewPanel({ tags }: { tags: string }) {
   const [preview, setPreview] = useState<RelationshipPreview | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [script, setScript] = useState('สวัสดี เราอยากรู้จักเธอมากขึ้น\nขอบคุณที่เล่าให้ฟังนะ เราไว้ใจเธอ\nถ้าไม่พร้อมก็ไม่เป็นไร')
+  const [script, setScript] = useState(
+    'Hi, I want to know you better.\nThank you for telling me that. I trust you.\nIf you are not ready, that is okay.',
+  )
 
   const runPreview = async () => {
     setIsLoading(true)
@@ -32,7 +34,7 @@ export function RelationshipPreviewPanel({ tags }: { tags: string }) {
           onClick={runPreview}
           type="button"
         >
-          {isLoading ? 'simulating...' : 'simulate'}
+          {isLoading ? 'simulating...' : 'simulate 5 turns'}
         </button>
       </div>
       <textarea
@@ -44,7 +46,7 @@ export function RelationshipPreviewPanel({ tags }: { tags: string }) {
 
       {preview && (
         <div className="mt-2 space-y-2">
-          <p className="m-0">
+          <p className="m-0 font-bold text-slate-900">
             seed: {preview.seed.status} / {preview.seed.arcStage} / {preview.seed.tier} / {preview.seed.tone}
           </p>
           {preview.validationIssues.map((issue) => (

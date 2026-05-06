@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { uploadAvatar, type CharacterInput } from '../lib/api'
 import { analyzeTags } from '../lib/tagAnalysis'
+import { CreatorReadinessPanel } from './CreatorReadinessPanel'
 import { RelationshipPreviewPanel } from './RelationshipPreviewPanel'
 import { RelationshipPresetPicker } from './RelationshipPresetPicker'
 
@@ -39,6 +40,7 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
     setForm((prev) => ({ ...prev, [field]: value }))
   }
   const tagAnalysis = analyzeTags(form.tags)
+  const hasDangerConflict = tagAnalysis.issues.some((issue) => issue.level === 'danger')
 
   const handleAvatarFile = async (file: File | null) => {
     if (!file) return
@@ -52,6 +54,7 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
   }
 
   const submit = async () => {
+    if (hasDangerConflict) return
     setNote('')
     await onCreate({
       name: form.name.trim(),
@@ -73,7 +76,7 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
       status: 'DRAFT',
     })
     setForm(emptyCharacter)
-    setNote('สร้างตัวละครใหม่แล้ว')
+    setNote('Character draft created.')
     setIsOpen(false)
   }
 
@@ -82,8 +85,9 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
       <button
         className="flex min-h-10 w-full items-center justify-between rounded-xl border border-slate-900/10 bg-slate-50 px-3 text-left text-sm font-extrabold text-slate-900 transition hover:bg-white"
         onClick={() => setIsOpen((value) => !value)}
+        type="button"
       >
-        <span>สร้างตัวละครใหม่</span>
+        <span>Create new character</span>
         <span className="text-lg leading-none">{isOpen ? '-' : '+'}</span>
       </button>
 
@@ -93,7 +97,7 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
             className={inputClass}
             value={form.name}
             onChange={(event) => update('name', event.target.value)}
-            placeholder="ชื่อตัวละคร"
+            placeholder="Character name"
           />
           <input
             className={inputClass}
@@ -112,19 +116,19 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
             className={inputClass}
             value={form.tagline}
             onChange={(event) => update('tagline', event.target.value)}
-            placeholder="Tagline สั้น ๆ"
+            placeholder="Short tagline"
           />
           <textarea
             className={textareaClass}
             value={form.description}
             onChange={(event) => update('description', event.target.value)}
-            placeholder="คำอธิบายตัวละคร"
+            placeholder="Character description"
           />
           <textarea
             className={textareaClass}
             value={form.greeting}
             onChange={(event) => update('greeting', event.target.value)}
-            placeholder="ข้อความทักทาย"
+            placeholder="Greeting message"
           />
           <textarea
             className={`${textareaClass} min-h-32`}
@@ -136,18 +140,18 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
             className={textareaClass}
             value={form.scenario}
             onChange={(event) => update('scenario', event.target.value)}
-            placeholder="ฉากเริ่มต้น"
+            placeholder="Opening scenario"
           />
           <input
             className={inputClass}
             value={form.tags}
             onChange={(event) => update('tags', event.target.value)}
-            placeholder="tags คั่นด้วย comma"
+            placeholder="tags separated by comma"
           />
+          <CreatorReadinessPanel analysis={tagAnalysis} />
           <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
             <p className="m-0 font-bold text-slate-900">
-              discovery {tagAnalysis.discovery.length}, engine {tagAnalysis.engine.length}, safety{' '}
-              {tagAnalysis.safety.length}
+              discovery {tagAnalysis.discovery.length}, engine {tagAnalysis.engine.length}, safety {tagAnalysis.safety.length}
             </p>
             {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">unknown: {tagAnalysis.unknown.join(', ')}</p>}
             {tagAnalysis.issues.map((issue) => (
@@ -165,9 +169,10 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
           <button
             className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white transition hover:bg-slate-800 disabled:opacity-60"
             onClick={submit}
-            disabled={isSaving || !form.name.trim() || !form.systemPrompt.trim()}
+            disabled={isSaving || hasDangerConflict || !form.name.trim() || !form.systemPrompt.trim()}
+            type="button"
           >
-            {isSaving ? 'กำลังสร้าง...' : 'สร้างเป็น Draft'}
+            {isSaving ? 'Creating...' : hasDangerConflict ? 'Fix tag conflicts first' : 'Create draft'}
           </button>
         </div>
       )}

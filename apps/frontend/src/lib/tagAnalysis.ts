@@ -43,6 +43,10 @@ const engineTags = new Set([
   'loyal',
   'hard-to-get',
   'golden',
+  'slow-burn',
+  'trust-building',
+  'mentor',
+  'hostile',
   'mafia',
   'doctor',
   'teacher',
@@ -52,32 +56,7 @@ const engineTags = new Set([
 
 const safetyTags = new Set(['family', 'no-romance', 'red-flag', 'yellow-flag', 'green-flag'])
 
-const aliases: Record<string, string> = {
-  ศัตรู: 'enemy',
-  คู่แข่ง: 'rival',
-  เพื่อน: 'friend',
-  เพื่อนสนิท: 'close-friend',
-  แฟน: 'lover',
-  แฟนเก่า: 'ex',
-  แอบรัก: 'crush',
-  ครอบครัว: 'family',
-  รักต้องห้าม: 'no-romance',
-  ซึนเดเระ: 'tsundere',
-  คุเดเระ: 'kuudere',
-  เย็นชา: 'cold',
-  ขี้อาย: 'shy',
-  ร่าเริง: 'cheerful',
-  ตัวละครจีบยาก: 'hard-to-get',
-  หมาโกลเด้น: 'golden',
-  มาเฟีย: 'mafia',
-  หมอ: 'doctor',
-  ครู: 'teacher',
-  อัศวิน: 'knight',
-  แวมไพร์: 'vampire',
-  ธงแดง: 'red-flag',
-  ธงเหลือง: 'yellow-flag',
-  ธงเขียว: 'green-flag',
-}
+const aliases: Record<string, string> = {}
 
 export function parseTags(value: string | string[]) {
   const tags = Array.isArray(value) ? value : value.split(',')
@@ -107,23 +86,38 @@ export function analyzeTags(value: string | string[]): TagAnalysis {
   }
 
   if (analysis.engine.length > 5) {
-    analysis.issues.push({ level: 'warning', message: 'Engine tags มากกว่า 5 ตัว อาจทำให้บุคลิกแกว่งหรือคุม progression ยาก' })
+    analysis.issues.push({
+      level: 'warning',
+      message: 'More than 5 engine tags can make personality and relationship progression harder to control.',
+    })
   }
 
   if (analysis.safety.includes('family') && (analysis.discovery.includes('nc') || analysis.engine.includes('lover'))) {
-    analysis.issues.push({ level: 'danger', message: 'family ขัดกับ nc/lover ควรเปลี่ยนเป็น no-romance หรือถอด tag เสี่ยงออก' })
+    analysis.issues.push({
+      level: 'danger',
+      message: 'family conflicts with nc/lover. Use no-romance or remove the risky tag before publishing.',
+    })
   }
 
   if (analysis.safety.includes('no-romance') && (analysis.engine.includes('lover') || analysis.engine.includes('crush'))) {
-    analysis.issues.push({ level: 'danger', message: 'no-romance ขัดกับ lover/crush ระบบจะบล็อก romance escalation' })
+    analysis.issues.push({
+      level: 'danger',
+      message: 'no-romance conflicts with lover/crush and will block romance escalation.',
+    })
   }
 
   if (analysis.engine.includes('hard-to-get') && analysis.engine.includes('golden')) {
-    analysis.issues.push({ level: 'warning', message: 'hard-to-get + golden ให้สัญญาณตรงข้ามกัน ควรเลือกว่าต้องการ progression ช้าหรือเข้าหาง่าย' })
+    analysis.issues.push({
+      level: 'warning',
+      message: 'hard-to-get + golden send opposite progression signals. Choose slow tension or easy warmth.',
+    })
   }
 
   if (analysis.safety.includes('red-flag') && analysis.safety.includes('green-flag')) {
-    analysis.issues.push({ level: 'warning', message: 'red-flag + green-flag อาจทำให้ safety tone สับสน ควรใช้ yellow-flag แทนถ้าต้องการกลาง ๆ' })
+    analysis.issues.push({
+      level: 'warning',
+      message: 'red-flag + green-flag can confuse safety tone. Use yellow-flag for a middle route.',
+    })
   }
 
   return analysis
