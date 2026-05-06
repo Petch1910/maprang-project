@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { uploadAvatar, type Character, type CharacterInput } from '../lib/api'
 import { analyzeTags } from '../lib/tagAnalysis'
+import { CreatorReadinessPanel } from './CreatorReadinessPanel'
 import { RelationshipPreviewPanel } from './RelationshipPreviewPanel'
 import { RelationshipPresetPicker } from './RelationshipPresetPicker'
 
@@ -15,13 +16,7 @@ type CharacterManagerProps = {
 }
 
 const visibilityOptions: Array<CharacterInput['visibility']> = ['PUBLIC', 'UNLISTED', 'PRIVATE']
-const statusOptions: Array<CharacterInput['status']> = [
-  'DRAFT',
-  'REVIEW',
-  'PUBLISHED',
-  'REJECTED',
-  'ARCHIVED',
-]
+const statusOptions: Array<CharacterInput['status']> = ['DRAFT', 'REVIEW', 'PUBLISHED', 'REJECTED', 'ARCHIVED']
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -80,7 +75,11 @@ export function CharacterManager({
     setSaveNote('')
   }, [character])
 
+  const tagAnalysis = analyzeTags(tags)
+  const hasDangerConflict = tagAnalysis.issues.some((issue) => issue.level === 'danger')
+
   const handleSubmit = async () => {
+    if (hasDangerConflict) return
     setSaveNote('')
     await onSave({
       name: name.trim(),
@@ -101,8 +100,9 @@ export function CharacterManager({
       visibility,
       status,
     })
-    setSaveNote('บันทึกข้อมูลตัวละครแล้ว')
+    setSaveNote('Character saved.')
   }
+
   const handleAvatarFile = async (file: File | null) => {
     if (!file) return
     setIsUploading(true)
@@ -113,13 +113,12 @@ export function CharacterManager({
       setIsUploading(false)
     }
   }
-  const tagAnalysis = analyzeTags(tags)
 
   return (
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
       <div className="mb-3">
-        <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">จัดการตัวละคร</p>
-        <h2 className="m-0 text-lg font-bold text-slate-900">แก้ข้อมูล {character.name}</h2>
+        <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Character manager</p>
+        <h2 className="m-0 text-lg font-bold text-slate-900">Edit {character.name}</h2>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -135,12 +134,12 @@ export function CharacterManager({
               {character.qualityNotes.notes.slice(0, 2).join(' ')}
             </p>
           ) : (
-            <p className="mt-2 mb-0 text-xs leading-relaxed text-green-700">พร้อมสำหรับ publish</p>
+            <p className="mt-2 mb-0 text-xs leading-relaxed text-green-700">Ready for publish review.</p>
           )}
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <Field label="ชื่อ">
+          <Field label="Name">
             <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} />
           </Field>
 
@@ -149,7 +148,7 @@ export function CharacterManager({
           </Field>
         </div>
 
-        <Field label="คำอธิบาย">
+        <Field label="Description">
           <textarea
             className={textareaClass}
             value={description}
@@ -157,11 +156,11 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="ประวัติ / biography">
+        <Field label="Biography">
           <textarea className={textareaClass} value={biography} onChange={(event) => setBiography(event.target.value)} />
         </Field>
 
-        <Field label="ฉากเริ่มต้น / scenario">
+        <Field label="Opening scenario">
           <textarea className={textareaClass} value={scenario} onChange={(event) => setScenario(event.target.value)} />
         </Field>
 
@@ -200,7 +199,7 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="ข้อจำกัด / constraints">
+        <Field label="Constraints">
           <textarea
             className={textareaClass}
             value={constraints}
@@ -220,10 +219,10 @@ export function CharacterManager({
             placeholder="thai, assistant, friendly"
           />
         </Field>
+        <CreatorReadinessPanel analysis={tagAnalysis} />
         <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
           <p className="m-0 font-bold text-slate-900">
-            Tags: discovery {tagAnalysis.discovery.length}, engine {tagAnalysis.engine.length}, safety{' '}
-            {tagAnalysis.safety.length}
+            Tags: discovery {tagAnalysis.discovery.length}, engine {tagAnalysis.engine.length}, safety {tagAnalysis.safety.length}
           </p>
           {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">unknown: {tagAnalysis.unknown.join(', ')}</p>}
           {tagAnalysis.issues.map((issue) => (
@@ -271,9 +270,10 @@ export function CharacterManager({
         <button
           className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white transition hover:bg-blue-700 disabled:opacity-60"
           onClick={handleSubmit}
-          disabled={isSaving || !name.trim() || !systemPrompt.trim()}
+          disabled={isSaving || hasDangerConflict || !name.trim() || !systemPrompt.trim()}
+          type="button"
         >
-          {isSaving ? 'กำลังบันทึก...' : 'บันทึกตัวละคร'}
+          {isSaving ? 'Saving...' : hasDangerConflict ? 'Fix tag conflicts first' : 'Save character'}
         </button>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -281,22 +281,25 @@ export function CharacterManager({
             className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
             onClick={onDuplicate}
             disabled={isSaving}
+            type="button"
           >
-            ทำสำเนา
+            Duplicate
           </button>
           <button
             className="min-h-10 rounded-xl border border-amber-500/25 bg-amber-50 px-3 text-xs font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60"
             onClick={onResetPrompt}
             disabled={isSaving}
+            type="button"
           >
-            รีเซ็ต prompt
+            Reset prompt
           </button>
           <button
             className="min-h-10 rounded-xl border border-red-500/25 bg-red-50 px-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
             onClick={onDelete}
             disabled={isSaving}
+            type="button"
           >
-            ลบตัวละคร
+            Delete character
           </button>
         </div>
 
