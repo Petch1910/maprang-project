@@ -6,6 +6,7 @@ import { createCharacter, updateCharacter } from './character.service'
 import { sendChat } from './chat.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
+import { reportRoutes } from './report.routes'
 import { userRoutes } from './user.routes'
 
 const prisma = getPrisma()
@@ -286,5 +287,36 @@ describe('character persistence quality gate', () => {
     expect(response.status).toBe(200)
     expect(body.user.id).toBe(otherUserId)
     expect(body.user.email).toBe('other@maprang.io')
+  })
+
+  test('blocks reports against private characters the reporter cannot access', async () => {
+    const privateCharacter = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Report Guard`,
+      tags: ['friend'],
+      visibility: 'PRIVATE',
+      status: CharacterStatus.DRAFT,
+    })
+
+    expect(privateCharacter).not.toBeNull()
+
+    const response = await reportRoutes.handle(
+      new Request('http://localhost/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': otherUserId,
+        },
+        body: JSON.stringify({
+          targetType: 'CHARACTER',
+          characterId: privateCharacter!.id,
+          reason: 'cannot access this',
+        }),
+      }),
+    )
+    const body = (await response.json()) as { error: string }
+
+    expect(response.status).toBe(404)
+    expect(body.error).toBe('character_not_found')
   })
 })

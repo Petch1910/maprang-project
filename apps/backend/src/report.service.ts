@@ -46,7 +46,14 @@ export async function createReport(input: CreateReportInput, reporterId = defaul
 
   if (input.characterId) {
     const character = await prisma.character.findFirst({
-      where: { id: input.characterId, deletedAt: null },
+      where: {
+        id: input.characterId,
+        deletedAt: null,
+        OR: [
+          { status: CharacterStatus.PUBLISHED, visibility: Visibility.PUBLIC },
+          { creatorId: reporterId },
+        ],
+      },
       select: { id: true },
     })
     if (!character) return { error: 'character_not_found' }
@@ -54,7 +61,14 @@ export async function createReport(input: CreateReportInput, reporterId = defaul
 
   if (input.messageId) {
     const message = await prisma.message.findFirst({
-      where: { id: input.messageId, deletedAt: null },
+      where: {
+        id: input.messageId,
+        deletedAt: null,
+        chat: {
+          userId: reporterId,
+          deletedAt: null,
+        },
+      },
       select: { id: true, chat: { select: { characterId: true } } },
     })
     if (!message) return { error: 'message_not_found' }
