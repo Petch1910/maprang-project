@@ -12,10 +12,16 @@ bun run qa:local
 
 This gate does not call the live AI provider. It verifies committed secrets, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, and avatar upload.
 
-Run the live provider gate only when the backend is allowed to reach OpenRouter:
+Run the full local or staging provider gate only when the backend is allowed to reach OpenRouter:
 
 ```bash
 bun run qa:live
+```
+
+For a deployed backend, use the smoke-only live gate with `SMOKE_API_BASE_URL` and smoke auth variables. Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless you intentionally want the automated persistence tests to create and archive test records there.
+
+```bash
+bun run smoke:live
 ```
 
 Or run each step separately:

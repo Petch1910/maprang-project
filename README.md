@@ -95,10 +95,16 @@ bun run qa:local
 
 Use this as the normal local readiness gate. It checks secrets, deploy wiring, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, and avatar upload.
 
-Run the live provider gate only when the backend can reach OpenRouter:
+Run the full local or staging provider gate only when the backend can reach OpenRouter:
 
 ```bash
 bun run qa:live
+```
+
+For an already deployed backend, use the smoke-only live gate with `SMOKE_API_BASE_URL` and smoke auth variables instead of running the backend test suite against production data:
+
+```bash
+bun run smoke:live
 ```
 
 Or run each check separately:

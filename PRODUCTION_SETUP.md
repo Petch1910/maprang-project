@@ -113,7 +113,9 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
-For a single production gate, run `bun run qa:live` with the same `SMOKE_API_BASE_URL` and smoke auth variables set.
+For a single production smoke gate, run `bun run smoke:live` with the same `SMOKE_API_BASE_URL` and smoke auth variables set.
+
+Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless you intentionally want the automated persistence tests to create and archive test records there. Use those gates with local or staging databases.
 
 9. Complete manual QA from `DEPLOYMENT_QA.md`.
 
