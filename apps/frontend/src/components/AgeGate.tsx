@@ -9,10 +9,10 @@ export function AgeGate() {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4 backdrop-blur-sm">
       <section className="w-full max-w-lg rounded-lg border border-white/10 bg-white p-5 shadow-2xl">
-        <p className="text-xs font-black tracking-widest text-slate-500 uppercase">Content preference</p>
-        <h2 className="mt-2 text-2xl font-black text-slate-950">Choose your browsing mode</h2>
+        <p className="text-xs font-black tracking-widest text-slate-500 uppercase">ตั้งค่าคอนเทนต์</p>
+        <h2 className="mt-2 text-2xl font-black text-slate-950">เลือกโหมดการใช้งาน</h2>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Maprang supports relationship-heavy roleplay. Mature discovery stays hidden unless you confirm adult mode.
+          Maprang รองรับโรลเพลย์ที่เน้นความสัมพันธ์และอีเวนต์เข้มข้น คอนเทนต์สำหรับผู้ใหญ่จะถูกซ่อนไว้จนกว่าจะยืนยันโหมดผู้ใหญ่
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <button
@@ -20,16 +20,16 @@ export function AgeGate() {
             onClick={() => dispatch(setAdultStatus(false))}
             type="button"
           >
-            <span className="block text-sm font-black text-slate-900">Teen mode</span>
-            <span className="mt-1 block text-xs font-bold text-slate-500">General and softer romance only.</span>
+            <span className="block text-sm font-black text-slate-900">โหมดทั่วไป</span>
+            <span className="mt-1 block text-xs font-bold text-slate-500">แสดงคอนเทนต์ทั่วไปและโรแมนซ์แบบเบาเท่านั้น</span>
           </button>
           <button
             className="min-h-16 rounded-lg bg-slate-950 px-4 text-left text-white transition hover:bg-slate-800"
             onClick={() => dispatch(setAdultStatus(true))}
             type="button"
           >
-            <span className="block text-sm font-black">Adult mode</span>
-            <span className="mt-1 block text-xs font-bold text-white/70">Enables mature and restricted discovery controls.</span>
+            <span className="block text-sm font-black">โหมดผู้ใหญ่</span>
+            <span className="mt-1 block text-xs font-bold text-white/70">เปิดการค้นพบคอนเทนต์สำหรับผู้ใหญ่ตามการตั้งค่า</span>
           </button>
         </div>
       </section>

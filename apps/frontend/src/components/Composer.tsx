@@ -18,7 +18,7 @@ export function Composer({ disabled, message, onMessageChange, onSubmit }: Compo
         className="min-h-13 w-full rounded-2xl border border-slate-900/15 bg-white px-4.5 text-slate-900 outline-none transition focus:border-blue-500/60 focus:ring-4 focus:ring-blue-500/15"
         value={message}
         onChange={(event) => onMessageChange(event.target.value)}
-        placeholder="Type a message to Maprang..."
+        placeholder="พิมพ์ข้อความถึงมะปราง..."
         disabled={disabled}
       />
       <button
@@ -26,7 +26,7 @@ export function Composer({ disabled, message, onMessageChange, onSubmit }: Compo
         disabled={disabled || !message.trim()}
         type="submit"
       >
-        Send
+        ส่ง
       </button>
     </form>
   )

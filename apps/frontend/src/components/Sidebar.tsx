@@ -158,7 +158,7 @@ function SidebarContent({
         className="min-h-12 w-full rounded-xl border-0 bg-blue-600 font-extrabold text-white shadow-[0_14px_28px_rgba(31,111,235,0.25)] transition hover:bg-blue-700"
         onClick={handleStartNewChat}
       >
-        New chat
+        แชทใหม่
       </button>
 
       <div className="grid grid-cols-[54px_minmax(0,1fr)] gap-3.5 rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
@@ -171,9 +171,9 @@ function SidebarContent({
             {character.tagline || character.description}
           </p>
           <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-400">
-            <span>{(character.favoriteCount ?? 0).toLocaleString()} favorites</span>
-            <span>{(character.viewCount ?? 0).toLocaleString()} views</span>
-            <span>{character.chatCount.toLocaleString()} chats</span>
+            <span>{(character.favoriteCount ?? 0).toLocaleString()} ถูกใจ</span>
+            <span>{(character.viewCount ?? 0).toLocaleString()} เข้าชม</span>
+            <span>{character.chatCount.toLocaleString()} แชท</span>
           </div>
         </div>
       </div>
@@ -223,20 +223,20 @@ function SidebarContent({
 
       <section className="flex min-h-0 flex-col gap-2.5">
         <div className="flex items-center justify-between gap-2.5">
-          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Chat history</p>
+          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">ประวัติแชท</p>
           <button
             className="min-h-7 rounded-full border border-slate-900/10 bg-white/80 px-3 text-xs font-bold text-slate-700"
             onClick={onLoadChatHistory}
             disabled={isHistoryLoading}
           >
-            Refresh
+            รีเฟรช
           </button>
         </div>
 
         <div className="flex min-h-30 flex-col gap-2 overflow-y-auto pr-0.5">
           {chatHistory.length === 0 && (
             <p className="m-0 rounded-lg border border-dashed border-slate-900/15 bg-white/60 p-3.5 text-sm leading-relaxed text-slate-500">
-              {isHistoryLoading ? 'Loading...' : 'No saved chats yet.'}
+              {isHistoryLoading ? 'กำลังโหลด...' : 'ยังไม่มีแชทที่บันทึกไว้'}
             </p>
           )}
 
@@ -258,7 +258,7 @@ function SidebarContent({
               <button
                 className="border-0 border-l border-slate-900/10 bg-transparent text-xl text-slate-400 transition hover:bg-red-50 hover:text-red-600"
                 onClick={() => onArchiveChat(chat.id)}
-                title="Archive chat"
+                title="เก็บแชท"
               >
                 x
               </button>

@@ -76,7 +76,7 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
       status: 'DRAFT',
     })
     setForm(emptyCharacter)
-    setNote('Character draft created.')
+    setNote('สร้างดราฟต์ตัวละครแล้ว')
     setIsOpen(false)
   }
 
@@ -87,7 +87,7 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
         onClick={() => setIsOpen((value) => !value)}
         type="button"
       >
-        <span>Create new character</span>
+        <span>สร้างตัวละครใหม่</span>
         <span className="text-lg leading-none">{isOpen ? '-' : '+'}</span>
       </button>
 
@@ -97,13 +97,13 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
             className={inputClass}
             value={form.name}
             onChange={(event) => update('name', event.target.value)}
-            placeholder="Character name"
+            placeholder="ชื่อตัวละคร"
           />
           <input
             className={inputClass}
             value={form.avatarUrl}
             onChange={(event) => update('avatarUrl', event.target.value)}
-            placeholder="Avatar URL"
+            placeholder="ลิงก์รูปตัวละคร"
           />
           <input
             accept="image/png,image/jpeg,image/webp,image/gif"
@@ -116,44 +116,44 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
             className={inputClass}
             value={form.tagline}
             onChange={(event) => update('tagline', event.target.value)}
-            placeholder="Short tagline"
+            placeholder="คำโปรยสั้นๆ"
           />
           <textarea
             className={textareaClass}
             value={form.description}
             onChange={(event) => update('description', event.target.value)}
-            placeholder="Character description"
+            placeholder="คำอธิบายตัวละคร"
           />
           <textarea
             className={textareaClass}
             value={form.greeting}
             onChange={(event) => update('greeting', event.target.value)}
-            placeholder="Greeting message"
+            placeholder="ข้อความทักทาย"
           />
           <textarea
             className={`${textareaClass} min-h-32`}
             value={form.systemPrompt}
             onChange={(event) => update('systemPrompt', event.target.value)}
-            placeholder="System prompt / personality"
+            placeholder="System prompt / บุคลิกตัวละคร"
           />
           <textarea
             className={textareaClass}
             value={form.scenario}
             onChange={(event) => update('scenario', event.target.value)}
-            placeholder="Opening scenario"
+            placeholder="ฉากเปิดเรื่อง"
           />
           <input
             className={inputClass}
             value={form.tags}
             onChange={(event) => update('tags', event.target.value)}
-            placeholder="tags separated by comma"
+            placeholder="แท็ก คั่นด้วย comma"
           />
           <CreatorReadinessPanel analysis={tagAnalysis} />
           <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
             <p className="m-0 font-bold text-slate-900">
-              discovery {tagAnalysis.discovery.length}, engine {tagAnalysis.engine.length}, safety {tagAnalysis.safety.length}
+              แท็กค้นหา {tagAnalysis.discovery.length}, แท็กระบบ {tagAnalysis.engine.length}, แท็กความปลอดภัย {tagAnalysis.safety.length}
             </p>
-            {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">unknown: {tagAnalysis.unknown.join(', ')}</p>}
+            {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">แท็กที่ยังไม่รู้จัก: {tagAnalysis.unknown.join(', ')}</p>}
             {tagAnalysis.issues.map((issue) => (
               <p
                 className={`mt-1 mb-0 font-bold ${issue.level === 'danger' ? 'text-red-700' : 'text-amber-700'}`}
@@ -172,7 +172,7 @@ export function CharacterCreateForm({ isSaving, onCreate }: CharacterCreateFormP
             disabled={isSaving || hasDangerConflict || !form.name.trim() || !form.systemPrompt.trim()}
             type="button"
           >
-            {isSaving ? 'Creating...' : hasDangerConflict ? 'Fix tag conflicts first' : 'Create draft'}
+            {isSaving ? 'กำลังสร้าง...' : hasDangerConflict ? 'แก้แท็กที่ขัดแย้งก่อน' : 'สร้างดราฟต์'}
           </button>
         </div>
       )}

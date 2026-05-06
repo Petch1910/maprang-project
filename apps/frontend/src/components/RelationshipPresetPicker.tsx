@@ -29,14 +29,14 @@ export function RelationshipPresetPicker({
   return (
     <div className="rounded-lg border border-slate-900/10 bg-white p-3 text-xs leading-relaxed text-slate-600">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <strong className="text-slate-900">Relationship preset</strong>
+        <strong className="text-slate-900">พรีเซ็ตความสัมพันธ์</strong>
         <button
           className="min-h-8 rounded-full border border-blue-600/20 bg-blue-600/10 px-3 font-bold text-blue-700 transition hover:bg-blue-600/15 disabled:opacity-60"
           disabled={!selected}
           onClick={applyPreset}
           type="button"
         >
-          apply
+          ใช้พรีเซ็ต
         </button>
       </div>
       <select
@@ -44,7 +44,7 @@ export function RelationshipPresetPicker({
         value={selectedId}
         onChange={(event) => setSelectedId(event.target.value)}
       >
-        <option value="">Choose preset</option>
+        <option value="">เลือกพรีเซ็ต</option>
         {presets.map((preset) => (
           <option key={preset.id} value={preset.id}>
             {preset.name}

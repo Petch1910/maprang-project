@@ -23,7 +23,7 @@ export function MessageBubble({ chat, isReporting = false, onReport }: MessageBu
           isUser ? 'col-start-2 row-start-1 bg-slate-900 text-white' : 'bg-orange-100 text-orange-900'
         }`}
       >
-        {isUser ? 'You' : 'AI'}
+        {isUser ? 'คุณ' : 'AI'}
       </div>
 
       <div
@@ -36,7 +36,7 @@ export function MessageBubble({ chat, isReporting = false, onReport }: MessageBu
         ) : chat.content.trim() ? (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{chat.content}</ReactMarkdown>
         ) : (
-          <p className="m-0 text-slate-400">Maprang is typing...</p>
+          <p className="m-0 text-slate-400">มะปรางกำลังพิมพ์...</p>
         )}
         {canReport && (
           <div className={`mt-3 flex ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -50,7 +50,7 @@ export function MessageBubble({ chat, isReporting = false, onReport }: MessageBu
               onClick={() => onReport?.(chat)}
               type="button"
             >
-              {isReporting ? 'Reporting...' : 'Report'}
+              {isReporting ? 'กำลังรายงาน...' : 'รายงาน'}
             </button>
           </div>
         )}

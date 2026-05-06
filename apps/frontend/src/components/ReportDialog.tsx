@@ -21,12 +21,16 @@ type ReportDialogProps = {
 }
 
 const reasons = [
-  { id: 'policy_review', label: 'Needs policy review' },
-  { id: 'wrong_rating', label: 'Wrong content rating' },
-  { id: 'unsafe_content', label: 'Unsafe or extreme content' },
-  { id: 'spam_or_low_quality', label: 'Spam or low quality' },
-  { id: 'other', label: 'Other' },
+  { id: 'policy_review', label: 'ควรให้ผู้ดูแลตรวจนโยบาย' },
+  { id: 'wrong_rating', label: 'จัดระดับคอนเทนต์ไม่ถูกต้อง' },
+  { id: 'unsafe_content', label: 'เนื้อหาไม่ปลอดภัยหรือรุนแรงเกินไป' },
+  { id: 'spam_or_low_quality', label: 'สแปมหรือคุณภาพต่ำ' },
+  { id: 'other', label: 'อื่นๆ' },
 ]
+
+function targetLabel(targetType: ReportTargetType) {
+  return targetType === 'CHARACTER' ? 'ตัวละคร' : 'ข้อความ'
+}
 
 export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, onSubmit }: ReportDialogProps) {
   const [reason, setReason] = useState(reasons[0].id)
@@ -45,7 +49,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
       <section className="w-full rounded-t-3xl bg-white p-5 shadow-2xl sm:max-w-lg sm:rounded-3xl">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="m-0 text-xs font-black tracking-widest text-slate-400 uppercase">Report {target.targetType.toLowerCase()}</p>
+            <p className="m-0 text-xs font-black tracking-widest text-slate-400 uppercase">รายงาน{targetLabel(target.targetType)}</p>
             <h2 className="m-0 mt-2 text-xl font-black tracking-normal text-slate-950">{target.title}</h2>
           </div>
           <button
@@ -65,7 +69,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
         )}
 
         <label className="mt-4 block text-sm font-black text-slate-700" htmlFor="report-reason">
-          Reason
+          เหตุผล
         </label>
         <select
           className="mt-2 min-h-11 w-full rounded-xl border border-slate-900/10 bg-white px-3 text-sm font-bold text-slate-700"
@@ -82,7 +86,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
         </select>
 
         <label className="mt-4 block text-sm font-black text-slate-700" htmlFor="report-details">
-          Details
+          รายละเอียด
         </label>
         <textarea
           className="mt-2 min-h-28 w-full resize-none rounded-xl border border-slate-900/10 bg-white p-3 text-sm leading-6 text-slate-700 outline-none focus:border-blue-500"
@@ -90,7 +94,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
           id="report-details"
           maxLength={800}
           onChange={(event) => setDetails(event.target.value)}
-          placeholder="Add context that helps moderators understand the issue."
+          placeholder="เพิ่มบริบทเพื่อช่วยให้ผู้ดูแลเข้าใจปัญหา"
           value={details}
         />
         <p className="m-0 mt-1 text-xs font-bold text-slate-400">{details.length}/800</p>
@@ -102,7 +106,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
             onClick={onClose}
             type="button"
           >
-            Cancel
+            ยกเลิก
           </button>
           <button
             className="min-h-11 rounded-xl bg-rose-600 px-4 text-sm font-black text-white transition hover:bg-rose-700 disabled:opacity-60"
@@ -110,7 +114,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
             onClick={submit}
             type="button"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit report'}
+            {isSubmitting ? 'กำลังส่ง...' : 'ส่งรายงาน'}
           </button>
         </div>
       </section>

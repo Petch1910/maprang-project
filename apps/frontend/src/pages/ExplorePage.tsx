@@ -13,31 +13,31 @@ import {
 import { selectContentSettings, setAdultStatus, setShowMature } from '../store/slices/contentSlice'
 
 const categories = [
-  { label: 'All', tag: '' },
-  { label: 'Anime', tag: 'anime' },
-  { label: 'Fantasy', tag: 'fantasy' },
-  { label: 'Romance', tag: 'romance' },
-  { label: 'Dark Romance', tag: 'red-flag' },
-  { label: 'Slice of Life', tag: 'slice-of-life' },
-  { label: 'Drama', tag: 'drama' },
-  { label: 'Mentor', tag: 'mentor' },
-  { label: 'Rival', tag: 'rival' },
+  { label: 'ทั้งหมด', tag: '' },
+  { label: 'อนิเมะ', tag: 'anime' },
+  { label: 'แฟนตาซี', tag: 'fantasy' },
+  { label: 'โรแมนซ์', tag: 'romance' },
+  { label: 'รักเข้มข้น', tag: 'red-flag' },
+  { label: 'ชีวิตประจำวัน', tag: 'slice-of-life' },
+  { label: 'ดราม่า', tag: 'drama' },
+  { label: 'พี่เลี้ยง/เมนเทอร์', tag: 'mentor' },
+  { label: 'คู่แข่ง', tag: 'rival' },
 ]
 
 const sortOptions: Array<{ label: string; value: CharacterListFilters['sort'] }> = [
-  { label: 'Popular', value: 'popular' },
-  { label: 'Newest', value: 'newest' },
-  { label: 'Quality', value: 'quality' },
-  { label: 'Most viewed', value: 'viewed' },
-  { label: 'Favorited', value: 'favorited' },
+  { label: 'ยอดนิยม', value: 'popular' },
+  { label: 'มาใหม่', value: 'newest' },
+  { label: 'คุณภาพสูง', value: 'quality' },
+  { label: 'คนดูมากสุด', value: 'viewed' },
+  { label: 'ถูกใจมากสุด', value: 'favorited' },
 ]
 
 function characterBadges(tags: string[]) {
   const badges = new Set<string>()
-  if (tags.some((tag) => ['slow-burn', 'trust-building', 'mentor'].includes(tag))) badges.add('Relationship Ready')
-  if (tags.some((tag) => ['slow-burn', 'rival', 'hostile'].includes(tag))) badges.add('Scene Event')
-  if (tags.includes('slow-burn')) badges.add('Slow Burn')
-  if (badges.size === 0) badges.add('Roleplay Ready')
+  if (tags.some((tag) => ['slow-burn', 'trust-building', 'mentor'].includes(tag))) badges.add('พร้อมระบบสัมพันธ์')
+  if (tags.some((tag) => ['slow-burn', 'rival', 'hostile'].includes(tag))) badges.add('มีอีเวนต์ฉาก')
+  if (tags.includes('slow-burn')) badges.add('ค่อยเป็นค่อยไป')
+  if (badges.size === 0) badges.add('พร้อมโรลเพลย์')
   return [...badges].slice(0, 3)
 }
 
@@ -76,16 +76,16 @@ export function ExplorePage() {
       <section className="overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#1d4ed8,#9333ea_52%,#f97316)] p-5 text-white shadow-[0_24px_70px_rgba(69,64,174,0.26)] sm:p-8">
         <div className="max-w-3xl space-y-4">
           <p className="text-xs font-black tracking-[0.22em] uppercase text-white/75">Maprang AI</p>
-          <h1 className="text-3xl font-black tracking-normal sm:text-5xl">Roleplay that remembers the relationship, not just the chat.</h1>
+          <h1 className="text-3xl font-black tracking-normal sm:text-5xl">โรลเพลย์ที่จำความสัมพันธ์ ไม่ใช่แค่จำข้อความแชท</h1>
           <p className="max-w-2xl text-sm leading-7 text-white/86 sm:text-base">
-            Explore characters, continue pending scenes, and choose relationship contracts before the first message.
+            สำรวจตัวละคร เล่นฉากที่ค้างไว้ และเลือกจุดเริ่มต้นความสัมพันธ์ก่อนเริ่มคุย
           </p>
           <div className="flex flex-wrap gap-2">
             <Link className="rounded-full bg-white px-4 py-2 text-sm font-black text-blue-700" to={`/characters/${heroCharacterId}`}>
-              Start exploring
+              เริ่มสำรวจ
             </Link>
             <Link className="rounded-full border border-white/40 px-4 py-2 text-sm font-black text-white" to="/chats">
-              Continue chatting
+              แชทต่อ
             </Link>
           </div>
         </div>
@@ -94,8 +94,8 @@ export function ExplorePage() {
       <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-black">Content preferences</h2>
-            <p className="mt-1 text-sm text-slate-500">Age-aware discovery keeps Explore familiar while making mature routes opt-in.</p>
+            <h2 className="text-lg font-black">การตั้งค่าคอนเทนต์</h2>
+            <p className="mt-1 text-sm text-slate-500">เลือกโหมดการมองเห็นคอนเทนต์ให้เหมาะกับอายุและความต้องการของคุณ</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
@@ -103,7 +103,7 @@ export function ExplorePage() {
               onClick={() => dispatch(setAdultStatus(!content.isAdult))}
               type="button"
             >
-              {content.isAdult ? '18+ enabled' : 'Teen mode'}
+              {content.isAdult ? 'เปิดโหมด 18+' : 'โหมดทั่วไป'}
             </button>
             <button
               className={`rounded-full px-4 py-2 text-sm font-black ${content.showMature ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600'}`}
@@ -111,10 +111,10 @@ export function ExplorePage() {
               onClick={() => dispatch(setShowMature(!content.showMature))}
               type="button"
             >
-              Mature {content.showMature ? 'shown' : 'hidden'}
+              คอนเทนต์ผู้ใหญ่: {content.showMature ? 'แสดง' : 'ซ่อน'}
             </button>
             <span className="flex min-h-10 items-center rounded-full bg-slate-100 px-4 text-sm font-black text-slate-600">
-              Max {ratingLabel(content.maxRating)}
+              สูงสุด {ratingLabel(content.maxRating)}
             </span>
           </div>
         </div>
@@ -122,9 +122,9 @@ export function ExplorePage() {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-black">Continue Chatting</h2>
+          <h2 className="text-xl font-black">แชทต่อ</h2>
           <Link className="text-sm font-black text-blue-600" to="/chats">
-            View all
+            ดูทั้งหมด
           </Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -135,14 +135,14 @@ export function ExplorePage() {
             chats.slice(0, 4).map((chat) => (
               <Link className="rounded-2xl border border-blue-600/15 bg-blue-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md" key={chat.id} to={`/chat/${chat.id}`}>
                 <p className="text-sm font-black text-blue-700">{chat.title || chat.characterName}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-600">{chat.preview || 'Relationship status will appear here next.'}</p>
-                <p className="mt-2 text-xs font-black text-blue-500">Continue with {chat.characterName}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-600">{chat.preview || 'สถานะความสัมพันธ์จะแสดงตรงนี้'}</p>
+                <p className="mt-2 text-xs font-black text-blue-500">คุยต่อกับ {chat.characterName}</p>
               </Link>
             ))}
 
           {!isChatsLoading && chats.length === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-900/15 bg-white p-4 text-sm text-slate-500">
-              No saved chats yet. Pick a character below to start your first route.
+              ยังไม่มีแชทที่บันทึกไว้ เลือกตัวละครด้านล่างเพื่อเริ่มเส้นทางแรกได้เลย
             </div>
           )}
         </div>
@@ -151,11 +151,11 @@ export function ExplorePage() {
       <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_auto] lg:items-center">
           <label className="block">
-            <span className="sr-only">Search characters</span>
+            <span className="sr-only">ค้นหาตัวละคร</span>
             <input
               className="min-h-11 w-full rounded-xl border border-slate-900/10 bg-slate-50 px-4 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-500/50 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search characters, mood, creator prompt..."
+              placeholder="ค้นหาตัวละคร อารมณ์ แท็ก หรือแนวเรื่อง..."
               value={search}
             />
           </label>
@@ -175,7 +175,7 @@ export function ExplorePage() {
             onClick={() => dispatch(loadExploreCharacters(exploreFilters))}
             type="button"
           >
-            Refresh
+            รีเฟรช
           </button>
         </div>
       </section>
@@ -230,14 +230,14 @@ export function ExplorePage() {
                     </span>
                   ))}
                 </div>
-                <p className="text-xs font-black text-slate-400">{character.chatCount.toLocaleString()} chats</p>
+                <p className="text-xs font-black text-slate-400">{character.chatCount.toLocaleString()} แชท</p>
               </div>
             </Link>
             )
           })}
         {!isCharactersLoading && characters.length > 0 && visibleCharacters.length === 0 && (
           <div className="col-span-full rounded-lg border border-dashed border-slate-900/15 bg-white p-6 text-sm text-slate-500">
-            No characters match your current search or content mode. Adjust filters or enable adult mode to show mature discovery.
+            ไม่พบตัวละครที่ตรงกับการค้นหาหรือโหมดคอนเทนต์ปัจจุบัน ลองปรับตัวกรองหรือเปิดโหมดผู้ใหญ่
           </div>
         )}
       </section>

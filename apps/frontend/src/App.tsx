@@ -25,15 +25,15 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({
 const WalletPage = lazy(() => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage })))
 
 const primaryNavItems = [
-  { to: '/', label: 'Explore', icon: Compass },
-  { to: '/chats', label: 'Chats', icon: MessageCircle },
-  { to: '/create', label: 'Create', icon: PlusCircle },
-  { to: '/events', label: 'Events', icon: Bell },
-  { to: '/profile', label: 'Profile', icon: UserRound },
+  { to: '/', label: 'สำรวจ', icon: Compass },
+  { to: '/chats', label: 'แชท', icon: MessageCircle },
+  { to: '/create', label: 'สร้าง', icon: PlusCircle },
+  { to: '/events', label: 'อีเวนต์', icon: Bell },
+  { to: '/profile', label: 'โปรไฟล์', icon: UserRound },
 ]
 
-const adminNavItems = [{ to: '/moderation', label: 'Moderation', icon: ShieldCheck }]
-const utilityNavItems = [{ to: '/wallet', label: 'Wallet', icon: Coins }]
+const adminNavItems = [{ to: '/moderation', label: 'ดูแลรายงาน', icon: ShieldCheck }]
+const utilityNavItems = [{ to: '/wallet', label: 'กระเป๋าโทเคน', icon: Coins }]
 
 function App() {
   const dispatch = useAppDispatch()
@@ -56,7 +56,7 @@ function App() {
             </span>
             <span className="min-w-0">
               <span className="block truncate text-base font-black">Maprang AI</span>
-              <span className="hidden text-xs font-bold text-slate-500 sm:block">Adult-first roleplay, deep relationship systems</span>
+              <span className="hidden text-xs font-bold text-slate-500 sm:block">โรลเพลย์ภาษาไทย พร้อมระบบความสัมพันธ์เชิงลึก</span>
             </span>
           </NavLink>
 
@@ -65,13 +65,13 @@ function App() {
               className="hidden min-h-10 items-center gap-2 rounded-full border border-amber-500/20 bg-amber-50 px-3 text-sm font-black text-amber-700 sm:flex"
               to="/wallet"
             >
-              <span>Tokens</span>
+              <span>โทเคน</span>
               <span>{tokenBalance.toLocaleString()}</span>
             </NavLink>
             <NavLink
               className="relative grid size-10 place-items-center rounded-full border border-slate-900/10 bg-white text-slate-700"
               to="/events"
-              title="Events"
+              title="อีเวนต์"
             >
               <Bell size={18} />
               {eventCount > 0 && (
@@ -104,7 +104,7 @@ function App() {
             ))}
 
             <div className="my-3 border-t border-slate-900/10 pt-3">
-              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">Account</p>
+              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">บัญชี</p>
               {utilityNavItems.map((item) => (
                 <NavLink
                   className={({ isActive }) =>
@@ -122,7 +122,7 @@ function App() {
             </div>
 
             <div className="my-3 border-t border-slate-900/10 pt-3">
-              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">Admin</p>
+              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">ผู้ดูแล</p>
               {adminNavItems.map((item) => (
                 <NavLink
                   className={({ isActive }) =>

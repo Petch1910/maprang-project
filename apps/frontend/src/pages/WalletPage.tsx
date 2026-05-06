@@ -19,9 +19,9 @@ function formatCost(value: string | null) {
 }
 
 function errorMessage(error: unknown) {
-  if (error instanceof ApiError && error.status === 404) return 'Usage profile was not found for this account.'
-  if (error instanceof ApiError && error.status === 401) return 'Please sign in again to view wallet usage.'
-  return 'Could not load wallet usage.'
+  if (error instanceof ApiError && error.status === 404) return 'ไม่พบข้อมูลการใช้งานของบัญชีนี้'
+  if (error instanceof ApiError && error.status === 401) return 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อดูข้อมูลโทเคน'
+  return 'โหลดข้อมูลโทเคนไม่ได้'
 }
 
 export function WalletPage() {
@@ -30,7 +30,7 @@ export function WalletPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isAdjusting, setIsAdjusting] = useState(false)
   const [adjustAmount, setAdjustAmount] = useState('1000')
-  const [note, setNote] = useState('Loading wallet...')
+  const [note, setNote] = useState('กำลังโหลดกระเป๋าโทเคน...')
 
   const usageCost = useMemo(
     () => summary?.usage.recent.reduce((total, item) => total + Number(item.cost ?? 0), 0) ?? 0,
@@ -43,7 +43,7 @@ export function WalletPage() {
       const data = await fetchUsageSummary()
       setSummary(data)
       dispatch(setTokenBalance(data.user.tokenBalance))
-      setNote('Wallet is up to date.')
+      setNote('ข้อมูลโทเคนอัปเดตแล้ว')
     } catch (error) {
       console.error('Load wallet error:', error)
       setNote(errorMessage(error))
@@ -59,10 +59,10 @@ export function WalletPage() {
       const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'manual_beta_grant' : 'manual_admin_debit')
       setSummary((prev) => (prev ? { ...prev, user: data.user } : prev))
       dispatch(setTokenBalance(data.user.tokenBalance))
-      setNote(`${amount > 0 ? 'Added' : 'Removed'} ${Math.abs(amount).toLocaleString()} token(s).`)
+      setNote(`${amount > 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(amount).toLocaleString()} โทเคนแล้ว`)
     } catch (error) {
       console.error('Adjust token error:', error)
-      setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key is required for token adjustments.' : 'Could not adjust tokens.')
+      setNote(error instanceof ApiError && error.status === 403 ? 'ต้องใช้ Admin API key เพื่อปรับโทเคน' : 'ปรับโทเคนไม่ได้')
     } finally {
       setIsAdjusting(false)
     }
@@ -79,13 +79,13 @@ export function WalletPage() {
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-slate-500 uppercase">
               <Coins size={16} />
-              Wallet
+              กระเป๋าโทเคน
             </p>
             <h1 className="m-0 mt-2 text-3xl font-black tracking-normal text-slate-950">
-              {summary ? summary.user.tokenBalance.toLocaleString() : '0'} Tokens
+              {summary ? summary.user.tokenBalance.toLocaleString() : '0'} โทเคน
             </h1>
             <p className="m-0 mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Track AI token spend, recent requests, and whether the account has enough balance for longer scenes.
+              ดูยอดโทเคน การใช้งานล่าสุด และความพร้อมสำหรับฉากยาว ๆ
             </p>
             {note && <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600">{note}</p>}
           </div>
@@ -98,13 +98,13 @@ export function WalletPage() {
               type="button"
             >
               <RefreshCw size={16} />
-              Refresh
+              รีเฟรช
             </button>
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
               to="/profile"
             >
-              Edit persona
+              แก้ตัวตนผู้เล่น
             </Link>
           </div>
         </div>
@@ -112,15 +112,15 @@ export function WalletPage() {
 
       <section className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
-          <p className="m-0 text-sm font-black text-slate-500">Total used</p>
+          <p className="m-0 text-sm font-black text-slate-500">ใช้ไปทั้งหมด</p>
           <p className="m-0 mt-2 text-2xl font-black text-slate-950">{(summary?.usage.totalTokens ?? 0).toLocaleString()}</p>
         </div>
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
-          <p className="m-0 text-sm font-black text-slate-500">Requests</p>
+          <p className="m-0 text-sm font-black text-slate-500">จำนวนคำขอ</p>
           <p className="m-0 mt-2 text-2xl font-black text-slate-950">{(summary?.usage.requestCount ?? 0).toLocaleString()}</p>
         </div>
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
-          <p className="m-0 text-sm font-black text-slate-500">Recent cost</p>
+          <p className="m-0 text-sm font-black text-slate-500">ค่าใช้จ่ายล่าสุด</p>
           <p className="m-0 mt-2 text-2xl font-black text-slate-950">${usageCost.toFixed(6)}</p>
         </div>
       </section>
@@ -128,9 +128,9 @@ export function WalletPage() {
       <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
           <div>
-            <p className="m-0 text-sm font-black text-slate-950">Admin token adjustment</p>
+            <p className="m-0 text-sm font-black text-slate-950">ปรับโทเคนโดยผู้ดูแล</p>
             <p className="m-0 mt-1 text-sm leading-6 text-slate-500">
-              Manual grants are useful for beta testing before payment and promo systems are connected.
+              ใช้สำหรับช่วงทดสอบ beta ก่อนเชื่อมระบบชำระเงินหรือโปรโมชันจริง
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
@@ -146,7 +146,7 @@ export function WalletPage() {
               onClick={() => adjustTokens(Math.abs(Number(adjustAmount) || 0))}
               type="button"
             >
-              Add
+              เพิ่ม
             </button>
             <button
               className="min-h-11 rounded-xl border border-rose-200 bg-rose-50 px-4 text-sm font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
@@ -154,7 +154,7 @@ export function WalletPage() {
               onClick={() => adjustTokens(-Math.abs(Number(adjustAmount) || 0))}
               type="button"
             >
-              Remove
+              หัก
             </button>
           </div>
         </div>
@@ -165,16 +165,16 @@ export function WalletPage() {
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
               <ReceiptText size={17} />
-              Recent usage
+              การใช้งานล่าสุด
             </p>
-            <p className="m-0 mt-1 text-xs font-bold text-slate-400">Latest AI requests recorded by the backend.</p>
+            <p className="m-0 mt-1 text-xs font-bold text-slate-400">รายการใช้ AI ล่าสุดที่ backend บันทึกไว้</p>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="p-5 text-sm font-bold text-slate-500">Loading usage...</div>
+          <div className="p-5 text-sm font-bold text-slate-500">กำลังโหลดการใช้งาน...</div>
         ) : !summary || summary.usage.recent.length === 0 ? (
-          <div className="p-5 text-sm font-bold text-slate-500">No token usage yet.</div>
+          <div className="p-5 text-sm font-bold text-slate-500">ยังไม่มีการใช้โทเคน</div>
         ) : (
           <div className="divide-y divide-slate-900/10">
             {summary.usage.recent.map((item) => (
@@ -186,7 +186,7 @@ export function WalletPage() {
                 <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                   <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-black text-rose-700">
                     <TrendingDown size={14} />
-                    {item.tokens.toLocaleString()} tokens
+                    {item.tokens.toLocaleString()} โทเคน
                   </span>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">
                     {formatCost(item.cost)}
@@ -199,10 +199,9 @@ export function WalletPage() {
       </section>
 
       <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-        <p className="m-0 font-black">Token guard</p>
+        <p className="m-0 font-black">ระบบกันใช้โทเคนซ้ำ</p>
         <p className="m-0 mt-1">
-          Chat actions already disable repeat sends during streaming. Next production step is connecting this page to payments,
-          promo grants, or manual admin top-ups.
+          ระหว่าง AI กำลังตอบ ระบบจะปิดการส่งซ้ำเพื่อลดการยิง API ซ้ำ ขั้นตอน production ถัดไปคือเชื่อมระบบชำระเงิน โปรโมชัน หรือการเติมโทเคนโดยผู้ดูแล
         </p>
       </section>
     </div>

@@ -38,11 +38,11 @@ function UsageStrip({ usage }: { usage: ChatUsage | null }) {
           : 'border-slate-900/10 bg-white/45 text-slate-500'
       }`}
     >
-      <span>Used {usage.totalTokens.toLocaleString()} tokens</span>
-      {typeof balance === 'number' && <span>Balance {balance.toLocaleString()}</span>}
+      <span>ใช้ไป {usage.totalTokens.toLocaleString()} โทเคน</span>
+      {typeof balance === 'number' && <span>คงเหลือ {balance.toLocaleString()}</span>}
       {isLowBalance && (
         <span className="rounded-full bg-amber-200/70 px-2 py-1 text-amber-950">
-          Token is low. Finish the next turn carefully.
+          โทเคนใกล้หมดแล้ว ใช้เทิร์นถัดไปอย่างระวัง
         </span>
       )}
       {usage.contextLoreCount !== undefined && <span>lore {usage.contextLoreCount}</span>}
@@ -57,13 +57,13 @@ function metricWidth(value: number) {
 
 function relationshipLabel(status?: string) {
   const labels: Record<string, string> = {
-    RIVAL: 'Rival',
-    NEUTRAL: 'Neutral',
-    CLOSE: 'Close',
-    TRUSTED: 'Trusted',
-    ROMANTIC: 'Romantic',
+    RIVAL: 'คู่แข่ง',
+    NEUTRAL: 'เป็นกลาง',
+    CLOSE: 'ใกล้ชิด',
+    TRUSTED: 'ไว้ใจ',
+    ROMANTIC: 'โรแมนติก',
   }
-  return status ? labels[status] ?? status.toLowerCase() : 'Starting'
+  return status ? labels[status] ?? status.toLowerCase() : 'เริ่มต้น'
 }
 
 function RelationshipTopBar({
@@ -77,10 +77,10 @@ function RelationshipTopBar({
   const momentum = runtimeState?.memory.emotionalMomentum
   const stats = relationship
     ? [
-        ['Affinity', relationship.affinity, 'bg-rose-500'],
-        ['Trust', relationship.trust, 'bg-sky-500'],
-        ['Intimacy', relationship.intimacy, 'bg-violet-500'],
-        ['Respect', relationship.respect, 'bg-emerald-500'],
+        ['ความผูกพัน', relationship.affinity, 'bg-rose-500'],
+        ['ความไว้ใจ', relationship.trust, 'bg-sky-500'],
+        ['ความใกล้ชิด', relationship.intimacy, 'bg-violet-500'],
+        ['ความเคารพ', relationship.respect, 'bg-emerald-500'],
       ]
     : []
 
@@ -88,7 +88,7 @@ function RelationshipTopBar({
     <div className="border-b border-slate-900/10 bg-white/70 px-4 py-3 backdrop-blur-xl sm:px-8">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <p className="m-0 text-xs font-extrabold tracking-widest text-slate-500 uppercase">Relationship</p>
+          <p className="m-0 text-xs font-extrabold tracking-widest text-slate-500 uppercase">ความสัมพันธ์</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span className="text-base font-extrabold text-slate-950 sm:text-lg">
               {character.name} / {relationshipLabel(relationship?.status)}
@@ -100,12 +100,12 @@ function RelationshipTopBar({
             )}
             {relationship?.tone && (
               <span className="rounded-full border border-orange-200 bg-orange-50 px-2 py-1 text-xs font-bold text-orange-800">
-                tone {relationship.tone}
+                โทน {relationship.tone}
               </span>
             )}
             {momentum?.direction && (
               <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-bold text-blue-800">
-                momentum {momentum.direction}
+                โมเมนตัม {momentum.direction}
               </span>
             )}
           </div>
@@ -155,7 +155,7 @@ function SceneRuntimePanel({
         <div className="rounded-lg border border-slate-900/15 bg-slate-950 px-4 py-3 text-white shadow-[0_20px_60px_rgba(15,23,42,0.20)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="m-0 text-xs font-extrabold tracking-widest text-slate-400 uppercase">Scene Mode</p>
+              <p className="m-0 text-xs font-extrabold tracking-widest text-slate-400 uppercase">โหมดฉาก</p>
               <h3 className="m-0 mt-1 truncate text-base font-extrabold">{activeScene.title}</h3>
               <p className="m-0 mt-1 text-sm leading-relaxed text-slate-300">{activeScene.objective}</p>
             </div>
@@ -166,7 +166,7 @@ function SceneRuntimePanel({
                 onClick={() => onSceneAction('accept')}
                 type="button"
               >
-                Accept
+                ยอมรับ
               </button>
               <button
                 className="min-h-10 rounded-full bg-sky-400 px-3 text-sm font-extrabold text-sky-950 transition hover:bg-sky-300 disabled:opacity-60"
@@ -174,7 +174,7 @@ function SceneRuntimePanel({
                 onClick={() => onSceneAction('resolve')}
                 type="button"
               >
-                Resolve
+                จบฉาก
               </button>
               <button
                 className="min-h-10 rounded-full bg-rose-400 px-3 text-sm font-extrabold text-rose-950 transition hover:bg-rose-300 disabled:opacity-60"
@@ -182,7 +182,7 @@ function SceneRuntimePanel({
                 onClick={() => onSceneAction('reject')}
                 type="button"
               >
-                Reject
+                ปฏิเสธ
               </button>
               <button
                 className="min-h-10 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-extrabold text-white transition hover:bg-white/15 disabled:opacity-60"
@@ -190,7 +190,7 @@ function SceneRuntimePanel({
                 onClick={() => onSceneAction('exit')}
                 type="button"
               >
-                Exit
+                ออก
               </button>
             </div>
           </div>
@@ -199,7 +199,7 @@ function SceneRuntimePanel({
         <div className="rounded-lg border border-amber-300/70 bg-amber-50 px-4 py-3 text-amber-950">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="m-0 text-xs font-extrabold tracking-widest uppercase">Scene Ready</p>
+              <p className="m-0 text-xs font-extrabold tracking-widest uppercase">ฉากพร้อมแล้ว</p>
               <h3 className="m-0 mt-1 text-base font-extrabold">{pendingEvent.title}</h3>
               <p className="m-0 mt-1 text-sm leading-relaxed text-amber-900">{pendingEvent.prompt}</p>
             </div>
@@ -210,7 +210,7 @@ function SceneRuntimePanel({
                 onClick={() => onSceneAction('enter', pendingEvent.code)}
                 type="button"
               >
-                Enter Scene
+                เข้าฉาก
               </button>
               <button
                 className="min-h-10 rounded-full border border-amber-300 bg-white/70 px-3 text-sm font-extrabold text-amber-950 transition hover:bg-white disabled:opacity-60"
@@ -218,7 +218,7 @@ function SceneRuntimePanel({
                 onClick={() => onSceneAction('hold', pendingEvent.code)}
                 type="button"
               >
-                Later
+                เก็บไว้ก่อน
               </button>
               <button
                 className="min-h-10 rounded-full border border-rose-300 bg-rose-50 px-3 text-sm font-extrabold text-rose-800 transition hover:bg-rose-100 disabled:opacity-60"
@@ -226,16 +226,16 @@ function SceneRuntimePanel({
                 onClick={() => onSceneAction('decline', pendingEvent.code)}
                 type="button"
               >
-                Skip
+                ข้าม
               </button>
             </div>
           </div>
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
-          <span>Sandbox</span>
-          <span>Turn {runtimeState.memory.turnCount.toLocaleString()}</span>
-          <span>Intent {scene.lastUserIntent}</span>
+          <span>โหมดอิสระ</span>
+          <span>เทิร์น {runtimeState.memory.turnCount.toLocaleString()}</span>
+          <span>เจตนา {scene.lastUserIntent}</span>
         </div>
       )}
     </div>
@@ -277,19 +277,19 @@ export function ChatPanel({
           <button
             className="grid size-10 place-items-center rounded-lg border border-slate-900/10 bg-white text-xs font-extrabold text-slate-700 shadow-sm md:hidden"
             onClick={onOpenMenu}
-            title="Open menu"
+            title="เปิดเมนู"
             type="button"
           >
-            Menu
+            เมนู
           </button>
           <div className="min-w-0">
-            <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Ready to chat</p>
-            <h2 className="m-0 truncate text-xl font-bold tracking-normal sm:text-2xl">Chat with {character.name}</h2>
+            <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">พร้อมแชท</p>
+            <h2 className="m-0 truncate text-xl font-bold tracking-normal sm:text-2xl">คุยกับ {character.name}</h2>
           </div>
         </div>
         <div className="inline-flex min-h-9 flex-none items-center gap-2 rounded-full border border-green-500/25 bg-green-500/10 px-3 text-sm font-extrabold text-green-700">
           <span className="size-2 rounded-full bg-green-500" />
-          {chatId ? 'Saved' : 'Online'}
+          {chatId ? 'บันทึกแล้ว' : 'ออนไลน์'}
         </div>
       </header>
 
@@ -313,7 +313,7 @@ export function ChatPanel({
               AI
             </div>
             <p className="m-0 rounded-[18px] bg-white px-4 py-3.5 leading-relaxed text-slate-500 shadow-[0_16px_44px_rgba(61,79,112,0.10)]">
-              Maprang is typing...
+              มะปรางกำลังพิมพ์...
             </p>
           </article>
         )}

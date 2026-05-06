@@ -8,10 +8,10 @@ import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/
 import { selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
 
 const seeds = [
-  { id: 'stranger', label: 'Stranger', tone: 'Cautious but open', color: 'bg-blue-600' },
-  { id: 'ally', label: 'Trusted Ally', tone: 'Warm, familiar, cooperative', color: 'bg-emerald-600' },
-  { id: 'rival', label: 'Rival', tone: 'Sharp, tense, emotionally charged', color: 'bg-rose-600' },
-  { id: 'crush', label: 'Secret Crush', tone: 'Soft tension, shy affection', color: 'bg-fuchsia-600' },
+  { id: 'stranger', label: 'คนแปลกหน้า', tone: 'ระวังตัว แต่ยังเปิดใจ', color: 'bg-blue-600' },
+  { id: 'ally', label: 'คนไว้ใจ', tone: 'อบอุ่น คุ้นเคย และร่วมมือกัน', color: 'bg-emerald-600' },
+  { id: 'rival', label: 'คู่แข่ง', tone: 'คม เข้ม และมีแรงปะทะทางอารมณ์', color: 'bg-rose-600' },
+  { id: 'crush', label: 'แอบชอบ', tone: 'ละมุน มีแรงดึงดูดแบบเขินๆ', color: 'bg-fuchsia-600' },
 ]
 
 export function CharacterLobbyPage() {
@@ -49,10 +49,10 @@ export function CharacterLobbyPage() {
           tags: character.tags,
         },
       })
-      setReportNote('Report submitted for review.')
+      setReportNote('ส่งรายงานให้ผู้ดูแลตรวจแล้ว')
       setIsReportDialogOpen(false)
     } catch {
-      setReportNote('Could not submit report. Please try again.')
+      setReportNote('ส่งรายงานไม่ได้ กรุณาลองใหม่')
     } finally {
       setIsReporting(false)
     }
@@ -72,10 +72,10 @@ export function CharacterLobbyPage() {
                 onClick={() => setIsReportDialogOpen(true)}
                 type="button"
               >
-                Report
+                รายงาน
               </button>
               <button className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700" type="button">
-                Share
+                แชร์
               </button>
             </div>
             {reportNote && <p className="m-0 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-600">{reportNote}</p>}
@@ -83,14 +83,14 @@ export function CharacterLobbyPage() {
 
           <div className="space-y-6">
             <div>
-              <p className="text-xs font-black tracking-[0.2em] text-slate-400 uppercase">Character Lobby</p>
-              <h1 className="mt-2 text-3xl font-black">{character?.name ?? 'Character'}</h1>
+              <p className="text-xs font-black tracking-[0.2em] text-slate-400 uppercase">ล็อบบี้ตัวละคร</p>
+              <h1 className="mt-2 text-3xl font-black">{character?.name ?? 'ตัวละคร'}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
                 {character?.biography ||
                   character?.description ||
-                  'Choose a relationship contract before starting this route.'}
+                  'เลือกสัญญาความสัมพันธ์ก่อนเริ่มเส้นทางนี้'}
               </p>
-              <p className="mt-2 text-xs font-bold text-slate-400">Character ID: {characterId}</p>
+              <p className="mt-2 text-xs font-bold text-slate-400">รหัสตัวละคร: {characterId}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-700">
                   {ratingLabel(rating)}
@@ -105,23 +105,23 @@ export function CharacterLobbyPage() {
 
             {!canView && (
               <section className="rounded-2xl border border-amber-300/70 bg-amber-50 p-4 text-amber-950">
-                <h2 className="text-lg font-black">Adult mode required</h2>
+                <h2 className="text-lg font-black">ต้องเปิดโหมดผู้ใหญ่</h2>
                 <p className="mt-1 text-sm leading-6 text-amber-900">
-                  This character is rated {ratingLabel(rating)}. Switch to adult mode to start this route.
+                  ตัวละครนี้อยู่ในระดับ {ratingLabel(rating)} เปิดโหมดผู้ใหญ่ก่อนเริ่มเส้นทางนี้
                 </p>
                 <button
                   className="mt-3 min-h-10 rounded-full bg-amber-900 px-4 text-sm font-black text-white"
                   onClick={() => dispatch(setAdultStatus(true))}
                   type="button"
                 >
-                  Enable adult mode
+                  เปิดโหมดผู้ใหญ่
                 </button>
               </section>
             )}
 
             <section className="rounded-2xl border border-slate-900/10 bg-slate-50 p-4">
-              <h2 className="text-lg font-black">Relationship Contract</h2>
-              <p className="mt-1 text-sm text-slate-500">Choose the starting emotional route before the first message.</p>
+              <h2 className="text-lg font-black">สัญญาความสัมพันธ์</h2>
+              <p className="mt-1 text-sm text-slate-500">เลือกจุดเริ่มต้นทางอารมณ์ก่อนส่งข้อความแรก</p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {seeds.map((item) => (
                   <button
@@ -138,7 +138,7 @@ export function CharacterLobbyPage() {
                 ))}
               </div>
               <div className="mt-4 rounded-2xl bg-white p-4">
-                <p className="text-sm font-black text-slate-500">Preview mood</p>
+                <p className="text-sm font-black text-slate-500">ตัวอย่างโทนอารมณ์</p>
                 <p className="mt-1 text-lg font-black">{seed.tone}</p>
               </div>
             </section>
@@ -148,7 +148,7 @@ export function CharacterLobbyPage() {
               className={`block min-h-12 rounded-2xl px-5 py-3 text-center font-black text-white ${canView ? seed.color : 'pointer-events-none bg-slate-300 text-slate-500'}`}
               to={`/chat?characterId=${characterId}&relationship_seed=${seed.id}`}
             >
-              Start chat as {seed.label}
+              เริ่มแชทในฐานะ{seed.label}
             </Link>
           </div>
         </div>

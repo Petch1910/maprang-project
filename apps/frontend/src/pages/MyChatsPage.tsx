@@ -17,19 +17,19 @@ export function MyChatsPage() {
     <div className="space-y-4 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black">My Chats</h1>
-          <p className="mt-2 text-slate-600">Continue saved routes, pending scenes, and relationship arcs.</p>
+          <h1 className="text-3xl font-black">แชทของฉัน</h1>
+          <p className="mt-2 text-slate-600">กลับไปเล่นต่อในเส้นทาง ฉาก และความสัมพันธ์ที่บันทึกไว้</p>
         </div>
         <button
           className="min-h-11 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
           onClick={() => dispatch(loadChatSummaries())}
           type="button"
         >
-          Refresh
+          รีเฟรช
         </button>
       </div>
 
-      {error && <div className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">Could not load chats.</div>}
+      {error && <div className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">โหลดรายการแชทไม่ได้</div>}
 
       <div className="grid gap-3 md:grid-cols-2">
         {isLoading && [1, 2, 3, 4].map((item) => <div className="h-32 animate-pulse rounded-2xl bg-slate-200" key={item} />)}
@@ -45,11 +45,11 @@ export function MyChatsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-black">{chat.title || chat.characterName}</p>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-500">{chat.preview || 'No message preview yet.'}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-slate-500">{chat.preview || 'ยังไม่มีตัวอย่างข้อความ'}</p>
                   </div>
                   {pendingCount > 0 && (
                     <span className="flex-none rounded-full bg-amber-100 px-2.5 py-1 text-xs font-black text-amber-800">
-                      {pendingCount} scene
+                      {pendingCount} ฉาก
                     </span>
                   )}
                 </div>
@@ -65,7 +65,7 @@ export function MyChatsPage() {
                   )}
                   {activeScene && (
                     <span className="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-black text-white">
-                      Scene mode
+                      โหมดฉาก
                     </span>
                   )}
                 </div>
@@ -75,7 +75,7 @@ export function MyChatsPage() {
 
         {!isLoading && chats.length === 0 && (
           <div className="rounded-2xl border border-dashed border-slate-900/15 bg-white p-6 text-slate-500">
-            No saved chats yet. Start from Explore and your active routes will appear here.
+            ยังไม่มีแชทที่บันทึกไว้ เริ่มจากหน้าสำรวจ แล้วเส้นทางที่เล่นอยู่จะแสดงที่นี่
           </div>
         )}
       </div>

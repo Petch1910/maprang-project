@@ -34,21 +34,39 @@ function statusStyle(status: ReportStatus) {
 }
 
 function apiErrorMessage(error: unknown) {
-  if (error instanceof ApiError && error.status === 403) return 'Admin API key is missing or invalid.'
-  if (error instanceof ApiError && error.status === 401) return 'Please sign in again before opening moderation.'
-  return 'Could not load moderation reports.'
+  if (error instanceof ApiError && error.status === 403) return 'Admin API key หายไปหรือไม่ถูกต้อง'
+  if (error instanceof ApiError && error.status === 401) return 'กรุณาเข้าสู่ระบบใหม่ก่อนเปิดหน้าดูแลรายงาน'
+  return 'โหลดรายการรายงานไม่ได้'
 }
 
 function reportTitle(report: ReportSummary) {
-  if (report.targetType === 'CHARACTER') return report.character?.name ?? `Character ${report.characterId ?? ''}`
-  return `${report.message?.role ?? 'Message'} report`
+  if (report.targetType === 'CHARACTER') return report.character?.name ?? `ตัวละคร ${report.characterId ?? ''}`
+  return `รายงานข้อความจาก ${report.message?.role ?? 'ข้อความ'}`
 }
 
 function reportBody(report: ReportSummary) {
   if (report.targetType === 'CHARACTER') {
-    return report.details ?? 'Character was reported for moderation review.'
+    return report.details ?? 'ตัวละครนี้ถูกรายงานให้ผู้ดูแลตรวจสอบ'
   }
-  return report.message?.content ?? report.details ?? 'Message content is no longer available.'
+  return report.message?.content ?? report.details ?? 'ไม่พบเนื้อหาข้อความนี้แล้ว'
+}
+
+function statusLabel(status: ReportStatus | '') {
+  const labels: Record<ReportStatus, string> = {
+    PENDING: 'รอตรวจ',
+    REVIEWED: 'ตรวจแล้ว',
+    RESOLVED: 'จัดการแล้ว',
+    REJECTED: 'ปฏิเสธ',
+  }
+  return status ? labels[status] : 'ทุกสถานะ'
+}
+
+function targetLabel(targetType: ReportTargetType | '') {
+  const labels: Record<ReportTargetType, string> = {
+    CHARACTER: 'ตัวละคร',
+    MESSAGE: 'ข้อความ',
+  }
+  return targetType ? labels[targetType] : 'ทุกประเภท'
 }
 
 export function AdminModerationPage() {
@@ -58,7 +76,7 @@ export function AdminModerationPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [updatingId, setUpdatingId] = useState('')
   const [auditLogs, setAuditLogs] = useState<AdminAuditLog[]>([])
-  const [note, setNote] = useState('Loading moderation queue...')
+  const [note, setNote] = useState('กำลังโหลดคิวรายงาน...')
 
   const pendingCount = useMemo(() => reports.filter((report) => report.status === 'PENDING').length, [reports])
 
@@ -69,7 +87,7 @@ export function AdminModerationPage() {
       setReports(data.reports)
       const auditData = await fetchAdminAuditLogs(12)
       setAuditLogs(auditData.logs)
-      setNote(data.reports.length > 0 ? `Loaded ${data.reports.length} report(s).` : 'No reports match this filter.')
+      setNote(data.reports.length > 0 ? `โหลดรายงานแล้ว ${data.reports.length} รายการ` : 'ไม่มีรายงานที่ตรงกับตัวกรองนี้')
     } catch (error) {
       console.error('Load admin reports error:', error)
       setReports([])
@@ -86,10 +104,10 @@ export function AdminModerationPage() {
       setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
       const auditData = await fetchAdminAuditLogs(12)
       setAuditLogs(auditData.logs)
-      setNote(`Report marked as ${nextStatus.toLowerCase()}.`)
+      setNote(`ปรับสถานะรายงานเป็น ${statusLabel(nextStatus)} แล้ว`)
     } catch (error) {
       console.error('Update report status error:', error)
-      setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key is missing or invalid.' : 'Could not update report status.')
+      setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key หายไปหรือไม่ถูกต้อง' : 'ปรับสถานะรายงานไม่ได้')
     } finally {
       setUpdatingId('')
     }
@@ -102,10 +120,10 @@ export function AdminModerationPage() {
       setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
       const auditData = await fetchAdminAuditLogs(12)
       setAuditLogs(auditData.logs)
-      setNote(action === 'HIDE_CHARACTER' ? 'Character hidden and report resolved.' : 'Message archived and report resolved.')
+      setNote(action === 'HIDE_CHARACTER' ? 'ซ่อนตัวละครและปิดรายงานแล้ว' : 'เก็บข้อความและปิดรายงานแล้ว')
     } catch (error) {
       console.error('Apply report action error:', error)
-      setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key is missing or invalid.' : 'Could not apply moderation action.')
+      setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key หายไปหรือไม่ถูกต้อง' : 'ทำคำสั่งดูแลรายงานไม่ได้')
     } finally {
       setUpdatingId('')
     }
@@ -122,17 +140,17 @@ export function AdminModerationPage() {
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-slate-500 uppercase">
               <ShieldCheck size={16} />
-              Moderation
+              ดูแลรายงาน
             </p>
-            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">Report Queue</h1>
+            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">คิวรายงาน</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Review reported characters and chat messages without leaving the product shell.
+              ตรวจตัวละครและข้อความที่ถูกรายงานจากหน้าเดียว พร้อมเก็บประวัติการทำงานของผู้ดูแล
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
             <div className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-black text-amber-900">
-              Pending {pendingCount}
+              รอตรวจ {pendingCount}
             </div>
             <button
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-900/10 bg-white px-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
@@ -141,7 +159,7 @@ export function AdminModerationPage() {
               type="button"
             >
               <RefreshCw size={16} />
-              Refresh
+              รีเฟรช
             </button>
           </div>
         </div>
@@ -151,7 +169,7 @@ export function AdminModerationPage() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-center gap-2 text-sm font-black text-slate-700">
             <Filter size={16} />
-            Queue filters
+            ตัวกรองคิว
           </div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <select
@@ -161,7 +179,7 @@ export function AdminModerationPage() {
             >
               {statuses.map((item) => (
                 <option key={item || 'ALL'} value={item}>
-                  {item || 'ALL STATUS'}
+                  {statusLabel(item)}
                 </option>
               ))}
             </select>
@@ -172,7 +190,7 @@ export function AdminModerationPage() {
             >
               {targetTypes.map((item) => (
                 <option key={item || 'ALL'} value={item}>
-                  {item || 'ALL TARGETS'}
+                  {targetLabel(item)}
                 </option>
               ))}
             </select>
@@ -184,11 +202,11 @@ export function AdminModerationPage() {
       <section className="space-y-3">
         {isLoading ? (
           <div className="rounded-2xl border border-slate-900/10 bg-white p-6 text-sm font-bold text-slate-500 shadow-sm">
-            Loading reports...
+            กำลังโหลดรายงาน...
           </div>
         ) : reports.length === 0 ? (
           <div className="rounded-2xl border border-slate-900/10 bg-white p-6 text-sm font-bold text-slate-500 shadow-sm">
-            No moderation items here.
+            ยังไม่มีรายการที่ต้องดูแล
           </div>
         ) : (
           reports.map((report) => (
@@ -197,23 +215,23 @@ export function AdminModerationPage() {
                 <div className="min-w-0 space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`rounded-full border px-2.5 py-1 text-xs font-black ${statusStyle(report.status)}`}>
-                      {report.status}
+                      {statusLabel(report.status)}
                     </span>
                     <span className="rounded-full border border-slate-900/10 bg-slate-50 px-2.5 py-1 text-xs font-black text-slate-600">
-                      {report.targetType}
+                      {targetLabel(report.targetType)}
                     </span>
                     <span className="text-xs font-bold text-slate-400">{formatDate(report.createdAt)}</span>
                   </div>
                   <div>
                     <h2 className="m-0 text-lg font-black tracking-normal text-slate-950">{reportTitle(report)}</h2>
-                    <p className="m-0 mt-1 text-sm font-bold text-slate-500">Reason: {report.reason}</p>
+                    <p className="m-0 mt-1 text-sm font-bold text-slate-500">เหตุผล: {report.reason}</p>
                   </div>
                   <p className="m-0 max-h-36 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700">
                     {reportBody(report)}
                   </p>
                   {report.reporter && (
                     <p className="m-0 text-xs font-bold text-slate-400">
-                      Reporter: {report.reporter.username ?? report.reporter.email ?? report.reporter.id}
+                      ผู้รายงาน: {report.reporter.username ?? report.reporter.email ?? report.reporter.id}
                     </p>
                   )}
                 </div>
@@ -226,7 +244,7 @@ export function AdminModerationPage() {
                       onClick={() => applyAction(report.id, 'HIDE_CHARACTER')}
                       type="button"
                     >
-                      Hide character
+                      ซ่อนตัวละคร
                     </button>
                   )}
                   {report.targetType === 'MESSAGE' && (
@@ -236,7 +254,7 @@ export function AdminModerationPage() {
                       onClick={() => applyAction(report.id, 'ARCHIVE_MESSAGE')}
                       type="button"
                     >
-                      Archive message
+                      เก็บข้อความ
                     </button>
                   )}
                   <button
@@ -246,7 +264,7 @@ export function AdminModerationPage() {
                     type="button"
                   >
                     <AlertTriangle size={16} />
-                    Review
+                    ตรวจแล้ว
                   </button>
                   <button
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
@@ -255,7 +273,7 @@ export function AdminModerationPage() {
                     type="button"
                   >
                     <CheckCircle2 size={16} />
-                    Resolve
+                    จัดการแล้ว
                   </button>
                   <button
                     className="col-span-2 min-h-10 rounded-xl border border-slate-900/10 bg-white px-3 text-sm font-black text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
@@ -263,7 +281,7 @@ export function AdminModerationPage() {
                     onClick={() => changeStatus(report.id, 'REJECTED')}
                     type="button"
                   >
-                    Reject report
+                    ปฏิเสธรายงาน
                   </button>
                 </div>
               </div>
@@ -274,11 +292,11 @@ export function AdminModerationPage() {
 
       <section className="rounded-2xl border border-slate-900/10 bg-white shadow-sm">
         <div className="border-b border-slate-900/10 p-4">
-          <p className="m-0 text-sm font-black text-slate-950">Recent admin audit</p>
-          <p className="m-0 mt-1 text-xs font-bold text-slate-400">Latest moderation and token actions recorded by the backend.</p>
+          <p className="m-0 text-sm font-black text-slate-950">ประวัติผู้ดูแลล่าสุด</p>
+          <p className="m-0 mt-1 text-xs font-bold text-slate-400">บันทึกคำสั่งดูแลรายงานและโทเคนที่ backend เก็บไว้</p>
         </div>
         {auditLogs.length === 0 ? (
-          <div className="p-4 text-sm font-bold text-slate-500">No audit logs loaded.</div>
+          <div className="p-4 text-sm font-bold text-slate-500">ยังไม่มีประวัติผู้ดูแล</div>
         ) : (
           <div className="divide-y divide-slate-900/10">
             {auditLogs.map((log) => (
