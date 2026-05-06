@@ -6,6 +6,7 @@ import { createCharacter, updateCharacter } from './character.service'
 import { sendChat } from './chat.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
+import { userRoutes } from './user.routes'
 
 const prisma = getPrisma()
 const testPrefix = 'Test Rel Quality'
@@ -272,5 +273,18 @@ describe('character persistence quality gate', () => {
     expect(body.reply).toBe('This character is private or not available for chat.')
     expect(body.chatId).toBeNull()
     expect(body.usage?.totalTokens).toBe(0)
+  })
+
+  test('ignores spoofed usage query user id', async () => {
+    const response = await userRoutes.handle(
+      new Request(`http://localhost/me/usage?userId=${defaultUserId}`, {
+        headers: { 'x-user-id': otherUserId },
+      }),
+    )
+    const body = (await response.json()) as { user: { id: string; email: string } }
+
+    expect(response.status).toBe(200)
+    expect(body.user.id).toBe(otherUserId)
+    expect(body.user.email).toBe('other@maprang.io')
   })
 })
