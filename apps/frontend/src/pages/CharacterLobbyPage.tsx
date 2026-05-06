@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { createReport } from '../lib/api'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/charactersSlice'
@@ -18,6 +19,8 @@ export function CharacterLobbyPage() {
   const characters = useAppSelector(selectExploreCharacters)
   const content = useAppSelector(selectContentSettings)
   const [seed, setSeed] = useState(seeds[0])
+  const [isReporting, setIsReporting] = useState(false)
+  const [reportNote, setReportNote] = useState('')
   const character = useMemo(
     () => characters.find((item) => item.id === characterId) ?? characters[0] ?? null,
     [characterId, characters],
@@ -29,6 +32,29 @@ export function CharacterLobbyPage() {
   const rating = character ? characterRating(character) : 'general'
   const canView = canViewRating(rating, content.maxRating)
 
+  const reportCharacter = async () => {
+    if (!character || isReporting) return
+    setIsReporting(true)
+    setReportNote('')
+    try {
+      await createReport({
+        targetType: 'CHARACTER',
+        characterId: character.id,
+        reason: 'character_policy_review',
+        details: `Reported from Character Lobby. Rating: ${ratingLabel(rating)}.`,
+        metadata: {
+          contentRating: rating,
+          tags: character.tags,
+        },
+      })
+      setReportNote('Report submitted for review.')
+    } catch {
+      setReportNote('Could not submit report. Please try again.')
+    } finally {
+      setIsReporting(false)
+    }
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-sm">
@@ -37,9 +63,19 @@ export function CharacterLobbyPage() {
           <div className="-mt-20 space-y-4">
             <div className="aspect-square rounded-3xl border-4 border-white bg-linear-to-br from-slate-200 to-blue-100 shadow-xl" />
             <div className="flex gap-2">
-              <button className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700">Report</button>
-              <button className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700">Share</button>
+              <button
+                className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700 disabled:opacity-60"
+                disabled={isReporting || !character}
+                onClick={reportCharacter}
+                type="button"
+              >
+                {isReporting ? 'Reporting...' : 'Report'}
+              </button>
+              <button className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700" type="button">
+                Share
+              </button>
             </div>
+            {reportNote && <p className="m-0 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-600">{reportNote}</p>}
           </div>
 
           <div className="space-y-6">

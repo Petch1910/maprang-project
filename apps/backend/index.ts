@@ -7,6 +7,7 @@ import { characterRoutes } from './src/character.routes'
 import { chatRoutes } from './src/chat.routes'
 import { healthRoutes } from './src/health.routes'
 import { loreRoutes } from './src/lore.routes'
+import { reportRoutes } from './src/report.routes'
 import { rateLimitKey, routeRateLimitMax } from './src/security'
 import { uploadRoutes } from './src/upload.routes'
 import { userRoutes } from './src/user.routes'
@@ -47,6 +48,7 @@ export const app = new Elysia()
   .use(characterRoutes)
   .use(loreRoutes)
   .use(chatRoutes)
+  .use(reportRoutes)
   .listen({
     hostname: serverHost,
     port: serverPort,

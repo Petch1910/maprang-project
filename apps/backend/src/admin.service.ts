@@ -14,6 +14,7 @@ export async function loadAdminSummary() {
     messageCount,
     loreEntryCount,
     favoriteCount,
+    pendingReportCount,
     usageAggregate,
     topCharacters,
   ] = await Promise.all([
@@ -25,6 +26,7 @@ export async function loadAdminSummary() {
     prisma.message.count({ where: { deletedAt: null } }),
     prisma.loreEntry.count({ where: { deletedAt: null } }),
     prisma.favorite.count(),
+    prisma.report.count({ where: { status: 'PENDING' } }),
     prisma.usage.aggregate({
       _sum: {
         tokens: true,
@@ -65,6 +67,7 @@ export async function loadAdminSummary() {
       messages: messageCount,
       loreEntries: loreEntryCount,
       favorites: favoriteCount,
+      pendingReports: pendingReportCount,
       usageRequests: usageAggregate._count.id,
       tokens: usageAggregate._sum.tokens ?? 0,
       cost: usageAggregate._sum.cost?.toString() ?? '0',

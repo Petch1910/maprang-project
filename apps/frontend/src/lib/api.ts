@@ -564,6 +564,34 @@ export async function archiveChat(chatId: string) {
   })
 }
 
+export type ReportTargetType = 'CHARACTER' | 'MESSAGE'
+export type ReportStatus = 'PENDING' | 'REVIEWED' | 'RESOLVED' | 'REJECTED'
+
+export type ReportSummary = {
+  id: string
+  targetType: ReportTargetType
+  reason: string
+  details: string | null
+  status: ReportStatus
+  characterId: string | null
+  messageId: string | null
+  createdAt: string
+}
+
+export async function createReport(input: {
+  targetType: ReportTargetType
+  characterId?: string
+  messageId?: string
+  reason: string
+  details?: string
+  metadata?: Record<string, unknown>
+}) {
+  return requestJson<{ report: ReportSummary }>('/reports', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
 export async function sendChatMessage(input: {
   message: string
   characterId: string
