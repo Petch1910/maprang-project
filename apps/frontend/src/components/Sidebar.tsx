@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Compass, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-react'
+import { Compass, Disc3, Globe2, MoreHorizontal, Plus, Search, Settings, Sparkle, Trash2 } from 'lucide-react'
 import type {
   AdminSummary as AdminSummaryData,
   Character,
@@ -72,7 +72,7 @@ export function Sidebar(props: SidebarProps) {
 
 function Avatar({ src, name }: { src: string | null; name: string }) {
   return src ? (
-    <img alt="" className="size-8 rounded-full object-cover" src={src} />
+    <img alt="" className="size-8 rounded-full object-cover ring-1 ring-white/10" src={src} />
   ) : (
     <span className="grid size-8 place-items-center rounded-full bg-white/12 text-xs font-black">{name.slice(0, 1)}</span>
   )
@@ -92,7 +92,7 @@ function SidebarContent({
   onSelectCharacter,
   onStartNewChat,
 }: SidebarProps) {
-  const pinnedCharacters = characters.slice(0, 8)
+  const pinnedCharacters = characters.slice(0, 9)
 
   const openChat = (id: string) => {
     onOpenChat(id)
@@ -106,28 +106,27 @@ function SidebarContent({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <section className="relative overflow-hidden rounded-md border border-white/8 bg-[linear-gradient(135deg,rgba(91,57,255,0.55),rgba(255,138,41,0.50))] p-3">
-        <p className="m-0 text-sm font-black">ดูดวงไพ่ทาโรต์ประจำวัน</p>
-        <p className="m-0 mt-1 line-clamp-2 text-xs leading-5 text-white/70">ไม่ว่าจะเป็นความรัก งาน หรือความสัมพันธ์ของคุณ</p>
-        <div className="mt-2 flex gap-1">
-          <span className="size-1.5 rounded-full bg-white" />
-          <span className="size-1.5 rounded-full bg-white/40" />
-          <span className="size-1.5 rounded-full bg-white/40" />
-        </div>
-      </section>
-
-      <Link className="flex min-h-9 items-center justify-center gap-2 rounded-md bg-white/10 text-sm font-black text-white hover:bg-white/14" to="/">
+      <Link
+        className="flex min-h-9 items-center justify-center gap-2 rounded-md bg-white/10 text-sm font-black text-white hover:bg-white/14"
+        to="/"
+      >
         <Compass size={16} />
         ไปหน้าหลัก
       </Link>
 
-      <button className="flex min-h-9 items-center justify-center gap-2 rounded-md bg-white text-sm font-black text-slate-950" onClick={onStartNewChat} type="button">
+      <button
+        className="flex min-h-9 items-center justify-center gap-2 rounded-md bg-white text-sm font-black text-slate-950 hover:bg-white/90"
+        onClick={onStartNewChat}
+        type="button"
+      >
         <Plus size={16} />
-        สร้างต่อจากตัวละครนี้
+        สร้างตัวละคร
       </button>
 
       <div className="mt-2 flex items-center justify-between border-b border-white/10 pb-2">
-        <button className="text-sm font-black text-white" type="button">แชทส่วนตัว</button>
+        <button className="relative text-sm font-black text-white after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-white" type="button">
+          แชทส่วนตัว
+        </button>
         <button className="text-sm font-black text-white/55" type="button">จักรวาล [ทดลอง]</button>
       </div>
 
@@ -136,7 +135,12 @@ function SidebarContent({
           <Search size={16} />
           <span className="truncate text-sm">ค้นหาแชท</span>
         </label>
-        <button className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60" onClick={onLoadChatHistory} type="button">
+        <button
+          className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60 hover:bg-white/10"
+          onClick={onLoadChatHistory}
+          title="โหลดรายการแชทใหม่"
+          type="button"
+        >
           <Trash2 size={16} />
         </button>
       </div>
@@ -156,7 +160,9 @@ function SidebarContent({
               <Avatar name={item.name} src={item.avatarUrl} />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-black text-white">{item.name}</span>
-                <span className="block truncate text-[11px] text-white/45">{item.tagline || item.description || 'พร้อมเริ่มแชท'}</span>
+                <span className="block truncate text-[11px] text-white/45">
+                  {item.tagline || item.description || 'พร้อมเริ่มแชท'}
+                </span>
               </span>
               <MoreHorizontal className="text-white/45" size={17} />
             </button>
@@ -179,7 +185,12 @@ function SidebarContent({
                 <span className="block truncate text-sm font-black text-white">{chat.title || chat.characterName}</span>
                 <span className="block truncate text-[11px] text-white/42">{chat.preview || formatTime(chat.lastMessageAt)}</span>
               </button>
-              <button className="grid place-items-center text-white/35 hover:text-rose-300" onClick={() => onArchiveChat(chat.id)} title="เก็บแชท" type="button">
+              <button
+                className="grid place-items-center text-white/35 hover:text-rose-300"
+                onClick={() => onArchiveChat(chat.id)}
+                title="เก็บแชท"
+                type="button"
+              >
                 <MoreHorizontal size={17} />
               </button>
             </div>
@@ -187,7 +198,21 @@ function SidebarContent({
         </div>
       </section>
 
-      <p className="m-0 border-t border-white/10 pt-2 text-[11px] leading-5 text-white/35">{connectionNote}</p>
+      <div className="flex items-center gap-2 border-t border-white/10 pt-2 text-white/45">
+        <button className="grid size-8 place-items-center rounded-md hover:bg-white/8" title="Discord" type="button">
+          <Disc3 size={16} />
+        </button>
+        <button className="grid size-8 place-items-center rounded-md hover:bg-white/8" title="Facebook" type="button">
+          <Globe2 size={16} />
+        </button>
+        <button className="grid size-8 place-items-center rounded-md hover:bg-white/8" title="ฟีเจอร์เด่น" type="button">
+          <Sparkle size={16} />
+        </button>
+        <button className="ml-auto grid size-8 place-items-center rounded-md hover:bg-white/8" title="ตั้งค่า" type="button">
+          <Settings size={16} />
+        </button>
+      </div>
+      <p className="m-0 text-[11px] leading-5 text-white/35">{connectionNote}</p>
     </div>
   )
 }
