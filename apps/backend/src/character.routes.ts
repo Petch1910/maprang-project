@@ -21,7 +21,7 @@ import {
   simulateRelationshipPreview,
   validateRelationshipTags,
 } from './relationship.engine'
-import { canAccessOwnerResource, requestUserId, resolveRequestUserId } from './security'
+import { canAccessOwnerResource, isAdminRequest, requestUserId, resolveRequestUserId } from './security'
 
 const visibilitySchema = t.Union([t.Literal('PUBLIC'), t.Literal('UNLISTED'), t.Literal('PRIVATE')])
 const statusSchema = t.Union([
@@ -59,6 +59,10 @@ function normalizeCharacterBody(body: Partial<typeof characterBody.static>): Par
   }
 }
 
+function hasRequestIdentity(request: Request) {
+  return Boolean(request.headers.get('authorization') || request.headers.get('x-user-id'))
+}
+
 export const characterRoutes = new Elysia()
   .get('/relationship/presets', () => ({ presets: RELATIONSHIP_PRESETS }))
   .post(
@@ -91,19 +95,26 @@ export const characterRoutes = new Elysia()
   )
   .get(
     '/characters',
-    async ({ query }) => ({
-      characters: await searchCharacters({
-        view: query.view ?? 'public',
-        query: query.q,
-        tag: query.tag,
-        status: query.status as CharacterStatus | undefined,
-        visibility: query.visibility as Visibility | undefined,
-        sort: query.sort,
-        favoriteOnly: query.favoriteOnly,
-        maxRating: query.maxRating,
-        limit: query.limit,
-      }),
-    }),
+    async ({ query, request }) => {
+      const admin = isAdminRequest(request)
+      const viewerUserId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : '__anonymous__'
+
+      return {
+        characters: await searchCharacters({
+          view: query.view ?? 'public',
+          viewerUserId,
+          includePrivateFields: admin,
+          query: query.q,
+          tag: query.tag,
+          status: query.status as CharacterStatus | undefined,
+          visibility: query.visibility as Visibility | undefined,
+          sort: query.sort,
+          favoriteOnly: query.favoriteOnly,
+          maxRating: query.maxRating,
+          limit: query.limit,
+        }),
+      }
+    },
     {
       query: t.Object({
         view: t.Optional(t.Union([t.Literal('public'), t.Literal('admin')])),
@@ -143,7 +154,7 @@ export const characterRoutes = new Elysia()
       if (!character) return { error: 'character_create_failed' }
 
       set.status = 201
-      return { character: publicCharacter(character) }
+      return { character: publicCharacter(character, { includePrivateFields: true }) }
     },
     {
       body: characterBody,
@@ -159,7 +170,16 @@ export const characterRoutes = new Elysia()
         return { error: 'character_not_found' }
       }
 
-      return { character: publicCharacter(character) }
+      const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
+      const includePrivateFields = actorId ? canAccessOwnerResource({ request, ownerId: character.creatorId, actorId }) : isAdminRequest(request)
+      const isPublicCharacter = character.status === CharacterStatus.PUBLISHED && character.visibility === 'PUBLIC'
+
+      if (!isPublicCharacter && !includePrivateFields) {
+        set.status = 404
+        return { error: 'character_not_found' }
+      }
+
+      return { character: publicCharacter(character, { viewerUserId: actorId ?? defaultUserId, includePrivateFields }) }
     },
     {
       params: t.Object({
@@ -185,7 +205,7 @@ export const characterRoutes = new Elysia()
       }
 
       const character = await updateCharacter(params.id, normalizeCharacterBody(body))
-      return { character: character ? publicCharacter(character) : null }
+      return { character: character ? publicCharacter(character, { includePrivateFields: true }) : null }
     },
     {
       params: t.Object({
@@ -226,14 +246,30 @@ export const characterRoutes = new Elysia()
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
 
-      const character = await duplicateCharacter(params.id, await resolveRequestUserId(request))
+      const existing = await loadCharacter(params.id)
+      if (!existing) {
+        set.status = 404
+        return { error: 'character_not_found' }
+      }
+
+      const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
+      const canReadSource =
+        (existing.status === CharacterStatus.PUBLISHED && existing.visibility === 'PUBLIC') ||
+        (actorId ? canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId }) : isAdminRequest(request))
+
+      if (!canReadSource) {
+        set.status = 404
+        return { error: 'character_not_found' }
+      }
+
+      const character = await duplicateCharacter(params.id, actorId ?? defaultUserId)
       if (!character) {
         set.status = 404
         return { error: 'character_not_found' }
       }
 
       set.status = 201
-      return { character: publicCharacter(character) }
+      return { character: publicCharacter(character, { includePrivateFields: true }) }
     },
     {
       params: t.Object({
@@ -263,7 +299,7 @@ export const characterRoutes = new Elysia()
         return { error: 'character_not_found' }
       }
 
-      return { character: publicCharacter(character) }
+      return { character: publicCharacter(character, { includePrivateFields: true }) }
     },
     {
       params: t.Object({
@@ -277,13 +313,29 @@ export const characterRoutes = new Elysia()
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
 
-      const character = await setFavorite(params.id, body.favorite, body.userId ?? (await resolveRequestUserId(request)))
+      const existing = await loadCharacter(params.id)
+      if (!existing) {
+        set.status = 404
+        return { error: 'character_not_found' }
+      }
+
+      const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
+      const canFavorite =
+        (existing.status === CharacterStatus.PUBLISHED && existing.visibility === 'PUBLIC') ||
+        (actorId ? canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId }) : isAdminRequest(request))
+
+      if (!canFavorite) {
+        set.status = 404
+        return { error: 'character_not_found' }
+      }
+
+      const character = await setFavorite(params.id, body.favorite, actorId ?? defaultUserId)
       if (!character) {
         set.status = 404
         return { error: 'character_not_found' }
       }
 
-      return { character: publicCharacter(character) }
+      return { character: publicCharacter(character, { viewerUserId: actorId ?? defaultUserId }) }
     },
     {
       params: t.Object({
@@ -291,15 +343,30 @@ export const characterRoutes = new Elysia()
       }),
       body: t.Object({
         favorite: t.Boolean(),
-        userId: t.Optional(t.String()),
       }),
     },
   )
   .post(
     '/characters/:id/view',
-    async ({ params, set }) => {
+    async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+
+      const existing = await loadCharacter(params.id)
+      if (!existing) {
+        set.status = 404
+        return { error: 'character_not_found' }
+      }
+
+      const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
+      const includePrivateFields = actorId ? canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId }) : isAdminRequest(request)
+      const canView =
+        (existing.status === CharacterStatus.PUBLISHED && existing.visibility === 'PUBLIC') || includePrivateFields
+
+      if (!canView) {
+        set.status = 404
+        return { error: 'character_not_found' }
+      }
 
       const character = await trackCharacterView(params.id)
       if (!character) {
@@ -307,7 +374,7 @@ export const characterRoutes = new Elysia()
         return { error: 'character_not_found' }
       }
 
-      return { character: publicCharacter(character) }
+      return { character: publicCharacter(character, { viewerUserId: actorId ?? defaultUserId, includePrivateFields }) }
     },
     {
       params: t.Object({

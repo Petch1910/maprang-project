@@ -147,4 +147,71 @@ describe('character persistence quality gate', () => {
     expect(allowed.status).toBe(200)
     expect(body.character.tagline).toBe('Changed by the owner')
   })
+
+  test('keeps owner/admin character listings from leaking to other users', async () => {
+    const character = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Private Listing Guard`,
+      tags: ['friend'],
+      visibility: 'PRIVATE',
+      status: CharacterStatus.DRAFT,
+    })
+
+    expect(character).not.toBeNull()
+
+    const otherResponse = await characterRoutes.handle(
+      new Request(`http://localhost/characters?view=admin&q=${encodeURIComponent(character!.name)}`, {
+        headers: { 'x-user-id': otherUserId },
+      }),
+    )
+    const otherBody = (await otherResponse.json()) as { characters: Array<{ id: string }> }
+
+    expect(otherResponse.status).toBe(200)
+    expect(otherBody.characters.some((item) => item.id === character!.id)).toBe(false)
+
+    const ownerResponse = await characterRoutes.handle(
+      new Request(`http://localhost/characters?view=admin&q=${encodeURIComponent(character!.name)}`, {
+        headers: { 'x-user-id': defaultUserId },
+      }),
+    )
+    const ownerBody = (await ownerResponse.json()) as { characters: Array<{ id: string; systemPrompt: string }> }
+
+    expect(ownerResponse.status).toBe(200)
+    expect(ownerBody.characters).toContainEqual(expect.objectContaining({ id: character!.id, systemPrompt: strongInput.systemPrompt }))
+  })
+
+  test('hides private characters and prompt fields from public access', async () => {
+    const privateCharacter = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Private Detail Guard`,
+      tags: ['friend'],
+      visibility: 'PRIVATE',
+      status: CharacterStatus.DRAFT,
+    })
+    const publicCharacter = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Public Prompt Guard`,
+      tags: ['friend', 'green-flag'],
+      visibility: 'PUBLIC',
+      status: CharacterStatus.PUBLISHED,
+    })
+
+    expect(privateCharacter).not.toBeNull()
+    expect(publicCharacter).not.toBeNull()
+
+    const privateResponse = await characterRoutes.handle(
+      new Request(`http://localhost/characters/${privateCharacter!.id}`, {
+        headers: { 'x-user-id': otherUserId },
+      }),
+    )
+
+    expect(privateResponse.status).toBe(404)
+
+    const publicResponse = await characterRoutes.handle(new Request(`http://localhost/characters/${publicCharacter!.id}`))
+    const publicBody = (await publicResponse.json()) as { character: { systemPrompt: string; compactPrompt: string | null } }
+
+    expect(publicResponse.status).toBe(200)
+    expect(publicBody.character.systemPrompt).toBe('')
+    expect(publicBody.character.compactPrompt).toBeNull()
+  })
 })

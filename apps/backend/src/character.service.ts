@@ -31,6 +31,8 @@ export type CharacterPatchInput = Partial<CharacterInput>
 
 export type CharacterListOptions = {
   view?: 'public' | 'admin'
+  viewerUserId?: string
+  includePrivateFields?: boolean
   query?: string
   tag?: string
   status?: CharacterStatus
@@ -41,7 +43,13 @@ export type CharacterListOptions = {
   limit?: number
 }
 
-export function publicCharacter(character: CharacterWithTags) {
+export function publicCharacter(
+  character: CharacterWithTags,
+  options: { viewerUserId?: string; includePrivateFields?: boolean } = {},
+) {
+  const includePrivateFields = options.includePrivateFields ?? false
+  const viewerUserId = options.viewerUserId ?? defaultUserId
+
   return {
     id: character.id,
     name: character.name,
@@ -50,21 +58,21 @@ export function publicCharacter(character: CharacterWithTags) {
     description: character.description,
     biography: character.biography,
     scenario: character.scenario,
-    systemPrompt: character.systemPrompt,
-    compactPrompt: character.compactPrompt,
-    characterAnchor: character.characterAnchor,
-    constraints: character.constraints,
+    systemPrompt: includePrivateFields ? character.systemPrompt : '',
+    compactPrompt: includePrivateFields ? character.compactPrompt : null,
+    characterAnchor: includePrivateFields ? character.characterAnchor : null,
+    constraints: includePrivateFields ? character.constraints : null,
     greeting: character.greeting,
     status: character.status,
     visibility: character.visibility,
     qualityScore: character.qualityScore,
-    qualityNotes: character.qualityNotes,
+    qualityNotes: includePrivateFields ? character.qualityNotes : null,
     publishedAt: character.publishedAt,
     promptVersion: character.promptVersion,
     viewCount: character.viewCount,
     chatCount: character.chatCount,
     favoriteCount: character._count?.favoritedBy ?? 0,
-    isFavorite: character.favoritedBy?.some((favorite) => favorite.userId === defaultUserId) ?? false,
+    isFavorite: character.favoritedBy?.some((favorite) => favorite.userId === viewerUserId) ?? false,
     tags: character.tags?.map((item) => item.tag.name) ?? [],
     contentRating: contentRatingFromTags(character.tags?.map((item) => item.tag.name) ?? []),
   }
@@ -140,7 +148,7 @@ export async function syncCharacterTags(characterId: string, tags: string[]) {
   }
 }
 
-export async function loadCharacter(characterId: string) {
+export async function loadCharacter(characterId: string, viewerUserId = defaultUserId) {
   const prisma = getPrisma()
   if (!prisma) return null
 
@@ -151,7 +159,7 @@ export async function loadCharacter(characterId: string) {
         include: { tag: true },
       },
       favoritedBy: {
-        where: { userId: defaultUserId },
+        where: { userId: viewerUserId },
         select: { userId: true },
       },
       _count: {
@@ -174,6 +182,8 @@ export async function searchCharacters(options: CharacterListOptions = {}) {
 
   const view = options.view ?? 'public'
   const isAdminView = view === 'admin'
+  const viewerUserId = options.viewerUserId ?? defaultUserId
+  const includePrivateFields = options.includePrivateFields ?? false
   const query = options.query?.trim()
   const tag = options.tag?.trim().toLowerCase()
   const maxRating = normalizeMaxRating(options.maxRating)
@@ -194,6 +204,7 @@ export async function searchCharacters(options: CharacterListOptions = {}) {
       deletedAt: null,
       ...(isAdminView
         ? {
+            ...(includePrivateFields ? {} : { creatorId: viewerUserId }),
             ...(options.status ? { status: options.status } : {}),
             ...(options.visibility ? { visibility: options.visibility } : {}),
           }
@@ -235,7 +246,7 @@ export async function searchCharacters(options: CharacterListOptions = {}) {
         include: { tag: true },
       },
       favoritedBy: {
-        where: { userId: defaultUserId },
+        where: { userId: viewerUserId },
         select: { userId: true },
       },
       _count: {
@@ -246,7 +257,7 @@ export async function searchCharacters(options: CharacterListOptions = {}) {
 
   return characters
     .filter((character) => isAdminView || ratingAllowed(contentRatingFromTags(tagNames(character.tags)), maxRating))
-    .map(publicCharacter)
+    .map((character) => publicCharacter(character, { viewerUserId, includePrivateFields: isAdminView }))
 }
 
 type QualityReviewInput = Omit<CharacterInput, 'tags'> & {
@@ -487,7 +498,7 @@ export async function setFavorite(characterId: string, favorite: boolean, userId
     })
   }
 
-  return loadCharacter(characterId)
+  return loadCharacter(characterId, userId)
 }
 
 export async function trackCharacterView(characterId: string) {
