@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Bell, Compass, MessageCircle, PlusCircle, ShieldCheck, UserRound } from 'lucide-react'
+import { Bell, Coins, Compass, MessageCircle, PlusCircle, ShieldCheck, UserRound } from 'lucide-react'
 import { AgeGate } from './components/AgeGate'
 import { useAppDispatch, useAppSelector } from './store/hooks'
 import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chatsSlice'
@@ -22,6 +22,7 @@ const EventsInboxPage = lazy(() =>
 const ExplorePage = lazy(() => import('./pages/ExplorePage').then((module) => ({ default: module.ExplorePage })))
 const MyChatsPage = lazy(() => import('./pages/MyChatsPage').then((module) => ({ default: module.MyChatsPage })))
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
+const WalletPage = lazy(() => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage })))
 
 const primaryNavItems = [
   { to: '/', label: 'Explore', icon: Compass },
@@ -32,6 +33,7 @@ const primaryNavItems = [
 ]
 
 const adminNavItems = [{ to: '/moderation', label: 'Moderation', icon: ShieldCheck }]
+const utilityNavItems = [{ to: '/wallet', label: 'Wallet', icon: Coins }]
 
 function App() {
   const dispatch = useAppDispatch()
@@ -61,7 +63,7 @@ function App() {
           <div className="flex items-center gap-2">
             <NavLink
               className="hidden min-h-10 items-center gap-2 rounded-full border border-amber-500/20 bg-amber-50 px-3 text-sm font-black text-amber-700 sm:flex"
-              to="/profile"
+              to="/wallet"
             >
               <span>Tokens</span>
               <span>{tokenBalance.toLocaleString()}</span>
@@ -102,6 +104,24 @@ function App() {
             ))}
 
             <div className="my-3 border-t border-slate-900/10 pt-3">
+              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">Account</p>
+              {utilityNavItems.map((item) => (
+                <NavLink
+                  className={({ isActive }) =>
+                    `flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-black transition ${
+                      isActive ? 'bg-amber-500 text-white shadow-[0_14px_28px_rgba(245,158,11,0.2)]' : 'text-slate-600 hover:bg-slate-100'
+                    }`
+                  }
+                  key={item.to}
+                  to={item.to}
+                >
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+            </div>
+
+            <div className="my-3 border-t border-slate-900/10 pt-3">
               <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">Admin</p>
               {adminNavItems.map((item) => (
                 <NavLink
@@ -132,6 +152,7 @@ function App() {
               <Route element={<EventsInboxPage />} path="/events" />
               <Route element={<AdminModerationPage />} path="/moderation" />
               <Route element={<ProfilePage />} path="/profile" />
+              <Route element={<WalletPage />} path="/wallet" />
             </Routes>
           </Suspense>
         </section>

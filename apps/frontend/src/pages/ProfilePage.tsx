@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ShieldCheck } from 'lucide-react'
+import { Coins, ShieldCheck } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { savePersonaDraft, selectPersonaDraft } from '../store/slices/draftsSlice'
 import { selectIsLowToken, selectTokenBalance } from '../store/slices/walletSlice'
@@ -78,7 +78,14 @@ export function ProfilePage() {
         </div>
 
         <div className="mt-5 border-t border-slate-900/10 pt-5">
-          <p className="m-0 text-sm font-black text-slate-900">Admin tools</p>
+          <p className="m-0 text-sm font-black text-slate-900">Account tools</p>
+          <Link
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 text-sm font-black text-white transition hover:bg-amber-600"
+            to="/wallet"
+          >
+            <Coins size={17} />
+            Wallet usage
+          </Link>
           <Link
             className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800"
             to="/moderation"
