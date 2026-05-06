@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { ChatPanel } from '../components/ChatPanel'
+import { ReportDialog, type ReportDialogSubmit, type ReportDialogTarget } from '../components/ReportDialog'
 import { Sidebar } from '../components/Sidebar'
 import {
   archiveChat as archiveSavedChat,
@@ -136,6 +137,8 @@ export function WorkspacePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSavingCharacter, setIsSavingCharacter] = useState(false)
   const [isSavingLore, setIsSavingLore] = useState(false)
+  const [reportTarget, setReportTarget] = useState<(ReportDialogTarget & { messageId: string; role: ChatMessage['role'] }) | null>(null)
+  const [isReporting, setIsReporting] = useState(false)
   const [connectionNote, setConnectionNote] = useState('Loading characters from the database...')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const draftKey = chatId ? `chat:${chatId}` : `character:${character.id}`
@@ -668,26 +671,41 @@ export function WorkspacePage() {
     }
   }
 
-  const reportMessage = async (chat: ChatMessage) => {
+  const openMessageReport = (chat: ChatMessage) => {
     if (isLoading || chat.role === 'system' || !chat.content.trim()) return
+    setReportTarget({
+      targetType: 'MESSAGE',
+      title: `${chat.role === 'assistant' ? character.name : 'User'} message`,
+      preview: chat.content,
+      messageId: chat.id,
+      role: chat.role,
+    })
+  }
+
+  const reportMessage = async ({ reason, details }: ReportDialogSubmit) => {
+    if (!reportTarget || isReporting) return
+    setIsReporting(true)
     setConnectionNote('Submitting message report...')
     try {
       await createReport({
         targetType: 'MESSAGE',
-        messageId: chat.id,
-        reason: 'message_policy_review',
-        details: `Reported ${chat.role} message from Chat Room.`,
+        messageId: reportTarget.messageId,
+        reason,
+        details: details || `Reported ${reportTarget.role} message from Chat Room.`,
         metadata: {
           chatId,
           characterId: character.id,
-          role: chat.role,
+          role: reportTarget.role,
         },
       })
       setConnectionNote('Message report submitted for moderation review.')
+      setReportTarget(null)
       await loadAdminSummary()
     } catch (error) {
       console.error('Report message error:', error)
       setConnectionNote(apiErrorMessage(error, 'Could not submit this message report. Try again after the chat finishes syncing.'))
+    } finally {
+      setIsReporting(false)
     }
   }
 
@@ -741,9 +759,17 @@ export function WorkspacePage() {
         message={message}
         onMessageChange={updateMessageDraft}
         onOpenMenu={() => setIsMobileMenuOpen(true)}
-        onReportMessage={reportMessage}
+        onReportMessage={openMessageReport}
         onSceneAction={handleSceneAction}
         onSendMessage={sendMessage}
+      />
+
+      <ReportDialog
+        isOpen={Boolean(reportTarget)}
+        isSubmitting={isReporting}
+        onClose={() => setReportTarget(null)}
+        onSubmit={reportMessage}
+        target={reportTarget}
       />
     </main>
   )

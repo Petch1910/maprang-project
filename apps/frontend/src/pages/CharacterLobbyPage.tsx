@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { ReportDialog, type ReportDialogSubmit } from '../components/ReportDialog'
 import { createReport } from '../lib/api'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -20,6 +21,7 @@ export function CharacterLobbyPage() {
   const content = useAppSelector(selectContentSettings)
   const [seed, setSeed] = useState(seeds[0])
   const [isReporting, setIsReporting] = useState(false)
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
   const [reportNote, setReportNote] = useState('')
   const character = useMemo(
     () => characters.find((item) => item.id === characterId) ?? characters[0] ?? null,
@@ -32,7 +34,7 @@ export function CharacterLobbyPage() {
   const rating = character ? characterRating(character) : 'general'
   const canView = canViewRating(rating, content.maxRating)
 
-  const reportCharacter = async () => {
+  const reportCharacter = async ({ reason, details }: ReportDialogSubmit) => {
     if (!character || isReporting) return
     setIsReporting(true)
     setReportNote('')
@@ -40,14 +42,15 @@ export function CharacterLobbyPage() {
       await createReport({
         targetType: 'CHARACTER',
         characterId: character.id,
-        reason: 'character_policy_review',
-        details: `Reported from Character Lobby. Rating: ${ratingLabel(rating)}.`,
+        reason,
+        details: details || `Reported from Character Lobby. Rating: ${ratingLabel(rating)}.`,
         metadata: {
           contentRating: rating,
           tags: character.tags,
         },
       })
       setReportNote('Report submitted for review.')
+      setIsReportDialogOpen(false)
     } catch {
       setReportNote('Could not submit report. Please try again.')
     } finally {
@@ -66,10 +69,10 @@ export function CharacterLobbyPage() {
               <button
                 className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700 disabled:opacity-60"
                 disabled={isReporting || !character}
-                onClick={reportCharacter}
+                onClick={() => setIsReportDialogOpen(true)}
                 type="button"
               >
-                {isReporting ? 'Reporting...' : 'Report'}
+                Report
               </button>
               <button className="min-h-11 flex-1 rounded-xl border border-slate-900/10 bg-white font-black text-slate-700" type="button">
                 Share
@@ -150,6 +153,21 @@ export function CharacterLobbyPage() {
           </div>
         </div>
       </div>
+      <ReportDialog
+        isOpen={isReportDialogOpen}
+        isSubmitting={isReporting}
+        onClose={() => setIsReportDialogOpen(false)}
+        onSubmit={reportCharacter}
+        target={
+          character
+            ? {
+                targetType: 'CHARACTER',
+                title: character.name,
+                preview: character.biography || character.description || character.tagline || undefined,
+              }
+            : null
+        }
+      />
     </div>
   )
 }
