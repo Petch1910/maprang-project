@@ -1,4 +1,5 @@
-import { CharacterStatus } from '@prisma/client'
+import { AdminAuditAction, CharacterStatus } from '@prisma/client'
+import { createAdminAuditLog } from './audit.service'
 import { getPrisma } from './db'
 
 export function validateTokenAdjustment(amount: number) {
@@ -92,7 +93,7 @@ export async function loadAdminSummary() {
   }
 }
 
-export async function adjustUserTokenBalance(userId: string, amount: number) {
+export async function adjustUserTokenBalance(userId: string, amount: number, actorUserId?: string | null, reason?: string | null) {
   const prisma = getPrisma()
   if (!prisma) return null
 
@@ -108,11 +109,29 @@ export async function adjustUserTokenBalance(userId: string, amount: number) {
   const nextBalance = user.tokenBalance + amount
   if (nextBalance < 0) return { error: 'insufficient_token_balance' }
 
-  const updatedUser = await prisma.user.update({
-    where: { id: userId },
-    data: { tokenBalance: nextBalance },
-    select: { id: true, email: true, username: true, role: true, tokenBalance: true },
-  })
+  return prisma.$transaction(async (tx) => {
+    const updatedUser = await tx.user.update({
+      where: { id: userId },
+      data: { tokenBalance: nextBalance },
+      select: { id: true, email: true, username: true, role: true, tokenBalance: true },
+    })
 
-  return { user: updatedUser, adjustment: amount }
+    await createAdminAuditLog(
+      {
+        action: AdminAuditAction.TOKEN_ADJUSTMENT,
+        targetType: 'USER',
+        targetId: userId,
+        actorUserId,
+        metadata: {
+          amount,
+          previousBalance: user.tokenBalance,
+          nextBalance,
+          reason: reason?.trim() || null,
+        },
+      },
+      tx,
+    )
+
+    return { user: updatedUser, adjustment: amount }
+  })
 }

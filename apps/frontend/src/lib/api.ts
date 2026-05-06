@@ -568,6 +568,22 @@ export async function archiveChat(chatId: string) {
 export type ReportTargetType = 'CHARACTER' | 'MESSAGE'
 export type ReportStatus = 'PENDING' | 'REVIEWED' | 'RESOLVED' | 'REJECTED'
 export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE'
+export type AdminAuditAction = 'REPORT_STATUS_UPDATE' | 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE' | 'TOKEN_ADJUSTMENT'
+
+export type AdminAuditLog = {
+  id: string
+  action: AdminAuditAction
+  targetType: string
+  targetId: string
+  metadata: Record<string, unknown> | null
+  actorUserId: string | null
+  actorUser?: {
+    id: string
+    email: string | null
+    username: string | null
+  } | null
+  createdAt: string
+}
 
 export type ReportSummary = {
   id: string
@@ -621,6 +637,10 @@ export async function fetchAdminReports(filters: {
   if (filters.limit) params.set('limit', String(filters.limit))
   const query = params.toString()
   return requestJson<{ reports: ReportSummary[] }>(`/admin/reports${query ? `?${query}` : ''}`)
+}
+
+export async function fetchAdminAuditLogs(limit = 40) {
+  return requestJson<{ logs: AdminAuditLog[] }>(`/admin/audit-logs?limit=${limit}`)
 }
 
 export async function updateAdminReportStatus(reportId: string, status: ReportStatus) {

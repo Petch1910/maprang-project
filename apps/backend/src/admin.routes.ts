@@ -1,7 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { adjustUserTokenBalance, loadAdminSummary } from './admin.service'
+import { listAdminAuditLogs } from './audit.service'
 import { requireDatabase } from './db'
-import { requireAdminApiKey } from './security'
+import { requireAdminApiKey, resolveRequestUserId } from './security'
 
 export const adminRoutes = new Elysia()
   .get('/admin/summary', async ({ request, set }) => {
@@ -26,7 +27,12 @@ export const adminRoutes = new Elysia()
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
 
-      const result = await adjustUserTokenBalance(params.id, body.amount)
+      const result = await adjustUserTokenBalance(
+        params.id,
+        body.amount,
+        await resolveRequestUserId(request),
+        body.reason,
+      )
       if (!result) {
         set.status = 503
         return { error: 'database_not_configured' }
@@ -46,6 +52,22 @@ export const adminRoutes = new Elysia()
       }),
       params: t.Object({
         id: t.String(),
+      }),
+    },
+  )
+  .get(
+    '/admin/audit-logs',
+    async ({ query, request, set }) => {
+      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured' }
+
+      return { logs: await listAdminAuditLogs(query.limit) }
+    },
+    {
+      query: t.Object({
+        limit: t.Optional(t.Number()),
       }),
     },
   )

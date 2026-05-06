@@ -84,7 +84,7 @@ export const reportRoutes = new Elysia()
       if (!prisma) return { error: 'database_not_configured' }
 
       try {
-        return { report: await updateReportStatus(params.id, body.status as ReportStatus) }
+        return { report: await updateReportStatus(params.id, body.status as ReportStatus, await resolveRequestUserId(request)) }
       } catch {
         set.status = 404
         return { error: 'report_not_found' }
@@ -102,7 +102,7 @@ export const reportRoutes = new Elysia()
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
 
-      const result = await applyReportAdminAction(params.id, body.action as ReportAdminAction)
+      const result = await applyReportAdminAction(params.id, body.action as ReportAdminAction, await resolveRequestUserId(request))
       if (!result) {
         set.status = 503
         return { error: 'database_not_configured' }

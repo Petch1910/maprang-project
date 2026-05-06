@@ -3,8 +3,10 @@ import { AlertTriangle, CheckCircle2, Filter, RefreshCw, ShieldCheck } from 'luc
 import {
   applyAdminReportAction,
   ApiError,
+  fetchAdminAuditLogs,
   fetchAdminReports,
   updateAdminReportStatus,
+  type AdminAuditLog,
   type ReportAdminAction,
   type ReportStatus,
   type ReportSummary,
@@ -55,6 +57,7 @@ export function AdminModerationPage() {
   const [targetType, setTargetType] = useState<ReportTargetType | ''>('')
   const [isLoading, setIsLoading] = useState(false)
   const [updatingId, setUpdatingId] = useState('')
+  const [auditLogs, setAuditLogs] = useState<AdminAuditLog[]>([])
   const [note, setNote] = useState('Loading moderation queue...')
 
   const pendingCount = useMemo(() => reports.filter((report) => report.status === 'PENDING').length, [reports])
@@ -64,6 +67,8 @@ export function AdminModerationPage() {
     try {
       const data = await fetchAdminReports({ status, targetType, limit: 80 })
       setReports(data.reports)
+      const auditData = await fetchAdminAuditLogs(12)
+      setAuditLogs(auditData.logs)
       setNote(data.reports.length > 0 ? `Loaded ${data.reports.length} report(s).` : 'No reports match this filter.')
     } catch (error) {
       console.error('Load admin reports error:', error)
@@ -79,6 +84,8 @@ export function AdminModerationPage() {
     try {
       const data = await updateAdminReportStatus(reportId, nextStatus)
       setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
+      const auditData = await fetchAdminAuditLogs(12)
+      setAuditLogs(auditData.logs)
       setNote(`Report marked as ${nextStatus.toLowerCase()}.`)
     } catch (error) {
       console.error('Update report status error:', error)
@@ -93,6 +100,8 @@ export function AdminModerationPage() {
     try {
       const data = await applyAdminReportAction(reportId, action)
       setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
+      const auditData = await fetchAdminAuditLogs(12)
+      setAuditLogs(auditData.logs)
       setNote(action === 'HIDE_CHARACTER' ? 'Character hidden and report resolved.' : 'Message archived and report resolved.')
     } catch (error) {
       console.error('Apply report action error:', error)
@@ -260,6 +269,32 @@ export function AdminModerationPage() {
               </div>
             </article>
           ))
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-slate-900/10 bg-white shadow-sm">
+        <div className="border-b border-slate-900/10 p-4">
+          <p className="m-0 text-sm font-black text-slate-950">Recent admin audit</p>
+          <p className="m-0 mt-1 text-xs font-bold text-slate-400">Latest moderation and token actions recorded by the backend.</p>
+        </div>
+        {auditLogs.length === 0 ? (
+          <div className="p-4 text-sm font-bold text-slate-500">No audit logs loaded.</div>
+        ) : (
+          <div className="divide-y divide-slate-900/10">
+            {auditLogs.map((log) => (
+              <article className="grid gap-2 p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={log.id}>
+                <div className="min-w-0">
+                  <p className="m-0 truncate text-sm font-black text-slate-950">
+                    {log.action} / {log.targetType}
+                  </p>
+                  <p className="m-0 mt-1 truncate text-xs font-bold text-slate-400">
+                    {log.targetId} / {log.actorUser?.username ?? log.actorUser?.email ?? log.actorUserId ?? 'admin key'}
+                  </p>
+                </div>
+                <span className="text-xs font-bold text-slate-400">{formatDate(log.createdAt)}</span>
+              </article>
+            ))}
+          </div>
         )}
       </section>
     </div>

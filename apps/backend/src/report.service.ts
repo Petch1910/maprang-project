@@ -1,4 +1,5 @@
-import { CharacterStatus, Prisma, ReportStatus, ReportTargetType, Visibility } from '@prisma/client'
+import { AdminAuditAction, CharacterStatus, Prisma, ReportStatus, ReportTargetType, Visibility } from '@prisma/client'
+import { createAdminAuditLog } from './audit.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
 
@@ -101,24 +102,42 @@ export async function listReports(options: ReportListOptions = {}) {
   return reports.map(publicReport)
 }
 
-export async function updateReportStatus(reportId: string, status: ReportStatus) {
+export async function updateReportStatus(reportId: string, status: ReportStatus, actorUserId?: string | null) {
   const prisma = getPrisma()
   if (!prisma) return null
 
-  const report = await prisma.report.update({
-    where: { id: reportId },
-    data: {
-      status,
-      reviewedAt: status === ReportStatus.PENDING ? null : new Date(),
-    },
-    include: {
-      character: { select: { id: true, name: true, status: true, visibility: true } },
-      message: { select: { id: true, role: true, content: true, chatId: true } },
-      reporter: { select: { id: true, email: true, username: true } },
-    },
-  })
+  return prisma.$transaction(async (tx) => {
+    const report = await tx.report.update({
+      where: { id: reportId },
+      data: {
+        status,
+        reviewedAt: status === ReportStatus.PENDING ? null : new Date(),
+      },
+      include: {
+        character: { select: { id: true, name: true, status: true, visibility: true } },
+        message: { select: { id: true, role: true, content: true, chatId: true } },
+        reporter: { select: { id: true, email: true, username: true } },
+      },
+    })
 
-  return publicReport(report)
+    await createAdminAuditLog(
+      {
+        action: AdminAuditAction.REPORT_STATUS_UPDATE,
+        targetType: 'REPORT',
+        targetId: reportId,
+        actorUserId,
+        metadata: {
+          status,
+          targetType: report.targetType,
+          characterId: report.characterId,
+          messageId: report.messageId,
+        },
+      },
+      tx,
+    )
+
+    return publicReport(report)
+  })
 }
 
 export function validateReportAdminAction(action: string) {
@@ -126,7 +145,7 @@ export function validateReportAdminAction(action: string) {
   return null
 }
 
-export async function applyReportAdminAction(reportId: string, action: ReportAdminAction) {
+export async function applyReportAdminAction(reportId: string, action: ReportAdminAction, actorUserId?: string | null) {
   const prisma = getPrisma()
   if (!prisma) return null
 
@@ -154,6 +173,16 @@ export async function applyReportAdminAction(reportId: string, action: ReportAdm
           deletedAt: new Date(),
         },
       })
+      await createAdminAuditLog(
+        {
+          action: AdminAuditAction.HIDE_CHARACTER,
+          targetType: 'CHARACTER',
+          targetId: report.characterId,
+          actorUserId,
+          metadata: { reportId },
+        },
+        tx,
+      )
     }
 
     if (action === 'ARCHIVE_MESSAGE') {
@@ -164,6 +193,16 @@ export async function applyReportAdminAction(reportId: string, action: ReportAdm
           deletedAt: new Date(),
         },
       })
+      await createAdminAuditLog(
+        {
+          action: AdminAuditAction.ARCHIVE_MESSAGE,
+          targetType: 'MESSAGE',
+          targetId: report.messageId,
+          actorUserId,
+          metadata: { reportId, characterId: report.characterId },
+        },
+        tx,
+      )
     }
 
     const updatedReport = await tx.report.update({
