@@ -19,7 +19,7 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Admin</p>
+          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">ผู้ดูแล</p>
           <h2 className="m-0 text-lg font-bold text-slate-900">ภาพรวมระบบ</h2>
         </div>
         <button
@@ -34,17 +34,17 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
       {summary ? (
         <>
           <div className="grid grid-cols-2 gap-2">
-            <Metric label="characters" value={summary.totals.characters.toLocaleString()} />
-            <Metric label="published" value={summary.totals.publishedCharacters.toLocaleString()} />
-            <Metric label="chats" value={summary.totals.chats.toLocaleString()} />
-            <Metric label="tokens" value={summary.totals.tokens.toLocaleString()} />
+            <Metric label="ตัวละคร" value={summary.totals.characters.toLocaleString()} />
+            <Metric label="เผยแพร่แล้ว" value={summary.totals.publishedCharacters.toLocaleString()} />
+            <Metric label="แชท" value={summary.totals.chats.toLocaleString()} />
+            <Metric label="โทเคน" value={summary.totals.tokens.toLocaleString()} />
           </div>
 
           <div className="mt-3 rounded-lg bg-slate-50 p-3 text-xs font-bold text-slate-500">
             <div className="flex flex-wrap gap-2">
-              <span>{summary.totals.messages.toLocaleString()} messages</span>
+              <span>{summary.totals.messages.toLocaleString()} ข้อความ</span>
               <span>{summary.totals.loreEntries.toLocaleString()} lore</span>
-              <span>{summary.totals.favorites.toLocaleString()} favorites</span>
+              <span>{summary.totals.favorites.toLocaleString()} ถูกใจ</span>
               <span>${Number(summary.totals.cost).toFixed(6)}</span>
             </div>
           </div>
@@ -59,7 +59,7 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
                   <strong className="truncate text-slate-800">{character.name}</strong>
                   <span className="font-bold text-slate-400">Q {character.qualityScore}</span>
                   <span className="truncate text-slate-500">
-                    {character.chatCount} chats · {character.viewCount} views · {character.favoriteCount} favs
+                    {character.chatCount} แชท · {character.viewCount} เข้าชม · {character.favoriteCount} ถูกใจ
                   </span>
                   <span className="font-bold text-slate-400">{character.status}</span>
                 </div>

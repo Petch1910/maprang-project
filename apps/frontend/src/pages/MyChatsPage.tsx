@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadChatSummaries, selectChatSummaries, selectChatsError, selectChatsLoading } from '../store/slices/chatsSlice'
 
+const relationshipLabels: Record<string, string> = {
+  RIVAL: 'คู่แข่ง',
+  NEUTRAL: 'เป็นกลาง',
+  CLOSE: 'ใกล้ชิด',
+  TRUSTED: 'ไว้ใจ',
+  ROMANTIC: 'โรแมนติก',
+}
+
 export function MyChatsPage() {
   const dispatch = useAppDispatch()
   const chats = useAppSelector(selectChatSummaries)
@@ -29,7 +37,11 @@ export function MyChatsPage() {
         </button>
       </div>
 
-      {error && <div className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">โหลดรายการแชทไม่ได้</div>}
+      {error && (
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">
+          โหลดรายการแชทไม่ได้
+        </div>
+      )}
 
       <div className="grid gap-3 md:grid-cols-2">
         {isLoading && [1, 2, 3, 4].map((item) => <div className="h-32 animate-pulse rounded-2xl bg-slate-200" key={item} />)}
@@ -39,9 +51,14 @@ export function MyChatsPage() {
             const pendingCount = (chat.sceneState?.pendingEvents ?? []).filter((event) => event.status === 'pending').length
             const activeScene = chat.sceneState?.activeScene
             const relationship = chat.relationshipState
+            const relationshipStatus = relationship?.status ?? 'NEUTRAL'
 
             return (
-              <Link className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={chat.id} to={`/chat/${chat.id}`}>
+              <Link
+                className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                key={chat.id}
+                to={`/chat/${chat.id}`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-black">{chat.title || chat.characterName}</p>
@@ -56,7 +73,7 @@ export function MyChatsPage() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-700">{chat.characterName}</span>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">
-                    {relationship?.status ?? 'NEUTRAL'}
+                    {relationshipLabels[relationshipStatus] ?? relationshipStatus}
                   </span>
                   {relationship?.tier && (
                     <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
@@ -64,9 +81,7 @@ export function MyChatsPage() {
                     </span>
                   )}
                   {activeScene && (
-                    <span className="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-black text-white">
-                      โหมดฉาก
-                    </span>
+                    <span className="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-black text-white">โหมดฉาก</span>
                   )}
                 </div>
               </Link>

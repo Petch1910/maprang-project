@@ -18,6 +18,20 @@ type CharacterManagerProps = {
 const visibilityOptions: Array<CharacterInput['visibility']> = ['PUBLIC', 'UNLISTED', 'PRIVATE']
 const statusOptions: Array<CharacterInput['status']> = ['DRAFT', 'REVIEW', 'PUBLISHED', 'REJECTED', 'ARCHIVED']
 
+const visibilityLabels: Record<NonNullable<CharacterInput['visibility']>, string> = {
+  PUBLIC: 'สาธารณะ',
+  UNLISTED: 'ไม่แสดงในหน้าค้นหา',
+  PRIVATE: 'ส่วนตัว',
+}
+
+const statusLabels: Record<NonNullable<CharacterInput['status']>, string> = {
+  DRAFT: 'ดราฟต์',
+  REVIEW: 'รอตรวจ',
+  PUBLISHED: 'เผยแพร่แล้ว',
+  REJECTED: 'ถูกปฏิเสธ',
+  ARCHIVED: 'เก็บแล้ว',
+}
+
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="flex flex-col gap-1.5 text-sm font-bold text-slate-700">
@@ -100,7 +114,7 @@ export function CharacterManager({
       visibility,
       status,
     })
-    setSaveNote('Character saved.')
+    setSaveNote('บันทึกตัวละครแล้ว')
   }
 
   const handleAvatarFile = async (file: File | null) => {
@@ -117,14 +131,14 @@ export function CharacterManager({
   return (
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
       <div className="mb-3">
-        <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Character manager</p>
-        <h2 className="m-0 text-lg font-bold text-slate-900">Edit {character.name}</h2>
+        <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">จัดการตัวละคร</p>
+        <h2 className="m-0 text-lg font-bold text-slate-900">แก้ไข {character.name}</h2>
       </div>
 
       <div className="flex flex-col gap-3">
         <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-bold tracking-widest text-slate-500 uppercase">Quality gate</span>
+            <span className="text-xs font-bold tracking-widest text-slate-500 uppercase">เกณฑ์คุณภาพ</span>
             <strong className={`text-sm ${character.qualityNotes?.passes ? 'text-green-700' : 'text-amber-700'}`}>
               {character.qualityScore ?? 0}/100
             </strong>
@@ -134,21 +148,21 @@ export function CharacterManager({
               {character.qualityNotes.notes.slice(0, 2).join(' ')}
             </p>
           ) : (
-            <p className="mt-2 mb-0 text-xs leading-relaxed text-green-700">Ready for publish review.</p>
+            <p className="mt-2 mb-0 text-xs leading-relaxed text-green-700">พร้อมส่งตรวจเพื่อเผยแพร่</p>
           )}
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <Field label="Name">
+          <Field label="ชื่อ">
             <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} />
           </Field>
 
-          <Field label="Tagline">
+          <Field label="คำโปรย">
             <input className={inputClass} value={tagline} onChange={(event) => setTagline(event.target.value)} />
           </Field>
         </div>
 
-        <Field label="Description">
+        <Field label="คำอธิบาย">
           <textarea
             className={textareaClass}
             value={description}
@@ -156,15 +170,15 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="Biography">
+        <Field label="ประวัติ">
           <textarea className={textareaClass} value={biography} onChange={(event) => setBiography(event.target.value)} />
         </Field>
 
-        <Field label="Opening scenario">
+        <Field label="ฉากเปิดเรื่อง">
           <textarea className={textareaClass} value={scenario} onChange={(event) => setScenario(event.target.value)} />
         </Field>
 
-        <Field label="Avatar URL">
+        <Field label="ลิงก์รูปตัวละคร">
           <input className={inputClass} value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} />
         </Field>
         <input
@@ -175,7 +189,7 @@ export function CharacterManager({
           type="file"
         />
 
-        <Field label="System prompt / personality">
+        <Field label="System prompt / บุคลิก">
           <textarea
             className={`${textareaClass} min-h-36`}
             value={systemPrompt}
@@ -183,7 +197,7 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="Compact prompt">
+        <Field label="Prompt แบบย่อ">
           <textarea
             className={textareaClass}
             value={compactPrompt}
@@ -191,7 +205,7 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="Character anchor">
+        <Field label="แกนหลักของตัวละคร">
           <textarea
             className={textareaClass}
             value={characterAnchor}
@@ -199,7 +213,7 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="Constraints">
+        <Field label="ข้อจำกัด">
           <textarea
             className={textareaClass}
             value={constraints}
@@ -207,11 +221,11 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="Greeting">
+        <Field label="ข้อความทักทาย">
           <textarea className={textareaClass} value={greeting} onChange={(event) => setGreeting(event.target.value)} />
         </Field>
 
-        <Field label="Tags">
+        <Field label="แท็ก">
           <input
             className={inputClass}
             value={tags}
@@ -222,9 +236,9 @@ export function CharacterManager({
         <CreatorReadinessPanel analysis={tagAnalysis} />
         <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
           <p className="m-0 font-bold text-slate-900">
-            Tags: discovery {tagAnalysis.discovery.length}, engine {tagAnalysis.engine.length}, safety {tagAnalysis.safety.length}
+            แท็ก: ค้นหา {tagAnalysis.discovery.length}, ระบบ {tagAnalysis.engine.length}, ความปลอดภัย {tagAnalysis.safety.length}
           </p>
-          {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">unknown: {tagAnalysis.unknown.join(', ')}</p>}
+          {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">แท็กที่ยังไม่รู้จัก: {tagAnalysis.unknown.join(', ')}</p>}
           {tagAnalysis.issues.map((issue) => (
             <p
               className={`mt-1 mb-0 font-bold ${issue.level === 'danger' ? 'text-red-700' : 'text-amber-700'}`}
@@ -238,7 +252,7 @@ export function CharacterManager({
         <RelationshipPreviewPanel tags={tags} />
 
         <div className="grid gap-3 md:grid-cols-2">
-          <Field label="Visibility">
+          <Field label="การมองเห็น">
             <select
               className={inputClass}
               value={visibility}
@@ -246,13 +260,13 @@ export function CharacterManager({
             >
               {visibilityOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option}
+                  {visibilityLabels[option]}
                 </option>
               ))}
             </select>
           </Field>
 
-          <Field label="Status">
+          <Field label="สถานะ">
             <select
               className={inputClass}
               value={status}
@@ -260,7 +274,7 @@ export function CharacterManager({
             >
               {statusOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option}
+                  {statusLabels[option]}
                 </option>
               ))}
             </select>
@@ -273,7 +287,7 @@ export function CharacterManager({
           disabled={isSaving || hasDangerConflict || !name.trim() || !systemPrompt.trim()}
           type="button"
         >
-          {isSaving ? 'Saving...' : hasDangerConflict ? 'Fix tag conflicts first' : 'Save character'}
+          {isSaving ? 'กำลังบันทึก...' : hasDangerConflict ? 'แก้แท็กที่ขัดแย้งก่อน' : 'บันทึกตัวละคร'}
         </button>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -283,7 +297,7 @@ export function CharacterManager({
             disabled={isSaving}
             type="button"
           >
-            Duplicate
+            ทำสำเนา
           </button>
           <button
             className="min-h-10 rounded-xl border border-amber-500/25 bg-amber-50 px-3 text-xs font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60"
@@ -291,7 +305,7 @@ export function CharacterManager({
             disabled={isSaving}
             type="button"
           >
-            Reset prompt
+            รีเซ็ต prompt
           </button>
           <button
             className="min-h-10 rounded-xl border border-red-500/25 bg-red-50 px-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
@@ -299,7 +313,7 @@ export function CharacterManager({
             disabled={isSaving}
             type="button"
           >
-            Delete character
+            ลบตัวละคร
           </button>
         </div>
 

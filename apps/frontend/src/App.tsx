@@ -56,7 +56,9 @@ function App() {
             </span>
             <span className="min-w-0">
               <span className="block truncate text-base font-black">Maprang AI</span>
-              <span className="hidden text-xs font-bold text-slate-500 sm:block">โรลเพลย์ภาษาไทย พร้อมระบบความสัมพันธ์เชิงลึก</span>
+              <span className="hidden text-xs font-bold text-slate-500 sm:block">
+                โรลเพลย์ภาษาไทย พร้อมระบบความสัมพันธ์เชิงลึก
+              </span>
             </span>
           </NavLink>
 

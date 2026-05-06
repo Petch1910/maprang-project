@@ -86,9 +86,7 @@ export function CharacterLobbyPage() {
               <p className="text-xs font-black tracking-[0.2em] text-slate-400 uppercase">ล็อบบี้ตัวละคร</p>
               <h1 className="mt-2 text-3xl font-black">{character?.name ?? 'ตัวละคร'}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                {character?.biography ||
-                  character?.description ||
-                  'เลือกสัญญาความสัมพันธ์ก่อนเริ่มเส้นทางนี้'}
+                {character?.biography || character?.description || 'เลือกสัญญาความสัมพันธ์ก่อนเริ่มเส้นทางนี้'}
               </p>
               <p className="mt-2 text-xs font-bold text-slate-400">รหัสตัวละคร: {characterId}</p>
               <div className="mt-4 flex flex-wrap gap-2">

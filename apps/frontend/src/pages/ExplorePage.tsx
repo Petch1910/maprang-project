@@ -20,7 +20,7 @@ const categories = [
   { label: 'รักเข้มข้น', tag: 'red-flag' },
   { label: 'ชีวิตประจำวัน', tag: 'slice-of-life' },
   { label: 'ดราม่า', tag: 'drama' },
-  { label: 'พี่เลี้ยง/เมนเทอร์', tag: 'mentor' },
+  { label: 'เมนเทอร์', tag: 'mentor' },
   { label: 'คู่แข่ง', tag: 'rival' },
 ]
 
@@ -76,7 +76,9 @@ export function ExplorePage() {
       <section className="overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#1d4ed8,#9333ea_52%,#f97316)] p-5 text-white shadow-[0_24px_70px_rgba(69,64,174,0.26)] sm:p-8">
         <div className="max-w-3xl space-y-4">
           <p className="text-xs font-black tracking-[0.22em] uppercase text-white/75">Maprang AI</p>
-          <h1 className="text-3xl font-black tracking-normal sm:text-5xl">โรลเพลย์ที่จำความสัมพันธ์ ไม่ใช่แค่จำข้อความแชท</h1>
+          <h1 className="text-3xl font-black tracking-normal sm:text-5xl">
+            โรลเพลย์ที่จำความสัมพันธ์ ไม่ใช่แค่จำข้อความแชท
+          </h1>
           <p className="max-w-2xl text-sm leading-7 text-white/86 sm:text-base">
             สำรวจตัวละคร เล่นฉากที่ค้างไว้ และเลือกจุดเริ่มต้นความสัมพันธ์ก่อนเริ่มคุย
           </p>
@@ -133,7 +135,11 @@ export function ExplorePage() {
 
           {!isChatsLoading &&
             chats.slice(0, 4).map((chat) => (
-              <Link className="rounded-2xl border border-blue-600/15 bg-blue-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md" key={chat.id} to={`/chat/${chat.id}`}>
+              <Link
+                className="rounded-2xl border border-blue-600/15 bg-blue-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+                key={chat.id}
+                to={`/chat/${chat.id}`}
+              >
                 <p className="text-sm font-black text-blue-700">{chat.title || chat.characterName}</p>
                 <p className="mt-1 line-clamp-2 text-sm text-slate-600">{chat.preview || 'สถานะความสัมพันธ์จะแสดงตรงนี้'}</p>
                 <p className="mt-2 text-xs font-black text-blue-500">คุยต่อกับ {chat.characterName}</p>
@@ -199,7 +205,7 @@ export function ExplorePage() {
 
       {charactersError && (
         <section className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">
-          Could not load live characters. Check backend connection and try again.
+          โหลดตัวละครจาก backend ไม่ได้ กรุณาเช็กการเชื่อมต่อแล้วลองใหม่
         </section>
       )}
 
@@ -211,30 +217,35 @@ export function ExplorePage() {
           visibleCharacters.map((character) => {
             const rating = characterRating(character)
             return (
-            <Link className="overflow-hidden rounded-2xl border border-slate-900/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={character.id} to={`/characters/${character.id}`}>
-              <div className="aspect-[4/3] overflow-hidden bg-linear-to-br from-slate-200 via-blue-100 to-amber-100">
-                {character.avatarUrl && <img alt="" className="h-full w-full object-cover" src={character.avatarUrl} />}
-              </div>
-              <div className="space-y-3 p-3 sm:p-4">
-                <div>
-                  <h3 className="truncate text-base font-black">{character.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{character.tagline || character.description}</p>
+              <Link
+                className="overflow-hidden rounded-2xl border border-slate-900/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                key={character.id}
+                to={`/characters/${character.id}`}
+              >
+                <div className="aspect-[4/3] overflow-hidden bg-linear-to-br from-slate-200 via-blue-100 to-amber-100">
+                  {character.avatarUrl && <img alt="" className="h-full w-full object-cover" src={character.avatarUrl} />}
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded-full bg-amber-50 px-2 py-1 text-[11px] font-black text-amber-700">
-                    {ratingLabel(rating)}
-                  </span>
-                  {characterBadges(character.tags).map((badge) => (
-                    <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600" key={badge}>
-                      {badge}
+                <div className="space-y-3 p-3 sm:p-4">
+                  <div>
+                    <h3 className="truncate text-base font-black">{character.name}</h3>
+                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{character.tagline || character.description}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="rounded-full bg-amber-50 px-2 py-1 text-[11px] font-black text-amber-700">
+                      {ratingLabel(rating)}
                     </span>
-                  ))}
+                    {characterBadges(character.tags).map((badge) => (
+                      <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600" key={badge}>
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs font-black text-slate-400">{character.chatCount.toLocaleString()} แชท</p>
                 </div>
-                <p className="text-xs font-black text-slate-400">{character.chatCount.toLocaleString()} แชท</p>
-              </div>
-            </Link>
+              </Link>
             )
           })}
+
         {!isCharactersLoading && characters.length > 0 && visibleCharacters.length === 0 && (
           <div className="col-span-full rounded-lg border border-dashed border-slate-900/15 bg-white p-6 text-sm text-slate-500">
             ไม่พบตัวละครที่ตรงกับการค้นหาหรือโหมดคอนเทนต์ปัจจุบัน ลองปรับตัวกรองหรือเปิดโหมดผู้ใหญ่

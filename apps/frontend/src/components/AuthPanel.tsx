@@ -55,9 +55,9 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
       if (error) throw error
       await refreshAuthState()
       await onAuthChanged()
-      setNote('Signed in')
+      setNote('เข้าสู่ระบบแล้ว')
     } catch (error) {
-      setNote(error instanceof Error ? error.message : 'Sign in failed')
+      setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
     } finally {
       setIsBusy(false)
     }
@@ -72,7 +72,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
       await supabase.auth.signOut()
       await refreshAuthState()
       await onAuthChanged()
-      setNote('Signed out')
+      setNote('ออกจากระบบแล้ว')
     } finally {
       setIsBusy(false)
     }
@@ -81,16 +81,16 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   const applyDevUser = async () => {
     setApiUserId(devUserId.trim() || DEFAULT_USER_ID)
     await onAuthChanged()
-    setNote('Dev user updated')
+    setNote('อัปเดต dev user แล้ว')
   }
 
   return (
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Auth</p>
+          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">บัญชี</p>
           <h2 className="m-0 text-base font-bold text-slate-900">
-            {authState.user?.email ?? (authState.isConfigured ? 'Supabase ready' : 'Local dev user')}
+            {authState.user?.email ?? (authState.isConfigured ? 'Supabase พร้อมแล้ว' : 'ผู้ใช้ dev ในเครื่อง')}
           </h2>
         </div>
         <span className="rounded-full border border-slate-900/10 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500">
@@ -102,12 +102,12 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
         <div className="flex flex-col gap-2">
           {!authState.user && (
             <>
-              <input className={inputClass} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" />
+              <input className={inputClass} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="อีเมล" />
               <input
                 className={inputClass}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Password"
+                placeholder="รหัสผ่าน"
                 type="password"
               />
               <button
@@ -115,7 +115,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
                 disabled={isBusy || !email || !password}
                 onClick={signIn}
               >
-                Sign in
+                เข้าสู่ระบบ
               </button>
             </>
           )}
@@ -126,7 +126,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
               disabled={isBusy}
               onClick={signOut}
             >
-              Sign out
+              ออกจากระบบ
             </button>
           )}
         </div>
@@ -134,7 +134,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
         <div className="flex flex-col gap-2">
           <input className={inputClass} value={devUserId} onChange={(event) => setDevUserId(event.target.value)} />
           <button className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white" onClick={applyDevUser}>
-            Use dev user
+            ใช้ dev user
           </button>
         </div>
       )}

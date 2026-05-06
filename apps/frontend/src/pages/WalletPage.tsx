@@ -85,7 +85,7 @@ export function WalletPage() {
               {summary ? summary.user.tokenBalance.toLocaleString() : '0'} โทเคน
             </h1>
             <p className="m-0 mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              ดูยอดโทเคน การใช้งานล่าสุด และความพร้อมสำหรับฉากยาว ๆ
+              ดูยอดโทเคน การใช้งานล่าสุด และความพร้อมสำหรับฉากยาวๆ
             </p>
             {note && <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600">{note}</p>}
           </div>

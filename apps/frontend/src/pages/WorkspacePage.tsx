@@ -48,13 +48,13 @@ type ChatUsage = NonNullable<ChatResponse['usage']>
 
 function apiErrorMessage(error: unknown, fallback: string) {
   if (!(error instanceof ApiError)) return fallback
-  if (error.status === 401) return 'Please sign in again. Your session may have expired.'
-  if (error.status === 403) return 'This account does not have permission for that action.'
-  if (error.status === 404) return 'The requested record was not found or belongs to another account.'
-  if (error.status === 413) return 'The uploaded file is too large.'
-  if (error.status === 415) return 'This file type is not supported.'
-  if (error.status === 422) return 'The submitted data is incomplete or invalid.'
-  if (error.status === 429) return 'Too many requests. Please wait a moment and try again.'
+  if (error.status === 401) return 'กรุณาเข้าสู่ระบบใหม่ เซสชันอาจหมดอายุแล้ว'
+  if (error.status === 403) return 'บัญชีนี้ไม่มีสิทธิ์ทำคำสั่งนี้'
+  if (error.status === 404) return 'ไม่พบข้อมูลนี้ หรือข้อมูลเป็นของบัญชีอื่น'
+  if (error.status === 413) return 'ไฟล์ที่อัปโหลดมีขนาดใหญ่เกินไป'
+  if (error.status === 415) return 'ไม่รองรับไฟล์ประเภทนี้'
+  if (error.status === 422) return 'ข้อมูลที่ส่งยังไม่ครบหรือไม่ถูกต้อง'
+  if (error.status === 429) return 'มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่'
   return fallback
 }
 
@@ -139,7 +139,7 @@ export function WorkspacePage() {
   const [isSavingLore, setIsSavingLore] = useState(false)
   const [reportTarget, setReportTarget] = useState<(ReportDialogTarget & { messageId: string; role: ChatMessage['role'] }) | null>(null)
   const [isReporting, setIsReporting] = useState(false)
-  const [connectionNote, setConnectionNote] = useState('Loading characters from the database...')
+  const [connectionNote, setConnectionNote] = useState('กำลังโหลดตัวละครจากฐานข้อมูล...')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const draftKey = chatId ? `chat:${chatId}` : `character:${character.id}`
   const savedDraft = useAppSelector(selectComposerDraft(draftKey))
@@ -163,18 +163,18 @@ export function WorkspacePage() {
       const health = await fetchHealthStatus()
       setHealthStatus(health)
       if (!health.checks.databaseConnected) {
-        setConnectionNote('Backend is running, but the database is not connected yet.')
+        setConnectionNote('Backend ทำงานแล้ว แต่ฐานข้อมูลยังไม่เชื่อมต่อ')
         return
       }
       if (!health.checks.openRouterConfigured) {
-        setConnectionNote('Database is ready, but OPENROUTER_API_KEY is not configured.')
+        setConnectionNote('ฐานข้อมูลพร้อมแล้ว แต่ยังไม่ได้ตั้งค่า OPENROUTER_API_KEY')
         return
       }
-      setConnectionNote('Database and AI service are connected.')
+      setConnectionNote('ฐานข้อมูลและบริการ AI เชื่อมต่อแล้ว')
     } catch (error) {
       console.error('Load health status error:', error)
       setHealthStatus(null)
-      setConnectionNote('Could not connect to the backend.')
+      setConnectionNote('เชื่อมต่อ backend ไม่ได้')
     }
   }
 
@@ -268,7 +268,7 @@ export function WorkspacePage() {
                 {
                   id: crypto.randomUUID(),
                   role: 'assistant' as const,
-                  content: `Relationship seed selected: ${relationshipSeed}. This chat will start from that emotional contract.`,
+                  content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeed} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
                 },
               ]
             : []),
@@ -276,7 +276,7 @@ export function WorkspacePage() {
         await loadLoreEntries(firstCharacter.id)
       } catch (error) {
         console.error('Load character error:', error)
-        setConnectionNote('Could not connect to the backend.')
+        setConnectionNote('เชื่อมต่อ backend ไม่ได้')
       }
 
       await loadChatHistory()
@@ -315,7 +315,7 @@ export function WorkspacePage() {
     setRuntimeState(null)
     setMessage('')
     setChatLog([createGreeting(nextCharacter)])
-    setConnectionNote(`Selected ${nextCharacter.name}.`)
+      setConnectionNote(`เลือก ${nextCharacter.name} แล้ว`)
     try {
       const data = await trackCharacterView(nextCharacter.id)
       setCharacter(data.character)
@@ -350,7 +350,7 @@ export function WorkspacePage() {
       await loadLoreEntries(data.chat.character.id)
     } catch (error) {
       console.error('Open chat error:', error)
-      setConnectionNote(apiErrorMessage(error, 'The action could not be completed. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsLoading(false)
     }
@@ -364,7 +364,7 @@ export function WorkspacePage() {
       await loadAdminSummary()
     } catch (error) {
       console.error('Archive chat error:', error)
-      setConnectionNote(apiErrorMessage(error, 'The action could not be completed. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
 
@@ -373,10 +373,10 @@ export function WorkspacePage() {
       const data = await setCharacterFavorite(characterId, favorite)
       setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
       if (character.id === data.character.id) setCharacter(data.character)
-      setConnectionNote(favorite ? `Added ${data.character.name} to favorites.` : `Removed ${data.character.name} from favorites.`)
+      setConnectionNote(favorite ? `เพิ่ม ${data.character.name} ในรายการโปรดแล้ว` : `นำ ${data.character.name} ออกจากรายการโปรดแล้ว`)
     } catch (error) {
       console.error('Favorite character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'The action could not be completed. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
 
@@ -387,10 +387,10 @@ export function WorkspacePage() {
       setCharacter(data.character)
       setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
       setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
-      setConnectionNote(`Saved ${data.character.name}.`)
+      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
     } catch (error) {
       console.error('Save character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'The action could not be completed. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
     }
@@ -406,10 +406,10 @@ export function WorkspacePage() {
       setLastUsage(null)
       setLoreEntries([])
       setChatLog([createGreeting(data.character)])
-      setConnectionNote(`Saved ${data.character.name}.`)
+      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
     } catch (error) {
       console.error('Create character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'The action could not be completed. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
     }
@@ -425,10 +425,10 @@ export function WorkspacePage() {
       setLastUsage(null)
       setLoreEntries([])
       setChatLog([createGreeting(data.character)])
-      setConnectionNote(`Updated ${character.name}.`)
+      setConnectionNote(`อัปเดต ${character.name} แล้ว`)
     } catch (error) {
       console.error('Duplicate character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'The action could not be completed. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
     }
@@ -441,10 +441,10 @@ export function WorkspacePage() {
       setCharacter(data.character)
       setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
       setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
-      setConnectionNote(`Saved ${data.character.name}.`)
+      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
     } catch (error) {
       console.error('Reset prompt error:', error)
-      setConnectionNote(apiErrorMessage(error, 'Could not reset the prompt. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'รีเซ็ต prompt ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
     }
@@ -462,11 +462,11 @@ export function WorkspacePage() {
       setLastUsage(null)
       setLoreEntries([])
       setChatLog([createGreeting(nextCharacter)])
-      setConnectionNote(`Updated ${character.name}.`)
+      setConnectionNote(`อัปเดต ${character.name} แล้ว`)
       await loadLoreEntries(nextCharacter.id)
     } catch (error) {
       console.error('Delete character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'The action could not be completed. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
     }
@@ -477,10 +477,10 @@ export function WorkspacePage() {
     try {
       const data = await createLoreEntry(character.id, input)
       setLoreEntries((prev) => [data.loreEntry, ...prev])
-      setConnectionNote(`Saved lore "${data.loreEntry.keyword}".`)
+      setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
     } catch (error) {
       console.error('Create lore error:', error)
-      setConnectionNote(apiErrorMessage(error, 'Could not update lore. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
     }
@@ -491,10 +491,10 @@ export function WorkspacePage() {
     try {
       const data = await updateLoreEntry(loreId, input)
       setLoreEntries((prev) => prev.map((entry) => (entry.id === loreId ? data.loreEntry : entry)))
-      setConnectionNote(`Saved lore "${data.loreEntry.keyword}".`)
+      setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
     } catch (error) {
       console.error('Update lore error:', error)
-      setConnectionNote(apiErrorMessage(error, 'Could not update lore. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
     }
@@ -505,10 +505,10 @@ export function WorkspacePage() {
     try {
       await deleteLoreEntry(loreId)
       setLoreEntries((prev) => prev.filter((entry) => entry.id !== loreId))
-      setConnectionNote('Updated lore.')
+      setConnectionNote('อัปเดต lore แล้ว')
     } catch (error) {
       console.error('Delete lore error:', error)
-      setConnectionNote(apiErrorMessage(error, 'Could not update lore. Please try again.'))
+      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
     }
@@ -521,18 +521,18 @@ export function WorkspacePage() {
     const sceneCommand = currentMsg.match(/^\/scene\s+(enter|hold|decline|exit|resolve|accept|reject)\s*([a-z0-9_-]+)?/i)
     const userFacingMessage = sceneCommand
       ? sceneCommand[1] === 'enter'
-        ? 'Enter this scene'
+        ? 'เข้าฉากนี้'
         : sceneCommand[1] === 'hold'
-          ? 'Hold this scene for later'
+          ? 'เก็บฉากนี้ไว้ก่อน'
           : sceneCommand[1] === 'decline'
-            ? 'Skip this scene'
+            ? 'ข้ามฉากนี้'
             : sceneCommand[1] === 'resolve'
-              ? 'Resolve this scene'
+              ? 'จบฉากนี้'
               : sceneCommand[1] === 'accept'
-                ? 'Accept this scene outcome'
+                ? 'ยอมรับผลลัพธ์ของฉากนี้'
                 : sceneCommand[1] === 'reject'
-                  ? 'Reject this scene outcome'
-                  : 'Exit this scene'
+                  ? 'ปฏิเสธผลลัพธ์ของฉากนี้'
+                  : 'ออกจากฉากนี้'
       : currentMsg
     const assistantMessageId = crypto.randomUUID()
     setChatLog((prev) => [
@@ -588,7 +588,7 @@ export function WorkspacePage() {
       await loadAdminSummary()
     } catch (error) {
       console.error('Chat error:', error)
-      const streamMessage = apiErrorMessage(error, 'The action could not be completed. Please try again.')
+      const streamMessage = apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่')
       try {
         const data = await sendChatMessage({
           message: currentMsg,
@@ -610,7 +610,7 @@ export function WorkspacePage() {
             chat.id === assistantMessageId
               ? {
                   ...chat,
-                  content: data.reply?.trim() || 'Maprang could not produce a reply yet. Please try asking again.',
+                  content: data.reply?.trim() || 'มะปรางยังตอบไม่ได้ในตอนนี้ กรุณาลองถามใหม่',
                 }
               : chat,
           ),
@@ -622,7 +622,7 @@ export function WorkspacePage() {
         setConnectionNote(
           apiErrorMessage(
             fallbackError,
-            streamMessage || 'Could not connect to the AI service. Check backend and OPENROUTER_API_KEY.',
+            streamMessage || 'เชื่อมต่อบริการ AI ไม่ได้ กรุณาเช็ก backend และ OPENROUTER_API_KEY',
           ),
         )
         setChatLog((prev) =>
@@ -630,7 +630,7 @@ export function WorkspacePage() {
             chat.id === assistantMessageId
               ? {
                   ...chat,
-                  content: 'Could not connect to the AI service. Confirm the backend is running at http://localhost:3000 and OPENROUTER_API_KEY is configured.',
+                  content: 'เชื่อมต่อบริการ AI ไม่ได้ กรุณายืนยันว่า backend รันอยู่ที่ http://localhost:3000 และตั้งค่า OPENROUTER_API_KEY แล้ว',
                 }
               : chat,
           ),
@@ -675,7 +675,7 @@ export function WorkspacePage() {
     if (isLoading || chat.role === 'system' || !chat.content.trim()) return
     setReportTarget({
       targetType: 'MESSAGE',
-      title: `${chat.role === 'assistant' ? character.name : 'User'} message`,
+      title: `ข้อความจาก${chat.role === 'assistant' ? character.name : 'ผู้ใช้'}`,
       preview: chat.content,
       messageId: chat.id,
       role: chat.role,
@@ -685,25 +685,25 @@ export function WorkspacePage() {
   const reportMessage = async ({ reason, details }: ReportDialogSubmit) => {
     if (!reportTarget || isReporting) return
     setIsReporting(true)
-    setConnectionNote('Submitting message report...')
+    setConnectionNote('กำลังส่งรายงานข้อความ...')
     try {
       await createReport({
         targetType: 'MESSAGE',
         messageId: reportTarget.messageId,
         reason,
-        details: details || `Reported ${reportTarget.role} message from Chat Room.`,
+        details: details || `รายงานข้อความจาก ${reportTarget.role} ในห้องแชท`,
         metadata: {
           chatId,
           characterId: character.id,
           role: reportTarget.role,
         },
       })
-      setConnectionNote('Message report submitted for moderation review.')
+      setConnectionNote('ส่งรายงานข้อความให้ผู้ดูแลตรวจแล้ว')
       setReportTarget(null)
       await loadAdminSummary()
     } catch (error) {
       console.error('Report message error:', error)
-      setConnectionNote(apiErrorMessage(error, 'Could not submit this message report. Try again after the chat finishes syncing.'))
+      setConnectionNote(apiErrorMessage(error, 'ส่งรายงานข้อความไม่ได้ กรุณาลองใหม่หลังแชทซิงก์เสร็จ'))
     } finally {
       setIsReporting(false)
     }

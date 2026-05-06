@@ -34,7 +34,11 @@ export function EventsInboxPage() {
         </button>
       </div>
 
-      {error && <div className="rounded-lg border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">โหลดอีเวนต์ไม่ได้</div>}
+      {error && (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">
+          โหลดอีเวนต์ไม่ได้
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid gap-3">

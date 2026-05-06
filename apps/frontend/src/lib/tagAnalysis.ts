@@ -88,35 +88,35 @@ export function analyzeTags(value: string | string[]): TagAnalysis {
   if (analysis.engine.length > 5) {
     analysis.issues.push({
       level: 'warning',
-      message: 'More than 5 engine tags can make personality and relationship progression harder to control.',
+      message: 'แท็กระบบมากกว่า 5 แท็กอาจทำให้บุคลิกและความสัมพันธ์ควบคุมยากขึ้น',
     })
   }
 
   if (analysis.safety.includes('family') && (analysis.discovery.includes('nc') || analysis.engine.includes('lover'))) {
     analysis.issues.push({
       level: 'danger',
-      message: 'family conflicts with nc/lover. Use no-romance or remove the risky tag before publishing.',
+      message: 'family ขัดแย้งกับ nc/lover ให้ใช้ no-romance หรือเอาแท็กเสี่ยงออกก่อนเผยแพร่',
     })
   }
 
   if (analysis.safety.includes('no-romance') && (analysis.engine.includes('lover') || analysis.engine.includes('crush'))) {
     analysis.issues.push({
       level: 'danger',
-      message: 'no-romance conflicts with lover/crush and will block romance escalation.',
+      message: 'no-romance ขัดแย้งกับ lover/crush และจะบล็อกการพัฒนาความโรแมนติก',
     })
   }
 
   if (analysis.engine.includes('hard-to-get') && analysis.engine.includes('golden')) {
     analysis.issues.push({
       level: 'warning',
-      message: 'hard-to-get + golden send opposite progression signals. Choose slow tension or easy warmth.',
+      message: 'hard-to-get + golden ส่งสัญญาณความสัมพันธ์คนละทาง ควรเลือก tension ช้าๆ หรือความอบอุ่นเข้าถึงง่าย',
     })
   }
 
   if (analysis.safety.includes('red-flag') && analysis.safety.includes('green-flag')) {
     analysis.issues.push({
       level: 'warning',
-      message: 'red-flag + green-flag can confuse safety tone. Use yellow-flag for a middle route.',
+      message: 'red-flag + green-flag ทำให้โทนความปลอดภัยสับสน ควรใช้ yellow-flag ถ้าต้องการทางกลาง',
     })
   }
 

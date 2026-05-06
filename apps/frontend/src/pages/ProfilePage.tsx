@@ -63,7 +63,7 @@ export function ProfilePage() {
           />
         </label>
         <div className="mt-4 rounded-lg border border-blue-500/15 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
-          เขียนให้กระชับจะได้ผลดีที่สุด เน้นตัวตน สไตล์การเล่น และขอบเขตสำคัญ มากกว่าประวัติยาว ๆ
+          เขียนให้กระชับจะได้ผลดีที่สุด เน้นตัวตน สไตล์การเล่น และขอบเขตสำคัญ มากกว่าประวัติยาวๆ
         </div>
       </section>
 
