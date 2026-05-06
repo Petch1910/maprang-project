@@ -2,7 +2,6 @@ import type { RefObject } from 'react'
 import { Archive, BookOpen, CalendarDays, ChevronDown, Flag, Heart, Image, Menu, MessageSquare, Music, Settings, Share2, UserRound } from 'lucide-react'
 import heroImage from '../assets/hero.png'
 import type { Character, ChatMessage, ChatResponse, ChatRuntimeState } from '../lib/api'
-import { starterPrompts } from '../lib/chat'
 import { Composer } from './Composer'
 import { MessageBubble } from './MessageBubble'
 
@@ -279,19 +278,6 @@ export function ChatPanel({
           <button className="absolute right-5 top-[-56px] grid size-10 place-items-center rounded-full bg-white text-slate-950 shadow-lg" type="button">
             <ChevronDown size={20} />
           </button>
-          <div className="mx-auto flex max-w-5xl gap-2 overflow-x-auto px-4 pb-2">
-            {starterPrompts.slice(0, 4).map((prompt) => (
-              <button
-                className="min-h-9 flex-none rounded-md bg-white/8 px-3 text-xs font-bold text-white/70 transition hover:bg-white/12 disabled:opacity-50"
-                disabled={isLoading}
-                key={prompt}
-                onClick={() => onSendMessage(prompt)}
-                type="button"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
           <Composer disabled={isLoading} message={message} onMessageChange={onMessageChange} onSubmit={() => onSendMessage()} />
           <p className="m-0 pb-2 text-center text-[11px] font-bold text-white/30">อย่าลืม: ทุกสิ่งที่ตัวละครพูดเป็นการแต่งเรื่อง</p>
         </div>
