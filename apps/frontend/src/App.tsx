@@ -23,14 +23,15 @@ const ExplorePage = lazy(() => import('./pages/ExplorePage').then((module) => ({
 const MyChatsPage = lazy(() => import('./pages/MyChatsPage').then((module) => ({ default: module.MyChatsPage })))
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
 
-const navItems = [
+const primaryNavItems = [
   { to: '/', label: 'Explore', icon: Compass },
   { to: '/chats', label: 'Chats', icon: MessageCircle },
   { to: '/create', label: 'Create', icon: PlusCircle },
   { to: '/events', label: 'Events', icon: Bell },
-  { to: '/moderation', label: 'Moderation', icon: ShieldCheck },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ]
+
+const adminNavItems = [{ to: '/moderation', label: 'Moderation', icon: ShieldCheck }]
 
 function App() {
   const dispatch = useAppDispatch()
@@ -84,7 +85,7 @@ function App() {
       <div className="mx-auto grid w-full max-w-7xl grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
         <nav className="hidden border-r border-slate-900/10 bg-white/70 px-3 py-5 md:block">
           <div className="sticky top-21 flex flex-col gap-1">
-            {navItems.map((item) => (
+            {primaryNavItems.map((item) => (
               <NavLink
                 className={({ isActive }) =>
                   `flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-black transition ${
@@ -99,6 +100,24 @@ function App() {
                 <span>{item.label}</span>
               </NavLink>
             ))}
+
+            <div className="my-3 border-t border-slate-900/10 pt-3">
+              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">Admin</p>
+              {adminNavItems.map((item) => (
+                <NavLink
+                  className={({ isActive }) =>
+                    `flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-black transition ${
+                      isActive ? 'bg-slate-950 text-white shadow-[0_14px_28px_rgba(15,23,42,0.18)]' : 'text-slate-600 hover:bg-slate-100'
+                    }`
+                  }
+                  key={item.to}
+                  to={item.to}
+                >
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+            </div>
           </div>
         </nav>
 
@@ -118,8 +137,8 @@ function App() {
         </section>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-slate-900/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden">
-        {navItems.map((item) => (
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-slate-900/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden">
+        {primaryNavItems.map((item) => (
           <NavLink
             className={({ isActive }) =>
               `flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-black ${
