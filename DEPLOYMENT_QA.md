@@ -63,6 +63,8 @@ To verify the live AI provider path, run this only when the backend is allowed t
 bun run smoke:chat
 ```
 
+`smoke:chat` checks `/me/usage` before it calls the AI provider. The smoke user must have at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`, so the test fails before spending provider credits when the smoke account is not topped up.
+
 If `smoke:chat` reports that the backend returned the temporary AI fallback, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. Check outbound network access to `https://openrouter.ai`, `OPENROUTER_API_KEY`, provider credits, and backend logs.
 
 For a deployed backend, point the smoke tests at the backend URL. Use either a Supabase user token or a known UUID user id:
@@ -75,6 +77,12 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 ```bash
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_USER_ID=<uuid-user-id> bun run smoke:local
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_USER_ID=<uuid-user-id> bun run smoke:chat
+```
+
+If the selected smoke model uses larger prompts, raise the preflight guard:
+
+```bash
+SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=3000 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
 Expected result:
@@ -94,7 +102,7 @@ CI also runs a seeded local backend smoke test and builds the backend and fronte
 
 For deployed environments, use the manual GitHub Actions workflow `Production Smoke`.
 Set repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN` or `SMOKE_USER_ID`.
-The optional `run_chat` input also verifies the live AI provider path and uses provider credits.
+The optional `run_chat` input also verifies the live AI provider path and uses provider credits. The workflow input `min_token_balance_for_chat` maps to `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` and defaults to `1000`.
 
 ## Required Production Environment
 

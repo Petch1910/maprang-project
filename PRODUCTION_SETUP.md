@@ -121,6 +121,8 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
+`smoke:chat` checks the smoke user's wallet before calling OpenRouter. Keep the smoke user topped up above `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT`, default `1000`, or override the threshold for heavier test prompts.
+
 For a single production smoke gate, run `bun run smoke:live` with the same `SMOKE_API_BASE_URL` and smoke auth variables set.
 
 Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless you intentionally want the automated persistence tests to create and archive test records there. Use those gates with local or staging databases.
@@ -129,11 +131,11 @@ Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless
 
 You can also run the manual GitHub Actions workflow `Production Smoke` after each deploy.
 Configure repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN` or `SMOKE_USER_ID`.
-Turn on `run_chat` only when you want to spend a small amount of provider credit to verify the live AI path.
+Turn on `run_chat` only when you want to spend a small amount of provider credit to verify the live AI path. Leave `min_token_balance_for_chat` at `1000` unless the smoke model or prompt needs a larger buffer.
 
 ## Production Readiness Notes
 
 - Latest migrations include reports, admin audit logs, and wallet token transactions. Always run `bunx prisma migrate deploy` before exposing the backend.
 - Admin actions now write audit logs for report status changes, hidden characters, archived messages, and manual token adjustments.
 - Payment is not connected yet. Use Wallet admin token adjustment only for beta/manual grants until a payment provider is added.
-- Production smoke tests require either a real Supabase access token or a known UUID user id accepted by the backend environment.
+- Production smoke tests require either a real Supabase access token or a known UUID user id accepted by the backend environment, and live chat smoke requires that user's wallet to be topped up.

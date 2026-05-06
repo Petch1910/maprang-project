@@ -1,5 +1,7 @@
 import { apiBaseUrl, readJson, smokeAuthHeaders } from './smoke-helpers'
 
+const minSmokeTokenBalance = parseMinSmokeTokenBalance()
+
 const health = await readJson<{
   ok: boolean
   checks: { databaseConnected: boolean; openRouterConfigured: boolean }
@@ -22,6 +24,18 @@ const characters = await readJson<{
 
 const maprang = characters.characters?.find((character) => character.name === 'Maprang')
 if (!maprang) throw new Error('Seeded Maprang character was not found')
+
+const walletBefore = await readJson<{
+  user: { tokenBalance: number }
+}>('/me/usage', {
+  headers: smokeAuthHeaders(),
+})
+
+if (walletBefore.user.tokenBalance < minSmokeTokenBalance) {
+  throw new Error(
+    `Smoke user has ${walletBefore.user.tokenBalance} tokens, below SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance}. Top up the smoke user before running live chat smoke.`,
+  )
+}
 
 const chat = await readJson<{
   reply?: string
@@ -52,7 +66,7 @@ if (chat.reply.includes('temporarily unavailable')) {
 if (!chat.chatId) throw new Error('Live chat did not create a chat id')
 if (!chat.usage?.totalTokens) throw new Error('Live chat did not return token usage')
 
-const wallet = await readJson<{
+const walletAfter = await readJson<{
   wallet?: {
     transactions?: Array<{
       id: string
@@ -65,7 +79,7 @@ const wallet = await readJson<{
   headers: smokeAuthHeaders(),
 })
 
-const chatDebit = wallet.wallet?.transactions?.find(
+const chatDebit = walletAfter.wallet?.transactions?.find(
   (transaction) => transaction.type === 'CHAT_USAGE' && transaction.amount === -chat.usage!.totalTokens,
 )
 
@@ -89,3 +103,14 @@ console.log(
     2,
   ),
 )
+
+function parseMinSmokeTokenBalance() {
+  const rawValue = process.env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000'
+  const value = Number(rawValue)
+
+  if (!Number.isInteger(value) || value < 1) {
+    throw new Error(`SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT must be a positive integer. Received: ${rawValue}`)
+  }
+
+  return value
+}

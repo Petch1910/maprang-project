@@ -99,7 +99,11 @@ const checks: Check[] = [
     run: async () => {
       const setup = await readRepoFile('PRODUCTION_SETUP.md')
       const render = await readRepoFile('DEPLOY_RENDER.md')
-      requireIncludes(setup, ['bunx prisma migrate deploy', 'SMOKE_API_BASE_URL', 'SUPABASE_STORAGE_ACCESS=signed', '/ready'], 'PRODUCTION_SETUP.md')
+      requireIncludes(
+        setup,
+        ['bunx prisma migrate deploy', 'SMOKE_API_BASE_URL', 'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT', 'SUPABASE_STORAGE_ACCESS=signed', '/ready'],
+        'PRODUCTION_SETUP.md',
+      )
       requireIncludes(render, ['Health check path: `/ready`', 'bunx prisma migrate deploy', 'SUPABASE_STORAGE_ACCESS=signed'], 'DEPLOY_RENDER.md')
     },
   },
@@ -109,7 +113,7 @@ const checks: Check[] = [
       const workflow = await readRepoFile('.github/workflows/production-smoke.yml')
       requireIncludes(
         workflow,
-        ['workflow_dispatch', 'SMOKE_API_BASE_URL', 'bun run smoke:ready', 'bun run smoke:local'],
+        ['workflow_dispatch', 'SMOKE_API_BASE_URL', 'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT', 'bun run smoke:ready', 'bun run smoke:local'],
         '.github/workflows/production-smoke.yml',
       )
     },

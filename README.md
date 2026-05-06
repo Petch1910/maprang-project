@@ -134,4 +134,4 @@ bun run smoke:local
 bun run smoke:chat
 ```
 
-`smoke:chat` verifies the real backend-to-OpenRouter path and can fail when outbound provider networking, API credits, or the provider key are not ready. GitHub Actions also runs deploy checks, a seeded local smoke test, and Docker image builds on pushes to `main` and on pull requests.
+`smoke:chat` verifies the real backend-to-OpenRouter path and can fail when outbound provider networking, API credits, or the provider key are not ready. It checks the smoke user's token balance before calling the AI provider and defaults to `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=1000`. GitHub Actions also runs deploy checks, a seeded local smoke test, and Docker image builds on pushes to `main` and on pull requests.

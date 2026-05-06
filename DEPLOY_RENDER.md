@@ -102,6 +102,8 @@ SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun 
 SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
+Before `smoke:chat` calls OpenRouter, it verifies the smoke user has at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`. Top up that user through the admin wallet flow before running live production smoke.
+
 Expected:
 
 - `/health` returns `ok=true`.
