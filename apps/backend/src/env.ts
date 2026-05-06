@@ -23,10 +23,88 @@ function present(name: string) {
   return !value.startsWith('replace-with-') && !value.includes('your-project.supabase.co') && !value.includes('example.com')
 }
 
+function csv(name: string) {
+  return (
+    process.env[name]
+      ?.split(',')
+      .map((value) => value.trim())
+      .filter(Boolean) ?? []
+  )
+}
+
+function normalizeUrl(value: string) {
+  return value.trim().replace(/\/+$/, '')
+}
+
+function jwtRole(value: string) {
+  if (!value.startsWith('eyJ')) return null
+  const [, payload] = value.split('.')
+  if (!payload) return null
+
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as { role?: unknown }
+    return typeof parsed.role === 'string' ? parsed.role : null
+  } catch {
+    return null
+  }
+}
+
 function invalidProductionValues() {
   if (process.env.NODE_ENV !== 'production') return []
 
   const invalid: string[] = []
+  const corsOrigins = csv('CORS_ORIGINS')
+
+  for (const origin of corsOrigins) {
+    try {
+      const url = new URL(origin)
+      if (url.protocol !== 'https:') {
+        invalid.push('CORS_ORIGINS must use https origins in production')
+        break
+      }
+      if (['localhost', '127.0.0.1', '::1'].includes(url.hostname)) {
+        invalid.push('CORS_ORIGINS must not include local origins in production')
+        break
+      }
+    } catch {
+      invalid.push('CORS_ORIGINS must be a comma-separated list of valid origins')
+      break
+    }
+  }
+
+  if (present('ADMIN_API_KEY') && process.env.ADMIN_API_KEY!.trim().length < 32) {
+    invalid.push('ADMIN_API_KEY must be at least 32 characters')
+  }
+
+  if (present('OPENROUTER_API_KEY') && process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-proj-')) {
+    invalid.push('OPENROUTER_API_KEY appears to be an OpenAI project key, not an OpenRouter key')
+  }
+
+  if (present('SUPABASE_URL')) {
+    try {
+      const supabaseUrl = new URL(process.env.SUPABASE_URL!.trim())
+      if (supabaseUrl.protocol !== 'https:' || !supabaseUrl.hostname.endsWith('.supabase.co')) {
+        invalid.push('SUPABASE_URL must be a https://<project-ref>.supabase.co URL')
+      }
+    } catch {
+      invalid.push('SUPABASE_URL must be a valid URL')
+    }
+  }
+
+  if (present('SUPABASE_URL') && present('SUPABASE_JWT_ISSUER')) {
+    const expectedIssuer = `${normalizeUrl(process.env.SUPABASE_URL!)}/auth/v1`
+    if (normalizeUrl(process.env.SUPABASE_JWT_ISSUER!) !== expectedIssuer) {
+      invalid.push('SUPABASE_JWT_ISSUER must equal SUPABASE_URL + /auth/v1')
+    }
+  }
+
+  if (present('SUPABASE_SERVICE_ROLE_KEY')) {
+    const role = jwtRole(process.env.SUPABASE_SERVICE_ROLE_KEY!.trim())
+    if (role && role !== 'service_role') {
+      invalid.push('SUPABASE_SERVICE_ROLE_KEY must use a service_role key')
+    }
+  }
+
   if (present('STORAGE_PROVIDER') && process.env.STORAGE_PROVIDER !== 'supabase') {
     invalid.push('STORAGE_PROVIDER must be supabase in production')
   }
@@ -39,10 +117,21 @@ function invalidProductionValues() {
   }
   if (
     process.env.SUPABASE_STORAGE_ACCESS === 'signed' &&
-    present('SUPABASE_SIGNED_URL_EXPIRES_IN') &&
-    Number(process.env.SUPABASE_SIGNED_URL_EXPIRES_IN) <= 0
+    present('SUPABASE_SIGNED_URL_EXPIRES_IN')
   ) {
-    invalid.push('SUPABASE_SIGNED_URL_EXPIRES_IN must be greater than 0')
+    const expiresIn = Number(process.env.SUPABASE_SIGNED_URL_EXPIRES_IN)
+    if (!Number.isFinite(expiresIn) || !Number.isInteger(expiresIn) || expiresIn <= 0) {
+      invalid.push('SUPABASE_SIGNED_URL_EXPIRES_IN must be a positive integer')
+    }
+  }
+
+  for (const name of recommendedInProduction) {
+    if (present(name)) {
+      const cost = Number(process.env[name])
+      if (!Number.isFinite(cost) || cost < 0) {
+        invalid.push(`${name} must be a non-negative number`)
+      }
+    }
   }
 
   return invalid
