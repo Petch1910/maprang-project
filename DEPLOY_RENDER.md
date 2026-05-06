@@ -28,7 +28,7 @@ Settings:
 - Environment: Docker
 - Dockerfile path: `apps/backend/Dockerfile`
 - Docker context: repository root
-- Health check path: `/health`
+- Health check path: `/ready`
 
 Backend environment:
 
@@ -105,5 +105,6 @@ SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun 
 Expected:
 
 - `/health` returns `ok=true`.
+- `/ready` returns `ok=true` before traffic is sent to the service.
 - Avatar upload returns `provider=supabase` and `access=signed`.
 - Live chat returns a reply, `chatId`, and token usage.

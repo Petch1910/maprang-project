@@ -52,6 +52,7 @@ bun run dev --host 127.0.0.1
 
 Frontend: `http://127.0.0.1:5173`
 Backend health: `http://127.0.0.1:3000/health`
+Backend readiness: `http://127.0.0.1:3000/ready`
 
 ## Production Checklist
 
@@ -119,6 +120,10 @@ bun run frontend:check
 
 ```bash
 bun run smoke:doctor
+```
+
+```bash
+bun run smoke:ready
 ```
 
 ```bash

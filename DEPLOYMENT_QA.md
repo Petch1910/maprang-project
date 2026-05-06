@@ -47,6 +47,12 @@ With local backend and frontend running, run:
 bun run smoke:doctor
 ```
 
+For a stricter traffic-readiness check, run:
+
+```bash
+bun run smoke:ready
+```
+
 ```bash
 bun run smoke:local
 ```
@@ -79,6 +85,7 @@ Expected result:
 - Backend tests pass.
 - Frontend TypeScript and Vite build pass.
 - Smoke doctor confirms the backend is reachable and the database is connected.
+- Readiness smoke confirms the backend is ready for traffic, including OpenRouter configuration and production hardening when `NODE_ENV=production`.
 - Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
 - Live chat smoke confirms backend-to-OpenRouter chat, chat persistence, and usage accounting.
 

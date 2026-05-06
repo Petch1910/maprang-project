@@ -98,8 +98,8 @@ const checks: Check[] = [
     run: async () => {
       const setup = await readRepoFile('PRODUCTION_SETUP.md')
       const render = await readRepoFile('DEPLOY_RENDER.md')
-      requireIncludes(setup, ['bunx prisma migrate deploy', 'SMOKE_API_BASE_URL', 'SUPABASE_STORAGE_ACCESS=signed'], 'PRODUCTION_SETUP.md')
-      requireIncludes(render, ['Health check path: `/health`', 'bunx prisma migrate deploy', 'SUPABASE_STORAGE_ACCESS=signed'], 'DEPLOY_RENDER.md')
+      requireIncludes(setup, ['bunx prisma migrate deploy', 'SMOKE_API_BASE_URL', 'SUPABASE_STORAGE_ACCESS=signed', '/ready'], 'PRODUCTION_SETUP.md')
+      requireIncludes(render, ['Health check path: `/ready`', 'bunx prisma migrate deploy', 'SUPABASE_STORAGE_ACCESS=signed'], 'DEPLOY_RENDER.md')
     },
   },
 ]

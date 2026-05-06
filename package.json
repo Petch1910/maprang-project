@@ -9,9 +9,10 @@
     "predeploy:check": "bun scripts/predeploy-check.ts",
     "secrets:check": "bun scripts/check-secrets.ts",
     "smoke:doctor": "bun scripts/smoke-doctor.ts",
+    "smoke:ready": "bun scripts/readiness-smoke.ts",
     "smoke:local": "bun scripts/local-smoke.ts",
     "smoke:chat": "bun scripts/live-chat-smoke.ts",
-    "smoke:live": "bun run smoke:doctor && bun run smoke:local && bun run smoke:chat",
+    "smoke:live": "bun run smoke:doctor && bun run smoke:ready && bun run smoke:local && bun run smoke:chat",
     "qa:local": "bun run secrets:check && bun run predeploy:check && bun run backend:check && bun run frontend:check && bun run smoke:doctor && bun run smoke:local",
     "qa:live": "bun run qa:local && bun run smoke:chat"
   },

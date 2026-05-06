@@ -96,7 +96,15 @@ bunx prisma migrate deploy
 curl https://api.example.com/health
 ```
 
-6. Build frontend with production API URL:
+6. Check backend traffic readiness:
+
+```bash
+curl https://api.example.com/ready
+```
+
+`/health` is the basic liveness and database check. `/ready` is stricter and should be green before sending real users to the backend; it requires database connectivity, OpenRouter configuration, and production auth/storage hardening.
+
+7. Build frontend with production API URL:
 
 ```bash
 docker build -f apps/frontend/Dockerfile -t maprang-frontend \
@@ -105,8 +113,8 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
   --build-arg VITE_SUPABASE_ANON_PUBLIC=<supabase-anon-key> .
 ```
 
-7. Deploy frontend.
-8. Run smoke against production backend:
+8. Deploy frontend.
+9. Run smoke against production backend:
 
 ```bash
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local
@@ -117,7 +125,7 @@ For a single production smoke gate, run `bun run smoke:live` with the same `SMOK
 
 Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless you intentionally want the automated persistence tests to create and archive test records there. Use those gates with local or staging databases.
 
-9. Complete manual QA from `DEPLOYMENT_QA.md`.
+10. Complete manual QA from `DEPLOYMENT_QA.md`.
 
 ## Production Readiness Notes
 
