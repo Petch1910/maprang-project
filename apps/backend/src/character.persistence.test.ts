@@ -342,4 +342,71 @@ describe('character persistence quality gate', () => {
     expect(response.status).toBe(404)
     expect(body.error).toBe('character_not_found')
   })
+
+  test('blocks message reports from users outside the chat', async () => {
+    const publicCharacter = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Message Report Guard`,
+      tags: ['friend', 'green-flag'],
+      visibility: 'PUBLIC',
+      status: CharacterStatus.PUBLISHED,
+    })
+
+    expect(publicCharacter).not.toBeNull()
+
+    const chat = await prisma!.chat.create({
+      data: {
+        characterId: publicCharacter!.id,
+        userId: defaultUserId,
+        title: 'Message report guard',
+        messages: {
+          create: {
+            role: 'assistant',
+            content: 'Only the chat owner should be able to report this message.',
+          },
+        },
+      },
+      include: { messages: true },
+    })
+    const messageId = chat.messages[0]!.id
+
+    const forbidden = await reportRoutes.handle(
+      new Request('http://localhost/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': otherUserId,
+        },
+        body: JSON.stringify({
+          targetType: 'MESSAGE',
+          messageId,
+          reason: 'not my chat',
+        }),
+      }),
+    )
+    const forbiddenBody = (await forbidden.json()) as { error: string }
+
+    expect(forbidden.status).toBe(404)
+    expect(forbiddenBody.error).toBe('message_not_found')
+
+    const allowed = await reportRoutes.handle(
+      new Request('http://localhost/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': defaultUserId,
+        },
+        body: JSON.stringify({
+          targetType: 'MESSAGE',
+          messageId,
+          reason: 'owner can report',
+        }),
+      }),
+    )
+    const allowedBody = (await allowed.json()) as { report: { messageId: string | null; characterId: string | null } }
+
+    expect(allowed.status).toBe(201)
+    expect(allowedBody.report.messageId).toBe(messageId)
+    expect(allowedBody.report.characterId).toBe(publicCharacter!.id)
+  })
 })
