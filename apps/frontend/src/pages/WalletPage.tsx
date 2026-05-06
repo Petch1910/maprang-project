@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Coins, RefreshCw, ReceiptText, TrendingDown } from 'lucide-react'
 import { adjustAdminUserTokens, ApiError, fetchUsageSummary, type UsageSummary } from '../lib/api'
@@ -37,7 +37,7 @@ export function WalletPage() {
     [summary],
   )
 
-  async function loadWallet() {
+  const loadWallet = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await fetchUsageSummary()
@@ -50,7 +50,7 @@ export function WalletPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [dispatch])
 
   async function adjustTokens(amount: number) {
     if (!summary || isAdjusting) return
@@ -70,7 +70,7 @@ export function WalletPage() {
 
   useEffect(() => {
     loadWallet()
-  }, [])
+  }, [loadWallet])
 
   return (
     <div className="space-y-5 p-4 sm:p-6 lg:p-8">

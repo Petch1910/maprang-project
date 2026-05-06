@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { ChatPanel } from '../components/ChatPanel'
 import { ReportDialog, type ReportDialogSubmit, type ReportDialogTarget } from '../components/ReportDialog'
@@ -158,7 +158,7 @@ export function WorkspacePage() {
     [chatLog],
   )
 
-  async function loadHealthStatus() {
+  const loadHealthStatus = useCallback(async () => {
     try {
       const health = await fetchHealthStatus()
       setHealthStatus(health)
@@ -176,9 +176,9 @@ export function WorkspacePage() {
       setHealthStatus(null)
       setConnectionNote('เชื่อมต่อ backend ไม่ได้')
     }
-  }
+  }, [])
 
-  async function loadUsageSummary() {
+  const loadUsageSummary = useCallback(async () => {
     try {
       const data = await fetchUsageSummary()
       setLastUsage({
@@ -192,9 +192,9 @@ export function WorkspacePage() {
     } catch (error) {
       console.error('Load usage summary error:', error)
     }
-  }
+  }, [])
 
-  async function loadAdminSummary() {
+  const loadAdminSummary = useCallback(async () => {
     try {
       const data = await fetchAdminSummary()
       setAdminSummary(data)
@@ -202,9 +202,9 @@ export function WorkspacePage() {
       console.error('Load admin summary error:', error)
       setAdminSummary(null)
     }
-  }
+  }, [])
 
-  async function loadChatHistory() {
+  const loadChatHistory = useCallback(async () => {
     setIsHistoryLoading(true)
     try {
       const data = await fetchChats()
@@ -215,16 +215,16 @@ export function WorkspacePage() {
     } finally {
       setIsHistoryLoading(false)
     }
-  }
+  }, [])
 
-  async function loadCharacters(filters: CharacterListFilters = { view: 'admin', sort: 'popular', limit: 40 }) {
+  const loadCharacters = useCallback(async (filters: CharacterListFilters = { view: 'admin', sort: 'popular', limit: 40 }) => {
     const data = await fetchCharacters(filters)
     const loadedCharacters = data.characters?.length ? data.characters : [fallbackCharacter]
     setCharacters(loadedCharacters)
     return loadedCharacters
-  }
+  }, [])
 
-  async function loadLoreEntries(characterId = character.id) {
+  const loadLoreEntries = useCallback(async (characterId: string) => {
     setIsLoreLoading(true)
     try {
       const data = await fetchLoreEntries(characterId)
@@ -235,7 +235,7 @@ export function WorkspacePage() {
     } finally {
       setIsLoreLoading(false)
     }
-  }
+  }, [])
 
   async function reloadWorkspaceAfterAuthChange() {
     await getAuthState()
@@ -254,7 +254,7 @@ export function WorkspacePage() {
 
   useEffect(() => {
     setMessage(savedDraft)
-  }, [draftKey])
+  }, [draftKey, savedDraft])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -290,7 +290,7 @@ export function WorkspacePage() {
     await loadLoreEntries(nextCharacter.id)
   }
 
-  const openChat = async (id: string) => {
+  const openChat = useCallback(async (id: string) => {
     setIsLoading(true)
     try {
       const data = await fetchChatMessages(id)
@@ -318,7 +318,7 @@ export function WorkspacePage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [loadLoreEntries])
 
   useEffect(() => {
     async function boot() {
@@ -354,7 +354,18 @@ export function WorkspacePage() {
     }
 
     void boot()
-  }, [])
+  }, [
+    loadAdminSummary,
+    loadCharacters,
+    loadChatHistory,
+    loadHealthStatus,
+    loadLoreEntries,
+    loadUsageSummary,
+    openChat,
+    relationshipSeed,
+    routeCharacterId,
+    routeChatId,
+  ])
 
   const archiveChat = async (id: string) => {
     try {
@@ -739,7 +750,7 @@ export function WorkspacePage() {
         onLoadChatHistory={loadChatHistory}
         onLoadHealth={loadHealthStatus}
         onLoadAdminSummary={loadAdminSummary}
-        onLoadLore={() => loadLoreEntries()}
+        onLoadLore={() => loadLoreEntries(character.id)}
         onOpenChat={openChat}
         onResetCharacterPrompt={resetSelectedCharacterPrompt}
         onSaveCharacter={saveCharacter}

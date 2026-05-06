@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Filter, RefreshCw, ShieldCheck } from 'lucide-react'
 import {
   applyAdminReportAction,
@@ -80,7 +80,7 @@ export function AdminModerationPage() {
 
   const pendingCount = useMemo(() => reports.filter((report) => report.status === 'PENDING').length, [reports])
 
-  async function loadReports() {
+  const loadReports = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await fetchAdminReports({ status, targetType, limit: 80 })
@@ -95,7 +95,7 @@ export function AdminModerationPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [status, targetType])
 
   async function changeStatus(reportId: string, nextStatus: ReportStatus) {
     setUpdatingId(reportId)
@@ -131,7 +131,7 @@ export function AdminModerationPage() {
 
   useEffect(() => {
     loadReports()
-  }, [status, targetType])
+  }, [loadReports])
 
   return (
     <div className="space-y-5 p-4 sm:p-6 lg:p-8">

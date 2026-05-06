@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { DEFAULT_USER_ID, setApiUserId } from '../lib/api'
 import { getAuthState, getSupabase, syncApiAuthFromSession, type AuthState } from '../lib/auth'
 
@@ -17,10 +17,10 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   const [note, setNote] = useState('')
   const [isBusy, setIsBusy] = useState(false)
 
-  const refreshAuthState = async () => {
+  const refreshAuthState = useCallback(async () => {
     const next = await getAuthState()
     setAuthState(next)
-  }
+  }, [])
 
   useEffect(() => {
     void refreshAuthState()
@@ -43,7 +43,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
     })
 
     return () => unsubscribe?.()
-  }, [])
+  }, [onAuthChanged, refreshAuthState])
 
   const signIn = async () => {
     const supabase = await getSupabase()
