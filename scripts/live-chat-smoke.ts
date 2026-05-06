@@ -39,8 +39,14 @@ const chat = await readJson<{
   }),
 })
 
-if (!chat.reply || chat.reply.includes('temporarily unavailable')) {
-  throw new Error(`Live chat did not return an AI reply: ${chat.reply ?? 'empty reply'}`)
+if (!chat.reply) {
+  throw new Error('Live chat did not return an AI reply: empty reply')
+}
+
+if (chat.reply.includes('temporarily unavailable')) {
+  throw new Error(
+    `Live chat reached the backend, but the AI provider path returned the fallback message. Check outbound network access to OpenRouter, OPENROUTER_API_KEY, and backend logs. Reply: ${chat.reply}`,
+  )
 }
 
 if (!chat.chatId) throw new Error('Live chat did not create a chat id')

@@ -43,6 +43,8 @@ To verify the live AI provider path, run this only when the backend is allowed t
 bun run smoke:chat
 ```
 
+If `smoke:chat` reports that the backend returned the temporary AI fallback, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. Check outbound network access to `https://openrouter.ai`, `OPENROUTER_API_KEY`, provider credits, and backend logs.
+
 For a deployed backend, point the smoke tests at the backend URL. Use either a Supabase user token or a known UUID user id:
 
 ```bash
