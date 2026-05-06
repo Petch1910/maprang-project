@@ -629,6 +629,8 @@ export async function listChats(userId = defaultUserId) {
     lastMessageAt: chat.lastMessageAt,
     createdAt: chat.createdAt,
     preview: chat.messages[0]?.content ?? '',
+    sceneState: chat.sceneState,
+    relationshipState: chat.relationshipState,
   }))
 }
 

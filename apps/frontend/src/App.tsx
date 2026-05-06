@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { Bell, Compass, MessageCircle, PlusCircle, UserRound } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from './store/hooks'
-import { selectEventCount } from './store/slices/eventsSlice'
+import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chatsSlice'
 import { loadWalletSummary, selectTokenBalance } from './store/slices/walletSlice'
 
 const ChatRoomPage = lazy(() => import('./pages/ChatRoomPage').then((module) => ({ default: module.ChatRoomPage })))
@@ -30,10 +30,11 @@ const navItems = [
 function App() {
   const dispatch = useAppDispatch()
   const tokenBalance = useAppSelector(selectTokenBalance)
-  const eventCount = useAppSelector(selectEventCount)
+  const eventCount = useAppSelector(selectPendingSceneCount)
 
   useEffect(() => {
     dispatch(loadWalletSummary())
+    dispatch(loadChatSummaries())
   }, [dispatch])
 
   return (

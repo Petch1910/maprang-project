@@ -43,4 +43,19 @@ const chatsSlice = createSlice({
 export const selectChatSummaries = (state: RootState) => state.chats.items
 export const selectChatsLoading = (state: RootState) => state.chats.isLoading
 export const selectChatsError = (state: RootState) => state.chats.error
+export const selectPendingSceneSummaries = (state: RootState) =>
+  state.chats.items.flatMap((chat) =>
+    (chat.sceneState?.pendingEvents ?? [])
+      .filter((event) => event.status === 'pending')
+      .map((event) => ({
+        id: `${chat.id}:${event.code}`,
+        chatId: chat.id,
+        characterName: chat.characterName,
+        title: event.title,
+        prompt: event.prompt,
+        relationshipStatus: chat.relationshipState?.status ?? 'NEUTRAL',
+        expiresAtTurn: event.expiresAtTurn,
+      })),
+  )
+export const selectPendingSceneCount = (state: RootState) => selectPendingSceneSummaries(state).length
 export default chatsSlice.reducer

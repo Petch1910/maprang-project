@@ -104,6 +104,8 @@ export type ChatSummary = {
   characterName: string
   lastMessageAt: string
   preview: string
+  sceneState?: ChatRuntimeState['sceneState'] | null
+  relationshipState?: ChatRuntimeState['relationshipState'] | null
 }
 
 export type ChatResponse = {
