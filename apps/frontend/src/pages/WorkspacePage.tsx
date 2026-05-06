@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { ChatPanel } from '../components/ChatPanel'
 import { Sidebar } from '../components/Sidebar'
 import {
@@ -37,6 +38,8 @@ import {
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { saveComposerDraft, selectComposerDraft } from '../store/slices/draftsSlice'
 
 type ChatUsage = NonNullable<ChatResponse['usage']>
 
@@ -109,6 +112,11 @@ function defaultRelationshipState(): ChatRuntimeState['relationshipState'] {
 }
 
 export function WorkspacePage() {
+  const reduxDispatch = useAppDispatch()
+  const { chatId: routeChatId } = useParams()
+  const [searchParams] = useSearchParams()
+  const routeCharacterId = searchParams.get('characterId')
+  const relationshipSeed = searchParams.get('relationship_seed')
   const [message, setMessage] = useState('')
   const [character, setCharacter] = useState<Character>(fallbackCharacter)
   const [characters, setCharacters] = useState<Character[]>([fallbackCharacter])
@@ -128,6 +136,8 @@ export function WorkspacePage() {
   const [isSavingLore, setIsSavingLore] = useState(false)
   const [connectionNote, setConnectionNote] = useState('Loading characters from the database...')
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const draftKey = chatId ? `chat:${chatId}` : `character:${character.id}`
+  const savedDraft = useAppSelector(selectComposerDraft(draftKey))
 
   const visibleHistory = useMemo(
     () =>
@@ -242,9 +252,20 @@ export function WorkspacePage() {
 
       try {
         const loadedCharacters = await loadCharacters()
-        const firstCharacter = loadedCharacters[0] ?? fallbackCharacter
+        const firstCharacter = loadedCharacters.find((item) => item.id === routeCharacterId) ?? loadedCharacters[0] ?? fallbackCharacter
         setCharacter(firstCharacter)
-        setChatLog([createGreeting(firstCharacter)])
+        setChatLog([
+          createGreeting(firstCharacter),
+          ...(relationshipSeed
+            ? [
+                {
+                  id: crypto.randomUUID(),
+                  role: 'assistant' as const,
+                  content: `Relationship seed selected: ${relationshipSeed}. This chat will start from that emotional contract.`,
+                },
+              ]
+            : []),
+        ])
         await loadLoreEntries(firstCharacter.id)
       } catch (error) {
         console.error('Load character error:', error)
@@ -254,14 +275,24 @@ export function WorkspacePage() {
       await loadChatHistory()
       await loadUsageSummary()
       await loadAdminSummary()
+      if (routeChatId) await openChat(routeChatId)
     }
 
     boot()
   }, [])
 
   useEffect(() => {
+    setMessage(savedDraft)
+  }, [draftKey])
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatLog, isLoading])
+
+  const updateMessageDraft = (nextMessage: string) => {
+    setMessage(nextMessage)
+    reduxDispatch(saveComposerDraft({ key: draftKey, value: nextMessage }))
+  }
 
   const startNewChat = () => {
     setChatId(null)
@@ -502,7 +533,10 @@ export function WorkspacePage() {
       { id: crypto.randomUUID(), role: 'user', content: userFacingMessage },
       { id: assistantMessageId, role: 'assistant', content: '' },
     ])
-    if (!sceneCommand) setMessage('')
+    if (!sceneCommand) {
+      setMessage('')
+      reduxDispatch(saveComposerDraft({ key: draftKey, value: '' }))
+    }
     setIsLoading(true)
 
     try {
@@ -511,6 +545,7 @@ export function WorkspacePage() {
           message: currentMsg,
           characterId: character.id,
           chatId,
+          relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           history: [...visibleHistory, { role: 'user', content: currentMsg }],
         },
         (event) => {
@@ -545,6 +580,7 @@ export function WorkspacePage() {
           message: currentMsg,
           characterId: character.id,
           chatId,
+          relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           history: [...visibleHistory, { role: 'user', content: currentMsg }],
         })
         if (data.chatId) setChatId(data.chatId)
@@ -641,7 +677,7 @@ export function WorkspacePage() {
         lastUsage={lastUsage}
         runtimeState={runtimeState}
         message={message}
-        onMessageChange={setMessage}
+        onMessageChange={updateMessageDraft}
         onOpenMenu={() => setIsMobileMenuOpen(true)}
         onSceneAction={handleSceneAction}
         onSendMessage={sendMessage}

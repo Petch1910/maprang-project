@@ -19,6 +19,22 @@ describe('chat runtime state', () => {
     expect(runtime.relationshipState.trust).toBeGreaterThan(0)
   })
 
+  test('starts new chat runtime from selected relationship seed', () => {
+    const runtime = updateRuntimeState({
+      previousMemory: null,
+      previousSceneState: null,
+      previousRelationshipState: null,
+      character: null,
+      userMessage: 'I did not expect to see you here.',
+      reply: 'I was not exactly hoping to see you either.',
+      relationshipSeed: 'rival',
+    })
+
+    expect(runtime.relationshipState.status).toBe('RIVAL')
+    expect(runtime.relationshipState.flags).toContain('competitive')
+    expect(runtime.relationshipState.respect).toBeGreaterThan(0)
+  })
+
   test('applies scene outcome delta when an active scene resolves', () => {
     const runtime = updateRuntimeState({
       previousMemory: { turnCount: 1 },

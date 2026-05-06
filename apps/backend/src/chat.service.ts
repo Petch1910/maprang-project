@@ -17,7 +17,9 @@ import { getPrisma } from './db'
 import {
   applyRelationshipDelta,
   buildRelationshipPrompt,
+  buildRelationshipSeedFromTags,
   coerceRelationshipState,
+  relationshipPresetById,
   updateRelationshipState,
   type RelationshipState,
 } from './relationship.engine'
@@ -47,6 +49,7 @@ export type SendChatInput = {
   message: string
   characterId?: string
   chatId?: string
+  relationshipSeed?: string
   userId?: string
   history?: ChatMessage[]
 }
@@ -164,10 +167,15 @@ async function loadTokenBalance(prisma: Prisma, userId: string) {
   return user?.tokenBalance ?? null
 }
 
-async function loadRuntimeContext(character: CharacterWithTags | null, userMessage: string, chatId?: string) {
+async function loadRuntimeContext(
+  character: CharacterWithTags | null,
+  userMessage: string,
+  chatId?: string,
+  relationshipSeed?: string,
+) {
   const prisma = getPrisma()
   if (!prisma || !chatId) {
-    const relationship = coerceRelationshipState(null, character)
+    const relationship = relationshipFromSeed(character, relationshipSeed)
     return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(defaultSceneState(relationship, userMessage, 0))]
       .filter(Boolean)
       .join('\n\n')
@@ -186,7 +194,7 @@ async function loadRuntimeContext(character: CharacterWithTags | null, userMessa
   })
 
   if (!chat) {
-    const relationship = coerceRelationshipState(null, character)
+    const relationship = relationshipFromSeed(character, relationshipSeed)
     return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(defaultSceneState(relationship, userMessage, 0))]
       .filter(Boolean)
       .join('\n\n')
@@ -225,9 +233,10 @@ async function buildMessages(
   userMessage: string,
   history?: ChatMessage[],
   chatId?: string,
+  relationshipSeed?: string,
 ) {
   const loreEntries = character ? await loadRelevantLore(character.id, userMessage) : []
-  const runtimeContext = await loadRuntimeContext(character, userMessage, chatId)
+  const runtimeContext = await loadRuntimeContext(character, userMessage, chatId, relationshipSeed)
   const systemPrompt = [character ? buildContextPrompt(character, loreEntries) : defaultSystemPrompt, runtimeContext]
     .filter(Boolean)
     .join('\n\n')
@@ -248,6 +257,28 @@ function asRecord(value: unknown): Record<string, unknown> {
 
 function asStringArray(value: unknown) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+}
+
+function relationshipSeedTags(seedId?: string) {
+  if (!seedId) return []
+  const preset = relationshipPresetById(seedId)
+  if (preset) return preset.tags
+
+  const aliases: Record<string, string[]> = {
+    stranger: [],
+    ally: ['close-friend', 'green-flag'],
+    rival: ['rival', 'hard-to-get'],
+    crush: ['crush', 'shy', 'slow-burn'],
+  }
+  return aliases[seedId] ?? []
+}
+
+function relationshipFromSeed(character: CharacterWithTags | null, seedId?: string) {
+  const characterTags = (character?.tags ?? []).map((item) => item.tag.name)
+  const seedTags = relationshipSeedTags(seedId)
+  if (seedTags.length === 0) return coerceRelationshipState(null, character)
+
+  return buildRelationshipSeedFromTags([...new Set([...characterTags, ...seedTags])])
 }
 
 function clip(value: string, maxLength: number) {
@@ -330,6 +361,7 @@ export function updateRuntimeState({
   character,
   userMessage,
   reply,
+  relationshipSeed,
 }: {
   previousMemory: unknown
   previousSceneState: unknown
@@ -337,6 +369,7 @@ export function updateRuntimeState({
   character: CharacterWithTags | null
   userMessage: string
   reply: string
+  relationshipSeed?: string
 }): ChatRuntimeState {
   const now = new Date().toISOString()
   const memory = asRecord(previousMemory)
@@ -352,7 +385,7 @@ export function updateRuntimeState({
     .join(' | ')
 
   const relationship = updateRelationshipState({
-    previous: relationshipState,
+    previous: Object.keys(relationshipState).length > 0 ? relationshipState : relationshipFromSeed(character, relationshipSeed),
     character,
     userMessage,
   })
@@ -454,6 +487,7 @@ async function persistChatTurn({
   reply,
   usage,
   loreKeywords,
+  relationshipSeed,
 }: {
   prisma: Prisma
   chatId?: string
@@ -463,6 +497,7 @@ async function persistChatTurn({
   reply: string
   usage: CompletionUsage
   loreKeywords: string[]
+  relationshipSeed?: string
 }): Promise<PersistResult> {
   const chat = await findOrCreateChat({
     prisma,
@@ -513,6 +548,7 @@ async function persistChatTurn({
     character,
     userMessage,
     reply,
+    relationshipSeed,
   })
 
   await prisma.chat.update({
@@ -640,14 +676,20 @@ export async function sendChat(input: SendChatInput) {
   }
 
   const character = await loadCharacter(activeCharacterId)
-  const { loreEntries, messages } = await buildMessages(character, input.message, input.history, input.chatId)
+  const { loreEntries, messages } = await buildMessages(
+    character,
+    input.message,
+    input.history,
+    input.chatId,
+    input.relationshipSeed,
+  )
 
   const completion = await openai.chat.completions.create({
     model: modelName,
     messages,
   })
 
-  const reply = completion.choices[0]?.message?.content?.trim() || 'มะปรางคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
+  const reply = completion.choices[0]?.message?.content?.trim() || 'มะปรางยังคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
   const usage = usageFromCompletion(completion)
   const loreKeywords = loreEntries.map((entry) => entry.keyword)
   const persistResult =
@@ -661,6 +703,7 @@ export async function sendChat(input: SendChatInput) {
           reply,
           usage,
           loreKeywords,
+          relationshipSeed: input.relationshipSeed,
         })
       : {
           chatId: input.chatId ?? null,
@@ -672,6 +715,7 @@ export async function sendChat(input: SendChatInput) {
             character,
             userMessage: input.message,
             reply,
+            relationshipSeed: input.relationshipSeed,
           }),
         }
 
@@ -749,7 +793,13 @@ export function streamChat(input: SendChatInput) {
         }
 
         const character = await loadCharacter(activeCharacterId)
-        const { loreEntries, messages } = await buildMessages(character, input.message, input.history, input.chatId)
+        const { loreEntries, messages } = await buildMessages(
+          character,
+          input.message,
+          input.history,
+          input.chatId,
+          input.relationshipSeed,
+        )
         const loreKeywords = loreEntries.map((entry) => entry.keyword)
         const stream = await openai.chat.completions.create({
           model: modelName,
@@ -780,7 +830,7 @@ export function streamChat(input: SendChatInput) {
           }
         }
 
-        const trimmedReply = reply.trim() || 'มะปรางคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
+        const trimmedReply = reply.trim() || 'มะปรางยังคิดคำตอบไม่ออก ขอฟังอีกครั้งได้ไหมคะ'
         const persistResult =
           prisma && character
             ? await persistChatTurn({
@@ -792,6 +842,7 @@ export function streamChat(input: SendChatInput) {
                 reply: trimmedReply,
                 usage,
                 loreKeywords,
+                relationshipSeed: input.relationshipSeed,
               })
             : {
                 chatId: input.chatId ?? null,
@@ -803,6 +854,7 @@ export function streamChat(input: SendChatInput) {
                   character,
                   userMessage: input.message,
                   reply: trimmedReply,
+                  relationshipSeed: input.relationshipSeed,
                 }),
               }
 
