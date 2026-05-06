@@ -99,10 +99,10 @@ export const characterRoutes = new Elysia()
     '/characters',
     async ({ query, request }) => {
       const admin = isAdminRequest(request)
-      const viewerUserId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : '__anonymous__'
+      const viewerUserId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : defaultUserId
       const requestedMaxRating = normalizeMaxRating(query.maxRating)
       const maxRating =
-        admin || viewerUserId === '__anonymous__'
+        admin || !hasRequestIdentity(request)
           ? clampMaxRating(requestedMaxRating, admin ? 'restricted_18' : 'teen_romance')
           : await effectiveMaxRatingForUser(viewerUserId, requestedMaxRating)
 
