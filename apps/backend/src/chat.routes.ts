@@ -8,6 +8,7 @@ const chatBody = t.Object({
   characterId: t.Optional(t.String()),
   chatId: t.Optional(t.String()),
   relationshipSeed: t.Optional(t.String()),
+  userPersona: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   history: t.Optional(
     t.Array(

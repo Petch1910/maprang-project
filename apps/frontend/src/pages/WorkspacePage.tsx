@@ -39,7 +39,7 @@ import {
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { saveComposerDraft, selectComposerDraft } from '../store/slices/draftsSlice'
+import { saveComposerDraft, selectComposerDraft, selectPersonaDraft } from '../store/slices/draftsSlice'
 
 type ChatUsage = NonNullable<ChatResponse['usage']>
 
@@ -138,6 +138,7 @@ export function WorkspacePage() {
   const chatEndRef = useRef<HTMLDivElement>(null)
   const draftKey = chatId ? `chat:${chatId}` : `character:${character.id}`
   const savedDraft = useAppSelector(selectComposerDraft(draftKey))
+  const personaDraft = useAppSelector(selectPersonaDraft)
 
   const visibleHistory = useMemo(
     () =>
@@ -546,6 +547,7 @@ export function WorkspacePage() {
           characterId: character.id,
           chatId,
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
+          userPersona: personaDraft.trim() || undefined,
           history: [...visibleHistory, { role: 'user', content: currentMsg }],
         },
         (event) => {
@@ -581,6 +583,7 @@ export function WorkspacePage() {
           characterId: character.id,
           chatId,
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
+          userPersona: personaDraft.trim() || undefined,
           history: [...visibleHistory, { role: 'user', content: currentMsg }],
         })
         if (data.chatId) setChatId(data.chatId)

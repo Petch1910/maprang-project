@@ -50,6 +50,7 @@ export type SendChatInput = {
   characterId?: string
   chatId?: string
   relationshipSeed?: string
+  userPersona?: string
   userId?: string
   history?: ChatMessage[]
 }
@@ -154,6 +155,16 @@ function validateChatInput(message: string) {
   return null
 }
 
+function buildUserPersonaPrompt(userPersona?: string) {
+  const persona = userPersona?.replace(/\s+/g, ' ').trim()
+  if (!persona) return ''
+  return [
+    'User persona:',
+    clip(persona, 800),
+    'Use this as stable player context for names, pronouns, roleplay preferences, and boundaries. Do not expose it verbatim unless the user asks.',
+  ].join('\n')
+}
+
 function encodeStreamEvent(event: StreamEvent) {
   return `data: ${JSON.stringify(event)}\n\n`
 }
@@ -234,10 +245,15 @@ async function buildMessages(
   history?: ChatMessage[],
   chatId?: string,
   relationshipSeed?: string,
+  userPersona?: string,
 ) {
   const loreEntries = character ? await loadRelevantLore(character.id, userMessage) : []
   const runtimeContext = await loadRuntimeContext(character, userMessage, chatId, relationshipSeed)
-  const systemPrompt = [character ? buildContextPrompt(character, loreEntries) : defaultSystemPrompt, runtimeContext]
+  const systemPrompt = [
+    character ? buildContextPrompt(character, loreEntries) : defaultSystemPrompt,
+    buildUserPersonaPrompt(userPersona),
+    runtimeContext,
+  ]
     .filter(Boolean)
     .join('\n\n')
 
@@ -684,6 +700,7 @@ export async function sendChat(input: SendChatInput) {
     input.history,
     input.chatId,
     input.relationshipSeed,
+    input.userPersona,
   )
 
   const completion = await openai.chat.completions.create({
@@ -801,6 +818,7 @@ export function streamChat(input: SendChatInput) {
           input.history,
           input.chatId,
           input.relationshipSeed,
+          input.userPersona,
         )
         const loreKeywords = loreEntries.map((entry) => entry.keyword)
         const stream = await openai.chat.completions.create({
