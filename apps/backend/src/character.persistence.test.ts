@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { CharacterStatus } from '@prisma/client'
 import { characterRoutes } from './character.routes'
 import { createCharacter, updateCharacter } from './character.service'
+import { sendChat } from './chat.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
 
@@ -213,5 +214,28 @@ describe('character persistence quality gate', () => {
     expect(publicResponse.status).toBe(200)
     expect(publicBody.character.systemPrompt).toBe('')
     expect(publicBody.character.compactPrompt).toBeNull()
+  })
+
+  test('blocks chat against another user private character before provider calls', async () => {
+    const privateCharacter = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Private Chat Guard`,
+      tags: ['friend'],
+      visibility: 'PRIVATE',
+      status: CharacterStatus.DRAFT,
+    })
+
+    expect(privateCharacter).not.toBeNull()
+
+    const response = await sendChat({
+      characterId: privateCharacter!.id,
+      userId: otherUserId,
+      message: 'hello',
+      maxRating: 'restricted_18',
+    })
+
+    expect(response.reply).toBe('This character is private or not available for chat.')
+    expect(response.chatId).toBeNull()
+    expect(response.usage?.totalTokens).toBe(0)
   })
 })

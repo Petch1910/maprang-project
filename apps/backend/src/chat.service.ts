@@ -310,6 +310,13 @@ function chatRatingError(character: CharacterWithTags | null, maxRating?: Conten
   return `This character is rated ${rating}. Enable a higher content mode before starting this chat.`
 }
 
+function chatCharacterAccessError(character: CharacterWithTags | null, userId: string) {
+  if (!character) return 'Character not found.'
+  if (character.status === 'PUBLISHED' && character.visibility === 'PUBLIC') return null
+  if (character.creatorId === userId) return null
+  return 'This character is private or not available for chat.'
+}
+
 function clip(value: string, maxLength: number) {
   const normalized = value.replace(/\s+/g, ' ').trim()
   return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}...` : normalized
@@ -682,10 +689,18 @@ export async function sendChat(input: SendChatInput) {
     }
   }
 
-  if (!process.env.OPENROUTER_API_KEY) {
+  const character = await loadCharacter(activeCharacterId, activeUserId)
+  const accessError = chatCharacterAccessError(character, activeUserId)
+  if (accessError) {
     return {
-      reply: `Backend is running, but OPENROUTER_API_KEY is not configured. Your message was: "${input.message}"`,
+      reply: accessError,
       chatId: input.chatId ?? null,
+      usage: {
+        ...fallbackUsage(),
+        modelName,
+        contextLoreCount: 0,
+        tokenBalance: prisma ? await loadTokenBalance(prisma, activeUserId) : null,
+      },
     }
   }
 
@@ -706,7 +721,13 @@ export async function sendChat(input: SendChatInput) {
     }
   }
 
-  const character = await loadCharacter(activeCharacterId)
+  if (!process.env.OPENROUTER_API_KEY) {
+    return {
+      reply: `Backend is running, but OPENROUTER_API_KEY is not configured. Your message was: "${input.message}"`,
+      chatId: input.chatId ?? null,
+    }
+  }
+
   const ratingError = chatRatingError(character, input.maxRating)
   if (ratingError) {
     return {
@@ -804,6 +825,23 @@ export function streamChat(input: SendChatInput) {
           return
         }
 
+        const character = await loadCharacter(activeCharacterId, activeUserId)
+        const accessError = chatCharacterAccessError(character, activeUserId)
+        if (accessError) {
+          send({ type: 'delta', content: accessError })
+          send({
+            type: 'done',
+            chatId: input.chatId ?? null,
+            usage: {
+              ...fallbackUsage(),
+              modelName,
+              contextLoreCount: 0,
+              tokenBalance: prisma ? await loadTokenBalance(prisma, activeUserId) : null,
+            },
+          })
+          return
+        }
+
         if (!process.env.OPENROUTER_API_KEY) {
           const reply = `Backend is running, but OPENROUTER_API_KEY is not configured. Your message was: "${input.message}"`
           send({ type: 'delta', content: reply })
@@ -837,7 +875,6 @@ export function streamChat(input: SendChatInput) {
           return
         }
 
-        const character = await loadCharacter(activeCharacterId)
         const ratingError = chatRatingError(character, input.maxRating)
         if (ratingError) {
           send({ type: 'delta', content: ratingError })
