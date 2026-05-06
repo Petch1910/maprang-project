@@ -253,42 +253,6 @@ export function WorkspacePage() {
   }
 
   useEffect(() => {
-    async function boot() {
-      await getAuthState()
-      await loadHealthStatus()
-
-      try {
-        const loadedCharacters = await loadCharacters()
-        const firstCharacter = loadedCharacters.find((item) => item.id === routeCharacterId) ?? loadedCharacters[0] ?? fallbackCharacter
-        setCharacter(firstCharacter)
-        setChatLog([
-          createGreeting(firstCharacter),
-          ...(relationshipSeed
-            ? [
-                {
-                  id: crypto.randomUUID(),
-                  role: 'assistant' as const,
-                  content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeed} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
-                },
-              ]
-            : []),
-        ])
-        await loadLoreEntries(firstCharacter.id)
-      } catch (error) {
-        console.error('Load character error:', error)
-        setConnectionNote('เชื่อมต่อ backend ไม่ได้')
-      }
-
-      await loadChatHistory()
-      await loadUsageSummary()
-      await loadAdminSummary()
-      if (routeChatId) await openChat(routeChatId)
-    }
-
-    boot()
-  }, [])
-
-  useEffect(() => {
     setMessage(savedDraft)
   }, [draftKey])
 
@@ -355,6 +319,42 @@ export function WorkspacePage() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    async function boot() {
+      await getAuthState()
+      await loadHealthStatus()
+
+      try {
+        const loadedCharacters = await loadCharacters()
+        const firstCharacter = loadedCharacters.find((item) => item.id === routeCharacterId) ?? loadedCharacters[0] ?? fallbackCharacter
+        setCharacter(firstCharacter)
+        setChatLog([
+          createGreeting(firstCharacter),
+          ...(relationshipSeed
+            ? [
+                {
+                  id: crypto.randomUUID(),
+                  role: 'assistant' as const,
+                  content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeed} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
+                },
+              ]
+            : []),
+        ])
+        await loadLoreEntries(firstCharacter.id)
+      } catch (error) {
+        console.error('Load character error:', error)
+        setConnectionNote('เชื่อมต่อ backend ไม่ได้')
+      }
+
+      await loadChatHistory()
+      await loadUsageSummary()
+      await loadAdminSummary()
+      if (routeChatId) await openChat(routeChatId)
+    }
+
+    void boot()
+  }, [])
 
   const archiveChat = async (id: string) => {
     try {
