@@ -69,6 +69,17 @@ Current implementation stores stable backend avatar URLs such as `/uploads/avata
 
 Recommended first hosting path: follow `DEPLOY_RENDER.md`.
 
+0. Run local static deployment readiness checks:
+
+```bash
+bun run secrets:check
+bun run predeploy:check
+bun run backend:check
+bun run frontend:check
+```
+
+`backend:check` requires a reachable database for persistence tests. If local Docker is not running, start Docker/Postgres first or run the check against a staging database.
+
 1. Provision production Postgres.
 2. Add backend env values.
 3. Run database migrations:
@@ -100,3 +111,10 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 ```
 
 9. Complete manual QA from `DEPLOYMENT_QA.md`.
+
+## Production Readiness Notes
+
+- Latest migrations include reports and admin audit logs. Always run `bunx prisma migrate deploy` before exposing the backend.
+- Admin actions now write audit logs for report status changes, hidden characters, archived messages, and manual token adjustments.
+- Payment is not connected yet. Use Wallet admin token adjustment only for beta/manual grants until a transaction ledger and payment provider are added.
+- Production smoke tests require either a real Supabase access token or a known UUID user id accepted by the backend environment.

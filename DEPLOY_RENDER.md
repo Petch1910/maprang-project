@@ -8,6 +8,17 @@ Create a Render Postgres database and copy the external connection string.
 
 Use it as backend `DATABASE_URL`.
 
+Before deploying public traffic, run the repository readiness checks locally:
+
+```bash
+bun run secrets:check
+bun run predeploy:check
+bun run backend:check
+bun run frontend:check
+```
+
+If Docker/Postgres is not available locally, run `backend:check` against a staging database before production.
+
 ## 2. Deploy Backend
 
 Create a new Render Web Service from this repository.
@@ -50,6 +61,8 @@ After the backend deploys, run migrations from a local terminal with production 
 cd apps/backend
 bunx prisma migrate deploy
 ```
+
+The current migration set includes moderation reports and admin audit logs. Do not skip this step.
 
 ## 3. Deploy Frontend
 
