@@ -41,6 +41,7 @@ function App() {
   const tokenBalance = useAppSelector(selectTokenBalance)
   const eventCount = useAppSelector(selectPendingSceneCount)
   const isChatRoute = location.pathname.startsWith('/chat')
+  const isExploreRoute = location.pathname === '/'
 
   useEffect(() => {
     dispatch(loadWalletSummary())
@@ -66,6 +67,15 @@ function App() {
   if (isChatRoute) {
     return (
       <div className="h-svh overflow-hidden bg-[#101012] text-white">
+        <AgeGate />
+        {appRoutes}
+      </div>
+    )
+  }
+
+  if (isExploreRoute) {
+    return (
+      <div className="min-h-svh bg-[#111113] text-white">
         <AgeGate />
         {appRoutes}
       </div>
