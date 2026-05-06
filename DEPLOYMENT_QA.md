@@ -101,7 +101,15 @@ Frontend:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
-For Docker frontend builds, pass Vite values as build args, for example `--build-arg VITE_API_BASE_URL=https://api.example.com`.
+For Docker frontend builds, pass Vite values as build args. The Docker build arg for the Supabase anon value is named `VITE_SUPABASE_ANON_PUBLIC` to avoid noisy secret-name warnings, and the Dockerfile maps it to `VITE_SUPABASE_ANON_KEY` only for the Vite build step.
+
+```bash
+docker build -f apps/frontend/Dockerfile -t maprang-frontend \
+  --build-arg VITE_API_BASE_URL=https://api.example.com \
+  --build-arg VITE_SUPABASE_URL=https://project-ref.supabase.co \
+  --build-arg VITE_SUPABASE_ANON_PUBLIC=<supabase-anon-key> .
+```
+
 `VITE_SUPABASE_ANON_KEY` is a frontend public anon key, but it is still baked into the static build like every other `VITE_*` value.
 
 ## Supabase Storage

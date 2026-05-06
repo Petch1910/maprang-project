@@ -72,7 +72,10 @@ Backend health: `http://127.0.0.1:3000/health`
 
 ```bash
 docker build -f apps/backend/Dockerfile -t maprang-backend .
-docker build -f apps/frontend/Dockerfile -t maprang-frontend --build-arg VITE_API_BASE_URL=https://api.example.com .
+docker build -f apps/frontend/Dockerfile -t maprang-frontend \
+  --build-arg VITE_API_BASE_URL=https://api.example.com \
+  --build-arg VITE_SUPABASE_URL=https://project-ref.supabase.co \
+  --build-arg VITE_SUPABASE_ANON_PUBLIC=<supabase-anon-key> .
 ```
 
 Frontend `VITE_*` values are compiled into the static bundle at build time. The Supabase anon key is intended to be public, but service role keys must stay backend-only.

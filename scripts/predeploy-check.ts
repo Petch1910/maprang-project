@@ -81,7 +81,7 @@ const checks: Check[] = [
       const backend = await readRepoFile('apps/backend/Dockerfile')
       const frontend = await readRepoFile('apps/frontend/Dockerfile')
       requireIncludes(backend, ['RUN bunx prisma generate', 'EXPOSE 3000', 'CMD ["bun", "run", "start"]'], 'apps/backend/Dockerfile')
-      requireIncludes(frontend, ['RUN bun run build', 'FROM nginx', 'EXPOSE 80'], 'apps/frontend/Dockerfile')
+      requireIncludes(frontend, ['bun run build', 'FROM nginx', 'EXPOSE 80'], 'apps/frontend/Dockerfile')
     },
   },
   {

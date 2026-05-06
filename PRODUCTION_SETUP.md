@@ -99,7 +99,10 @@ curl https://api.example.com/health
 6. Build frontend with production API URL:
 
 ```bash
-docker build -f apps/frontend/Dockerfile -t maprang-frontend --build-arg VITE_API_BASE_URL=https://api.example.com .
+docker build -f apps/frontend/Dockerfile -t maprang-frontend \
+  --build-arg VITE_API_BASE_URL=https://api.example.com \
+  --build-arg VITE_SUPABASE_URL=https://project-ref.supabase.co \
+  --build-arg VITE_SUPABASE_ANON_PUBLIC=<supabase-anon-key> .
 ```
 
 7. Deploy frontend.
