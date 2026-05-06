@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { ReportTargetType } from '@prisma/client'
-import { validateReportInput } from './report.service'
+import { validateReportAdminAction, validateReportInput } from './report.service'
 
 describe('report validation', () => {
   test('requires target ids for character and message reports', () => {
@@ -27,5 +27,11 @@ describe('report validation', () => {
         reason: 'policy concern',
       }),
     ).toBeNull()
+  })
+
+  test('validates admin report actions', () => {
+    expect(validateReportAdminAction('HIDE_CHARACTER')).toBeNull()
+    expect(validateReportAdminAction('ARCHIVE_MESSAGE')).toBeNull()
+    expect(validateReportAdminAction('BANANA')).toBe('invalid_report_action')
   })
 })

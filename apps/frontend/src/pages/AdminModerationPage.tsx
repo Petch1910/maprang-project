@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Filter, RefreshCw, ShieldCheck } from 'lucide-react'
 import {
+  applyAdminReportAction,
   ApiError,
   fetchAdminReports,
   updateAdminReportStatus,
+  type ReportAdminAction,
   type ReportStatus,
   type ReportSummary,
   type ReportTargetType,
@@ -81,6 +83,20 @@ export function AdminModerationPage() {
     } catch (error) {
       console.error('Update report status error:', error)
       setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key is missing or invalid.' : 'Could not update report status.')
+    } finally {
+      setUpdatingId('')
+    }
+  }
+
+  async function applyAction(reportId: string, action: ReportAdminAction) {
+    setUpdatingId(reportId)
+    try {
+      const data = await applyAdminReportAction(reportId, action)
+      setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
+      setNote(action === 'HIDE_CHARACTER' ? 'Character hidden and report resolved.' : 'Message archived and report resolved.')
+    } catch (error) {
+      console.error('Apply report action error:', error)
+      setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key is missing or invalid.' : 'Could not apply moderation action.')
     } finally {
       setUpdatingId('')
     }
@@ -194,6 +210,26 @@ export function AdminModerationPage() {
                 </div>
 
                 <div className="grid min-w-[220px] grid-cols-2 gap-2">
+                  {report.targetType === 'CHARACTER' && (
+                    <button
+                      className="col-span-2 min-h-10 rounded-xl bg-slate-950 px-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+                      disabled={updatingId === report.id || report.status === 'RESOLVED'}
+                      onClick={() => applyAction(report.id, 'HIDE_CHARACTER')}
+                      type="button"
+                    >
+                      Hide character
+                    </button>
+                  )}
+                  {report.targetType === 'MESSAGE' && (
+                    <button
+                      className="col-span-2 min-h-10 rounded-xl bg-slate-950 px-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+                      disabled={updatingId === report.id || report.status === 'RESOLVED' || Boolean(report.message?.deletedAt)}
+                      onClick={() => applyAction(report.id, 'ARCHIVE_MESSAGE')}
+                      type="button"
+                    >
+                      Archive message
+                    </button>
+                  )}
                   <button
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-sky-600 px-3 text-sm font-black text-white transition hover:bg-sky-700 disabled:opacity-60"
                     disabled={updatingId === report.id}

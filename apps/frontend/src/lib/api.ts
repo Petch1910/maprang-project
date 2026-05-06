@@ -567,6 +567,7 @@ export async function archiveChat(chatId: string) {
 
 export type ReportTargetType = 'CHARACTER' | 'MESSAGE'
 export type ReportStatus = 'PENDING' | 'REVIEWED' | 'RESOLVED' | 'REJECTED'
+export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE'
 
 export type ReportSummary = {
   id: string
@@ -583,6 +584,7 @@ export type ReportSummary = {
     role: ChatRole
     content: string
     chatId: string
+    deletedAt?: string | null
   } | null
   reporter?: {
     id: string
@@ -625,6 +627,16 @@ export async function updateAdminReportStatus(reportId: string, status: ReportSt
   return requestJson<{ report: ReportSummary }>(`/admin/reports/${reportId}`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  })
+}
+
+export async function applyAdminReportAction(reportId: string, action: ReportAdminAction) {
+  return requestJson<{
+    action: ReportAdminAction
+    report: ReportSummary
+  }>(`/admin/reports/${reportId}/actions`, {
+    method: 'POST',
+    body: JSON.stringify({ action }),
   })
 }
 

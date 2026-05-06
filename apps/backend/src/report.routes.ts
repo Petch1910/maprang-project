@@ -1,7 +1,7 @@
 import { ReportStatus, ReportTargetType } from '@prisma/client'
 import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
-import { createReport, listReports, updateReportStatus } from './report.service'
+import { applyReportAdminAction, createReport, listReports, updateReportStatus, type ReportAdminAction } from './report.service'
 import { requireAdminApiKey, resolveRequestUserId } from './security'
 
 const reportTargetTypeSchema = t.Union([t.Literal('CHARACTER'), t.Literal('MESSAGE')])
@@ -11,6 +11,7 @@ const reportStatusSchema = t.Union([
   t.Literal('RESOLVED'),
   t.Literal('REJECTED'),
 ])
+const reportAdminActionSchema = t.Union([t.Literal('HIDE_CHARACTER'), t.Literal('ARCHIVE_MESSAGE')])
 
 export const reportRoutes = new Elysia()
   .post(
@@ -92,5 +93,30 @@ export const reportRoutes = new Elysia()
     {
       params: t.Object({ id: t.String() }),
       body: t.Object({ status: reportStatusSchema }),
+    },
+  )
+  .post(
+    '/admin/reports/:id/actions',
+    async ({ body, params, request, set }) => {
+      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured' }
+
+      const result = await applyReportAdminAction(params.id, body.action as ReportAdminAction)
+      if (!result) {
+        set.status = 503
+        return { error: 'database_not_configured' }
+      }
+
+      if ('error' in result) {
+        set.status = result.error === 'report_not_found' ? 404 : 422
+        return { error: result.error }
+      }
+
+      return result
+    },
+    {
+      params: t.Object({ id: t.String() }),
+      body: t.Object({ action: reportAdminActionSchema }),
     },
   )

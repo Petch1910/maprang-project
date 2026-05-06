@@ -1,4 +1,4 @@
-import { Prisma, ReportStatus, ReportTargetType } from '@prisma/client'
+import { CharacterStatus, Prisma, ReportStatus, ReportTargetType, Visibility } from '@prisma/client'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
 
@@ -16,6 +16,8 @@ export type ReportListOptions = {
   targetType?: ReportTargetType
   limit?: number
 }
+
+export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE'
 
 function sanitizeReason(reason: string) {
   return reason.trim().slice(0, 80)
@@ -117,6 +119,68 @@ export async function updateReportStatus(reportId: string, status: ReportStatus)
   })
 
   return publicReport(report)
+}
+
+export function validateReportAdminAction(action: string) {
+  if (action !== 'HIDE_CHARACTER' && action !== 'ARCHIVE_MESSAGE') return 'invalid_report_action'
+  return null
+}
+
+export async function applyReportAdminAction(reportId: string, action: ReportAdminAction) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const validationError = validateReportAdminAction(action)
+  if (validationError) return { error: validationError }
+
+  return prisma.$transaction(async (tx) => {
+    const report = await tx.report.findUnique({
+      where: { id: reportId },
+      select: {
+        id: true,
+        characterId: true,
+        messageId: true,
+      },
+    })
+    if (!report) return { error: 'report_not_found' }
+
+    if (action === 'HIDE_CHARACTER') {
+      if (!report.characterId) return { error: 'character_report_required' }
+      await tx.character.update({
+        where: { id: report.characterId },
+        data: {
+          status: CharacterStatus.ARCHIVED,
+          visibility: Visibility.PRIVATE,
+          deletedAt: new Date(),
+        },
+      })
+    }
+
+    if (action === 'ARCHIVE_MESSAGE') {
+      if (!report.messageId) return { error: 'message_report_required' }
+      await tx.message.update({
+        where: { id: report.messageId },
+        data: {
+          deletedAt: new Date(),
+        },
+      })
+    }
+
+    const updatedReport = await tx.report.update({
+      where: { id: reportId },
+      data: {
+        status: ReportStatus.RESOLVED,
+        reviewedAt: new Date(),
+      },
+      include: {
+        character: { select: { id: true, name: true, status: true, visibility: true } },
+        message: { select: { id: true, role: true, content: true, chatId: true, deletedAt: true } },
+        reporter: { select: { id: true, email: true, username: true } },
+      },
+    })
+
+    return { action, report: publicReport(updatedReport) }
+  })
 }
 
 function publicReport(report: {
