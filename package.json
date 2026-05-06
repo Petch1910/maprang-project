@@ -8,6 +8,7 @@
     "frontend:check": "cd apps/frontend && bun run deploy:check",
     "predeploy:check": "bun scripts/predeploy-check.ts",
     "secrets:check": "bun scripts/check-secrets.ts",
+    "smoke:doctor": "bun scripts/smoke-doctor.ts",
     "smoke:local": "bun scripts/local-smoke.ts",
     "smoke:chat": "bun scripts/live-chat-smoke.ts",
     "qa:local": "bun run secrets:check && bun run predeploy:check && bun run backend:check && bun run frontend:check && bun run smoke:local && bun run smoke:chat"

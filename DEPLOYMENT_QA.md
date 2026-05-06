@@ -30,6 +30,10 @@ bun run deploy:check
 With local backend and frontend running, run:
 
 ```bash
+bun run smoke:doctor
+```
+
+```bash
 bun run smoke:local
 ```
 
@@ -58,6 +62,7 @@ Expected result:
 - Backend TypeScript passes.
 - Backend tests pass.
 - Frontend TypeScript and Vite build pass.
+- Smoke doctor confirms the backend is reachable and the database is connected.
 - Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
 - Live chat smoke confirms backend-to-OpenRouter chat, chat persistence, and usage accounting.
 

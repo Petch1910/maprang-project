@@ -101,6 +101,10 @@ bun run frontend:check
 ```
 
 ```bash
+bun run smoke:doctor
+```
+
+```bash
 bun run smoke:local
 ```
 
