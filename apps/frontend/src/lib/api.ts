@@ -1,4 +1,7 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+import { API_BASE_URL } from './env'
+
+export { API_BASE_URL }
+
 export const DEFAULT_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 

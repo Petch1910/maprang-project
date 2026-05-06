@@ -1,14 +1,8 @@
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { clearApiAuth, setAccessToken, setApiUserId } from './api'
+import { hasRealEnvValue, SUPABASE_ANON_KEY, SUPABASE_URL } from './env'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
-
-function hasRealEnvValue(value: string | undefined) {
-  return Boolean(value?.trim() && !value.includes('your-project.supabase.co') && !value.startsWith('replace-with-'))
-}
-
-export const isSupabaseConfigured = hasRealEnvValue(supabaseUrl) && hasRealEnvValue(supabaseAnonKey)
+export const isSupabaseConfigured = hasRealEnvValue(SUPABASE_URL) && hasRealEnvValue(SUPABASE_ANON_KEY)
 
 let supabaseClient: SupabaseClient | null = null
 
@@ -17,7 +11,7 @@ export async function getSupabase() {
   if (supabaseClient) return supabaseClient
 
   const { createClient } = await import('@supabase/supabase-js')
-  supabaseClient = createClient(supabaseUrl!, supabaseAnonKey!, {
+  supabaseClient = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,

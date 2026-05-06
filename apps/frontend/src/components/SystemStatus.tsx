@@ -1,4 +1,5 @@
 import type { HealthStatus } from '../lib/api'
+import { frontendEnvWarnings } from '../lib/env'
 
 type SystemStatusProps = {
   healthStatus: HealthStatus | null
@@ -11,6 +12,7 @@ function Dot({ ok }: { ok: boolean }) {
 
 export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
   const checks = healthStatus?.checks
+  const frontendWarnings = frontendEnvWarnings()
 
   return (
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
@@ -81,6 +83,21 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
         <p className="mt-3 mb-0 line-clamp-3 text-xs leading-relaxed text-slate-500">
           env แนะนำที่ยังขาด: {healthStatus.env.missingRecommended.join(', ')}
         </p>
+      )}
+
+      {healthStatus?.env && (healthStatus.env.missingRequired.length > 0 || (healthStatus.env.invalid?.length ?? 0) > 0) && (
+        <div className="mt-3 rounded-lg border border-rose-500/20 bg-rose-50 p-3 text-xs leading-relaxed text-rose-800">
+          <p className="m-0 font-black">Backend env ยังไม่พร้อม production</p>
+          {healthStatus.env.missingRequired.length > 0 && <p className="m-0 mt-1">ขาด: {healthStatus.env.missingRequired.join(', ')}</p>}
+          {(healthStatus.env.invalid?.length ?? 0) > 0 && <p className="m-0 mt-1">ผิดค่า: {healthStatus.env.invalid?.join(', ')}</p>}
+        </div>
+      )}
+
+      {frontendWarnings.length > 0 && (
+        <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">
+          <p className="m-0 font-black">Frontend env ควรตรวจเพิ่ม</p>
+          <p className="m-0 mt-1">{frontendWarnings.join(' / ')}</p>
+        </div>
       )}
 
       {healthStatus?.databaseError && (
