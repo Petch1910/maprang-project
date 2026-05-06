@@ -17,7 +17,6 @@ const chatBody = t.Object({
       t.Literal('restricted_18'),
     ]),
   ),
-  userId: t.Optional(t.String()),
   history: t.Optional(
     t.Array(
       t.Object({
@@ -31,23 +30,18 @@ const chatBody = t.Object({
 export const chatRoutes = new Elysia()
   .get(
     '/chats',
-    async ({ query, request, set }) => {
+    async ({ request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
 
-      return { chats: await listChats(query.userId ?? (await resolveRequestUserId(request))) }
-    },
-    {
-      query: t.Object({
-        userId: t.Optional(t.String()),
-      }),
+      return { chats: await listChats(await resolveRequestUserId(request)) }
     },
   )
   .post(
     '/chat',
     async ({ body, request }) => {
       try {
-        return await sendChat({ ...body, userId: body.userId ?? (await resolveRequestUserId(request)) })
+        return await sendChat({ ...body, userId: await resolveRequestUserId(request) })
       } catch (error) {
         console.error('Chat error:', error)
         return {
@@ -63,7 +57,7 @@ export const chatRoutes = new Elysia()
   .post(
     '/chat/stream',
     async ({ body, request }) =>
-      new Response(streamChat({ ...body, userId: body.userId ?? (await resolveRequestUserId(request)) }), {
+      new Response(streamChat({ ...body, userId: await resolveRequestUserId(request) }), {
         headers: {
           'Content-Type': 'text/event-stream; charset=utf-8',
           'Cache-Control': 'no-cache, no-transform',

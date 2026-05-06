@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { CharacterStatus } from '@prisma/client'
 import { characterRoutes } from './character.routes'
+import { chatRoutes } from './chat.routes'
 import { createCharacter, updateCharacter } from './character.service'
 import { sendChat } from './chat.service'
 import { defaultUserId } from './config'
@@ -237,5 +238,39 @@ describe('character persistence quality gate', () => {
     expect(response.reply).toBe('This character is private or not available for chat.')
     expect(response.chatId).toBeNull()
     expect(response.usage?.totalTokens).toBe(0)
+  })
+
+  test('ignores spoofed chat body user id', async () => {
+    const privateCharacter = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Chat Spoof Guard`,
+      tags: ['friend'],
+      visibility: 'PRIVATE',
+      status: CharacterStatus.DRAFT,
+    })
+
+    expect(privateCharacter).not.toBeNull()
+
+    const response = await chatRoutes.handle(
+      new Request('http://localhost/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': otherUserId,
+        },
+        body: JSON.stringify({
+          characterId: privateCharacter!.id,
+          userId: defaultUserId,
+          message: 'hello',
+          maxRating: 'restricted_18',
+        }),
+      }),
+    )
+    const body = (await response.json()) as { reply: string; chatId: string | null; usage?: { totalTokens: number } }
+
+    expect(response.status).toBe(200)
+    expect(body.reply).toBe('This character is private or not available for chat.')
+    expect(body.chatId).toBeNull()
+    expect(body.usage?.totalTokens).toBe(0)
   })
 })
