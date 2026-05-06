@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import type { CharacterListFilters } from '../lib/api'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadChatSummaries, selectChatSummaries, selectChatsLoading } from '../store/slices/chatsSlice'
@@ -11,7 +12,25 @@ import {
 } from '../store/slices/charactersSlice'
 import { selectContentSettings, setAdultStatus, setShowMature } from '../store/slices/contentSlice'
 
-const categories = ['Anime', 'Fantasy', 'Romance', 'Dark Romance', 'Slice of Life', 'Drama', 'Mentor', 'Rival']
+const categories = [
+  { label: 'All', tag: '' },
+  { label: 'Anime', tag: 'anime' },
+  { label: 'Fantasy', tag: 'fantasy' },
+  { label: 'Romance', tag: 'romance' },
+  { label: 'Dark Romance', tag: 'red-flag' },
+  { label: 'Slice of Life', tag: 'slice-of-life' },
+  { label: 'Drama', tag: 'drama' },
+  { label: 'Mentor', tag: 'mentor' },
+  { label: 'Rival', tag: 'rival' },
+]
+
+const sortOptions: Array<{ label: string; value: CharacterListFilters['sort'] }> = [
+  { label: 'Popular', value: 'popular' },
+  { label: 'Newest', value: 'newest' },
+  { label: 'Quality', value: 'quality' },
+  { label: 'Most viewed', value: 'viewed' },
+  { label: 'Favorited', value: 'favorited' },
+]
 
 function characterBadges(tags: string[]) {
   const badges = new Set<string>()
@@ -30,11 +49,24 @@ export function ExplorePage() {
   const isCharactersLoading = useAppSelector(selectCharactersLoading)
   const isChatsLoading = useAppSelector(selectChatsLoading)
   const charactersError = useAppSelector(selectCharactersError)
+  const [search, setSearch] = useState('')
+  const [activeTag, setActiveTag] = useState('')
+  const [sort, setSort] = useState<CharacterListFilters['sort']>('popular')
+  const exploreFilters = useMemo(
+    () => ({
+      q: search.trim() || undefined,
+      tag: activeTag || undefined,
+      sort,
+      maxRating: content.maxRating,
+      limit: 24,
+    }),
+    [activeTag, content.maxRating, search, sort],
+  )
 
   useEffect(() => {
-    dispatch(loadExploreCharacters(content.maxRating))
+    dispatch(loadExploreCharacters(exploreFilters))
     dispatch(loadChatSummaries())
-  }, [content.maxRating, dispatch])
+  }, [dispatch, exploreFilters])
 
   const heroCharacterId = characters[0]?.id ?? 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
   const visibleCharacters = characters.filter((character) => canViewRating(characterRating(character), content.maxRating))
@@ -116,10 +148,51 @@ export function ExplorePage() {
         </div>
       </section>
 
+      <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_auto] lg:items-center">
+          <label className="block">
+            <span className="sr-only">Search characters</span>
+            <input
+              className="min-h-11 w-full rounded-xl border border-slate-900/10 bg-slate-50 px-4 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-500/50 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search characters, mood, creator prompt..."
+              value={search}
+            />
+          </label>
+          <select
+            className="min-h-11 rounded-xl border border-slate-900/10 bg-slate-50 px-3 text-sm font-black text-slate-700 outline-none"
+            onChange={(event) => setSort(event.target.value as CharacterListFilters['sort'])}
+            value={sort}
+          >
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <button
+            className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700"
+            onClick={() => dispatch(loadExploreCharacters(exploreFilters))}
+            type="button"
+          >
+            Refresh
+          </button>
+        </div>
+      </section>
+
       <section className="flex gap-2 overflow-x-auto pb-1">
         {categories.map((category) => (
-          <button className="min-h-10 flex-none rounded-full border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700" key={category}>
-            {category}
+          <button
+            className={`min-h-10 flex-none rounded-full border px-4 text-sm font-black transition ${
+              activeTag === category.tag
+                ? 'border-blue-600 bg-blue-600 text-white'
+                : 'border-slate-900/10 bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+            key={category.label}
+            onClick={() => setActiveTag(category.tag)}
+            type="button"
+          >
+            {category.label}
           </button>
         ))}
       </section>
@@ -164,7 +237,7 @@ export function ExplorePage() {
           })}
         {!isCharactersLoading && characters.length > 0 && visibleCharacters.length === 0 && (
           <div className="col-span-full rounded-lg border border-dashed border-slate-900/15 bg-white p-6 text-sm text-slate-500">
-            No characters match your current content mode. Enable adult mode to show mature discovery.
+            No characters match your current search or content mode. Adjust filters or enable adult mode to show mature discovery.
           </div>
         )}
       </section>

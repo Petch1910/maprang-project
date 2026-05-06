@@ -24,7 +24,7 @@ export function CharacterLobbyPage() {
   )
 
   useEffect(() => {
-    if (characters.length === 0) dispatch(loadExploreCharacters(content.maxRating))
+    if (characters.length === 0) dispatch(loadExploreCharacters({ maxRating: content.maxRating }))
   }, [characters.length, content.maxRating, dispatch])
   const rating = character ? characterRating(character) : 'general'
   const canView = canViewRating(rating, content.maxRating)

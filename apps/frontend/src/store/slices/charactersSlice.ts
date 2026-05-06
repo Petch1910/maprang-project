@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
-import { fetchCharacters, type Character } from '../../lib/api'
+import { fetchCharacters, type Character, type CharacterListFilters } from '../../lib/api'
 
 type CharactersState = {
   items: Character[]
@@ -16,10 +16,11 @@ const initialState: CharactersState = {
 
 export const loadExploreCharacters = createAsyncThunk(
   'characters/loadExplore',
-  async (maxRating: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18' = 'teen_romance') => {
-  const data = await fetchCharacters({ view: 'public', sort: 'popular', maxRating, limit: 24 })
-  return data.characters ?? []
-})
+  async (filters: CharacterListFilters = {}) => {
+    const data = await fetchCharacters({ view: 'public', sort: 'popular', limit: 24, ...filters })
+    return data.characters ?? []
+  },
+)
 
 const charactersSlice = createSlice({
   name: 'characters',
