@@ -628,6 +628,16 @@ export async function updateAdminReportStatus(reportId: string, status: ReportSt
   })
 }
 
+export async function adjustAdminUserTokens(userId: string, amount: number, reason?: string) {
+  return requestJson<{
+    user: UsageSummary['user']
+    adjustment: number
+  }>(`/admin/users/${userId}/tokens`, {
+    method: 'PATCH',
+    body: JSON.stringify({ amount, reason }),
+  })
+}
+
 export async function sendChatMessage(input: {
   message: string
   characterId: string

@@ -1,6 +1,13 @@
 import { CharacterStatus } from '@prisma/client'
 import { getPrisma } from './db'
 
+export function validateTokenAdjustment(amount: number) {
+  if (!Number.isInteger(amount)) return 'amount_must_be_integer'
+  if (amount === 0) return 'amount_required'
+  if (Math.abs(amount) > 1_000_000) return 'amount_too_large'
+  return null
+}
+
 export async function loadAdminSummary() {
   const prisma = getPrisma()
   if (!prisma) return null
@@ -83,4 +90,29 @@ export async function loadAdminSummary() {
       favoriteCount: character._count.favoritedBy,
     })),
   }
+}
+
+export async function adjustUserTokenBalance(userId: string, amount: number) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const validationError = validateTokenAdjustment(amount)
+  if (validationError) return { error: validationError }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, username: true, role: true, tokenBalance: true },
+  })
+  if (!user) return { error: 'user_not_found' }
+
+  const nextBalance = user.tokenBalance + amount
+  if (nextBalance < 0) return { error: 'insufficient_token_balance' }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { tokenBalance: nextBalance },
+    select: { id: true, email: true, username: true, role: true, tokenBalance: true },
+  })
+
+  return { user: updatedUser, adjustment: amount }
 }

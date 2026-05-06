@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Coins, RefreshCw, ReceiptText, TrendingDown } from 'lucide-react'
-import { ApiError, fetchUsageSummary, type UsageSummary } from '../lib/api'
+import { adjustAdminUserTokens, ApiError, fetchUsageSummary, type UsageSummary } from '../lib/api'
 import { useAppDispatch } from '../store/hooks'
 import { setTokenBalance } from '../store/slices/walletSlice'
 
@@ -28,6 +28,8 @@ export function WalletPage() {
   const dispatch = useAppDispatch()
   const [summary, setSummary] = useState<UsageSummary | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isAdjusting, setIsAdjusting] = useState(false)
+  const [adjustAmount, setAdjustAmount] = useState('1000')
   const [note, setNote] = useState('Loading wallet...')
 
   const usageCost = useMemo(
@@ -47,6 +49,22 @@ export function WalletPage() {
       setNote(errorMessage(error))
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  async function adjustTokens(amount: number) {
+    if (!summary || isAdjusting) return
+    setIsAdjusting(true)
+    try {
+      const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'manual_beta_grant' : 'manual_admin_debit')
+      setSummary((prev) => (prev ? { ...prev, user: data.user } : prev))
+      dispatch(setTokenBalance(data.user.tokenBalance))
+      setNote(`${amount > 0 ? 'Added' : 'Removed'} ${Math.abs(amount).toLocaleString()} token(s).`)
+    } catch (error) {
+      console.error('Adjust token error:', error)
+      setNote(error instanceof ApiError && error.status === 403 ? 'Admin API key is required for token adjustments.' : 'Could not adjust tokens.')
+    } finally {
+      setIsAdjusting(false)
     }
   }
 
@@ -104,6 +122,41 @@ export function WalletPage() {
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
           <p className="m-0 text-sm font-black text-slate-500">Recent cost</p>
           <p className="m-0 mt-2 text-2xl font-black text-slate-950">${usageCost.toFixed(6)}</p>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+          <div>
+            <p className="m-0 text-sm font-black text-slate-950">Admin token adjustment</p>
+            <p className="m-0 mt-1 text-sm leading-6 text-slate-500">
+              Manual grants are useful for beta testing before payment and promo systems are connected.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+            <input
+              className="min-h-11 rounded-xl border border-slate-900/10 px-3 text-sm font-bold text-slate-700 outline-none focus:border-amber-500"
+              inputMode="numeric"
+              onChange={(event) => setAdjustAmount(event.target.value)}
+              value={adjustAmount}
+            />
+            <button
+              className="min-h-11 rounded-xl bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              disabled={isAdjusting || !summary}
+              onClick={() => adjustTokens(Math.abs(Number(adjustAmount) || 0))}
+              type="button"
+            >
+              Add
+            </button>
+            <button
+              className="min-h-11 rounded-xl border border-rose-200 bg-rose-50 px-4 text-sm font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
+              disabled={isAdjusting || !summary}
+              onClick={() => adjustTokens(-Math.abs(Number(adjustAmount) || 0))}
+              type="button"
+            >
+              Remove
+            </button>
+          </div>
         </div>
       </section>
 
