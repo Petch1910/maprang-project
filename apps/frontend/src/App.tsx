@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { Bell, Compass, MessageCircle, PlusCircle, UserRound } from 'lucide-react'
+import { AgeGate } from './components/AgeGate'
 import { useAppDispatch, useAppSelector } from './store/hooks'
 import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chatsSlice'
 import { loadWalletSummary, selectTokenBalance } from './store/slices/walletSlice'
@@ -39,6 +40,7 @@ function App() {
 
   return (
     <div className="min-h-svh bg-slate-50 text-slate-950">
+      <AgeGate />
       <header className="sticky top-0 z-40 border-b border-slate-900/10 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <NavLink className="flex min-w-0 items-center gap-3" to="/">

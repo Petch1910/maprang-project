@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadChatSummaries, selectChatSummaries, selectChatsLoading } from '../store/slices/chatsSlice'
 import {
@@ -36,6 +37,7 @@ export function ExplorePage() {
   }, [dispatch])
 
   const heroCharacterId = characters[0]?.id ?? 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
+  const visibleCharacters = characters.filter((character) => canViewRating(characterRating(character), content.maxRating))
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
@@ -79,6 +81,9 @@ export function ExplorePage() {
             >
               Mature {content.showMature ? 'shown' : 'hidden'}
             </button>
+            <span className="flex min-h-10 items-center rounded-full bg-slate-100 px-4 text-sm font-black text-slate-600">
+              Max {ratingLabel(content.maxRating)}
+            </span>
           </div>
         </div>
       </section>
@@ -130,7 +135,9 @@ export function ExplorePage() {
           [1, 2, 3, 4, 5, 6].map((item) => <div className="h-72 animate-pulse rounded-2xl bg-slate-200" key={item} />)}
 
         {!isCharactersLoading &&
-          characters.map((character) => (
+          visibleCharacters.map((character) => {
+            const rating = characterRating(character)
+            return (
             <Link className="overflow-hidden rounded-2xl border border-slate-900/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" key={character.id} to={`/characters/${character.id}`}>
               <div className="aspect-[4/3] overflow-hidden bg-linear-to-br from-slate-200 via-blue-100 to-amber-100">
                 {character.avatarUrl && <img alt="" className="h-full w-full object-cover" src={character.avatarUrl} />}
@@ -141,6 +148,9 @@ export function ExplorePage() {
                   <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{character.tagline || character.description}</p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
+                  <span className="rounded-full bg-amber-50 px-2 py-1 text-[11px] font-black text-amber-700">
+                    {ratingLabel(rating)}
+                  </span>
                   {characterBadges(character.tags).map((badge) => (
                     <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-black text-slate-600" key={badge}>
                       {badge}
@@ -150,7 +160,13 @@ export function ExplorePage() {
                 <p className="text-xs font-black text-slate-400">{character.chatCount.toLocaleString()} chats</p>
               </div>
             </Link>
-          ))}
+            )
+          })}
+        {!isCharactersLoading && characters.length > 0 && visibleCharacters.length === 0 && (
+          <div className="col-span-full rounded-lg border border-dashed border-slate-900/15 bg-white p-6 text-sm text-slate-500">
+            No characters match your current content mode. Enable adult mode to show mature discovery.
+          </div>
+        )}
       </section>
     </div>
   )

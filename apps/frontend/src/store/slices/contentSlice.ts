@@ -5,12 +5,14 @@ export type ContentRating = 'general' | 'teen_romance' | 'mature_18' | 'restrict
 
 type ContentState = {
   isAdult: boolean
+  ageGateAnswered: boolean
   showMature: boolean
   maxRating: ContentRating
 }
 
 const initialState: ContentState = {
   isAdult: false,
+  ageGateAnswered: false,
   showMature: false,
   maxRating: 'teen_romance',
 }
@@ -24,6 +26,7 @@ const contentSlice = createSlice({
     },
     setAdultStatus(state, action: PayloadAction<boolean>) {
       state.isAdult = action.payload
+      state.ageGateAnswered = true
       state.showMature = action.payload ? state.showMature : false
       state.maxRating = action.payload ? 'restricted_18' : 'teen_romance'
     },
