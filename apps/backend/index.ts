@@ -8,7 +8,7 @@ import { chatRoutes } from './src/chat.routes'
 import { healthRoutes } from './src/health.routes'
 import { loreRoutes } from './src/lore.routes'
 import { reportRoutes } from './src/report.routes'
-import { rateLimitKey, routeRateLimitMax } from './src/security'
+import { AuthError, rateLimitKey, routeRateLimitMax } from './src/security'
 import { uploadRoutes } from './src/upload.routes'
 import { userRoutes } from './src/user.routes'
 import { allowedOrigins, serverHost, serverPort } from './src/config'
@@ -17,6 +17,12 @@ import { logRuntimeEnvStatus } from './src/env'
 logRuntimeEnvStatus()
 
 export const app = new Elysia()
+  .onError(({ error, set }) => {
+    if (error instanceof AuthError) {
+      set.status = 401
+      return { error: error.code, message: error.message }
+    }
+  })
   .use(
     cors({
       origin: allowedOrigins,

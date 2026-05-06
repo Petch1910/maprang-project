@@ -22,11 +22,23 @@ type SupabaseJwtPayload = {
   aud?: string | string[]
   iss?: string
   exp?: number
+  app_metadata?: {
+    role?: string
+    app_role?: string
+  }
   user_metadata?: {
     username?: string
     name?: string
     preferred_username?: string
   }
+}
+
+type SupabaseUserResponse = {
+  id?: string
+  email?: string
+  role?: string
+  app_metadata?: SupabaseJwtPayload['app_metadata']
+  user_metadata?: SupabaseJwtPayload['user_metadata']
 }
 
 type JwksKey = {
@@ -40,6 +52,16 @@ type JwksKey = {
 
 let jwksCache: { keys: JwksKey[]; expiresAt: number } | null = null
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+export class AuthError extends Error {
+  code: 'auth_required' | 'invalid_auth_token'
+
+  constructor(code: AuthError['code'], message: string) {
+    super(message)
+    this.name = 'AuthError'
+    this.code = code
+  }
+}
 
 function bearerToken(request: Request) {
   return request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
@@ -63,6 +85,19 @@ function supabaseIssuer() {
   return supabaseUrl ? `${supabaseUrl.replace(/\/$/, '')}/auth/v1` : null
 }
 
+function strictAuthEnabled() {
+  return process.env.NODE_ENV === 'production' && Boolean(supabaseIssuer())
+}
+
+function supabaseAuthVerificationApiKey() {
+  return (
+    process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ||
+    process.env.SUPABASE_ANON_KEY?.trim() ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+    null
+  )
+}
+
 async function loadSupabaseJwks() {
   if (jwksCache && jwksCache.expiresAt > Date.now()) return jwksCache.keys
 
@@ -81,41 +116,74 @@ async function loadSupabaseJwks() {
 }
 
 async function verifySupabaseJwt(token: string) {
-  const parts = token.split('.')
-  if (parts.length !== 3) return null
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
 
-  const [encodedHeader, encodedPayload, encodedSignature] = parts
-  if (!encodedHeader || !encodedPayload || !encodedSignature) return null
-  const header = decodeJsonPart<JwtHeader>(encodedHeader)
-  const payload = decodeJsonPart<SupabaseJwtPayload>(encodedPayload)
-  if (header.alg !== 'RS256' || !header.kid || !payload.sub) return null
+    const [encodedHeader, encodedPayload, encodedSignature] = parts
+    if (!encodedHeader || !encodedPayload || !encodedSignature) return null
+    const header = decodeJsonPart<JwtHeader>(encodedHeader)
+    const payload = decodeJsonPart<SupabaseJwtPayload>(encodedPayload)
+    if (header.alg !== 'RS256' || !header.kid || !payload.sub) return null
 
+    const issuer = supabaseIssuer()
+    if (!issuer || payload.iss?.replace(/\/$/, '') !== issuer) return null
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null
+
+    const key = (await loadSupabaseJwks()).find((item) => item.kid === header.kid && item.kty === 'RSA')
+    if (!key) return null
+
+    const cryptoKey = await crypto.subtle.importKey(
+      'jwk',
+      {
+        kty: key.kty,
+        n: key.n,
+        e: key.e,
+      },
+      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    )
+    const isValid = await crypto.subtle.verify(
+      'RSASSA-PKCS1-v1_5',
+      cryptoKey,
+      base64UrlToBytes(encodedSignature),
+      new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`),
+    )
+
+    return isValid ? payload : null
+  } catch {
+    return null
+  }
+}
+
+async function verifySupabaseJwtWithAuthServer(token: string) {
   const issuer = supabaseIssuer()
-  if (!issuer || payload.iss?.replace(/\/$/, '') !== issuer) return null
-  if (payload.exp && payload.exp * 1000 < Date.now()) return null
+  const apiKey = supabaseAuthVerificationApiKey()
+  if (!issuer || !apiKey) return null
 
-  const key = (await loadSupabaseJwks()).find((item) => item.kid === header.kid && item.kty === 'RSA')
-  if (!key) return null
+  let user: SupabaseUserResponse
+  try {
+    const response = await fetch(`${issuer}/user`, {
+      headers: {
+        apikey: apiKey,
+        authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) return null
+    user = (await response.json()) as SupabaseUserResponse
+  } catch {
+    return null
+  }
 
-  const cryptoKey = await crypto.subtle.importKey(
-    'jwk',
-    {
-      kty: key.kty,
-      n: key.n,
-      e: key.e,
-    },
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['verify'],
-  )
-  const isValid = await crypto.subtle.verify(
-    'RSASSA-PKCS1-v1_5',
-    cryptoKey,
-    base64UrlToBytes(encodedSignature),
-    new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`),
-  )
-
-  return isValid ? payload : null
+  if (!user.id) return null
+  return {
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    app_metadata: user.app_metadata,
+    user_metadata: user.user_metadata,
+  } satisfies SupabaseJwtPayload
 }
 
 async function syncSupabaseUser(payload: SupabaseJwtPayload) {
@@ -125,17 +193,19 @@ async function syncSupabaseUser(payload: SupabaseJwtPayload) {
   if (!prisma) return payload.sub
 
   const metadata = payload.user_metadata ?? {}
+  const role = payload.app_metadata?.role === 'admin' || payload.app_metadata?.app_role === 'admin' ? Role.ADMIN : Role.USER
   await prisma.user.upsert({
     where: { id: payload.sub },
     update: {
       email: payload.email,
       username: metadata.username ?? metadata.preferred_username ?? metadata.name ?? undefined,
+      role,
     },
     create: {
       id: payload.sub,
       email: payload.email,
       username: metadata.username ?? metadata.preferred_username ?? metadata.name ?? null,
-      role: payload.role === 'admin' ? Role.ADMIN : Role.USER,
+      role,
     },
   })
 
@@ -152,8 +222,16 @@ export function requestUserId(request: Request, fallback?: string) {
 export async function resolveRequestUserId(request: Request, fallback?: string) {
   const token = bearerToken(request)
   if (token && supabaseIssuer()) {
-    const payload = await verifySupabaseJwt(token)
+    const payload = (await verifySupabaseJwt(token)) ?? (await verifySupabaseJwtWithAuthServer(token))
     if (payload?.sub) return syncSupabaseUser(payload)
+    if (strictAuthEnabled()) {
+      throw new AuthError('invalid_auth_token', 'A valid Supabase access token is required.')
+    }
+  }
+
+  if (strictAuthEnabled()) {
+    if (isAdminRequest(request)) return requestUserId(request, fallback)
+    throw new AuthError('auth_required', 'Authentication is required.')
   }
 
   return requestUserId(request, fallback)
@@ -190,8 +268,19 @@ export function canAccessOwnerResource({
 }
 
 export function rateLimitKey(request: Request) {
+  if (strictAuthEnabled()) {
+    const adminUserId = isAdminRequest(request) ? request.headers.get('x-user-id')?.trim() : null
+    const token = bearerToken(request)
+    if (adminUserId && uuidPattern.test(adminUserId)) return `admin-user:${adminUserId}`
+    if (token) return `auth-token:${token.slice(-32)}`
+    return ipRateLimitKey(request)
+  }
+
+  return request.headers.get('x-user-id') ?? ipRateLimitKey(request)
+}
+
+function ipRateLimitKey(request: Request) {
   return (
-    request.headers.get('x-user-id') ??
     request.headers.get('cf-connecting-ip') ??
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     request.headers.get('x-real-ip') ??

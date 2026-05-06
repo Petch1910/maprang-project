@@ -65,6 +65,7 @@ Backend readiness: `http://127.0.0.1:3000/ready`
 - Set `CORS_ORIGINS` to deployed frontend origins only.
 - Set a long random `ADMIN_API_KEY`.
 - Set `SUPABASE_URL` or `SUPABASE_JWT_ISSUER` for JWT verification.
+- Set backend `SUPABASE_ANON_KEY` so HS256/shared-secret Supabase access tokens can be verified through the Auth server when needed.
 - Set `STORAGE_PROVIDER=supabase`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET=avatars`, and `SUPABASE_STORAGE_ACCESS=signed`.
 - Create the Supabase Storage bucket before multi-instance deploy.
 - Run the verification commands below before deploying.

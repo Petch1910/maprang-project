@@ -139,9 +139,13 @@ function invalidProductionValues() {
 
 export function validateRuntimeEnv() {
   const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
-  const missingRequired = requiredInProduction.filter((name) => !present(name))
+  const missingRequired: string[] = [...requiredInProduction.filter((name) => !present(name))]
   const missingRecommended = recommendedInProduction.filter((name) => !present(name))
   const invalid = invalidProductionValues()
+
+  if (mode === 'production' && !present('SUPABASE_ANON_KEY') && !present('SUPABASE_PUBLISHABLE_KEY')) {
+    missingRequired.push('SUPABASE_ANON_KEY or SUPABASE_PUBLISHABLE_KEY')
+  }
 
   if (mode === 'production' && missingRequired.length > 0) {
     throw new Error(`Missing required production env: ${missingRequired.join(', ')}`)

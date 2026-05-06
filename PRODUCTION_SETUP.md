@@ -25,6 +25,7 @@ Required:
 - `ADMIN_API_KEY`
 - `SUPABASE_URL`
 - `SUPABASE_JWT_ISSUER`
+- `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `STORAGE_PROVIDER=supabase`
 - `SUPABASE_STORAGE_BUCKET`
@@ -55,7 +56,7 @@ All `VITE_*` values are compiled into the frontend bundle at build time.
 1. Create a Supabase project.
 2. Copy the project URL to `SUPABASE_URL` and `VITE_SUPABASE_URL`.
 3. Set `SUPABASE_JWT_ISSUER` to `<SUPABASE_URL>/auth/v1`.
-4. Copy the anon public key to `VITE_SUPABASE_ANON_KEY`.
+4. Copy the anon public key to `VITE_SUPABASE_ANON_KEY` and backend `SUPABASE_ANON_KEY`.
 5. Copy the service role key to backend-only `SUPABASE_SERVICE_ROLE_KEY`.
 6. Create a storage bucket named `avatars`.
 7. Set `SUPABASE_STORAGE_BUCKET=avatars`.
@@ -123,6 +124,8 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 
 `smoke:chat` checks the smoke user's wallet before calling OpenRouter. Keep the smoke user topped up above `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT`, default `1000`, or override the threshold for heavier test prompts.
 
+For production, prefer a real `SMOKE_ACCESS_TOKEN`. If you use `SMOKE_USER_ID` instead, also set `SMOKE_ADMIN_API_KEY` so the backend treats header-based user id as an admin-only smoke path, not public authentication.
+
 For a single production smoke gate, run `bun run smoke:live` with the same `SMOKE_API_BASE_URL` and smoke auth variables set.
 
 Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless you intentionally want the automated persistence tests to create and archive test records there. Use those gates with local or staging databases.
@@ -130,12 +133,13 @@ Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless
 10. Complete manual QA from `DEPLOYMENT_QA.md`.
 
 You can also run the manual GitHub Actions workflow `Production Smoke` after each deploy.
-Configure repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN` or `SMOKE_USER_ID`.
+Configure repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN`, or both `SMOKE_USER_ID` and `SMOKE_ADMIN_API_KEY`.
 Turn on `run_chat` only when you want to spend a small amount of provider credit to verify the live AI path. Leave `min_token_balance_for_chat` at `1000` unless the smoke model or prompt needs a larger buffer.
 
 ## Production Readiness Notes
 
 - Latest migrations include reports, admin audit logs, and wallet token transactions. Always run `bunx prisma migrate deploy` before exposing the backend.
+- Production auth rejects plain `x-user-id` impersonation. Use Supabase access tokens for users; reserve `SMOKE_USER_ID` for admin-key smoke tests only.
 - Admin actions now write audit logs for report status changes, hidden characters, archived messages, and manual token adjustments.
 - Payment is not connected yet. Use Wallet admin token adjustment only for beta/manual grants until a payment provider is added.
-- Production smoke tests require either a real Supabase access token or a known UUID user id accepted by the backend environment, and live chat smoke requires that user's wallet to be topped up.
+- Production smoke tests require either a real Supabase access token or an admin-key-authorized UUID user id, and live chat smoke requires that user's wallet to be topped up.

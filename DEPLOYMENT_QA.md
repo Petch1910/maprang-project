@@ -67,7 +67,7 @@ bun run smoke:chat
 
 If `smoke:chat` reports that the backend returned the temporary AI fallback, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. Check outbound network access to `https://openrouter.ai`, `OPENROUTER_API_KEY`, provider credits, and backend logs.
 
-For a deployed backend, point the smoke tests at the backend URL. Use either a Supabase user token or a known UUID user id:
+For a deployed backend, point the smoke tests at the backend URL. Prefer a Supabase user token:
 
 ```bash
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local
@@ -75,8 +75,8 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 ```
 
 ```bash
-SMOKE_API_BASE_URL=https://api.example.com SMOKE_USER_ID=<uuid-user-id> bun run smoke:local
-SMOKE_API_BASE_URL=https://api.example.com SMOKE_USER_ID=<uuid-user-id> bun run smoke:chat
+SMOKE_API_BASE_URL=https://api.example.com SMOKE_USER_ID=<uuid-user-id> SMOKE_ADMIN_API_KEY=<admin-api-key> bun run smoke:local
+SMOKE_API_BASE_URL=https://api.example.com SMOKE_USER_ID=<uuid-user-id> SMOKE_ADMIN_API_KEY=<admin-api-key> bun run smoke:chat
 ```
 
 If the selected smoke model uses larger prompts, raise the preflight guard:
@@ -101,7 +101,7 @@ The same deploy checks also run in GitHub Actions through `.github/workflows/ci.
 CI also runs a seeded local backend smoke test and builds the backend and frontend Docker images without pushing them.
 
 For deployed environments, use the manual GitHub Actions workflow `Production Smoke`.
-Set repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN` or `SMOKE_USER_ID`.
+Set repository secrets `SMOKE_API_BASE_URL` and either `SMOKE_ACCESS_TOKEN`, or both `SMOKE_USER_ID` and `SMOKE_ADMIN_API_KEY`.
 The optional `run_chat` input also verifies the live AI provider path and uses provider credits. The workflow input `min_token_balance_for_chat` maps to `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` and defaults to `1000`.
 
 ## Required Production Environment
@@ -120,6 +120,7 @@ Recommended backend:
 
 - `SUPABASE_URL`
 - `SUPABASE_JWT_ISSUER`
+- `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `STORAGE_PROVIDER`
 - `SUPABASE_STORAGE_BUCKET`

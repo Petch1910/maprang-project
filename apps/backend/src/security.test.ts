@@ -1,18 +1,28 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import { rateLimitKey, requireAdminApiKey, resolveRequestUserId, routeRateLimitMax } from './security'
+import { chatRoutes } from './chat.routes'
+import { AuthError, rateLimitKey, requireAdminApiKey, resolveRequestUserId, routeRateLimitMax } from './security'
 
 describe('security helpers', () => {
+  const previousNodeEnv = process.env.NODE_ENV
   const previousAdminKey = process.env.ADMIN_API_KEY
   const previousSupabaseUrl = process.env.SUPABASE_URL
   const previousSupabaseIssuer = process.env.SUPABASE_JWT_ISSUER
+  const previousSupabaseAnonKey = process.env.SUPABASE_ANON_KEY
+  const previousSupabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   afterEach(() => {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV
+    else process.env.NODE_ENV = previousNodeEnv
     if (previousAdminKey === undefined) delete process.env.ADMIN_API_KEY
     else process.env.ADMIN_API_KEY = previousAdminKey
     if (previousSupabaseUrl === undefined) delete process.env.SUPABASE_URL
     else process.env.SUPABASE_URL = previousSupabaseUrl
     if (previousSupabaseIssuer === undefined) delete process.env.SUPABASE_JWT_ISSUER
     else process.env.SUPABASE_JWT_ISSUER = previousSupabaseIssuer
+    if (previousSupabaseAnonKey === undefined) delete process.env.SUPABASE_ANON_KEY
+    else process.env.SUPABASE_ANON_KEY = previousSupabaseAnonKey
+    if (previousSupabaseServiceRoleKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY
+    else process.env.SUPABASE_SERVICE_ROLE_KEY = previousSupabaseServiceRoleKey
   })
 
   test('admin key guard is disabled until ADMIN_API_KEY is configured', () => {
@@ -59,6 +69,20 @@ describe('security helpers', () => {
     expect(rateLimitKey(request)).toBe('user-1')
   })
 
+  test('production rate limit key ignores spoofed user ids without admin auth', () => {
+    process.env.NODE_ENV = 'production'
+    process.env.SUPABASE_URL = 'https://project-ref.supabase.co'
+    delete process.env.ADMIN_API_KEY
+    const request = new Request('http://local/chat', {
+      headers: {
+        'x-user-id': '550e8400-e29b-41d4-a716-446655440000',
+        'x-forwarded-for': '203.0.113.1, 10.0.0.1',
+      },
+    })
+
+    expect(rateLimitKey(request)).toBe('203.0.113.1')
+  })
+
   test('route rate limits are stricter for chat generation', () => {
     expect(routeRateLimitMax('local', new Request('http://local/chat'))).toBeLessThan(
       routeRateLimitMax('local', new Request('http://local/characters')),
@@ -96,5 +120,65 @@ describe('security helpers', () => {
         '550e8400-e29b-41d4-a716-446655440000',
       ),
     ).resolves.toBe('550e8400-e29b-41d4-a716-446655440000')
+  })
+
+  test('production Supabase auth rejects local user id impersonation without admin key', async () => {
+    process.env.NODE_ENV = 'production'
+    process.env.SUPABASE_URL = 'https://project-ref.supabase.co'
+    delete process.env.SUPABASE_JWT_ISSUER
+    delete process.env.ADMIN_API_KEY
+
+    await expect(
+      resolveRequestUserId(
+        new Request('http://local/me/usage', {
+          headers: {
+            'x-user-id': '550e8400-e29b-41d4-a716-446655440000',
+          },
+        }),
+        'fallback-user',
+      ),
+    ).rejects.toBeInstanceOf(AuthError)
+  })
+
+  test('production Supabase auth allows admin-key smoke user impersonation', async () => {
+    process.env.NODE_ENV = 'production'
+    process.env.SUPABASE_URL = 'https://project-ref.supabase.co'
+    process.env.ADMIN_API_KEY = 'secret'
+    delete process.env.SUPABASE_JWT_ISSUER
+
+    await expect(
+      resolveRequestUserId(
+        new Request('http://local/me/usage', {
+          headers: {
+            'x-admin-key': 'secret',
+            'x-user-id': '550e8400-e29b-41d4-a716-446655440000',
+          },
+        }),
+        'fallback-user',
+      ),
+    ).resolves.toBe('550e8400-e29b-41d4-a716-446655440000')
+  })
+
+  test('chat route returns 401 for production auth failures instead of provider fallback', async () => {
+    process.env.NODE_ENV = 'production'
+    process.env.SUPABASE_URL = 'https://project-ref.supabase.co'
+    delete process.env.ADMIN_API_KEY
+
+    const response = await chatRoutes.handle(
+      new Request('http://local/chat', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-user-id': '550e8400-e29b-41d4-a716-446655440000',
+        },
+        body: JSON.stringify({
+          message: 'hello',
+        }),
+      }),
+    )
+    const body = (await response.json()) as { error?: string }
+
+    expect(response.status).toBe(401)
+    expect(body.error).toBe('auth_required')
   })
 })

@@ -56,8 +56,9 @@ function authHeaders() {
   if (storedUserId && storedUserId !== userId) window.localStorage.removeItem('maprang:userId')
   const adminKey = localValue('maprang:adminKey')
   const accessToken = localValue('maprang:accessToken')
+  const shouldSendLocalUserId = import.meta.env.DEV || Boolean(adminKey)
   return {
-    'x-user-id': userId,
+    ...(shouldSendLocalUserId ? { 'x-user-id': userId } : {}),
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...(adminKey ? { 'x-admin-key': adminKey } : {}),
   }

@@ -46,6 +46,7 @@ CORS_ORIGINS=<frontend-url>
 ADMIN_API_KEY=<long-random-admin-key>
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_JWT_ISSUER=https://<project-ref>.supabase.co/auth/v1
+SUPABASE_ANON_KEY=<anon-key>
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 STORAGE_PROVIDER=supabase
 SUPABASE_STORAGE_BUCKET=avatars
@@ -102,7 +103,7 @@ SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun 
 SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
-Before `smoke:chat` calls OpenRouter, it verifies the smoke user has at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`. Top up that user through the admin wallet flow before running live production smoke.
+Before `smoke:chat` calls OpenRouter, it verifies the smoke user has at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`. Top up that user through the admin wallet flow before running live production smoke. If you smoke with `SMOKE_USER_ID` instead of a real Supabase token, set `SMOKE_ADMIN_API_KEY` too.
 
 Expected:
 

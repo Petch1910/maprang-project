@@ -21,6 +21,7 @@ function setCompleteProductionEnv() {
   process.env.ADMIN_API_KEY = 'test-admin-key-with-enough-entropy-for-validation'
   process.env.SUPABASE_URL = 'https://maprang-prod.supabase.co'
   process.env.SUPABASE_JWT_ISSUER = 'https://maprang-prod.supabase.co/auth/v1'
+  process.env.SUPABASE_ANON_KEY = jwtWithRole('anon')
   process.env.SUPABASE_SERVICE_ROLE_KEY = jwtWithRole('service_role')
   process.env.STORAGE_PROVIDER = 'supabase'
   process.env.SUPABASE_STORAGE_BUCKET = 'avatars'
@@ -52,6 +53,8 @@ describe('runtime env validation', () => {
     delete process.env.ADMIN_API_KEY
     delete process.env.SUPABASE_URL
     delete process.env.SUPABASE_JWT_ISSUER
+    delete process.env.SUPABASE_ANON_KEY
+    delete process.env.SUPABASE_PUBLISHABLE_KEY
     delete process.env.SUPABASE_SERVICE_ROLE_KEY
     delete process.env.STORAGE_PROVIDER
     delete process.env.SUPABASE_STORAGE_BUCKET
@@ -105,5 +108,13 @@ describe('runtime env validation', () => {
     expect(status.mode).toBe('production')
     expect(status.missingRequired).toEqual([])
     expect(status.invalid).toEqual([])
+  })
+
+  test('accepts publishable key as Supabase auth verification key', () => {
+    setCompleteProductionEnv()
+    delete process.env.SUPABASE_ANON_KEY
+    process.env.SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_maprang_test_key'
+
+    expect(validateRuntimeEnv().missingRequired).toEqual([])
   })
 })

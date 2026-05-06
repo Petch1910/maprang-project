@@ -5,9 +5,11 @@ export function smokeAuthHeaders() {
   const headers: Record<string, string> = {}
   const userId = process.env.SMOKE_USER_ID ?? (isLocalSmokeTarget ? 'dev-user' : '')
   const accessToken = process.env.SMOKE_ACCESS_TOKEN
+  const adminKey = process.env.SMOKE_ADMIN_API_KEY
 
   if (userId) headers['x-user-id'] = userId
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`
+  if (adminKey) headers['x-admin-key'] = adminKey
 
   return headers
 }

@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
 import { archiveChat, listChats, loadChatMessages, sendChat, streamChat } from './chat.service'
-import { resolveRequestUserId } from './security'
+import { AuthError, resolveRequestUserId } from './security'
 
 const chatBody = t.Object({
   message: t.String({ minLength: 1 }),
@@ -39,10 +39,19 @@ export const chatRoutes = new Elysia()
   )
   .post(
     '/chat',
-    async ({ body, request }) => {
+    async ({ body, request, set }) => {
       try {
         return await sendChat({ ...body, userId: await resolveRequestUserId(request) })
       } catch (error) {
+        if (error instanceof AuthError) {
+          set.status = 401
+          return {
+            error: error.code,
+            message: error.message,
+            chatId: body.chatId ?? null,
+          }
+        }
+
         console.error('Chat error:', error)
         return {
           reply: 'The AI service is temporarily unavailable. Please try again.',
