@@ -65,7 +65,7 @@ function App() {
 
   if (isChatRoute) {
     return (
-      <div className="min-h-svh bg-[#101012] text-white">
+      <div className="h-svh overflow-hidden bg-[#101012] text-white">
         <AgeGate />
         {appRoutes}
       </div>

@@ -199,6 +199,10 @@ export function WorkspacePage() {
       const data = await fetchAdminSummary()
       setAdminSummary(data)
     } catch (error) {
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        setAdminSummary(null)
+        return
+      }
       console.error('Load admin summary error:', error)
       setAdminSummary(null)
     }
@@ -230,6 +234,10 @@ export function WorkspacePage() {
       const data = await fetchLoreEntries(characterId)
       setLoreEntries(data.loreEntries ?? [])
     } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        setLoreEntries([])
+        return
+      }
       console.error('Load lore error:', error)
       setLoreEntries([])
     } finally {
@@ -721,7 +729,7 @@ export function WorkspacePage() {
   }
 
   return (
-    <main className="grid min-h-svh grid-cols-1 overflow-hidden bg-[#111113] text-white md:grid-cols-[246px_minmax(0,1fr)]">
+    <main className="grid h-svh grid-cols-1 overflow-hidden bg-[#111113] text-white md:grid-cols-[246px_minmax(0,1fr)]">
       <Sidebar
         character={character}
         adminSummary={adminSummary}

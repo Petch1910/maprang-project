@@ -1,4 +1,4 @@
-import { FastForward, Plus, Sparkles } from 'lucide-react'
+import { Plus, SendHorizontal } from 'lucide-react'
 
 type ComposerProps = {
   disabled: boolean
@@ -10,38 +10,37 @@ type ComposerProps = {
 export function Composer({ disabled, message, onMessageChange, onSubmit }: ComposerProps) {
   return (
     <form
-      className="mx-auto w-full max-w-5xl px-4 pb-4"
+      className="mx-auto w-full max-w-3xl px-3 pb-3 sm:px-5"
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()
       }}
     >
-      <div className="grid grid-cols-[44px_minmax(0,1fr)_52px] items-center gap-2 rounded-lg border border-white/10 bg-[#18181b]/85 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+      <div className="grid grid-cols-[40px_minmax(0,1fr)_44px] items-center gap-2 rounded-2xl border border-white/10 bg-[#18181b]/90 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.40)] backdrop-blur-xl">
         <button
-          className="grid size-11 place-items-center rounded-md bg-white/8 text-white transition hover:bg-white/12 disabled:opacity-50"
+          className="grid size-10 place-items-center rounded-xl bg-white/8 text-white transition hover:bg-white/12 disabled:opacity-50"
           disabled={disabled}
           title="เพิ่มตัวเลือก"
           type="button"
         >
           <Plus size={18} />
         </button>
-        <label className="relative block min-w-0">
-          <Sparkles className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/35" size={16} />
+        <label className="block min-w-0">
           <input
-            className="min-h-14 w-full rounded-md border border-white/8 bg-black/25 pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-white/25"
+            className="min-h-11 w-full rounded-xl border border-transparent bg-transparent px-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-white/12 focus:bg-black/18"
             disabled={disabled}
             onChange={(event) => onMessageChange(event.target.value)}
-            placeholder="พิมพ์ข้อความถึงตัวละคร..."
+            placeholder="พิมพ์ข้อความ..."
             value={message}
           />
         </label>
         <button
-          className="grid size-12 place-items-center rounded-md bg-white text-slate-950 transition hover:bg-white/90 disabled:opacity-50"
+          className="grid size-11 place-items-center rounded-xl bg-white text-slate-950 transition hover:bg-white/90 disabled:opacity-45"
           disabled={disabled || !message.trim()}
           title="ส่งข้อความ"
           type="submit"
         >
-          <FastForward size={20} />
+          <SendHorizontal size={19} />
         </button>
       </div>
     </form>

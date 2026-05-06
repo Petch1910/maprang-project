@@ -13,23 +13,19 @@ export function MessageBubble({ chat, isReporting = false, onReport }: MessageBu
   const canReport = chat.role !== 'system' && chat.content.trim().length > 0 && Boolean(onReport)
 
   return (
-    <article
-      className={`grid max-w-[min(760px,92%)] items-end gap-3 ${
-        isUser ? 'grid-cols-[minmax(0,auto)_40px] self-end' : 'grid-cols-[40px_minmax(0,auto)] self-start'
-      }`}
-    >
-      <div
-        className={`grid size-10 place-items-center rounded-full text-xs font-extrabold ${
-          isUser ? 'col-start-2 row-start-1 bg-white text-slate-950' : 'bg-white/15 text-white ring-1 ring-white/15'
-        }`}
-      >
-        {isUser ? 'คุณ' : 'AI'}
-      </div>
+    <article className={`flex w-full items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+      {!isUser && (
+        <div className="mb-1 grid size-8 flex-none place-items-center rounded-full bg-white/12 text-[11px] font-black text-white ring-1 ring-white/12">
+          AI
+        </div>
+      )}
 
       <div
-        className={`min-w-0 rounded-[18px] px-4 py-3.5 leading-relaxed shadow-[0_16px_44px_rgba(0,0,0,0.22)] ${
-          isUser ? 'col-start-1 row-start-1 bg-white text-slate-950' : 'border border-white/10 bg-black/35 text-white backdrop-blur-md'
-        } ${isUser ? '' : 'markdown-body'}`}
+        className={`group min-w-0 max-w-[min(760px,84%)] rounded-2xl px-4 py-3 text-sm leading-7 shadow-[0_14px_42px_rgba(0,0,0,0.22)] ${
+          isUser
+            ? 'rounded-br-md bg-white text-slate-950'
+            : 'rounded-bl-md border border-white/10 bg-black/38 text-white backdrop-blur-md markdown-body'
+        }`}
       >
         {isUser ? (
           <p className="m-0 whitespace-pre-wrap break-words">{chat.content}</p>
@@ -38,23 +34,23 @@ export function MessageBubble({ chat, isReporting = false, onReport }: MessageBu
         ) : (
           <p className="m-0 text-white/55">กำลังพิมพ์...</p>
         )}
-        {canReport && (
-          <div className={`mt-3 flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-            <button
-              className={`min-h-8 rounded-full border px-2.5 text-xs font-extrabold transition disabled:opacity-60 ${
-                isUser
-                  ? 'border-slate-900/15 bg-slate-900/5 text-slate-600 hover:bg-slate-900/10'
-                  : 'border-white/10 bg-white/5 text-white/55 hover:bg-white/10'
-              }`}
-              disabled={isReporting}
-              onClick={() => onReport?.(chat)}
-              type="button"
-            >
-              {isReporting ? 'กำลังรายงาน...' : 'รายงาน'}
-            </button>
-          </div>
+        {canReport && !isUser && (
+          <button
+            className="mt-2 hidden min-h-7 rounded-full border border-white/10 bg-white/5 px-2.5 text-xs font-bold text-white/50 transition hover:bg-white/10 hover:text-white group-hover:inline-flex disabled:opacity-60"
+            disabled={isReporting}
+            onClick={() => onReport?.(chat)}
+            type="button"
+          >
+            {isReporting ? 'กำลังรายงาน...' : 'รายงาน'}
+          </button>
         )}
       </div>
+
+      {isUser && (
+        <div className="mb-1 grid size-8 flex-none place-items-center rounded-full bg-white text-[11px] font-black text-slate-950">
+          คุณ
+        </div>
+      )}
     </article>
   )
 }
