@@ -312,6 +312,7 @@ export type AdminSummary = {
     usageRequests: number
     tokens: number
     cost: string
+    pendingReports?: number
   }
   topCharacters: Array<{
     id: string
@@ -573,9 +574,24 @@ export type ReportSummary = {
   reason: string
   details: string | null
   status: ReportStatus
+  reporterId?: string
   characterId: string | null
   messageId: string | null
+  character?: Pick<Character, 'id' | 'name' | 'status' | 'visibility'> | null
+  message?: {
+    id: string
+    role: ChatRole
+    content: string
+    chatId: string
+  } | null
+  reporter?: {
+    id: string
+    email: string | null
+    username: string | null
+  } | null
+  reviewedAt?: string | null
   createdAt: string
+  updatedAt?: string
 }
 
 export async function createReport(input: {
@@ -589,6 +605,26 @@ export async function createReport(input: {
   return requestJson<{ report: ReportSummary }>('/reports', {
     method: 'POST',
     body: JSON.stringify(input),
+  })
+}
+
+export async function fetchAdminReports(filters: {
+  status?: ReportStatus | ''
+  targetType?: ReportTargetType | ''
+  limit?: number
+} = {}) {
+  const params = new URLSearchParams()
+  if (filters.status) params.set('status', filters.status)
+  if (filters.targetType) params.set('targetType', filters.targetType)
+  if (filters.limit) params.set('limit', String(filters.limit))
+  const query = params.toString()
+  return requestJson<{ reports: ReportSummary[] }>(`/admin/reports${query ? `?${query}` : ''}`)
+}
+
+export async function updateAdminReportStatus(reportId: string, status: ReportStatus) {
+  return requestJson<{ report: ReportSummary }>(`/admin/reports/${reportId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
   })
 }
 

@@ -1,12 +1,15 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Bell, Compass, MessageCircle, PlusCircle, UserRound } from 'lucide-react'
+import { Bell, Compass, MessageCircle, PlusCircle, ShieldCheck, UserRound } from 'lucide-react'
 import { AgeGate } from './components/AgeGate'
 import { useAppDispatch, useAppSelector } from './store/hooks'
 import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chatsSlice'
 import { loadWalletSummary, selectTokenBalance } from './store/slices/walletSlice'
 
 const ChatRoomPage = lazy(() => import('./pages/ChatRoomPage').then((module) => ({ default: module.ChatRoomPage })))
+const AdminModerationPage = lazy(() =>
+  import('./pages/AdminModerationPage').then((module) => ({ default: module.AdminModerationPage })),
+)
 const CharacterLobbyPage = lazy(() =>
   import('./pages/CharacterLobbyPage').then((module) => ({ default: module.CharacterLobbyPage })),
 )
@@ -25,6 +28,7 @@ const navItems = [
   { to: '/chats', label: 'Chats', icon: MessageCircle },
   { to: '/create', label: 'Create', icon: PlusCircle },
   { to: '/events', label: 'Events', icon: Bell },
+  { to: '/moderation', label: 'Moderation', icon: ShieldCheck },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ]
 
@@ -107,13 +111,14 @@ function App() {
               <Route element={<MyChatsPage />} path="/chats" />
               <Route element={<CreatorStudioPage />} path="/create" />
               <Route element={<EventsInboxPage />} path="/events" />
+              <Route element={<AdminModerationPage />} path="/moderation" />
               <Route element={<ProfilePage />} path="/profile" />
             </Routes>
           </Suspense>
         </section>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-slate-900/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-slate-900/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden">
         {navItems.map((item) => (
           <NavLink
             className={({ isActive }) =>
