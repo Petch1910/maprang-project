@@ -5,6 +5,7 @@ import { Sidebar } from '../components/Sidebar'
 import {
   archiveChat as archiveSavedChat,
   createCharacter,
+  createReport,
   createLoreEntry,
   deleteCharacter,
   deleteLoreEntry,
@@ -541,6 +542,7 @@ export function WorkspacePage() {
       reduxDispatch(saveComposerDraft({ key: draftKey, value: '' }))
     }
     setIsLoading(true)
+    let completedChatId = chatId
 
     try {
       await streamChatMessage(
@@ -563,7 +565,10 @@ export function WorkspacePage() {
           }
 
           if (event.type === 'done') {
-            if (event.chatId) setChatId(event.chatId)
+            if (event.chatId) {
+              completedChatId = event.chatId
+              setChatId(event.chatId)
+            }
             setLastUsage(event.usage)
             if (event.memory) setRuntimeState(event.memory)
           }
@@ -575,6 +580,7 @@ export function WorkspacePage() {
           }
         },
       )
+      if (completedChatId) await syncOpenChatMessages(completedChatId)
       await loadChatHistory()
       await loadAdminSummary()
     } catch (error) {
@@ -590,7 +596,10 @@ export function WorkspacePage() {
           maxRating: contentSettings.maxRating,
           history: [...visibleHistory, { role: 'user', content: currentMsg }],
         })
-        if (data.chatId) setChatId(data.chatId)
+        if (data.chatId) {
+          completedChatId = data.chatId
+          setChatId(data.chatId)
+        }
         if (data.usage) setLastUsage(data.usage)
         if (data.memory) setRuntimeState(data.memory)
         setChatLog((prev) =>
@@ -603,6 +612,7 @@ export function WorkspacePage() {
               : chat,
           ),
         )
+        if (completedChatId) await syncOpenChatMessages(completedChatId)
         await loadChatHistory()
       } catch (fallbackError) {
         console.error('Chat fallback error:', fallbackError)
@@ -634,6 +644,51 @@ export function WorkspacePage() {
   ) => {
     const command = `/scene ${action}${code ? ` ${code}` : ''}`
     sendMessage(command)
+  }
+
+  const syncOpenChatMessages = async (id: string) => {
+    try {
+      const data = await fetchChatMessages(id)
+      if (!data.chat) return
+      setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
+      setRuntimeState({
+        memory: data.chat.memory ?? {
+          summary: '',
+          facts: [],
+          turnCount: 0,
+          updatedAt: '',
+        },
+        sceneState: { ...defaultSceneState(), ...(data.chat.sceneState ?? {}) },
+        relationshipState: data.chat.relationshipState ?? {
+          ...defaultRelationshipState(),
+        },
+      })
+    } catch (error) {
+      console.error('Sync chat messages error:', error)
+    }
+  }
+
+  const reportMessage = async (chat: ChatMessage) => {
+    if (isLoading || chat.role === 'system' || !chat.content.trim()) return
+    setConnectionNote('Submitting message report...')
+    try {
+      await createReport({
+        targetType: 'MESSAGE',
+        messageId: chat.id,
+        reason: 'message_policy_review',
+        details: `Reported ${chat.role} message from Chat Room.`,
+        metadata: {
+          chatId,
+          characterId: character.id,
+          role: chat.role,
+        },
+      })
+      setConnectionNote('Message report submitted for moderation review.')
+      await loadAdminSummary()
+    } catch (error) {
+      console.error('Report message error:', error)
+      setConnectionNote(apiErrorMessage(error, 'Could not submit this message report. Try again after the chat finishes syncing.'))
+    }
   }
 
   return (
@@ -686,6 +741,7 @@ export function WorkspacePage() {
         message={message}
         onMessageChange={updateMessageDraft}
         onOpenMenu={() => setIsMobileMenuOpen(true)}
+        onReportMessage={reportMessage}
         onSceneAction={handleSceneAction}
         onSendMessage={sendMessage}
       />

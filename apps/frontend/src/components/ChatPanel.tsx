@@ -17,6 +17,7 @@ type ChatPanelProps = {
   message: string
   onMessageChange: (message: string) => void
   onOpenMenu: () => void
+  onReportMessage?: (chat: ChatMessage) => void
   onSceneAction: (
     action: 'enter' | 'hold' | 'decline' | 'exit' | 'resolve' | 'accept' | 'reject',
     code?: string,
@@ -259,6 +260,7 @@ export function ChatPanel({
   message,
   onMessageChange,
   onOpenMenu,
+  onReportMessage,
   onSceneAction,
   onSendMessage,
 }: ChatPanelProps) {
@@ -302,7 +304,7 @@ export function ChatPanel({
       >
         <SceneBackdrop runtimeState={runtimeState} />
         {chatLog.map((chat) => (
-          <MessageBubble chat={chat} key={chat.id} />
+          <MessageBubble chat={chat} isReporting={isLoading} key={chat.id} onReport={onReportMessage} />
         ))}
 
         {isLoading && chatLog.at(-1)?.role !== 'assistant' && (
