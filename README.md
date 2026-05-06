@@ -93,6 +93,14 @@ bunx prisma migrate deploy
 bun run qa:local
 ```
 
+Use this as the normal local readiness gate. It checks secrets, deploy wiring, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, and avatar upload.
+
+Run the live provider gate only when the backend can reach OpenRouter:
+
+```bash
+bun run qa:live
+```
+
 Or run each check separately:
 
 ```bash
@@ -115,4 +123,4 @@ bun run smoke:local
 bun run smoke:chat
 ```
 
-GitHub Actions also runs the same deploy checks on pushes to `main` and on pull requests.
+`smoke:chat` verifies the real backend-to-OpenRouter path and can fail when outbound provider networking, API credits, or the provider key are not ready. GitHub Actions also runs the same deploy checks on pushes to `main` and on pull requests.

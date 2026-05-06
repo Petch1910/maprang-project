@@ -10,6 +10,14 @@ Run the full local gate when Postgres, backend, and frontend are available:
 bun run qa:local
 ```
 
+This gate does not call the live AI provider. It verifies committed secrets, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, and avatar upload.
+
+Run the live provider gate only when the backend is allowed to reach OpenRouter:
+
+```bash
+bun run qa:live
+```
+
 Or run each step separately:
 
 ```bash

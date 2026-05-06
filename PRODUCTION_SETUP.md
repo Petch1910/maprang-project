@@ -113,6 +113,8 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
+For a single production gate, run `bun run qa:live` with the same `SMOKE_API_BASE_URL` and smoke auth variables set.
+
 9. Complete manual QA from `DEPLOYMENT_QA.md`.
 
 ## Production Readiness Notes
