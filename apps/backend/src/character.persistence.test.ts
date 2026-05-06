@@ -219,6 +219,29 @@ describe('character persistence quality gate', () => {
     expect(publicBody.character.compactPrompt).toBeNull()
   })
 
+  test('blocks duplicating another creator public character', async () => {
+    const publicCharacter = await createCharacter({
+      ...strongInput,
+      name: `${testPrefix} Duplicate Guard`,
+      tags: ['friend', 'green-flag'],
+      visibility: 'PUBLIC',
+      status: CharacterStatus.PUBLISHED,
+    })
+
+    expect(publicCharacter).not.toBeNull()
+
+    const response = await characterRoutes.handle(
+      new Request(`http://localhost/characters/${publicCharacter!.id}/duplicate`, {
+        method: 'POST',
+        headers: { 'x-user-id': otherUserId },
+      }),
+    )
+    const body = (await response.json()) as { error: string }
+
+    expect(response.status).toBe(404)
+    expect(body.error).toBe('character_not_found')
+  })
+
   test('blocks chat against another user private character before provider calls', async () => {
     const privateCharacter = await createCharacter({
       ...strongInput,

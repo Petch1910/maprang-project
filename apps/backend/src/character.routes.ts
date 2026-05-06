@@ -253,11 +253,11 @@ export const characterRoutes = new Elysia()
       }
 
       const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
-      const canReadSource =
-        (existing.status === CharacterStatus.PUBLISHED && existing.visibility === 'PUBLIC') ||
-        (actorId ? canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId }) : isAdminRequest(request))
+      const canDuplicateSource = actorId
+        ? canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId })
+        : isAdminRequest(request)
 
-      if (!canReadSource) {
+      if (!canDuplicateSource) {
         set.status = 404
         return { error: 'character_not_found' }
       }
