@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { TokenTransactionType } from '@prisma/client'
 import { adjustUserTokenBalance } from './admin.service'
+import { debitUserTokensWithoutOverdraft } from './chat.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
 
@@ -53,5 +54,34 @@ describe('wallet token ledger', () => {
       balanceAfter: 350,
       reason: 'ledger_test',
     })
+  })
+
+  test('debits chat usage without allowing negative token balances', async () => {
+    expect(prisma).not.toBeNull()
+
+    await prisma!.tokenTransaction.deleteMany({ where: { userId: ledgerUserId } })
+    await prisma!.user.upsert({
+      where: { id: ledgerUserId },
+      update: { email: 'ledger@maprang.io', username: 'LedgerUser', tokenBalance: 100 },
+      create: {
+        id: ledgerUserId,
+        email: 'ledger@maprang.io',
+        username: 'LedgerUser',
+        tokenBalance: 100,
+      },
+    })
+
+    const debit = await debitUserTokensWithoutOverdraft(prisma!, ledgerUserId, 250)
+    const user = await prisma!.user.findUnique({
+      where: { id: ledgerUserId },
+      select: { tokenBalance: true },
+    })
+
+    expect(debit).toEqual({
+      previousBalance: 100,
+      tokenBalance: 0,
+      chargedTokens: 100,
+    })
+    expect(user?.tokenBalance).toBe(0)
   })
 })

@@ -180,6 +180,42 @@ async function loadTokenBalance(prisma: Prisma, userId: string) {
   return user?.tokenBalance ?? null
 }
 
+export async function debitUserTokensWithoutOverdraft(prisma: Prisma, userId: string, requestedTokens: number) {
+  if (requestedTokens <= 0) {
+    return {
+      previousBalance: await loadTokenBalance(prisma, userId),
+      tokenBalance: await loadTokenBalance(prisma, userId),
+      chargedTokens: 0,
+    }
+  }
+
+  const rows = await prisma.$queryRaw<Array<{ previousBalance: number; tokenBalance: number }>>`
+    WITH current_balance AS (
+      SELECT "tokenBalance" AS "previousBalance"
+      FROM "User"
+      WHERE "id" = CAST(${userId} AS uuid)
+      FOR UPDATE
+    ),
+    updated_user AS (
+      UPDATE "User"
+      SET
+        "tokenBalance" = GREATEST(0, current_balance."previousBalance" - ${requestedTokens}),
+        "updatedAt" = CURRENT_TIMESTAMP
+      FROM current_balance
+      WHERE "User"."id" = CAST(${userId} AS uuid)
+      RETURNING current_balance."previousBalance", "User"."tokenBalance"
+    )
+    SELECT "previousBalance", "tokenBalance" FROM updated_user
+  `
+
+  const row = rows[0]
+  const previousBalance = row?.previousBalance ?? null
+  const tokenBalance = row?.tokenBalance ?? null
+  const chargedTokens = previousBalance === null ? 0 : Math.min(Math.max(previousBalance, 0), requestedTokens)
+
+  return { previousBalance, tokenBalance, chargedTokens }
+}
+
 async function loadRuntimeContext(
   character: CharacterWithTags | null,
   userMessage: string,
@@ -614,29 +650,27 @@ async function persistChatTurn({
       },
     })
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        tokenBalance: { decrement: usage.totalTokens },
-      },
-      select: { tokenBalance: true },
-    })
-    tokenBalance = updatedUser.tokenBalance
+    const debit = await debitUserTokensWithoutOverdraft(prisma, userId, usage.totalTokens)
+    tokenBalance = debit.tokenBalance
 
     await prisma.tokenTransaction.create({
       data: {
         userId,
         usageId: usageRecord.id,
         type: TokenTransactionType.CHAT_USAGE,
-        amount: -usage.totalTokens,
-        balanceAfter: updatedUser.tokenBalance,
+        amount: -debit.chargedTokens,
+        balanceAfter: debit.tokenBalance ?? 0,
         reason: 'chat_usage',
         metadata: {
           chatId: chat.id,
           characterId: character.id,
           modelName,
+          previousBalance: debit.previousBalance,
+          chargedTokens: debit.chargedTokens,
+          unchargedTokens: Math.max(usage.totalTokens - debit.chargedTokens, 0),
           promptTokens: usage.promptTokens,
           completionTokens: usage.completionTokens,
+          totalTokens: usage.totalTokens,
           cost: usage.cost,
         },
       },
