@@ -94,8 +94,9 @@ export type Character = {
   favoriteCount?: number
   isFavorite?: boolean
   tags: string[]
-  chatCount: number
-}
+    chatCount: number
+    contentRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
+  }
 
 export type ChatSummary = {
   id: string
@@ -373,10 +374,11 @@ export type CharacterListFilters = {
   tag?: string
   status?: Character['status'] | ''
   visibility?: Character['visibility'] | ''
-  sort?: 'popular' | 'newest' | 'quality' | 'viewed' | 'favorited'
-  favoriteOnly?: boolean
-  limit?: number
-}
+    sort?: 'popular' | 'newest' | 'quality' | 'viewed' | 'favorited'
+    favoriteOnly?: boolean
+    maxRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
+    limit?: number
+  }
 
 export async function fetchCharacters(filters: CharacterListFilters = { view: 'public' }) {
   const params = new URLSearchParams()
@@ -385,9 +387,10 @@ export async function fetchCharacters(filters: CharacterListFilters = { view: 'p
   if (filters.tag?.trim()) params.set('tag', filters.tag.trim())
   if (filters.status) params.set('status', filters.status)
   if (filters.visibility) params.set('visibility', filters.visibility)
-  if (filters.sort) params.set('sort', filters.sort)
-  if (filters.favoriteOnly) params.set('favoriteOnly', 'true')
-  if (filters.limit) params.set('limit', String(filters.limit))
+    if (filters.sort) params.set('sort', filters.sort)
+    if (filters.favoriteOnly) params.set('favoriteOnly', 'true')
+    if (filters.maxRating) params.set('maxRating', filters.maxRating)
+    if (filters.limit) params.set('limit', String(filters.limit))
 
   return requestJson<{ characters?: Character[] }>(`/characters?${params.toString()}`)
 }

@@ -100,6 +100,7 @@ export const characterRoutes = new Elysia()
         visibility: query.visibility as Visibility | undefined,
         sort: query.sort,
         favoriteOnly: query.favoriteOnly,
+        maxRating: query.maxRating,
         limit: query.limit,
       }),
     }),
@@ -120,6 +121,14 @@ export const characterRoutes = new Elysia()
           ]),
         ),
         favoriteOnly: t.Optional(t.Boolean()),
+        maxRating: t.Optional(
+          t.Union([
+            t.Literal('general'),
+            t.Literal('teen_romance'),
+            t.Literal('mature_18'),
+            t.Literal('restricted_18'),
+          ]),
+        ),
         limit: t.Optional(t.Number()),
       }),
     },

@@ -1,5 +1,6 @@
 import { CharacterStatus, type Character, type Prisma, type Visibility } from '@prisma/client'
 import { defaultCharacterId, defaultSystemPrompt, defaultUserId } from './config'
+import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentRating } from './content-rating'
 import { getPrisma } from './db'
 import { validateRelationshipTags } from './relationship.engine'
 
@@ -36,6 +37,7 @@ export type CharacterListOptions = {
   visibility?: Visibility
   sort?: 'popular' | 'newest' | 'quality' | 'viewed' | 'favorited'
   favoriteOnly?: boolean
+  maxRating?: ContentRating
   limit?: number
 }
 
@@ -64,6 +66,7 @@ export function publicCharacter(character: CharacterWithTags) {
     favoriteCount: character._count?.favoritedBy ?? 0,
     isFavorite: character.favoritedBy?.some((favorite) => favorite.userId === defaultUserId) ?? false,
     tags: character.tags?.map((item) => item.tag.name) ?? [],
+    contentRating: contentRatingFromTags(character.tags?.map((item) => item.tag.name) ?? []),
   }
 }
 
@@ -173,6 +176,7 @@ export async function searchCharacters(options: CharacterListOptions = {}) {
   const isAdminView = view === 'admin'
   const query = options.query?.trim()
   const tag = options.tag?.trim().toLowerCase()
+  const maxRating = normalizeMaxRating(options.maxRating)
   const limit = Math.min(Math.max(options.limit ?? 24, 1), 60)
   const orderBy: Prisma.CharacterOrderByWithRelationInput[] =
     options.sort === 'newest'
@@ -240,7 +244,9 @@ export async function searchCharacters(options: CharacterListOptions = {}) {
     },
   })
 
-  return characters.map(publicCharacter)
+  return characters
+    .filter((character) => isAdminView || ratingAllowed(contentRatingFromTags(tagNames(character.tags)), maxRating))
+    .map(publicCharacter)
 }
 
 type QualityReviewInput = Omit<CharacterInput, 'tags'> & {

@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { CharacterStatus } from '@prisma/client'
 import { characterRoutes } from './character.routes'
 import { reviewCharacterQuality } from './character.service'
+import { contentRatingFromTags, ratingAllowed } from './content-rating'
 
 const strongCharacter = {
   name: 'Maple',
@@ -97,5 +98,21 @@ describe('relationship route endpoints', () => {
     expect(body.preview.seed.arcStage).toBe('commitment-test')
     expect(body.preview.turns).toHaveLength(2)
     expect(body.preview.finalState.trust).toBeGreaterThan(body.preview.seed.trust)
+  })
+})
+
+describe('content rating', () => {
+  test('derives conservative rating from discovery and engine tags', () => {
+    expect(contentRatingFromTags(['roleplay', 'thai'])).toBe('general')
+    expect(contentRatingFromTags(['romance', 'slow-burn'])).toBe('teen_romance')
+    expect(contentRatingFromTags(['enemy', 'hostile'])).toBe('mature_18')
+    expect(contentRatingFromTags(['nc'])).toBe('restricted_18')
+  })
+
+  test('enforces max rating rank', () => {
+    expect(ratingAllowed('teen_romance', 'teen_romance')).toBe(true)
+    expect(ratingAllowed('mature_18', 'teen_romance')).toBe(false)
+    expect(ratingAllowed('restricted_18', 'mature_18')).toBe(false)
+    expect(ratingAllowed('restricted_18', 'restricted_18')).toBe(true)
   })
 })

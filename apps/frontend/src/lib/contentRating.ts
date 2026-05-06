@@ -8,7 +8,8 @@ const ratingRank: Record<ContentRating, number> = {
   restricted_18: 3,
 }
 
-export function characterRating(character: Pick<Character, 'tags'>): ContentRating {
+export function characterRating(character: Pick<Character, 'tags' | 'contentRating'>): ContentRating {
+  if ('contentRating' in character && character.contentRating) return character.contentRating
   const tags = new Set(character.tags.map((tag) => tag.toLowerCase()))
   if (tags.has('nc') || tags.has('red-flag')) return 'restricted_18'
   if (tags.has('mafia') || tags.has('vampire') || tags.has('enemy') || tags.has('hostile')) return 'mature_18'

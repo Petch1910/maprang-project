@@ -14,8 +14,10 @@ const initialState: CharactersState = {
   error: null,
 }
 
-export const loadExploreCharacters = createAsyncThunk('characters/loadExplore', async () => {
-  const data = await fetchCharacters({ view: 'public', sort: 'popular', limit: 24 })
+export const loadExploreCharacters = createAsyncThunk(
+  'characters/loadExplore',
+  async (maxRating: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18' = 'teen_romance') => {
+  const data = await fetchCharacters({ view: 'public', sort: 'popular', maxRating, limit: 24 })
   return data.characters ?? []
 })
 

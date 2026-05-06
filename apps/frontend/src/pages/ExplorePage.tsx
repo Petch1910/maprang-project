@@ -32,9 +32,9 @@ export function ExplorePage() {
   const charactersError = useAppSelector(selectCharactersError)
 
   useEffect(() => {
-    dispatch(loadExploreCharacters())
+    dispatch(loadExploreCharacters(content.maxRating))
     dispatch(loadChatSummaries())
-  }, [dispatch])
+  }, [content.maxRating, dispatch])
 
   const heroCharacterId = characters[0]?.id ?? 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
   const visibleCharacters = characters.filter((character) => canViewRating(characterRating(character), content.maxRating))
