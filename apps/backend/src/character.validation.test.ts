@@ -33,10 +33,27 @@ describe('character quality relationship validation', () => {
     expect(quality.relationshipIssues).toHaveLength(0)
   })
 
-  test('fails publish quality when relationship tags have a danger conflict', () => {
+  test('passes adult-mode relationship conflicts as creator warnings', () => {
     const quality = reviewCharacterQuality({
       ...strongCharacter,
       tags: ['family', 'lover', 'nc'],
+      status: CharacterStatus.PUBLISHED,
+    })
+
+    expect(quality.passes).toBe(true)
+    expect(quality.relationshipIssues).toContainEqual(
+      expect.objectContaining({
+        code: 'family_romance_conflict',
+        level: 'warning',
+      }),
+    )
+    expect(quality.notes.some((note) => note.includes('family conflicts'))).toBe(true)
+  })
+
+  test('fails publish quality when non-adult relationship tags have a danger conflict', () => {
+    const quality = reviewCharacterQuality({
+      ...strongCharacter,
+      tags: ['family', 'lover'],
       status: CharacterStatus.PUBLISHED,
     })
 
@@ -47,7 +64,6 @@ describe('character quality relationship validation', () => {
         level: 'danger',
       }),
     )
-    expect(quality.notes.some((note) => note.includes('family conflicts'))).toBe(true)
   })
 })
 

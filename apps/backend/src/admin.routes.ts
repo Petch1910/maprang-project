@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia'
 import { adjustUserTokenBalance, loadAdminSummary } from './admin.service'
 import { listAdminAuditLogs } from './audit.service'
 import { requireDatabase } from './db'
+import { rejectInvalidUuid } from './route-guards'
 import { requireAdminApiKey, resolveRequestUserId } from './security'
 
 export const adminRoutes = new Elysia()
@@ -26,6 +27,8 @@ export const adminRoutes = new Elysia()
 
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_user_id')
+      if (invalidId) return invalidId
 
       const result = await adjustUserTokenBalance(
         params.id,

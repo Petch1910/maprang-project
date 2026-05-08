@@ -181,6 +181,12 @@ const TAG_RULES: Record<string, TagRule> = {
 }
 
 const TAG_ALIASES: Record<string, string> = {
+  '18+': 'nc',
+  adult: 'nc',
+  mature: 'nc',
+  nsfw: 'nc',
+  smut: 'nc',
+  spicy: 'nc',
   'ศัตรู': 'enemy',
   'คู่แข่ง': 'rival',
   'เพื่อน': 'friend',
@@ -506,6 +512,10 @@ export function analyzeRelationshipTags(tags: string[]) {
 export function validateRelationshipTags(tags: string[]): RelationshipValidationIssue[] {
   const profile = classifyTags(tags)
   const issues: RelationshipValidationIssue[] = []
+  const adultMode = profile.discovery.includes('nc')
+  const strictConflictLevel: RelationshipValidationIssue['level'] = adultMode ? 'warning' : 'danger'
+  const adultSimulationDisclosure =
+    'This story is fictional simulated adult roleplay. Adult mode keeps this as a creator-facing warning instead of blocking publish; define context and boundaries clearly.'
 
   if (profile.engine.length > 5) {
     issues.push({
@@ -517,17 +527,21 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
 
   if (profile.safety.includes('family') && (profile.discovery.includes('nc') || profile.engine.includes('lover'))) {
     issues.push({
-      level: 'danger',
+      level: strictConflictLevel,
       code: 'family_romance_conflict',
-      message: 'family conflicts with nc/lover. The relationship should use no-romance or remove romantic tags.',
+      message: adultMode
+        ? `family conflicts with nc/lover. ${adultSimulationDisclosure}`
+        : 'family conflicts with nc/lover. The relationship should use no-romance or remove romantic tags before publishing.',
     })
   }
 
   if (profile.safety.includes('no-romance') && (profile.engine.includes('lover') || profile.engine.includes('crush'))) {
     issues.push({
-      level: 'danger',
+      level: strictConflictLevel,
       code: 'no_romance_romantic_seed',
-      message: 'no-romance conflicts with lover/crush. Romance progression will be blocked.',
+      message: adultMode
+        ? `no-romance conflicts with lover/crush. ${adultSimulationDisclosure} Bot behavior may drift unless the prompt is explicit.`
+        : 'no-romance conflicts with lover/crush. Romance progression will be blocked.',
     })
   }
 

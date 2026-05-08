@@ -2,6 +2,7 @@ import { CharacterStatus, type Visibility } from '@prisma/client'
 import { Elysia, t } from 'elysia'
 import { defaultUserId } from './config'
 import { clampMaxRating, normalizeMaxRating } from './content-rating'
+import { generateCreatorDraft } from './creator-draft.service'
 import { requireDatabase } from './db'
 import {
   createCharacter,
@@ -22,7 +23,8 @@ import {
   simulateRelationshipPreview,
   validateRelationshipTags,
 } from './relationship.engine'
-import { canAccessOwnerResource, isAdminRequest, requestUserId, resolveRequestUserId } from './security'
+import { rejectInvalidUuid } from './route-guards'
+import { canAccessOwnerResource, isAdminRequest, resolveRequestUserId } from './security'
 import { effectiveMaxRatingForUser } from './user.service'
 
 const visibilitySchema = t.Union([t.Literal('PUBLIC'), t.Literal('UNLISTED'), t.Literal('PRIVATE')])
@@ -52,6 +54,27 @@ const characterBody = t.Object({
 })
 
 const characterPatchBody = t.Partial(characterBody)
+const creatorDraftBody = t.Object({
+  brief: t.Optional(t.String()),
+  imagePrompt: t.Optional(t.String()),
+  current: t.Optional(
+    t.Partial(
+      t.Object({
+        name: t.String(),
+        tagline: t.String(),
+        description: t.String(),
+        biography: t.String(),
+        scenario: t.String(),
+        systemPrompt: t.String(),
+        compactPrompt: t.String(),
+        characterAnchor: t.String(),
+        constraints: t.String(),
+        greeting: t.String(),
+        tags: t.String(),
+      }),
+    ),
+  ),
+})
 
 function normalizeCharacterBody(body: Partial<typeof characterBody.static>): Partial<CharacterInput> {
   return {
@@ -66,6 +89,9 @@ function hasRequestIdentity(request: Request) {
 }
 
 export const characterRoutes = new Elysia()
+  .post('/creator/ai-draft', ({ body, request }) => generateCreatorDraft({ ...body, origin: new URL(request.url).origin }), {
+    body: creatorDraftBody,
+  })
   .get('/relationship/presets', () => ({ presets: RELATIONSHIP_PRESETS }))
   .post(
     '/relationship/preview',
@@ -170,6 +196,9 @@ export const characterRoutes = new Elysia()
   .get(
     '/characters/:id',
     async ({ params, request, set }) => {
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
+
       const character = await loadCharacter(params.id)
 
       if (!character) {
@@ -199,6 +228,8 @@ export const characterRoutes = new Elysia()
     async ({ body, params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
@@ -226,6 +257,8 @@ export const characterRoutes = new Elysia()
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
@@ -252,6 +285,8 @@ export const characterRoutes = new Elysia()
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
@@ -289,6 +324,8 @@ export const characterRoutes = new Elysia()
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
@@ -319,6 +356,8 @@ export const characterRoutes = new Elysia()
     async ({ body, params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
@@ -358,6 +397,8 @@ export const characterRoutes = new Elysia()
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {

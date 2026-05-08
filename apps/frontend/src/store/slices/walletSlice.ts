@@ -47,5 +47,6 @@ const walletSlice = createSlice({
 
 export const { setTokenBalance, setWalletLoading } = walletSlice.actions
 export const selectTokenBalance = (state: RootState) => state.wallet.tokenBalance
+export const selectWalletLoading = (state: RootState) => state.wallet.isLoading
 export const selectIsLowToken = (state: RootState) => state.wallet.tokenBalance <= state.wallet.lowTokenThreshold
 export default walletSlice.reducer

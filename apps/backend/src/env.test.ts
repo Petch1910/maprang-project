@@ -27,8 +27,15 @@ function setCompleteProductionEnv() {
   process.env.SUPABASE_STORAGE_BUCKET = 'avatars'
   process.env.SUPABASE_STORAGE_ACCESS = 'signed'
   process.env.SUPABASE_SIGNED_URL_EXPIRES_IN = '3600'
+  process.env.IMAGE_GENERATION_API_KEY = 'sk-proj-image-key'
+  process.env.IMAGE_GENERATION_MODEL = 'gpt-image-1.5'
+  process.env.IMAGE_GENERATION_SIZE = '1024x1536'
+  process.env.IMAGE_GENERATION_OUTPUT_FORMAT = 'webp'
+  process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION = '85'
   process.env.MODEL_INPUT_COST_PER_1M = '0.1'
   process.env.MODEL_OUTPUT_COST_PER_1M = '0.4'
+  process.env.MODEL_TEMPERATURE = '0.85'
+  process.env.MODEL_MAX_OUTPUT_TOKENS = '900'
 }
 
 describe('runtime env validation', () => {
@@ -60,6 +67,8 @@ describe('runtime env validation', () => {
     delete process.env.SUPABASE_STORAGE_BUCKET
     delete process.env.SUPABASE_STORAGE_ACCESS
     delete process.env.SUPABASE_SIGNED_URL_EXPIRES_IN
+    delete process.env.IMAGE_GENERATION_API_KEY
+    delete process.env.OPENAI_API_KEY
 
     expect(() => validateRuntimeEnv()).toThrow('Missing required production env')
   })
@@ -94,10 +103,24 @@ describe('runtime env validation', () => {
     process.env.OPENROUTER_API_KEY = 'sk-proj-openai-key'
     process.env.SUPABASE_SIGNED_URL_EXPIRES_IN = 'later'
     process.env.MODEL_INPUT_COST_PER_1M = 'free'
+    process.env.SUPABASE_STORAGE_ACCESS = 'public'
+    process.env.IMAGE_GENERATION_API_KEY = 'sk-or-test-image-key'
+    process.env.IMAGE_GENERATION_SIZE = 'large'
+    process.env.IMAGE_GENERATION_OUTPUT_FORMAT = 'gif'
+    process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION = '101'
+    process.env.MODEL_TEMPERATURE = '3'
+    process.env.MODEL_MAX_OUTPUT_TOKENS = '64'
 
     expect(() => validateRuntimeEnv()).toThrow('OPENROUTER_API_KEY appears to be an OpenAI project key')
     expect(() => validateRuntimeEnv()).toThrow('SUPABASE_SIGNED_URL_EXPIRES_IN must be a positive integer')
+    expect(() => validateRuntimeEnv()).toThrow('SUPABASE_STORAGE_ACCESS must be signed in production')
+    expect(() => validateRuntimeEnv()).toThrow('IMAGE_GENERATION_API_KEY appears to be an OpenRouter key')
+    expect(() => validateRuntimeEnv()).toThrow('IMAGE_GENERATION_SIZE must use WIDTHxHEIGHT format')
+    expect(() => validateRuntimeEnv()).toThrow('IMAGE_GENERATION_OUTPUT_FORMAT must be png, jpeg, or webp')
+    expect(() => validateRuntimeEnv()).toThrow('IMAGE_GENERATION_OUTPUT_COMPRESSION must be an integer from 0 to 100')
     expect(() => validateRuntimeEnv()).toThrow('MODEL_INPUT_COST_PER_1M must be a non-negative number')
+    expect(() => validateRuntimeEnv()).toThrow('MODEL_TEMPERATURE must be between 0 and 2')
+    expect(() => validateRuntimeEnv()).toThrow('MODEL_MAX_OUTPUT_TOKENS must be an integer from 128 to 2400')
   })
 
   test('accepts complete production env', () => {

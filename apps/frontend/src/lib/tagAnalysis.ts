@@ -23,6 +23,8 @@ const discoveryTags = new Set([
   'romance',
   'drama',
   'slice-of-life',
+  'comfort',
+  'mystery',
   'pg',
   'nc',
 ])
@@ -56,7 +58,20 @@ const engineTags = new Set([
 
 const safetyTags = new Set(['family', 'no-romance', 'red-flag', 'yellow-flag', 'green-flag'])
 
-const aliases: Record<string, string> = {}
+const aliases: Record<string, string> = {
+  '18+': 'nc',
+  adult: 'nc',
+  mature: 'nc',
+  nsfw: 'nc',
+  smut: 'nc',
+  spicy: 'nc',
+  'คอนเทนต์ผู้ใหญ่': 'nc',
+  ผู้ใหญ่: 'nc',
+  ครอบครัว: 'family',
+  คนในครอบครัว: 'family',
+  คู่รัก: 'lover',
+  แฟน: 'lover',
+}
 
 export function parseTags(value: string | string[]) {
   const tags = Array.isArray(value) ? value : value.split(',')
@@ -85,6 +100,10 @@ export function analyzeTags(value: string | string[]): TagAnalysis {
     else analysis.unknown.push(tag)
   }
 
+  const adultMode = analysis.discovery.includes('nc')
+  const strictConflictLevel: TagIssue['level'] = adultMode ? 'warning' : 'danger'
+  const adultSimulationDisclosure = 'เนื้อเรื่องนี้เป็นการจำลอง/สมมุติสำหรับผู้ใหญ่ ระบบจะปล่อยผ่านเป็นคำเตือน แต่ควรเขียนขอบเขตและสถานการณ์ให้ชัด'
+
   if (analysis.engine.length > 5) {
     analysis.issues.push({
       level: 'warning',
@@ -94,15 +113,19 @@ export function analyzeTags(value: string | string[]): TagAnalysis {
 
   if (analysis.safety.includes('family') && (analysis.discovery.includes('nc') || analysis.engine.includes('lover'))) {
     analysis.issues.push({
-      level: 'danger',
-      message: 'family ขัดแย้งกับ nc/lover ให้ใช้ no-romance หรือเอาแท็กเสี่ยงออกก่อนเผยแพร่',
+      level: strictConflictLevel,
+      message: adultMode
+        ? `family + nc/lover เป็นโหมดผู้ใหญ่ที่มีความเสี่ยงด้านบริบท ${adultSimulationDisclosure}`
+        : 'family ขัดแย้งกับ nc/lover ให้ใช้ no-romance หรือเอาแท็กเสี่ยงออกก่อนเผยแพร่',
     })
   }
 
   if (analysis.safety.includes('no-romance') && (analysis.engine.includes('lover') || analysis.engine.includes('crush'))) {
     analysis.issues.push({
-      level: 'danger',
-      message: 'no-romance ขัดแย้งกับ lover/crush และจะบล็อกการพัฒนาความโรแมนติก',
+      level: strictConflictLevel,
+      message: adultMode
+        ? `no-romance + lover/crush ส่งสัญญาณความสัมพันธ์คนละทาง ${adultSimulationDisclosure} พฤติกรรมบอทอาจแกว่งถ้า prompt ไม่ชัด`
+        : 'no-romance ขัดแย้งกับ lover/crush และจะบล็อกการพัฒนาความโรแมนติก',
     })
   }
 

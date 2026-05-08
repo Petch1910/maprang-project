@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { updateContentSettings } from '../../lib/api'
+import { fetchContentSettings, updateContentSettings } from '../../lib/api'
 import type { RootState } from '../store'
 
 export type ContentRating = 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
@@ -17,6 +17,11 @@ const initialState: ContentState = {
   showMature: false,
   maxRating: 'teen_romance',
 }
+
+export const loadContentSettings = createAsyncThunk('content/loadSettings', async () => {
+  const data = await fetchContentSettings()
+  return data.contentSettings
+})
 
 export const saveContentSettings = createAsyncThunk(
   'content/saveSettings',
@@ -50,12 +55,19 @@ const contentSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(saveContentSettings.fulfilled, (state, action) => {
-      state.isAdult = action.payload.isAdult
-      state.ageGateAnswered = true
-      state.showMature = action.payload.isAdult ? state.showMature : false
-      state.maxRating = action.payload.maxRating
-    })
+    builder
+      .addCase(loadContentSettings.fulfilled, (state, action) => {
+        state.isAdult = action.payload.isAdult
+        state.ageGateAnswered = true
+        state.showMature = action.payload.isAdult ? state.showMature : false
+        state.maxRating = action.payload.maxRating
+      })
+      .addCase(saveContentSettings.fulfilled, (state, action) => {
+        state.isAdult = action.payload.isAdult
+        state.ageGateAnswered = true
+        state.showMature = action.payload.isAdult ? state.showMature : false
+        state.maxRating = action.payload.maxRating
+      })
   },
 })
 

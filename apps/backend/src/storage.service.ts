@@ -28,6 +28,10 @@ export function avatarExtension(file: File) {
   return extension === '.jpeg' ? '.jpg' : extension
 }
 
+export function avatarExtensionFromContentType(contentType: string) {
+  return allowedAvatarTypes.get(contentType.split(';')[0]?.trim().toLowerCase() ?? '') ?? null
+}
+
 export function avatarUrl(origin: string, filename: string) {
   return `${origin}/uploads/avatars/${filename}`
 }
@@ -124,5 +128,39 @@ export async function uploadAvatarFile({ file, origin }: { file: File; origin: s
     access: storageProvider === 'supabase' ? supabaseStorageAccess : 'local',
     size: file.size,
     contentType: file.type,
+  }
+}
+
+export async function uploadAvatarBytes({
+  bytes,
+  contentType,
+  origin,
+}: {
+  bytes: Uint8Array
+  contentType: string
+  origin: string
+}) {
+  if (bytes.byteLength > maxAvatarBytes) {
+    return { ok: false as const, status: 413, error: 'avatar_too_large', maxBytes: maxAvatarBytes }
+  }
+
+  const extension = avatarExtensionFromContentType(contentType)
+  if (!extension) return { ok: false as const, status: 415, error: 'avatar_type_not_supported' }
+
+  const filename = `${crypto.randomUUID()}${extension}`
+  if (storageProvider === 'supabase') {
+    await uploadSupabaseAvatar({ bytes, contentType, filename })
+  } else {
+    await uploadLocalAvatar({ bytes, filename })
+  }
+
+  return {
+    ok: true as const,
+    url: avatarUrl(origin, filename),
+    filename,
+    provider: storageProvider,
+    access: storageProvider === 'supabase' ? supabaseStorageAccess : 'local',
+    size: bytes.byteLength,
+    contentType,
   }
 }

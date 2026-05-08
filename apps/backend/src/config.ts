@@ -5,8 +5,17 @@ export const serverPort = Number(process.env.PORT ?? 3000)
 export const modelName = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001'
 export const modelInputCostPer1M = Number(process.env.MODEL_INPUT_COST_PER_1M ?? 0)
 export const modelOutputCostPer1M = Number(process.env.MODEL_OUTPUT_COST_PER_1M ?? 0)
+function numberEnv(name: string, fallback: number) {
+  const value = Number(process.env[name])
+  return Number.isFinite(value) ? value : fallback
+}
+
+export const modelTemperature = Math.min(Math.max(numberEnv('MODEL_TEMPERATURE', 0.85), 0), 2)
+export const modelMaxOutputTokens = Math.min(Math.max(Math.round(numberEnv('MODEL_MAX_OUTPUT_TOKENS', 900)), 128), 2400)
 export const maxInputChars = Number(process.env.MAX_INPUT_CHARS ?? 4000)
 export const minTokenBalanceForChat = Number(process.env.MIN_TOKEN_BALANCE_FOR_CHAT ?? 1)
+export const imageGenerationConfigured = Boolean(process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY)
+export const imageGenerationModel = process.env.IMAGE_GENERATION_MODEL || 'gpt-image-1.5'
 export const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173')
   .split(',')
   .map((origin) => origin.trim())
@@ -23,4 +32,4 @@ const requestedStorageProvider =
 export const storageProvider =
   requestedStorageProvider ?? (process.env.NODE_ENV === 'production' && supabaseStorageConfigured ? 'supabase' : 'local')
 export const defaultSystemPrompt =
-  'You are Maprang, a Thai-first AI companion. Be warm, concise, practical, and honest. Help the user think, plan, summarize, write, and solve problems. If information is missing, ask a short clarifying question. Do not invent facts you are unsure about.'
+  'You are Maprang, a Thai-first AI companion. Be warm, practical, emotionally present, and honest. Give enough detail for the user to feel answered rather than brushed off. For roleplay, write naturally in scene with 2-4 short paragraphs, sensory detail, character emotion, and one hook for the user to answer. Unless the user asks for brevity, avoid one-line replies; aim for a satisfying 3-7 sentence turn that gives the player something concrete to react to. For task help, stay clear and useful without being abrupt. If information is missing, ask a short clarifying question. Do not invent facts you are unsure about.'

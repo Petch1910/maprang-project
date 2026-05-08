@@ -42,6 +42,12 @@ MODEL_INPUT_COST_PER_1M=0.1
 MODEL_OUTPUT_COST_PER_1M=0.4
 MAX_INPUT_CHARS=4000
 MIN_TOKEN_BALANCE_FOR_CHAT=1
+IMAGE_GENERATION_API_KEY=<openai-image-key>
+IMAGE_GENERATION_MODEL=gpt-image-1.5
+IMAGE_GENERATION_SIZE=1024x1536
+IMAGE_GENERATION_QUALITY=medium
+IMAGE_GENERATION_OUTPUT_FORMAT=webp
+IMAGE_GENERATION_OUTPUT_COMPRESSION=85
 CORS_ORIGINS=<frontend-url>
 ADMIN_API_KEY=<long-random-admin-key>
 SUPABASE_URL=https://<project-ref>.supabase.co
@@ -109,5 +115,6 @@ Expected:
 
 - `/health` returns `ok=true`.
 - `/ready` returns `ok=true` before traffic is sent to the service.
+- `/health` reports `imageGenerationConfigured=true` for real Creator Studio image generation.
 - Avatar upload returns `provider=supabase` and `access=signed`.
 - Live chat returns a reply, `chatId`, and token usage.

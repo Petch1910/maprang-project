@@ -2,6 +2,7 @@ import { AdminAuditAction, CharacterStatus, Prisma, ReportStatus, ReportTargetTy
 import { createAdminAuditLog } from './audit.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
+import { isSafeRecordId, isUuid } from './security'
 
 export type CreateReportInput = {
   targetType: ReportTargetType
@@ -34,6 +35,8 @@ export function validateReportInput(input: CreateReportInput) {
   if (!reason) return 'reason_required'
   if (input.targetType === ReportTargetType.CHARACTER && !input.characterId) return 'character_id_required'
   if (input.targetType === ReportTargetType.MESSAGE && !input.messageId) return 'message_id_required'
+  if (input.characterId && !isUuid(input.characterId)) return 'invalid_character_id'
+  if (input.messageId && !isSafeRecordId(input.messageId)) return 'invalid_message_id'
   return null
 }
 

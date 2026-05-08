@@ -105,7 +105,7 @@ export function LoreManager({
           <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Lorebook</p>
           <h2 className="m-0 text-lg font-bold text-slate-900">ความรู้ของ {character.name}</h2>
         </div>
-        <button
+        <button type="button"
           className="min-h-8 rounded-full border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700"
           onClick={onLoad}
           disabled={isLoading}
@@ -114,7 +114,7 @@ export function LoreManager({
         </button>
       </div>
 
-      <button
+      <button type="button"
         className="mb-3 flex min-h-10 w-full items-center justify-between rounded-xl border border-slate-900/10 bg-slate-50 px-3 text-left text-sm font-extrabold text-slate-900 transition hover:bg-white"
         onClick={() => setIsOpen((value) => !value)}
       >
@@ -150,14 +150,14 @@ export function LoreManager({
             placeholder="priority"
           />
           <div className="grid grid-cols-2 gap-2">
-            <button
+            <button type="button"
               className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white transition hover:bg-slate-800 disabled:opacity-60"
               onClick={submit}
               disabled={isSaving || !form.keyword.trim() || !form.content.trim()}
             >
               {isSaving ? 'กำลังบันทึก...' : editingId ? 'บันทึก lore' : 'เพิ่ม lore'}
             </button>
-            <button
+            <button type="button"
               className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-bold text-slate-700"
               onClick={reset}
               disabled={isSaving}
@@ -188,13 +188,13 @@ export function LoreManager({
             )}
             <p className="mt-2 mb-3 line-clamp-3 text-xs leading-relaxed text-slate-600">{entry.content}</p>
             <div className="grid grid-cols-2 gap-2">
-              <button
+              <button type="button"
                 className="min-h-8 rounded-lg border border-slate-900/10 bg-white text-xs font-bold text-slate-700"
                 onClick={() => startEdit(entry)}
               >
                 แก้ไข
               </button>
-              <button
+              <button type="button"
                 className="min-h-8 rounded-lg border border-red-500/20 bg-red-50 text-xs font-bold text-red-700"
                 onClick={() => onDelete(entry.id)}
                 disabled={isSaving}

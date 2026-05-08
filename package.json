@@ -5,18 +5,28 @@
   "private": true,
   "scripts": {
     "backend:check": "cd apps/backend && bun run deploy:check",
+    "backend:check:db": "bun scripts/backend-db-check.ts",
     "frontend:check": "cd apps/frontend && bun run deploy:check",
+    "security:audit": "bun scripts/backend-security-audit.ts",
+    "api:smoke": "bun scripts/api-smoke.ts",
+    "api:smoke:live": "bun scripts/api-smoke.ts --live --require-live-image",
     "predeploy:check": "bun scripts/predeploy-check.ts",
     "secrets:check": "bun scripts/check-secrets.ts",
     "smoke:doctor": "bun scripts/smoke-doctor.ts",
     "smoke:ready": "bun scripts/readiness-smoke.ts",
+    "smoke:image": "bun scripts/image-smoke.ts",
     "smoke:local": "bun scripts/local-smoke.ts",
     "smoke:chat": "bun scripts/live-chat-smoke.ts",
-    "smoke:live": "bun run smoke:doctor && bun run smoke:ready && bun run smoke:local && bun run smoke:chat",
-    "qa:local": "bun run secrets:check && bun run predeploy:check && bun run backend:check && bun run frontend:check && bun run smoke:doctor && bun run smoke:local",
-    "qa:live": "bun run qa:local && bun run smoke:chat"
+    "smoke:live": "bun run smoke:doctor && bun run smoke:ready && bun run smoke:local && bun run smoke:image && bun run smoke:chat",
+    "production:check": "bun run predeploy:check && bun scripts/smoke-doctor.ts --strict-production && bun run smoke:ready",
+    "qa:seed": "cd apps/backend && bun prisma/qa-seed.ts",
+    "e2e:smoke": "bun scripts/e2e-smoke.ts",
+    "qa:local": "bun run secrets:check && bun run security:audit && bun run predeploy:check && bun run backend:check && bun run frontend:check && bun run smoke:doctor && bun run smoke:local && bun run api:smoke",
+    "qa:full": "bun run qa:local && bun run e2e:smoke",
+    "qa:live": "bun run qa:local && bun run api:smoke:live && bun run smoke:image && bun run smoke:chat"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/bun": "latest"
   },
   "peerDependencies": {

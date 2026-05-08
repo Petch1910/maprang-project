@@ -6,10 +6,12 @@ import { createCharacter, updateCharacter } from './character.service'
 import { sendChat } from './chat.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
+import { createDbTestGate } from './db.test-gate'
 import { reportRoutes } from './report.routes'
 import { userRoutes } from './user.routes'
 
 const prisma = getPrisma()
+const shouldRunDbTest = createDbTestGate(prisma, 'character persistence quality gate')
 const testPrefix = 'Test Rel Quality'
 const otherUserId = '660e8400-e29b-41d4-a716-446655440000'
 
@@ -43,7 +45,7 @@ async function cleanup() {
 
 describe('character persistence quality gate', () => {
   beforeAll(async () => {
-    expect(prisma).not.toBeNull()
+    if (!(await shouldRunDbTest({ silent: true }))) return
     await prisma?.user.upsert({
       where: { id: defaultUserId },
       update: { email: 'phet@maprang.io', username: 'PhetDev' },
@@ -66,28 +68,36 @@ describe('character persistence quality gate', () => {
   })
 
   afterAll(async () => {
+    if (!(await shouldRunDbTest({ silent: true }))) return
     await cleanup()
   })
 
-  test('downgrades published character with dangerous relationship conflict to review', async () => {
+  test('keeps adult-mode relationship conflict published with warning notes', async () => {
+    if (!(await shouldRunDbTest())) return
     const character = await createCharacter({
       ...strongInput,
-      name: `${testPrefix} Conflict`,
+      name: `${testPrefix} Adult Conflict`,
       tags: ['family', 'lover', 'nc'],
       visibility: 'PUBLIC',
       status: CharacterStatus.PUBLISHED,
     })
 
     expect(character).not.toBeNull()
-    expect(character?.status).toBe(CharacterStatus.REVIEW)
+    expect(character?.status).toBe(CharacterStatus.PUBLISHED)
     expect(character?.qualityNotes).toMatchObject({
-      passes: false,
-      relationshipIssues: [expect.objectContaining({ code: 'family_romance_conflict' })],
+      passes: true,
+      relationshipIssues: [
+        expect.objectContaining({
+          code: 'family_romance_conflict',
+          level: 'warning',
+        }),
+      ],
     })
     expect(character?.tags.map((item) => item.tag.name).sort()).toEqual(['family', 'lover', 'nc'])
   })
 
   test('keeps compatible published character published and updates conflict back to review', async () => {
+    if (!(await shouldRunDbTest())) return
     const character = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Compatible`,
@@ -113,6 +123,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('blocks character edits from a different user but allows the owner', async () => {
+    if (!(await shouldRunDbTest())) return
     const character = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Owner Guard`,
@@ -153,6 +164,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('keeps owner/admin character listings from leaking to other users', async () => {
+    if (!(await shouldRunDbTest())) return
     const character = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Private Listing Guard`,
@@ -185,6 +197,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('hides private characters and prompt fields from public access', async () => {
+    if (!(await shouldRunDbTest())) return
     const privateCharacter = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Private Detail Guard`,
@@ -220,6 +233,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('blocks duplicating another creator public character', async () => {
+    if (!(await shouldRunDbTest())) return
     const publicCharacter = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Duplicate Guard`,
@@ -243,6 +257,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('blocks chat against another user private character before provider calls', async () => {
+    if (!(await shouldRunDbTest())) return
     const privateCharacter = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Private Chat Guard`,
@@ -266,6 +281,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('ignores spoofed chat body user id', async () => {
+    if (!(await shouldRunDbTest())) return
     const privateCharacter = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Chat Spoof Guard`,
@@ -300,6 +316,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('ignores spoofed usage query user id', async () => {
+    if (!(await shouldRunDbTest())) return
     const response = await userRoutes.handle(
       new Request(`http://localhost/me/usage?userId=${defaultUserId}`, {
         headers: { 'x-user-id': otherUserId },
@@ -313,6 +330,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('blocks reports against private characters the reporter cannot access', async () => {
+    if (!(await shouldRunDbTest())) return
     const privateCharacter = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Report Guard`,
@@ -344,6 +362,7 @@ describe('character persistence quality gate', () => {
   })
 
   test('blocks message reports from users outside the chat', async () => {
+    if (!(await shouldRunDbTest())) return
     const publicCharacter = await createCharacter({
       ...strongInput,
       name: `${testPrefix} Message Report Guard`,

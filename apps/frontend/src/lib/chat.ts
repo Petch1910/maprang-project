@@ -1,4 +1,5 @@
 import type { Character, ChatMessage } from './api'
+import { displayMessageContent } from './characterDisplay'
 
 export const fallbackCharacter: Character = {
   id: 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
@@ -32,7 +33,7 @@ export function createGreeting(character: Character): ChatMessage {
   return {
     id: crypto.randomUUID(),
     role: 'assistant',
-    content: character.greeting || 'สวัสดีค่ะ มะปรางพร้อมช่วยแล้วนะคะ',
+    content: displayMessageContent(character.greeting || 'สวัสดีค่ะ มะปรางพร้อมช่วยแล้วนะคะ'),
   }
 }
 

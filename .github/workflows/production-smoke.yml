@@ -12,6 +12,11 @@ on:
         required: true
         default: false
         type: boolean
+      run_image:
+        description: Also run live image generation smoke. This uses image provider credits.
+        required: true
+        default: false
+        type: boolean
       min_token_balance_for_chat:
         description: Minimum smoke-user token balance before live chat smoke spends provider credits.
         required: true
@@ -43,5 +48,10 @@ jobs:
       - run: bun run smoke:doctor
       - run: bun run smoke:ready
       - run: bun run smoke:local
+      - run: bun run smoke:image
+      - if: ${{ inputs.run_image }}
+        env:
+          SMOKE_IMAGE_LIVE: '1'
+        run: bun run smoke:image
       - if: ${{ inputs.run_chat }}
         run: bun run smoke:chat

@@ -1,10 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { readinessFailures, type HealthStatus } from './health.service'
+import { readinessFailures, summarizeDatabaseError, type HealthStatus } from './health.service'
 
 type HealthOverrides = Partial<Omit<HealthStatus, 'checks' | 'model' | 'security' | 'env'>> & {
   checks?: Partial<HealthStatus['checks']>
   model?: Partial<HealthStatus['model']>
   security?: Partial<HealthStatus['security']>
+  securityPosture?: Partial<HealthStatus['securityPosture']>
   env?: Partial<HealthStatus['env']>
 }
 
@@ -16,6 +17,7 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
       databaseConfigured: true,
       databaseConnected: true,
       openRouterConfigured: true,
+      imageGenerationConfigured: true,
       adminAuthConfigured: true,
       supabaseAuthConfigured: true,
     },
@@ -23,14 +25,30 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
       name: 'google/gemini-2.0-flash-001',
       inputCostPer1M: 0.1,
       outputCostPer1M: 0.4,
+      temperature: 0.85,
+      maxOutputTokens: 900,
       maxInputChars: 4000,
       minTokenBalanceForChat: 1,
+      imageGeneration: {
+        configured: true,
+        model: 'gpt-image-1.5',
+      },
     },
     security: {
       corsOrigins: ['https://app.example.com'],
       authMode: 'supabase-jwt',
       adminGuard: 'api-key',
       avatarStorage: 'supabase',
+      avatarStorageAccess: 'signed',
+      signedUrlExpiresIn: 3600,
+    },
+    securityPosture: {
+      confidentiality: { ok: true, detail: 'Supabase JWT and admin API key are configured.' },
+      integrity: { ok: true, detail: 'Prisma query builder and owner guards are active.' },
+      availability: { ok: true, detail: 'Database and model provider checks are available.' },
+      authentication: { ok: true, detail: 'Supabase JWT authentication is configured.' },
+      authorization: { ok: true, detail: 'Owner/admin checks cover protected actions.' },
+      accounting: { ok: true, detail: 'Usage ledger and admin audit logs are available.' },
     },
     env: {
       mode: 'production',
@@ -48,11 +66,22 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
     checks: { ...base.checks, ...overrides.checks },
     model: { ...base.model, ...overrides.model },
     security: { ...base.security, ...overrides.security },
+    securityPosture: { ...base.securityPosture, ...overrides.securityPosture },
     env: { ...base.env, ...overrides.env },
   }
 }
 
 describe('readiness gate', () => {
+  test('summarizes Prisma database errors with code and useful message', () => {
+    const error = new Error('\nInvalid `prisma.$queryRaw()` invocation:\n\nconnect ECONNREFUSED 127.0.0.1:5432')
+    error.name = 'PrismaClientKnownRequestError'
+    ;(error as Error & { code: string }).code = 'ECONNREFUSED'
+
+    expect(summarizeDatabaseError(error)).toBe(
+      'PrismaClientKnownRequestError (ECONNREFUSED): connect ECONNREFUSED 127.0.0.1:5432',
+    )
+  })
+
   test('accepts a complete production health status', () => {
     expect(readinessFailures(health())).toEqual([])
   })
@@ -66,6 +95,7 @@ describe('readiness gate', () => {
             databaseConfigured: false,
             databaseConnected: false,
             openRouterConfigured: false,
+            imageGenerationConfigured: false,
           },
         }),
       ),
@@ -75,6 +105,7 @@ describe('readiness gate', () => {
         'DATABASE_URL is not configured',
         'database is not connected',
         'OPENROUTER_API_KEY is not configured',
+        'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY is not configured',
       ]),
     )
   })
@@ -91,6 +122,7 @@ describe('readiness gate', () => {
             authMode: 'local-dev-header',
             adminGuard: 'disabled',
             avatarStorage: 'local',
+            avatarStorageAccess: 'local',
           },
         }),
       ),
@@ -99,6 +131,7 @@ describe('readiness gate', () => {
         'Supabase auth is not configured',
         'ADMIN_API_KEY is not configured',
         'production avatar storage must use Supabase',
+        'production avatar storage access must use signed URLs',
         'production auth mode must use Supabase JWT',
         'production admin guard must use an API key',
       ]),

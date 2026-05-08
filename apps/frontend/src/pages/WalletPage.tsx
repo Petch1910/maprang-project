@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Coins, RefreshCw, ReceiptText, TrendingDown } from 'lucide-react'
-import { adjustAdminUserTokens, ApiError, fetchUsageSummary, type UsageSummary } from '../lib/api'
+import { Coins, KeyRound, RefreshCw, ReceiptText, TrendingDown, X } from 'lucide-react'
+import {
+  adjustAdminUserTokens,
+  ApiError,
+  clearAdminApiKey,
+  fetchUsageSummary,
+  setAdminApiKey,
+  shouldLogUnexpectedError,
+  type UsageSummary,
+} from '../lib/api'
 import { useAppDispatch } from '../store/hooks'
 import { setTokenBalance } from '../store/slices/walletSlice'
 
@@ -41,12 +49,26 @@ export function WalletPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isAdjusting, setIsAdjusting] = useState(false)
   const [adjustAmount, setAdjustAmount] = useState('1000')
+  const [adminKeyInput, setAdminKeyInput] = useState(() =>
+    typeof window === 'undefined' ? '' : window.localStorage.getItem('maprang:adminKey') || '',
+  )
   const [note, setNote] = useState('กำลังโหลดกระเป๋าโทเคน...')
 
   const usageCost = useMemo(
     () => summary?.usage.recent.reduce((total, item) => total + Number(item.cost ?? 0), 0) ?? 0,
     [summary],
   )
+  const normalizedAdjustAmount = useMemo(() => {
+    const amount = Number(adjustAmount)
+    if (!Number.isFinite(amount)) return 0
+    return Math.trunc(Math.abs(amount))
+  }, [adjustAmount])
+  const hasAdminKey = adminKeyInput.trim().length > 0
+  const canAdjustTokens = Boolean(summary) && !isAdjusting && normalizedAdjustAmount > 0 && hasAdminKey
+  const balanceLabel = summary ? `${summary.user.tokenBalance.toLocaleString()} โทเคน` : isLoading ? 'กำลังโหลด...' : '0 โทเคน'
+  const totalTokensLabel = summary ? summary.usage.totalTokens.toLocaleString() : isLoading ? '...' : '0'
+  const requestCountLabel = summary ? summary.usage.requestCount.toLocaleString() : isLoading ? '...' : '0'
+  const recentCostLabel = summary ? `$${usageCost.toFixed(6)}` : isLoading ? '...' : '$0.000000'
 
   const loadWallet = useCallback(async () => {
     setIsLoading(true)
@@ -56,7 +78,7 @@ export function WalletPage() {
       dispatch(setTokenBalance(data.user.tokenBalance))
       setNote('ข้อมูลโทเคนอัปเดตแล้ว')
     } catch (error) {
-      console.error('Load wallet error:', error)
+      if (shouldLogUnexpectedError(error)) console.error('Load wallet error:', error)
       setNote(errorMessage(error))
     } finally {
       setIsLoading(false)
@@ -84,11 +106,36 @@ export function WalletPage() {
       dispatch(setTokenBalance(data.user.tokenBalance))
       setNote(`${amount > 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(amount).toLocaleString()} โทเคนแล้ว`)
     } catch (error) {
-      console.error('Adjust token error:', error)
-      setNote(error instanceof ApiError && error.status === 403 ? 'ต้องใช้ Admin API key เพื่อปรับโทเคน' : 'ปรับโทเคนไม่ได้')
+      if (shouldLogUnexpectedError(error)) console.error('Adjust token error:', error)
+      setNote(
+        error instanceof ApiError && error.status === 401
+          ? 'ADMIN_API_KEY ไม่ถูกต้องหรือยังไม่ได้บันทึกในเบราว์เซอร์นี้'
+          : error instanceof ApiError && error.status === 403
+            ? 'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลสำหรับปรับโทเคน'
+            : 'ปรับโทเคนไม่ได้',
+      )
     } finally {
       setIsAdjusting(false)
     }
+  }
+
+  function saveAdminKey() {
+    const key = adminKeyInput.trim()
+    if (!key) {
+      clearAdminApiKey()
+      setAdminKeyInput('')
+      setNote('ล้าง ADMIN_API_KEY แล้ว')
+      return
+    }
+    setAdminApiKey(key)
+    setAdminKeyInput(key)
+    setNote('บันทึก ADMIN_API_KEY สำหรับเครื่องนี้แล้ว')
+  }
+
+  function removeAdminKey() {
+    clearAdminApiKey()
+    setAdminKeyInput('')
+    setNote('ล้าง ADMIN_API_KEY แล้ว')
   }
 
   useEffect(() => {
@@ -104,18 +151,23 @@ export function WalletPage() {
               <Coins size={16} />
               กระเป๋าโทเคน
             </p>
-            <h1 className="m-0 mt-2 text-3xl font-black tracking-normal text-slate-950">
-              {summary ? summary.user.tokenBalance.toLocaleString() : '0'} โทเคน
+            <h1 className="m-0 mt-2 break-words text-3xl font-black tracking-normal text-slate-950">
+              {balanceLabel}
             </h1>
             <p className="m-0 mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               ดูยอดโทเคน การใช้งานล่าสุด และความพร้อมสำหรับฉากยาวๆ
             </p>
-            {note && <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600">{note}</p>}
+            {note && (
+              <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600" data-testid="wallet-note">
+                {note}
+              </p>
+            )}
           </div>
 
           <div className="grid gap-2">
             <button
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+              data-testid="wallet-refresh"
               disabled={isLoading}
               onClick={loadWallet}
               type="button"
@@ -136,15 +188,56 @@ export function WalletPage() {
       <section className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
           <p className="m-0 text-sm font-black text-slate-500">ใช้ไปทั้งหมด</p>
-          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{(summary?.usage.totalTokens ?? 0).toLocaleString()}</p>
+          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{totalTokensLabel}</p>
         </div>
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
           <p className="m-0 text-sm font-black text-slate-500">จำนวนคำขอ</p>
-          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{(summary?.usage.requestCount ?? 0).toLocaleString()}</p>
+          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{requestCountLabel}</p>
         </div>
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
           <p className="m-0 text-sm font-black text-slate-500">ค่าใช้จ่ายล่าสุด</p>
-          <p className="m-0 mt-2 text-2xl font-black text-slate-950">${usageCost.toFixed(6)}</p>
+          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{recentCostLabel}</p>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-end">
+          <div>
+            <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
+              <KeyRound size={17} />
+              สิทธิ์ผู้ดูแลสำหรับเครื่องนี้
+            </p>
+            <p className="m-0 mt-1 text-sm leading-6 text-slate-500">
+              ใช้เฉพาะเครื่อง dev/admin เพื่อเรียก endpoint ผู้ดูแล เช่น เพิ่มหรือหักโทเคน คีย์จะถูกเก็บใน localStorage ของเบราว์เซอร์นี้
+            </p>
+          </div>
+          <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <input
+              className="min-h-11 min-w-0 rounded-xl border border-slate-900/10 px-3 text-sm font-bold text-slate-700 outline-none focus:border-amber-500"
+              data-testid="wallet-admin-key-input"
+              onChange={(event) => setAdminKeyInput(event.target.value)}
+              placeholder="วาง ADMIN_API_KEY"
+              type="password"
+              value={adminKeyInput}
+            />
+            <button
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800"
+              data-testid="wallet-admin-key-save"
+              onClick={saveAdminKey}
+              type="button"
+            >
+              บันทึกคีย์
+            </button>
+            <button
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+              data-testid="wallet-admin-key-clear"
+              onClick={removeAdminKey}
+              type="button"
+            >
+              <X size={16} />
+              ล้าง
+            </button>
+          </div>
         </div>
       </section>
 
@@ -153,33 +246,41 @@ export function WalletPage() {
           <div>
             <p className="m-0 text-sm font-black text-slate-950">ปรับโทเคนโดยผู้ดูแล</p>
             <p className="m-0 mt-1 text-sm leading-6 text-slate-500">
-              ใช้สำหรับช่วงทดสอบ beta ก่อนเชื่อมระบบชำระเงินหรือโปรโมชันจริง
+              ใช้สำหรับช่วงทดสอบก่อนเชื่อมระบบชำระเงินจริงหรือโปรโมชันจริง
             </p>
           </div>
-          <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+          <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input
-              className="min-h-11 rounded-xl border border-slate-900/10 px-3 text-sm font-bold text-slate-700 outline-none focus:border-amber-500"
+              className="min-h-11 min-w-0 rounded-xl border border-slate-900/10 px-3 text-sm font-bold text-slate-700 outline-none focus:border-amber-500"
+              data-testid="wallet-adjust-amount"
               inputMode="numeric"
               onChange={(event) => setAdjustAmount(event.target.value)}
               value={adjustAmount}
             />
             <button
-              className="min-h-11 rounded-xl bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
-              disabled={isAdjusting || !summary}
-              onClick={() => adjustTokens(Math.abs(Number(adjustAmount) || 0))}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              data-testid="wallet-adjust-add"
+              disabled={!canAdjustTokens}
+              onClick={() => adjustTokens(normalizedAdjustAmount)}
               type="button"
             >
               เพิ่ม
             </button>
             <button
-              className="min-h-11 rounded-xl border border-rose-200 bg-rose-50 px-4 text-sm font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
-              disabled={isAdjusting || !summary}
-              onClick={() => adjustTokens(-Math.abs(Number(adjustAmount) || 0))}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-4 text-sm font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
+              data-testid="wallet-adjust-debit"
+              disabled={!canAdjustTokens}
+              onClick={() => adjustTokens(-normalizedAdjustAmount)}
               type="button"
             >
               หัก
             </button>
           </div>
+          {!hasAdminKey && (
+            <p className="m-0 mt-3 rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-800">
+              ใส่และบันทึก ADMIN_API_KEY ก่อน จึงจะใช้ปุ่มเพิ่ม/หักโทเคนได้
+            </p>
+          )}
         </div>
       </section>
 
@@ -190,7 +291,7 @@ export function WalletPage() {
               <ReceiptText size={17} />
               ประวัติธุรกรรมโทเคน
             </p>
-            <p className="m-0 mt-1 text-xs font-bold text-slate-400">รายการเพิ่ม/หักยอดที่ใช้ตรวจสอบ wallet ได้ย้อนหลัง</p>
+            <p className="m-0 mt-1 text-xs font-bold text-slate-400">รายการเพิ่ม/หักยอดที่ตรวจสอบกระเป๋าโทเคนย้อนหลังได้</p>
           </div>
         </div>
 
@@ -229,7 +330,7 @@ export function WalletPage() {
               <ReceiptText size={17} />
               การใช้งานล่าสุด
             </p>
-            <p className="m-0 mt-1 text-xs font-bold text-slate-400">รายการใช้ AI ล่าสุดที่ backend บันทึกไว้</p>
+            <p className="m-0 mt-1 text-xs font-bold text-slate-400">รายการใช้ AI ล่าสุดที่ระบบบันทึกไว้</p>
           </div>
         </div>
 
@@ -242,7 +343,7 @@ export function WalletPage() {
             {summary.usage.recent.map((item) => (
               <article className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={item.id}>
                 <div className="min-w-0">
-                  <p className="m-0 truncate text-sm font-black text-slate-950">{item.modelName ?? 'unknown model'}</p>
+                  <p className="m-0 truncate text-sm font-black text-slate-950">{item.modelName ?? 'โมเดลไม่ระบุ'}</p>
                   <p className="m-0 mt-1 text-xs font-bold text-slate-400">{formatDate(item.createdAt)}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:justify-end">
@@ -263,7 +364,7 @@ export function WalletPage() {
       <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
         <p className="m-0 font-black">ระบบกันใช้โทเคนซ้ำ</p>
         <p className="m-0 mt-1">
-          ระหว่าง AI กำลังตอบ ระบบจะปิดการส่งซ้ำเพื่อลดการยิง API ซ้ำ ขั้นตอน production ถัดไปคือเชื่อมระบบชำระเงิน โปรโมชัน หรือการเติมโทเคนโดยผู้ดูแล
+          ระหว่าง AI กำลังตอบ ระบบจะปิดการส่งซ้ำเพื่อลดการเรียกใช้งานซ้ำ ขั้นตอนระบบใช้งานจริงถัดไปคือเชื่อมระบบชำระเงิน โปรโมชัน หรือการเติมโทเคนโดยผู้ดูแล
         </p>
       </section>
     </div>

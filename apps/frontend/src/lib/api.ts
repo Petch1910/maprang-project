@@ -23,6 +23,19 @@ export class ApiError extends Error {
   }
 }
 
+export function shouldLogUnexpectedError(error: unknown) {
+  if (error instanceof ApiError) return false
+  if (error instanceof TypeError && error.message === 'Failed to fetch') return false
+  if (error instanceof DOMException && error.name === 'AbortError') return false
+  if (error && typeof error === 'object') {
+    const namedError = error as { name?: unknown; path?: unknown; status?: unknown }
+    if (namedError.name === 'ApiError') return false
+    if (namedError.name === 'AbortError') return false
+    if (typeof namedError.path === 'string' && typeof namedError.status === 'number') return false
+  }
+  return true
+}
+
 function localValue(key: string) {
   if (typeof window === 'undefined') return null
   return window.localStorage.getItem(key)
@@ -37,6 +50,11 @@ export function setApiUserId(userId: string) {
 export function setAdminApiKey(apiKey: string) {
   if (typeof window === 'undefined') return
   window.localStorage.setItem('maprang:adminKey', apiKey)
+}
+
+export function clearAdminApiKey() {
+  if (typeof window === 'undefined') return
+  window.localStorage.removeItem('maprang:adminKey')
 }
 
 export function setAccessToken(accessToken: string) {
@@ -109,6 +127,7 @@ export type ChatSummary = {
   characterName: string
   lastMessageAt: string
   preview: string
+  isArchived?: boolean
   sceneState?: ChatRuntimeState['sceneState'] | null
   relationshipState?: ChatRuntimeState['relationshipState'] | null
 }
@@ -256,6 +275,7 @@ export type HealthStatus = {
     databaseConfigured: boolean
     databaseConnected: boolean
     openRouterConfigured: boolean
+    imageGenerationConfigured?: boolean
     adminAuthConfigured?: boolean
     supabaseAuthConfigured?: boolean
   }
@@ -264,7 +284,16 @@ export type HealthStatus = {
     authMode: 'supabase-jwt' | 'local-dev-header'
     adminGuard: 'api-key' | 'disabled'
     avatarStorage: 'local' | 'supabase'
+    avatarStorageAccess?: 'local' | 'public' | 'signed'
+    signedUrlExpiresIn?: number | null
   }
+  securityPosture?: Record<
+    'confidentiality' | 'integrity' | 'availability' | 'authentication' | 'authorization' | 'accounting',
+    {
+      ok: boolean
+      detail: string
+    }
+  >
   env?: {
     mode: 'production' | 'development'
     missingRequired: string[]
@@ -277,8 +306,14 @@ export type HealthStatus = {
     name: string
     inputCostPer1M: number
     outputCostPer1M: number
+    temperature?: number
+    maxOutputTokens?: number
     maxInputChars: number
     minTokenBalanceForChat: number
+    imageGeneration?: {
+      configured: boolean
+      model: string
+    }
   }
 }
 
@@ -370,13 +405,20 @@ export type LoreInput = {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const timeoutMs = path === '/chat' ? 60_000 : 12_000
+  const controller = init?.signal ? null : new AbortController()
+  const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    signal: init?.signal ?? controller?.signal,
     headers: {
       'Content-Type': 'application/json',
       ...authHeaders(),
       ...init?.headers,
     },
+  }).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId)
   })
 
   if (!response.ok) {
@@ -415,6 +457,10 @@ export async function fetchCharacters(filters: CharacterListFilters = { view: 'p
   if (filters.limit) params.set('limit', String(filters.limit))
 
   return requestJson<{ characters?: Character[] }>(`/characters?${params.toString()}`)
+}
+
+export async function fetchCharacter(characterId: string) {
+  return requestJson<{ character: Character }>(`/characters/${characterId}`)
 }
 
 export async function fetchHealthStatus() {
@@ -492,6 +538,44 @@ export type CharacterInput = {
   tags: string[]
   visibility: 'PUBLIC' | 'UNLISTED' | 'PRIVATE'
   status: 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED'
+}
+
+export type CreatorAiDraftFields = {
+  name: string
+  tagline: string
+  description: string
+  biography: string
+  scenario: string
+  systemPrompt: string
+  compactPrompt: string
+  characterAnchor: string
+  constraints: string
+  greeting: string
+  tags: string
+}
+
+export type CreatorAiDraftResponse = {
+  draft: CreatorAiDraftFields
+  image: {
+    url: string
+    provider: 'configured' | 'placeholder'
+    prompt: string
+    note: string
+  }
+  source: 'ai' | 'fallback'
+  modelName: string
+  warnings: string[]
+}
+
+export async function generateCreatorAiDraft(input: {
+  brief?: string
+  imagePrompt?: string
+  current?: Partial<CreatorAiDraftFields>
+}) {
+  return requestJson<CreatorAiDraftResponse>('/creator/ai-draft', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
 }
 
 export async function createCharacter(input: CharacterInput) {
@@ -583,8 +667,11 @@ export async function deleteLoreEntry(loreId: string) {
   })
 }
 
-export async function fetchChats() {
-  return requestJson<{ chats?: ChatSummary[] }>('/chats')
+export async function fetchChats(options: { archived?: boolean } = {}) {
+  const params = new URLSearchParams()
+  if (options.archived) params.set('archived', 'true')
+  const query = params.toString()
+  return requestJson<{ chats?: ChatSummary[] }>(`/chats${query ? `?${query}` : ''}`)
 }
 
 export async function fetchChatMessages(chatId: string) {
@@ -594,6 +681,25 @@ export async function fetchChatMessages(chatId: string) {
 export async function archiveChat(chatId: string) {
   return requestJson<{ ok: boolean }>(`/chats/${chatId}/archive`, {
     method: 'PATCH',
+  })
+}
+
+export async function restoreChat(chatId: string) {
+  return requestJson<{ ok: boolean }>(`/chats/${chatId}/restore`, {
+    method: 'PATCH',
+  })
+}
+
+export async function deleteChat(chatId: string) {
+  return requestJson<{ ok: boolean }>(`/chats/${chatId}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function updateChatTitle(chatId: string, title: string) {
+  return requestJson<{ chat: { id: string; title: string } }>(`/chats/${chatId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ title }),
   })
 }
 
@@ -714,7 +820,7 @@ export async function sendChatMessage(input: {
 }) {
   return requestJson<ChatResponse>('/chat', {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: JSON.stringify({ ...input, chatId: input.chatId ?? undefined }),
   })
 }
 
@@ -736,7 +842,7 @@ export async function streamChatMessage(
       'Content-Type': 'application/json',
       ...authHeaders(),
     },
-    body: JSON.stringify(input),
+    body: JSON.stringify({ ...input, chatId: input.chatId ?? undefined }),
   })
 
   if (!response.ok || !response.body) {
@@ -751,26 +857,28 @@ export async function streamChatMessage(
   const decoder = new TextDecoder()
   let buffer = ''
 
+  const emitEvent = (rawEvent: string) => {
+    const line = rawEvent
+      .split('\n')
+      .find((item) => item.startsWith('data: '))
+
+    if (!line) return
+    onEvent(JSON.parse(line.slice(6)) as ChatStreamEvent)
+  }
+
   while (true) {
     const { done, value } = await reader.read()
     if (done) break
 
     buffer += decoder.decode(value, { stream: true })
+    buffer = buffer.replace(/\r\n/g, '\n')
     const events = buffer.split('\n\n')
     buffer = events.pop() ?? ''
 
-    for (const rawEvent of events) {
-      const line = rawEvent
-        .split('\n')
-        .find((item) => item.startsWith('data: '))
-
-      if (!line) continue
-      onEvent(JSON.parse(line.slice(6)) as ChatStreamEvent)
-    }
+    for (const rawEvent of events) emitEvent(rawEvent)
   }
 
   buffer += decoder.decode()
-  if (buffer.trim().startsWith('data: ')) {
-    onEvent(JSON.parse(buffer.trim().slice(6)) as ChatStreamEvent)
-  }
+  buffer = buffer.replace(/\r\n/g, '\n')
+  for (const rawEvent of buffer.split('\n\n').filter((event) => event.trim())) emitEvent(rawEvent)
 }

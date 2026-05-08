@@ -23,10 +23,28 @@ describe('report validation', () => {
     expect(
       validateReportInput({
         targetType: ReportTargetType.CHARACTER,
-        characterId: '11111111-1111-1111-1111-111111111111',
+        characterId: '11111111-1111-4111-8111-111111111111',
         reason: 'policy concern',
       }),
     ).toBeNull()
+  })
+
+  test('rejects invalid target ids before persistence', () => {
+    expect(
+      validateReportInput({
+        targetType: ReportTargetType.CHARACTER,
+        characterId: "' OR 1=1 --",
+        reason: 'policy concern',
+      }),
+    ).toBe('invalid_character_id')
+
+    expect(
+      validateReportInput({
+        targetType: ReportTargetType.MESSAGE,
+        messageId: "' OR 1=1 --",
+        reason: 'unsafe message',
+      }),
+    ).toBe('invalid_message_id')
   })
 
   test('validates admin report actions', () => {

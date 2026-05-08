@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, test } from 'bun:test'
 import { chatRoutes } from './chat.routes'
-import { AuthError, rateLimitKey, requireAdminApiKey, resolveRequestUserId, routeRateLimitMax } from './security'
+import {
+  AuthError,
+  rateLimitBucket,
+  rateLimitKey,
+  rateLimitRequestKey,
+  requireAdminApiKey,
+  resolveRequestUserId,
+  routeRateLimitMax,
+} from './security'
 
 describe('security helpers', () => {
   const previousNodeEnv = process.env.NODE_ENV
@@ -87,6 +95,17 @@ describe('security helpers', () => {
     expect(routeRateLimitMax('local', new Request('http://local/chat'))).toBeLessThan(
       routeRateLimitMax('local', new Request('http://local/characters')),
     )
+  })
+
+  test('rate limit request key separates read navigation from expensive chat generation', () => {
+    const headers = { 'x-user-id': 'user-1' }
+    const readRequest = new Request('http://local/characters', { headers })
+    const chatRequest = new Request('http://local/chat', { method: 'POST', headers })
+
+    expect(rateLimitBucket(readRequest)).toBe('read')
+    expect(rateLimitBucket(chatRequest)).toBe('chat')
+    expect(rateLimitRequestKey(readRequest)).toBe('user-1:read')
+    expect(rateLimitRequestKey(chatRequest)).toBe('user-1:chat')
   })
 
   test('request user resolution keeps local dev fallback when Supabase issuer is not configured', async () => {

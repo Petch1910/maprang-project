@@ -4,20 +4,38 @@ import { hasRealEnvValue, SUPABASE_ANON_KEY, SUPABASE_URL } from './env'
 
 export const isSupabaseConfigured = hasRealEnvValue(SUPABASE_URL) && hasRealEnvValue(SUPABASE_ANON_KEY)
 
-let supabaseClient: SupabaseClient | null = null
+type SupabaseClientCache = typeof globalThis & {
+  __maprangSupabaseClient?: SupabaseClient | null
+  __maprangSupabaseClientPromise?: Promise<SupabaseClient | null> | null
+}
+
+function getSupabaseClientCache() {
+  return globalThis as SupabaseClientCache
+}
 
 export async function getSupabase() {
   if (!isSupabaseConfigured) return null
-  if (supabaseClient) return supabaseClient
+  const cache = getSupabaseClientCache()
+  if (cache.__maprangSupabaseClient) return cache.__maprangSupabaseClient
+  if (cache.__maprangSupabaseClientPromise) return cache.__maprangSupabaseClientPromise
 
-  const { createClient } = await import('@supabase/supabase-js')
-  supabaseClient = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  })
-  return supabaseClient
+  cache.__maprangSupabaseClientPromise = import('@supabase/supabase-js')
+    .then(({ createClient }) => {
+      const client = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        },
+      })
+      cache.__maprangSupabaseClient = client
+      return client
+    })
+    .catch((error) => {
+      cache.__maprangSupabaseClientPromise = null
+      throw error
+    })
+
+  return cache.__maprangSupabaseClientPromise
 }
 
 export type AuthState = {

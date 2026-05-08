@@ -107,11 +107,10 @@ export function CharacterList({
             <option value="newest">ล่าสุด</option>
             <option value="quality">คุณภาพ</option>
           </select>
-          <button
+          <button type="button"
             className="min-h-9 rounded-lg bg-slate-900 px-3 text-xs font-extrabold text-white disabled:opacity-60"
             onClick={applyFilters}
             disabled={isFiltering}
-            type="button"
           >
             {isFiltering ? '...' : 'ค้นหา'}
           </button>

@@ -22,10 +22,9 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
           <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">ผู้ดูแล</p>
           <h2 className="m-0 text-lg font-bold text-slate-900">ภาพรวมระบบ</h2>
         </div>
-        <button
+        <button type="button"
           className="min-h-8 rounded-full border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700"
           onClick={onRefresh}
-          type="button"
         >
           รีเฟรช
         </button>

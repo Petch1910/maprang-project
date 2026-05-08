@@ -15,6 +15,8 @@ const requiredInProduction = [
 const recommendedInProduction = [
   'MODEL_INPUT_COST_PER_1M',
   'MODEL_OUTPUT_COST_PER_1M',
+  'MODEL_TEMPERATURE',
+  'MODEL_MAX_OUTPUT_TOKENS',
 ] as const
 
 function present(name: string) {
@@ -79,6 +81,12 @@ function invalidProductionValues() {
   if (present('OPENROUTER_API_KEY') && process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-proj-')) {
     invalid.push('OPENROUTER_API_KEY appears to be an OpenAI project key, not an OpenRouter key')
   }
+  if (present('IMAGE_GENERATION_API_KEY') && process.env.IMAGE_GENERATION_API_KEY!.trim().startsWith('sk-or-')) {
+    invalid.push('IMAGE_GENERATION_API_KEY appears to be an OpenRouter key, not an OpenAI image key')
+  }
+  if (present('OPENAI_API_KEY') && process.env.OPENAI_API_KEY!.trim().startsWith('sk-or-')) {
+    invalid.push('OPENAI_API_KEY appears to be an OpenRouter key, not an OpenAI image key')
+  }
 
   if (present('SUPABASE_URL')) {
     try {
@@ -108,20 +116,28 @@ function invalidProductionValues() {
   if (present('STORAGE_PROVIDER') && process.env.STORAGE_PROVIDER !== 'supabase') {
     invalid.push('STORAGE_PROVIDER must be supabase in production')
   }
-  if (
-    present('SUPABASE_STORAGE_ACCESS') &&
-    process.env.SUPABASE_STORAGE_ACCESS !== 'signed' &&
-    process.env.SUPABASE_STORAGE_ACCESS !== 'public'
-  ) {
-    invalid.push('SUPABASE_STORAGE_ACCESS must be signed or public')
+  if (present('SUPABASE_STORAGE_ACCESS') && process.env.SUPABASE_STORAGE_ACCESS !== 'signed') {
+    invalid.push('SUPABASE_STORAGE_ACCESS must be signed in production')
   }
-  if (
-    process.env.SUPABASE_STORAGE_ACCESS === 'signed' &&
-    present('SUPABASE_SIGNED_URL_EXPIRES_IN')
-  ) {
+  if (present('SUPABASE_SIGNED_URL_EXPIRES_IN')) {
     const expiresIn = Number(process.env.SUPABASE_SIGNED_URL_EXPIRES_IN)
     if (!Number.isFinite(expiresIn) || !Number.isInteger(expiresIn) || expiresIn <= 0) {
       invalid.push('SUPABASE_SIGNED_URL_EXPIRES_IN must be a positive integer')
+    }
+  }
+  if (present('IMAGE_GENERATION_SIZE') && !/^\d+x\d+$/.test(process.env.IMAGE_GENERATION_SIZE!.trim())) {
+    invalid.push('IMAGE_GENERATION_SIZE must use WIDTHxHEIGHT format')
+  }
+  if (present('IMAGE_GENERATION_OUTPUT_FORMAT')) {
+    const format = process.env.IMAGE_GENERATION_OUTPUT_FORMAT!.trim()
+    if (!['png', 'jpeg', 'webp'].includes(format)) {
+      invalid.push('IMAGE_GENERATION_OUTPUT_FORMAT must be png, jpeg, or webp')
+    }
+  }
+  if (present('IMAGE_GENERATION_OUTPUT_COMPRESSION')) {
+    const compression = Number(process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION)
+    if (!Number.isFinite(compression) || !Number.isInteger(compression) || compression < 0 || compression > 100) {
+      invalid.push('IMAGE_GENERATION_OUTPUT_COMPRESSION must be an integer from 0 to 100')
     }
   }
 
@@ -131,6 +147,19 @@ function invalidProductionValues() {
       if (!Number.isFinite(cost) || cost < 0) {
         invalid.push(`${name} must be a non-negative number`)
       }
+    }
+  }
+
+  if (present('MODEL_TEMPERATURE')) {
+    const temperature = Number(process.env.MODEL_TEMPERATURE)
+    if (!Number.isFinite(temperature) || temperature < 0 || temperature > 2) {
+      invalid.push('MODEL_TEMPERATURE must be between 0 and 2')
+    }
+  }
+  if (present('MODEL_MAX_OUTPUT_TOKENS')) {
+    const maxTokens = Number(process.env.MODEL_MAX_OUTPUT_TOKENS)
+    if (!Number.isFinite(maxTokens) || !Number.isInteger(maxTokens) || maxTokens < 128 || maxTokens > 2400) {
+      invalid.push('MODEL_MAX_OUTPUT_TOKENS must be an integer from 128 to 2400')
     }
   }
 
@@ -145,6 +174,9 @@ export function validateRuntimeEnv() {
 
   if (mode === 'production' && !present('SUPABASE_ANON_KEY') && !present('SUPABASE_PUBLISHABLE_KEY')) {
     missingRequired.push('SUPABASE_ANON_KEY or SUPABASE_PUBLISHABLE_KEY')
+  }
+  if (mode === 'production' && !present('IMAGE_GENERATION_API_KEY') && !present('OPENAI_API_KEY')) {
+    missingRequired.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY')
   }
 
   if (mode === 'production' && missingRequired.length > 0) {

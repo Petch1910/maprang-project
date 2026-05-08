@@ -7,6 +7,7 @@ type ReadinessPayload = {
     databaseConfigured?: boolean
     databaseConnected?: boolean
     openRouterConfigured?: boolean
+    imageGenerationConfigured?: boolean
     adminAuthConfigured?: boolean
     supabaseAuthConfigured?: boolean
   }
@@ -18,6 +19,8 @@ type ReadinessPayload = {
     authMode?: string
     adminGuard?: string
     avatarStorage?: string
+    avatarStorageAccess?: string
+    signedUrlExpiresIn?: number | null
   }
   env?: {
     mode?: string
@@ -61,6 +64,8 @@ console.log(
       authMode: payload.security?.authMode,
       adminGuard: payload.security?.adminGuard,
       avatarStorage: payload.security?.avatarStorage,
+      avatarStorageAccess: payload.security?.avatarStorageAccess,
+      signedUrlExpiresIn: payload.security?.signedUrlExpiresIn,
       model: payload.model?.name,
     },
     null,

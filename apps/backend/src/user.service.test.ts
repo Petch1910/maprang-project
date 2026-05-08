@@ -1,8 +1,10 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { getPrisma } from './db'
+import { createDbTestGate } from './db.test-gate'
 import { effectiveMaxRatingForUser, loadContentSettings, updateContentSettings } from './user.service'
 
 const prisma = getPrisma()
+const shouldRunDbTest = createDbTestGate(prisma, 'user content settings')
 const contentUserIds = [
   '880e8400-e29b-41d4-a716-446655440000',
   '880e8400-e29b-41d4-a716-446655440001',
@@ -27,11 +29,12 @@ async function ensureContentUser(userId: string) {
 
 describe('user content settings', () => {
   afterAll(async () => {
+    if (!(await shouldRunDbTest({ silent: true }))) return
     await prisma?.user.deleteMany({ where: { id: { in: contentUserIds } } })
   })
 
   test('defaults users to teen romance and clamps requested adult ratings', async () => {
-    expect(prisma).not.toBeNull()
+    if (!(await shouldRunDbTest())) return
     const contentUserId = contentUserIds[0]!
 
     await ensureContentUser(contentUserId)
@@ -46,7 +49,7 @@ describe('user content settings', () => {
   })
 
   test('persists adult content mode server-side', async () => {
-    expect(prisma).not.toBeNull()
+    if (!(await shouldRunDbTest())) return
     const contentUserId = contentUserIds[1]!
     await ensureContentUser(contentUserId)
 

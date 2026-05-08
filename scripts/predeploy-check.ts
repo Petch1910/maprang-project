@@ -12,6 +12,9 @@ const requiredFiles = [
   'DEPLOY_RENDER.md',
   'DEPLOYMENT_QA.md',
   'PRODUCTION_SETUP.md',
+  'ROUTE_MENU_AUDIT.md',
+  'SECURITY_CHECKLIST.md',
+  'STAGING_RUNBOOK.md',
   '.github/workflows/production-smoke.yml',
   'apps/backend/Dockerfile',
   'apps/backend/.env.production.example',
@@ -61,6 +64,9 @@ const checks: Check[] = [
           'STORAGE_PROVIDER=supabase',
           'SUPABASE_STORAGE_BUCKET=avatars',
           'SUPABASE_STORAGE_ACCESS=signed',
+          'SUPABASE_SIGNED_URL_EXPIRES_IN=3600',
+          'IMAGE_GENERATION_API_KEY=',
+          'IMAGE_GENERATION_MODEL=gpt-image-1.5',
         ],
         'apps/backend/.env.production.example',
       )
@@ -112,16 +118,83 @@ const checks: Check[] = [
           'SMOKE_API_BASE_URL',
           'SMOKE_ADMIN_API_KEY',
           'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT',
+          'SMOKE_IMAGE_LIVE=1',
           'SUPABASE_ANON_KEY',
           'SUPABASE_STORAGE_ACCESS=signed',
+          'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY',
+          'private bucket with `SUPABASE_STORAGE_ACCESS=signed`',
           '/ready',
         ],
         'PRODUCTION_SETUP.md',
       )
       requireIncludes(
         render,
-        ['Health check path: `/ready`', 'bunx prisma migrate deploy', 'SUPABASE_ANON_KEY', 'SUPABASE_STORAGE_ACCESS=signed'],
+        [
+          'Health check path: `/ready`',
+          'bunx prisma migrate deploy',
+          'SUPABASE_ANON_KEY',
+          'SUPABASE_STORAGE_ACCESS=signed',
+          'IMAGE_GENERATION_API_KEY',
+          'imageGenerationConfigured=true',
+        ],
         'DEPLOY_RENDER.md',
+      )
+    },
+  },
+  {
+    name: 'QA scripts cover seed and Playwright e2e smoke',
+    run: async () => {
+      const content = await readRepoFile('package.json')
+      const frontendPackage = await readRepoFile('apps/frontend/package.json')
+      requireIncludes(
+        content,
+        [
+          '"security:audit"',
+          '"api:smoke"',
+          '"api:smoke:live"',
+          '"qa:seed"',
+          '"e2e:smoke"',
+          '"qa:full"',
+          '"smoke:image"',
+          '"production:check"',
+          '@playwright/test',
+        ],
+        'package.json',
+      )
+      requireIncludes(
+        frontendPackage,
+        ['frontend-static-audit.ts', 'frontend-route-audit.ts', 'check-frontend-bundles.ts'],
+        'apps/frontend/package.json',
+      )
+    },
+  },
+  {
+    name: 'security checklist and audit script are available',
+    run: async () => {
+      const checklist = await readRepoFile('SECURITY_CHECKLIST.md')
+      const packageJson = await readRepoFile('package.json')
+      requireIncludes(
+        checklist,
+        ['SQL Injection', 'Broken Access Control', 'Prompt Control', 'bun run security:audit', 'Production Must-Pass'],
+        'SECURITY_CHECKLIST.md',
+      )
+      requireIncludes(packageJson, ['"security:audit"', 'backend-security-audit.ts'], 'package.json')
+    },
+  },
+  {
+    name: 'route/menu audit and staging runbook are available',
+    run: async () => {
+      const audit = await readRepoFile('ROUTE_MENU_AUDIT.md')
+      const staging = await readRepoFile('STAGING_RUNBOOK.md')
+      requireIncludes(
+        audit,
+        ['/admin/health', 'Route/Menu Audit', 'bun run e2e:smoke', 'Creator Studio', 'Moderation'],
+        'ROUTE_MENU_AUDIT.md',
+      )
+      requireIncludes(
+        staging,
+        ['Supabase Staging', 'SUPABASE_STORAGE_ACCESS=signed', 'Render', 'Railway', 'E2E_BASE_URL', '/ready'],
+        'STAGING_RUNBOOK.md',
       )
     },
   },
@@ -136,8 +209,10 @@ const checks: Check[] = [
           'SMOKE_API_BASE_URL',
           'SMOKE_ADMIN_API_KEY',
           'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT',
+          'SMOKE_IMAGE_LIVE',
           'bun run smoke:ready',
           'bun run smoke:local',
+          'bun run smoke:image',
         ],
         '.github/workflows/production-smoke.yml',
       )

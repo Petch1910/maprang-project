@@ -52,6 +52,15 @@ type JwksKey = {
 
 let jwksCache: { keys: JwksKey[]; expiresAt: number } | null = null
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const safeRecordIdPattern = /^[a-z0-9_-]{8,80}$/i
+
+export function isUuid(value: string | null | undefined): value is string {
+  return Boolean(value && uuidPattern.test(value))
+}
+
+export function isSafeRecordId(value: string | null | undefined): value is string {
+  return Boolean(value && safeRecordIdPattern.test(value))
+}
 
 export class AuthError extends Error {
   code: 'auth_required' | 'invalid_auth_token'
@@ -214,7 +223,7 @@ async function syncSupabaseUser(payload: SupabaseJwtPayload) {
 
 export function requestUserId(request: Request, fallback?: string) {
   const requestedUserId = request.headers.get('x-user-id')?.trim()
-  if (requestedUserId && uuidPattern.test(requestedUserId)) return requestedUserId
+  if (isUuid(requestedUserId)) return requestedUserId
 
   return fallback ?? defaultUserId
 }
@@ -271,12 +280,28 @@ export function rateLimitKey(request: Request) {
   if (strictAuthEnabled()) {
     const adminUserId = isAdminRequest(request) ? request.headers.get('x-user-id')?.trim() : null
     const token = bearerToken(request)
-    if (adminUserId && uuidPattern.test(adminUserId)) return `admin-user:${adminUserId}`
+    if (isUuid(adminUserId)) return `admin-user:${adminUserId}`
     if (token) return `auth-token:${token.slice(-32)}`
     return ipRateLimitKey(request)
   }
 
   return request.headers.get('x-user-id') ?? ipRateLimitKey(request)
+}
+
+export function rateLimitBucket(request: Request) {
+  const path = new URL(request.url).pathname
+  const method = request.method.toUpperCase()
+
+  if (path === '/chat' || path === '/chat/stream') return 'chat'
+  if (path === '/creator/ai-draft') return 'ai-draft'
+  if (path.startsWith('/admin')) return 'admin'
+  if (path === '/health' || path === '/ready' || path === '/') return 'system'
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return 'read'
+  return 'write'
+}
+
+export function rateLimitRequestKey(request: Request) {
+  return `${rateLimitKey(request)}:${rateLimitBucket(request)}`
 }
 
 function ipRateLimitKey(request: Request) {
@@ -289,9 +314,10 @@ function ipRateLimitKey(request: Request) {
 }
 
 export function routeRateLimitMax(key: string, request: Request) {
-  const path = new URL(request.url).pathname
-  if (path === '/chat' || path === '/chat/stream') return 30
-  if (path.startsWith('/relationship/preview')) return 60
-  if (path.startsWith('/admin')) return 120
+  const bucket = rateLimitBucket(request)
+  if (bucket === 'chat') return 30
+  if (bucket === 'ai-draft') return 20
+  if (bucket === 'admin') return 120
+  if (bucket === 'read' || bucket === 'system') return 600
   return 240
 }

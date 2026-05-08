@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, Clock3, MessageCircle, RefreshCw, Search, Sparkles } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
   loadChatSummaries,
@@ -8,11 +9,48 @@ import {
   selectPendingSceneSummaries,
 } from '../store/slices/chatsSlice'
 
+const relationshipLabels: Record<string, string> = {
+  RIVAL: 'คู่แข่ง',
+  NEUTRAL: 'เป็นกลาง',
+  CLOSE: 'ใกล้ชิด',
+  TRUSTED: 'ไว้ใจ',
+  ROMANTIC: 'โรแมนติก',
+}
+
+const eventTones = [
+  {
+    border: 'border-l-amber-400',
+    icon: 'bg-amber-400/15 text-amber-700',
+    chip: 'bg-amber-50 text-amber-700',
+  },
+  {
+    border: 'border-l-sky-400',
+    icon: 'bg-sky-400/15 text-sky-700',
+    chip: 'bg-sky-50 text-sky-700',
+  },
+  {
+    border: 'border-l-emerald-400',
+    icon: 'bg-emerald-400/15 text-emerald-700',
+    chip: 'bg-emerald-50 text-emerald-700',
+  },
+]
+
 export function EventsInboxPage() {
   const dispatch = useAppDispatch()
   const events = useAppSelector(selectPendingSceneSummaries)
   const isLoading = useAppSelector(selectChatsLoading)
   const error = useAppSelector(selectChatsError)
+  const [search, setSearch] = useState('')
+  const normalizedSearch = search.trim().toLowerCase()
+  const visibleEvents = useMemo(() => {
+    if (!normalizedSearch) return events
+    return events.filter((event) =>
+      [event.title, event.prompt, event.characterName, event.relationshipStatus]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedSearch),
+    )
+  }, [events, normalizedSearch])
 
   useEffect(() => {
     dispatch(loadChatSummaries())
@@ -26,13 +64,29 @@ export function EventsInboxPage() {
           <p className="mt-2 text-slate-600">รวมฉากสำคัญจากแชทที่กำลังเล่น เพื่อให้กลับไปต่อได้เร็ว</p>
         </div>
         <button
-          className="min-h-11 rounded-lg border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
           onClick={() => dispatch(loadChatSummaries())}
           type="button"
         >
+          <RefreshCw size={16} />
           รีเฟรช
         </button>
       </div>
+
+      <section className="grid gap-3 rounded-2xl border border-slate-900/10 bg-white p-3 shadow-sm md:grid-cols-[minmax(0,1fr)_auto]">
+        <label className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-900/10 bg-slate-50 px-3 text-slate-500 focus-within:border-amber-500/50 focus-within:bg-white">
+          <Search size={17} />
+          <input
+            className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="ค้นหาฉาก ตัวละคร หรือสถานะความสัมพันธ์"
+            value={search}
+          />
+        </label>
+        <div className="flex min-h-11 items-center justify-center rounded-lg border border-slate-900/10 bg-slate-50 px-4 text-xs font-black text-slate-600">
+          แสดง {visibleEvents.length.toLocaleString()} จาก {events.length.toLocaleString()} ฉาก
+        </div>
+      </section>
 
       {error && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">
@@ -46,34 +100,71 @@ export function EventsInboxPage() {
             <div className="h-28 animate-pulse rounded-lg bg-slate-200" key={item} />
           ))}
         </div>
-      ) : events.length === 0 ? (
+      ) : visibleEvents.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-900/15 bg-white p-6 text-slate-500">
-          ยังไม่มีฉากที่รออยู่ คุยต่อไปจนกว่าอีเวนต์ความสัมพันธ์จะพร้อม
+          <p className="m-0 text-sm leading-6">
+            {events.length === 0
+              ? 'ยังไม่มีฉากที่รออยู่ คุยต่อในห้องแชทจนกว่าเงื่อนไขความสัมพันธ์จะพร้อม แล้วระบบจะแจ้งเตือนก่อนเข้าสู่ฉากสำคัญ'
+              : 'ไม่พบฉากที่ตรงกับคำค้นหาตอนนี้'}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link className="inline-flex min-h-10 items-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white" to="/chat">
+              ไปห้องแชท
+            </Link>
+            <Link
+              className="inline-flex min-h-10 items-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
+              to="/"
+            >
+              เลือกตัวละครใหม่
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid gap-3">
-          {events.map((event) => (
+          {visibleEvents.map((event, index) => {
+            const tone = eventTones[index % eventTones.length]
+            return (
             <Link
-              className="rounded-lg border border-amber-300/60 bg-amber-50 p-4 text-amber-950 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className={`group rounded-2xl border border-l-4 border-slate-900/10 ${tone.border} bg-white p-4 text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900/20 hover:shadow-md`}
               key={event.id}
               to={`/chat/${event.chatId}`}
             >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs font-black tracking-widest uppercase text-amber-700">ฉากพร้อมแล้ว</p>
-                  <h2 className="mt-1 text-lg font-black">{event.title}</h2>
-                  <p className="mt-1 line-clamp-2 text-sm text-amber-900">{event.prompt}</p>
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                <div className="flex min-w-0 gap-3">
+                  <span className={`mt-0.5 grid size-10 flex-none place-items-center rounded-xl ${tone.icon}`}>
+                    <Sparkles size={18} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="m-0 text-xs font-black tracking-widest text-slate-500 uppercase">ฉากพร้อมเข้า</p>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-black ${tone.chip}`}>
+                        {relationshipLabels[event.relationshipStatus] ?? event.relationshipStatus}
+                      </span>
+                    </div>
+                    <h2 className="mt-1 line-clamp-1 text-lg font-black">{event.title}</h2>
+                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{event.prompt}</p>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full bg-white/80 px-2.5 py-1 text-xs font-black">{event.characterName}</span>
-                  <span className="rounded-full bg-amber-200/70 px-2.5 py-1 text-xs font-black">{event.relationshipStatus}</span>
-                  <span className="rounded-full bg-white/80 px-2.5 py-1 text-xs font-black">
-                    หมดอายุเทิร์น {event.expiresAtTurn}
+                <div className="grid gap-2 sm:min-w-52">
+                  <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-slate-50 px-3 text-xs font-black text-slate-600">
+                    <MessageCircle size={14} />
+                    <span className="truncate">{event.characterName}</span>
+                  </span>
+                  <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-slate-50 px-3 text-xs font-black text-slate-600">
+                    <Clock3 size={14} />
+                    เหลือถึงเทิร์น {event.expiresAtTurn}
                   </span>
                 </div>
               </div>
+              <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-900/10 pt-3">
+                <p className="m-0 min-w-0 truncate text-xs font-bold text-slate-500">{event.chatTitle}</p>
+                <span className="inline-flex flex-none items-center gap-1.5 text-xs font-black text-slate-700 transition group-hover:translate-x-0.5">
+                  เปิดแชท <ArrowRight size={14} />
+                </span>
+              </div>
             </Link>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

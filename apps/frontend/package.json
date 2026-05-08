@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "deploy:check": "eslint . && tsc -b && vite build",
+    "deploy:check": "bun ../../scripts/frontend-static-audit.ts && bun ../../scripts/frontend-route-audit.ts && eslint . && tsc -b && vite build && bun ../../scripts/check-frontend-bundles.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },

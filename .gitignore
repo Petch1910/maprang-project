@@ -5,6 +5,8 @@ node_modules
 out
 dist
 *.tgz
+test-results
+playwright-report
 
 # code coverage
 coverage
@@ -12,7 +14,8 @@ coverage
 
 # logs
 logs
-_.log
+*.log
+.tmp/
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # dotenv environment variable files

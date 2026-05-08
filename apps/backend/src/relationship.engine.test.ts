@@ -8,11 +8,39 @@ import {
 } from './relationship.engine'
 
 describe('relationship tag validation', () => {
-  test('blocks family with romantic or NC tags', () => {
+  test('allows adult-mode family conflicts as creator warnings', () => {
     const issues = validateRelationshipTags(['family', 'lover', 'nc'])
 
-    expect(issues.some((issue) => issue.code === 'family_romance_conflict')).toBe(true)
-    expect(issues.some((issue) => issue.level === 'danger')).toBe(true)
+    expect(issues).toContainEqual(
+      expect.objectContaining({
+        code: 'family_romance_conflict',
+        level: 'warning',
+      }),
+    )
+    expect(issues.some((issue) => issue.level === 'danger')).toBe(false)
+  })
+
+  test('normalizes adult aliases before relaxing conflicts', () => {
+    const issues = validateRelationshipTags(['ครอบครัว', 'smut', 'แฟน'])
+
+    expect(issues).toContainEqual(
+      expect.objectContaining({
+        code: 'family_romance_conflict',
+        level: 'warning',
+      }),
+    )
+    expect(issues.some((issue) => issue.level === 'danger')).toBe(false)
+  })
+
+  test('keeps non-adult no-romance conflicts blocking', () => {
+    const issues = validateRelationshipTags(['no-romance', 'crush'])
+
+    expect(issues).toContainEqual(
+      expect.objectContaining({
+        code: 'no_romance_romantic_seed',
+        level: 'danger',
+      }),
+    )
   })
 
   test('warns when progression tags conflict', () => {

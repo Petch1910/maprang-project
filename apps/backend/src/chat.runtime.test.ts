@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { updateRuntimeState } from './chat.service'
+import { sendChat, updateRuntimeState } from './chat.service'
 import { contentRatingFromTags, ratingAllowed } from './content-rating'
 
 describe('chat runtime state', () => {
@@ -89,5 +89,19 @@ describe('chat content rating guard', () => {
 
     expect(rating).toBe('restricted_18')
     expect(ratingAllowed(rating, 'teen_romance')).toBe(false)
+  })
+})
+
+describe('chat id validation guard', () => {
+  test('rejects injection-shaped ids before model or database work', async () => {
+    const result = await sendChat({
+      message: 'hello',
+      characterId: "' OR 1=1 --",
+      chatId: "' OR 1=1 --",
+      userId: 'not-a-user-id',
+    })
+
+    expect(result.reply).toBe('Invalid user id.')
+    expect(result.chatId).toBeNull()
   })
 })

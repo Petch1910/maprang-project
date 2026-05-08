@@ -8,7 +8,7 @@ import { chatRoutes } from './src/chat.routes'
 import { healthRoutes } from './src/health.routes'
 import { loreRoutes } from './src/lore.routes'
 import { reportRoutes } from './src/report.routes'
-import { AuthError, rateLimitKey, routeRateLimitMax } from './src/security'
+import { AuthError, rateLimitRequestKey, routeRateLimitMax } from './src/security'
 import { uploadRoutes } from './src/upload.routes'
 import { userRoutes } from './src/user.routes'
 import { allowedOrigins, serverHost, serverPort } from './src/config'
@@ -34,7 +34,7 @@ export const app = new Elysia()
     rateLimit({
       duration: 60_000,
       max: routeRateLimitMax,
-      generator: (request) => rateLimitKey(request),
+      generator: (request) => rateLimitRequestKey(request),
       errorResponse: new Response(JSON.stringify({ error: 'rate_limited', message: 'Too many requests. Please try again soon.' }), {
         status: 429,
         headers: {

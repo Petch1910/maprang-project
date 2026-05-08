@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchRelationshipPresets, type RelationshipPreset } from '../lib/api'
+import { fetchRelationshipPresets, shouldLogUnexpectedError, type RelationshipPreset } from '../lib/api'
 import { parseTags } from '../lib/tagAnalysis'
 
 export function RelationshipPresetPicker({
@@ -15,7 +15,9 @@ export function RelationshipPresetPicker({
   useEffect(() => {
     fetchRelationshipPresets()
       .then((data) => setPresets(data.presets))
-      .catch((error) => console.error('Load relationship presets error:', error))
+      .catch((error) => {
+        if (shouldLogUnexpectedError(error)) console.error('Load relationship presets error:', error)
+      })
   }, [])
 
   const selected = presets.find((preset) => preset.id === selectedId)
@@ -30,11 +32,10 @@ export function RelationshipPresetPicker({
     <div className="rounded-lg border border-slate-900/10 bg-white p-3 text-xs leading-relaxed text-slate-600">
       <div className="mb-2 flex items-center justify-between gap-2">
         <strong className="text-slate-900">พรีเซ็ตความสัมพันธ์</strong>
-        <button
+        <button type="button"
           className="min-h-8 rounded-full border border-blue-600/20 bg-blue-600/10 px-3 font-bold text-blue-700 transition hover:bg-blue-600/15 disabled:opacity-60"
           disabled={!selected}
           onClick={applyPreset}
-          type="button"
         >
           ใช้พรีเซ็ต
         </button>

@@ -42,7 +42,7 @@ export function frontendEnvWarnings() {
   const hasSupabaseAnonKey = hasRealEnvValue(SUPABASE_ANON_KEY)
 
   if (import.meta.env.PROD && (!hasApiBase || isLocalOrPlaceholderUrl(API_BASE_URL))) {
-    warnings.push('VITE_API_BASE_URL ยังไม่ใช่ backend production จริง')
+    warnings.push('VITE_API_BASE_URL ยังไม่ใช่ URL บริการแชทจริง')
   }
 
   if (hasSupabaseUrl !== hasSupabaseAnonKey) {
@@ -50,7 +50,7 @@ export function frontendEnvWarnings() {
   }
 
   if (import.meta.env.PROD && (!hasSupabaseUrl || !hasSupabaseAnonKey)) {
-    warnings.push('production frontend ยังไม่ได้ตั้งค่า Supabase Auth')
+    warnings.push('หน้าเว็บใช้งานจริงยังไม่ได้ตั้งค่า Supabase Auth')
   }
 
   if (hasSupabaseUrl) {

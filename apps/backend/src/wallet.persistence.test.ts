@@ -4,17 +4,20 @@ import { adjustUserTokenBalance } from './admin.service'
 import { debitUserTokensWithoutOverdraft } from './chat.service'
 import { defaultUserId } from './config'
 import { getPrisma } from './db'
+import { createDbTestGate } from './db.test-gate'
 
 const prisma = getPrisma()
+const shouldRunDbTest = createDbTestGate(prisma, 'wallet token ledger')
 const ledgerUserId = '770e8400-e29b-41d4-a716-446655440000'
 
 describe('wallet token ledger', () => {
   afterAll(async () => {
+    if (!(await shouldRunDbTest({ silent: true }))) return
     await prisma?.user.deleteMany({ where: { id: ledgerUserId } })
   })
 
   test('records admin token adjustments as wallet transactions', async () => {
-    expect(prisma).not.toBeNull()
+    if (!(await shouldRunDbTest())) return
 
     await prisma!.tokenTransaction.deleteMany({ where: { userId: ledgerUserId } })
     await prisma!.user.upsert({
@@ -57,7 +60,7 @@ describe('wallet token ledger', () => {
   })
 
   test('debits chat usage without allowing negative token balances', async () => {
-    expect(prisma).not.toBeNull()
+    if (!(await shouldRunDbTest())) return
 
     await prisma!.tokenTransaction.deleteMany({ where: { userId: ledgerUserId } })
     await prisma!.user.upsert({

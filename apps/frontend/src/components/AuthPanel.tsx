@@ -110,7 +110,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
                 placeholder="รหัสผ่าน"
                 type="password"
               />
-              <button
+              <button type="button"
                 className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white disabled:opacity-60"
                 disabled={isBusy || !email || !password}
                 onClick={signIn}
@@ -121,7 +121,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
           )}
 
           {authState.user && (
-            <button
+            <button type="button"
               className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-extrabold text-slate-700 disabled:opacity-60"
               disabled={isBusy}
               onClick={signOut}
@@ -133,7 +133,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
       ) : (
         <div className="flex flex-col gap-2">
           <input className={inputClass} value={devUserId} onChange={(event) => setDevUserId(event.target.value)} />
-          <button className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white" onClick={applyDevUser}>
+          <button type="button" className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white" onClick={applyDevUser}>
             ใช้ dev user
           </button>
         </div>

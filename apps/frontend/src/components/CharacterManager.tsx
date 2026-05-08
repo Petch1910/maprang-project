@@ -281,37 +281,33 @@ export function CharacterManager({
           </Field>
         </div>
 
-        <button
+        <button type="button"
           className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white transition hover:bg-blue-700 disabled:opacity-60"
           onClick={handleSubmit}
           disabled={isSaving || hasDangerConflict || !name.trim() || !systemPrompt.trim()}
-          type="button"
         >
           {isSaving ? 'กำลังบันทึก...' : hasDangerConflict ? 'แก้แท็กที่ขัดแย้งก่อน' : 'บันทึกตัวละคร'}
         </button>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <button
+          <button type="button"
             className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
             onClick={onDuplicate}
             disabled={isSaving}
-            type="button"
           >
             ทำสำเนา
           </button>
-          <button
+          <button type="button"
             className="min-h-10 rounded-xl border border-amber-500/25 bg-amber-50 px-3 text-xs font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60"
             onClick={onResetPrompt}
             disabled={isSaving}
-            type="button"
           >
             รีเซ็ต prompt
           </button>
-          <button
+          <button type="button"
             className="min-h-10 rounded-xl border border-red-500/25 bg-red-50 px-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
             onClick={onDelete}
             disabled={isSaving}
-            type="button"
           >
             ลบตัวละคร
           </button>

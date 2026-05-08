@@ -18,6 +18,8 @@ cp apps/backend/.env.example apps/backend/.env
 
 Fill `OPENROUTER_API_KEY`. Supabase values are optional for local dev. Avatar uploads use local disk by default and switch to Supabase Storage when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET` are set.
 
+Creator Studio can draft Thai character content through OpenRouter. Real AI avatar generation is optional and needs `IMAGE_GENERATION_API_KEY`; without it the app uses a clearly labeled temporary placeholder image while still filling the character fields.
+
 3. Frontend env:
 
 ```bash
@@ -60,6 +62,7 @@ Backend readiness: `http://127.0.0.1:3000/ready`
 - Use `DEPLOY_RENDER.md` for the recommended first hosting path.
 - Set backend env from `apps/backend/.env.production.example`.
 - Set frontend env from `apps/frontend/.env.production.example`.
+- Set `IMAGE_GENERATION_API_KEY` if Creator Studio should generate real avatar images instead of placeholders.
 - Set `VITE_API_BASE_URL` to the deployed backend URL.
 - Set `NODE_ENV=production`.
 - Set `CORS_ORIGINS` to deployed frontend origins only.
@@ -115,6 +118,12 @@ Or run each check separately:
 bun run backend:check
 ```
 
+Use this stricter backend gate when Postgres is running and you want persistence tests to be mandatory:
+
+```bash
+bun run backend:check:db
+```
+
 ```bash
 bun run frontend:check
 ```
@@ -122,6 +131,8 @@ bun run frontend:check
 ```bash
 bun run smoke:doctor
 ```
+
+`smoke:doctor` reports local health plus `productionBlockers`; clear those blockers on staging before deploy.
 
 ```bash
 bun run smoke:ready

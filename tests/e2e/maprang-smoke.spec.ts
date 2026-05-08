@@ -1,0 +1,428 @@
+import { expect, test } from '@playwright/test'
+
+const backendUrl = process.env.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'
+const defaultUserId = process.env.E2E_USER_ID ?? '550e8400-e29b-41d4-a716-446655440000'
+const seededCharacterId = process.env.E2E_CHARACTER_ID ?? 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
+const seededChatId = process.env.E2E_CHAT_ID ?? '61aaecf2-a85b-4e01-a7ee-0973eef62699'
+const seededMenuArchiveDesktopChatId = 'aaaaaaaa-1111-4111-8111-aaaaaaaa1111'
+const seededMenuArchiveMobileChatId = 'aaaaaaaa-2222-4222-8222-aaaaaaaa2222'
+const seededMenuDeleteDesktopChatId = 'bbbbbbbb-1111-4111-8111-bbbbbbbb1111'
+const seededMenuDeleteMobileChatId = 'bbbbbbbb-2222-4222-8222-bbbbbbbb2222'
+const seededMyChatsArchiveDesktopChatId = 'cccccccc-1111-4111-8111-cccccccc1111'
+const seededMyChatsArchiveMobileChatId = 'cccccccc-2222-4222-8222-cccccccc2222'
+const seededMyChatsDeleteDesktopChatId = 'dddddddd-1111-4111-8111-dddddddd1111'
+const seededMyChatsDeleteMobileChatId = 'dddddddd-2222-4222-8222-dddddddd2222'
+const adminKey = process.env.E2E_ADMIN_API_KEY ?? process.env.SMOKE_ADMIN_API_KEY ?? ''
+
+const routeSmokeTargets = [
+  { path: '/', text: 'Maprang' },
+  { path: `/characters/${seededCharacterId}`, text: 'สัญญาความสัมพันธ์' },
+  { path: `/chat/${seededChatId}`, testId: 'chat-composer-input' },
+  { path: '/chats', text: 'แชท' },
+  { path: '/create', testId: 'creator-name' },
+  { path: '/events', text: 'อีเวนต์' },
+  { path: '/profile', text: 'ตัวตนผู้เล่น' },
+  { path: '/wallet', text: 'โทเคน' },
+  { path: '/moderation', text: adminKey ? 'คิวรายงาน' : 'ADMIN_API_KEY' },
+  { path: '/admin/health', text: 'Route/Menu Audit' },
+]
+
+function persistedReduxState() {
+  return JSON.stringify({
+    content: {
+      isAdult: true,
+      ageGateAnswered: true,
+      showMature: true,
+      maxRating: 'restricted_18',
+    },
+    drafts: {
+      composerByKey: {},
+      personaDraft: '',
+      creatorDraftUpdatedAt: null,
+    },
+  })
+}
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(
+    ({ userId, savedRedux, key }) => {
+      window.localStorage.setItem('maprang:userId', userId)
+      window.localStorage.setItem('maprang:redux:v1', savedRedux)
+      window.localStorage.setItem('maprang:theme:v2', 'dark')
+      if (key) window.localStorage.setItem('maprang:adminKey', key)
+    },
+    {
+      userId: defaultUserId,
+      savedRedux: persistedReduxState(),
+      key: adminKey,
+    },
+  )
+})
+
+function collectBrowserErrors(page: Parameters<typeof test>[0]['page']) {
+  const errors: string[] = []
+  page.on('pageerror', (error) => {
+    errors.push(`pageerror: ${error.message}`)
+  })
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(`console.error: ${message.text()}`)
+  })
+  return errors
+}
+
+async function expectNoHorizontalOverflow(page: Parameters<typeof test>[0]['page']) {
+  const overflow = await page.evaluate(() => {
+    const viewportWidth = window.innerWidth
+    const scrollWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth)
+    const offenders = Array.from(document.body.querySelectorAll<HTMLElement>('*'))
+      .map((element) => {
+        const rect = element.getBoundingClientRect()
+        const label = [
+          element.tagName.toLowerCase(),
+          element.id ? `#${element.id}` : '',
+          element.className && typeof element.className === 'string'
+            ? `.${element.className.split(/\s+/).filter(Boolean).slice(0, 3).join('.')}`
+            : '',
+        ].join('')
+        return {
+          label,
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+        }
+      })
+      .filter((item) => item.width > 0 && (item.left < -2 || item.right > viewportWidth + 2))
+      .slice(0, 8)
+
+    return { viewportWidth, scrollWidth, offenders }
+  })
+
+  expect(
+    overflow.scrollWidth <= overflow.viewportWidth + 2,
+    `page should not overflow horizontally: ${JSON.stringify(overflow)}`,
+  ).toBeTruthy()
+}
+
+test('core route and menu smoke', async ({ page, request }, testInfo) => {
+  const isMobile = testInfo.project.name.includes('mobile')
+  const menuArchiveChatId = isMobile ? seededMenuArchiveMobileChatId : seededMenuArchiveDesktopChatId
+  const menuDeleteChatId = isMobile ? seededMenuDeleteMobileChatId : seededMenuDeleteDesktopChatId
+  const myChatsArchiveChatId = isMobile ? seededMyChatsArchiveMobileChatId : seededMyChatsArchiveDesktopChatId
+  const myChatsDeleteChatId = isMobile ? seededMyChatsDeleteMobileChatId : seededMyChatsDeleteDesktopChatId
+  const health = await request.get(`${backendUrl}/health`)
+  expect(health.ok(), 'backend /health should be reachable before browser smoke').toBeTruthy()
+
+  await page.goto('/')
+  await expect(page.locator('body')).toContainText('Maprang')
+  await expect(page.locator('a[href="/create"]').first()).toHaveAttribute('href', '/create')
+
+  await page.goto(`/characters/${seededCharacterId}`)
+  await expect(page.getByTestId('character-start-chat')).toBeVisible()
+  await page.getByTestId('character-seed-rival').click()
+  await expect(page.getByTestId('character-seed-rival')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByTestId('character-start-chat')).toHaveAttribute(
+    'href',
+    `/chat?characterId=${seededCharacterId}&relationship_seed=rival`,
+  )
+  await page.getByTestId('character-share-button').click()
+  await expect(page.getByTestId('character-action-note')).toBeVisible()
+  await page.getByTestId('character-report-button').click()
+  await expect(page.getByTestId('report-dialog')).toBeVisible()
+  await page.getByTestId('report-cancel').click()
+  await expect(page.getByTestId('report-dialog')).toBeHidden()
+
+  await page.goto('/create')
+  await expect(page.getByTestId('creator-name')).toBeVisible()
+  const uniqueName = `QA Smoke ${Date.now()}`
+  await page.getByTestId('creator-avatar-url').fill('/src/assets/hero.png')
+  await page.getByTestId('creator-name').fill(uniqueName)
+  await page.getByTestId('creator-tagline').fill('ตัวละครทดสอบ e2e smoke ก่อน deploy')
+  await page.getByTestId('creator-description').fill('ใช้ตรวจว่า Creator Studio สร้าง draft ได้จริงและไม่ติดปุ่มหลอก')
+  await page.getByTestId('creator-greeting').fill('พร้อมทดสอบระบบหรือยัง')
+  await page.getByTestId('creator-system-prompt').fill('คุณคือตัวละคร QA สำหรับตรวจระบบ Maprang ตอบภาษาไทย กระชับ และคงบทบาท')
+  await page.getByTestId('creator-scenario').fill('ผู้เล่นเปิดหน้า smoke test และต้องการเช็ค flow สร้างตัวละคร')
+  await page.getByTestId('creator-tags').fill('qa, thai, roleplay, slow-burn')
+  await expect(page.getByTestId('creator-submit')).toBeEnabled()
+  await page.getByTestId('creator-submit').click()
+  await expect(page.locator('body')).toContainText(uniqueName)
+  let createdCharacterId = page.url().match(/\/characters\/([^/?#]+)/)?.[1]
+  if (!createdCharacterId) {
+    const createdCharacters = await request.get(
+      `${backendUrl}/characters?view=admin&q=${encodeURIComponent(uniqueName)}&limit=5`,
+      {
+        headers: {
+          'x-user-id': defaultUserId,
+          ...(adminKey ? { 'x-admin-key': adminKey } : {}),
+        },
+      },
+    )
+    expect(createdCharacters.ok(), 'browser smoke should find the temporary character it just created').toBeTruthy()
+    const body = (await createdCharacters.json()) as { characters?: Array<{ id: string; name: string }> }
+    createdCharacterId = body.characters?.find((item) => item.name === uniqueName)?.id
+  }
+  expect(createdCharacterId, 'browser smoke should capture the temporary character id for cleanup').toBeTruthy()
+  if (createdCharacterId) {
+    const cleanup = await request.delete(`${backendUrl}/characters/${createdCharacterId}`, {
+      headers: {
+        'x-user-id': defaultUserId,
+        ...(adminKey ? { 'x-admin-key': adminKey } : {}),
+      },
+    })
+    expect([200, 404], 'browser smoke should clean up its temporary character').toContain(cleanup.status())
+  }
+
+  await page.goto('/chats')
+  await expect(page.locator('body')).toContainText('แชท')
+  const myChatsArchiveMenuButton = page.getByTestId(`my-chat-menu-${myChatsArchiveChatId}`)
+  await expect(myChatsArchiveMenuButton).toBeVisible()
+  await myChatsArchiveMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await expect(page.locator('[role="menu"] [role="menuitem"]')).toHaveText([
+    'แก้ไขแชท',
+    'ปักหมุดแชท',
+    'จัดเก็บแชท',
+    'เลือก',
+    'ลบแชท',
+  ])
+  await expect(page.getByTestId(`my-chat-pin-${myChatsArchiveChatId}`)).toContainText('ปักหมุดแชท')
+  await expect(page.getByTestId(`my-chat-rename-${myChatsArchiveChatId}`)).toContainText('แก้ไขแชท')
+  await expect(page.getByTestId(`my-chat-archive-${myChatsArchiveChatId}`)).toContainText('จัดเก็บแชท')
+  const myChatsRenamedTitle = `My Chats renamed ${isMobile ? 'mobile' : 'desktop'}`
+  await page.getByTestId(`my-chat-pin-${myChatsArchiveChatId}`).click()
+  await expect(page.locator('[role="menu"]')).toBeHidden()
+  expect(
+    await page.evaluate((id) => {
+      const pinned = JSON.parse(window.localStorage.getItem('maprang:pinned-chats:v1') ?? '[]') as string[]
+      return pinned.includes(id)
+    }, myChatsArchiveChatId),
+    'my chats menu should pin the selected chat using the shared pinned storage',
+  ).toBe(true)
+
+  await myChatsArchiveMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await expect(page.getByTestId(`my-chat-pin-${myChatsArchiveChatId}`)).toContainText('เอาออกจากปักหมุดแชท')
+  await page.getByTestId(`my-chat-pin-${myChatsArchiveChatId}`).click()
+  await expect(page.locator('[role="menu"]')).toBeHidden()
+  expect(
+    await page.evaluate((id) => {
+      const pinned = JSON.parse(window.localStorage.getItem('maprang:pinned-chats:v1') ?? '[]') as string[]
+      return pinned.includes(id)
+    }, myChatsArchiveChatId),
+    'my chats menu should unpin the selected chat using the shared pinned storage',
+  ).toBe(false)
+
+  await myChatsArchiveMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.getByTestId(`my-chat-select-${myChatsArchiveChatId}`).click()
+  await expect(page.getByTestId('my-chats-selection-toolbar')).toBeVisible()
+  await expect(page.getByTestId(`my-chat-checkbox-${myChatsArchiveChatId}`)).toHaveAttribute('aria-pressed', 'true')
+  await page.getByTestId('my-chats-select-mode').click()
+  await expect(page.getByTestId('my-chats-selection-toolbar')).toBeHidden()
+
+  await myChatsArchiveMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.getByTestId(`my-chat-rename-${myChatsArchiveChatId}`).click()
+  await expect(page.getByTestId('my-chat-rename-dialog')).toBeVisible()
+  await page.getByTestId('my-chat-rename-input').fill(myChatsRenamedTitle)
+  await page.getByTestId('my-chat-rename-confirm').click()
+  await expect(page.getByTestId('my-chat-rename-dialog')).toBeHidden()
+  await expect(page.locator('body')).toContainText(myChatsRenamedTitle)
+
+  await myChatsArchiveMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.getByTestId(`my-chat-archive-${myChatsArchiveChatId}`).click()
+  await expect(page.getByTestId(`my-chat-menu-${myChatsArchiveChatId}`)).toBeHidden()
+  await page.getByTestId('my-chats-filter-archived').click()
+  await expect(page.getByTestId(`my-chat-restore-button-${myChatsArchiveChatId}`)).toBeVisible()
+  await page.getByTestId(`my-chat-restore-button-${myChatsArchiveChatId}`).click()
+  await expect(page.getByTestId(`my-chat-restore-button-${myChatsArchiveChatId}`)).toBeHidden()
+  await page.getByTestId('my-chats-filter-all').click()
+  await expect(page.getByTestId(`my-chat-menu-${myChatsArchiveChatId}`)).toBeVisible()
+
+  const myChatsDeleteMenuButton = page.getByTestId(`my-chat-menu-${myChatsDeleteChatId}`)
+  await expect(myChatsDeleteMenuButton).toBeVisible()
+  await myChatsDeleteMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.getByTestId(`my-chat-delete-${myChatsDeleteChatId}`).click()
+  await expect(page.getByTestId('my-chat-delete-dialog')).toBeVisible()
+  await page.getByTestId('my-chat-delete-confirm').click()
+  await expect(page.getByTestId('my-chat-delete-dialog')).toBeHidden()
+  await expect(page.getByTestId(`my-chat-menu-${myChatsDeleteChatId}`)).toBeHidden()
+
+  await page.goto(`/chat/${seededChatId}`)
+  await expect(page.getByTestId('chat-composer-input')).toBeVisible()
+
+  if (isMobile) {
+    await page.getByTestId('chat-mobile-menu').click()
+  }
+
+  const menuButton = page.locator(`[data-testid="chat-row-menu-${seededChatId}"]`)
+  await expect(menuButton).toBeVisible()
+  await menuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await expect(page.locator('[role="menu"] [role="menuitem"]')).toHaveCount(5)
+  await expect(page.locator('[role="menu"] [role="menuitem"]')).toHaveText([
+    'แก้ไขแชท',
+    'ปักหมุดแชท',
+    'จัดเก็บแชท',
+    'เลือก',
+    'ลบแชท',
+  ])
+  await expect(page.getByTestId(`chat-row-rename-${seededChatId}`)).toContainText('แก้ไขแชท')
+  await expect(page.getByTestId(`chat-row-pin-${seededChatId}`)).toContainText('ปักหมุดแชท')
+  await expect(page.getByTestId(`chat-row-archive-${seededChatId}`)).toContainText('จัดเก็บแชท')
+  await expect(page.getByTestId(`chat-row-pin-${seededChatId}`)).toBeVisible()
+  await page.getByTestId(`chat-row-pin-${seededChatId}`).click()
+  await expect(page.locator('[role="menu"]')).toBeHidden()
+  expect(
+    await page.evaluate((id) => {
+      const pinned = JSON.parse(window.localStorage.getItem('maprang:pinned-chats:v1') ?? '[]') as string[]
+      return pinned.includes(id)
+    }, seededChatId),
+    'sidebar menu should pin the selected chat',
+  ).toBe(true)
+
+  await menuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await expect(page.getByTestId(`chat-row-pin-${seededChatId}`)).toBeVisible()
+  await expect(page.getByTestId(`chat-row-pin-${seededChatId}`)).toContainText('เอาออกจากปักหมุดแชท')
+  await page.getByTestId(`chat-row-pin-${seededChatId}`).click()
+  await expect(page.locator('[role="menu"]')).toBeHidden()
+  expect(
+    await page.evaluate((id) => {
+      const pinned = JSON.parse(window.localStorage.getItem('maprang:pinned-chats:v1') ?? '[]') as string[]
+      return pinned.includes(id)
+    }, seededChatId),
+    'sidebar menu should unpin the selected chat',
+  ).toBe(false)
+
+  await menuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('[role="menu"]')).toBeHidden()
+
+  await menuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.getByTestId(`chat-row-select-${seededChatId}`).click()
+  await expect(page.getByTestId('chat-selection-toolbar')).toBeVisible()
+  await expect(page.getByTestId(`chat-row-checkbox-${seededChatId}`)).toHaveAttribute('aria-pressed', 'true')
+  await page.getByTestId('chat-selection-cancel').click()
+  await expect(page.getByTestId('chat-selection-toolbar')).toBeHidden()
+
+  await page.goto(`/chat/${menuArchiveChatId}`)
+  await expect(page.getByTestId('chat-composer-input')).toBeVisible()
+  if (isMobile) {
+    await page.getByTestId('chat-mobile-menu').click()
+  }
+  const archiveMenuButton = page.locator(`[data-testid="chat-row-menu-${menuArchiveChatId}"]`)
+  await expect(archiveMenuButton).toBeVisible()
+  await archiveMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  const renamedTitle = `QA menu renamed ${isMobile ? 'mobile' : 'desktop'}`
+  await page.getByTestId(`chat-row-rename-${menuArchiveChatId}`).click()
+  await expect(page.getByTestId('chat-rename-dialog')).toBeVisible()
+  await page.getByTestId('chat-rename-input').fill(renamedTitle)
+  await page.getByTestId('chat-rename-confirm').click()
+  await expect(page.getByTestId('chat-rename-dialog')).toBeHidden()
+  await expect(page.locator('body')).toContainText(renamedTitle)
+
+  await archiveMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.getByTestId(`chat-row-archive-${menuArchiveChatId}`).click()
+  await expect(page.getByTestId(`chat-row-menu-${menuArchiveChatId}`)).toBeHidden()
+
+  await page.goto(`/chat/${menuDeleteChatId}`)
+  await expect(page.getByTestId('chat-composer-input')).toBeVisible()
+  if (isMobile) {
+    await page.getByTestId('chat-mobile-menu').click()
+  }
+  const deleteMenuButton = page.locator(`[data-testid="chat-row-menu-${menuDeleteChatId}"]`)
+  await expect(deleteMenuButton).toBeVisible()
+  await deleteMenuButton.click()
+  await expect(page.locator('[role="menu"]')).toBeVisible()
+  await page.getByTestId(`chat-row-delete-${menuDeleteChatId}`).click()
+  await expect(page.getByTestId('chat-delete-dialog')).toBeVisible()
+  await page.getByTestId('chat-delete-confirm').click()
+  await expect(page.getByTestId('chat-delete-dialog')).toBeHidden()
+  await expect(page.getByTestId(`chat-row-menu-${menuDeleteChatId}`)).toBeHidden()
+
+  await page.goto(`/chat/${seededChatId}`)
+  await expect(page.getByTestId('chat-composer-input')).toBeVisible()
+  if (isMobile) {
+    await page.getByTestId('chat-mobile-menu').click()
+  }
+
+  if (isMobile) {
+    await page.getByTestId('chat-sidebar-overlay').click({ position: { x: 320, y: 40 } })
+    await expect(page.getByTestId('chat-sidebar-overlay')).toHaveClass(/pointer-events-none/)
+  }
+
+  await page.getByTestId('chat-report-character').click()
+  await expect(page.getByTestId('report-dialog')).toBeVisible()
+  await expect(page.getByTestId('report-submit')).toBeEnabled()
+  await page.getByTestId('report-cancel').click()
+  await expect(page.getByTestId('report-dialog')).toBeHidden()
+
+  await page.goto('/profile')
+  await expect(page.getByTestId('profile-persona-textarea')).toBeVisible()
+  await page.getByTestId('profile-persona-clear').click()
+  await expect(page.getByTestId('profile-persona-textarea')).toHaveValue('')
+  await page.getByTestId('profile-persona-template').click()
+  expect((await page.getByTestId('profile-persona-textarea').inputValue()).trim().length).toBeGreaterThan(10)
+  await expect(page.getByTestId('profile-persona-count')).toBeVisible()
+  await page.getByTestId('profile-content-mode-teen_romance').click()
+  await expect(page.getByTestId('profile-content-mode-teen_romance')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByTestId('profile-content-note')).toBeVisible()
+
+  await page.goto('/wallet')
+  await expect(page.locator('body')).toContainText('โทเคน')
+  await expect(page.locator('body')).toContainText('ธุรกรรม')
+
+  await expect(page.getByTestId('wallet-refresh')).toBeVisible()
+  await page.getByTestId('wallet-refresh').click()
+  await expect(page.getByTestId('wallet-note')).toBeVisible()
+  await page.getByTestId('wallet-admin-key-input').fill('temporary-smoke-admin-key')
+  await page.getByTestId('wallet-admin-key-save').click()
+  expect(await page.evaluate(() => window.localStorage.getItem('maprang:adminKey'))).toBe('temporary-smoke-admin-key')
+  await page.getByTestId('wallet-admin-key-clear').click()
+  await expect(page.getByTestId('wallet-admin-key-input')).toHaveValue('')
+  expect(await page.evaluate(() => window.localStorage.getItem('maprang:adminKey'))).toBeNull()
+  await expect(page.getByTestId('wallet-adjust-add')).toBeDisabled()
+  await expect(page.getByTestId('wallet-adjust-debit')).toBeDisabled()
+  if (adminKey) {
+    await page.getByTestId('wallet-admin-key-input').fill(adminKey)
+    await page.getByTestId('wallet-admin-key-save').click()
+  }
+
+  await page.goto('/moderation')
+  await expect(page.locator('body')).toContainText('คิวรายงาน')
+  if (adminKey) {
+    await expect(page.locator('body')).toContainText('QA seed')
+  } else {
+    await expect(page.locator('input[type="password"]').first()).toBeVisible()
+  }
+
+  await page.goto('/admin/health')
+  await expect(page.locator('body')).toContainText('Deploy checklist')
+  await expect(page.locator('body')).toContainText('Route/Menu Audit')
+  await expect(page.locator('body')).toContainText('Chat Sidebar')
+})
+
+test('all primary routes render without console errors or horizontal overflow', async ({ page, request }) => {
+  const health = await request.get(`${backendUrl}/health`)
+  expect(health.ok(), 'backend /health should be reachable before route audit smoke').toBeTruthy()
+
+  const browserErrors = collectBrowserErrors(page)
+
+  for (const target of routeSmokeTargets) {
+    await page.goto(target.path)
+    if ('testId' in target && target.testId) {
+      await expect(page.getByTestId(target.testId), `${target.path} should expose ${target.testId}`).toBeVisible()
+    } else {
+      await expect(page.locator('body'), `${target.path} should render expected text`).toContainText(target.text)
+    }
+    await expectNoHorizontalOverflow(page)
+  }
+
+  expect(browserErrors, 'routes should not emit browser console/page errors').toEqual([])
+})

@@ -3,6 +3,7 @@ import { loadCharacter } from './character.service'
 import { defaultUserId } from './config'
 import { requireDatabase } from './db'
 import { createLoreEntry, listLoreEntries, loadLoreEntry, softDeleteLoreEntry, updateLoreEntry } from './lore.service'
+import { rejectInvalidUuid } from './route-guards'
 import { canAccessOwnerResource, resolveRequestUserId } from './security'
 
 const loreBody = t.Object({
@@ -22,6 +23,8 @@ export const loreRoutes = new Elysia()
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
 
       const characterId = params.id
       const character = await loadCharacter(characterId)
@@ -43,6 +46,12 @@ export const loreRoutes = new Elysia()
     async ({ body, params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+      if (invalidId) return invalidId
+      if (body.parentLoreId) {
+        const invalidParentId = rejectInvalidUuid(body.parentLoreId, set, 'invalid_parent_lore_id')
+        if (invalidParentId) return invalidParentId
+      }
 
       const characterId = params.id
       const character = await loadCharacter(characterId)
@@ -74,6 +83,12 @@ export const loreRoutes = new Elysia()
     async ({ body, params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_lore_id')
+      if (invalidId) return invalidId
+      if (body.parentLoreId) {
+        const invalidParentId = rejectInvalidUuid(body.parentLoreId, set, 'invalid_parent_lore_id')
+        if (invalidParentId) return invalidParentId
+      }
 
       try {
         const existing = await loadLoreEntry(params.id)
@@ -104,6 +119,8 @@ export const loreRoutes = new Elysia()
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_lore_id')
+      if (invalidId) return invalidId
 
       try {
         const existing = await loadLoreEntry(params.id)

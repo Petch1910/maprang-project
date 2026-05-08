@@ -2,6 +2,7 @@ import { ReportStatus, ReportTargetType } from '@prisma/client'
 import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
 import { applyReportAdminAction, createReport, listReports, updateReportStatus, type ReportAdminAction } from './report.service'
+import { rejectInvalidUuid } from './route-guards'
 import { requireAdminApiKey, resolveRequestUserId } from './security'
 
 const reportTargetTypeSchema = t.Union([t.Literal('CHARACTER'), t.Literal('MESSAGE')])
@@ -82,6 +83,8 @@ export const reportRoutes = new Elysia()
       if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_report_id')
+      if (invalidId) return invalidId
 
       try {
         return { report: await updateReportStatus(params.id, body.status as ReportStatus, await resolveRequestUserId(request)) }
@@ -101,6 +104,8 @@ export const reportRoutes = new Elysia()
       if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_report_id')
+      if (invalidId) return invalidId
 
       const result = await applyReportAdminAction(params.id, body.action as ReportAdminAction, await resolveRequestUserId(request))
       if (!result) {

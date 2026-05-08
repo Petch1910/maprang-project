@@ -1,7 +1,12 @@
 import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
-import { archiveChat, listChats, loadChatMessages, sendChat, streamChat } from './chat.service'
-import { AuthError, resolveRequestUserId } from './security'
+import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, sendChat, streamChat, updateChatTitle } from './chat.service'
+import { AuthError, isUuid, resolveRequestUserId } from './security'
+import { rejectInvalidUuid } from './route-guards'
+
+function responseChatId(chatId?: string) {
+  return isUuid(chatId) ? chatId : null
+}
 
 const chatBody = t.Object({
   message: t.String({ minLength: 1 }),
@@ -30,11 +35,16 @@ const chatBody = t.Object({
 export const chatRoutes = new Elysia()
   .get(
     '/chats',
-    async ({ request, set }) => {
+    async ({ query, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
 
-      return { chats: await listChats(await resolveRequestUserId(request)) }
+      return { chats: await listChats(await resolveRequestUserId(request), { archived: query.archived === 'true' }) }
+    },
+    {
+      query: t.Object({
+        archived: t.Optional(t.String()),
+      }),
     },
   )
   .post(
@@ -48,14 +58,14 @@ export const chatRoutes = new Elysia()
           return {
             error: error.code,
             message: error.message,
-            chatId: body.chatId ?? null,
+            chatId: responseChatId(body.chatId),
           }
         }
 
         console.error('Chat error:', error)
         return {
           reply: 'The AI service is temporarily unavailable. Please try again.',
-          chatId: body.chatId ?? null,
+          chatId: responseChatId(body.chatId),
         }
       }
     },
@@ -65,14 +75,28 @@ export const chatRoutes = new Elysia()
   )
   .post(
     '/chat/stream',
-    async ({ body, request }) =>
-      new Response(streamChat({ ...body, userId: await resolveRequestUserId(request) }), {
-        headers: {
-          'Content-Type': 'text/event-stream; charset=utf-8',
-          'Cache-Control': 'no-cache, no-transform',
-          Connection: 'keep-alive',
-        },
-      }),
+    async ({ body, request, set }) => {
+      try {
+        return new Response(streamChat({ ...body, userId: await resolveRequestUserId(request) }), {
+          headers: {
+            'Content-Type': 'text/event-stream; charset=utf-8',
+            'Cache-Control': 'no-cache, no-transform',
+            Connection: 'keep-alive',
+          },
+        })
+      } catch (error) {
+        if (error instanceof AuthError) {
+          set.status = 401
+          return {
+            error: error.code,
+            message: error.message,
+            chatId: responseChatId(body.chatId),
+          }
+        }
+
+        throw error
+      }
+    },
     {
       body: chatBody,
     },
@@ -82,6 +106,8 @@ export const chatRoutes = new Elysia()
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_chat_id')
+      if (invalidId) return invalidId
 
       const chat = await loadChatMessages(params.id, await resolveRequestUserId(request))
       if (!chat) {
@@ -98,13 +124,84 @@ export const chatRoutes = new Elysia()
     },
   )
   .patch(
+    '/chats/:id',
+    async ({ body, params, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_chat_id')
+      if (invalidId) return invalidId
+
+      const chat = await updateChatTitle(params.id, body.title, await resolveRequestUserId(request))
+      if (!chat) {
+        set.status = 404
+        return { error: 'chat_not_found' }
+      }
+
+      return { chat }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      body: t.Object({
+        title: t.String({ minLength: 1, maxLength: 80 }),
+      }),
+    },
+  )
+  .patch(
     '/chats/:id/archive',
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_chat_id')
+      if (invalidId) return invalidId
 
       const archived = await archiveChat(params.id, await resolveRequestUserId(request))
       if (!archived) {
+        set.status = 404
+        return { error: 'chat_not_found' }
+      }
+
+      return { ok: true }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+    },
+  )
+  .patch(
+    '/chats/:id/restore',
+    async ({ params, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_chat_id')
+      if (invalidId) return invalidId
+
+      const restored = await restoreChat(params.id, await resolveRequestUserId(request))
+      if (!restored) {
+        set.status = 404
+        return { error: 'chat_not_found' }
+      }
+
+      return { ok: true }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+    },
+  )
+  .delete(
+    '/chats/:id',
+    async ({ params, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured' }
+      const invalidId = rejectInvalidUuid(params.id, set, 'invalid_chat_id')
+      if (invalidId) return invalidId
+
+      const deleted = await deleteChat(params.id, await resolveRequestUserId(request))
+      if (!deleted) {
         set.status = 404
         return { error: 'chat_not_found' }
       }

@@ -18,12 +18,15 @@ if (!health.checks.openRouterConfigured) {
 
 const characters = await readJson<{
   characters?: Array<{ id: string; name: string }>
-}>('/characters?view=admin&q=Maprang&limit=5', {
+}>('/characters?view=admin&limit=10', {
   headers: smokeAuthHeaders(),
 })
 
-const maprang = characters.characters?.find((character) => character.name === 'Maprang')
-if (!maprang) throw new Error('Seeded Maprang character was not found')
+const smokeCharacter =
+  characters.characters?.find((character) => character.name.includes('MIKA')) ??
+  characters.characters?.find((character) => character.name === 'Maprang') ??
+  characters.characters?.[0]
+if (!smokeCharacter) throw new Error('Seeded smoke character was not found')
 
 const walletBefore = await readJson<{
   user: { tokenBalance: number }
@@ -48,8 +51,12 @@ const chat = await readJson<{
     ...smokeAuthHeaders(),
   },
   body: JSON.stringify({
-    characterId: maprang.id,
-    message: 'Reply with a very short Thai greeting.',
+    characterId: smokeCharacter.id,
+    relationshipSeed: 'stranger',
+    maxRating: 'restricted_18',
+    history: [],
+    message:
+      'ฉันนั่งลงตรงข้ามเธอ แล้วถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า ช่วยตอบเป็นฉากสั้นๆ 2 ย่อหน้า',
   }),
 })
 
@@ -65,6 +72,9 @@ if (chat.reply.includes('temporarily unavailable')) {
 
 if (!chat.chatId) throw new Error('Live chat did not create a chat id')
 if (!chat.usage?.totalTokens) throw new Error('Live chat did not return token usage')
+if (chat.reply.length < 80) {
+  throw new Error(`Live chat reply is too short for roleplay QA. Reply: ${chat.reply}`)
+}
 
 const walletAfter = await readJson<{
   wallet?: {
@@ -92,11 +102,12 @@ console.log(
     {
       ok: true,
       apiBaseUrl,
-      character: maprang.name,
+      character: smokeCharacter.name,
       model: chat.usage.modelName ?? health.model?.name ?? null,
       totalTokens: chat.usage.totalTokens,
       walletTransactionId: chatDebit.id,
       balanceAfter: chatDebit.balanceAfter,
+      replyChars: chat.reply.length,
       replyPreview: chat.reply.slice(0, 120),
     },
     null,

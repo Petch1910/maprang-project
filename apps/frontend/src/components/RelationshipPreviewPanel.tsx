@@ -2,15 +2,23 @@ import { useState } from 'react'
 import { previewRelationship, type RelationshipPreview } from '../lib/api'
 import { parseTags } from '../lib/tagAnalysis'
 
-export function RelationshipPreviewPanel({ tags }: { tags: string }) {
+export function RelationshipPreviewPanel({
+  tags,
+  onPreviewComplete,
+}: {
+  tags: string
+  onPreviewComplete?: (preview: RelationshipPreview) => void
+}) {
   const [preview, setPreview] = useState<RelationshipPreview | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [script, setScript] = useState(
     'สวัสดี ฉันอยากรู้จักเธอให้มากขึ้น\nขอบคุณที่เล่าให้ฟังนะ ฉันไว้ใจเธอ\nถ้าเธอยังไม่พร้อมก็ไม่เป็นไร',
   )
 
   const runPreview = async () => {
     setIsLoading(true)
+    setError('')
     try {
       const messages = script
         .split('\n')
@@ -19,6 +27,9 @@ export function RelationshipPreviewPanel({ tags }: { tags: string }) {
         .slice(0, 5)
       const data = await previewRelationship(parseTags(tags), messages)
       setPreview(data.preview)
+      onPreviewComplete?.(data.preview)
+    } catch {
+      setError('ทดสอบบทไม่สำเร็จ กรุณาเช็กเซิร์ฟเวอร์แล้วลองใหม่')
     } finally {
       setIsLoading(false)
     }
@@ -28,11 +39,10 @@ export function RelationshipPreviewPanel({ tags }: { tags: string }) {
     <div className="rounded-lg border border-slate-900/10 bg-white p-3 text-xs leading-relaxed text-slate-600">
       <div className="flex items-center justify-between gap-2">
         <strong className="text-slate-900">พรีวิวสำหรับครีเอเตอร์</strong>
-        <button
+        <button type="button"
           className="min-h-8 rounded-full border border-slate-900/10 bg-slate-50 px-3 font-bold text-slate-700 transition hover:bg-white disabled:opacity-60"
           disabled={isLoading}
           onClick={runPreview}
-          type="button"
         >
           {isLoading ? 'กำลังจำลอง...' : 'ทดสอบ 5 เทิร์น'}
         </button>
@@ -43,6 +53,8 @@ export function RelationshipPreviewPanel({ tags }: { tags: string }) {
         onChange={(event) => setScript(event.target.value)}
         placeholder="ใส่ข้อความจำลองของผู้ใช้ บรรทัดละ 1 เทิร์น"
       />
+
+      {error && <p className="mt-2 mb-0 rounded-lg bg-red-50 p-2 font-bold text-red-700">{error}</p>}
 
       {preview && (
         <div className="mt-2 space-y-2">
