@@ -42,6 +42,8 @@ type HealthSmokePayload = {
   }
   model?: {
     minRoleplayReplyChars?: number
+    promptBudgetTokens?: number
+    promptHistoryMaxMessages?: number
   }
 }
 
@@ -81,6 +83,8 @@ await check('GET /health', async () => {
   healthStatus = await readJson<HealthSmokePayload>('/health')
   if (!healthStatus.ok) throw new Error('health ok=false')
   if (!healthStatus.checks?.databaseConnected) throw new Error('databaseConnected=false')
+  if (typeof healthStatus.model?.promptBudgetTokens !== 'number') throw new Error('missing promptBudgetTokens')
+  if (typeof healthStatus.model?.promptHistoryMaxMessages !== 'number') throw new Error('missing promptHistoryMaxMessages')
   return 'backend and database ready'
 })
 

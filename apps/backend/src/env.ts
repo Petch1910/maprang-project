@@ -18,6 +18,8 @@ const recommendedInProduction = [
   'MODEL_TEMPERATURE',
   'MODEL_MAX_OUTPUT_TOKENS',
   'MODEL_MIN_ROLEPLAY_REPLY_CHARS',
+  'PROMPT_BUDGET_TOKENS',
+  'PROMPT_HISTORY_MAX_MESSAGES',
   'CHAT_PROVIDER_RETRY_ATTEMPTS',
   'CHAT_PROVIDER_RETRY_DELAY_MS',
   'CREATOR_DRAFT_RETRY_ATTEMPTS',
@@ -211,6 +213,18 @@ function invalidProductionValues() {
     const minChars = Number(process.env.MODEL_MIN_ROLEPLAY_REPLY_CHARS)
     if (!Number.isFinite(minChars) || !Number.isInteger(minChars) || minChars < 0 || minChars > 1200) {
       invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be an integer from 0 to 1200')
+    }
+  }
+  if (present('PROMPT_BUDGET_TOKENS')) {
+    const budget = Number(process.env.PROMPT_BUDGET_TOKENS)
+    if (!Number.isFinite(budget) || !Number.isInteger(budget) || budget < 1200 || budget > 20000) {
+      invalid.push('PROMPT_BUDGET_TOKENS must be an integer from 1200 to 20000')
+    }
+  }
+  if (present('PROMPT_HISTORY_MAX_MESSAGES')) {
+    const messages = Number(process.env.PROMPT_HISTORY_MAX_MESSAGES)
+    if (!Number.isFinite(messages) || !Number.isInteger(messages) || messages < 0 || messages > 40) {
+      invalid.push('PROMPT_HISTORY_MAX_MESSAGES must be an integer from 0 to 40')
     }
   }
   if (present('CHAT_PROVIDER_RETRY_ATTEMPTS')) {

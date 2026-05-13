@@ -125,6 +125,12 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
             {typeof healthStatus.model.minRoleplayReplyChars === 'number' && (
               <span>roleplay ขั้นต่ำ {healthStatus.model.minRoleplayReplyChars.toLocaleString()} ตัวอักษร</span>
             )}
+            {typeof healthStatus.model.promptBudgetTokens === 'number' && (
+              <span>prompt budget {healthStatus.model.promptBudgetTokens.toLocaleString()} tokens</span>
+            )}
+            {typeof healthStatus.model.promptHistoryMaxMessages === 'number' && (
+              <span>history {healthStatus.model.promptHistoryMaxMessages.toLocaleString()} messages</span>
+            )}
             {healthStatus.model.providerRetry && (
               <span>
                 retry แชท {healthStatus.model.providerRetry.chatAttempts} ครั้ง / draft{' '}

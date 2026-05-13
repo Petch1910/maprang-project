@@ -598,6 +598,18 @@ function RightRail({
         <InfoLine label="โมเดลล่าสุด" value={usage?.modelName ?? 'ยังไม่มีรอบแชทล่าสุด'} />
         <InfoLine label="โทเคนรอบล่าสุด" value={usage ? usage.totalTokens.toLocaleString() : '0'} />
         <InfoLine label="Lore ที่ดึงมาใช้" value={String(usage?.contextLoreCount ?? 0)} />
+        <InfoLine
+          label="Prompt budget"
+          value={
+            usage?.promptBudget
+              ? `${usage.promptBudget.estimatedTokens.toLocaleString()} / ${usage.promptBudget.maxTokens.toLocaleString()}`
+              : 'ยังไม่มีข้อมูล'
+          }
+        />
+        <InfoLine
+          label="ประวัติที่ตัดออก"
+          value={usage?.promptBudget ? usage.promptBudget.historyMessagesDropped.toLocaleString() : '0'}
+        />
       </>
     )
   }

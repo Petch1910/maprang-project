@@ -144,6 +144,13 @@ export type ChatResponse = {
     modelName: string
     contextLoreCount?: number
     tokenBalance?: number | null
+    promptBudget?: {
+      estimatedTokens: number
+      maxTokens: number
+      historyMessagesIncluded: number
+      historyMessagesDropped: number
+      overBudget: boolean
+    }
   }
 }
 
@@ -337,6 +344,8 @@ export type HealthStatus = {
     temperature?: number
     maxOutputTokens?: number
     minRoleplayReplyChars?: number
+    promptBudgetTokens?: number
+    promptHistoryMaxMessages?: number
     maxInputChars: number
     minTokenBalanceForChat: number
     providerRetry?: {

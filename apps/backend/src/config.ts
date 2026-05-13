@@ -16,6 +16,11 @@ export const modelMinRoleplayReplyChars = Math.min(
   Math.max(Math.round(numberEnv('MODEL_MIN_ROLEPLAY_REPLY_CHARS', 320)), 0),
   1200,
 )
+export const promptBudgetTokens = Math.min(Math.max(Math.round(numberEnv('PROMPT_BUDGET_TOKENS', 6000)), 1200), 20000)
+export const promptHistoryMaxMessages = Math.min(
+  Math.max(Math.round(numberEnv('PROMPT_HISTORY_MAX_MESSAGES', 12)), 0),
+  40,
+)
 export const chatProviderRetryAttempts = Math.min(
   Math.max(Math.round(numberEnv('CHAT_PROVIDER_RETRY_ATTEMPTS', 2)), 1),
   5,

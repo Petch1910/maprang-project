@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  applyPromptBudget,
   buildRoleplayContinuationInstruction,
   isTransientChatProviderError,
   sendChat,
@@ -10,6 +11,27 @@ import { contentRatingFromTags, ratingAllowed } from './content-rating'
 import { buildWorldStatePrompt, coerceWorldState, mergeWorldState } from './world-state.service'
 
 describe('chat runtime state', () => {
+  test('drops oldest history messages to stay within prompt budget', () => {
+    const history = Array.from({ length: 6 }, (_, index) => ({
+      role: index % 2 === 0 ? ('user' as const) : ('assistant' as const),
+      content: `history-${index} ${'x'.repeat(500)}`,
+    }))
+
+    const result = applyPromptBudget({
+      systemPrompt: 'System prompt stays because it carries platform and character policy.',
+      history,
+      userMessage: 'current user turn',
+      maxTokens: 420,
+    })
+
+    expect(result.promptBudget.historyMessagesDropped).toBeGreaterThan(0)
+    expect(result.promptBudget.historyMessagesIncluded).toBeLessThan(history.length)
+    expect(result.promptBudget.estimatedTokens).toBeLessThanOrEqual(420)
+    expect(result.messages[0]).toMatchObject({ role: 'system' })
+    expect(result.messages.at(-1)).toMatchObject({ role: 'user', content: 'current user turn' })
+    expect(result.messages.some((message) => message.content.includes('history-0'))).toBe(false)
+  })
+
   test('persists emotional momentum and relationship timeline from user pressure', () => {
     const runtime = updateRuntimeState({
       previousMemory: null,

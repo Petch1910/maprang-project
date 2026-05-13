@@ -16,6 +16,8 @@ import {
   modelName,
   modelOutputCostPer1M,
   modelTemperature,
+  promptBudgetTokens,
+  promptHistoryMaxMessages,
   supabaseAuthConfigured,
   storageProvider,
 } from './config'
@@ -126,6 +128,8 @@ export async function loadHealthStatus() {
       temperature: modelTemperature,
       maxOutputTokens: modelMaxOutputTokens,
       minRoleplayReplyChars: modelMinRoleplayReplyChars,
+      promptBudgetTokens,
+      promptHistoryMaxMessages,
       maxInputChars,
       minTokenBalanceForChat,
       providerRetry: {

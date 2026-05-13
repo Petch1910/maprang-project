@@ -20,10 +20,13 @@ import {
   modelName,
   modelOutputCostPer1M,
   modelTemperature,
+  promptBudgetTokens,
+  promptHistoryMaxMessages,
 } from './config'
 import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentRating } from './content-rating'
 import { buildContextPrompt, loadRelevantLore, promptControlPolicy } from './context.service'
 import { getPrisma } from './db'
+import { estimatePromptTokens } from './prompt-inspector.service'
 import { isUuid } from './security'
 import {
   applyRelationshipDelta,
@@ -76,6 +79,14 @@ type CompletionUsage = {
   cost: number
 }
 
+export type PromptBudget = {
+  estimatedTokens: number
+  maxTokens: number
+  historyMessagesIncluded: number
+  historyMessagesDropped: number
+  overBudget: boolean
+}
+
 type PersistResult = {
   chatId: string
   tokenBalance: number | null
@@ -125,16 +136,63 @@ type StreamEvent =
         contextLoreCount: number
         tokenBalance: number | null
         cost: number
+        promptBudget?: PromptBudget
       }
       memory?: ChatRuntimeState
     }
   | { type: 'error'; message: string; chatId: string | null }
 
 function normalizeHistory(history?: ChatMessage[]) {
+  if (promptHistoryMaxMessages <= 0) return []
   return (history ?? [])
     .filter((message) => message.role !== 'system')
     .filter((message) => message.content.trim().length > 0)
-    .slice(-12)
+    .slice(-promptHistoryMaxMessages)
+}
+
+function estimateMessagesTokens(messages: ChatMessage[]) {
+  return estimatePromptTokens(messages.map((message) => `${message.role}: ${message.content}`).join('\n\n'))
+}
+
+export function applyPromptBudget({
+  systemPrompt,
+  history,
+  userMessage,
+  maxTokens = promptBudgetTokens,
+}: {
+  systemPrompt: string
+  history: ChatMessage[]
+  userMessage: string
+  maxTokens?: number
+}) {
+  const originalHistoryCount = history.length
+  let includedHistory = [...history]
+  let messages = [
+    { role: 'system', content: systemPrompt },
+    ...includedHistory,
+    { role: 'user', content: userMessage },
+  ] satisfies ChatMessage[]
+  let estimatedTokens = estimateMessagesTokens(messages)
+
+  while (includedHistory.length > 0 && estimatedTokens > maxTokens) {
+    includedHistory = includedHistory.slice(1)
+    messages = [
+      { role: 'system', content: systemPrompt },
+      ...includedHistory,
+      { role: 'user', content: userMessage },
+    ] satisfies ChatMessage[]
+    estimatedTokens = estimateMessagesTokens(messages)
+  }
+
+  const promptBudget = {
+    estimatedTokens,
+    maxTokens,
+    historyMessagesIncluded: includedHistory.length,
+    historyMessagesDropped: originalHistoryCount - includedHistory.length,
+    overBudget: estimatedTokens > maxTokens,
+  } satisfies PromptBudget
+
+  return { messages, promptBudget }
 }
 
 function usageFromCompletion(completion: ChatCompletion): CompletionUsage {
@@ -476,13 +534,16 @@ async function buildMessages(
     .filter(Boolean)
     .join('\n\n')
 
+  const budgeted = applyPromptBudget({
+    systemPrompt,
+    history: normalizeHistory(history),
+    userMessage,
+  })
+
   return {
     loreEntries,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...normalizeHistory(history),
-      { role: 'user', content: userMessage },
-    ] satisfies ChatMessage[],
+    messages: budgeted.messages,
+    promptBudget: budgeted.promptBudget,
   }
 }
 
@@ -776,6 +837,7 @@ async function persistChatTurn({
   reply,
   usage,
   loreKeywords,
+  promptBudget,
   relationshipSeed,
 }: {
   prisma: Prisma
@@ -786,6 +848,7 @@ async function persistChatTurn({
   reply: string
   usage: CompletionUsage
   loreKeywords: string[]
+  promptBudget?: PromptBudget
   relationshipSeed?: string
 }): Promise<PersistResult> {
   const chat = await findOrCreateChat({
@@ -795,6 +858,7 @@ async function persistChatTurn({
     userId,
     title: userMessage,
   })
+  const promptBudgetMetadata = promptBudget ? { promptBudget } : {}
 
   await prisma.message.createMany({
     data: [
@@ -809,6 +873,7 @@ async function persistChatTurn({
         cost: 0,
         metadata: {
           contextLoreCount: loreKeywords.length,
+          ...promptBudgetMetadata,
         },
       },
       {
@@ -825,6 +890,7 @@ async function persistChatTurn({
           totalTokens: usage.totalTokens,
           contextLoreCount: loreKeywords.length,
           contextLoreKeywords: loreKeywords,
+          ...promptBudgetMetadata,
         },
       },
     ],
@@ -889,6 +955,7 @@ async function persistChatTurn({
           completionTokens: usage.completionTokens,
           totalTokens: usage.totalTokens,
           cost: usage.cost,
+          ...promptBudgetMetadata,
         },
       },
     })
@@ -1014,7 +1081,7 @@ export async function sendChat(input: SendChatInput) {
       },
     }
   }
-  const { loreEntries, messages } = await buildMessages(
+  const { loreEntries, messages, promptBudget } = await buildMessages(
     character,
     input.message,
     input.history,
@@ -1055,6 +1122,7 @@ export async function sendChat(input: SendChatInput) {
           reply,
           usage,
           loreKeywords,
+          promptBudget,
           relationshipSeed: input.relationshipSeed,
         })
       : {
@@ -1080,6 +1148,7 @@ export async function sendChat(input: SendChatInput) {
       modelName,
       contextLoreCount: loreKeywords.length,
       tokenBalance: persistResult.tokenBalance,
+      promptBudget,
     },
   }
 }
@@ -1177,7 +1246,7 @@ export function streamChat(input: SendChatInput) {
           })
           return
         }
-        const { loreEntries, messages } = await buildMessages(
+        const { loreEntries, messages, promptBudget } = await buildMessages(
           character,
           input.message,
           input.history,
@@ -1242,6 +1311,7 @@ export function streamChat(input: SendChatInput) {
                 reply: trimmedReply,
                 usage,
                 loreKeywords,
+                promptBudget,
                 relationshipSeed: input.relationshipSeed,
               })
             : {
@@ -1266,6 +1336,7 @@ export function streamChat(input: SendChatInput) {
             modelName,
             contextLoreCount: loreKeywords.length,
             tokenBalance: persistResult.tokenBalance,
+            promptBudget,
           },
           memory: persistResult.memory,
         })
