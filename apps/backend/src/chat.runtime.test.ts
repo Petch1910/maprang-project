@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   applyPromptBudget,
   buildRoleplayContinuationInstruction,
+  classifyChatProviderError,
   isTransientChatProviderError,
   sendChat,
   shouldExtendShortRoleplayReply,
@@ -209,5 +210,24 @@ describe('chat provider retry guard', () => {
     expect(isTransientChatProviderError(new Error('The operation was aborted'))).toBe(true)
     expect(isTransientChatProviderError({ status: 401, message: 'invalid api key' })).toBe(false)
     expect(isTransientChatProviderError({ status: 400, message: 'billing hard limit reached' })).toBe(false)
+  })
+
+  test('classifies provider failures into safe user-facing states', () => {
+    const credentialFailure = classifyChatProviderError({ status: 401, message: 'invalid api key sk-secret' })
+    expect(credentialFailure.code).toBe('invalid_credentials')
+    expect(credentialFailure.retryable).toBe(false)
+    expect(credentialFailure.userMessage).not.toContain('sk-secret')
+
+    const rateLimitFailure = classifyChatProviderError({ status: 429, message: 'too many requests' })
+    expect(rateLimitFailure.code).toBe('rate_limited')
+    expect(rateLimitFailure.retryable).toBe(true)
+
+    const timeoutFailure = classifyChatProviderError(new Error('The operation was aborted after timeout'))
+    expect(timeoutFailure.code).toBe('timeout')
+    expect(timeoutFailure.retryable).toBe(true)
+
+    const quotaFailure = classifyChatProviderError({ status: 402, message: 'insufficient_quota' })
+    expect(quotaFailure.code).toBe('quota_exhausted')
+    expect(quotaFailure.retryable).toBe(false)
   })
 })

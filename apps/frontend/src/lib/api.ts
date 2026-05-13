@@ -151,6 +151,12 @@ export type ChatResponse = {
       historyMessagesDropped: number
       overBudget: boolean
     }
+    providerFailure?: {
+      code: 'rate_limited' | 'quota_exhausted' | 'invalid_credentials' | 'timeout' | 'provider_unavailable' | 'unknown'
+      status: number | null
+      retryable: boolean
+      userMessage: string
+    }
   }
 }
 

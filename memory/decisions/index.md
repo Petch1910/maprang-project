@@ -15,3 +15,4 @@ Last updated: 2026-05-14
 - [0011 - Add chat world state controller](./0011-add-chat-world-state-controller.md)
 - [0012 - Add usage and cost intelligence](./0012-add-usage-cost-intelligence.md)
 - [0013 - Add prompt budgeting](./0013-add-prompt-budgeting.md)
+- [0014 - Add chat provider failure classification](./0014-add-chat-provider-failure-classification.md)

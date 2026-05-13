@@ -88,6 +88,19 @@ function usageLabel(usage: ChatUsage | null) {
   return `ใช้ ${usage.totalTokens.toLocaleString()} โทเคน${balance}`
 }
 
+function providerFailureLabel(failure?: ChatUsage['providerFailure']) {
+  if (!failure) return 'ปกติ'
+  const labels: Record<NonNullable<ChatUsage['providerFailure']>['code'], string> = {
+    invalid_credentials: 'คีย์ผู้ให้บริการไม่พร้อม',
+    provider_unavailable: 'ผู้ให้บริการล่มชั่วคราว',
+    quota_exhausted: 'เครดิตผู้ให้บริการไม่พอ',
+    rate_limited: 'ถูกจำกัดการเรียกใช้ชั่วคราว',
+    timeout: 'ตอบช้าเกินเวลา',
+    unknown: 'ผิดพลาดไม่ทราบสาเหตุ',
+  }
+  return `${labels[failure.code]}${failure.retryable ? ' · ลองใหม่ได้' : ' · ต้องให้ผู้ดูแลแก้'}`
+}
+
 function compactSceneLabel(runtimeState: ChatRuntimeState | null) {
   const scene = runtimeState?.sceneState
   if (scene?.activeScene) return scene.activeScene.title
@@ -610,6 +623,7 @@ function RightRail({
           label="ประวัติที่ตัดออก"
           value={usage?.promptBudget ? usage.promptBudget.historyMessagesDropped.toLocaleString() : '0'}
         />
+        <InfoLine label="สถานะผู้ให้บริการ" value={providerFailureLabel(usage?.providerFailure)} />
       </>
     )
   }

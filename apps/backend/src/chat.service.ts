@@ -87,6 +87,13 @@ export type PromptBudget = {
   overBudget: boolean
 }
 
+export type ChatProviderFailure = {
+  code: 'rate_limited' | 'quota_exhausted' | 'invalid_credentials' | 'timeout' | 'provider_unavailable' | 'unknown'
+  status: number | null
+  retryable: boolean
+  userMessage: string
+}
+
 type PersistResult = {
   chatId: string
   tokenBalance: number | null
@@ -137,6 +144,7 @@ type StreamEvent =
         tokenBalance: number | null
         cost: number
         promptBudget?: PromptBudget
+        providerFailure?: ChatProviderFailure
       }
       memory?: ChatRuntimeState
     }
@@ -236,6 +244,93 @@ function providerStatus(error: unknown) {
   const code = (error as { code?: unknown }).code
   if (typeof code === 'number') return code
   return null
+}
+
+function providerMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+  if (error && typeof error === 'object') {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string') return message
+    const errorField = (error as { error?: unknown }).error
+    if (typeof errorField === 'string') return errorField
+  }
+  return String(error)
+}
+
+export function classifyChatProviderError(error: unknown): ChatProviderFailure {
+  const status = providerStatus(error)
+  const message = providerMessage(error).toLowerCase()
+
+  if (
+    status === 401 ||
+    status === 403 ||
+    message.includes('invalid api key') ||
+    message.includes('unauthorized') ||
+    message.includes('forbidden') ||
+    message.includes('authentication')
+  ) {
+    return {
+      code: 'invalid_credentials',
+      status,
+      retryable: false,
+      userMessage: 'บริการ AI ยังไม่พร้อม เพราะคีย์ผู้ให้บริการไม่ถูกต้องหรือไม่มีสิทธิ์ใช้งาน กรุณาแจ้งผู้ดูแลระบบ',
+    }
+  }
+
+  if (
+    status === 402 ||
+    message.includes('insufficient_quota') ||
+    message.includes('quota') ||
+    message.includes('billing') ||
+    message.includes('credit') ||
+    message.includes('out of tokens')
+  ) {
+    return {
+      code: 'quota_exhausted',
+      status,
+      retryable: false,
+      userMessage: 'โควตาหรือเครดิตของผู้ให้บริการ AI ไม่พอในตอนนี้ ข้อความนี้ยังไม่ถูกคิดโทเคน กรุณาแจ้งผู้ดูแลระบบ',
+    }
+  }
+
+  if (status === 429 || message.includes('rate limit') || message.includes('too many requests')) {
+    return {
+      code: 'rate_limited',
+      status,
+      retryable: true,
+      userMessage: 'ผู้ให้บริการ AI จำกัดการเรียกใช้งานชั่วคราว ข้อความนี้ยังไม่ถูกคิดโทเคน กรุณารอสักครู่แล้วลองใหม่',
+    }
+  }
+
+  if (message.includes('timeout') || message.includes('timed out') || message.includes('operation was aborted')) {
+    return {
+      code: 'timeout',
+      status,
+      retryable: true,
+      userMessage: 'ผู้ให้บริการ AI ตอบช้าเกินไป ข้อความนี้ยังไม่ถูกคิดโทเคน กรุณาลองใหม่อีกครั้ง',
+    }
+  }
+
+  if (
+    isTransientChatProviderError(error) ||
+    (typeof status === 'number' && status >= 500) ||
+    message.includes('network') ||
+    message.includes('fetch failed')
+  ) {
+    return {
+      code: 'provider_unavailable',
+      status,
+      retryable: true,
+      userMessage: 'เชื่อมต่อผู้ให้บริการ AI ไม่สำเร็จชั่วคราว ข้อความนี้ยังไม่ถูกคิดโทเคน กรุณาลองใหม่อีกครั้ง',
+    }
+  }
+
+  return {
+    code: 'unknown',
+    status,
+    retryable: false,
+    userMessage: 'บริการ AI ตอบกลับไม่สำเร็จ ข้อความนี้ยังไม่ถูกคิดโทเคน กรุณาลองใหม่หรือติดต่อผู้ดูแลระบบ',
+  }
 }
 
 export function isTransientChatProviderError(error: unknown) {
@@ -1061,9 +1156,17 @@ export async function sendChat(input: SendChatInput) {
   }
 
   if (!process.env.OPENROUTER_API_KEY) {
+    const providerFailure = classifyChatProviderError(new Error('invalid api key: OPENROUTER_API_KEY is missing'))
     return {
-      reply: `Backend is running, but OPENROUTER_API_KEY is not configured. Your message was: "${input.message}"`,
+      reply: providerFailure.userMessage,
       chatId: responseChatId(input.chatId),
+      usage: {
+        ...fallbackUsage(),
+        modelName,
+        contextLoreCount: 0,
+        tokenBalance,
+        providerFailure,
+      },
     }
   }
 
@@ -1096,7 +1199,27 @@ export async function sendChat(input: SendChatInput) {
     messages,
     max_tokens: modelMaxOutputTokens,
     temperature: modelTemperature,
+  }).catch((error): { providerFailure: ChatProviderFailure } => {
+    const providerFailure = classifyChatProviderError(error)
+    return {
+      providerFailure,
+    }
   })
+
+  if ('providerFailure' in completion) {
+    return {
+      reply: completion.providerFailure.userMessage,
+      chatId: responseChatId(input.chatId),
+      usage: {
+        ...fallbackUsage(),
+        modelName,
+        contextLoreCount: loreEntries.length,
+        tokenBalance,
+        promptBudget,
+        providerFailure: completion.providerFailure,
+      },
+    }
+  }
 
   let reply = completion.choices[0]?.message?.content?.trim() || 'Maprang could not produce a reply yet. Please try asking again.'
   let usage = usageFromCompletion(completion)
@@ -1105,6 +1228,9 @@ export async function sendChat(input: SendChatInput) {
     messages,
     reply,
     userMessage: input.message,
+  }).catch((error): { reply: string; usage: CompletionUsage; extended: false } => {
+    console.warn('Roleplay continuation failed:', classifyChatProviderError(error))
+    return { reply, usage: fallbackUsage(), extended: false }
   })
   if (extension.extended) {
     reply = extension.reply
@@ -1163,6 +1289,9 @@ export function streamChat(input: SendChatInput) {
       const activeUserId = input.userId || defaultUserId
       const prisma = getPrisma()
       const validationError = validateChatInput({ ...input, userId: activeUserId, characterId: activeCharacterId })
+      let streamTokenBalance: number | null = null
+      let streamPromptBudget: PromptBudget | undefined
+      let streamContextLoreCount = 0
 
       try {
         if (validationError) {
@@ -1198,7 +1327,8 @@ export function streamChat(input: SendChatInput) {
         }
 
         if (!process.env.OPENROUTER_API_KEY) {
-          const reply = `Backend is running, but OPENROUTER_API_KEY is not configured. Your message was: "${input.message}"`
+          const providerFailure = classifyChatProviderError(new Error('invalid api key: OPENROUTER_API_KEY is missing'))
+          const reply = providerFailure.userMessage
           send({ type: 'delta', content: reply })
           send({
             type: 'done',
@@ -1208,12 +1338,14 @@ export function streamChat(input: SendChatInput) {
               modelName,
               contextLoreCount: 0,
               tokenBalance: prisma ? await loadTokenBalance(prisma, activeUserId) : null,
+              providerFailure,
             },
           })
           return
         }
 
         const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
+        streamTokenBalance = tokenBalance
         if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
           const reply = 'This account is out of tokens. Please add quota before continuing.'
           send({ type: 'delta', content: reply })
@@ -1256,6 +1388,8 @@ export function streamChat(input: SendChatInput) {
           activeUserId,
         )
         const loreKeywords = loreEntries.map((entry) => entry.keyword)
+        streamPromptBudget = promptBudget
+        streamContextLoreCount = loreKeywords.length
         const stream = await createChatCompletionStream({
           model: modelName,
           messages,
@@ -1293,6 +1427,9 @@ export function streamChat(input: SendChatInput) {
           messages,
           reply: trimmedReply,
           userMessage: input.message,
+        }).catch((error): { reply: string; usage: CompletionUsage; extended: false } => {
+          console.warn('Roleplay stream continuation failed:', classifyChatProviderError(error))
+          return { reply: trimmedReply, usage: fallbackUsage(), extended: false }
         })
         if (extension.extended) {
           const appended = extension.reply.slice(trimmedReply.length)
@@ -1341,11 +1478,24 @@ export function streamChat(input: SendChatInput) {
           memory: persistResult.memory,
         })
       } catch (error) {
-        console.error('Chat stream error:', error)
+        const providerFailure = classifyChatProviderError(error)
+        console.error('Chat stream error:', providerFailure, error)
         send({
           type: 'error',
-          message: 'The AI service is temporarily unavailable. Please try again.',
+          message: providerFailure.userMessage,
           chatId: responseChatId(input.chatId),
+        })
+        send({
+          type: 'done',
+          chatId: responseChatId(input.chatId),
+          usage: {
+            ...fallbackUsage(),
+            modelName,
+            contextLoreCount: streamContextLoreCount,
+            tokenBalance: streamTokenBalance,
+            promptBudget: streamPromptBudget,
+            providerFailure,
+          },
         })
       } finally {
         controller.close()

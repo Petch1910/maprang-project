@@ -21,6 +21,7 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Chat World State Controller stores owner-scoped scene constants in chat memory, injects them into runtime prompts, and exposes them through the chat UI plus Prompt Inspector runtime memory.
 - Usage and cost intelligence is derived from the existing usage ledger, exposing total cost, model breakdown, daily trend, and remaining-request estimates through `/me/usage`.
 - Prompt budgeting trims oldest chat history before provider calls, records budget metadata, and exposes budget configuration through health/readiness surfaces.
+- Chat provider failures are classified into safe retry/admin states, returned with zero token usage, and exposed as `providerFailure` metadata in normal and streamed chat responses.
 
 ## Production-Critical API Areas
 
@@ -45,3 +46,4 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Do not mark live verification flags from local deterministic smoke.
 - Keep `knowledge/structured/*.json` deterministic, schema-versioned, and verified by `bun run knowledge:audit`.
 - Keep `evals/golden-roleplay.json` deterministic and verified by `bun run eval:local` before changing context assembly.
+- Do not expose raw provider errors or secrets to users; classify provider failures and keep failed provider attempts uncharged.

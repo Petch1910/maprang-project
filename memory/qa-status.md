@@ -17,7 +17,7 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 123 pass, 0 fail.
+- Backend tests: 124 pass, 0 fail.
 - API smoke: 25 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
@@ -33,6 +33,7 @@ Results:
 - API smoke and E2E now cover chat world state save/read persistence.
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
+- Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate
