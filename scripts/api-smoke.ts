@@ -35,6 +35,19 @@ type SmokeLoreEntry = {
   priority?: number
 }
 
+type StreamSmokeEvent =
+  | { type: 'delta'; content?: string }
+  | {
+      type: 'done'
+      chatId?: string | null
+      usage?: {
+        totalTokens?: number
+        contextLoreCount?: number
+        providerFailure?: { code?: string }
+      }
+    }
+  | { type: 'error'; message?: string; chatId?: string | null }
+
 type HealthSmokePayload = {
   ok: boolean
   checks?: {
@@ -423,6 +436,26 @@ if (live) {
   record('POST /chat', 'skip', 'live model call skipped; run `bun run api:smoke:live`')
 }
 
+await check('POST /chat/stream', async () => {
+  const events = await readStreamEvents('/chat/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({
+      characterId: "' OR 1=1 --",
+      message: 'stream validation smoke should never call the live provider',
+      history: [],
+    }),
+  })
+
+  const delta = events.find((event): event is Extract<StreamSmokeEvent, { type: 'delta' }> => event.type === 'delta')
+  const done = events.find((event): event is Extract<StreamSmokeEvent, { type: 'done' }> => event.type === 'done')
+  if (!delta?.content?.includes('Invalid character id')) throw new Error('stream did not return validation delta')
+  if (!done) throw new Error('stream did not return done event')
+  if ((done.usage?.totalTokens ?? 0) !== 0) throw new Error('stream validation path should not use tokens')
+  if (done.usage?.providerFailure) throw new Error(`stream validation path returned provider failure: ${done.usage.providerFailure.code}`)
+  return `${events.length} SSE events, validation path uncharged`
+})
+
 const activeChats = await runRequired('GET /chats', async () => {
   const payload = await readJson<{ chats?: ChatSummary[] }>('/chats', { headers: authHeaders })
   if (!payload.chats) throw new Error('missing chats array')
@@ -739,6 +772,22 @@ async function bestEffort(name: string, fn: () => Promise<unknown>) {
   } catch (error) {
     console.warn(`Warning: could not ${name}: ${error instanceof Error ? error.message : String(error)}`)
   }
+}
+
+async function readStreamEvents(path: string, init: RequestInit) {
+  const response = await fetch(`${apiBaseUrl}${path}`, init)
+  const raw = await response.text()
+  if (!response.ok) throw new Error(`${path} failed with ${response.status}: ${raw.slice(0, 500)}`)
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('text/event-stream')) throw new Error(`${path} did not return an event stream: ${contentType}`)
+
+  const events = raw
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith('data: '))
+    .map((line) => JSON.parse(line.slice('data: '.length)) as StreamSmokeEvent)
+
+  if (events.length === 0) throw new Error(`${path} returned no SSE data events`)
+  return events
 }
 
 function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {

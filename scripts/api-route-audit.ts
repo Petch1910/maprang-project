@@ -168,8 +168,8 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
   'POST /chat/stream': {
     owner: 'chat',
-    coverage: ['backend-test', 'manual-production'],
-    note: 'route shares chat body/auth path with POST /chat; manual QA covers streaming UX before release',
+    coverage: ['smoke', 'backend-test', 'manual-production'],
+    note: 'api-smoke verifies SSE shape on the validation path without spending provider tokens; manual QA covers live streaming UX before release',
   },
   'GET /chats/:id/messages': {
     owner: 'chat',

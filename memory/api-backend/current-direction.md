@@ -47,3 +47,4 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Keep `knowledge/structured/*.json` deterministic, schema-versioned, and verified by `bun run knowledge:audit`.
 - Keep `evals/golden-roleplay.json` deterministic and verified by `bun run eval:local` before changing context assembly.
 - Do not expose raw provider errors or secrets to users; classify provider failures and keep failed provider attempts uncharged.
+- Keep `/chat/stream` covered in local smoke through uncharged validation paths, then verify live streaming manually or against staging before production.

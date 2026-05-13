@@ -1,6 +1,6 @@
 # Deploy Blockers
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 ## Active Blockers
 
@@ -22,8 +22,8 @@ Status: needs verification
 
 Current issue:
 - One live chat smoke returned a real model reply with token usage and wallet debit.
-- A later live chat smoke returned the temporary provider fallback.
-- Treat the provider path as not stable enough for production until staging smoke passes in an ordered run.
+- A later live chat smoke reached the provider failure path.
+- Provider failures are now classified as `usage.providerFailure`, but the live provider path still needs a clean staging smoke before production.
 
 Required:
 - Run `bun run smoke:chat` or `bun run api:smoke:live` against staging.
