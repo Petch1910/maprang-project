@@ -119,11 +119,22 @@ await check('GET /characters/:id', async () => {
 })
 
 await check('GET /me/usage', async () => {
-  const payload = await readJson<{ user?: { tokenBalance?: number }; wallet?: { transactions?: unknown[] } }>('/me/usage', {
-    headers: authHeaders,
-  })
+  const payload = await readJson<{
+    user?: { tokenBalance?: number }
+    usage?: {
+      totalCost?: string
+      byModel?: unknown[]
+      daily?: unknown[]
+      estimate?: { averageTokensPerRequest?: number; estimatedRemainingRequests?: number | null }
+    }
+    wallet?: { transactions?: unknown[] }
+  }>('/me/usage', { headers: authHeaders })
   if (typeof payload.user?.tokenBalance !== 'number') throw new Error('missing tokenBalance')
-  return `tokenBalance=${payload.user.tokenBalance}, transactions=${payload.wallet?.transactions?.length ?? 0}`
+  if (typeof payload.usage?.totalCost !== 'string') throw new Error('missing totalCost')
+  if (!Array.isArray(payload.usage.byModel)) throw new Error('missing usage byModel')
+  if (!Array.isArray(payload.usage.daily) || payload.usage.daily.length !== 7) throw new Error('missing 7 day usage trend')
+  if (typeof payload.usage.estimate?.averageTokensPerRequest !== 'number') throw new Error('missing usage estimate')
+  return `tokenBalance=${payload.user.tokenBalance}, cost=${payload.usage.totalCost}, transactions=${payload.wallet?.transactions?.length ?? 0}`
 })
 
 await check('GET /me/content-settings', async () => {

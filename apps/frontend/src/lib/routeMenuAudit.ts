@@ -88,8 +88,8 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'Wallet',
     route: '/wallet',
-    control: 'รีเฟรช, admin key, เพิ่ม/หัก token, usage history, transaction history',
-    result: 'โหลดยอด token และธุรกรรมจาก backend; QA seed มีข้อมูลให้ตรวจทันที',
+    control: 'รีเฟรช, admin key, เพิ่ม/หัก token, usage history, transaction history, cost by model, 7-day usage',
+    result: 'โหลดยอด token, ธุรกรรม, ต้นทุนรวม, ต้นทุนแยกโมเดล, กราฟ 7 วัน และคาดการณ์รอบแชทที่เหลือจาก backend; QA seed มีข้อมูลให้ตรวจทันที',
     disabledReason: 'เพิ่ม/หัก token disabled ถ้าไม่มี ADMIN_API_KEY, ไม่มี user summary, จำนวนไม่ถูกต้อง, หรือกำลังส่ง',
     emptyState: 'ถ้ายังไม่มีธุรกรรม/usage จะบอกว่ายังไม่มีรายการ ไม่ปล่อยช่องว่าง',
     status: 'ready',

@@ -1,28 +1,39 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
-import { effectiveMaxRatingForUser, loadContentSettings, loadUserPersona, updateContentSettings, updateUserPersona } from './user.service'
+import {
+  effectiveMaxRatingForUser,
+  loadContentSettings,
+  loadUsageSummary,
+  loadUserPersona,
+  updateContentSettings,
+  updateUserPersona,
+} from './user.service'
 
 const prisma = getPrisma()
 const shouldRunDbTest = createDbTestGate(prisma, 'user content settings')
 const contentUserIds = [
   '880e8400-e29b-41d4-a716-446655440000',
   '880e8400-e29b-41d4-a716-446655440001',
+  '880e8400-e29b-41d4-a716-446655440002',
 ]
 
 async function ensureContentUser(userId: string) {
+  const suffix = userId.slice(-1)
   await prisma!.user.upsert({
     where: { id: userId },
     update: {
-      email: 'content@maprang.io',
-      username: `ContentUser${userId.slice(-1)}`,
+      email: `content-${suffix}@maprang.io`,
+      username: `ContentUser${suffix}`,
+      tokenBalance: 1000,
       contentMaxRating: 'teen_romance',
       adultVerifiedAt: null,
     },
     create: {
       id: userId,
-      email: `content-${userId.slice(-1)}@maprang.io`,
-      username: `ContentUser${userId.slice(-1)}`,
+      email: `content-${suffix}@maprang.io`,
+      username: `ContentUser${suffix}`,
+      tokenBalance: 1000,
     },
   })
 }
@@ -85,5 +96,64 @@ describe('user content settings', () => {
 
     const cleared = await updateUserPersona(contentUserId, { persona: '' })
     expect(cleared?.persona).toBe('')
+  })
+
+  test('summarizes usage cost by model and daily trend', async () => {
+    if (!(await shouldRunDbTest())) return
+    const contentUserId = contentUserIds[2]!
+    await ensureContentUser(contentUserId)
+    await prisma!.usage.deleteMany({ where: { userId: contentUserId } })
+
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setUTCDate(today.getUTCDate() - 1)
+
+    await prisma!.usage.createMany({
+      data: [
+        {
+          userId: contentUserId,
+          tokens: 300,
+          cost: '0.000030',
+          modelName: 'model-a',
+          createdAt: today,
+        },
+        {
+          userId: contentUserId,
+          tokens: 700,
+          cost: '0.000070',
+          modelName: 'model-a',
+          createdAt: yesterday,
+        },
+        {
+          userId: contentUserId,
+          tokens: 200,
+          cost: '0.000020',
+          modelName: 'model-b',
+          createdAt: yesterday,
+        },
+      ],
+    })
+
+    const summary = await loadUsageSummary(contentUserId)
+
+    expect(summary?.usage.totalTokens).toBe(1200)
+    expect(summary?.usage.totalCost).toBe('0.000120')
+    expect(summary?.usage.requestCount).toBe(3)
+    expect(summary?.usage.estimate.averageTokensPerRequest).toBe(400)
+    expect(summary?.usage.estimate.estimatedRemainingRequests).toBe(2)
+    expect(summary?.usage.byModel[0]).toMatchObject({
+      modelName: 'model-a',
+      tokens: 1000,
+      cost: '0.000100',
+      requestCount: 2,
+    })
+    expect(summary?.usage.byModel[1]).toMatchObject({
+      modelName: 'model-b',
+      tokens: 200,
+      cost: '0.000020',
+      requestCount: 1,
+    })
+    expect(summary?.usage.daily).toHaveLength(7)
+    expect(summary?.usage.daily.reduce((total, item) => total + item.tokens, 0)).toBe(1200)
   })
 })

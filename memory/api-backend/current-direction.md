@@ -19,6 +19,7 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Admin Prompt Inspector gives redacted prompt snapshots, section token estimates, retrieved lore, and previous/current prompt diffs without spending live model tokens.
 - Admin Automated Evals exposes the deterministic golden roleplay suite through a guarded API/UI so prompt regressions are visible without terminal access.
 - Chat World State Controller stores owner-scoped scene constants in chat memory, injects them into runtime prompts, and exposes them through the chat UI plus Prompt Inspector runtime memory.
+- Usage and cost intelligence is derived from the existing usage ledger, exposing total cost, model breakdown, daily trend, and remaining-request estimates through `/me/usage`.
 
 ## Production-Critical API Areas
 

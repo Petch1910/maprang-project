@@ -13,3 +13,4 @@ Last updated: 2026-05-14
 - [0009 - Add admin prompt inspector](./0009-add-admin-prompt-inspector.md)
 - [0010 - Add admin automated evals](./0010-add-admin-automated-evals.md)
 - [0011 - Add chat world state controller](./0011-add-chat-world-state-controller.md)
+- [0012 - Add usage and cost intelligence](./0012-add-usage-cost-intelligence.md)

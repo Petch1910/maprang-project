@@ -483,6 +483,8 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.goto('/wallet')
   await expect(page.locator('body')).toContainText('โทเคน')
   await expect(page.locator('body')).toContainText('ธุรกรรม')
+  await expect(page.getByTestId('wallet-cost-by-model')).toContainText('ต้นทุนแยกตามโมเดล')
+  await expect(page.getByTestId('wallet-usage-trend')).toContainText('การใช้ 7 วันล่าสุด')
 
   await expect(page.getByTestId('wallet-refresh')).toBeVisible()
   await page.getByTestId('wallet-refresh').click()

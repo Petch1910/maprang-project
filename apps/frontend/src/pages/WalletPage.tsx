@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Coins, KeyRound, RefreshCw, ReceiptText, TrendingDown, X } from 'lucide-react'
+import { BarChart3, Coins, Gauge, KeyRound, RefreshCw, ReceiptText, TrendingDown, X } from 'lucide-react'
 import {
   adjustAdminUserTokens,
   ApiError,
@@ -24,6 +24,13 @@ function formatCost(value: string | null) {
   const cost = Number(value ?? 0)
   if (!Number.isFinite(cost) || cost <= 0) return '$0.000000'
   return `$${cost.toFixed(6)}`
+}
+
+function formatShortDate(value: string) {
+  return new Intl.DateTimeFormat('th-TH', {
+    day: '2-digit',
+    month: 'short',
+  }).format(new Date(`${value}T00:00:00.000Z`))
 }
 
 function errorMessage(error: unknown) {
@@ -54,8 +61,8 @@ export function WalletPage() {
   )
   const [note, setNote] = useState('กำลังโหลดกระเป๋าโทเคน...')
 
-  const usageCost = useMemo(
-    () => summary?.usage.recent.reduce((total, item) => total + Number(item.cost ?? 0), 0) ?? 0,
+  const maxDailyTokens = useMemo(
+    () => Math.max(...(summary?.usage.daily.map((item) => item.tokens) ?? [0]), 1),
     [summary],
   )
   const normalizedAdjustAmount = useMemo(() => {
@@ -68,7 +75,14 @@ export function WalletPage() {
   const balanceLabel = summary ? `${summary.user.tokenBalance.toLocaleString()} โทเคน` : isLoading ? 'กำลังโหลด...' : '0 โทเคน'
   const totalTokensLabel = summary ? summary.usage.totalTokens.toLocaleString() : isLoading ? '...' : '0'
   const requestCountLabel = summary ? summary.usage.requestCount.toLocaleString() : isLoading ? '...' : '0'
-  const recentCostLabel = summary ? `$${usageCost.toFixed(6)}` : isLoading ? '...' : '$0.000000'
+  const totalCostLabel = summary ? formatCost(summary.usage.totalCost) : isLoading ? '...' : '$0.000000'
+  const estimatedRemainingLabel = summary
+    ? summary.usage.estimate.estimatedRemainingRequests === null
+      ? 'ยังประเมินไม่ได้'
+      : `${summary.usage.estimate.estimatedRemainingRequests.toLocaleString()} รอบ`
+    : isLoading
+      ? '...'
+      : '0 รอบ'
 
   const loadWallet = useCallback(async () => {
     setIsLoading(true)
@@ -185,7 +199,7 @@ export function WalletPage() {
         </div>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
           <p className="m-0 text-sm font-black text-slate-500">ใช้ไปทั้งหมด</p>
           <p className="m-0 mt-2 text-2xl font-black text-slate-950">{totalTokensLabel}</p>
@@ -195,8 +209,91 @@ export function WalletPage() {
           <p className="m-0 mt-2 text-2xl font-black text-slate-950">{requestCountLabel}</p>
         </div>
         <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
-          <p className="m-0 text-sm font-black text-slate-500">ค่าใช้จ่ายล่าสุด</p>
-          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{recentCostLabel}</p>
+          <p className="m-0 text-sm font-black text-slate-500">ค่าใช้จ่ายรวม</p>
+          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{totalCostLabel}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
+          <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-500">
+            <Gauge size={16} />
+            คาดว่าคุยได้อีก
+          </p>
+          <p className="m-0 mt-2 text-2xl font-black text-slate-950">{estimatedRemainingLabel}</p>
+          <p className="m-0 mt-1 text-xs font-bold text-slate-400">
+            เฉลี่ย {summary?.usage.estimate.averageTokensPerRequest.toLocaleString() ?? 0} โทเคน/รอบ
+          </p>
+        </div>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm" data-testid="wallet-cost-by-model">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
+                <BarChart3 size={17} />
+                ต้นทุนแยกตามโมเดล
+              </p>
+              <p className="m-0 mt-1 text-xs font-bold text-slate-400">ใช้ดูว่าโมเดลไหนกินโทเคนและเงินมากที่สุด</p>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="py-5 text-sm font-bold text-slate-500">กำลังโหลดสรุปโมเดล...</div>
+          ) : !summary || summary.usage.byModel.length === 0 ? (
+            <div className="py-5 text-sm font-bold text-slate-500">ยังไม่มีข้อมูลต้นทุนแยกตามโมเดล</div>
+          ) : (
+            <div className="grid gap-2">
+              {summary.usage.byModel.map((item) => {
+                const tokenShare = summary.usage.totalTokens > 0 ? Math.round((item.tokens / summary.usage.totalTokens) * 100) : 0
+                return (
+                  <article className="rounded-xl border border-slate-900/10 p-3" key={item.modelName ?? 'unknown-model'}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="m-0 min-w-0 truncate text-sm font-black text-slate-950">
+                        {item.modelName ?? 'โมเดลไม่ระบุ'}
+                      </p>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">
+                        {formatCost(item.cost)}
+                      </span>
+                    </div>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-amber-500" style={{ width: `${Math.max(tokenShare, 4)}%` }} />
+                    </div>
+                    <p className="m-0 mt-2 text-xs font-bold text-slate-400">
+                      {item.tokens.toLocaleString()} โทเคน / {item.requestCount.toLocaleString()} คำขอ / {tokenShare}%
+                    </p>
+                  </article>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm" data-testid="wallet-usage-trend">
+          <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
+            <TrendingDown size={17} />
+            การใช้ 7 วันล่าสุด
+          </p>
+          <p className="m-0 mt-1 text-xs font-bold text-slate-400">ดูจังหวะใช้โทเคนเพื่อประเมินงบและโปรโมชั่น</p>
+
+          {isLoading ? (
+            <div className="py-5 text-sm font-bold text-slate-500">กำลังโหลดกราฟการใช้งาน...</div>
+          ) : !summary || summary.usage.daily.every((item) => item.tokens === 0) ? (
+            <div className="py-5 text-sm font-bold text-slate-500">ยังไม่มีการใช้โทเคนใน 7 วันล่าสุด</div>
+          ) : (
+            <div className="mt-4 grid gap-3">
+              {summary.usage.daily.map((item) => {
+                const width = Math.max(Math.round((item.tokens / maxDailyTokens) * 100), item.tokens > 0 ? 6 : 0)
+                return (
+                  <div className="grid grid-cols-[76px_minmax(0,1fr)_auto] items-center gap-3" key={item.date}>
+                    <span className="text-xs font-black text-slate-500">{formatShortDate(item.date)}</span>
+                    <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-slate-950" style={{ width: `${width}%` }} />
+                    </div>
+                    <span className="min-w-[4rem] text-right text-xs font-black text-slate-600">{item.tokens.toLocaleString()}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 

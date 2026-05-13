@@ -374,6 +374,7 @@ export type UsageSummary = {
   contentSettings?: ContentSettings
   usage: {
     totalTokens: number
+    totalCost: string
     requestCount: number
     recent: Array<{
       id: string
@@ -382,6 +383,23 @@ export type UsageSummary = {
       cost: string | null
       createdAt: string
     }>
+    byModel: Array<{
+      modelName: string | null
+      tokens: number
+      cost: string
+      requestCount: number
+    }>
+    daily: Array<{
+      date: string
+      tokens: number
+      cost: string
+      requestCount: number
+    }>
+    estimate: {
+      averageTokensPerRequest: number
+      averageCostPerRequest: string
+      estimatedRemainingRequests: number | null
+    }
   }
   wallet?: {
     transactions: Array<{
