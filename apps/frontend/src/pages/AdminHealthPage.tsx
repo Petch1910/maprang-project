@@ -113,7 +113,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: chatProductionReady
         ? 'ยืนยัน live chat smoke แล้ว'
         : checks?.openRouterConfigured || chatProvider?.configured
-          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าได้ fallback ต้องเช็ค OpenRouter quota, model access, key และ network`
+          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าได้ usage.providerFailure ต้องเช็ค OpenRouter quota, model access, key และ network`
           : 'ยังไม่มี OPENROUTER_API_KEY จึงยังทดสอบ live chat ไม่ได้',
       scope: 'production',
     },
