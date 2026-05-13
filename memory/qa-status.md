@@ -34,6 +34,7 @@ Results:
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
+- Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate

@@ -1,6 +1,6 @@
 # Working Context
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 ## Current Goal
 
@@ -11,9 +11,9 @@ Bring Maprang AI to a production-ready state before deploy. The local system sho
 Status: local QA ready
 
 Verified:
-- Backend tests pass: 118 pass, 0 fail.
+- Backend tests pass: 124 pass, 0 fail.
 - Frontend deploy check passes.
-- Local API smoke passes: 24 pass, 0 fail, 1 live chat skip.
+- Local API smoke passes: 25 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.
@@ -24,6 +24,7 @@ Verified:
 - Security audit, route audit, deploy env doctor self-test, and predeploy check pass.
 - Project memory, runtime knowledge, and deterministic prompt/context evals are part of the local QA gate.
 - Backend health/readiness now reports structured knowledge pack status.
+- Chat provider failures are typed as `providerFailure`, returned with zero usage/cost, surfaced in Chat UI, and read directly by live smoke scripts.
 
 ## Current Production Status
 

@@ -388,7 +388,14 @@ if (live) {
       )
     }
 
-    const payload = await readJson<{ reply?: string; chatId?: string; usage?: { totalTokens?: number } }>('/chat', {
+    const payload = await readJson<{
+      reply?: string
+      chatId?: string
+      usage?: {
+        totalTokens?: number
+        providerFailure?: { code?: string; retryable?: boolean; userMessage?: string }
+      }
+    }>('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify({
@@ -400,7 +407,10 @@ if (live) {
           'ฉันนั่งลงตรงข้ามเธอแล้ววางแก้วชาไว้ใกล้มือเธอ ก่อนถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า เล่าเป็นฉากโรลเพลย์ที่มีบรรยากาศ ความรู้สึก และจังหวะให้ฉันตอบต่อ',
       }),
     })
-    if (!payload.reply || payload.reply.includes('temporarily unavailable')) throw new Error('chat provider returned fallback')
+    if (!payload.reply) throw new Error('chat provider returned empty reply')
+    if (payload.usage?.providerFailure) {
+      throw new Error(providerFailureIssue(payload.usage.providerFailure))
+    }
     if (!payload.chatId) throw new Error('missing chatId')
     if (!payload.usage?.totalTokens) throw new Error('missing token usage')
     const minRoleplayReplyChars = Math.max(320, healthStatus?.model?.minRoleplayReplyChars ?? 320)
@@ -752,6 +762,12 @@ function providerFailureHint(message: string) {
     return ' | Fix: check IMAGE_GENERATION_MODEL and whether the provider account can use that image model.'
   }
   return ''
+}
+
+function providerFailureIssue(failure: { code?: string; retryable?: boolean; userMessage?: string }) {
+  const userMessage = failure.userMessage ? ` Message: ${failure.userMessage}` : ''
+  const retry = failure.retryable ? ' Retryable after cooldown.' : ' Requires configuration/quota/admin fix.'
+  return `chat provider failure: ${failure.code ?? 'unknown'}.${retry}${userMessage} Fix: check OpenRouter key, provider credits/quota, rate limits, model access, and outbound network before setting CHAT_PROVIDER_LIVE_VERIFIED=1.`
 }
 
 function isOnlyImageLiveVerificationFailure(failures: string[]) {

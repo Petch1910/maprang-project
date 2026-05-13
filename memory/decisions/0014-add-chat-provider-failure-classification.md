@@ -17,6 +17,7 @@ Maprang now depends on live LLM providers for both normal chat and streamed chat
 - Keep failed provider attempts at zero token usage and zero cost.
 - Send `providerFailure` metadata in normal and streamed chat responses so the UI and QA can observe the failure mode.
 - Let roleplay continuation failures degrade gracefully by keeping the primary provider reply instead of failing the whole turn.
+- Make live chat smoke fail on `usage.providerFailure` directly so staging diagnostics point to the actual provider failure class.
 
 ## Consequences
 

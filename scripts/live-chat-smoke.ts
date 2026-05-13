@@ -44,7 +44,11 @@ if (walletBefore.user.tokenBalance < minSmokeTokenBalance) {
 const chat = await readJson<{
   reply?: string
   chatId?: string | null
-  usage?: { totalTokens?: number; modelName?: string }
+  usage?: {
+    totalTokens?: number
+    modelName?: string
+    providerFailure?: { code?: string; retryable?: boolean; userMessage?: string }
+  }
 }>('/chat', {
   method: 'POST',
   headers: {
@@ -65,10 +69,8 @@ if (!chat.reply) {
   throw new Error('Live chat did not return an AI reply: empty reply')
 }
 
-if (chat.reply.includes('temporarily unavailable')) {
-  throw new Error(
-    `Live chat reached the backend, but the AI provider path returned the fallback message. Check outbound network access to OpenRouter, OPENROUTER_API_KEY, provider credits/quota, rate limits, model access, and backend logs. Reply: ${chat.reply}`,
-  )
+if (chat.usage?.providerFailure) {
+  throw new Error(providerFailureIssue(chat.usage.providerFailure))
 }
 
 if (!chat.chatId) throw new Error('Live chat did not create a chat id')
@@ -128,4 +130,10 @@ function parseMinSmokeTokenBalance() {
   }
 
   return value
+}
+
+function providerFailureIssue(failure: { code?: string; retryable?: boolean; userMessage?: string }) {
+  const userMessage = failure.userMessage ? ` Message: ${failure.userMessage}` : ''
+  const retry = failure.retryable ? ' Retryable after cooldown.' : ' Requires configuration/quota/admin fix.'
+  return `Live chat reached the backend, but the AI provider returned ${failure.code ?? 'unknown'}.${retry}${userMessage} Check outbound network access to OpenRouter, OPENROUTER_API_KEY, provider credits/quota, rate limits, model access, and backend logs before setting CHAT_PROVIDER_LIVE_VERIFIED=1.`
 }
