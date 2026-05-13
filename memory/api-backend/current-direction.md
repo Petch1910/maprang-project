@@ -17,6 +17,7 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Structured knowledge packs feed chat/creator prompt guidance and are surfaced through health/readiness.
 - Deterministic prompt/context evals guard roleplay depth, prompt-control ordering, lore injection, and relationship/scene continuity.
 - Admin Prompt Inspector gives redacted prompt snapshots, section token estimates, retrieved lore, and previous/current prompt diffs without spending live model tokens.
+- Admin Automated Evals exposes the deterministic golden roleplay suite through a guarded API/UI so prompt regressions are visible without terminal access.
 
 ## Production-Critical API Areas
 
@@ -31,6 +32,7 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - `/admin/reports`
 - `/admin/audit-logs`
 - `/admin/prompt-inspector`
+- `/admin/evals/local`
 
 ## Provider Policy
 

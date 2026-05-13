@@ -26,4 +26,25 @@ describe('admin prompt inspector route', () => {
     expect(response.status).toBe(401)
     expect(payload.error).toBe('admin_unauthorized')
   })
+
+  test('runs deterministic local evals behind the admin guard', async () => {
+    process.env.ADMIN_API_KEY = 'prompt-inspector-test-key'
+
+    const response = await adminRoutes.handle(
+      new Request('http://localhost/admin/evals/local', {
+        headers: { 'x-admin-key': 'prompt-inspector-test-key' },
+      }),
+    )
+    const payload = (await response.json()) as {
+      passed?: boolean
+      scenarioCount?: number
+      results?: Array<{ id?: string; passed?: boolean; estimatedTokens?: number }>
+    }
+
+    expect(response.status).toBe(200)
+    expect(payload.passed).toBe(true)
+    expect(payload.scenarioCount).toBeGreaterThan(0)
+    expect(payload.results?.some((result) => result.id === 'prompt-injection-defense' && result.passed)).toBe(true)
+    expect(payload.results?.every((result) => typeof result.estimatedTokens === 'number')).toBe(true)
+  })
 })

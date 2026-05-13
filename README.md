@@ -102,8 +102,9 @@ secret-shaped exclusions without calling a live model.
 bun run eval:local
 ```
 
-`eval:local` runs inside `qa:local` and CI. Optional Promptfoo scaffolding is also available for future live model quality
-comparisons:
+`eval:local` runs inside `qa:local` and CI. Admins can also run the same deterministic suite from `/admin/evals` or
+`GET /admin/evals/local` without spending live model tokens. Optional Promptfoo scaffolding is available for future live
+model quality comparisons:
 
 ```bash
 bun run eval:promptfoo
@@ -116,7 +117,7 @@ assembles the same base context blocks used by chat, adds optional persona/runti
 redacted prompt text, estimates token usage by section, and can diff the current message against a previous message. Use it
 when a character reply becomes too short, loses lore, or drifts from relationship/scene continuity.
 
-Local API smoke covers this endpoint when `ADMIN_API_KEY` or `SMOKE_ADMIN_API_KEY` is available.
+Local API smoke covers this endpoint and `/admin/evals/local` when `ADMIN_API_KEY` or `SMOKE_ADMIN_API_KEY` is available.
 
 ## Production Checklist
 

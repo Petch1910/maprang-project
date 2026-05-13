@@ -11,3 +11,4 @@ Last updated: 2026-05-13
 - [0007 - Add deterministic roleplay evals](./0007-add-deterministic-roleplay-evals.md)
 - [0008 - Stage background and observability tooling](./0008-stage-background-observability-tooling.md)
 - [0009 - Add admin prompt inspector](./0009-add-admin-prompt-inspector.md)
+- [0010 - Add admin automated evals](./0010-add-admin-automated-evals.md)

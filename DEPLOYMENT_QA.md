@@ -36,10 +36,10 @@ bun run e2e:smoke
 ```
 
 `e2e:smoke` opens the home page, Character Lobby, Creator Studio, My Chats, Events, Profile, Wallet, Moderation,
-`/admin/health`, `/admin/prompt-inspector`, and a seeded chat on both desktop and mobile viewports. It also verifies the
-chat three-dot menu, report dialog, prompt inspector snapshot flow when an admin key is available, route rendering, browser
-console errors, and horizontal overflow. It avoids sending a live chat message so it does not spend provider credits during
-UI smoke testing.
+`/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, and a seeded chat on both desktop and mobile viewports. It also
+verifies the chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow when an admin key is
+available, route rendering, browser console errors, and horizontal overflow. It avoids sending a live chat message so it
+does not spend provider credits during UI smoke testing.
 
 For the full local predeploy gate plus browser smoke:
 
@@ -92,13 +92,13 @@ bun run knowledge:audit
 bun run eval:local
 ```
 
-`eval:local` runs deterministic prompt assembly checks against `evals/golden-roleplay.json`. It verifies prompt-control
-ordering, runtime knowledge injection, lore placement, relationship/scene continuity, rough token budget, and
-secret-shaped exclusions without calling a live model. It is included in `qa:local` and CI so context changes fail before
-they reach staging.
+`eval:local` runs deterministic prompt assembly checks against `evals/golden-roleplay.json`. The same suite is exposed to
+admins through `/admin/evals` and `GET /admin/evals/local`. It verifies prompt-control ordering, runtime knowledge
+injection, lore placement, relationship/scene continuity, rough token budget, and secret-shaped exclusions without calling
+a live model. It is included in `qa:local` and CI so context changes fail before they reach staging.
 
-Admin prompt inspection is covered by `/admin/prompt-inspector`, `POST /admin/prompt-inspector`, local `api:smoke`, and
-browser e2e when an admin key is available.
+Admin prompt inspection and deterministic evals are covered by `/admin/prompt-inspector`, `/admin/evals`,
+`POST /admin/prompt-inspector`, `GET /admin/evals/local`, local `api:smoke`, and browser e2e when an admin key is available.
 Use it before blaming the model provider: it shows the redacted final prompt, section token estimates, retrieved lore, and
 the diff between the current and previous prompt shape without making a live model call.
 

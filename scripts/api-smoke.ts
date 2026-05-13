@@ -598,6 +598,24 @@ if (adminHeaders) {
     return `sections=${payload.snapshot.totals.sectionCount}, estimatedTokens=${payload.snapshot.totals.estimatedTokens}`
   })
 
+  await check('GET /admin/evals/local', async () => {
+    const payload = await readJson<{
+      passed?: boolean
+      scenarioCount?: number
+      passCount?: number
+      failCount?: number
+      results?: Array<{ id?: string; passed?: boolean; estimatedTokens?: number }>
+    }>('/admin/evals/local', {
+      headers: adminHeaders,
+    })
+    if (!payload.passed) throw new Error(`local eval did not pass; failCount=${payload.failCount ?? 'unknown'}`)
+    if (!payload.scenarioCount || !payload.results?.length) throw new Error('missing local eval scenarios')
+    if (!payload.results.some((result) => result.id === 'prompt-injection-defense' && result.passed)) {
+      throw new Error('missing prompt injection eval result')
+    }
+    return `${payload.passCount ?? payload.results.length}/${payload.scenarioCount} scenarios`
+  })
+
   await check('GET /admin/reports', async () => {
     const payload = await readJson<{ reports?: unknown[] }>('/admin/reports?limit=5', { headers: adminHeaders })
     if (!payload.reports) throw new Error('missing reports array')
@@ -614,6 +632,7 @@ if (adminHeaders) {
   const detail = 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available'
   record('GET /admin/summary', status, detail)
   record('POST /admin/prompt-inspector', status, detail)
+  record('GET /admin/evals/local', status, detail)
   record('GET /admin/reports', status, detail)
   record('GET /admin/audit-logs', status, detail)
 }

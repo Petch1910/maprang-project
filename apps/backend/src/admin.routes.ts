@@ -4,6 +4,7 @@ import { listAdminAuditLogs } from './audit.service'
 import { loadCharacter } from './character.service'
 import { loadRelevantLore } from './context.service'
 import { requireDatabase } from './db'
+import { runLocalEvalSuite } from './eval.service'
 import {
   buildPromptInspectorSnapshot,
   diffPromptSnapshots,
@@ -123,6 +124,19 @@ export const adminRoutes = new Elysia()
       }),
     },
   )
+  .get('/admin/evals/local', async ({ request, set }) => {
+    if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+
+    try {
+      return await runLocalEvalSuite()
+    } catch (error) {
+      set.status = 500
+      return {
+        error: 'local_eval_unavailable',
+        message: error instanceof Error ? error.message : String(error),
+      }
+    }
+  })
   .post(
     '/admin/prompt-inspector',
     async ({ body, request, set }) => {

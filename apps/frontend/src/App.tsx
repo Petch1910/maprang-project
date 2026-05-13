@@ -6,6 +6,7 @@ import {
   Coins,
   Compass,
   FileSearch,
+  FlaskConical,
   MessageCircle,
   Moon,
   PlusCircle,
@@ -29,6 +30,7 @@ const loadAdminModerationPage = () => import('./pages/AdminModerationPage').then
 const loadAdminHealthPage = () => import('./pages/AdminHealthPage').then((module) => ({ default: module.AdminHealthPage }))
 const loadAdminPromptInspectorPage = () =>
   import('./pages/AdminPromptInspectorPage').then((module) => ({ default: module.AdminPromptInspectorPage }))
+const loadAdminEvalsPage = () => import('./pages/AdminEvalsPage').then((module) => ({ default: module.AdminEvalsPage }))
 const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPage').then((module) => ({ default: module.CharacterLobbyPage }))
 const loadExplorePage = () => import('./pages/ExplorePage').then((module) => ({ default: module.ExplorePage }))
 const loadProfilePage = () => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage }))
@@ -41,6 +43,7 @@ const MyChatsPage = lazy(loadMyChatsPage)
 const AdminModerationPage = lazy(loadAdminModerationPage)
 const AdminHealthPage = lazy(loadAdminHealthPage)
 const AdminPromptInspectorPage = lazy(loadAdminPromptInspectorPage)
+const AdminEvalsPage = lazy(loadAdminEvalsPage)
 const CharacterLobbyPage = lazy(loadCharacterLobbyPage)
 const ExplorePage = lazy(loadExplorePage)
 const ProfilePage = lazy(loadProfilePage)
@@ -58,6 +61,7 @@ const adminNavItems = [
   { to: '/moderation', label: 'ดูแลรายงาน', icon: ShieldCheck },
   { to: '/admin/health', label: 'ตรวจระบบ', icon: Activity },
   { to: '/admin/prompt-inspector', label: 'ตรวจพรอมป์', icon: FileSearch },
+  { to: '/admin/evals', label: 'ทดสอบคุณภาพ', icon: FlaskConical },
 ]
 const utilityNavItems = [{ to: '/wallet', label: 'กระเป๋าโทเคน', icon: Coins }]
 
@@ -65,6 +69,7 @@ const routePreloads: Record<string, () => Promise<unknown>> = {
   '/': loadExplorePage,
   '/admin/health': loadAdminHealthPage,
   '/admin/prompt-inspector': loadAdminPromptInspectorPage,
+  '/admin/evals': loadAdminEvalsPage,
   '/chats': loadMyChatsPage,
   '/create': loadCreatorStudioPage,
   '/events': loadEventsInboxPage,
@@ -160,6 +165,7 @@ function App() {
         <Route element={<AdminModerationPage />} path="/moderation" />
         <Route element={<AdminHealthPage />} path="/admin/health" />
         <Route element={<AdminPromptInspectorPage />} path="/admin/prompt-inspector" />
+        <Route element={<AdminEvalsPage />} path="/admin/evals" />
         <Route element={<ProfilePage />} path="/profile" />
         <Route element={<WalletPage />} path="/wallet" />
         <Route element={<NotFoundPage />} path="*" />

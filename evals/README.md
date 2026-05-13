@@ -19,6 +19,7 @@ bun run eval:local
 ```
 
 `eval:local` is deterministic and safe for CI. It validates the golden scenario corpus, prompt section order, knowledge pack inclusion, prompt-control policy, lore injection, and rough token budget.
+The same shared backend eval service is exposed to admins through `GET /admin/evals/local` and the `/admin/evals` UI.
 
 ```bash
 bun run eval:promptfoo

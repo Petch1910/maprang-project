@@ -236,6 +236,11 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['admin-smoke', 'backend-test'],
     note: 'api-smoke verifies redacted prompt snapshots/diff; backend tests cover redaction, section accounting, and admin guard',
   },
+  'GET /admin/evals/local': {
+    owner: 'admin/evals',
+    coverage: ['admin-smoke', 'e2e', 'backend-test'],
+    note: 'api-smoke and Admin Evals page verify deterministic prompt/context regression checks behind admin auth',
+  },
   'PATCH /admin/users/:id/tokens': {
     owner: 'wallet/admin',
     coverage: ['backend-test'],

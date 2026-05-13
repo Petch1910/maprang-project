@@ -30,6 +30,7 @@ const routeSmokeTargets = [
   { path: '/moderation', text: adminKey ? 'คิวรายงาน' : 'ADMIN_API_KEY' },
   { path: '/admin/health', text: 'Route/Menu Audit' },
   { path: '/admin/prompt-inspector', text: adminKey ? 'Prompt Inspector' : 'ADMIN_API_KEY' },
+  { path: '/admin/evals', text: adminKey ? 'Automated Evals' : 'ADMIN_API_KEY' },
 ]
 
 function persistedReduxState() {
@@ -514,6 +515,18 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     await expect(page.getByTestId('prompt-inspector-diff')).toBeVisible()
   } else {
     await expect(page.getByTestId('prompt-inspector-admin-key-input')).toBeVisible()
+  }
+
+  await page.goto('/admin/evals')
+  await expect(page.locator('body')).toContainText('Automated Evals')
+  if (adminKey) {
+    await expect(page.getByTestId('admin-evals-output')).toContainText('maprang-golden-roleplay')
+    await expect(page.getByTestId('admin-evals-run')).toBeEnabled()
+    await page.getByTestId('admin-evals-run').click()
+    await expect(page.getByTestId('admin-evals-output')).toContainText('maprang-golden-roleplay')
+    await expect(page.getByTestId('admin-evals-scenario')).toHaveCount(3)
+  } else {
+    await expect(page.getByTestId('admin-evals-admin-key-input')).toBeVisible()
   }
 })
 

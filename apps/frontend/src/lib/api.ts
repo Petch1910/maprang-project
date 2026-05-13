@@ -478,6 +478,39 @@ export type PromptInspectorResponse = {
   previousSnapshot?: PromptInspectorSnapshot
 }
 
+export type EvalCheck = {
+  label: string
+  status: 'pass' | 'fail'
+  detail: string
+}
+
+export type EvalScenarioResult = {
+  id: string
+  title: string
+  estimatedTokens: number
+  passed: boolean
+  failures: string[]
+  checks: EvalCheck[]
+}
+
+export type LocalEvalRun = {
+  generatedAt: string
+  suite: {
+    schemaVersion: number
+    name: string
+    updatedAt: string | null
+    description: string | null
+  }
+  passed: boolean
+  scenarioCount: number
+  passCount: number
+  failCount: number
+  totalEstimatedTokens: number
+  maxEstimatedTokens: number
+  failures: string[]
+  results: EvalScenarioResult[]
+}
+
 export type LoreEntry = {
   id: string
   characterId: string
@@ -607,6 +640,10 @@ export async function inspectAdminPrompt(input: {
     method: 'POST',
     body: JSON.stringify(input),
   })
+}
+
+export async function fetchAdminLocalEvals() {
+  return requestJson<LocalEvalRun>('/admin/evals/local')
 }
 
 export type RelationshipPreset = {

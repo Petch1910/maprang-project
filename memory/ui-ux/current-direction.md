@@ -26,6 +26,7 @@ Maprang should feel familiar to Thai character-chat users while adding deeper re
 - Wallet: token balance, usage, admin adjustment guard.
 - Admin Health: deploy blockers in plain language.
 - Prompt Inspector: admin-only prompt snapshot/diff tool for debugging reply depth, lore retrieval, and context drift.
+- Automated Evals: admin-only deterministic quality checks for prompt/context regression before staging.
 
 ## Current Known UX Concern
 
@@ -37,3 +38,4 @@ The user has repeatedly flagged that UI must feel complete and natural. Any visi
 - Chat read mode is no longer decorative: the top bar and right-rail control both toggle the reading layout, show a visible reading-state notice, and narrow the message area for long scenes.
 - E2E smoke now verifies mobile Explore navigation and Chat read mode on desktop/mobile.
 - Prompt Inspector now has a guarded admin UI at `/admin/prompt-inspector` with character selection, section budget, diff, lore retrieval, warnings, and redacted prompt copy.
+- Automated Evals now has a guarded admin UI at `/admin/evals` with suite summary, scenario accordion, per-check status, and failure summary.

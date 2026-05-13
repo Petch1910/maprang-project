@@ -253,7 +253,7 @@ export function AdminHealthPage() {
               เพื่อกันปุ่มหลอกหรือ config พลาดก่อน deploy จริง
             </p>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:w-auto">
+          <div className="grid gap-2 sm:grid-cols-3 lg:w-auto">
             <button
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
               disabled={isLoading}
@@ -268,6 +268,12 @@ export function AdminHealthPage() {
               to="/admin/prompt-inspector"
             >
               ตรวจพรอมป์
+            </Link>
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+              to="/admin/evals"
+            >
+              ทดสอบคุณภาพ
             </Link>
           </div>
         </div>
