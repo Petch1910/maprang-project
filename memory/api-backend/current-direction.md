@@ -43,6 +43,7 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 
 - Chat provider readiness requires real reply, `chatId`, token usage, and wallet transaction.
 - Image provider readiness requires configured generated image, not placeholder fallback.
+- Production `/ready` must fail until both chat and image live verification flags are set in that target environment.
 - Do not mark live verification flags from local deterministic smoke.
 - Keep `knowledge/structured/*.json` deterministic, schema-versioned, and verified by `bun run knowledge:audit`.
 - Keep `evals/golden-roleplay.json` deterministic and verified by `bun run eval:local` before changing context assembly.

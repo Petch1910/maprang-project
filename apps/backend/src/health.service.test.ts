@@ -193,11 +193,18 @@ describe('readiness gate', () => {
     )
   })
 
-  test('requires production image live verification', () => {
+  test('requires production live provider verification', () => {
     expect(
       readinessFailures(
         health({
           model: {
+            chatProvider: {
+              configured: true,
+              liveVerified: false,
+              productionReady: false,
+              status: 'needs_live_smoke',
+              liveSmokeCommand: 'bun run smoke:chat',
+            },
             imageGeneration: {
               configured: true,
               liveVerified: false,
@@ -209,7 +216,12 @@ describe('readiness gate', () => {
           },
         }),
       ),
-    ).toEqual(expect.arrayContaining(['image generation live smoke has not been verified']))
+    ).toEqual(
+      expect.arrayContaining([
+        'chat provider live smoke has not been verified',
+        'image generation live smoke has not been verified',
+      ]),
+    )
   })
 
   test('passes through env validation failures', () => {

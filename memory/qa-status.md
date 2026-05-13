@@ -36,6 +36,7 @@ Results:
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.
 - API smoke now covers `/chat/stream` SSE shape on an uncharged validation path.
+- Production readiness now blocks on both chat provider and image provider live verification flags.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate

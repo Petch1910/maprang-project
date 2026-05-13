@@ -106,10 +106,10 @@ await warnable('GET /ready', async () => {
   if (!ready.ok || ready.readiness?.status !== 'ready') {
     const failures = ready.readiness?.failures ?? []
     const reason = failures.join(', ') || 'unknown failure'
-    if (live && requireLiveImage && isOnlyImageLiveVerificationFailure(failures)) {
+    if (live && isOnlyLiveVerificationFailure(failures)) {
       return {
         ok: false,
-        detail: `readiness is waiting for live image verification; continuing provider smoke so IMAGE_GENERATION_LIVE_VERIFIED can be set after success (${reason})`,
+        detail: `readiness is waiting for live provider verification; continuing provider smoke so verification flags can be set after success (${reason})`,
       }
     }
     throw new Error(`not ready: ${reason}`)
@@ -819,10 +819,16 @@ function providerFailureIssue(failure: { code?: string; retryable?: boolean; use
   return `chat provider failure: ${failure.code ?? 'unknown'}.${retry}${userMessage} Fix: check OpenRouter key, provider credits/quota, rate limits, model access, and outbound network before setting CHAT_PROVIDER_LIVE_VERIFIED=1.`
 }
 
-function isOnlyImageLiveVerificationFailure(failures: string[]) {
+function isOnlyLiveVerificationFailure(failures: string[]) {
   return (
     failures.length > 0 &&
-    failures.every((failure) => failure.toLowerCase().includes('image generation live smoke has not been verified'))
+    failures.every((failure) => {
+      const normalized = failure.toLowerCase()
+      return (
+        normalized.includes('chat provider live smoke has not been verified') ||
+        normalized.includes('image generation live smoke has not been verified')
+      )
+    })
   )
 }
 

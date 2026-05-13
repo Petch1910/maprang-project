@@ -215,6 +215,9 @@ export function readinessFailures(health: HealthStatus) {
     if (!health.checks.supabaseAuthConfigured) failures.push('Supabase auth is not configured')
     if (!health.checks.adminAuthConfigured) failures.push('ADMIN_API_KEY is not configured')
     if (!health.checks.imageGenerationConfigured) failures.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY is not configured')
+    if (!health.model.chatProvider.liveVerified) {
+      failures.push('chat provider live smoke has not been verified')
+    }
     if (!health.model.imageGeneration.liveVerified) {
       failures.push('image generation live smoke has not been verified')
     }
