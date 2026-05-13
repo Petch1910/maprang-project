@@ -15,6 +15,7 @@ Required:
 - Set deployed backend URL for `SMOKE_API_BASE_URL`.
 - Set deployed backend URL for frontend `VITE_API_BASE_URL`.
 - Set real frontend domain in backend `CORS_ORIGINS`.
+- Run `bun run staging:verify` with `SMOKE_API_BASE_URL` and `SMOKE_ADMIN_API_KEY` after staging domains exist.
 
 ### Chat provider live verification
 

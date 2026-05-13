@@ -55,6 +55,14 @@ bun run staging:check
 
 `staging:check` is useful before the final domain/provider gate. It runs `qa:full`, verifies the real `avatars` bucket through signed URLs, and reruns API smoke with admin checks required. The API smoke creates a private draft character and lore entry, checks edit/view/favorite/duplicate/reset/delete, then cleans up. It can still pass while live chat/image provider checks are left for `production:check`.
 
+After staging domains exist, run the strict deployed staging gate:
+
+```bash
+SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
+```
+
+`staging:verify` runs `smoke-doctor --strict-staging`, Supabase signed-storage check, `/ready`, and admin-required API smoke against the deployed backend. It fails on localhost URLs, local CORS, missing signed storage, broken readiness, or missing admin smoke auth, but it does not require `CHAT_PROVIDER_LIVE_VERIFIED=1` or `IMAGE_GENERATION_LIVE_VERIFIED=1` yet.
+
 Run the full local or staging provider gate only when the backend is allowed to reach OpenRouter:
 
 ```bash

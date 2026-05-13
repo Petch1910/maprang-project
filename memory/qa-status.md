@@ -37,6 +37,7 @@ Results:
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.
 - API smoke now covers `/chat/stream` SSE shape on an uncharged validation path.
 - Production readiness now blocks on both chat provider and image provider live verification flags.
+- Smoke doctor now reports separate staging blockers and production blockers; `--strict-staging` rejects local backend/CORS before provider verification.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate
@@ -48,6 +49,10 @@ Known `production:check` blockers:
 - Local or missing production CORS.
 - Chat provider live smoke not marked verified.
 - Image provider live smoke not marked verified.
+
+Known `staging:verify` blockers in local mode:
+- Local backend URL.
+- Local or missing staging CORS.
 
 ## Browser QA
 

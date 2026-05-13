@@ -12,6 +12,7 @@ Last updated: 2026-05-14
 - Verify Supabase Auth configuration.
 - Verify private signed `avatars` bucket.
 - Run `bun run staging:check`.
+- After staging domains exist, run `bun run staging:verify` with `SMOKE_API_BASE_URL` and `SMOKE_ADMIN_API_KEY`.
 - Run ordered live provider smoke.
 - Set provider live verification flags only after successful live smoke.
 - Run `bun run production:check`.
@@ -29,6 +30,7 @@ Staging confidence:
 
 ```bash
 bun run staging:check
+SMOKE_API_BASE_URL=https://<backend-staging-domain> SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
 Final production gate:

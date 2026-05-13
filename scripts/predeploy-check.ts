@@ -197,6 +197,7 @@ const checks: Check[] = [
           '"e2e:smoke"',
           '"qa:full"',
           '"staging:check"',
+          '"staging:verify"',
           '"smoke:image"',
           '"smoke:image:live"',
           '"supabase:storage:setup"',
@@ -209,6 +210,7 @@ const checks: Check[] = [
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
       const stagingCheck = packageJson.scripts?.['staging:check'] ?? ''
+      const stagingVerify = packageJson.scripts?.['staging:verify'] ?? ''
       const productionCheck = packageJson.scripts?.['production:check'] ?? ''
       if (smokeLive.includes('smoke:chat')) {
         throw new Error('package.json smoke:live should use api:smoke:live once instead of calling smoke:chat separately')
@@ -218,6 +220,14 @@ const checks: Check[] = [
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
+      }
+      if (
+        !stagingVerify.includes('bun scripts/smoke-doctor.ts --strict-staging') ||
+        !stagingVerify.includes('supabase:storage:check') ||
+        !stagingVerify.includes('smoke:ready') ||
+        !stagingVerify.includes('--require-admin')
+      ) {
+        throw new Error('package.json staging:verify must require strict staging smoke doctor, Supabase storage, readiness, and admin API smoke')
       }
       if (!productionCheck.includes('supabase:storage:check')) {
         throw new Error('package.json production:check must verify Supabase signed avatar storage')
@@ -308,6 +318,9 @@ const checks: Check[] = [
       if (!packageJson.scripts?.['production:check']?.includes('bun scripts/smoke-doctor.ts --strict-production')) {
         throw new Error('package.json production:check must run smoke-doctor in strict production mode')
       }
+      if (!packageJson.scripts?.['staging:verify']?.includes('bun scripts/smoke-doctor.ts --strict-staging')) {
+        throw new Error('package.json staging:verify must run smoke-doctor in strict staging mode')
+      }
     },
   },
   {
@@ -335,7 +348,16 @@ const checks: Check[] = [
       )
       requireIncludes(
         staging,
-        ['Supabase Staging', 'SUPABASE_STORAGE_ACCESS=signed', 'bun run supabase:storage:setup', 'Render', 'Railway', 'E2E_BASE_URL', '/ready'],
+        [
+          'Supabase Staging',
+          'SUPABASE_STORAGE_ACCESS=signed',
+          'bun run supabase:storage:setup',
+          'Render',
+          'Railway',
+          'E2E_BASE_URL',
+          '/ready',
+          'bun run staging:verify',
+        ],
         'STAGING_RUNBOOK.md',
       )
     },

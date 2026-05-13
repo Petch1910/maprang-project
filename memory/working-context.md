@@ -21,6 +21,7 @@ Verified:
 - Automated Evals are available through `/admin/evals` and `GET /admin/evals/local` using the same deterministic suite as `bun run eval:local`.
 - Admin Health page renders production blockers and has no browser console errors.
 - Admin Health deploy cards now show the next action for each blocker so staging setup can be followed directly from the UI.
+- `staging:verify` is now the strict deployed-staging gate for real backend URL, CORS, signed storage, `/ready`, and admin smoke before provider verification.
 - Route/menu audit exists and is wired into QA.
 - Security audit, route audit, deploy env doctor self-test, and predeploy check pass.
 - Project memory, runtime knowledge, and deterministic prompt/context evals are part of the local QA gate.
@@ -44,6 +45,7 @@ Known blockers:
 
 1. Deploy staging backend and frontend.
 2. Set real staging URLs and production-like CORS.
-3. Run ordered live provider smoke against staging, preferably `api:smoke:live`.
-4. Set verification flags only after live smoke passes.
-5. Rerun `production:check`.
+3. Run `staging:verify` against the deployed staging backend.
+4. Run ordered live provider smoke against staging, preferably `api:smoke:live`.
+5. Set verification flags only after live smoke passes.
+6. Rerun `production:check`.

@@ -64,6 +64,8 @@ type HealthPayload = {
 let health: HealthPayload
 const strictProductionGate =
   process.argv.includes('--strict-production') || process.env.STRICT_PRODUCTION_GATE === '1'
+const strictStagingGate =
+  process.argv.includes('--strict-staging') || process.env.STRICT_STAGING_GATE === '1'
 
 try {
   health = await readJson<HealthPayload>('/health')
@@ -122,6 +124,10 @@ function isLocalOrigin(origin: string) {
 
 const productionBlockers: string[] = []
 const productionFixes: string[] = []
+const liveVerificationBlockers = new Set([
+  'chat provider live smoke is not marked verified',
+  'image generation live smoke is not marked verified',
+])
 
 function addProductionBlocker(blocker: string, fix: string) {
   productionBlockers.push(blocker)
@@ -215,6 +221,29 @@ if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.
 }
 
 const productionReady = productionBlockers.length === 0
+const stagingBlockers = productionBlockers.filter((blocker) => !liveVerificationBlockers.has(blocker))
+const stagingFixes = productionFixes.filter((fix) => {
+  for (const blocker of liveVerificationBlockers) {
+    if (fix.startsWith(`${blocker}:`)) return false
+  }
+  return true
+})
+const stagingReady = stagingBlockers.length === 0
+console.log(`stagingReady: ${stagingReady}`)
+console.log(`stagingBlockerCount: ${stagingBlockers.length}`)
+if (stagingBlockers.length > 0) {
+  console.log(`stagingBlockers: ${stagingBlockers.join('; ')}`)
+  console.log('stagingFixes:')
+  for (const fix of stagingFixes) console.log(`- ${fix}`)
+  console.log('stagingGate: run `bun run staging:verify` against the deployed staging backend before production verification.')
+  if (strictStagingGate) {
+    console.error('Staging gate failed. Fix the staging blockers above, then rerun with a deployed backend URL.')
+    process.exit(1)
+  }
+} else {
+  console.log('stagingBlockers: none detected')
+}
+
 console.log(`productionReady: ${productionReady}`)
 console.log(`productionBlockerCount: ${productionBlockers.length}`)
 

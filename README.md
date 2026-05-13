@@ -213,6 +213,14 @@ bun run staging:check
 
 This runs the full local QA suite, desktop/mobile Playwright smoke, real Supabase signed-storage verification, and admin-required API smoke. It does not mark production ready by itself; `production:check` remains the final gate after real domains, CORS, and live image/chat provider paths are available.
 
+After staging backend/frontend domains exist, run the deployed staging gate:
+
+```bash
+SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
+```
+
+`staging:verify` rejects localhost backend URLs, local CORS, missing Supabase signed storage, failed `/ready`, and missing admin smoke coverage. It intentionally allows chat/image live verification flags to stay pending so you can run live provider smoke next, then use `production:check` as the final go/no-go.
+
 Or run each check separately:
 
 ```bash
