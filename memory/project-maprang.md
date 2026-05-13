@@ -49,3 +49,4 @@ Primary surfaces:
 - SocratiCode MCP as local codebase intelligence
 - Markdown memory vault in `memory/`
 - Runtime knowledge layer in `knowledge/` for chat, creator, relationship, scene, and content-policy packs
+- Deterministic roleplay evals in `evals/`, with optional Promptfoo live-eval scaffolding

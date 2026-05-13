@@ -11,14 +11,14 @@ Bring Maprang AI to a production-ready state before deploy. The local system sho
 Status: local QA ready
 
 Verified:
-- Backend tests pass: 109 pass, 0 fail.
+- Backend tests pass: 113 pass, 0 fail.
 - Frontend deploy check passes.
 - Local API smoke passes: 22 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
 - Admin Health page renders production blockers and has no browser console errors.
 - Route/menu audit exists and is wired into QA.
 - Security audit, route audit, deploy env doctor self-test, and predeploy check pass.
-- Project memory and runtime knowledge audits are part of the local QA gate.
+- Project memory, runtime knowledge, and deterministic prompt/context evals are part of the local QA gate.
 - Backend health/readiness now reports structured knowledge pack status.
 
 ## Current Production Status
@@ -32,6 +32,7 @@ Known blockers:
 - Chat provider needs stable live smoke verification before setting `CHAT_PROVIDER_LIVE_VERIFIED=1`.
 - Image provider live smoke is blocked by provider billing hard limit. Keep `IMAGE_GENERATION_LIVE_VERIFIED=0`.
 - Structured knowledge must remain valid through `bun run knowledge:audit` before deploy.
+- Prompt/context assembly must remain valid through `bun run eval:local` before deploy.
 
 ## Most Important Next Steps
 

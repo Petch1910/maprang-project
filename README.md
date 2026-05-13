@@ -91,6 +91,24 @@ bun run knowledge:audit
 `knowledge:audit` validates the structured JSON packs, local wiki links, and secret-shaped values. The backend exposes the
 structured knowledge status in `/health` and `/ready`, and `qa:local` runs the audit before smoke tests.
 
+## Evaluation Layer
+
+Prompt and context regression checks live in [`evals/README.md`](./evals/README.md). The deterministic local eval reads
+[`evals/golden-roleplay.json`](./evals/golden-roleplay.json), assembles Maprang chat context through the backend context
+service, and verifies section order, prompt-control text, relationship/scene continuity, lore injection, token budget, and
+secret-shaped exclusions without calling a live model.
+
+```bash
+bun run eval:local
+```
+
+`eval:local` runs inside `qa:local` and CI. Optional Promptfoo scaffolding is also available for future live model quality
+comparisons:
+
+```bash
+bun run eval:promptfoo
+```
+
 ## Production Checklist
 
 - Follow `PRODUCTION_SETUP.md` for the full production env and Supabase setup.
@@ -136,7 +154,7 @@ bunx prisma migrate deploy
 bun run qa:local
 ```
 
-Use this as the normal local readiness gate. It checks secrets, memory and knowledge audits, API route coverage mapping, deploy wiring, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke skips the external image provider for creator draft checks so routine QA is deterministic; live avatar generation is verified only by `api:smoke:live`, `smoke:image:live`, or `production:check`.
+Use this as the normal local readiness gate. It checks secrets, memory and knowledge audits, deterministic prompt/context evals, API route coverage mapping, deploy wiring, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke skips the external image provider for creator draft checks so routine QA is deterministic; live avatar generation is verified only by `api:smoke:live`, `smoke:image:live`, or `production:check`.
 It also audits the project memory vault and runtime knowledge packs so long-running context cannot silently lose required files or pick up secret-shaped values.
 
 To check only backend API route coverage:

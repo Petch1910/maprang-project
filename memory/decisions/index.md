@@ -8,3 +8,5 @@ Last updated: 2026-05-13
 - [0004 - Keep adult-mode conflicts as warnings](./0004-adult-mode-conflict-policy.md)
 - [0005 - Audit memory in local QA](./0005-audit-memory-in-local-qa.md)
 - [0006 - Add runtime knowledge layer](./0006-add-runtime-knowledge-layer.md)
+- [0007 - Add deterministic roleplay evals](./0007-add-deterministic-roleplay-evals.md)
+- [0008 - Stage background and observability tooling](./0008-stage-background-observability-tooling.md)

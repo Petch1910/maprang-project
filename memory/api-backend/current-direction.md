@@ -15,6 +15,7 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Local smoke skips live provider spending but still checks endpoint shape.
 - Live provider paths are separate gates.
 - Structured knowledge packs feed chat/creator prompt guidance and are surfaced through health/readiness.
+- Deterministic prompt/context evals guard roleplay depth, prompt-control ordering, lore injection, and relationship/scene continuity.
 
 ## Production-Critical API Areas
 
@@ -35,3 +36,4 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Image provider readiness requires configured generated image, not placeholder fallback.
 - Do not mark live verification flags from local deterministic smoke.
 - Keep `knowledge/structured/*.json` deterministic, schema-versioned, and verified by `bun run knowledge:audit`.
+- Keep `evals/golden-roleplay.json` deterministic and verified by `bun run eval:local` before changing context assembly.

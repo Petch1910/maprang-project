@@ -14,6 +14,7 @@ jobs:
       - run: bun run secrets:check
       - run: bun run memory:audit
       - run: bun run knowledge:audit
+      - run: bun run eval:local
 
   predeploy:
     runs-on: ubuntu-latest

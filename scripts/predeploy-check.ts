@@ -23,6 +23,10 @@ const requiredFiles = [
   'knowledge/structured/relationship-rules.json',
   'knowledge/structured/scene-rules.json',
   'knowledge/structured/content-policy.json',
+  'evals/README.md',
+  'evals/golden-roleplay.json',
+  'evals/promptfoo.roleplay.yaml',
+  'evals/promptfoo-templates/roleplay-context.txt',
   'memory/README.md',
   'memory/working-context.md',
   'memory/deploy-blockers.md',
@@ -35,6 +39,7 @@ const requiredFiles = [
   'apps/frontend/Dockerfile',
   'scripts/deploy-env-doctor.ts',
   'scripts/deploy-env-doctor-self-test.ts',
+  'scripts/eval-local.ts',
   'scripts/knowledge-audit.ts',
   'scripts/memory-audit.ts',
   'scripts/route-menu-doc-check.ts',
@@ -181,6 +186,8 @@ const checks: Check[] = [
           '"route-menu:audit"',
           '"memory:audit"',
           '"knowledge:audit"',
+          '"eval:local"',
+          '"eval:promptfoo"',
           '"security:audit"',
           '"api:smoke"',
           '"api:smoke:live"',
@@ -257,6 +264,27 @@ const checks: Check[] = [
         ['buildChatKnowledgePrompt', 'buildCreatorKnowledgePrompt', 'structuredKnowledgeHealth'],
         'apps/backend/src/knowledge.service.ts',
       )
+    },
+  },
+  {
+    name: 'project eval foundation is available',
+    run: async () => {
+      const packageJson = await readRepoFile('package.json')
+      const readme = await readRepoFile('README.md')
+      const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+      const evalReadme = await readRepoFile('evals/README.md')
+      const golden = await readRepoFile('evals/golden-roleplay.json')
+      const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
+      requireIncludes(packageJson, ['"eval:local"', 'bun scripts/eval-local.ts', '"eval:promptfoo"'], 'package.json')
+      requireIncludes(readme, ['Evaluation Layer', 'bun run eval:local', 'evals/golden-roleplay.json'], 'README.md')
+      requireIncludes(deploymentQa, ['bun run eval:local', 'deterministic prompt assembly'], 'DEPLOYMENT_QA.md')
+      requireIncludes(evalReadme, ['Golden Dataset', 'Promptfoo', 'No secrets'], 'evals/README.md')
+      requireIncludes(
+        golden,
+        ['roleplay-depth-and-knowledge', 'prompt-injection-defense', 'relationship-scene-continuity'],
+        'evals/golden-roleplay.json',
+      )
+      requireIncludes(ciWorkflow, ['bun run eval:local'], '.github/workflows/ci.yml')
     },
   },
   {
@@ -341,7 +369,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         ciWorkflow,
-        ['bun run predeploy:check', 'bun run deploy:doctor:self-test', 'bun run memory:audit', 'bun run knowledge:audit'],
+        [
+          'bun run predeploy:check',
+          'bun run deploy:doctor:self-test',
+          'bun run memory:audit',
+          'bun run knowledge:audit',
+          'bun run eval:local',
+        ],
         '.github/workflows/ci.yml',
       )
     },

@@ -85,6 +85,15 @@ bun run knowledge:audit
 `knowledge:audit` verifies the runtime knowledge layer under `knowledge/`, including structured JSON packs, local wiki links, and secret-shaped values. It is included in `qa:local` so chat/creator prompt rules cannot drift silently.
 
 ```bash
+bun run eval:local
+```
+
+`eval:local` runs deterministic prompt assembly checks against `evals/golden-roleplay.json`. It verifies prompt-control
+ordering, runtime knowledge injection, lore placement, relationship/scene continuity, rough token budget, and
+secret-shaped exclusions without calling a live model. It is included in `qa:local` and CI so context changes fail before
+they reach staging.
+
+```bash
 cd apps/backend
 bun run env:check
 bun run deploy:check

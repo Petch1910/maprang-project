@@ -12,11 +12,12 @@ Commands verified:
 - `bun run predeploy:check`
 - `bun run memory:audit`
 - `bun run knowledge:audit`
+- `bun run eval:local`
 - `bun run smoke:doctor`
 - `git diff --check`
 
 Results:
-- Backend tests: 109 pass, 0 fail.
+- Backend tests: 113 pass, 0 fail.
 - API smoke: 22 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
@@ -24,8 +25,9 @@ Results:
 - Secrets check: pass.
 - Memory audit: pass.
 - Knowledge audit: pass.
+- Local prompt/context eval: pass.
 - Route/menu audit: pass.
-- CI workflow includes `memory:audit` and `knowledge:audit`.
+- CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate
 
