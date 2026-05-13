@@ -60,7 +60,7 @@ Required for production Creator Studio image generation:
 `CHAT_PROVIDER_RETRY_*` and `CREATOR_DRAFT_RETRY_*` make provider failures less brittle during traffic spikes or truncated JSON responses. The defaults retry chat twice and creator drafting three times with a short delay, while still failing fast for credential, billing, and policy errors.
 
 For production, configure a real OpenAI image key before opening Creator Studio to users. The backend calls the OpenAI Images endpoint and uploads generated avatars through the same avatar storage pipeline.
-Having an image key is not enough for production readiness because billing/quota can still fail. Run `bun run smoke:image:live` or `bun run api:smoke:live` against staging/production first. `api:smoke:live` may warn that `/ready` is waiting for image verification; that is expected on the first verification run. Set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after the live image call passes, then rerun the final production gate.
+Having an image key is not enough for production readiness because billing/quota can still fail. Run `bun run smoke:image:live` or `bun run api:smoke:live` against staging/production first. `api:smoke:live` may warn that `/ready` is waiting for chat/image live verification; that is expected on the first verification run before the flags are set. Set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after the live image call passes, then rerun the final production gate.
 If the live image smoke reports `billing_hard_limit_reached`, `billing hard limit`, or `insufficient_quota`, the fix is on the image provider account: increase/reset the billing limit or add quota, then rerun the same live smoke. Keep `IMAGE_GENERATION_LIVE_VERIFIED=0` until that rerun returns a configured generated image instead of a placeholder.
 
 After adding backend env values, validate them:
@@ -157,7 +157,7 @@ curl https://api.example.com/health
 curl https://api.example.com/ready
 ```
 
-`/health` is the basic liveness and database check. `/ready` is stricter and should be green before sending real users to the backend; it requires database connectivity, OpenRouter configuration, production auth/storage hardening, and `IMAGE_GENERATION_LIVE_VERIFIED=1` after live image smoke passes.
+`/health` is the basic liveness and database check. `/ready` is stricter and should be green before sending real users to the backend; it requires database connectivity, OpenRouter configuration, production auth/storage hardening, `CHAT_PROVIDER_LIVE_VERIFIED=1` after live chat smoke passes, and `IMAGE_GENERATION_LIVE_VERIFIED=1` after live image smoke passes.
 The `/health` response and `/admin/health` page also show CIA/AAA security posture: confidentiality, integrity, availability, authentication, authorization, and accounting/audit.
 
 7. Build frontend with production API URL:
@@ -190,7 +190,7 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 The GitHub `Production Smoke` workflow also requires repository secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` so it can verify the private `avatars` bucket instead of only trusting backend health flags.
 It also requires `SMOKE_ADMIN_API_KEY` so the smoke run verifies admin summary, moderation reports, and audit logs instead of silently skipping admin-only APIs.
 
-`smoke:chat` and the combined `api:smoke:live` provider gate check the smoke user's wallet before calling OpenRouter. Keep the smoke user topped up above `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT`, default `1000`, or override the threshold for heavier test prompts. If the backend returns the temporary AI fallback, the route is reachable but the live provider path is still blocked; check OpenRouter credits/quota, model access, key validity, outbound networking, and backend logs before deploy.
+`smoke:chat` and the combined `api:smoke:live` provider gate check the smoke user's wallet before calling OpenRouter. Keep the smoke user topped up above `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT`, default `1000`, or override the threshold for heavier test prompts. If the backend returns `usage.providerFailure`, the route is reachable but the live provider path is still blocked; check OpenRouter credits/quota, model access, key validity, outbound networking, and backend logs before deploy.
 
 `smoke:image` checks the image provider configuration without spending image credits by default. To generate one real staging/production avatar, run `bun run smoke:image:live` or `SMOKE_IMAGE_LIVE=1 bun run smoke:image`; this calls `/creator/ai-draft` and fails if Creator Studio falls back to the placeholder image.
 

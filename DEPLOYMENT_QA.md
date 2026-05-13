@@ -148,7 +148,7 @@ bun run smoke:chat
 
 `smoke:chat` and `api:smoke:live` check `/me/usage` before they call the AI provider. The smoke user must have at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`, so the test fails before spending provider credits when the smoke account is not topped up. `smoke:chat` is a targeted retry/debug command; use `production:check` for the final go/no-go gate.
 
-If `smoke:chat` reports that the backend returned the temporary AI fallback, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. Check outbound network access to `https://openrouter.ai`, `OPENROUTER_API_KEY`, provider credits/quota, selected model access, and backend logs.
+If `smoke:chat` reports `usage.providerFailure`, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. Check outbound network access to `https://openrouter.ai`, `OPENROUTER_API_KEY`, provider credits/quota, selected model access, and backend logs.
 Do not set `CHAT_PROVIDER_LIVE_VERIFIED=1` until a live chat smoke returns a real model reply, `chatId`, token usage, and a matching `CHAT_USAGE` wallet transaction.
 
 To verify that the image generation provider is configured without spending image credits:
@@ -196,7 +196,7 @@ Expected result:
 - Backend tests pass.
 - Frontend TypeScript and Vite build pass.
 - Smoke doctor confirms the backend is reachable and the database is connected.
-- Readiness smoke confirms the backend is ready for traffic, including OpenRouter configuration, production hardening, and live image verification when `NODE_ENV=production`.
+- Readiness smoke confirms the backend is ready for traffic, including OpenRouter configuration, production hardening, and live chat/image verification when `NODE_ENV=production`.
 - Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
 - API smoke confirms temporary character creation/edit/view/favorite/duplicate/reset/delete and temporary lore create/edit/delete.
 - API smoke confirms chat menu mutations by renaming one seeded chat, archiving it, verifying the archived list, and restoring it back to active chats.

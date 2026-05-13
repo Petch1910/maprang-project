@@ -87,12 +87,13 @@ bun run staging:check
 - `/admin/health` แสดง DB connected
 - `/admin/health` แสดง CIA/AAA Security Posture พร้อมครบ หรือมีเหตุผลชัดเจนถ้ายังไม่ครบ
 - OpenRouter configured
-- Image provider configured และต้องผ่าน live smoke ถ้าจะเปิดฟีเจอร์สร้างรูปจริงใน production
+- OpenRouter chat provider ต้องผ่าน live smoke และตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`
+- Image provider configured และต้องผ่าน live smoke พร้อมตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ถ้าจะเปิดฟีเจอร์สร้างรูปจริงใน production
 - Supabase Auth configured ทั้ง backend/frontend
 - avatar storage เป็น Supabase + signed URL
 - CORS เป็น frontend domain จริง ไม่ใช่ localhost
 - `production:check` ผ่านโดยไม่มี `productionBlockers`
-- `api:smoke:live` หรือ `smoke:chat` ต้องผ่านสำหรับแชท ถ้า OpenRouter ตอบ fallback ยังห้ามถือว่าพร้อม production
+- `api:smoke:live` หรือ `smoke:chat` ต้องผ่านสำหรับแชท ถ้า OpenRouter คืน `usage.providerFailure` ยังห้ามถือว่าพร้อม production
 - `api:smoke:live` หรือ `smoke:image:live` ต้องผ่านสำหรับรูป ถ้า image provider ติด billing/quota ยังห้ามถือว่าพร้อม production
 - `e2e:smoke` ผ่าน desktop และ mobile
 - Route/Menu Audit ไม่มีปุ่มหลักที่กดแล้วไม่เกิดผล
