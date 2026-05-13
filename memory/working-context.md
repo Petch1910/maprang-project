@@ -15,6 +15,7 @@ Verified:
 - Frontend deploy check passes.
 - Local API smoke passes: 22 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
+- Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
 - Admin Health page renders production blockers and has no browser console errors.
 - Route/menu audit exists and is wired into QA.
 - Security audit, route audit, deploy env doctor self-test, and predeploy check pass.

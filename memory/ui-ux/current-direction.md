@@ -29,3 +29,9 @@ Maprang should feel familiar to Thai character-chat users while adding deeper re
 ## Current Known UX Concern
 
 The user has repeatedly flagged that UI must feel complete and natural. Any visible menu item should either work, be clearly guarded, or not be shown yet.
+
+## Latest Frontend Pass
+
+- Explore now keeps mobile users in the same primary navigation model with a bottom nav for Explore, Chats, Create, Events, and Profile.
+- Chat read mode is no longer decorative: the top bar and right-rail control both toggle the reading layout, show a visible reading-state notice, and narrow the message area for long scenes.
+- E2E smoke now verifies mobile Explore navigation and Chat read mode on desktop/mobile.

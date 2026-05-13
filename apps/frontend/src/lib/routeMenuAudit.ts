@@ -14,8 +14,8 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'Explore / Home',
     route: '/',
-    control: 'ค้นหา, หมวดหมู่, การ์ดตัวละคร, Continue Chatting, ปุ่มสร้างตัวละคร',
-    result: 'ค้นหาและเปิดหน้า Lobby หรือแชทเดิมได้จริง ปุ่มสร้างไปที่ Creator Studio',
+    control: 'ค้นหา, หมวดหมู่, การ์ดตัวละคร, Continue Chatting, ปุ่มสร้างตัวละคร, mobile bottom nav',
+    result: 'ค้นหาและเปิดหน้า Lobby หรือแชทเดิมได้จริง ปุ่มสร้างไปที่ Creator Studio และมือถือมี nav ไปหน้าหลักครบ',
     disabledReason: 'ไม่มีปุ่มหลักที่ควร disabled ยกเว้นข้อมูลกำลังโหลด',
     emptyState: 'ถ้าโหลดตัวละครไม่ได้จะแสดงข้อความให้เช็คการเชื่อมต่อ และยังมี demo card กันหน้าว่าง',
     status: 'ready',
@@ -32,8 +32,8 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'Chat Room',
     route: '/chat, /chat/:chatId',
-    control: 'composer, ส่งข้อความ, quick-start, tool tray, Scene event, ปุ่มรายงาน, ปุ่มโปรไฟล์',
-    result: 'เปิดห้องแชทได้ มี draft autosave, quick-start สำหรับเริ่มคุย, report dialog, wallet/profile navigation และ pending scene UI',
+    control: 'composer, ส่งข้อความ, quick-start, tool tray, Scene event, โหมดอ่าน, ปุ่มรายงาน, ปุ่มโปรไฟล์',
+    result: 'เปิดห้องแชทได้ มี draft autosave, quick-start สำหรับเริ่มคุย, โหมดอ่านเปลี่ยนพื้นที่อ่านข้อความจริง, report dialog, wallet/profile navigation และ pending scene UI',
     disabledReason: 'ส่งข้อความ disabled เมื่อข้อความว่าง, กำลัง streaming, หรือ token ไม่พอ',
     emptyState: 'ห้องใหม่มี intro และ greeting แทนหน้าว่าง ส่วน chat เดิมโหลดจาก QA seed ได้',
     status: 'ready',

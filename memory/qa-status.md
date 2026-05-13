@@ -27,6 +27,7 @@ Results:
 - Knowledge audit: pass.
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
+- Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate
@@ -41,7 +42,7 @@ Known `production:check` blockers:
 
 ## Browser QA
 
-Status: passing for Admin Health
+Status: passing for Admin Health and Chat UI interaction
 
 Checked:
 - `/admin/health` renders.
@@ -49,4 +50,5 @@ Checked:
 - Chat live smoke row is visible.
 - `bun run production:check` guidance is visible.
 - Refresh interaction works.
+- `/chat` read mode toggles and shows the reading-mode notice.
 - Console errors/warnings: none relevant.

@@ -309,6 +309,8 @@ function RightRail({
   onOpenChats,
   onReportCharacter,
   onStartNewChat,
+  isReadMode,
+  onToggleReadMode,
   runtimeState,
   usage,
 }: {
@@ -318,13 +320,14 @@ function RightRail({
   onOpenChats: () => void
   onReportCharacter: () => void
   onStartNewChat: () => void
+  isReadMode: boolean
+  onToggleReadMode: () => void
   runtimeState: ChatRuntimeState | null
   usage: ChatUsage | null
 }) {
   const relationship = runtimeState?.relationshipState
   const [activePanel, setActivePanel] = useState('role')
   const [isSoundOn, setIsSoundOn] = useState(false)
-  const [isReadMode, setIsReadMode] = useState(false)
   const [notice, setNotice] = useState('')
   const [isFavoritePending, setIsFavoritePending] = useState(false)
   const menuItems = [
@@ -447,9 +450,9 @@ function RightRail({
       return (
         <>
           <p className="m-0 text-sm leading-6 text-white/65">
-            โหมดอ่านจะทำให้ผู้เล่นโฟกัสเนื้อเรื่อง ลดสิ่งรบกวน และใช้กับฉากยาวได้ดี
+            โหมดอ่านจะบีบพื้นที่ข้อความให้แคบลง ลดสิ่งรบกวน และทำให้ฉากยาวอ่านต่อเนื่องขึ้น
           </p>
-          <button className="min-h-9 rounded-lg bg-white px-3 text-xs font-black text-slate-950" onClick={() => setIsReadMode((value) => !value)} type="button">
+          <button className="min-h-9 rounded-lg bg-white px-3 text-xs font-black text-slate-950" onClick={onToggleReadMode} type="button">
             {isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
           </button>
         </>
@@ -572,6 +575,11 @@ function RightRail({
             <span className="flex items-center gap-2">
               <Icon size={16} />
               {label}
+              {key === 'read' && isReadMode && (
+                <span className="rounded-full bg-orange-400/16 px-1.5 py-0.5 text-[10px] font-black text-orange-100">
+                  เปิด
+                </span>
+              )}
             </span>
             <ChevronRight className="text-white/35" size={15} />
           </button>
@@ -623,6 +631,7 @@ export function ChatPanel({
   const backdropUrl = character.avatarUrl || heroImage
   const hasAvatarBackdrop = Boolean(character.avatarUrl)
   const isSceneMode = runtimeState?.sceneState.mode === 'scene'
+  const [isReadMode, setIsReadMode] = useState(false)
   const isLowToken = !isWalletLoading && tokenBalance <= 250
   const isOutOfTokens = !isWalletLoading && tokenBalance <= 0
   const visibleMessages = useMemo(
@@ -634,6 +643,7 @@ export function ChatPanel({
   )
   const hasUserTurn = visibleMessages.some((chat) => chat.role === 'user')
   const showIntro = !hasUserTurn && visibleMessages.length <= 2
+  const readingWidthClass = isReadMode ? 'max-w-[700px]' : 'max-w-[820px]'
 
   return (
     <section className="grid h-svh min-w-0 grid-cols-1 overflow-hidden bg-[#0c0c0f] lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -687,6 +697,19 @@ export function ChatPanel({
           >
             <MessageSquare size={18} />
           </button>
+          <button
+            type="button"
+            aria-label={isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
+            aria-pressed={isReadMode}
+            className={`grid size-9 place-items-center rounded-lg transition ${
+              isReadMode ? 'bg-orange-500/18 text-orange-100' : 'text-white/55 hover:bg-white/8 hover:text-white'
+            }`}
+            data-testid="chat-read-mode"
+            onClick={() => setIsReadMode((value) => !value)}
+            title={isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
+          >
+            <BookOpen size={18} />
+          </button>
           <button type="button"
             aria-label="รายงานตัวละคร"
             className="grid size-9 place-items-center rounded-lg text-white/55 hover:bg-white/8 hover:text-white"
@@ -708,15 +731,22 @@ export function ChatPanel({
         </header>
 
         <div className="relative z-10 min-h-0 overflow-y-auto px-3 pb-6 pt-5 sm:px-6">
-          <div className={`mx-auto flex min-h-full max-w-[820px] flex-col gap-5 ${showIntro ? 'justify-center pb-14' : 'justify-end'}`}>
-            <MobileQuickActions
-              onOpenCharacterProfile={onOpenCharacterProfile}
-              onOpenChats={onOpenChats}
-              onOpenWallet={onOpenWallet}
-              runtimeState={runtimeState}
-              tokenBalance={tokenBalance}
-            />
-            {showIntro && <CharacterStage character={character} chatId={chatId} runtimeState={runtimeState} />}
+          <div className={`mx-auto flex min-h-full ${readingWidthClass} flex-col gap-5 transition-[max-width] duration-300 ${showIntro ? 'justify-center pb-14' : 'justify-end'}`}>
+            {!isReadMode && (
+              <MobileQuickActions
+                onOpenCharacterProfile={onOpenCharacterProfile}
+                onOpenChats={onOpenChats}
+                onOpenWallet={onOpenWallet}
+                runtimeState={runtimeState}
+                tokenBalance={tokenBalance}
+              />
+            )}
+            {isReadMode && (
+              <div className="rounded-xl border border-orange-300/20 bg-orange-400/10 px-3 py-2 text-xs font-black text-orange-100 shadow-[0_18px_46px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+                โหมดอ่านเปิดอยู่ พื้นที่ข้อความถูกบีบให้พอดีสายตา
+              </div>
+            )}
+            {showIntro && !isReadMode && <CharacterStage character={character} chatId={chatId} runtimeState={runtimeState} />}
             <SceneBar isLoading={isLoading} onSceneAction={onSceneAction} runtimeState={runtimeState} />
 
             <div className="flex flex-col gap-3.5">
@@ -754,7 +784,7 @@ export function ChatPanel({
           </button>
           {isLowToken && (
             <div
-              className={`mx-auto mb-2 flex w-[calc(100%-1.5rem)] max-w-[820px] items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs font-black sm:w-[calc(100%-3rem)] ${
+              className={`mx-auto mb-2 flex w-[calc(100%-1.5rem)] ${readingWidthClass} items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs font-black transition-[max-width] duration-300 sm:w-[calc(100%-3rem)] ${
                 isOutOfTokens
                   ? 'border-rose-300/30 bg-rose-500/14 text-rose-100'
                   : 'border-amber-300/30 bg-amber-400/12 text-amber-100'
@@ -773,14 +803,16 @@ export function ChatPanel({
               </button>
             </div>
           )}
-          <Composer
-            canSubmit={!isOutOfTokens}
-            disabled={isLoading}
-            message={message}
-            onMessageChange={onMessageChange}
-            onSubmit={() => onSendMessage()}
-            sendDisabledReason="โทเคนหมดแล้ว เติมก่อนส่งข้อความ"
-          />
+          <div className={`mx-auto ${readingWidthClass} transition-[max-width] duration-300`}>
+            <Composer
+              canSubmit={!isOutOfTokens}
+              disabled={isLoading}
+              message={message}
+              onMessageChange={onMessageChange}
+              onSubmit={() => onSendMessage()}
+              sendDisabledReason="โทเคนหมดแล้ว เติมก่อนส่งข้อความ"
+            />
+          </div>
           <p className="m-0 pb-2 text-center text-[11px] font-bold text-white/30">อย่าลืม: ทุกสิ่งที่ตัวละครพูดเป็นการแต่งเรื่อง</p>
         </div>
       </div>
@@ -792,6 +824,8 @@ export function ChatPanel({
         onOpenChats={onOpenChats}
         onReportCharacter={onReportCharacter}
         onStartNewChat={onStartNewChat}
+        isReadMode={isReadMode}
+        onToggleReadMode={() => setIsReadMode((value) => !value)}
         runtimeState={runtimeState}
         usage={lastUsage}
       />

@@ -4,9 +4,9 @@
 
 | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
 | --- | --- | --- | --- | --- | --- |
-| Explore / Home | `/` | ค้นหา, หมวดหมู่, การ์ดตัวละคร, Continue Chatting, สร้างตัวละคร | เปิด Lobby, เปิดแชทเดิม, หรือไป Creator Studio ได้จริง | disabled เฉพาะตอนโหลดข้อมูล | มีข้อความโหลดผิดพลาดและ demo card กันหน้าว่าง |
+| Explore / Home | `/` | ค้นหา, หมวดหมู่, การ์ดตัวละคร, Continue Chatting, สร้างตัวละคร, mobile bottom nav | เปิด Lobby, เปิดแชทเดิม, ไป Creator Studio ได้จริง และมือถือมี nav ไปหน้าหลักครบ | disabled เฉพาะตอนโหลดข้อมูล | มีข้อความโหลดผิดพลาดและ demo card กันหน้าว่าง |
 | Character Lobby | `/characters/:characterId` | Relationship Contract, เริ่มแชท, คัดลอกลิงก์, รายงาน | ส่ง `relationship_seed` ไปหน้าแชทและเปิด report dialog | รายงาน disabled ระหว่างส่ง | มีข้อความบอกเมื่อโหลดตัวละครไม่ได้ |
-| Chat Room | `/chat`, `/chat/:chatId` | composer, tool tray, pending scene, รายงาน, โปรไฟล์ | ส่งข้อความ, เปิด scene prompt, report, wallet/profile navigation | ส่ง disabled เมื่อข้อความว่าง, streaming, หรือ token ไม่พอ | ห้องใหม่มี intro/greeting |
+| Chat Room | `/chat`, `/chat/:chatId` | composer, tool tray, pending scene, โหมดอ่าน, รายงาน, โปรไฟล์ | ส่งข้อความ, เปิด scene prompt, โหมดอ่านเปลี่ยนพื้นที่อ่านข้อความจริง, report, wallet/profile navigation | ส่ง disabled เมื่อข้อความว่าง, streaming, หรือ token ไม่พอ | ห้องใหม่มี intro/greeting |
 | Chat Sidebar | `/chat` | เมนูสามจุด: แก้ไขแชท, ปักหมุด/ถอนหมุด, จัดเก็บ, เลือก, ลบ | ทุกคำสั่งมีผลจริง ลบต้อง confirm และเมนูท้ายแถบเปิดขึ้นด้านบนเพื่อไม่ให้โดนตัด | ไม่มี disabled ถาวร | ถ้าไม่มีแชทจะแจ้งว่ายังไม่มีแชท |
 | Creator Studio | `/create` | AI สร้างรูป+เนื้อหา, อัปโหลด, ลิงก์รูป, tag resolver, preview, submit | สร้าง draft ได้จริง มี fallback ภาพตัวอย่างถ้ายังไม่มี image provider | submit disabled เมื่อข้อมูลหลักไม่ครบ, แท็ก danger, หรือกำลังบันทึก | readiness panel บอกช่องที่ยังขาด |
 | My Chats | `/chats` | ค้นหา, filter, เปิดแชท, pending scene badge, เมนูสามจุด, เลือกหลายแชท, กู้คืนแชท | เปิดกลับไป `/chat/:chatId` ได้ เมนูแก้ชื่อ/ปักหมุด/จัดเก็บ/ลบมีผลจริง bulk archive/restore/delete ถูก smoke บน desktop/mobile แล้ว | disabled เฉพาะตอนกำลังบันทึกหรือยังไม่ได้เลือกแชท | แต่ละ filter มี empty state ของตัวเอง เช่น ยังไม่มีแชทปักหมุด/จัดเก็บ |

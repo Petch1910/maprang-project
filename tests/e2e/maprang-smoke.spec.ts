@@ -136,6 +136,11 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.goto('/')
   await expect(page.locator('body')).toContainText('Maprang')
   await expect(page.locator('a[href="/create"]').first()).toHaveAttribute('href', '/create')
+  if (isMobile) {
+    await expect(page.getByTestId('explore-mobile-nav')).toBeVisible()
+    await expect(page.getByTestId('explore-mobile-nav-create')).toHaveAttribute('href', '/create')
+    await expect(page.getByTestId('explore-mobile-nav-chats')).toHaveAttribute('href', '/chats')
+  }
 
   await page.goto(`/characters/${seededCharacterId}`)
   await expect(page.getByTestId('character-start-chat')).toBeVisible()
@@ -431,6 +436,12 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     await page.getByTestId('chat-sidebar-overlay').click({ position: { x: 320, y: 40 } })
     await expect(page.getByTestId('chat-sidebar-overlay')).toHaveClass(/pointer-events-none/)
   }
+
+  await page.getByTestId('chat-read-mode').click()
+  await expect(page.getByTestId('chat-read-mode')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('body')).toContainText('โหมดอ่านเปิดอยู่')
+  await page.getByTestId('chat-read-mode').click()
+  await expect(page.getByTestId('chat-read-mode')).toHaveAttribute('aria-pressed', 'false')
 
   await page.getByTestId('chat-report-character').click()
   await expect(page.getByTestId('report-dialog')).toBeVisible()
