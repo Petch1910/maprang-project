@@ -13,9 +13,11 @@ state. When a bot reply becomes too short or drifts from character, guessing at 
 
 ## Decision
 
-Add an admin-only prompt inspector endpoint:
+Add an admin-only prompt inspector endpoint and UI:
 
 - `POST /admin/prompt-inspector` builds a redacted prompt snapshot without making a live model call.
+- `/admin/prompt-inspector` lets admins select a character, compare messages, add runtime/persona context, and inspect the
+  redacted prompt from the browser.
 - The response includes section-level character counts, estimated tokens, retrieved lore previews, warnings, and optional
   previous/current prompt diff.
 - The inspector output always redacts secret-shaped values before returning text.
@@ -25,4 +27,5 @@ Add an admin-only prompt inspector endpoint:
 
 - Developers can debug prompt shape, missing lore, runtime memory, and prompt bloat before spending provider tokens.
 - The endpoint must remain admin-only because it reveals private character prompt structure.
-- Future frontend admin tooling can build a visual Prompt Inspector UI on top of this API.
+- Future prompt work can add saved snapshots, side-by-side prompt diff visualization, and links from Chat/Creator Studio
+  directly into the inspector.

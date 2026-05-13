@@ -111,10 +111,10 @@ bun run eval:promptfoo
 
 ## Prompt Inspector
 
-Admin-only prompt debugging is available through `POST /admin/prompt-inspector`. It assembles the same base context blocks
-used by chat, adds optional persona/runtime memory/user message context, returns only redacted prompt text, estimates token
-usage by section, and can diff the current message against a previous message. Use it when a character reply becomes too
-short, loses lore, or drifts from relationship/scene continuity.
+Admin-only prompt debugging is available through `/admin/prompt-inspector` and `POST /admin/prompt-inspector`. It
+assembles the same base context blocks used by chat, adds optional persona/runtime memory/user message context, returns only
+redacted prompt text, estimates token usage by section, and can diff the current message against a previous message. Use it
+when a character reply becomes too short, loses lore, or drifts from relationship/scene continuity.
 
 Local API smoke covers this endpoint when `ADMIN_API_KEY` or `SMOKE_ADMIN_API_KEY` is available.
 

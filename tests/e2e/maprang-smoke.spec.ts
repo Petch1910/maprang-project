@@ -29,6 +29,7 @@ const routeSmokeTargets = [
   { path: '/wallet', text: 'โทเคน' },
   { path: '/moderation', text: adminKey ? 'คิวรายงาน' : 'ADMIN_API_KEY' },
   { path: '/admin/health', text: 'Route/Menu Audit' },
+  { path: '/admin/prompt-inspector', text: adminKey ? 'Prompt Inspector' : 'ADMIN_API_KEY' },
 ]
 
 function persistedReduxState() {
@@ -501,6 +502,19 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.locator('body')).toContainText('Deploy checklist')
   await expect(page.locator('body')).toContainText('Route/Menu Audit')
   await expect(page.locator('body')).toContainText('Chat Sidebar')
+
+  await page.goto('/admin/prompt-inspector')
+  await expect(page.locator('body')).toContainText('Prompt Inspector')
+  if (adminKey) {
+    await expect(page.getByTestId('prompt-inspector-character-select')).toBeEnabled()
+    await page.getByTestId('prompt-inspector-message').fill('ช่วยตรวจว่าพรอมป์ยังคุมบุคลิกและตอบยาวพอไหม')
+    await expect(page.getByTestId('prompt-inspector-submit')).toBeEnabled()
+    await page.getByTestId('prompt-inspector-submit').click()
+    await expect(page.getByTestId('prompt-inspector-output')).toContainText('Platform prompt-control policy')
+    await expect(page.getByTestId('prompt-inspector-diff')).toBeVisible()
+  } else {
+    await expect(page.getByTestId('prompt-inspector-admin-key-input')).toBeVisible()
+  }
 })
 
 test('all primary routes render without console errors or horizontal overflow', async ({ page, request }) => {

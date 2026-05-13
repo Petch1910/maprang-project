@@ -106,11 +106,21 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'Admin Health',
     route: '/admin/health',
-    control: 'รีเฟรช health, deploy checklist, route/menu audit, staging checklist',
-    result: 'เห็น readiness ของ DB, AI, Supabase, signed storage, CORS และ route audit ในหน้าเดียว',
+    control: 'รีเฟรช health, deploy checklist, route/menu audit, staging checklist, ลิงก์ตรวจพรอมป์',
+    result: 'เห็น readiness ของ DB, AI, Supabase, signed storage, CORS และ route audit ในหน้าเดียว พร้อมไป Prompt Inspector ได้',
     disabledReason: 'ไม่มี disabled ถาวร รีเฟรช disabled ได้เฉพาะตอนเรียกข้อมูลในอนาคต',
     emptyState: 'ถ้า backend ล่มจะแสดงสถานะไม่พร้อมและรายการที่ต้องแก้',
     status: 'ready',
+  },
+  {
+    area: 'Prompt Inspector',
+    route: '/admin/prompt-inspector',
+    control: 'ADMIN_API_KEY, เลือกตัวละคร, ข้อความปัจจุบัน, ข้อความก่อนหน้า, runtime note, persona override, ตรวจพรอมป์, คัดลอก redacted prompt',
+    result:
+      'เรียก admin API เพื่อตรวจ redacted prompt snapshot, section token budget, lore retrieval, warnings และ prompt diff โดยไม่ยิงโมเดลจริง',
+    disabledReason: 'ปุ่มตรวจ disabled เมื่อไม่มี ADMIN_API_KEY, ยังไม่เลือกตัวละคร, ข้อความว่าง หรือกำลังตรวจอยู่',
+    emptyState: 'แสดงสถานะยังไม่ได้ตรวจพรอมป์และบอกให้เลือกตัวละคร/ข้อความก่อนตรวจ',
+    status: 'guarded',
   },
   {
     area: 'Staging',

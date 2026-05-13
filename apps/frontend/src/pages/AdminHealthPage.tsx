@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Activity, CheckCircle2, CircleAlert, RefreshCw, ShieldCheck } from 'lucide-react'
 import { SystemStatus } from '../components/SystemStatus'
 import { fetchHealthStatus, type HealthStatus } from '../lib/api'
@@ -252,15 +253,23 @@ export function AdminHealthPage() {
               เพื่อกันปุ่มหลอกหรือ config พลาดก่อน deploy จริง
             </p>
           </div>
-          <button
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
-            disabled={isLoading}
-            onClick={() => void loadHealth()}
-            type="button"
-          >
-            <RefreshCw size={16} />
-            รีเฟรช
-          </button>
+          <div className="grid gap-2 sm:grid-cols-2 lg:w-auto">
+            <button
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+              disabled={isLoading}
+              onClick={() => void loadHealth()}
+              type="button"
+            >
+              <RefreshCw size={16} />
+              รีเฟรช
+            </button>
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+              to="/admin/prompt-inspector"
+            >
+              ตรวจพรอมป์
+            </Link>
+          </div>
         </div>
         {note && <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600">{note}</p>}
       </section>

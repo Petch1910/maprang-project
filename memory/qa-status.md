@@ -29,6 +29,7 @@ Results:
 - Route/menu audit: pass.
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - API smoke now covers admin-only prompt inspector snapshots and prompt diffs.
+- Route/menu audit now covers 13 surfaces including `/admin/prompt-inspector`.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate
@@ -47,6 +48,7 @@ Status: passing for Admin Health and Chat UI interaction
 
 Checked:
 - `/admin/health` renders.
+- `/admin/prompt-inspector` renders and can call the admin prompt snapshot flow when an admin key is available.
 - Production blocker summary is visible.
 - Chat live smoke row is visible.
 - `bun run production:check` guidance is visible.

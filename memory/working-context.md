@@ -17,6 +17,7 @@ Verified:
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.
+- Frontend Prompt Inspector page is available at `/admin/prompt-inspector` and is included in route/menu audit.
 - Admin Health page renders production blockers and has no browser console errors.
 - Route/menu audit exists and is wired into QA.
 - Security audit, route audit, deploy env doctor self-test, and predeploy check pass.

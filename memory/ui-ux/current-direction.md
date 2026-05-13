@@ -25,6 +25,7 @@ Maprang should feel familiar to Thai character-chat users while adding deeper re
 - My Chats: real chat management with rename, pin/unpin, archive, delete, report paths.
 - Wallet: token balance, usage, admin adjustment guard.
 - Admin Health: deploy blockers in plain language.
+- Prompt Inspector: admin-only prompt snapshot/diff tool for debugging reply depth, lore retrieval, and context drift.
 
 ## Current Known UX Concern
 
@@ -35,3 +36,4 @@ The user has repeatedly flagged that UI must feel complete and natural. Any visi
 - Explore now keeps mobile users in the same primary navigation model with a bottom nav for Explore, Chats, Create, Events, and Profile.
 - Chat read mode is no longer decorative: the top bar and right-rail control both toggle the reading layout, show a visible reading-state notice, and narrow the message area for long scenes.
 - E2E smoke now verifies mobile Explore navigation and Chat read mode on desktop/mobile.
+- Prompt Inspector now has a guarded admin UI at `/admin/prompt-inspector` with character selection, section budget, diff, lore retrieval, warnings, and redacted prompt copy.

@@ -422,6 +422,62 @@ export type AdminSummary = {
   }>
 }
 
+export type PromptInspectorSection = {
+  index: number
+  title: string
+  chars: number
+  estimatedTokens: number
+  fingerprint: string
+  preview: string
+  content: string
+}
+
+export type PromptInspectorSnapshot = {
+  generatedAt: string
+  character: {
+    id: string | null
+    name: string | null
+  }
+  redacted: true
+  prompt: string
+  totals: {
+    chars: number
+    estimatedTokens: number
+    sectionCount: number
+  }
+  sections: PromptInspectorSection[]
+  retrieval: {
+    loreCount: number
+    lore: Array<{
+      keyword: string
+      aliases: string[]
+      priority: number
+      preview: string
+    }>
+  }
+  warnings: string[]
+}
+
+export type PromptInspectorDiff = {
+  previousEstimatedTokens: number
+  currentEstimatedTokens: number
+  estimatedTokenDelta: number
+  charDelta: number
+  changedSections: Array<{
+    index: number
+    title: string
+    status: 'added' | 'removed' | 'changed'
+    estimatedTokenDelta: number
+    charDelta: number
+  }>
+}
+
+export type PromptInspectorResponse = {
+  snapshot: PromptInspectorSnapshot
+  diff?: PromptInspectorDiff
+  previousSnapshot?: PromptInspectorSnapshot
+}
+
 export type LoreEntry = {
   id: string
   characterId: string
@@ -535,6 +591,22 @@ export async function updateUserPersona(persona: string) {
 
 export async function fetchAdminSummary() {
   return requestJson<AdminSummary>('/admin/summary')
+}
+
+export async function inspectAdminPrompt(input: {
+  characterId: string
+  message: string
+  chatId?: string
+  compareWithMessage?: string
+  includePreviousSnapshot?: boolean
+  includeSavedPersona?: boolean
+  runtimeNote?: string
+  userPersona?: string
+}) {
+  return requestJson<PromptInspectorResponse>('/admin/prompt-inspector', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
 }
 
 export type RelationshipPreset = {
