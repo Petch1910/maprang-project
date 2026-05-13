@@ -10,3 +10,4 @@ Last updated: 2026-05-13
 - [0006 - Add runtime knowledge layer](./0006-add-runtime-knowledge-layer.md)
 - [0007 - Add deterministic roleplay evals](./0007-add-deterministic-roleplay-evals.md)
 - [0008 - Stage background and observability tooling](./0008-stage-background-observability-tooling.md)
+- [0009 - Add admin prompt inspector](./0009-add-admin-prompt-inspector.md)

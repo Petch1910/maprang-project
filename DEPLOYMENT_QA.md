@@ -93,6 +93,10 @@ ordering, runtime knowledge injection, lore placement, relationship/scene contin
 secret-shaped exclusions without calling a live model. It is included in `qa:local` and CI so context changes fail before
 they reach staging.
 
+Admin prompt inspection is covered by `POST /admin/prompt-inspector` and local `api:smoke` when an admin key is available.
+Use it before blaming the model provider: it shows the redacted final prompt, section token estimates, retrieved lore, and
+the diff between the current and previous prompt shape without making a live model call.
+
 ```bash
 cd apps/backend
 bun run env:check
@@ -191,6 +195,7 @@ Expected result:
 - Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
 - API smoke confirms temporary character creation/edit/view/favorite/duplicate/reset/delete and temporary lore create/edit/delete.
 - API smoke confirms chat menu mutations by renaming one seeded chat, archiving it, verifying the archived list, and restoring it back to active chats.
+- API smoke confirms admin prompt inspection returns redacted prompt snapshots, section accounting, and prompt diffs.
 - Image smoke confirms Creator Studio image generation is configured, and live opt-in confirms generated avatars do not fall back to placeholders.
 - Live chat smoke confirms backend-to-OpenRouter chat, chat persistence, and usage accounting.
 

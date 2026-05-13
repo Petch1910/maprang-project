@@ -231,6 +231,11 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['admin-smoke', 'e2e'],
     note: 'api-smoke --require-admin and Admin Health/Moderation smoke verify admin guard',
   },
+  'POST /admin/prompt-inspector': {
+    owner: 'admin/context',
+    coverage: ['admin-smoke', 'backend-test'],
+    note: 'api-smoke verifies redacted prompt snapshots/diff; backend tests cover redaction, section accounting, and admin guard',
+  },
   'PATCH /admin/users/:id/tokens': {
     owner: 'wallet/admin',
     coverage: ['backend-test'],

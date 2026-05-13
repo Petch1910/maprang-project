@@ -567,6 +567,37 @@ if (adminHeaders) {
     return `users=${payload.totals.users}, characters=${payload.totals.characters ?? 0}`
   })
 
+  await check('POST /admin/prompt-inspector', async () => {
+    const payload = await readJson<{
+      snapshot?: {
+        prompt?: string
+        totals?: { estimatedTokens?: number; sectionCount?: number }
+        sections?: Array<{ title?: string }>
+        redacted?: boolean
+      }
+      diff?: { estimatedTokenDelta?: number; changedSections?: unknown[] }
+    }>('/admin/prompt-inspector', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...adminHeaders },
+      body: JSON.stringify({
+        characterId: primaryCharacter.id,
+        compareWithMessage: 'สวัสดี',
+        message: 'ช่วยคงบรรยากาศเดิมและตอบแบบมีรายละเอียดมากขึ้น',
+        runtimeNote: 'Smoke runtime note: verify context inspector without calling the live model.',
+      }),
+    })
+    if (!payload.snapshot?.redacted) throw new Error('prompt inspector did not return a redacted snapshot')
+    if (!payload.snapshot.prompt?.includes('Platform prompt-control policy')) throw new Error('missing prompt-control policy')
+    if (!payload.snapshot.sections?.some((section) => section.title === 'Runtime memory')) {
+      throw new Error('missing runtime memory section')
+    }
+    if (!payload.snapshot.totals?.estimatedTokens || !payload.snapshot.totals.sectionCount) {
+      throw new Error('missing prompt totals')
+    }
+    if (!payload.diff || !Array.isArray(payload.diff.changedSections)) throw new Error('missing prompt diff')
+    return `sections=${payload.snapshot.totals.sectionCount}, estimatedTokens=${payload.snapshot.totals.estimatedTokens}`
+  })
+
   await check('GET /admin/reports', async () => {
     const payload = await readJson<{ reports?: unknown[] }>('/admin/reports?limit=5', { headers: adminHeaders })
     if (!payload.reports) throw new Error('missing reports array')
@@ -582,6 +613,7 @@ if (adminHeaders) {
   const status: ApiSmokeStatus = requireAdmin ? 'fail' : 'skip'
   const detail = 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available'
   record('GET /admin/summary', status, detail)
+  record('POST /admin/prompt-inspector', status, detail)
   record('GET /admin/reports', status, detail)
   record('GET /admin/audit-logs', status, detail)
 }

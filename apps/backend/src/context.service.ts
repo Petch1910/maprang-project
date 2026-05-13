@@ -2,14 +2,14 @@ import type { Character } from '@prisma/client'
 import { getPrisma } from './db'
 import { buildChatKnowledgePrompt } from './knowledge.service'
 
-type LoreForContext = {
+export type LoreForContext = {
   keyword: string
   aliases: string[]
   content: string
   priority: number
 }
 
-type ContextCharacter = Pick<
+export type ContextCharacter = Pick<
   Character,
   | 'name'
   | 'tagline'
@@ -70,7 +70,7 @@ export async function loadRelevantLore(characterId: string, userMessage: string)
   return [...unique.values()].slice(0, 8)
 }
 
-export function buildContextPrompt(character: ContextCharacter, loreEntries: LoreForContext[]) {
+export function buildContextPromptBlocks(character: ContextCharacter, loreEntries: LoreForContext[]) {
   const blocks = [
     promptControlPolicy,
     compact(character.systemPrompt),
@@ -113,5 +113,9 @@ export function buildContextPrompt(character: ContextCharacter, loreEntries: Lor
     ].filter(Boolean).join('\n'),
   )
 
-  return blocks.join('\n\n')
+  return blocks
+}
+
+export function buildContextPrompt(character: ContextCharacter, loreEntries: LoreForContext[]) {
+  return buildContextPromptBlocks(character, loreEntries).join('\n\n')
 }

@@ -17,8 +17,8 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 113 pass, 0 fail.
-- API smoke: 22 pass, 0 fail, 1 skip for live chat in local mode.
+- Backend tests: 117 pass, 0 fail.
+- API smoke: 23 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.
@@ -28,6 +28,7 @@ Results:
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
+- API smoke now covers admin-only prompt inspector snapshots and prompt diffs.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate
