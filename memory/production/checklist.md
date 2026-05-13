@@ -1,6 +1,6 @@
 # Production Checklist Memory
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 ## Before Production
 
@@ -15,6 +15,7 @@ Last updated: 2026-05-13
 - Run ordered live provider smoke.
 - Set provider live verification flags only after successful live smoke.
 - Run `bun run production:check`.
+- Use `/admin/health` to follow the next action shown on every blocker before rerunning the final gate.
 
 ## Commands
 

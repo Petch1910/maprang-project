@@ -107,7 +107,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     area: 'Admin Health',
     route: '/admin/health',
     control: 'รีเฟรช health, deploy checklist, route/menu audit, staging checklist, ลิงก์ตรวจพรอมป์, ลิงก์ทดสอบคุณภาพ',
-    result: 'เห็น readiness ของ DB, AI, Supabase, signed storage, CORS และ route audit ในหน้าเดียว พร้อมไป Prompt Inspector และ Automated Evals ได้',
+    result: 'เห็น readiness ของ DB, AI, Supabase, signed storage, CORS, route audit และขั้นต่อไปของแต่ละ blocker ในหน้าเดียว พร้อมไป Prompt Inspector และ Automated Evals ได้',
     disabledReason: 'ไม่มี disabled ถาวร รีเฟรช disabled ได้เฉพาะตอนเรียกข้อมูลในอนาคต',
     emptyState: 'ถ้า backend ล่มจะแสดงสถานะไม่พร้อมและรายการที่ต้องแก้',
     status: 'ready',

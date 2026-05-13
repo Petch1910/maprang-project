@@ -10,6 +10,7 @@ type DeployCheck = {
   label: string
   ok: boolean
   detail: string
+  action: string
   scope: 'local' | 'production' | 'frontend'
 }
 
@@ -78,6 +79,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       label: 'DB connected',
       ok: Boolean(checks?.databaseConfigured && checks.databaseConnected),
       detail: checks?.databaseConnected ? 'backend ต่อฐานข้อมูลได้แล้ว' : 'ตั้ง DATABASE_URL แล้วรัน migration/smoke กับ DB จริง',
+      action: checks?.databaseConnected ? 'เช็คซ้ำด้วย bun run smoke:local ก่อนส่ง staging' : 'ตั้ง DATABASE_URL, รัน bunx prisma migrate deploy แล้วรัน bun run smoke:local',
       scope: 'local',
     },
     {
@@ -87,6 +89,10 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         backendEnvMissing.length === 0 && backendEnvInvalid.length === 0
           ? 'backend env ไม่มีค่า required ที่ขาดหรือค่าผิดรูปแบบ'
           : [...backendEnvMissing.map((name) => `ขาด ${name}`), ...backendEnvInvalid].join(' / '),
+      action:
+        backendEnvMissing.length === 0 && backendEnvInvalid.length === 0
+          ? 'ล็อกค่า env ชุดนี้ไว้ใน hosting secret manager'
+          : 'แก้ backend host secrets แล้วรัน bun run deploy:doctor และ bun run production:check ซ้ำ',
       scope: 'production',
     },
     {
@@ -97,6 +103,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         : structuredKnowledge
           ? [...structuredKnowledge.missing.map((name) => `missing ${name}`), ...structuredKnowledge.errors].join(' / ')
           : 'waiting for backend health response',
+      action: structuredKnowledge?.ok ? 'รัน bun run knowledge:audit ใน CI ต่อเนื่อง' : 'แก้ไฟล์ knowledge/structured แล้วรัน bun run knowledge:audit',
       scope: isProductionMode ? 'production' : 'local',
     },
     {
@@ -105,6 +112,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: checks?.openRouterConfigured
         ? 'ตั้ง key แล้ว แต่ยังต้องให้ smoke:chat หรือ api:smoke:live ผ่านเพื่อยืนยัน quota/model/network จริง'
         : 'ตั้ง OPENROUTER_API_KEY ก่อนทดสอบแชทจริง',
+      action: checks?.openRouterConfigured ? 'รัน bun run smoke:chat กับ staging เพื่อยืนยัน provider จริง' : 'ตั้ง OPENROUTER_API_KEY ที่ขึ้นต้น sk-or- ใน backend host secrets',
       scope: 'local',
     },
     {
@@ -115,6 +123,9 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         : checks?.openRouterConfigured || chatProvider?.configured
           ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าได้ usage.providerFailure ต้องเช็ค OpenRouter quota, model access, key และ network`
           : 'ยังไม่มี OPENROUTER_API_KEY จึงยังทดสอบ live chat ไม่ได้',
+      action: chatProductionReady
+        ? 'คง CHAT_PROVIDER_LIVE_VERIFIED=1 ไว้เฉพาะ environment ที่ smoke ผ่านจริง'
+        : `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} กับ staging ถ้าผ่านแล้วค่อยตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`,
       scope: 'production',
     },
     {
@@ -123,6 +134,10 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: model
         ? `ใช้ ${model.name}, max output ${model.maxOutputTokens ?? 'default'} tokens, min roleplay ${model.minRoleplayReplyChars ?? 'default'} chars, temperature ${model.temperature ?? 'default'}, retry แชท ${providerRetry?.chatAttempts ?? 'default'} ครั้ง`
         : 'รอ health response จาก backend',
+      action:
+        model && maxOutputTokens >= 700 && minRoleplayReplyChars >= 240
+          ? 'ค่าความยาวตอบกลับพร้อมสำหรับ roleplay แล้ว'
+          : 'ตั้ง MODEL_MAX_OUTPUT_TOKENS=1200 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=320 เพื่อลดคำตอบสั้นเกินไป',
       scope: 'local',
     },
     {
@@ -132,6 +147,10 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         checks?.imageGenerationConfigured || imageGeneration?.configured
           ? `ตั้งค่า ${imageGeneration?.model ?? 'provider'} แล้ว สถานะ ${imageGeneration?.status ?? 'needs_live_smoke'} ต้องผ่าน live smoke เพื่อยืนยัน billing/quota ก่อน production`
           : 'ยัง fallback เป็นภาพตัวอย่าง ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อน production',
+      action:
+        checks?.imageGenerationConfigured || imageGeneration?.configured
+          ? 'รัน bun run smoke:image:live เพื่อยืนยันว่า provider สร้างภาพจริง'
+          : 'ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ใน backend host secrets',
       scope: 'local',
     },
     {
@@ -143,12 +162,19 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
           : isProductionMode
             ? `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หรือ bun run api:smoke:live กับ production/staging ให้ผ่าน ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงิน provider ก่อน แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`
             : `local/dev ยังไม่บังคับ แต่ก่อน production ต้องรัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} ให้ผ่าน ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงิน provider ก่อน`,
+      action: imageProductionReady
+        ? 'คง IMAGE_GENERATION_LIVE_VERIFIED=1 ไว้เฉพาะ environment ที่ smoke ผ่านจริง'
+        : `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หลังเพิ่ม billing/quota แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`,
       scope: 'production',
     },
     {
       label: 'Supabase Auth',
       ok: Boolean(checks?.supabaseAuthConfigured && hasFrontendSupabase),
       detail: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'backend/frontend มีค่า Supabase Auth แล้ว' : 'ต้องมี SUPABASE_URL/JWT issuer และ VITE_SUPABASE_*',
+      action:
+        checks?.supabaseAuthConfigured && hasFrontendSupabase
+          ? 'ทดสอบ login/session กับ staging domain อีกครั้ง'
+          : 'ตั้ง SUPABASE_URL, SUPABASE_JWT_ISSUER, VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ให้ครบ',
       scope: 'local',
     },
     {
@@ -158,6 +184,10 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed'
           ? `bucket ใช้ signed URL ${security.signedUrlExpiresIn ?? 3600}s`
           : 'production ควรใช้ Supabase bucket private + signed URL',
+      action:
+        security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed'
+          ? 'รัน bun run supabase:storage:check กับ staging/prod ก่อนเปิดใช้'
+          : 'รัน bun run supabase:storage:setup แล้วตั้ง SUPABASE_STORAGE_ACCESS=signed',
       scope: 'production',
     },
     {
@@ -167,18 +197,27 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))
           ? security.corsOrigins.join(', ')
           : 'staging/production ต้องเปลี่ยน CORS_ORIGINS เป็น domain จริง',
+      action:
+        security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))
+          ? 'คง CORS ให้เหลือเฉพาะ frontend domain จริง'
+          : 'ตั้ง CORS_ORIGINS=https://<frontend-domain> และเอา localhost ออกจาก production',
       scope: 'production',
     },
     {
       label: 'Frontend backend URL',
       ok: hasBackendUrl,
       detail: hasBackendUrl ? API_BASE_URL : 'ตั้ง VITE_API_BASE_URL เป็น URL backend staging/production จริง',
+      action: hasBackendUrl ? 'เช็คด้วย browser smoke ว่า frontend เรียก backend domain จริง' : 'ตั้ง VITE_API_BASE_URL=https://<backend-domain> ใน frontend hosting env',
       scope: 'frontend',
     },
     {
       label: 'Frontend env warnings',
       ok: frontendWarnings.length === 0,
       detail: frontendWarnings.length === 0 ? 'ไม่มี warning ฝั่ง frontend' : frontendWarnings.join(' / '),
+      action:
+        frontendWarnings.length === 0
+          ? 'ล็อก frontend env ชุดนี้ไว้ก่อน build production'
+          : 'แก้ VITE_API_BASE_URL, VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ตาม warning',
       scope: 'frontend',
     },
   ]
@@ -340,6 +379,9 @@ export function AdminHealthPage() {
                   </span>
                 </div>
                 <p className="m-0 mt-2 text-xs font-bold leading-5 text-amber-900/80">{check.detail}</p>
+                <p className="m-0 mt-2 rounded-lg bg-white/70 p-2 text-xs font-black leading-5 text-amber-950">
+                  ขั้นต่อไป: {check.action}
+                </p>
               </article>
             ))}
           </div>
@@ -408,6 +450,9 @@ export function AdminHealthPage() {
                   <StatusPill ok={check.ok} />
                 </div>
                 <p className="m-0 mt-2 text-xs font-bold leading-5 text-slate-500">{check.detail}</p>
+                <p className="m-0 mt-2 rounded-lg bg-white p-2 text-xs font-black leading-5 text-slate-700">
+                  ขั้นต่อไป: {check.action}
+                </p>
               </article>
             ))}
           </div>

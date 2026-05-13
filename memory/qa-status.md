@@ -65,4 +65,5 @@ Checked:
 - `/chat/:id` world state panel opens from the right rail, saves location/notes, and persists after reload.
 - `/wallet` renders model cost breakdown and seven-day usage trend without console errors.
 - `/admin/health` shows prompt budget/history settings without console errors.
+- `/admin/health` deploy checklist shows a concrete next action on each blocker card.
 - Console errors/warnings: none relevant.

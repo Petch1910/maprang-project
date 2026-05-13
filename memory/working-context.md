@@ -13,13 +13,14 @@ Status: local QA ready
 Verified:
 - Backend tests pass: 124 pass, 0 fail.
 - Frontend deploy check passes.
-- Local API smoke passes: 25 pass, 0 fail, 1 live chat skip.
+- Local API smoke passes: 26 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.
 - Frontend Prompt Inspector page is available at `/admin/prompt-inspector` and is included in route/menu audit.
 - Automated Evals are available through `/admin/evals` and `GET /admin/evals/local` using the same deterministic suite as `bun run eval:local`.
 - Admin Health page renders production blockers and has no browser console errors.
+- Admin Health deploy cards now show the next action for each blocker so staging setup can be followed directly from the UI.
 - Route/menu audit exists and is wired into QA.
 - Security audit, route audit, deploy env doctor self-test, and predeploy check pass.
 - Project memory, runtime knowledge, and deterministic prompt/context evals are part of the local QA gate.
