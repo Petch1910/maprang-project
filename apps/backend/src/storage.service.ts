@@ -36,6 +36,14 @@ export function avatarUrl(origin: string, filename: string) {
   return `${origin}/uploads/avatars/${filename}`
 }
 
+export function normalizeSupabaseSignedUrl(supabaseUrl: string, signedPath: string) {
+  if (signedPath.startsWith('http')) return signedPath
+  const baseUrl = supabaseUrl.replace(/\/$/, '')
+  if (signedPath.startsWith('/storage/v1/')) return `${baseUrl}${signedPath}`
+  if (signedPath.startsWith('/object/')) return `${baseUrl}/storage/v1${signedPath}`
+  return `${baseUrl}/storage/v1/${signedPath.replace(/^\//, '')}`
+}
+
 function supabaseStorageConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '')
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -100,7 +108,7 @@ export async function resolveAvatarLocation(filename: string) {
   if (!signedPath) throw new Error('Supabase signed avatar URL response is missing signedURL')
   return {
     type: 'redirect' as const,
-    url: signedPath.startsWith('http') ? signedPath : `${supabaseUrl}${signedPath}`,
+    url: normalizeSupabaseSignedUrl(supabaseUrl, signedPath),
   }
 }
 

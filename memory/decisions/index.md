@@ -1,0 +1,10 @@
+# Decision Log
+
+Last updated: 2026-05-13
+
+- [0001 - Use SocratiCode as local codebase intelligence](./0001-use-socraticode-local-tool.md)
+- [0002 - Add Markdown memory vault](./0002-add-markdown-memory-vault.md)
+- [0003 - Separate live chat and live image verification flags](./0003-separate-live-provider-verification.md)
+- [0004 - Keep adult-mode conflicts as warnings](./0004-adult-mode-conflict-policy.md)
+- [0005 - Audit memory in local QA](./0005-audit-memory-in-local-qa.md)
+- [0006 - Add runtime knowledge layer](./0006-add-runtime-knowledge-layer.md)

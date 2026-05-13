@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "creator-guides",
+  "updatedAt": "2026-05-13",
+  "draftPrompt": {
+    "principles": [
+      "Create Thai roleplay characters that feel usable immediately.",
+      "Make personality, voice, scenario, greeting, boundaries, and relationship hooks concrete.",
+      "Prefer specific character anchors over generic traits.",
+      "Include slow-burn or scene-ready hooks when they fit the user's brief.",
+      "Keep output compatible with a Khuiai-like creator flow while adding Maprang relationship depth."
+    ],
+    "requiredQualities": [
+      "Clear name and short tagline.",
+      "Description that explains why users would want to chat.",
+      "Biography with emotional texture and roleplay hooks.",
+      "Scenario that gives the first chat a natural starting point.",
+      "System prompt that protects character consistency and player agency.",
+      "Tags that are useful for discovery and relationship seeding."
+    ],
+    "avoid": [
+      "Do not output markdown when JSON is requested.",
+      "Do not make tags an array when a comma-separated string is requested.",
+      "Do not write explicit sexual content in generated drafts.",
+      "Do not turn warnings into hard blocks in adult-mode drafts unless required by platform policy."
+    ]
+  }
+}

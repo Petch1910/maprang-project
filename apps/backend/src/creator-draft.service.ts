@@ -1,8 +1,33 @@
 import { Buffer } from 'node:buffer'
 import OpenAI from 'openai'
 import type { ChatCompletion } from 'openai/resources/chat/completions'
-import { modelName } from './config'
+import { creatorDraftRetryAttempts, creatorDraftRetryDelayMs, modelName } from './config'
 import { uploadAvatarBytes } from './storage.service'
+import { getPrisma } from './db'
+import { buildCreatorKnowledgePrompt } from './knowledge.service'
+
+export async function getCreatorDraft(userId: string) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+  const draft = await prisma.creatorDraft.findUnique({
+    where: { userId },
+  })
+  return draft ? draft.payload : null
+}
+
+export async function saveCreatorDraft(userId: string, payload: unknown) {
+  const prisma = getPrisma()
+  if (!prisma) return
+  if (payload === null) {
+    await prisma.creatorDraft.deleteMany({ where: { userId } })
+    return
+  }
+  await prisma.creatorDraft.upsert({
+    where: { userId },
+    update: { payload: payload ?? {} },
+    create: { userId, payload: payload ?? {} },
+  })
+}
 
 export type CreatorDraftFields = {
   name: string
@@ -23,6 +48,9 @@ export type CreatorDraftInput = {
   imagePrompt?: string
   current?: Partial<CreatorDraftFields>
   origin?: string
+  imageOnly?: boolean
+  skipImageProvider?: boolean
+  imageStyle?: string
 }
 
 export type CreatorDraftResult = {
@@ -154,11 +182,112 @@ function fallbackDraft(input: CreatorDraftInput): CreatorDraftFields {
   }
 }
 
+function stripCodeFence(value: string) {
+  return value
+    .trim()
+    .replace(/^\uFEFF/, '')
+    .replace(/^```[^\n\r]*[\n\r]+/, '')
+    .replace(/```$/, '')
+    .trim()
+}
+
+function extractJsonObject(value: string) {
+  const start = value.indexOf('{')
+  if (start < 0) return null
+
+  let depth = 0
+  let inString = false
+  let escaped = false
+
+  for (let index = start; index < value.length; index += 1) {
+    const char = value[index]
+    if (inString) {
+      if (escaped) {
+        escaped = false
+      } else if (char === '\\') {
+        escaped = true
+      } else if (char === '"') {
+        inString = false
+      }
+      continue
+    }
+
+    if (char === '"') {
+      inString = true
+    } else if (char === '{') {
+      depth += 1
+    } else if (char === '}') {
+      depth -= 1
+      if (depth === 0) return value.slice(start, index + 1)
+    }
+  }
+
+  return null
+}
+
 function parseJsonObject(value: string) {
-  const trimmed = value.trim()
-  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim()
-  const raw = fenced || trimmed.match(/\{[\s\S]*\}/)?.[0] || trimmed
+  const unfenced = stripCodeFence(value)
+  const raw = extractJsonObject(unfenced) || unfenced
   return JSON.parse(raw) as Partial<CreatorDraftFields>
+}
+
+function providerStatus(error: unknown) {
+  if (!error || typeof error !== 'object') return null
+  const status = (error as { status?: unknown }).status
+  if (typeof status === 'number') return status
+  const code = (error as { code?: unknown }).code
+  if (typeof code === 'number') return code
+  return null
+}
+
+function isRetryableCreatorDraftError(error: unknown) {
+  const status = providerStatus(error)
+  if (status && [408, 409, 425, 429, 500, 502, 503, 504].includes(status)) return true
+
+  if (error instanceof SyntaxError) return true
+
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase()
+  return [
+    'fetch failed',
+    'network',
+    'timeout',
+    'timed out',
+    'operation was aborted',
+    'econnreset',
+    'etimedout',
+    'temporarily unavailable',
+    'rate limit',
+    'overloaded',
+    'service unavailable',
+    'bad gateway',
+    'gateway timeout',
+    'json parse error',
+    'unexpected eof',
+    'unexpected end',
+    'unterminated',
+  ].some((hint) => message.includes(hint))
+}
+
+async function buildAiDraftWithRetry(
+  completion: CompletionFn,
+  messages: Array<{ role: 'system' | 'user'; content: string }>,
+  fallback: CreatorDraftFields,
+) {
+  let lastError: unknown = null
+
+  for (let attempt = 1; attempt <= creatorDraftRetryAttempts; attempt += 1) {
+    try {
+      const completionResult = await completion(messages)
+      const content = completionResult.choices[0]?.message?.content ?? ''
+      return normalizeDraft(parseJsonObject(content), fallback)
+    } catch (error) {
+      lastError = error
+      if (attempt >= creatorDraftRetryAttempts || !isRetryableCreatorDraftError(error)) throw error
+      await new Promise((resolve) => setTimeout(resolve, creatorDraftRetryDelayMs * attempt))
+    }
+  }
+
+  throw lastError
 }
 
 function normalizeDraft(value: Partial<CreatorDraftFields>, fallback: CreatorDraftFields): CreatorDraftFields {
@@ -181,6 +310,7 @@ function draftPrompt(input: CreatorDraftInput) {
   const current = input.current ?? {}
   return [
     'Create a Thai roleplay character draft for Maprang AI.',
+    buildCreatorKnowledgePrompt(),
     'Return JSON only. Do not include markdown.',
     'Required keys: name, tagline, description, biography, scenario, systemPrompt, compactPrompt, characterAnchor, constraints, greeting, tags.',
     'Every value must be a plain string. tags must be one comma-separated string, not an array.',
@@ -192,7 +322,7 @@ function draftPrompt(input: CreatorDraftInput) {
     `Current name: ${current.name || ''}`,
     `Current tagline: ${current.tagline || ''}`,
     `Current tags: ${current.tags || ''}`,
-  ].join('\n')
+  ].filter(Boolean).join('\n')
 }
 
 async function defaultCompletion(messages: Array<{ role: 'system' | 'user'; content: string }>) {
@@ -200,6 +330,22 @@ async function defaultCompletion(messages: Array<{ role: 'system' | 'user'; cont
     model: modelName,
     messages,
   })
+}
+
+function friendlyImageFailureReason(message: string) {
+  const normalized = message.toLowerCase()
+  const status = message.match(/returned\s+(\d{3})/i)?.[1]
+  const suffix = status ? ` (HTTP ${status})` : ''
+  if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
+    return `image provider billing hard limit reached${suffix}: เพิ่มหรือรีเซ็ตวงเงิน/เพดานใช้จ่ายของ image provider แล้วรัน smoke:image:live อีกครั้ง`
+  }
+  if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
+    return `image provider quota is not available${suffix}: เติมเครดิตหรือเพิ่ม quota ของ image provider แล้วรัน smoke:image:live อีกครั้ง`
+  }
+  if (normalized.includes('invalid_api_key') || normalized.includes('incorrect api key') || normalized.includes('unauthorized')) {
+    return `image provider API key is invalid${suffix}: เปลี่ยน IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY เป็น key backend-only ที่ถูกต้อง`
+  }
+  return clip(message, 180)
 }
 
 async function generateConfiguredImage(prompt: string, origin?: string) {
@@ -265,24 +411,32 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
     imagePrompt: clip(input.imagePrompt || '', 1200),
     current: input.current,
     origin: input.origin,
+    imageOnly: input.imageOnly,
+    skipImageProvider: input.skipImageProvider,
+    imageStyle: clip(input.imageStyle || '', 100),
   }
   const fallback = fallbackDraft(safeInput)
   const warnings: string[] = []
   let draft = fallback
   let source: CreatorDraftResult['source'] = 'fallback'
 
-  if (process.env.OPENROUTER_API_KEY) {
+  if (safeInput.imageOnly) {
+    draft = normalizeDraft(safeInput.current || {}, fallback)
+    source = 'fallback'
+  } else if (process.env.OPENROUTER_API_KEY) {
     try {
-      const completionResult = await completion([
-        {
-          role: 'system',
-          content:
-            'You are a senior Thai character designer for an AI roleplay platform. Produce concise, playable, emotionally coherent character drafts.',
-        },
-        { role: 'user', content: draftPrompt(safeInput) },
-      ])
-      const content = completionResult.choices[0]?.message?.content ?? ''
-      draft = normalizeDraft(parseJsonObject(content), fallback)
+      draft = await buildAiDraftWithRetry(
+        completion,
+        [
+          {
+            role: 'system',
+            content:
+              'You are a senior Thai character designer for an AI roleplay platform. Produce concise, playable, emotionally coherent character drafts.',
+          },
+          { role: 'user', content: draftPrompt(safeInput) },
+        ],
+        fallback,
+      )
       source = 'ai'
     } catch (error) {
       const reason = error instanceof Error ? clip(error.message, 160) : 'unknown error'
@@ -296,19 +450,21 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
     safeInput.imagePrompt || safeInput.brief || draft.description,
     draft.name,
     draft.tagline,
+    safeInput.imageStyle ? `${safeInput.imageStyle} style` : '',
     'portrait character concept art, clean composition, suitable for roleplay character avatar',
   ]
     .filter(Boolean)
     .join(', ')
   const hasImageProvider = Boolean(process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY)
+  const shouldUseImageProvider = hasImageProvider && !safeInput.skipImageProvider
   let configuredImage: string | null = null
   let imageFailureReason: string | null = null
 
-  if (hasImageProvider) {
+  if (shouldUseImageProvider) {
     try {
       configuredImage = await generateConfiguredImage(imagePrompt, safeInput.origin)
     } catch (error) {
-      const reason = error instanceof Error ? clip(error.message, 180) : 'unknown error'
+      const reason = error instanceof Error ? friendlyImageFailureReason(error.message) : 'unknown error'
       imageFailureReason = reason
       warnings.push(`สร้างรูปด้วย image provider ไม่สำเร็จ จึงใช้ภาพตัวอย่างระบบ: ${reason}`)
     }
@@ -327,7 +483,9 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
           url: buildGeneratedAvatarDataUrl(imagePrompt),
           provider: 'placeholder',
           prompt: imagePrompt,
-          note: hasImageProvider
+          note: safeInput.skipImageProvider
+            ? 'ข้าม image provider สำหรับ smoke/dev check จึงใช้ภาพตัวอย่างระบบชั่วคราว'
+            : shouldUseImageProvider
             ? `ตั้งค่า image provider แล้ว แต่สร้างรูปไม่สำเร็จ${imageFailureReason ? `: ${imageFailureReason}` : ''} จึงใช้ภาพตัวอย่างระบบชั่วคราว`
             : 'ยังไม่ได้ตั้งค่า image provider จริง จึงใช้ภาพตัวอย่างระบบชั่วคราว',
         },

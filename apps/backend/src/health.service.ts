@@ -2,12 +2,17 @@ import { getPrisma } from './db'
 import {
   adminAuthConfigured,
   allowedOrigins,
+  chatProviderRetryAttempts,
+  chatProviderRetryDelayMs,
+  creatorDraftRetryAttempts,
+  creatorDraftRetryDelayMs,
   imageGenerationConfigured,
   imageGenerationModel,
   maxInputChars,
   minTokenBalanceForChat,
   modelInputCostPer1M,
   modelMaxOutputTokens,
+  modelMinRoleplayReplyChars,
   modelName,
   modelOutputCostPer1M,
   modelTemperature,
@@ -15,6 +20,7 @@ import {
   storageProvider,
 } from './config'
 import { validateRuntimeEnv } from './env'
+import { structuredKnowledgeHealth } from './knowledge.service'
 import { supabaseSignedUrlExpiresInSeconds, supabaseStorageAccess } from './storage.service'
 
 export function summarizeDatabaseError(error: unknown) {
@@ -72,10 +78,23 @@ function securityPosture({
 
 export async function loadHealthStatus() {
   const prisma = getPrisma()
+  const chatLiveVerified = process.env.CHAT_PROVIDER_LIVE_VERIFIED === '1'
+  const imageLiveVerified = process.env.IMAGE_GENERATION_LIVE_VERIFIED === '1'
+  const chatProviderConfigured = Boolean(process.env.OPENROUTER_API_KEY)
+  const chatProviderStatus = !chatProviderConfigured
+    ? 'missing_provider'
+    : chatLiveVerified
+      ? 'verified'
+      : 'needs_live_smoke'
+  const imageGenerationStatus = !imageGenerationConfigured
+    ? 'missing_provider'
+    : imageLiveVerified
+      ? 'verified'
+      : 'needs_live_smoke'
   const checks = {
     databaseConfigured: Boolean(process.env.DATABASE_URL),
     databaseConnected: false,
-    openRouterConfigured: Boolean(process.env.OPENROUTER_API_KEY),
+    openRouterConfigured: chatProviderConfigured,
     imageGenerationConfigured,
     adminAuthConfigured,
     supabaseAuthConfigured,
@@ -93,7 +112,8 @@ export async function loadHealthStatus() {
   }
 
   const ok = checks.databaseConfigured && checks.databaseConnected
-  const env = validateRuntimeEnv()
+  const env = validateRuntimeEnv({ throwOnError: false })
+  const knowledge = structuredKnowledgeHealth()
 
   return {
     ok,
@@ -105,11 +125,29 @@ export async function loadHealthStatus() {
       outputCostPer1M: modelOutputCostPer1M,
       temperature: modelTemperature,
       maxOutputTokens: modelMaxOutputTokens,
+      minRoleplayReplyChars: modelMinRoleplayReplyChars,
       maxInputChars,
       minTokenBalanceForChat,
+      providerRetry: {
+        chatAttempts: chatProviderRetryAttempts,
+        chatDelayMs: chatProviderRetryDelayMs,
+        creatorDraftAttempts: creatorDraftRetryAttempts,
+        creatorDraftDelayMs: creatorDraftRetryDelayMs,
+      },
+      chatProvider: {
+        configured: chatProviderConfigured,
+        liveVerified: chatLiveVerified,
+        productionReady: chatProviderConfigured && chatLiveVerified,
+        status: chatProviderStatus,
+        liveSmokeCommand: 'bun run smoke:chat',
+      },
       imageGeneration: {
         configured: imageGenerationConfigured,
+        liveVerified: imageLiveVerified,
+        productionReady: imageGenerationConfigured && imageLiveVerified,
+        status: imageGenerationStatus,
         model: imageGenerationModel,
+        liveSmokeCommand: 'bun run smoke:image:live',
       },
     },
     security: {
@@ -124,6 +162,22 @@ export async function loadHealthStatus() {
       databaseConnected: checks.databaseConnected,
       openRouterConfigured: checks.openRouterConfigured,
     }),
+    knowledge: {
+      structured: {
+        ok: knowledge.ok,
+        fileCount: knowledge.files.length,
+        missing: knowledge.missing,
+        errors: knowledge.errors,
+        files: knowledge.files.map((file) => ({
+          file: file.file,
+          ok: file.ok,
+          id: file.id,
+          schemaVersion: file.schemaVersion,
+          updatedAt: file.updatedAt,
+          errors: file.errors,
+        })),
+      },
+    },
     env: {
       mode: env.mode,
       missingRequired: env.missingRequired,
@@ -144,6 +198,7 @@ export function readinessFailures(health: HealthStatus) {
   if (!health.checks.databaseConfigured) failures.push('DATABASE_URL is not configured')
   if (!health.checks.databaseConnected) failures.push('database is not connected')
   if (!health.checks.openRouterConfigured) failures.push('OPENROUTER_API_KEY is not configured')
+  if (!health.knowledge.structured.ok) failures.push('structured knowledge is not valid')
 
   for (const name of health.env.missingRequired) {
     failures.push(`${name} is missing`)
@@ -156,6 +211,9 @@ export function readinessFailures(health: HealthStatus) {
     if (!health.checks.supabaseAuthConfigured) failures.push('Supabase auth is not configured')
     if (!health.checks.adminAuthConfigured) failures.push('ADMIN_API_KEY is not configured')
     if (!health.checks.imageGenerationConfigured) failures.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY is not configured')
+    if (!health.model.imageGeneration.liveVerified) {
+      failures.push('image generation live smoke has not been verified')
+    }
     if (health.security.avatarStorage !== 'supabase') failures.push('production avatar storage must use Supabase')
     if (health.security.avatarStorageAccess !== 'signed') failures.push('production avatar storage access must use signed URLs')
     if (health.security.authMode !== 'supabase-jwt') failures.push('production auth mode must use Supabase JWT')

@@ -25,6 +25,10 @@ const qaMyChatsArchiveDesktopChatId = 'cccccccc-1111-4111-8111-cccccccc1111'
 const qaMyChatsArchiveMobileChatId = 'cccccccc-2222-4222-8222-cccccccc2222'
 const qaMyChatsDeleteDesktopChatId = 'dddddddd-1111-4111-8111-dddddddd1111'
 const qaMyChatsDeleteMobileChatId = 'dddddddd-2222-4222-8222-dddddddd2222'
+const qaMyChatsBulkArchiveDesktopChatId = 'eeeeeeee-1111-4111-8111-eeeeeeee1111'
+const qaMyChatsBulkArchiveMobileChatId = 'eeeeeeee-2222-4222-8222-eeeeeeee2222'
+const qaMyChatsBulkDeleteDesktopChatId = 'ffffffff-1111-4111-8111-ffffffff1111'
+const qaMyChatsBulkDeleteMobileChatId = 'ffffffff-2222-4222-8222-ffffffff2222'
 const qaUsageId = '11111111-1111-4111-8111-111111111111'
 const qaReportId = '22222222-2222-4222-8222-222222222222'
 const qaAuditId = '33333333-3333-4333-8333-333333333333'
@@ -39,6 +43,10 @@ const qaChatIds = [
   qaMyChatsArchiveMobileChatId,
   qaMyChatsDeleteDesktopChatId,
   qaMyChatsDeleteMobileChatId,
+  qaMyChatsBulkArchiveDesktopChatId,
+  qaMyChatsBulkArchiveMobileChatId,
+  qaMyChatsBulkDeleteDesktopChatId,
+  qaMyChatsBulkDeleteMobileChatId,
 ]
 
 const qaMessageUserId = 'qa-smoke-message-user-1'
@@ -54,6 +62,10 @@ const qaSeedMessageIds = [
   'qa-my-chats-archive-mobile-message-1',
   'qa-my-chats-delete-desktop-message-1',
   'qa-my-chats-delete-mobile-message-1',
+  'qa-my-chats-bulk-archive-desktop-message-1',
+  'qa-my-chats-bulk-archive-mobile-message-1',
+  'qa-my-chats-bulk-delete-desktop-message-1',
+  'qa-my-chats-bulk-delete-mobile-message-1',
 ]
 
 const now = new Date()
@@ -471,6 +483,30 @@ async function upsertMenuActionChats() {
       title: 'เสียงเรียกก่อนหายไป',
       messageId: 'qa-my-chats-delete-mobile-message-1',
       content: 'เธอเรียกชื่อคุณเบาๆ เหมือนกำลังทดสอบว่าคุณจะหันกลับไปไหม',
+    },
+    {
+      id: qaMyChatsBulkArchiveDesktopChatId,
+      title: 'ชุดทดสอบจัดเก็บหลายรายการ',
+      messageId: 'qa-my-chats-bulk-archive-desktop-message-1',
+      content: 'แชทนี้ใช้ทดสอบปุ่มเลือกหลายแชท จัดเก็บหลายรายการ และกู้คืนหลายรายการบน desktop',
+    },
+    {
+      id: qaMyChatsBulkArchiveMobileChatId,
+      title: 'ชุดทดสอบจัดเก็บหลายรายการมือถือ',
+      messageId: 'qa-my-chats-bulk-archive-mobile-message-1',
+      content: 'แชทนี้ใช้ทดสอบปุ่มเลือกหลายแชท จัดเก็บหลายรายการ และกู้คืนหลายรายการบน mobile',
+    },
+    {
+      id: qaMyChatsBulkDeleteDesktopChatId,
+      title: 'ชุดทดสอบลบหลายรายการ',
+      messageId: 'qa-my-chats-bulk-delete-desktop-message-1',
+      content: 'แชทนี้ใช้ทดสอบ confirm ลบหลายรายการจากหน้ารวมแชทบน desktop',
+    },
+    {
+      id: qaMyChatsBulkDeleteMobileChatId,
+      title: 'ชุดทดสอบลบหลายรายการมือถือ',
+      messageId: 'qa-my-chats-bulk-delete-mobile-message-1',
+      content: 'แชทนี้ใช้ทดสอบ confirm ลบหลายรายการจากหน้ารวมแชทบน mobile',
     },
   ]
 

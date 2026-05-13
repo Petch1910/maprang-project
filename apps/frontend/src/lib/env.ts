@@ -4,11 +4,15 @@ export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefi
 export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
 export function hasRealEnvValue(value: string | undefined) {
+  const normalized = value?.trim().toLowerCase()
   return Boolean(
-    value?.trim() &&
-      !value.includes('your-project.supabase.co') &&
-      !value.includes('example.com') &&
-      !value.startsWith('replace-with-'),
+    normalized &&
+      !normalized.includes('<') &&
+      !normalized.includes('>') &&
+      !normalized.includes('your-project.supabase.co') &&
+      !normalized.includes('example.com') &&
+      !normalized.startsWith('replace-with-') &&
+      !['backend-domain', 'supabase-url', 'supabase-anon-key'].includes(normalized),
   )
 }
 
@@ -26,7 +30,8 @@ function jwtRole(value: string | undefined) {
 }
 
 function isLocalOrPlaceholderUrl(value: string) {
-  if (value.includes('example.com')) return true
+  const normalized = value.toLowerCase()
+  if (normalized.includes('example.com') || normalized.includes('<') || normalized.includes('>')) return true
   try {
     const url = new URL(value)
     return ['localhost', '127.0.0.1', '::1'].includes(url.hostname)
@@ -64,8 +69,9 @@ export function frontendEnvWarnings() {
     }
   }
 
-  if (jwtRole(SUPABASE_ANON_KEY) === 'service_role') {
-    warnings.push('VITE_SUPABASE_ANON_KEY ต้องเป็น anon/public key ห้ามใช้ service role key')
+  const supabaseAnonRole = jwtRole(SUPABASE_ANON_KEY)
+  if (supabaseAnonRole && supabaseAnonRole !== 'anon') {
+    warnings.push('VITE_SUPABASE_ANON_KEY ต้องเป็น anon/public key ห้ามใช้ service role key หรือ role อื่น')
   }
 
   return warnings

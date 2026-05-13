@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia'
 import { defaultUserId } from './config'
 import { requireDatabase } from './db'
 import { resolveRequestUserId } from './security'
-import { loadContentSettings, loadUsageSummary, updateContentSettings } from './user.service'
+import { loadContentSettings, loadUsageSummary, loadUserPersona, updateContentSettings, updateUserPersona } from './user.service'
 
 const contentRatingSchema = t.Union([
   t.Literal('general'),
@@ -36,6 +36,38 @@ export const userRoutes = new Elysia()
 
     return { contentSettings }
   })
+  .get('/me/persona', async ({ request, set }) => {
+    const prisma = requireDatabase(set)
+    if (!prisma) return { error: 'database_not_configured', message: 'ยังไม่ได้ตั้งค่า DATABASE_URL' }
+
+    const persona = await loadUserPersona(await resolveRequestUserId(request, defaultUserId))
+    if (!persona) {
+      set.status = 404
+      return { error: 'user_not_found', message: 'ไม่พบผู้ใช้นี้' }
+    }
+
+    return { persona }
+  })
+  .patch(
+    '/me/persona',
+    async ({ body, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured', message: 'ยังไม่ได้ตั้งค่า DATABASE_URL' }
+
+      const persona = await updateUserPersona(await resolveRequestUserId(request, defaultUserId), body)
+      if (!persona) {
+        set.status = 404
+        return { error: 'user_not_found', message: 'ไม่พบผู้ใช้นี้' }
+      }
+
+      return { persona }
+    },
+    {
+      body: t.Object({
+        persona: t.String({ maxLength: 2000 }),
+      }),
+    },
+  )
   .patch(
     '/me/content-settings',
     async ({ body, request, set }) => {

@@ -18,6 +18,7 @@ import { useAppDispatch, useAppSelector } from './store/hooks'
 import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chatsSlice'
 import { loadContentSettings } from './store/slices/contentSlice'
 import { loadWalletSummary, selectTokenBalance, selectWalletLoading } from './store/slices/walletSlice'
+import { loadPersonaDraft } from './store/slices/draftsSlice'
 
 const loadCreatorStudioPage = () => import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage }))
 const loadChatRoomPage = () => import('./pages/ChatRoomPage').then((module) => ({ default: module.ChatRoomPage }))
@@ -125,6 +126,7 @@ function App() {
     dispatch(loadContentSettings())
     dispatch(loadWalletSummary())
     dispatch(loadChatSummaries())
+    dispatch(loadPersonaDraft())
   }, [dispatch])
 
   useEffect(() => {

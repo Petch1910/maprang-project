@@ -2,7 +2,7 @@ import { CharacterStatus, type Visibility } from '@prisma/client'
 import { Elysia, t } from 'elysia'
 import { defaultUserId } from './config'
 import { clampMaxRating, normalizeMaxRating } from './content-rating'
-import { generateCreatorDraft } from './creator-draft.service'
+import { generateCreatorDraft, getCreatorDraft, saveCreatorDraft } from './creator-draft.service'
 import { requireDatabase } from './db'
 import {
   createCharacter,
@@ -57,6 +57,9 @@ const characterPatchBody = t.Partial(characterBody)
 const creatorDraftBody = t.Object({
   brief: t.Optional(t.String()),
   imagePrompt: t.Optional(t.String()),
+  imageOnly: t.Optional(t.Boolean()),
+  skipImageProvider: t.Optional(t.Boolean()),
+  imageStyle: t.Optional(t.String()),
   current: t.Optional(
     t.Partial(
       t.Object({
@@ -89,6 +92,34 @@ function hasRequestIdentity(request: Request) {
 }
 
 export const characterRoutes = new Elysia()
+  .get('/creator/draft', async ({ request, set }) => {
+    const prisma = requireDatabase(set)
+    if (!prisma) return { error: 'database_not_configured' }
+
+    const actorId = await resolveRequestUserId(request)
+    if (!actorId) {
+      set.status = 401
+      return { error: 'unauthorized' }
+    }
+    const payload = await getCreatorDraft(actorId)
+    return { draft: payload ?? null }
+  })
+  .put('/creator/draft', async ({ body, request, set }) => {
+    const prisma = requireDatabase(set)
+    if (!prisma) return { error: 'database_not_configured' }
+
+    const actorId = await resolveRequestUserId(request)
+    if (!actorId) {
+      set.status = 401
+      return { error: 'unauthorized' }
+    }
+    await saveCreatorDraft(actorId, body.payload)
+    return { ok: true }
+  }, {
+    body: t.Object({
+      payload: t.Any(),
+    }),
+  })
   .post('/creator/ai-draft', ({ body, request }) => generateCreatorDraft({ ...body, origin: new URL(request.url).origin }), {
     body: creatorDraftBody,
   })

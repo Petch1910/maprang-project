@@ -6,6 +6,7 @@ type HealthOverrides = Partial<Omit<HealthStatus, 'checks' | 'model' | 'security
   model?: Partial<HealthStatus['model']>
   security?: Partial<HealthStatus['security']>
   securityPosture?: Partial<HealthStatus['securityPosture']>
+  knowledge?: Partial<HealthStatus['knowledge']>
   env?: Partial<HealthStatus['env']>
 }
 
@@ -27,11 +28,29 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
       outputCostPer1M: 0.4,
       temperature: 0.85,
       maxOutputTokens: 900,
+      minRoleplayReplyChars: 320,
       maxInputChars: 4000,
       minTokenBalanceForChat: 1,
+      providerRetry: {
+        chatAttempts: 2,
+        chatDelayMs: 350,
+        creatorDraftAttempts: 3,
+        creatorDraftDelayMs: 350,
+      },
+      chatProvider: {
+        configured: true,
+        liveVerified: true,
+        productionReady: true,
+        status: 'verified',
+        liveSmokeCommand: 'bun run smoke:chat',
+      },
       imageGeneration: {
         configured: true,
+        liveVerified: true,
+        productionReady: true,
+        status: 'verified',
         model: 'gpt-image-1.5',
+        liveSmokeCommand: 'bun run smoke:image:live',
       },
     },
     security: {
@@ -50,6 +69,21 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
       authorization: { ok: true, detail: 'Owner/admin checks cover protected actions.' },
       accounting: { ok: true, detail: 'Usage ledger and admin audit logs are available.' },
     },
+    knowledge: {
+      structured: {
+        ok: true,
+        fileCount: 5,
+        missing: [],
+        errors: [],
+        files: [
+          { file: 'chat-style-guide.json', ok: true, id: 'chat-style-guide', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'creator-guides.json', ok: true, id: 'creator-guides', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'relationship-rules.json', ok: true, id: 'relationship-rules', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'scene-rules.json', ok: true, id: 'scene-rules', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'content-policy.json', ok: true, id: 'content-policy', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+        ],
+      },
+    },
     env: {
       mode: 'production',
       missingRequired: [],
@@ -67,6 +101,7 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
     model: { ...base.model, ...overrides.model },
     security: { ...base.security, ...overrides.security },
     securityPosture: { ...base.securityPosture, ...overrides.securityPosture },
+    knowledge: { ...base.knowledge, ...overrides.knowledge },
     env: { ...base.env, ...overrides.env },
   }
 }
@@ -110,6 +145,24 @@ describe('readiness gate', () => {
     )
   })
 
+  test('requires structured knowledge validity', () => {
+    expect(
+      readinessFailures(
+        health({
+          knowledge: {
+            structured: {
+              ok: false,
+              fileCount: 4,
+              missing: ['scene-rules.json'],
+              errors: ['scene-rules.json: missing file'],
+              files: [],
+            },
+          },
+        }),
+      ),
+    ).toEqual(expect.arrayContaining(['structured knowledge is not valid']))
+  })
+
   test('requires production auth and storage hardening', () => {
     expect(
       readinessFailures(
@@ -136,6 +189,25 @@ describe('readiness gate', () => {
         'production admin guard must use an API key',
       ]),
     )
+  })
+
+  test('requires production image live verification', () => {
+    expect(
+      readinessFailures(
+        health({
+          model: {
+            imageGeneration: {
+              configured: true,
+              liveVerified: false,
+              productionReady: false,
+              status: 'needs_live_smoke',
+              model: 'gpt-image-1.5',
+              liveSmokeCommand: 'bun run smoke:image:live',
+            },
+          },
+        }),
+      ),
+    ).toEqual(expect.arrayContaining(['image generation live smoke has not been verified']))
   })
 
   test('passes through env validation failures', () => {

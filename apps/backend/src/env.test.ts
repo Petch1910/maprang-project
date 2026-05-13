@@ -15,7 +15,7 @@ function jwtWithRole(role: string) {
 
 function setCompleteProductionEnv() {
   process.env.NODE_ENV = 'production'
-  process.env.DATABASE_URL = 'postgresql://user:pass@db.example.net:5432/maprang?sslmode=require'
+  process.env.DATABASE_URL = 'postgresql://maprang_app:prod-secret@db.example.net:5432/maprang?sslmode=require'
   process.env.OPENROUTER_API_KEY = 'sk-or-realistic'
   process.env.CORS_ORIGINS = 'https://app.maprang.example'
   process.env.ADMIN_API_KEY = 'test-admin-key-with-enough-entropy-for-validation'
@@ -35,7 +35,12 @@ function setCompleteProductionEnv() {
   process.env.MODEL_INPUT_COST_PER_1M = '0.1'
   process.env.MODEL_OUTPUT_COST_PER_1M = '0.4'
   process.env.MODEL_TEMPERATURE = '0.85'
-  process.env.MODEL_MAX_OUTPUT_TOKENS = '900'
+  process.env.MODEL_MAX_OUTPUT_TOKENS = '1200'
+  process.env.MODEL_MIN_ROLEPLAY_REPLY_CHARS = '320'
+  process.env.CHAT_PROVIDER_RETRY_ATTEMPTS = '2'
+  process.env.CHAT_PROVIDER_RETRY_DELAY_MS = '350'
+  process.env.CREATOR_DRAFT_RETRY_ATTEMPTS = '3'
+  process.env.CREATOR_DRAFT_RETRY_DELAY_MS = '350'
 }
 
 describe('runtime env validation', () => {
@@ -110,6 +115,11 @@ describe('runtime env validation', () => {
     process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION = '101'
     process.env.MODEL_TEMPERATURE = '3'
     process.env.MODEL_MAX_OUTPUT_TOKENS = '64'
+    process.env.MODEL_MIN_ROLEPLAY_REPLY_CHARS = 'soon'
+    process.env.CHAT_PROVIDER_RETRY_ATTEMPTS = '0'
+    process.env.CHAT_PROVIDER_RETRY_DELAY_MS = 'later'
+    process.env.CREATOR_DRAFT_RETRY_ATTEMPTS = '10'
+    process.env.CREATOR_DRAFT_RETRY_DELAY_MS = '-1'
 
     expect(() => validateRuntimeEnv()).toThrow('OPENROUTER_API_KEY appears to be an OpenAI project key')
     expect(() => validateRuntimeEnv()).toThrow('SUPABASE_SIGNED_URL_EXPIRES_IN must be a positive integer')
@@ -121,6 +131,47 @@ describe('runtime env validation', () => {
     expect(() => validateRuntimeEnv()).toThrow('MODEL_INPUT_COST_PER_1M must be a non-negative number')
     expect(() => validateRuntimeEnv()).toThrow('MODEL_TEMPERATURE must be between 0 and 2')
     expect(() => validateRuntimeEnv()).toThrow('MODEL_MAX_OUTPUT_TOKENS must be an integer from 128 to 2400')
+    expect(() => validateRuntimeEnv()).toThrow('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be an integer from 0 to 1200')
+    expect(() => validateRuntimeEnv()).toThrow('CHAT_PROVIDER_RETRY_ATTEMPTS must be an integer from 1 to 5')
+    expect(() => validateRuntimeEnv()).toThrow('CHAT_PROVIDER_RETRY_DELAY_MS must be an integer from 0 to 5000')
+    expect(() => validateRuntimeEnv()).toThrow('CREATOR_DRAFT_RETRY_ATTEMPTS must be an integer from 1 to 5')
+    expect(() => validateRuntimeEnv()).toThrow('CREATOR_DRAFT_RETRY_DELAY_MS must be an integer from 0 to 5000')
+  })
+
+  test('rejects placeholder and local production database URLs', () => {
+    setCompleteProductionEnv()
+    process.env.DATABASE_URL = 'postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require'
+
+    expect(() => validateRuntimeEnv()).toThrow('Missing required production env: DATABASE_URL')
+
+    setCompleteProductionEnv()
+    process.env.DATABASE_URL = 'postgresql://maprang:secret@localhost:5432/maprang?sslmode=require'
+
+    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL must not point to localhost in production')
+
+    setCompleteProductionEnv()
+    process.env.DATABASE_URL = 'postgresql://maprang:secret@db.example.net:5432/maprang'
+
+    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL must include sslmode=require in production')
+  })
+
+  test('rejects non-OpenRouter chat keys in production', () => {
+    setCompleteProductionEnv()
+    process.env.OPENROUTER_API_KEY = 'sk-live-but-not-openrouter'
+
+    expect(() => validateRuntimeEnv()).toThrow('OPENROUTER_API_KEY must look like an OpenRouter key starting with sk-or-')
+  })
+
+  test('can report production env failures without throwing for health endpoints', () => {
+    setCompleteProductionEnv()
+    process.env.DATABASE_URL = 'postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require'
+    process.env.OPENROUTER_API_KEY = 'sk-proj-openai-key'
+
+    const status = validateRuntimeEnv({ throwOnError: false })
+
+    expect(status.ok).toBe(false)
+    expect(status.missingRequired).toContain('DATABASE_URL')
+    expect(status.invalid).toContain('OPENROUTER_API_KEY appears to be an OpenAI project key, not an OpenRouter key')
   })
 
   test('accepts complete production env', () => {

@@ -7,6 +7,16 @@ export type ContentSettingsInput = {
   maxRating?: ContentRating
 }
 
+export type UserPersonaInput = {
+  persona?: string
+}
+
+const maxPersonaChars = 2000
+
+function normalizePersona(value?: string) {
+  return value?.replace(/\r\n/g, '\n').trim().slice(0, maxPersonaChars) ?? ''
+}
+
 function publicContentSettings(user: { contentMaxRating: string; adultVerifiedAt: Date | null }) {
   const maxRating = normalizeMaxRating(user.contentMaxRating)
   return {
@@ -29,6 +39,51 @@ export async function loadContentSettings(userId = defaultUserId) {
   })
 
   return user ? publicContentSettings(user) : null
+}
+
+export async function loadUserPersona(userId = defaultUserId) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      persona: true,
+      personaUpdatedAt: true,
+    },
+  })
+
+  if (!user) return null
+  return {
+    persona: user.persona ?? '',
+    updatedAt: user.personaUpdatedAt,
+    maxChars: maxPersonaChars,
+  }
+}
+
+export async function updateUserPersona(userId = defaultUserId, input: UserPersonaInput) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const persona = normalizePersona(input.persona)
+  const updatedAt = new Date()
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      persona: persona || null,
+      personaUpdatedAt: updatedAt,
+    },
+    select: {
+      persona: true,
+      personaUpdatedAt: true,
+    },
+  })
+
+  return {
+    persona: user.persona ?? '',
+    updatedAt: user.personaUpdatedAt,
+    maxChars: maxPersonaChars,
+  }
 }
 
 export async function updateContentSettings(userId = defaultUserId, input: ContentSettingsInput) {

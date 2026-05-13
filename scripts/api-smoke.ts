@@ -13,15 +13,47 @@ type ApiSmokeResult = {
 type ChatSummary = {
   id: string
   title?: string | null
+  characterName?: string | null
+  isArchived?: boolean
+}
+
+type SmokeCharacter = {
+  id: string
+  name?: string | null
+  tagline?: string | null
+  systemPrompt?: string | null
+  viewCount?: number
+  favoriteCount?: number
+  isFavorite?: boolean
+  tags?: string[]
+}
+
+type SmokeLoreEntry = {
+  id: string
+  keyword?: string
+  content?: string
+  priority?: number
+}
+
+type HealthSmokePayload = {
+  ok: boolean
+  checks?: {
+    databaseConnected?: boolean
+  }
+  model?: {
+    minRoleplayReplyChars?: number
+  }
 }
 
 const live = process.argv.includes('--live')
 const requireLiveImage = process.argv.includes('--require-live-image')
+const requireAdmin = process.argv.includes('--require-admin')
 const results: ApiSmokeResult[] = []
 
 const authHeaders = smokeAuthHeaders()
 const adminKey = await loadAdminKey()
 const adminHeaders = adminKey ? { ...authHeaders, 'x-admin-key': adminKey } : null
+let healthStatus: HealthSmokePayload | null = null
 
 function record(name: string, status: ApiSmokeStatus, detail: string) {
   results.push({ name, status, detail })
@@ -46,18 +78,26 @@ async function warnable(name: string, fn: () => Promise<{ ok: boolean; detail: s
 }
 
 await check('GET /health', async () => {
-  const health = await readJson<{ ok: boolean; checks?: { databaseConnected?: boolean } }>('/health')
-  if (!health.ok) throw new Error('health ok=false')
-  if (!health.checks?.databaseConnected) throw new Error('databaseConnected=false')
+  healthStatus = await readJson<HealthSmokePayload>('/health')
+  if (!healthStatus.ok) throw new Error('health ok=false')
+  if (!healthStatus.checks?.databaseConnected) throw new Error('databaseConnected=false')
   return 'backend and database ready'
 })
 
-await check('GET /ready', async () => {
+await warnable('GET /ready', async () => {
   const ready = await readJson<{ ok: boolean; readiness?: { status?: string; failures?: string[] } }>('/ready')
   if (!ready.ok || ready.readiness?.status !== 'ready') {
-    throw new Error(`not ready: ${(ready.readiness?.failures ?? []).join(', ') || 'unknown failure'}`)
+    const failures = ready.readiness?.failures ?? []
+    const reason = failures.join(', ') || 'unknown failure'
+    if (live && requireLiveImage && isOnlyImageLiveVerificationFailure(failures)) {
+      return {
+        ok: false,
+        detail: `readiness is waiting for live image verification; continuing provider smoke so IMAGE_GENERATION_LIVE_VERIFIED can be set after success (${reason})`,
+      }
+    }
+    throw new Error(`not ready: ${reason}`)
   }
-  return 'readiness gate ready'
+  return { ok: true, detail: 'readiness gate ready' }
 })
 
 const characters = await runRequired('GET /characters', async () => {
@@ -94,6 +134,30 @@ await check('GET /me/content-settings', async () => {
   return payload.contentSettings.maxRating
 })
 
+await check('GET/PATCH /me/persona', async () => {
+  const current = await readJson<{ persona?: { persona?: string; updatedAt?: string | null; maxChars?: number } }>('/me/persona', {
+    headers: authHeaders,
+  })
+  if (typeof current.persona?.persona !== 'string') throw new Error('missing persona payload')
+
+  const marker = `API smoke persona ${Date.now()}`
+  const saved = await readJson<{ persona?: { persona?: string; updatedAt?: string | null; maxChars?: number } }>('/me/persona', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({ persona: marker }),
+  })
+  if (saved.persona?.persona !== marker) throw new Error('persona was not saved')
+  if (!saved.persona.updatedAt) throw new Error('persona updatedAt missing')
+
+  await readJson<{ persona?: { persona?: string } }>('/me/persona', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({ persona: current.persona.persona }),
+  })
+
+  return `maxChars=${saved.persona.maxChars ?? 'unknown'}`
+})
+
 await check('GET /relationship/presets', async () => {
   const payload = await readJson<{ presets?: unknown[] }>('/relationship/presets')
   if (!payload.presets?.length) throw new Error('no presets returned')
@@ -126,6 +190,140 @@ await check('POST /relationship/validate', async () => {
   return `route=${payload.seed.route}, issues=${payload.issues.length}`
 })
 
+await check('POST/PATCH /characters + lore runtime', async () => {
+  const marker = Date.now()
+  const createdCharacterIds: string[] = []
+  let createdLoreId: string | null = null
+
+  try {
+    const created = await readJson<{ character?: SmokeCharacter }>('/characters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({
+        name: `API Smoke ${marker}`,
+        tagline: 'ตัวละครชั่วคราวสำหรับตรวจ runtime API',
+        description:
+          'ตัวละครทดสอบนี้ถูกสร้างโดย smoke test เพื่อยืนยันว่า API สร้าง แก้ไข จัดการ lore และลบข้อมูลได้จริง',
+        biography:
+          'เกิดมาเพื่อทดสอบระบบก่อนขึ้น production มีบุคลิกชัดเจน สุภาพ และพร้อมถูกลบทิ้งหลังตรวจสอบเสร็จ',
+        scenario: 'พบกันในห้อง QA ก่อนปล่อยระบบจริง ผู้ใช้กำลังตรวจว่าทุก endpoint ทำงานครบถ้วน',
+        systemPrompt:
+          'คุณคือ API Smoke Character สำหรับทดสอบระบบเท่านั้น ตอบเป็นภาษาไทย สุภาพ กระชับ และไม่สร้างข้อมูลถาวร',
+        compactPrompt: 'API Smoke Character: ตัวละครทดสอบชั่วคราวสำหรับตรวจระบบ runtime',
+        characterAnchor: 'ย้ำเสมอว่านี่คือข้อมูลทดสอบชั่วคราวของระบบ QA',
+        constraints: 'ห้ามอ้างว่าเป็นตัวละครจริงหรือข้อมูล production',
+        greeting: 'สวัสดี นี่คือรอบตรวจระบบ API แบบชั่วคราว',
+        tags: ['api-smoke', 'thai', 'roleplay', 'relationship-ready'],
+        visibility: 'PRIVATE',
+        status: 'DRAFT',
+      }),
+    })
+    const characterId = created.character?.id
+    if (!characterId) throw new Error('character create did not return id')
+    createdCharacterIds.push(characterId)
+
+    const loaded = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}`, { headers: authHeaders })
+    if (loaded.character?.id !== characterId) throw new Error('created character could not be loaded')
+
+    const patchedTagline = `แก้ไขโดย API smoke ${marker}`
+    const patched = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({
+        tagline: patchedTagline,
+        tags: ['api-smoke', 'thai', 'slow-burn', 'scene-ready'],
+      }),
+    })
+    if (patched.character?.tagline !== patchedTagline) throw new Error('character patch did not persist tagline')
+    if (!patched.character.tags?.includes('scene-ready')) throw new Error('character patch did not persist tags')
+
+    const viewed = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/view`, {
+      method: 'POST',
+      headers: authHeaders,
+    })
+    if (typeof viewed.character?.viewCount !== 'number') throw new Error('view endpoint did not return viewCount')
+
+    const favorited = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/favorite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({ favorite: true }),
+    })
+    if (!favorited.character?.isFavorite) throw new Error('favorite endpoint did not mark character as favorite')
+
+    const unfavorited = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/favorite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({ favorite: false }),
+    })
+    if (unfavorited.character?.isFavorite) throw new Error('favorite endpoint did not remove favorite')
+
+    const lore = await readJson<{ loreEntry?: SmokeLoreEntry }>(`/characters/${characterId}/lore`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({
+        keyword: `api-smoke-${marker}`,
+        aliases: ['qa', 'runtime'],
+        content: 'Lore ชั่วคราวสำหรับยืนยันว่า creator สามารถเพิ่มข้อมูลจักรวาลของตัวละครได้',
+        priority: 2,
+      }),
+    })
+    createdLoreId = lore.loreEntry?.id ?? null
+    if (!createdLoreId) throw new Error('lore create did not return id')
+
+    const patchedLore = await readJson<{ loreEntry?: SmokeLoreEntry }>(`/lore/${createdLoreId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({
+        content: 'Lore ชั่วคราวถูกแก้ไขแล้วโดย API smoke',
+        priority: 4,
+      }),
+    })
+    if (patchedLore.loreEntry?.priority !== 4) throw new Error('lore patch did not persist priority')
+
+    const deletedLore = await readJson<{ ok?: boolean }>(`/lore/${createdLoreId}`, {
+      method: 'DELETE',
+      headers: authHeaders,
+    })
+    if (!deletedLore.ok) throw new Error('lore delete endpoint returned ok=false')
+    createdLoreId = null
+
+    const duplicated = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/duplicate`, {
+      method: 'POST',
+      headers: authHeaders,
+    })
+    const duplicatedId = duplicated.character?.id
+    if (!duplicatedId || duplicatedId === characterId) throw new Error('duplicate endpoint did not return a new character id')
+    createdCharacterIds.push(duplicatedId)
+
+    const reset = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/reset-prompt`, {
+      method: 'POST',
+      headers: authHeaders,
+    })
+    if (reset.character?.id !== characterId) throw new Error('reset prompt returned the wrong character')
+    if (!reset.character.systemPrompt) throw new Error('reset prompt did not return systemPrompt')
+
+    return `characterId=${characterId}, duplicateId=${duplicatedId}, lore=created/updated/deleted`
+  } finally {
+    if (createdLoreId) {
+      await bestEffort('delete temporary lore after character smoke', () =>
+        readJson(`/lore/${createdLoreId}`, {
+          method: 'DELETE',
+          headers: authHeaders,
+        }),
+      )
+    }
+
+    for (const characterId of [...createdCharacterIds].reverse()) {
+      await bestEffort(`delete temporary character ${characterId} after character smoke`, () =>
+        readJson(`/characters/${characterId}`, {
+          method: 'DELETE',
+          headers: authHeaders,
+        }),
+      )
+    }
+  }
+})
+
 await warnable('POST /creator/ai-draft', async () => {
   const payload = await readJson<{
     source?: string
@@ -138,6 +336,8 @@ await warnable('POST /creator/ai-draft', async () => {
     body: JSON.stringify({
       brief: 'Create a Thai slow-burn roleplay character for API smoke. Keep it safe and immediately playable.',
       imagePrompt: 'original Thai roleplay character portrait, cinematic light, no text, no watermark',
+      imageOnly: !live,
+      skipImageProvider: !live,
       current: {
         tags: 'roleplay, thai, slow-burn, relationship-ready, scene-ready',
       },
@@ -149,6 +349,12 @@ await warnable('POST /creator/ai-draft', async () => {
   if (imageProvider !== 'configured') {
     const issue = creatorImageIssue(payload)
     if (requireLiveImage) throw new Error(issue)
+    if (!live) {
+      return {
+        ok: true,
+        detail: `${detail}; provider skipped for local smoke`,
+      }
+    }
     return {
       ok: false,
       detail: `${detail}; ${issue}`,
@@ -159,8 +365,13 @@ await warnable('POST /creator/ai-draft', async () => {
 
 if (live) {
   await check('POST /chat', async () => {
+    const minSmokeTokenBalance = parseMinSmokeTokenBalance()
     const wallet = await readJson<{ user?: { tokenBalance?: number } }>('/me/usage', { headers: authHeaders })
-    if ((wallet.user?.tokenBalance ?? 0) < 1) throw new Error('smoke user has no tokens')
+    if ((wallet.user?.tokenBalance ?? 0) < minSmokeTokenBalance) {
+      throw new Error(
+        `Smoke user has ${wallet.user?.tokenBalance ?? 0} tokens, below SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance}. Top up the smoke user before running live API smoke.`,
+      )
+    }
 
     const payload = await readJson<{ reply?: string; chatId?: string; usage?: { totalTokens?: number } }>('/chat', {
       method: 'POST',
@@ -171,14 +382,17 @@ if (live) {
         maxRating: 'restricted_18',
         history: [],
         message:
-          'ฉันนั่งลงตรงข้ามเธอ แล้วถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า ช่วยตอบเป็นฉากสั้นๆ 2 ย่อหน้า',
+          'ฉันนั่งลงตรงข้ามเธอแล้ววางแก้วชาไว้ใกล้มือเธอ ก่อนถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า เล่าเป็นฉากโรลเพลย์ที่มีบรรยากาศ ความรู้สึก และจังหวะให้ฉันตอบต่อ',
       }),
     })
     if (!payload.reply || payload.reply.includes('temporarily unavailable')) throw new Error('chat provider returned fallback')
     if (!payload.chatId) throw new Error('missing chatId')
     if (!payload.usage?.totalTokens) throw new Error('missing token usage')
-    if (payload.reply.length < 80) throw new Error(`reply too short: ${payload.reply}`)
-    return `chatId=${payload.chatId}, tokens=${payload.usage.totalTokens}, replyChars=${payload.reply.length}`
+    const minRoleplayReplyChars = Math.max(320, healthStatus?.model?.minRoleplayReplyChars ?? 320)
+    if (payload.reply.length < minRoleplayReplyChars) {
+      throw new Error(`reply too short for roleplay QA; expected at least ${minRoleplayReplyChars} chars: ${payload.reply}`)
+    }
+    return `chatId=${payload.chatId}, tokens=${payload.usage.totalTokens}, minBalance=${minSmokeTokenBalance}, replyChars=${payload.reply.length}, minRoleplayReplyChars=${minRoleplayReplyChars}`
   })
 } else {
   record('POST /chat', 'skip', 'live model call skipped; run `bun run api:smoke:live`')
@@ -197,6 +411,76 @@ await check('GET /chats?archived=true', async () => {
 })
 
 if (activeChats.length > 0) {
+  await check('PATCH /chats/:id menu actions', async () => {
+    const chat = activeChats[0]
+    const originalTitle = chat.title?.trim() || chat.characterName?.trim() || 'API Smoke Chat'
+    const smokeTitle = `API smoke menu ${Date.now()}`
+    let titleRestored = false
+    let chatArchived = false
+
+    try {
+      const renamed = await readJson<{ chat?: { id?: string; title?: string | null } }>(`/chats/${chat.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
+        body: JSON.stringify({ title: smokeTitle }),
+      })
+      if (renamed.chat?.id !== chat.id || renamed.chat.title !== smokeTitle) throw new Error('chat title was not updated')
+
+      const restoredTitle = await readJson<{ chat?: { id?: string; title?: string | null } }>(`/chats/${chat.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
+        body: JSON.stringify({ title: originalTitle }),
+      })
+      if (restoredTitle.chat?.id !== chat.id || restoredTitle.chat.title !== originalTitle) {
+        throw new Error('chat title was not restored')
+      }
+      titleRestored = true
+
+      const archived = await readJson<{ ok?: boolean }>(`/chats/${chat.id}/archive`, {
+        method: 'PATCH',
+        headers: authHeaders,
+      })
+      if (!archived.ok) throw new Error('archive endpoint returned ok=false')
+      chatArchived = true
+
+      const archivedList = await readJson<{ chats?: ChatSummary[] }>('/chats?archived=true', { headers: authHeaders })
+      const archivedChat = archivedList.chats?.find((item) => item.id === chat.id)
+      if (!archivedChat?.isArchived) throw new Error('archived chat was not returned by archived list')
+
+      const restored = await readJson<{ ok?: boolean }>(`/chats/${chat.id}/restore`, {
+        method: 'PATCH',
+        headers: authHeaders,
+      })
+      if (!restored.ok) throw new Error('restore endpoint returned ok=false')
+      chatArchived = false
+
+      const activeList = await readJson<{ chats?: ChatSummary[] }>('/chats', { headers: authHeaders })
+      if (!activeList.chats?.some((item) => item.id === chat.id && !item.isArchived)) {
+        throw new Error('restored chat was not returned by active list')
+      }
+    } finally {
+      if (!titleRestored) {
+        await bestEffort('restore chat title after menu smoke', () =>
+          readJson(`/chats/${chat.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify({ title: originalTitle }),
+          }),
+        )
+      }
+      if (chatArchived) {
+        await bestEffort('restore archived chat after menu smoke', () =>
+          readJson(`/chats/${chat.id}/restore`, {
+            method: 'PATCH',
+            headers: authHeaders,
+          }),
+        )
+      }
+    }
+
+    return 'rename, archive, and restore worked'
+  })
+
   await check('GET /chats/:id/messages', async () => {
     const payload = await readJson<{ chat?: { id?: string; messages?: unknown[] } }>(`/chats/${activeChats[0].id}/messages`, {
       headers: authHeaders,
@@ -231,10 +515,47 @@ await check('PATCH /me/content-settings', async () => {
       maxRating: current.contentSettings.maxRating,
     }),
   })
-  if (payload.contentSettings?.maxRating !== current.contentSettings.maxRating) {
-    throw new Error(`content setting changed unexpectedly: ${payload.contentSettings?.maxRating}`)
+  const nextMaxRating = payload.contentSettings?.maxRating
+  if (nextMaxRating !== current.contentSettings.maxRating) {
+    throw new Error(`content setting changed unexpectedly: ${nextMaxRating}`)
   }
-  return payload.contentSettings.maxRating
+  return nextMaxRating
+})
+
+await check('PUT/GET /creator/draft', async () => {
+  const marker = `api-smoke-${Date.now()}`
+  await readJson<{ ok: boolean }>('/creator/draft', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({
+      payload: {
+        creatorBrief: marker,
+        form: {
+          name: 'API Smoke Draft',
+          tags: 'roleplay, thai, api-smoke',
+        },
+        updatedAt: Date.now(),
+      },
+    }),
+  })
+
+  const saved = await readJson<{ draft?: { creatorBrief?: string } | null }>('/creator/draft', {
+    headers: authHeaders,
+  })
+  if (saved.draft?.creatorBrief !== marker) throw new Error('creator draft was not saved')
+
+  await readJson<{ ok: boolean }>('/creator/draft', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({ payload: null }),
+  })
+
+  const cleared = await readJson<{ draft?: unknown | null }>('/creator/draft', {
+    headers: authHeaders,
+  })
+  if (cleared.draft !== null) throw new Error('creator draft was not cleared')
+
+  return 'saved and cleared'
 })
 
 if (adminHeaders) {
@@ -258,9 +579,11 @@ if (adminHeaders) {
     return `${payload.logs.length} logs`
   })
 } else {
-  record('GET /admin/summary', 'skip', 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available')
-  record('GET /admin/reports', 'skip', 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available')
-  record('GET /admin/audit-logs', 'skip', 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available')
+  const status: ApiSmokeStatus = requireAdmin ? 'fail' : 'skip'
+  const detail = 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available'
+  record('GET /admin/summary', status, detail)
+  record('GET /admin/reports', status, detail)
+  record('GET /admin/audit-logs', status, detail)
 }
 
 for (const result of results) {
@@ -277,6 +600,7 @@ console.log(
       apiBaseUrl,
       live,
       requireLiveImage,
+      requireAdmin,
       pass: results.filter((result) => result.status === 'pass').length,
       warn: warned.length,
       skip: results.filter((result) => result.status === 'skip').length,
@@ -301,9 +625,53 @@ async function runRequired<T>(name: string, fn: () => Promise<T>) {
   }
 }
 
+async function bestEffort(name: string, fn: () => Promise<unknown>) {
+  try {
+    await fn()
+  } catch (error) {
+    console.warn(`Warning: could not ${name}: ${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
 function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {
   const warnings = payload.warnings?.filter(Boolean).join('; ')
-  return warnings || payload.image?.note || 'image provider did not return a generated image'
+  const issue = warnings || payload.image?.note || 'image provider did not return a generated image'
+  return `${issue}${providerFailureHint(issue)}`
+}
+
+function providerFailureHint(message: string) {
+  const normalized = message.toLowerCase()
+  if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
+    return ' | Fix: increase or reset the image provider billing limit, then rerun `bun run api:smoke:live`.'
+  }
+  if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
+    return ' | Fix: add image provider credits/quota, then rerun `bun run api:smoke:live`.'
+  }
+  if (normalized.includes('401') || normalized.includes('403') || normalized.includes('invalid api key')) {
+    return ' | Fix: replace IMAGE_GENERATION_API_KEY/OPENAI_API_KEY with a valid backend-only image provider key.'
+  }
+  if (normalized.includes('model')) {
+    return ' | Fix: check IMAGE_GENERATION_MODEL and whether the provider account can use that image model.'
+  }
+  return ''
+}
+
+function isOnlyImageLiveVerificationFailure(failures: string[]) {
+  return (
+    failures.length > 0 &&
+    failures.every((failure) => failure.toLowerCase().includes('image generation live smoke has not been verified'))
+  )
+}
+
+function parseMinSmokeTokenBalance() {
+  const rawValue = process.env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000'
+  const value = Number(rawValue)
+
+  if (!Number.isInteger(value) || value < 1) {
+    throw new Error(`SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT must be a positive integer. Received: ${rawValue}`)
+  }
+
+  return value
 }
 
 async function loadAdminKey() {

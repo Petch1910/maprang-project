@@ -1,0 +1,244 @@
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { basename, join, resolve } from 'node:path'
+
+function findProjectRoot() {
+  const candidates = [
+    process.env.KNOWLEDGE_ROOT ? resolve(process.env.KNOWLEDGE_ROOT, '..') : '',
+    resolve(import.meta.dir, '..'),
+    resolve(import.meta.dir, '../..'),
+    resolve(import.meta.dir, '../../..'),
+  ].filter(Boolean)
+
+  return candidates.find((candidate) => existsSync(join(candidate, 'knowledge', 'structured'))) ?? resolve(import.meta.dir, '../../..')
+}
+
+const projectRoot = findProjectRoot()
+const structuredRoot = join(projectRoot, 'knowledge', 'structured')
+
+const requiredKnowledgeFiles = [
+  'chat-style-guide.json',
+  'creator-guides.json',
+  'relationship-rules.json',
+  'scene-rules.json',
+  'content-policy.json',
+] as const
+
+type KnowledgeFileName = (typeof requiredKnowledgeFiles)[number]
+
+type JsonRecord = Record<string, unknown>
+
+export type StructuredKnowledgeStatus = {
+  ok: boolean
+  root: string
+  files: Array<{
+    file: KnowledgeFileName | string
+    ok: boolean
+    id?: string
+    schemaVersion?: number
+    updatedAt?: string
+    errors: string[]
+  }>
+  missing: string[]
+  errors: string[]
+}
+
+export type StructuredKnowledge = {
+  chatStyle: JsonRecord
+  creatorGuides: JsonRecord
+  relationshipRules: JsonRecord
+  sceneRules: JsonRecord
+  contentPolicy: JsonRecord
+  status: StructuredKnowledgeStatus
+}
+
+let cachedKnowledge: StructuredKnowledge | null = null
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as JsonRecord) : {}
+}
+
+function stringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0) : []
+}
+
+function childRecord(source: JsonRecord, key: string) {
+  return asRecord(source[key])
+}
+
+function validateBase(file: string, value: JsonRecord) {
+  const errors: string[] = []
+  if (value.schemaVersion !== 1) errors.push('schemaVersion must be 1')
+  if (typeof value.id !== 'string' || value.id.length === 0) errors.push('id is required')
+  if (typeof value.updatedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.updatedAt)) errors.push('updatedAt must be YYYY-MM-DD')
+  if (!file.startsWith(`${String(value.id)}.`)) {
+    errors.push(`file name must start with id "${String(value.id)}"`)
+  }
+  return errors
+}
+
+function validateStructuredFile(file: string, value: JsonRecord) {
+  const errors = validateBase(file, value)
+
+  if (file === 'chat-style-guide.json') {
+    const prompt = childRecord(value, 'runtimePrompt')
+    if (stringArray(prompt.principles).length < 3) errors.push('runtimePrompt.principles needs at least 3 items')
+    if (stringArray(prompt.replyShape).length < 2) errors.push('runtimePrompt.replyShape needs at least 2 items')
+    if (stringArray(prompt.avoid).length < 2) errors.push('runtimePrompt.avoid needs at least 2 items')
+  }
+
+  if (file === 'creator-guides.json') {
+    const prompt = childRecord(value, 'draftPrompt')
+    if (stringArray(prompt.principles).length < 3) errors.push('draftPrompt.principles needs at least 3 items')
+    if (stringArray(prompt.requiredQualities).length < 3) errors.push('draftPrompt.requiredQualities needs at least 3 items')
+    if (stringArray(prompt.avoid).length < 2) errors.push('draftPrompt.avoid needs at least 2 items')
+  }
+
+  if (file === 'relationship-rules.json') {
+    if (!Array.isArray(value.presetSeeds) || value.presetSeeds.length < 3) errors.push('presetSeeds needs at least 3 items')
+    if (stringArray(value.runtimeRules).length < 3) errors.push('runtimeRules needs at least 3 items')
+  }
+
+  if (file === 'scene-rules.json') {
+    const sceneMode = childRecord(value, 'sceneMode')
+    if (sceneMode.defaultMode !== 'sandbox') errors.push('sceneMode.defaultMode must be sandbox')
+    if (stringArray(value.eventTypes).length < 3) errors.push('eventTypes needs at least 3 items')
+    if (stringArray(value.runtimeRules).length < 3) errors.push('runtimeRules needs at least 3 items')
+  }
+
+  if (file === 'content-policy.json') {
+    const policy = childRecord(value, 'runtimePolicy')
+    if (typeof policy.fictionNotice !== 'string' || policy.fictionNotice.length === 0) errors.push('runtimePolicy.fictionNotice is required')
+    if (stringArray(policy.ageMode).length < 2) errors.push('runtimePolicy.ageMode needs at least 2 items')
+    if (stringArray(policy.promptControl).length < 2) errors.push('runtimePolicy.promptControl needs at least 2 items')
+  }
+
+  return errors
+}
+
+function readJsonFile(file: KnowledgeFileName) {
+  const raw = readFileSync(join(structuredRoot, file), 'utf8')
+  return asRecord(JSON.parse(raw))
+}
+
+export function loadStructuredKnowledge({ force = false } = {}): StructuredKnowledge {
+  if (cachedKnowledge && !force) return cachedKnowledge
+
+  const files: StructuredKnowledgeStatus['files'] = []
+  const missing: string[] = []
+  const errors: string[] = []
+  const values = new Map<KnowledgeFileName, JsonRecord>()
+
+  let existingFiles: string[] = []
+  try {
+    existingFiles = readdirSync(structuredRoot).filter((file) => file.endsWith('.json'))
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : String(error))
+  }
+
+  for (const file of requiredKnowledgeFiles) {
+    if (!existingFiles.includes(file)) {
+      missing.push(file)
+      files.push({ file, ok: false, errors: ['missing file'] })
+      continue
+    }
+
+    try {
+      const value = readJsonFile(file)
+      const fileErrors = validateStructuredFile(file, value)
+      values.set(file, value)
+      files.push({
+        file,
+        ok: fileErrors.length === 0,
+        id: typeof value.id === 'string' ? value.id : undefined,
+        schemaVersion: typeof value.schemaVersion === 'number' ? value.schemaVersion : undefined,
+        updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : undefined,
+        errors: fileErrors,
+      })
+      errors.push(...fileErrors.map((issue) => `${file}: ${issue}`))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      files.push({ file, ok: false, errors: [message] })
+      errors.push(`${file}: ${message}`)
+    }
+  }
+
+  for (const file of existingFiles) {
+    if (!requiredKnowledgeFiles.includes(file as KnowledgeFileName)) {
+      files.push({ file, ok: true, id: basename(file, '.json'), errors: [] })
+    }
+  }
+
+  const status: StructuredKnowledgeStatus = {
+    ok: missing.length === 0 && errors.length === 0,
+    root: structuredRoot,
+    files,
+    missing,
+    errors,
+  }
+
+  cachedKnowledge = {
+    chatStyle: values.get('chat-style-guide.json') ?? {},
+    creatorGuides: values.get('creator-guides.json') ?? {},
+    relationshipRules: values.get('relationship-rules.json') ?? {},
+    sceneRules: values.get('scene-rules.json') ?? {},
+    contentPolicy: values.get('content-policy.json') ?? {},
+    status,
+  }
+
+  return cachedKnowledge
+}
+
+function bulletBlock(title: string, values: string[], maxItems = 6) {
+  const items = values.slice(0, maxItems)
+  if (items.length === 0) return ''
+  return [title, ...items.map((item) => `- ${item}`)].join('\n')
+}
+
+export function buildChatKnowledgePrompt() {
+  const knowledge = loadStructuredKnowledge()
+  if (!knowledge.status.ok) return ''
+
+  const runtimePrompt = childRecord(knowledge.chatStyle, 'runtimePrompt')
+  const policy = childRecord(knowledge.contentPolicy, 'runtimePolicy')
+  const sceneMode = childRecord(knowledge.sceneRules, 'sceneMode')
+  const relationshipRules = stringArray(knowledge.relationshipRules.runtimeRules)
+  const sceneRules = stringArray(knowledge.sceneRules.runtimeRules)
+  const ageMode = stringArray(policy.ageMode)
+
+  return [
+    'Maprang structured knowledge pack:',
+    bulletBlock('Chat style principles:', stringArray(runtimePrompt.principles)),
+    bulletBlock('Reply shape:', stringArray(runtimePrompt.replyShape)),
+    bulletBlock('Platform avoid rules:', stringArray(runtimePrompt.avoid)),
+    bulletBlock('Relationship runtime rules:', relationshipRules, 4),
+    bulletBlock('Scene runtime rules:', sceneRules, 4),
+    typeof sceneMode.defaultMode === 'string' ? `Default mode: ${sceneMode.defaultMode}` : '',
+    typeof sceneMode.entryRule === 'string' ? `Scene entry rule: ${sceneMode.entryRule}` : '',
+    typeof policy.fictionNotice === 'string' ? `Fiction notice: ${policy.fictionNotice}` : '',
+    bulletBlock('Age/content mode rules:', ageMode, 4),
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
+export function buildCreatorKnowledgePrompt() {
+  const knowledge = loadStructuredKnowledge()
+  if (!knowledge.status.ok) return ''
+
+  const draftPrompt = childRecord(knowledge.creatorGuides, 'draftPrompt')
+  const policy = childRecord(knowledge.contentPolicy, 'runtimePolicy')
+
+  return [
+    'Maprang creator knowledge pack:',
+    bulletBlock('Creator drafting principles:', stringArray(draftPrompt.principles)),
+    bulletBlock('Required character qualities:', stringArray(draftPrompt.requiredQualities)),
+    bulletBlock('Creator draft avoid rules:', stringArray(draftPrompt.avoid)),
+    typeof policy.fictionNotice === 'string' ? `Fiction notice: ${policy.fictionNotice}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
+export function structuredKnowledgeHealth() {
+  return loadStructuredKnowledge().status
+}

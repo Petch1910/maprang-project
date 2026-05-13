@@ -60,7 +60,17 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const checks = healthStatus?.checks
   const security = healthStatus?.security
   const model = healthStatus?.model
+  const chatProvider = model?.chatProvider
+  const imageGeneration = model?.imageGeneration
+  const structuredKnowledge = healthStatus?.knowledge?.structured
+  const providerRetry = model?.providerRetry
+  const backendEnvMissing = healthStatus?.env?.missingRequired ?? []
+  const backendEnvInvalid = healthStatus?.env?.invalid ?? []
   const maxOutputTokens = model?.maxOutputTokens ?? 0
+  const minRoleplayReplyChars = model?.minRoleplayReplyChars ?? 0
+  const isProductionMode = healthStatus?.env?.mode === 'production'
+  const chatProductionReady = Boolean(chatProvider?.productionReady ?? chatProvider?.liveVerified)
+  const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
 
   return [
     {
@@ -70,27 +80,69 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'local',
     },
     {
-      label: 'OpenRouter chat',
+      label: 'Backend env validation',
+      ok: backendEnvMissing.length === 0 && backendEnvInvalid.length === 0,
+      detail:
+        backendEnvMissing.length === 0 && backendEnvInvalid.length === 0
+          ? 'backend env ไม่มีค่า required ที่ขาดหรือค่าผิดรูปแบบ'
+          : [...backendEnvMissing.map((name) => `ขาด ${name}`), ...backendEnvInvalid].join(' / '),
+      scope: 'production',
+    },
+    {
+      label: 'Structured knowledge',
+      ok: Boolean(structuredKnowledge?.ok),
+      detail: structuredKnowledge?.ok
+        ? `runtime knowledge packs ready (${structuredKnowledge.fileCount} files)`
+        : structuredKnowledge
+          ? [...structuredKnowledge.missing.map((name) => `missing ${name}`), ...structuredKnowledge.errors].join(' / ')
+          : 'waiting for backend health response',
+      scope: isProductionMode ? 'production' : 'local',
+    },
+    {
+      label: 'OpenRouter key',
       ok: Boolean(checks?.openRouterConfigured),
-      detail: checks?.openRouterConfigured ? 'พร้อมเรียกโมเดลแชท' : 'ตั้ง OPENROUTER_API_KEY ก่อนทดสอบแชทจริง',
+      detail: checks?.openRouterConfigured
+        ? 'ตั้ง key แล้ว แต่ยังต้องให้ smoke:chat หรือ api:smoke:live ผ่านเพื่อยืนยัน quota/model/network จริง'
+        : 'ตั้ง OPENROUTER_API_KEY ก่อนทดสอบแชทจริง',
       scope: 'local',
     },
     {
+      label: 'Chat live smoke',
+      ok: chatProductionReady,
+      detail: chatProductionReady
+        ? 'ยืนยัน live chat smoke แล้ว'
+        : checks?.openRouterConfigured || chatProvider?.configured
+          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าได้ fallback ต้องเช็ค OpenRouter quota, model access, key และ network`
+          : 'ยังไม่มี OPENROUTER_API_KEY จึงยังทดสอบ live chat ไม่ได้',
+      scope: 'production',
+    },
+    {
       label: 'Chat reply budget',
-      ok: Boolean(model && maxOutputTokens >= 700),
+      ok: Boolean(model && maxOutputTokens >= 700 && minRoleplayReplyChars >= 240),
       detail: model
-        ? `ใช้ ${model.name}, max output ${model.maxOutputTokens ?? 'default'} tokens, temperature ${model.temperature ?? 'default'}`
+        ? `ใช้ ${model.name}, max output ${model.maxOutputTokens ?? 'default'} tokens, min roleplay ${model.minRoleplayReplyChars ?? 'default'} chars, temperature ${model.temperature ?? 'default'}, retry แชท ${providerRetry?.chatAttempts ?? 'default'} ครั้ง`
         : 'รอ health response จาก backend',
       scope: 'local',
     },
     {
-      label: 'Image provider',
-      ok: Boolean(checks?.imageGenerationConfigured || model?.imageGeneration?.configured),
+      label: 'Image provider configured',
+      ok: Boolean(checks?.imageGenerationConfigured || imageGeneration?.configured),
       detail:
-        checks?.imageGenerationConfigured || model?.imageGeneration?.configured
-          ? `ตั้งค่า ${model?.imageGeneration?.model ?? 'provider'} แล้ว ต้องผ่าน live smoke ด้วย bun run api:smoke:live ก่อน production`
+        checks?.imageGenerationConfigured || imageGeneration?.configured
+          ? `ตั้งค่า ${imageGeneration?.model ?? 'provider'} แล้ว สถานะ ${imageGeneration?.status ?? 'needs_live_smoke'} ต้องผ่าน live smoke เพื่อยืนยัน billing/quota ก่อน production`
           : 'ยัง fallback เป็นภาพตัวอย่าง ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อน production',
       scope: 'local',
+    },
+    {
+      label: 'Image live smoke',
+      ok: imageProductionReady,
+      detail:
+        imageProductionReady
+          ? 'ยืนยัน live image smoke แล้ว'
+          : isProductionMode
+            ? `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หรือ bun run api:smoke:live กับ production/staging ให้ผ่าน ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงิน provider ก่อน แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`
+            : `local/dev ยังไม่บังคับ แต่ก่อน production ต้องรัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} ให้ผ่าน ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงิน provider ก่อน`,
+      scope: 'production',
     },
     {
       label: 'Supabase Auth',
@@ -174,6 +226,7 @@ export function AdminHealthPage() {
   const localReadyCount = localChecks.filter((check) => check.ok).length
   const productionReadyCount = productionChecks.filter((check) => check.ok).length
   const productionBlockers = productionChecks.filter((check) => !check.ok)
+  const productionReady = productionBlockers.length === 0
   const auditReadyCount = routeMenuAuditRows.filter((row) => row.status === 'ready' || row.status === 'guarded').length
   const postureRows = postureLabels.map((item) => ({
     ...item,
@@ -240,6 +293,42 @@ export function AdminHealthPage() {
             ใช้เช็ค backend, frontend, smoke, route, console error และ mobile overflow ก่อนส่ง staging
           </p>
         </article>
+      </section>
+
+      <section
+        className={`rounded-2xl border p-4 shadow-sm ${
+          productionReady ? 'border-emerald-500/20 bg-emerald-50 text-emerald-950' : 'border-amber-500/25 bg-amber-50 text-amber-950'
+        }`}
+      >
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <p className="m-0 text-sm font-black">Production blocker summary</p>
+            <p className="m-0 mt-1 text-sm font-bold leading-6">
+              {productionReady
+                ? 'พร้อมสำหรับ final gate แล้ว ให้รัน production smoke กับ backend/frontend domain จริงอีกครั้ง'
+                : `ยังค้าง ${productionBlockers.length} ข้อก่อน deploy จริง แก้ตามรายการนี้ก่อนค่อยรัน production gate ซ้ำ`}
+            </p>
+          </div>
+          <code className="inline-flex min-h-9 items-center rounded-xl bg-white/75 px-3 text-xs font-black text-slate-800 shadow-sm">
+            bun run production:check
+          </code>
+        </div>
+
+        {!productionReady && (
+          <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {productionBlockers.map((check) => (
+              <article className="rounded-xl border border-amber-900/10 bg-white/70 p-3" key={check.label}>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="m-0 text-sm font-black text-amber-950">{check.label}</p>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-black ${checkScopeClass(check.scope)}`}>
+                    {checkScopeLabel(check.scope)}
+                  </span>
+                </div>
+                <p className="m-0 mt-2 text-xs font-bold leading-5 text-amber-900/80">{check.detail}</p>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">

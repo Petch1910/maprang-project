@@ -5,8 +5,9 @@ const minSmokeTokenBalance = parseMinSmokeTokenBalance()
 const health = await readJson<{
   ok: boolean
   checks: { databaseConnected: boolean; openRouterConfigured: boolean }
-  model?: { name: string }
+  model?: { name: string; minRoleplayReplyChars?: number }
 }>('/health')
+const minRoleplayReplyChars = Math.max(320, health.model?.minRoleplayReplyChars ?? 320)
 
 if (!health.ok || !health.checks.databaseConnected) {
   throw new Error('Backend health check failed')
@@ -56,7 +57,7 @@ const chat = await readJson<{
     maxRating: 'restricted_18',
     history: [],
     message:
-      'ฉันนั่งลงตรงข้ามเธอ แล้วถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า ช่วยตอบเป็นฉากสั้นๆ 2 ย่อหน้า',
+      'ฉันนั่งลงตรงข้ามเธอแล้ววางแก้วชาไว้ใกล้มือเธอ ก่อนถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า เล่าเป็นฉากโรลเพลย์ที่มีบรรยากาศ ความรู้สึก และจังหวะให้ฉันตอบต่อ',
   }),
 })
 
@@ -66,14 +67,14 @@ if (!chat.reply) {
 
 if (chat.reply.includes('temporarily unavailable')) {
   throw new Error(
-    `Live chat reached the backend, but the AI provider path returned the fallback message. Check outbound network access to OpenRouter, OPENROUTER_API_KEY, and backend logs. Reply: ${chat.reply}`,
+    `Live chat reached the backend, but the AI provider path returned the fallback message. Check outbound network access to OpenRouter, OPENROUTER_API_KEY, provider credits/quota, rate limits, model access, and backend logs. Reply: ${chat.reply}`,
   )
 }
 
 if (!chat.chatId) throw new Error('Live chat did not create a chat id')
 if (!chat.usage?.totalTokens) throw new Error('Live chat did not return token usage')
-if (chat.reply.length < 80) {
-  throw new Error(`Live chat reply is too short for roleplay QA. Reply: ${chat.reply}`)
+if (chat.reply.length < minRoleplayReplyChars) {
+  throw new Error(`Live chat reply is too short for roleplay QA. Expected at least ${minRoleplayReplyChars} characters. Reply: ${chat.reply}`)
 }
 
 const walletAfter = await readJson<{
@@ -103,11 +104,14 @@ console.log(
       ok: true,
       apiBaseUrl,
       character: smokeCharacter.name,
+      chatId: chat.chatId,
       model: chat.usage.modelName ?? health.model?.name ?? null,
       totalTokens: chat.usage.totalTokens,
       walletTransactionId: chatDebit.id,
       balanceAfter: chatDebit.balanceAfter,
       replyChars: chat.reply.length,
+      minRoleplayReplyChars,
+      nextStep: 'Set CHAT_PROVIDER_LIVE_VERIFIED=1 in this target environment, then rerun production:check.',
       replyPreview: chat.reply.slice(0, 120),
     },
     null,

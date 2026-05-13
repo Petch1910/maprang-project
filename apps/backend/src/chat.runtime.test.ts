@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { sendChat, updateRuntimeState } from './chat.service'
+import {
+  buildRoleplayContinuationInstruction,
+  isTransientChatProviderError,
+  sendChat,
+  shouldExtendShortRoleplayReply,
+  updateRuntimeState,
+} from './chat.service'
 import { contentRatingFromTags, ratingAllowed } from './content-rating'
 
 describe('chat runtime state', () => {
@@ -103,5 +109,54 @@ describe('chat id validation guard', () => {
 
     expect(result.reply).toBe('Invalid user id.')
     expect(result.chatId).toBeNull()
+  })
+})
+
+describe('roleplay reply quality guard', () => {
+  test('extends only short roleplay replies when the user did not ask for brevity', () => {
+    expect(
+      shouldExtendShortRoleplayReply({
+        character: { id: 'character' },
+        userMessage: 'เล่าต่อจากตรงนี้',
+        reply: 'เธอเงียบไปครู่หนึ่ง',
+        minChars: 120,
+      }),
+    ).toBe(true)
+
+    expect(
+      shouldExtendShortRoleplayReply({
+        character: { id: 'character' },
+        userMessage: 'ตอบสั้นๆ',
+        reply: 'ได้',
+        minChars: 120,
+      }),
+    ).toBe(false)
+
+    expect(
+      shouldExtendShortRoleplayReply({
+        character: null,
+        userMessage: 'เล่าต่อ',
+        reply: 'ได้',
+        minChars: 120,
+      }),
+    ).toBe(false)
+  })
+
+  test('builds continuation instruction that avoids repeating the previous answer', () => {
+    const instruction = buildRoleplayContinuationInstruction('เธอหลบตา', 320)
+
+    expect(instruction).toContain('Do not repeat')
+    expect(instruction).toContain('2-4 short paragraphs')
+    expect(instruction).toContain('Thai')
+  })
+})
+
+describe('chat provider retry guard', () => {
+  test('retries transient provider failures but not credential failures', () => {
+    expect(isTransientChatProviderError({ status: 429, message: 'rate limited' })).toBe(true)
+    expect(isTransientChatProviderError({ status: 504, message: 'gateway timeout' })).toBe(true)
+    expect(isTransientChatProviderError(new Error('The operation was aborted'))).toBe(true)
+    expect(isTransientChatProviderError({ status: 401, message: 'invalid api key' })).toBe(false)
+    expect(isTransientChatProviderError({ status: 400, message: 'billing hard limit reached' })).toBe(false)
   })
 })

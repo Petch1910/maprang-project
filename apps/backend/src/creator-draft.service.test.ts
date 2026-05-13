@@ -150,6 +150,87 @@ describe('creator AI draft', () => {
     expect(result.draft.tags).toContain('slow-burn')
   })
 
+  test('accepts fenced JSON from chat models without falling back', async () => {
+    const previousKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    delete process.env.IMAGE_GENERATION_API_KEY
+    delete process.env.OPENAI_API_KEY
+
+    const result = await generateCreatorDraft(
+      {
+        brief: 'นักดนตรีกลางคืนที่ไม่ไว้ใจคนง่าย',
+      },
+      completionWith(`ได้เลย\n\`\`\`json\n${JSON.stringify({
+        name: 'ลิน | LIN',
+        tagline: 'นักดนตรีที่ยิ้มเหมือนมีความลับ',
+        description: 'นักดนตรีกลางคืนที่ค่อยๆ เปิดใจผ่านบทสนทนา',
+        biography: 'ลินเล่นดนตรีในบาร์เล็กๆ และจดจำคนฟังได้แม่นกว่าที่ใครคิด',
+        scenario: 'คุณเจอเธอหลังเวทีตอนเพลงสุดท้ายจบลง',
+        systemPrompt: 'คุณคือลิน ตอบเป็นภาษาไทยและไม่เขียนแทนผู้เล่น',
+        compactPrompt: 'ลิน: นักดนตรีกลางคืน slow-burn',
+        characterAnchor: 'นิ่ง สุภาพ ช่างสังเกต และไม่เชื่อใจเร็วเกินไป',
+        constraints: 'อย่าเขียนแทนผู้เล่น\nค่อยๆ เปิดเผยความลับ',
+        greeting: 'เพลงจบแล้ว... แต่เธอยังยืนอยู่ตรงนี้ มีอะไรจะถามฉันหรือเปล่า',
+        tags: 'roleplay, thai, music, slow-burn',
+      })}\n\`\`\``),
+    )
+
+    restoreOpenRouterKey(previousKey)
+    restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+    restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+
+    expect(result.source).toBe('ai')
+    expect(result.draft.name).toBe('ลิน | LIN')
+    expect(result.draft.tags).toContain('music')
+  })
+
+  test('retries when the text model returns truncated JSON once', async () => {
+    const previousKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    delete process.env.IMAGE_GENERATION_API_KEY
+    delete process.env.OPENAI_API_KEY
+    let attempts = 0
+
+    const result = await generateCreatorDraft(
+      {
+        brief: 'quiet cafe slow burn character',
+      },
+      async () => {
+        attempts += 1
+        const content =
+          attempts === 1
+            ? '{"name":"BROKEN"'
+            : JSON.stringify({
+                name: 'มิน | MIN',
+                tagline: 'บาริสต้าที่จำรายละเอียดของคุณได้เสมอ',
+                description: 'ตัวละคร slow-burn ในคาเฟ่เงียบ ๆ ที่ค่อย ๆ เปิดใจผ่านบทสนทนา',
+                biography: 'มินเคยทำงานหนักจนลืมดูแลตัวเอง และเริ่มเรียนรู้ที่จะไว้ใจคนอื่นอีกครั้ง',
+                scenario: 'คุณเข้ามาในร้านตอนใกล้ปิด และมินยังเก็บโต๊ะสุดท้ายไม่เสร็จ',
+                systemPrompt: 'คุณคือมิน ตอบเป็นภาษาไทย อยู่ในบทบาท และไม่เขียนแทนผู้เล่น',
+                compactPrompt: 'มิน: บาริสต้า slow-burn ที่จำรายละเอียดเล็ก ๆ ได้',
+                characterAnchor: 'นิ่ง อ่อนโยน ช่างสังเกต และค่อย ๆ เปิดใจ',
+                constraints: 'อย่าเขียนแทนผู้เล่น\nรักษาจังหวะ slow-burn',
+                greeting: 'ร้านใกล้ปิดแล้วนะ... แต่ถ้าเธออยากนั่งต่ออีกหน่อย ฉันก็ไม่ว่าอะไร',
+                tags: 'roleplay, thai, cafe, slow-burn',
+              })
+        return (await completionWith(content)()) as ChatCompletion
+      },
+    )
+
+    restoreOpenRouterKey(previousKey)
+    restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+    restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+
+    expect(attempts).toBe(2)
+    expect(result.source).toBe('ai')
+    expect(result.draft.name).toBe('มิน | MIN')
+    expect(result.warnings).toEqual([])
+  })
+
   test('uses GPT Image request shape when image provider is configured', async () => {
     const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
     const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
@@ -165,7 +246,11 @@ describe('creator AI draft', () => {
     process.env.IMAGE_GENERATION_MODEL = 'gpt-image-1.5'
     process.env.IMAGE_GENERATION_QUALITY = 'medium'
     process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION = '85'
-    globalThis.fetch = (async (_url, init) => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      if (url.includes('/storage/v1/object/')) {
+        return new Response('{}', { headers: { 'Content-Type': 'application/json' }, status: 200 })
+      }
       requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>
       return new Response(JSON.stringify({ data: [{ b64_json: 'abc123' }] }), {
         headers: { 'Content-Type': 'application/json' },
@@ -221,6 +306,44 @@ describe('creator AI draft', () => {
     }
   })
 
+  test('can skip configured image provider for deterministic smoke checks', async () => {
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    const previousFetch = globalThis.fetch
+    let fetchCalled = false
+
+    process.env.IMAGE_GENERATION_API_KEY = 'image-key'
+    delete process.env.OPENAI_API_KEY
+    globalThis.fetch = (async () => {
+      fetchCalled = true
+      throw new Error('image provider should not be called')
+    }) as unknown as typeof fetch
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'local smoke draft',
+          imageOnly: true,
+          skipImageProvider: true,
+          current: {
+            name: 'Smoke Draft',
+            tags: 'roleplay, thai',
+          },
+        },
+        completionWith('{}'),
+      )
+
+      expect(fetchCalled).toBe(false)
+      expect(result.image.provider).toBe('placeholder')
+      expect(result.image.note).toContain('smoke/dev')
+      expect(result.warnings.some((warning) => warning.includes('image provider'))).toBe(false)
+    } finally {
+      restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+      restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+      globalThis.fetch = previousFetch
+    }
+  })
+
   test('reports configured image provider failure separately from missing provider', async () => {
     const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
     const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
@@ -260,6 +383,62 @@ describe('creator AI draft', () => {
       expect(result.image.provider).toBe('placeholder')
       expect(result.image.note).toContain('ตั้งค่า image provider แล้ว')
       expect(result.warnings.some((warning) => warning.includes('image provider') && warning.includes('400'))).toBe(true)
+    } finally {
+      restoreOpenRouterKey(previousOpenRouterKey)
+      if (previousImageKey === undefined) delete process.env.IMAGE_GENERATION_API_KEY
+      else process.env.IMAGE_GENERATION_API_KEY = previousImageKey
+      globalThis.fetch = previousFetch
+    }
+  })
+
+  test('reports image provider billing limits with an actionable message', async () => {
+    const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousFetch = globalThis.fetch
+
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    process.env.IMAGE_GENERATION_API_KEY = 'image-key'
+    globalThis.fetch = (async (_url, _init) =>
+      new Response(
+        JSON.stringify({
+          error: {
+            message: 'Billing hard limit has been reached.',
+            code: 'billing_hard_limit_reached',
+          },
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+          status: 400,
+        },
+      )) as typeof fetch
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'billing limit smoke character',
+          imagePrompt: 'cinematic portrait',
+        },
+        completionWith(
+          JSON.stringify({
+            name: 'MIRA',
+            tagline: 'billing smoke',
+            description: 'A smoke-test character.',
+            biography: 'Created for provider failure tests.',
+            scenario: 'A quiet studio.',
+            systemPrompt: 'You are MIRA. Stay in character.',
+            compactPrompt: 'MIRA: smoke test.',
+            characterAnchor: 'Calm and observant.',
+            constraints: 'Do not write for the player.',
+            greeting: 'Hello.',
+            tags: 'roleplay, thai, slow-burn',
+          }),
+        ),
+      )
+
+      expect(result.image.provider).toBe('placeholder')
+      expect(result.image.note).toContain('billing hard limit reached')
+      expect(result.warnings.some((warning) => warning.includes('billing hard limit reached'))).toBe(true)
+      expect(result.warnings.some((warning) => warning.includes('smoke:image:live'))).toBe(true)
     } finally {
       restoreOpenRouterKey(previousOpenRouterKey)
       if (previousImageKey === undefined) delete process.env.IMAGE_GENERATION_API_KEY

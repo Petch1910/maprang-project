@@ -143,7 +143,7 @@ export function MyChatsPage() {
     const willPin = !pinnedChatIds.includes(chat.id)
     setPinnedChatIds((current) => togglePinnedChatId(current, chat.id))
     setOpenMenuChatId(null)
-    setActionNote(willPin ? 'ปักหมุดแชทแล้ว' : 'เอาออกจากปักหมุดแล้ว')
+    setActionNote(willPin ? 'ปักหมุดแชทแล้ว' : 'ถอนหมุดแชทแล้ว')
   }
 
   const startSelection = (chat?: ChatSummary) => {
@@ -456,8 +456,8 @@ export function MyChatsPage() {
         </div>
       )}
 
-      <div className="grid min-w-0 gap-3 md:grid-cols-2">
-        {isListLoading && [1, 2, 3, 4].map((item) => <div className="h-32 animate-pulse rounded-2xl bg-slate-200" key={item} />)}
+      <div className="grid min-w-0 gap-2">
+        {isListLoading && [1, 2, 3, 4].map((item) => <div className="h-28 animate-pulse rounded-2xl bg-slate-200" key={item} />)}
 
         {!isListLoading &&
           visibleChats.map((chat) => {
@@ -475,12 +475,12 @@ export function MyChatsPage() {
 
             return (
               <article
-                className={`relative min-w-0 overflow-visible rounded-lg border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                className={`relative min-w-0 overflow-visible rounded-xl border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-4 ${
                   selectedChatIds.includes(chat.id) ? 'border-slate-950 bg-slate-50 ring-2 ring-slate-950/10' : 'border-slate-900/10 bg-white'
-                } ${openMenuChatId === chat.id ? 'z-30' : 'z-0'}`}
+                } ${openMenuChatId === chat.id ? 'z-[70]' : 'z-0'}`}
                 key={chat.id}
               >
-                <div className="relative flex min-h-10 min-w-0 items-start gap-3 pr-28">
+                <div className="relative flex min-h-10 min-w-0 items-start gap-3 pr-24 sm:pr-32">
                   {isSelectionMode && (
                     <button
                       aria-label="Select chat"
@@ -493,6 +493,9 @@ export function MyChatsPage() {
                       {selectedChatIds.includes(chat.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                     </button>
                   )}
+                  <div className="grid size-10 flex-none place-items-center rounded-xl bg-slate-950 text-sm font-black text-white shadow-sm">
+                    {(chat.characterName || chat.title || 'M').trim().slice(0, 1).toUpperCase()}
+                  </div>
                   <div className="pointer-events-none min-w-0 flex-1 overflow-hidden">
                     <p className="flex min-w-0 items-center gap-1.5 font-black">
                       {isPinned && <Pin className="flex-none text-amber-500" size={14} />}
@@ -526,7 +529,7 @@ export function MyChatsPage() {
                       </button>
                       {openMenuChatId === chat.id && (
                         <div
-                          className="absolute right-0 top-10 z-50 w-44 overflow-hidden rounded-xl border border-slate-900/10 bg-white py-1 shadow-[0_18px_44px_rgba(15,23,42,0.16)]"
+                          className="absolute right-0 top-10 z-[80] w-44 overflow-hidden rounded-xl border border-slate-900/10 bg-white py-1 shadow-[0_18px_44px_rgba(15,23,42,0.16)]"
                           role="menu"
                         >
                           <button
@@ -548,7 +551,7 @@ export function MyChatsPage() {
                               type="button"
                             >
                               {isPinned ? <PinOff size={15} /> : <Pin size={15} />}
-                              {isPinned ? 'เอาออกจากปักหมุดแชท' : 'ปักหมุดแชท'}
+                              {isPinned ? 'ถอนหมุดแชท' : 'ปักหมุดแชท'}
                             </button>
                           )}
                           {isArchived ? (
@@ -616,7 +619,7 @@ export function MyChatsPage() {
                     <span className="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-black text-white">โหมดฉาก</span>
                   )}
                 </div>
-                <div className={`mt-4 flex flex-wrap gap-2 ${openMenuChatId === chat.id ? 'pointer-events-none' : ''}`}>
+                <div className={`mt-4 flex flex-wrap gap-2 sm:justify-end ${openMenuChatId === chat.id ? 'pointer-events-none' : ''}`}>
                   <Link
                     className="inline-flex min-h-10 items-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white"
                     to={`/chat/${chat.id}`}
@@ -648,7 +651,7 @@ export function MyChatsPage() {
           })}
 
         {!isListLoading && visibleChats.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-900/15 bg-white p-6 text-slate-500 md:col-span-2">
+          <div className="rounded-2xl border border-dashed border-slate-900/15 bg-white p-6 text-slate-500">
             <p className="m-0 text-sm leading-6">
               {filter === 'archived'
                 ? 'ยังไม่มีแชทที่จัดเก็บไว้ เมื่อจัดเก็บแชทจากเมนูสามจุด รายการจะมาอยู่ตรงนี้และสามารถเอากลับมาได้'

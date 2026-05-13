@@ -108,7 +108,10 @@ function CharacterStage({
   const relationship = runtimeState?.relationshipState
 
   return (
-    <section className="mx-auto w-full max-w-3xl rounded-xl border border-white/10 bg-black/34 p-4 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-2xl sm:p-5">
+    <section
+      className="mx-auto w-full max-w-3xl rounded-xl border border-white/10 bg-black/34 p-4 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-2xl sm:p-5"
+      data-testid="chat-character-stage"
+    >
       <div className="space-y-4">
         <div className="flex min-w-0 items-center gap-4">
           {character.avatarUrl ? (
@@ -629,7 +632,8 @@ export function ChatPanel({
         .map((chat) => ({ ...chat, content: displayMessageContent(chat.content) })),
     [chatLog],
   )
-  const showIntro = visibleMessages.length <= 2
+  const hasUserTurn = visibleMessages.some((chat) => chat.role === 'user')
+  const showIntro = !hasUserTurn && visibleMessages.length <= 2
 
   return (
     <section className="grid h-svh min-w-0 grid-cols-1 overflow-hidden bg-[#0c0c0f] lg:grid-cols-[minmax(0,1fr)_300px]">

@@ -14,14 +14,17 @@ if (!health.ok || !health.checks.databaseConnected) {
 
 const characters = await readJson<{
   characters?: Array<{ id: string; name: string; tags: string[] }>
-}>('/characters?view=admin&q=Maprang&limit=5', {
+}>('/characters?view=admin&limit=10', {
   headers: smokeAuthHeaders(),
 })
 
-const maprang = characters.characters?.find((character) => character.name === 'Maprang')
-if (!maprang) throw new Error('Seeded Maprang character was not found')
+const smokeCharacter =
+  characters.characters?.find((character) => character.name.includes('MIKA')) ??
+  characters.characters?.find((character) => character.name === 'Maprang') ??
+  characters.characters?.[0]
+if (!smokeCharacter) throw new Error('No seeded smoke character was found')
 
-const lore = await readJson<{ loreEntries?: Array<{ id: string; keyword: string }> }>(`/characters/${maprang.id}/lore`)
+const lore = await readJson<{ loreEntries?: Array<{ id: string; keyword: string }> }>(`/characters/${smokeCharacter.id}/lore`)
 
 const preview = await readJson<{ preview?: { turns?: unknown[] } }>('/relationship/preview', {
   method: 'POST',
@@ -67,8 +70,8 @@ console.log(
       databaseConnected: health.checks.databaseConnected,
       openRouterConfigured: health.checks.openRouterConfigured,
       avatarStorage: health.security.avatarStorage,
-      character: maprang.name,
-      tags: maprang.tags,
+      character: smokeCharacter.name,
+      tags: smokeCharacter.tags,
       loreCount: lore.loreEntries?.length ?? 0,
       previewTurns: preview.preview.turns.length,
       uploadProvider: upload.provider,

@@ -32,26 +32,62 @@ jobs:
       SMOKE_USER_ID: ${{ secrets.SMOKE_USER_ID }}
       SMOKE_ADMIN_API_KEY: ${{ secrets.SMOKE_ADMIN_API_KEY }}
       SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: ${{ inputs.min_token_balance_for_chat }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_STORAGE_BUCKET: ${{ secrets.SUPABASE_STORAGE_BUCKET }}
+      SUPABASE_STORAGE_ACCESS: ${{ secrets.SUPABASE_STORAGE_ACCESS }}
+      SUPABASE_SIGNED_URL_EXPIRES_IN: ${{ secrets.SUPABASE_SIGNED_URL_EXPIRES_IN }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
       - name: Validate smoke configuration
         run: |
           if [ -z "$SMOKE_API_BASE_URL" ]; then
             echo "Set workflow input api_base_url or repository secret SMOKE_API_BASE_URL."
             exit 1
           fi
-          if [ -z "$SMOKE_ACCESS_TOKEN" ] && { [ -z "$SMOKE_USER_ID" ] || [ -z "$SMOKE_ADMIN_API_KEY" ]; }; then
-            echo "Set repository secret SMOKE_ACCESS_TOKEN, or set both SMOKE_USER_ID and SMOKE_ADMIN_API_KEY."
+          case "$SMOKE_API_BASE_URL" in
+            https://localhost*|https://127.0.0.1*|http://*)
+              echo "SMOKE_API_BASE_URL must be a deployed https backend URL, not localhost or http."
+              exit 1
+              ;;
+          esac
+          if [ -z "$SMOKE_ACCESS_TOKEN" ] && [ -z "$SMOKE_USER_ID" ]; then
+            echo "Set repository secret SMOKE_ACCESS_TOKEN or SMOKE_USER_ID for user-flow smoke requests."
             exit 1
           fi
-      - run: bun run smoke:doctor
+          if [ -z "$SMOKE_ADMIN_API_KEY" ]; then
+            echo "Set repository secret SMOKE_ADMIN_API_KEY so production smoke can verify admin reports and audit logs."
+            exit 1
+          fi
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "Set repository secrets SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY so production smoke can verify the private avatars bucket."
+            exit 1
+          fi
+          if [ -z "$SUPABASE_STORAGE_BUCKET" ]; then
+            echo "Set repository secret SUPABASE_STORAGE_BUCKET, normally avatars."
+            exit 1
+          fi
+          if [ "$SUPABASE_STORAGE_ACCESS" != "signed" ]; then
+            echo "Set repository secret SUPABASE_STORAGE_ACCESS=signed for production smoke."
+            exit 1
+          fi
+          if [ -z "$SUPABASE_SIGNED_URL_EXPIRES_IN" ]; then
+            echo "Set repository secret SUPABASE_SIGNED_URL_EXPIRES_IN, normally 3600."
+            exit 1
+          fi
+      - run: bun scripts/smoke-doctor.ts --strict-production
+      - name: Verify Supabase signed avatar storage
+        run: bun run supabase:storage:check
       - run: bun run smoke:ready
       - run: bun run smoke:local
       - run: bun run smoke:image
-      - if: ${{ inputs.run_image }}
-        env:
-          SMOKE_IMAGE_LIVE: '1'
-        run: bun run smoke:image
-      - if: ${{ inputs.run_chat }}
+      - name: Verify admin APIs
+        run: bun scripts/api-smoke.ts --require-admin
+      - if: ${{ inputs.run_chat && inputs.run_image }}
+        run: bun scripts/api-smoke.ts --live --require-live-image --require-admin
+      - if: ${{ inputs.run_image && !inputs.run_chat }}
+        run: bun run smoke:image:live
+      - if: ${{ inputs.run_chat && !inputs.run_image }}
         run: bun run smoke:chat

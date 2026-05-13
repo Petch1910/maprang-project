@@ -15,12 +15,30 @@ const requiredFiles = [
   'ROUTE_MENU_AUDIT.md',
   'SECURITY_CHECKLIST.md',
   'STAGING_RUNBOOK.md',
+  'knowledge/README.md',
+  'knowledge/raw/README.md',
+  'knowledge/wiki/INDEX.md',
+  'knowledge/structured/chat-style-guide.json',
+  'knowledge/structured/creator-guides.json',
+  'knowledge/structured/relationship-rules.json',
+  'knowledge/structured/scene-rules.json',
+  'knowledge/structured/content-policy.json',
+  'memory/README.md',
+  'memory/working-context.md',
+  'memory/deploy-blockers.md',
+  'memory/qa-status.md',
   '.github/workflows/production-smoke.yml',
   'apps/backend/Dockerfile',
   'apps/backend/.env.production.example',
   'apps/backend/prisma/schema.prisma',
   'apps/frontend/.env.production.example',
   'apps/frontend/Dockerfile',
+  'scripts/deploy-env-doctor.ts',
+  'scripts/deploy-env-doctor-self-test.ts',
+  'scripts/knowledge-audit.ts',
+  'scripts/memory-audit.ts',
+  'scripts/route-menu-doc-check.ts',
+  'scripts/supabase-storage-setup.ts',
 ]
 
 async function assertFile(path: string) {
@@ -55,6 +73,10 @@ const checks: Check[] = [
           'NODE_ENV=production',
           'DATABASE_URL=',
           'OPENROUTER_API_KEY=',
+          'CHAT_PROVIDER_LIVE_VERIFIED=0',
+          'MODEL_MIN_ROLEPLAY_REPLY_CHARS=320',
+          'CHAT_PROVIDER_RETRY_ATTEMPTS=2',
+          'CREATOR_DRAFT_RETRY_ATTEMPTS=3',
           'CORS_ORIGINS=',
           'ADMIN_API_KEY=',
           'SUPABASE_URL=',
@@ -67,6 +89,7 @@ const checks: Check[] = [
           'SUPABASE_SIGNED_URL_EXPIRES_IN=3600',
           'IMAGE_GENERATION_API_KEY=',
           'IMAGE_GENERATION_MODEL=gpt-image-1.5',
+          'IMAGE_GENERATION_LIVE_VERIFIED=0',
         ],
         'apps/backend/.env.production.example',
       )
@@ -88,7 +111,7 @@ const checks: Check[] = [
     run: async () => {
       const backend = await readRepoFile('apps/backend/Dockerfile')
       const frontend = await readRepoFile('apps/frontend/Dockerfile')
-      requireIncludes(backend, ['RUN bunx prisma generate', 'EXPOSE 3000', 'CMD ["bun", "run", "start"]'], 'apps/backend/Dockerfile')
+      requireIncludes(backend, ['COPY knowledge ./knowledge', 'RUN bunx prisma generate', 'EXPOSE 3000', 'CMD ["bun", "run", "start"]'], 'apps/backend/Dockerfile')
       requireIncludes(frontend, ['bun run build', 'FROM nginx', 'EXPOSE 80'], 'apps/frontend/Dockerfile')
     },
   },
@@ -101,6 +124,9 @@ const checks: Check[] = [
         '20260506123000_admin_audit_logs',
         '20260506160000_token_transactions',
         '20260506173000_user_content_settings',
+        '20260508210300_add_creator_draft',
+        '20260509093000_add_user_persona',
+        '20260513103000_add_lore_parent_index',
       ]
       const missing = required.filter((name) => !migrations.includes(name))
       if (missing.length > 0) throw new Error(`missing migration(s): ${missing.join(', ')}`)
@@ -121,6 +147,7 @@ const checks: Check[] = [
           'SMOKE_IMAGE_LIVE=1',
           'SUPABASE_ANON_KEY',
           'SUPABASE_STORAGE_ACCESS=signed',
+          'bun run supabase:storage:setup',
           'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY',
           'private bucket with `SUPABASE_STORAGE_ACCESS=signed`',
           '/ready',
@@ -146,26 +173,113 @@ const checks: Check[] = [
     run: async () => {
       const content = await readRepoFile('package.json')
       const frontendPackage = await readRepoFile('apps/frontend/package.json')
+      const packageJson = JSON.parse(content) as { scripts?: Record<string, string> }
       requireIncludes(
         content,
         [
+          '"api:audit"',
+          '"route-menu:audit"',
+          '"memory:audit"',
+          '"knowledge:audit"',
           '"security:audit"',
           '"api:smoke"',
           '"api:smoke:live"',
+          '"deploy:doctor"',
+          '"deploy:doctor:self-test"',
           '"qa:seed"',
           '"e2e:smoke"',
           '"qa:full"',
+          '"staging:check"',
           '"smoke:image"',
+          '"smoke:image:live"',
+          '"supabase:storage:setup"',
+          '"supabase:storage:check"',
           '"production:check"',
           '@playwright/test',
         ],
         'package.json',
       )
+      const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
+      const qaLive = packageJson.scripts?.['qa:live'] ?? ''
+      const stagingCheck = packageJson.scripts?.['staging:check'] ?? ''
+      const productionCheck = packageJson.scripts?.['production:check'] ?? ''
+      if (smokeLive.includes('smoke:chat')) {
+        throw new Error('package.json smoke:live should use api:smoke:live once instead of calling smoke:chat separately')
+      }
+      if (qaLive.includes('smoke:chat') || qaLive.includes('smoke:image')) {
+        throw new Error('package.json qa:live should not duplicate provider calls outside api:smoke:live')
+      }
+      if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
+        throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
+      }
+      if (!productionCheck.includes('supabase:storage:check')) {
+        throw new Error('package.json production:check must verify Supabase signed avatar storage')
+      }
+      if (!productionCheck.includes('--require-admin')) {
+        throw new Error('package.json production:check must require admin smoke checks')
+      }
       requireIncludes(
         frontendPackage,
         ['frontend-static-audit.ts', 'frontend-route-audit.ts', 'check-frontend-bundles.ts'],
         'apps/frontend/package.json',
       )
+    },
+  },
+  {
+    name: 'project memory vault is available',
+    run: async () => {
+      const packageJson = await readRepoFile('package.json')
+      const readme = await readRepoFile('README.md')
+      const memoryReadme = await readRepoFile('memory/README.md')
+      const workingContext = await readRepoFile('memory/working-context.md')
+      const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
+      requireIncludes(packageJson, ['"memory:audit"', 'bun scripts/memory-audit.ts', 'bun run memory:audit'], 'package.json')
+      requireIncludes(readme, ['memory/README.md', 'Project Memory'], 'README.md')
+      requireIncludes(memoryReadme, ['Never store secrets', 'Update Protocol', 'Working Context', 'Deploy Blockers'], 'memory/README.md')
+      requireIncludes(workingContext, ['Current Local Status', 'Current Production Status'], 'memory/working-context.md')
+      requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
+    },
+  },
+  {
+    name: 'project knowledge layer is available',
+    run: async () => {
+      const packageJson = await readRepoFile('package.json')
+      const readme = await readRepoFile('README.md')
+      const knowledgeReadme = await readRepoFile('knowledge/README.md')
+      const wikiIndex = await readRepoFile('knowledge/wiki/INDEX.md')
+      const backendKnowledge = await readRepoFile('apps/backend/src/knowledge.service.ts')
+      requireIncludes(packageJson, ['"knowledge:audit"', 'bun scripts/knowledge-audit.ts', 'bun run knowledge:audit'], 'package.json')
+      requireIncludes(readme, ['Knowledge Layer', 'knowledge/README.md', 'bun run knowledge:audit'], 'README.md')
+      requireIncludes(knowledgeReadme, ['Runtime Usage', 'Structured Packs', 'Never store secrets'], 'knowledge/README.md')
+      requireIncludes(wikiIndex, ['Maprang Product', 'Relationship Engine', 'Creator Studio', 'Production Deploy'], 'knowledge/wiki/INDEX.md')
+      requireIncludes(
+        backendKnowledge,
+        ['buildChatKnowledgePrompt', 'buildCreatorKnowledgePrompt', 'structuredKnowledgeHealth'],
+        'apps/backend/src/knowledge.service.ts',
+      )
+    },
+  },
+  {
+    name: 'local smoke cannot hide live image verification',
+    run: async () => {
+      const packageJsonContent = await readRepoFile('package.json')
+      const packageJson = JSON.parse(packageJsonContent) as { scripts?: Record<string, string> }
+      const apiSmoke = await readRepoFile('scripts/api-smoke.ts')
+
+      requireIncludes(
+        apiSmoke,
+        ['const live = process.argv.includes(\'--live\')', 'const requireLiveImage = process.argv.includes(\'--require-live-image\')', 'imageOnly: !live', 'skipImageProvider: !live', 'if (requireLiveImage) throw new Error(issue)'],
+        'scripts/api-smoke.ts',
+      )
+      if (apiSmoke.includes('skipImageProvider: true')) {
+        throw new Error('scripts/api-smoke.ts must only skip the image provider through skipImageProvider: !live')
+      }
+      if (!packageJson.scripts?.['api:smoke:live']?.includes('--live --require-live-image')) {
+        throw new Error('package.json api:smoke:live must require a real live image provider check')
+      }
+      if (!packageJson.scripts?.['production:check']?.includes('bun scripts/smoke-doctor.ts --strict-production')) {
+        throw new Error('package.json production:check must run smoke-doctor in strict production mode')
+      }
     },
   },
   {
@@ -178,7 +292,7 @@ const checks: Check[] = [
         ['SQL Injection', 'Broken Access Control', 'Prompt Control', 'bun run security:audit', 'Production Must-Pass'],
         'SECURITY_CHECKLIST.md',
       )
-      requireIncludes(packageJson, ['"security:audit"', 'backend-security-audit.ts'], 'package.json')
+      requireIncludes(packageJson, ['"security:audit"', 'backend-security-audit.ts', '"api:audit"', 'api-route-audit.ts'], 'package.json')
     },
   },
   {
@@ -188,12 +302,12 @@ const checks: Check[] = [
       const staging = await readRepoFile('STAGING_RUNBOOK.md')
       requireIncludes(
         audit,
-        ['/admin/health', 'Route/Menu Audit', 'bun run e2e:smoke', 'Creator Studio', 'Moderation'],
+        ['/admin/health', 'Route/Menu Audit', 'bun run route-menu:audit', 'bun run e2e:smoke', 'Creator Studio', 'Moderation'],
         'ROUTE_MENU_AUDIT.md',
       )
       requireIncludes(
         staging,
-        ['Supabase Staging', 'SUPABASE_STORAGE_ACCESS=signed', 'Render', 'Railway', 'E2E_BASE_URL', '/ready'],
+        ['Supabase Staging', 'SUPABASE_STORAGE_ACCESS=signed', 'bun run supabase:storage:setup', 'Render', 'Railway', 'E2E_BASE_URL', '/ready'],
         'STAGING_RUNBOOK.md',
       )
     },
@@ -202,6 +316,7 @@ const checks: Check[] = [
     name: 'production smoke workflow is available',
     run: async () => {
       const workflow = await readRepoFile('.github/workflows/production-smoke.yml')
+      const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
       requireIncludes(
         workflow,
         [
@@ -209,12 +324,25 @@ const checks: Check[] = [
           'SMOKE_API_BASE_URL',
           'SMOKE_ADMIN_API_KEY',
           'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT',
-          'SMOKE_IMAGE_LIVE',
+          'SUPABASE_URL',
+          'SUPABASE_SERVICE_ROLE_KEY',
+          '--require-admin',
+          'bun install --frozen-lockfile',
+          'bun scripts/smoke-doctor.ts --strict-production',
+          'bun run supabase:storage:check',
+          'bun scripts/api-smoke.ts --require-admin',
+          'bun scripts/api-smoke.ts --live --require-live-image --require-admin',
+          'bun run smoke:image:live',
           'bun run smoke:ready',
           'bun run smoke:local',
           'bun run smoke:image',
         ],
         '.github/workflows/production-smoke.yml',
+      )
+      requireIncludes(
+        ciWorkflow,
+        ['bun run predeploy:check', 'bun run deploy:doctor:self-test', 'bun run memory:audit', 'bun run knowledge:audit'],
+        '.github/workflows/ci.yml',
       )
     },
   },

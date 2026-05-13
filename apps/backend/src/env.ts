@@ -17,12 +17,31 @@ const recommendedInProduction = [
   'MODEL_OUTPUT_COST_PER_1M',
   'MODEL_TEMPERATURE',
   'MODEL_MAX_OUTPUT_TOKENS',
+  'MODEL_MIN_ROLEPLAY_REPLY_CHARS',
+  'CHAT_PROVIDER_RETRY_ATTEMPTS',
+  'CHAT_PROVIDER_RETRY_DELAY_MS',
+  'CREATOR_DRAFT_RETRY_ATTEMPTS',
+  'CREATOR_DRAFT_RETRY_DELAY_MS',
 ] as const
 
 function present(name: string) {
   const value = process.env[name]?.trim()
   if (!value) return false
-  return !value.startsWith('replace-with-') && !value.includes('your-project.supabase.co') && !value.includes('example.com')
+  const normalized = value.toLowerCase()
+  const placeholderFragments = [
+    'replace-with-',
+    '<',
+    '>',
+    'your-project.supabase.co',
+    'example.com',
+    'postgresql://user:password@host',
+    'postgres://user:password@host',
+  ]
+  const placeholderTokens = ['user', 'password', 'host', 'database']
+  return (
+    !placeholderFragments.some((fragment) => normalized.includes(fragment)) &&
+    !placeholderTokens.includes(normalized)
+  )
 }
 
 function csv(name: string) {
@@ -81,6 +100,9 @@ function invalidProductionValues() {
   if (present('OPENROUTER_API_KEY') && process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-proj-')) {
     invalid.push('OPENROUTER_API_KEY appears to be an OpenAI project key, not an OpenRouter key')
   }
+  if (present('OPENROUTER_API_KEY') && !process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-or-')) {
+    invalid.push('OPENROUTER_API_KEY must look like an OpenRouter key starting with sk-or-')
+  }
   if (present('IMAGE_GENERATION_API_KEY') && process.env.IMAGE_GENERATION_API_KEY!.trim().startsWith('sk-or-')) {
     invalid.push('IMAGE_GENERATION_API_KEY appears to be an OpenRouter key, not an OpenAI image key')
   }
@@ -96,6 +118,29 @@ function invalidProductionValues() {
       }
     } catch {
       invalid.push('SUPABASE_URL must be a valid URL')
+    }
+  }
+
+  if (present('DATABASE_URL')) {
+    try {
+      const databaseUrl = new URL(process.env.DATABASE_URL!.trim())
+      if (!['postgres:', 'postgresql:'].includes(databaseUrl.protocol)) {
+        invalid.push('DATABASE_URL must be a Postgres connection string')
+      }
+      if (['localhost', '127.0.0.1', '::1'].includes(databaseUrl.hostname)) {
+        invalid.push('DATABASE_URL must not point to localhost in production')
+      }
+      const user = decodeURIComponent(databaseUrl.username).toLowerCase()
+      const password = decodeURIComponent(databaseUrl.password).toLowerCase()
+      const databaseName = databaseUrl.pathname.replace(/^\//, '').toLowerCase()
+      if (['user', 'username'].includes(user) || ['password', 'pass'].includes(password) || ['database', 'db'].includes(databaseName)) {
+        invalid.push('DATABASE_URL still contains placeholder credentials or database name')
+      }
+      if (databaseUrl.searchParams.get('sslmode') !== 'require') {
+        invalid.push('DATABASE_URL must include sslmode=require in production')
+      }
+    } catch {
+      invalid.push('DATABASE_URL must be a valid Postgres connection string')
     }
   }
 
@@ -162,11 +207,42 @@ function invalidProductionValues() {
       invalid.push('MODEL_MAX_OUTPUT_TOKENS must be an integer from 128 to 2400')
     }
   }
+  if (present('MODEL_MIN_ROLEPLAY_REPLY_CHARS')) {
+    const minChars = Number(process.env.MODEL_MIN_ROLEPLAY_REPLY_CHARS)
+    if (!Number.isFinite(minChars) || !Number.isInteger(minChars) || minChars < 0 || minChars > 1200) {
+      invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be an integer from 0 to 1200')
+    }
+  }
+  if (present('CHAT_PROVIDER_RETRY_ATTEMPTS')) {
+    const attempts = Number(process.env.CHAT_PROVIDER_RETRY_ATTEMPTS)
+    if (!Number.isFinite(attempts) || !Number.isInteger(attempts) || attempts < 1 || attempts > 5) {
+      invalid.push('CHAT_PROVIDER_RETRY_ATTEMPTS must be an integer from 1 to 5')
+    }
+  }
+  if (present('CHAT_PROVIDER_RETRY_DELAY_MS')) {
+    const delayMs = Number(process.env.CHAT_PROVIDER_RETRY_DELAY_MS)
+    if (!Number.isFinite(delayMs) || !Number.isInteger(delayMs) || delayMs < 0 || delayMs > 5000) {
+      invalid.push('CHAT_PROVIDER_RETRY_DELAY_MS must be an integer from 0 to 5000')
+    }
+  }
+  if (present('CREATOR_DRAFT_RETRY_ATTEMPTS')) {
+    const attempts = Number(process.env.CREATOR_DRAFT_RETRY_ATTEMPTS)
+    if (!Number.isFinite(attempts) || !Number.isInteger(attempts) || attempts < 1 || attempts > 5) {
+      invalid.push('CREATOR_DRAFT_RETRY_ATTEMPTS must be an integer from 1 to 5')
+    }
+  }
+  if (present('CREATOR_DRAFT_RETRY_DELAY_MS')) {
+    const delayMs = Number(process.env.CREATOR_DRAFT_RETRY_DELAY_MS)
+    if (!Number.isFinite(delayMs) || !Number.isInteger(delayMs) || delayMs < 0 || delayMs > 5000) {
+      invalid.push('CREATOR_DRAFT_RETRY_DELAY_MS must be an integer from 0 to 5000')
+    }
+  }
 
   return invalid
 }
 
-export function validateRuntimeEnv() {
+export function validateRuntimeEnv(options: { throwOnError?: boolean } = {}) {
+  const shouldThrow = options.throwOnError ?? true
   const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
   const missingRequired: string[] = [...requiredInProduction.filter((name) => !present(name))]
   const missingRecommended = recommendedInProduction.filter((name) => !present(name))
@@ -179,10 +255,10 @@ export function validateRuntimeEnv() {
     missingRequired.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY')
   }
 
-  if (mode === 'production' && missingRequired.length > 0) {
+  if (shouldThrow && mode === 'production' && missingRequired.length > 0) {
     throw new Error(`Missing required production env: ${missingRequired.join(', ')}`)
   }
-  if (mode === 'production' && invalid.length > 0) {
+  if (shouldThrow && mode === 'production' && invalid.length > 0) {
     throw new Error(`Invalid production env: ${invalid.join(', ')}`)
   }
 
@@ -196,7 +272,7 @@ export function validateRuntimeEnv() {
 }
 
 export function logRuntimeEnvStatus() {
-  const status = validateRuntimeEnv()
+  const status = validateRuntimeEnv({ throwOnError: false })
   if (status.missingRequired.length > 0) {
     console.warn(`[env] Missing required env for production: ${status.missingRequired.join(', ')}`)
   }
@@ -205,6 +281,12 @@ export function logRuntimeEnvStatus() {
   }
   if (status.invalid.length > 0) {
     console.warn(`[env] Invalid production env: ${status.invalid.join(', ')}`)
+  }
+  if (status.mode === 'production' && status.missingRequired.length > 0) {
+    throw new Error(`Missing required production env: ${status.missingRequired.join(', ')}`)
+  }
+  if (status.mode === 'production' && status.invalid.length > 0) {
+    throw new Error(`Invalid production env: ${status.invalid.join(', ')}`)
   }
   return status
 }

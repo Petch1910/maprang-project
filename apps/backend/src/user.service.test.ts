@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
-import { effectiveMaxRatingForUser, loadContentSettings, updateContentSettings } from './user.service'
+import { effectiveMaxRatingForUser, loadContentSettings, loadUserPersona, updateContentSettings, updateUserPersona } from './user.service'
 
 const prisma = getPrisma()
 const shouldRunDbTest = createDbTestGate(prisma, 'user content settings')
@@ -65,5 +65,25 @@ describe('user content settings', () => {
     expect(contentSettings?.adultVerifiedAt).toBeInstanceOf(Date)
     const effectiveMaxRating = await effectiveMaxRatingForUser(contentUserId, 'restricted_18')
     expect(effectiveMaxRating).toBe('restricted_18')
+  })
+
+  test('persists user persona server-side and trims long drafts', async () => {
+    if (!(await shouldRunDbTest())) return
+    const contentUserId = contentUserIds[0]!
+    await ensureContentUser(contentUserId)
+
+    const saved = await updateUserPersona(contentUserId, {
+      persona: `  ชื่อ: พลอย\nสไตล์: ชอบ slow burn  ${'x'.repeat(2200)}`,
+    })
+
+    expect(saved?.persona.startsWith('ชื่อ: พลอย')).toBe(true)
+    expect(saved?.persona.length).toBeLessThanOrEqual(2000)
+    expect(saved?.updatedAt).toBeInstanceOf(Date)
+
+    const loaded = await loadUserPersona(contentUserId)
+    expect(loaded?.persona).toBe(saved?.persona)
+
+    const cleared = await updateUserPersona(contentUserId, { persona: '' })
+    expect(cleared?.persona).toBe('')
   })
 })

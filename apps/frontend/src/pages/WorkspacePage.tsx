@@ -649,7 +649,7 @@ export function WorkspacePage() {
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           userPersona: personaDraft.trim() || undefined,
           maxRating: contentSettings.maxRating,
-          history: [...visibleHistory, { role: 'user', content: currentMsg }],
+          history: visibleHistory,
         },
         (event) => {
           if (event.type === 'delta') {
@@ -708,7 +708,7 @@ export function WorkspacePage() {
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           userPersona: personaDraft.trim() || undefined,
           maxRating: contentSettings.maxRating,
-          history: [...visibleHistory, { role: 'user', content: currentMsg }],
+          history: visibleHistory,
         })
         if (data.chatId) {
           completedChatId = data.chatId

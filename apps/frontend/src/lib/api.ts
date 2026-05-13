@@ -294,6 +294,22 @@ export type HealthStatus = {
       detail: string
     }
   >
+  knowledge?: {
+    structured?: {
+      ok: boolean
+      fileCount: number
+      missing: string[]
+      errors: string[]
+      files: Array<{
+        file: string
+        ok: boolean
+        id?: string
+        schemaVersion?: number
+        updatedAt?: string
+        errors: string[]
+      }>
+    }
+  }
   env?: {
     mode: 'production' | 'development'
     missingRequired: string[]
@@ -308,11 +324,29 @@ export type HealthStatus = {
     outputCostPer1M: number
     temperature?: number
     maxOutputTokens?: number
+    minRoleplayReplyChars?: number
     maxInputChars: number
     minTokenBalanceForChat: number
+    providerRetry?: {
+      chatAttempts: number
+      chatDelayMs: number
+      creatorDraftAttempts: number
+      creatorDraftDelayMs: number
+    }
+    chatProvider?: {
+      configured: boolean
+      liveVerified?: boolean
+      productionReady?: boolean
+      status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
+      liveSmokeCommand?: string
+    }
     imageGeneration?: {
       configured: boolean
+      liveVerified?: boolean
+      productionReady?: boolean
+      status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
       model: string
+      liveSmokeCommand?: string
     }
   }
 }
@@ -353,6 +387,12 @@ export type ContentSettings = {
   isAdult: boolean
   maxRating: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
   adultVerifiedAt: string | null
+}
+
+export type UserPersona = {
+  persona: string
+  updatedAt: string | null
+  maxChars: number
 }
 
 export type AdminSummary = {
@@ -482,6 +522,17 @@ export async function updateContentSettings(input: { isAdult: boolean; maxRating
   })
 }
 
+export async function fetchUserPersona() {
+  return requestJson<{ persona: UserPersona }>('/me/persona')
+}
+
+export async function updateUserPersona(persona: string) {
+  return requestJson<{ persona: UserPersona }>('/me/persona', {
+    method: 'PATCH',
+    body: JSON.stringify({ persona }),
+  })
+}
+
 export async function fetchAdminSummary() {
   return requestJson<AdminSummary>('/admin/summary')
 }
@@ -571,10 +622,23 @@ export async function generateCreatorAiDraft(input: {
   brief?: string
   imagePrompt?: string
   current?: Partial<CreatorAiDraftFields>
+  imageOnly?: boolean
+  imageStyle?: string
 }) {
   return requestJson<CreatorAiDraftResponse>('/creator/ai-draft', {
     method: 'POST',
     body: JSON.stringify(input),
+  })
+}
+
+export async function fetchCreatorDraft() {
+  return requestJson<{ draft: unknown }>('/creator/draft')
+}
+
+export async function updateCreatorDraft(payload: unknown) {
+  return requestJson<{ ok: boolean }>('/creator/draft', {
+    method: 'PUT',
+    body: JSON.stringify({ payload }),
   })
 }
 

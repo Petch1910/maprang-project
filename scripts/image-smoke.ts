@@ -9,6 +9,8 @@ type HealthPayload = {
   model?: {
     imageGeneration?: {
       configured?: boolean
+      status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
+      productionReady?: boolean
       model?: string
     }
   }
@@ -26,7 +28,10 @@ type CreatorDraftPayload = {
   warnings?: string[]
 }
 
-const live = ['1', 'true', 'yes'].includes(String(process.env.SMOKE_IMAGE_LIVE ?? '').toLowerCase())
+const live =
+  ['1', 'true', 'yes'].includes(String(process.env.SMOKE_IMAGE_LIVE ?? '').toLowerCase()) ||
+  process.argv.includes('--live') ||
+  process.argv.includes('--require-live-image')
 
 const health = await readJson<HealthPayload>('/health')
 const imageConfigured = Boolean(health.checks?.imageGenerationConfigured || health.model?.imageGeneration?.configured)
@@ -46,7 +51,10 @@ if (!live) {
         live: false,
         imageGenerationConfigured: true,
         imageModel: health.model?.imageGeneration?.model ?? null,
-        skipped: 'Live provider call was skipped. Set SMOKE_IMAGE_LIVE=1 to generate a real image during staging/production QA.',
+        imageStatus: health.model?.imageGeneration?.status ?? null,
+        imageProductionReady: health.model?.imageGeneration?.productionReady ?? false,
+        skipped:
+          'Live provider call was skipped. Set SMOKE_IMAGE_LIVE=1 or run `bun run smoke:image:live` to generate a real image during staging/production QA.',
       },
       null,
       2,
@@ -72,7 +80,8 @@ const draft = await readJson<CreatorDraftPayload>('/creator/ai-draft', {
 
 if (draft.image?.provider !== 'configured') {
   const warnings = draft.warnings?.filter(Boolean).join('; ')
-  throw new Error(`Image smoke fell back to placeholder: ${warnings || draft.image?.note || 'no warnings'}`)
+  const issue = warnings || draft.image?.note || 'no warnings'
+  throw new Error(`Image smoke fell back to placeholder: ${issue}${providerFailureHint(issue)}`)
 }
 
 if (!draft.image.url) {
@@ -92,6 +101,7 @@ console.log(
       source: draft.source ?? null,
       modelName: draft.modelName ?? null,
       imageModel: health.model?.imageGeneration?.model ?? null,
+      imageStatus: health.model?.imageGeneration?.status ?? null,
       imageProvider: draft.image.provider,
       imageUrlKind: draft.image.url.startsWith('data:') ? 'data-url' : 'remote-or-upload-url',
       elapsedMs: Date.now() - startedAt,
@@ -101,3 +111,20 @@ console.log(
     2,
   ),
 )
+
+function providerFailureHint(message: string) {
+  const normalized = message.toLowerCase()
+  if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
+    return ' | Fix: increase or reset the image provider billing limit, then rerun `bun run smoke:image:live`.'
+  }
+  if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
+    return ' | Fix: add image provider credits/quota, then rerun `bun run smoke:image:live`.'
+  }
+  if (normalized.includes('401') || normalized.includes('403') || normalized.includes('invalid api key')) {
+    return ' | Fix: replace IMAGE_GENERATION_API_KEY/OPENAI_API_KEY with a valid backend-only image provider key.'
+  }
+  if (normalized.includes('model')) {
+    return ' | Fix: check IMAGE_GENERATION_MODEL and whether the provider account can use that image model.'
+  }
+  return ''
+}

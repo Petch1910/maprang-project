@@ -41,7 +41,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'Chat Sidebar',
     route: '/chat',
-    control: 'เมนูสามจุดของแชท: แก้ไขแชท, ปักหมุดแชท/เอาออกจากปักหมุดแชท, จัดเก็บแชท, เลือก, ลบแชท',
+    control: 'เมนูสามจุดของแชท: แก้ไขแชท, ปักหมุดแชท/ถอนหมุดแชท, จัดเก็บแชท, เลือก, ลบแชท',
     result:
       'เมนูเปิด/ปิดได้ด้วยปุ่ม, Escape, คลิกข้างนอก รายการท้ายแถบเปิดขึ้นด้านบนไม่โดนตัด เลือกจะเข้าสู่โหมดจัดการหลายแชท และทุกคำสั่งมีผลจริงหรือ confirm ก่อนลบ',
     disabledReason: 'ไม่มี disabled ถาวร คำสั่งลบใช้ confirm เพื่อกันพลาด',
@@ -62,7 +62,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     route: '/chats',
     control: 'ค้นหา, filter ทั้งหมด/ปักหมุด/มีฉาก/จัดเก็บ, เปิดแชท, เมนูสามจุด, เลือกหลายแชท, กู้คืนแชท',
     result:
-      'รายการแชทเปิดกลับไป /chat/:chatId ได้ เมนูแก้ชื่อ/ปักหมุดแชท/จัดเก็บแชท/ลบแชทมีผลจริง โหมดเลือกจัดการหลายแชทได้ และแชทที่จัดเก็บกู้คืนกลับมาหน้ารวมได้',
+      'รายการแชทเปิดกลับไป /chat/:chatId ได้ เมนูแก้ชื่อ/ปักหมุดแชท/จัดเก็บแชท/ลบแชทมีผลจริง โหมดเลือกหลายแชทรองรับ bulk archive/restore/delete และถูก smoke บน desktop/mobile แล้ว',
     disabledReason: 'คำสั่งกู้คืน/ลบ/แก้ชื่อ/จัดการหลายรายการ disabled เฉพาะระหว่างกำลังบันทึก action นั้นหรือยังไม่ได้เลือกแชท',
     emptyState: 'แต่ละ filter มีข้อความบอกบริบท เช่น ยังไม่มีแชทจัดเก็บหรือยังไม่มีแชทปักหมุด',
     status: 'ready',
@@ -70,8 +70,8 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'Events Inbox',
     route: '/events',
-    control: 'รายการ pending scene จากทุกแชท, เปิดกลับเข้าห้อง',
-    result: 'กด event แล้วไปยังแชทที่มีฉากรออยู่',
+    control: 'รายการ pending scene แบบจัดกลุ่มตามฉาก พร้อมแชทย่อยแต่ละห้อง',
+    result: 'กดแชทย่อยในกลุ่ม event แล้วไปยังแชทที่มีฉากรออยู่',
     disabledReason: 'event หมดอายุ/ไม่มี chat จะไม่แสดงเป็น action หลัก',
     emptyState: 'แสดงข้อความว่ายังไม่มีฉากสำคัญรออยู่',
     status: 'ready',
@@ -80,7 +80,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     area: 'Profile / Persona',
     route: '/profile',
     control: 'User Persona, content setting, created/favorite characters',
-    result: 'เซฟ persona และ content mode ลง state/local flow สำหรับแนบใน chat prompt',
+    result: 'เซฟ persona ลงบัญชีและ local draft พร้อมใช้เป็นบริบทใน chat prompt ส่วน content mode บันทึกผ่าน backend',
     disabledReason: 'ปุ่มบันทึก disabled เฉพาะตอนกำลังบันทึกหรือข้อมูลไม่ครบ',
     emptyState: 'ถ้ายังไม่มีตัวละคร/รายการโปรดจะแสดงคำแนะนำให้เริ่มสร้างหรือสำรวจ',
     status: 'ready',

@@ -8,6 +8,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/backend ./
+COPY knowledge ./knowledge
 RUN bunx prisma generate
 EXPOSE 3000
 CMD ["bun", "run", "start"]

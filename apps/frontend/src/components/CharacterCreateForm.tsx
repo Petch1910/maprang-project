@@ -12,7 +12,7 @@ import {
   Upload,
   WandSparkles,
 } from 'lucide-react'
-import { generateCreatorAiDraft, uploadAvatar, type CharacterInput, type CreatorAiDraftResponse } from '../lib/api'
+import { generateCreatorAiDraft, uploadAvatar, fetchCreatorDraft, updateCreatorDraft, type CharacterInput, type CreatorAiDraftResponse } from '../lib/api'
 import { buildCharacterDraftFromImage, buildGeneratedAvatarDataUrl, mergeDraftTags } from '../lib/characterDraft'
 import { analyzeTags, type TagAnalysis, type TagIssue } from '../lib/tagAnalysis'
 import { CreatorReadinessPanel } from './CreatorReadinessPanel'
@@ -81,6 +81,8 @@ type CreatorStoredDraft = {
   hasImageDraft?: boolean
   hasPreviewRun?: boolean
   lastImageSignal?: string
+  generatedImages?: { url: string; source: CreatorDraftStatus['avatarSource'] }[]
+  imageStyle?: string
   updatedAt?: number
 }
 
@@ -209,6 +211,8 @@ export function CharacterCreateForm({
   const [storedAvatarSource, setStoredAvatarSource] = useState<CreatorDraftStatus['avatarSource']>(storedDraft?.avatarSource ?? 'none')
   const [hasImageDraft, setHasImageDraft] = useState(Boolean(storedDraft?.hasImageDraft))
   const [hasPreviewRun, setHasPreviewRun] = useState(Boolean(storedDraft?.hasPreviewRun))
+  const [generatedImages, setGeneratedImages] = useState<{ url: string; source: CreatorDraftStatus['avatarSource'] }[]>(storedDraft?.generatedImages ?? [])
+  const [imageStyle, setImageStyle] = useState(storedDraft?.imageStyle ?? '')
   const avatarUrlInputRef = useRef<HTMLInputElement | null>(null)
 
   const update = (field: keyof typeof emptyCharacter, value: string) => {
@@ -262,6 +266,29 @@ export function CharacterCreateForm({
   }, [onDraftStatusChange, status])
 
   useEffect(() => {
+    fetchCreatorDraft()
+      .then((res) => {
+        if (res.draft) {
+          const dbDraft = res.draft as CreatorStoredDraft
+          const localDraft = loadStoredCreatorDraft()
+          if (!localDraft || (dbDraft.updatedAt ?? 0) > (localDraft.updatedAt ?? 0)) {
+            setForm(mergeStoredForm(dbDraft))
+            setCreatorBrief(dbDraft.creatorBrief ?? '')
+            setStoredAvatarSource(dbDraft.avatarSource ?? 'none')
+            setHasImageDraft(Boolean(dbDraft.hasImageDraft))
+            setHasPreviewRun(Boolean(dbDraft.hasPreviewRun))
+            setLastImageSignal(dbDraft.lastImageSignal ?? '')
+            setGeneratedImages(dbDraft.generatedImages ?? [])
+            setImageStyle(dbDraft.imageStyle ?? '')
+            setNote('โหลดดราฟต์ล่าสุดจากระบบคลาวด์แล้ว คุณแก้ต่อได้ทันที')
+            window.localStorage.setItem(creatorDraftStorageKey, JSON.stringify(dbDraft))
+          }
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
     if (typeof window === 'undefined') return
     const hasDraftContent = Object.entries(form).some(([key, value]) => {
       if (key === 'tags') return value.trim() !== emptyCharacter.tags
@@ -280,10 +307,18 @@ export function CharacterCreateForm({
       hasImageDraft,
       hasPreviewRun,
       lastImageSignal,
+      generatedImages,
+      imageStyle,
       updatedAt: Date.now(),
     }
     window.localStorage.setItem(creatorDraftStorageKey, JSON.stringify(payload))
-  }, [avatarSource, creatorBrief, form, hasImageDraft, hasPreviewRun, lastImageSignal])
+
+    const timeoutId = setTimeout(() => {
+      updateCreatorDraft(payload).catch(() => {})
+    }, 1500)
+
+    return () => clearTimeout(timeoutId)
+  }, [avatarSource, creatorBrief, form, hasImageDraft, hasPreviewRun, lastImageSignal, generatedImages, imageStyle])
 
   useEffect(() => {
     setHasPreviewRun(false)
@@ -293,7 +328,16 @@ export function CharacterCreateForm({
     const draft = buildCharacterDraftFromImage(source)
     const nextAvatarUrl = source.imageUrl ?? form.avatarUrl
     const nextIsPlaceholder = nextAvatarUrl.startsWith('data:image/svg+xml')
-    setStoredAvatarSource(nextIsPlaceholder ? 'placeholder' : 'manual')
+    const nextSource = nextIsPlaceholder ? 'placeholder' : 'manual'
+    setStoredAvatarSource(nextSource)
+
+    if (nextAvatarUrl) {
+      setGeneratedImages((prev) => {
+        if (prev.some((img) => img.url === nextAvatarUrl)) return prev
+        return [{ url: nextAvatarUrl, source: nextSource }, ...prev]
+      })
+    }
+
     setForm((prev) => ({
       ...prev,
       avatarUrl: nextAvatarUrl || prev.avatarUrl,
@@ -333,7 +377,17 @@ export function CharacterCreateForm({
       greeting: result.draft.greeting,
       tags: result.draft.tags,
     }))
-    setStoredAvatarSource(result.image.provider === 'configured' ? 'provider' : 'placeholder')
+    const nextSource = result.image.provider === 'configured' ? 'provider' : 'placeholder'
+    setStoredAvatarSource(nextSource)
+
+    const nextAvatarUrl = result.image.url
+    if (nextAvatarUrl) {
+      setGeneratedImages((prev) => {
+        if (prev.some((img) => img.url === nextAvatarUrl)) return prev
+        return [{ url: nextAvatarUrl, source: nextSource }, ...prev]
+      })
+    }
+
     setHasImageDraft(true)
     setLastImageSignal(result.image.prompt)
     const contentStatus = result.source === 'ai' ? 'เนื้อหาสร้างจาก AI แล้ว' : 'ใช้ดราฟต์สำรองเพราะโมเดลเนื้อหาไม่พร้อม'
@@ -360,7 +414,7 @@ export function CharacterCreateForm({
     }
   }
 
-  const generateImageDraft = async () => {
+  const generateImageDraft = async (imageOnly = false) => {
     const imagePrompt = [creatorBrief, form.name, form.tagline, form.description, form.tags, lastImageSignal]
       .map((value) => value.trim())
       .filter(Boolean)
@@ -369,19 +423,27 @@ export function CharacterCreateForm({
       imagePrompt ||
       'original Thai roleplay character, emotionally layered, slow-burn relationship, cinematic portrait, clear personality, scene-ready'
     setIsGeneratingDraft(true)
-    setNote('กำลังให้ AI ช่วยร่างตัวละคร...')
+    setNote(imageOnly ? 'กำลังให้ AI สร้างรูปใหม่...' : 'กำลังให้ AI ช่วยร่างตัวละคร...')
     try {
       const result = await generateCreatorAiDraft({
         brief: source,
         imagePrompt: source,
         current: form,
+        imageOnly,
+        imageStyle,
       })
-      applyAiDraft(result)
+      if (imageOnly) {
+        applyImageDraft({ imagePrompt: result.image.prompt, imageUrl: result.image.url }, false)
+        setStoredAvatarSource(result.image.provider === 'configured' ? 'provider' : result.image.provider)
+        setNote('สร้างรูปใหม่สำเร็จแล้ว')
+      } else {
+        applyAiDraft(result)
+      }
     } catch {
       const imageUrl = buildGeneratedAvatarDataUrl({ imagePrompt: source })
       setLastImageSignal(source)
       applyImageDraft({ imagePrompt: source, imageUrl }, true)
-      setNote('เรียก AI ไม่สำเร็จ จึงสร้างภาพตัวอย่างและดราฟต์สำรองในเครื่องให้ก่อน')
+      setNote('เรียก AI ไม่สำเร็จ จึงสร้างภาพตัวอย่างให้ก่อน')
     } finally {
       setIsGeneratingDraft(false)
     }
@@ -416,7 +478,10 @@ export function CharacterCreateForm({
       setHasImageDraft(false)
       setHasPreviewRun(false)
       setLastImageSignal('')
+      setGeneratedImages([])
+      setImageStyle('')
       clearStoredCreatorDraft()
+      updateCreatorDraft(null).catch(() => {})
       setNote('สร้างดราฟต์ตัวละครแล้ว')
       setIsOpen(false)
     } catch {
@@ -466,23 +531,53 @@ export function CharacterCreateForm({
                     </div>
                   )}
                 </div>
+                {generatedImages.length > 0 && (
+                  <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200">
+                    {generatedImages.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        aria-label="เลือกรูปประวัติ"
+                        onClick={() => {
+                          update('avatarUrl', img.url)
+                          setStoredAvatarSource(img.source)
+                        }}
+                        className={`relative aspect-[3/4] w-14 flex-none overflow-hidden rounded-md border-2 transition-all ${
+                          form.avatarUrl === img.url ? 'border-orange-500 shadow-sm' : 'border-transparent hover:border-slate-300'
+                        }`}
+                      >
+                        <img alt="ประวัติรูป" className="h-full w-full object-cover" src={img.url} />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid w-full max-w-xl gap-3">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <button
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-orange-500 px-3 text-xs font-black text-white transition hover:bg-orange-600"
                     data-testid="creator-ai-draft"
                     disabled={isGeneratingDraft}
-                    onClick={() => void generateImageDraft()}
+                    onClick={() => void generateImageDraft(false)}
                     type="button"
                   >
                     <WandSparkles size={15} />
-                    {isGeneratingDraft ? 'AI กำลังร่าง...' : 'AI สร้างรูป + เนื้อหา'}
+                    {isGeneratingDraft ? 'ร่าง...' : 'รูป+ข้อความ'}
+                  </button>
+                  <button
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-800 px-3 text-xs font-black text-white transition hover:bg-slate-900"
+                    data-testid="creator-ai-image-only"
+                    disabled={isGeneratingDraft}
+                    onClick={() => void generateImageDraft(true)}
+                    type="button"
+                  >
+                    <ImageIcon size={15} />
+                    {isGeneratingDraft ? 'สร้าง...' : 'สร้างเฉพาะรูป'}
                   </button>
                   <label className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50">
                     <Upload size={15} />
-                    {isUploading ? 'กำลังอัปโหลด...' : 'อัปโหลดรูป'}
+                    {isUploading ? 'โหลด...' : 'อัปโหลด'}
                     <input
                       accept="image/png,image/jpeg,image/webp,image/gif"
                       className="sr-only"
@@ -507,8 +602,24 @@ export function CharacterCreateForm({
                     type="button"
                   >
                     <LinkIcon size={15} />
-                    วางลิงก์รูป
+                    ลิงก์รูป
                   </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <select
+                    className="h-10 rounded-lg border border-slate-900/10 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    data-testid="creator-image-style"
+                    value={imageStyle}
+                    onChange={(e) => setImageStyle(e.target.value)}
+                  >
+                    <option value="">สไตล์ภาพอัตโนมัติ (Automatic)</option>
+                    <option value="anime">อนิเมะ (Anime)</option>
+                    <option value="cinematic">ภาพยนตร์สมจริง (Cinematic Realistic)</option>
+                    <option value="watercolor">สีน้ำ (Watercolor)</option>
+                    <option value="3d-render">ภาพวาด 3D (3D Render)</option>
+                    <option value="digital-art">ดิจิทัลอาร์ต (Digital Art)</option>
+                  </select>
                 </div>
 
                 <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs font-bold leading-5 text-slate-500">
@@ -793,7 +904,10 @@ export function CharacterCreateForm({
                   setHasImageDraft(false)
                   setHasPreviewRun(false)
                   setLastImageSignal('')
+                  setGeneratedImages([])
+                  setImageStyle('')
                   clearStoredCreatorDraft()
+                  updateCreatorDraft(null).catch(() => {})
                   setNote('ล้างฟอร์มแล้ว')
                 }}
                 type="button"

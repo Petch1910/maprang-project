@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Coins, ShieldCheck } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { saveContentSettings, selectContentSettings } from '../store/slices/contentSlice'
-import { savePersonaDraft, selectPersonaDraft } from '../store/slices/draftsSlice'
+import { savePersonaDraft, savePersonaDraftToCloud, selectPersonaDraft, selectPersonaUpdatedAt } from '../store/slices/draftsSlice'
 import { selectIsLowToken, selectTokenBalance } from '../store/slices/walletSlice'
 
 const personaTemplate = [
@@ -57,9 +57,12 @@ export function ProfilePage() {
   const tokenBalance = useAppSelector(selectTokenBalance)
   const isLowToken = useAppSelector(selectIsLowToken)
   const personaDraft = useAppSelector(selectPersonaDraft)
+  const personaUpdatedAt = useAppSelector(selectPersonaUpdatedAt)
   const contentSettings = useAppSelector(selectContentSettings)
   const [savedAt, setSavedAt] = useState(initialSavedAt)
   const [contentNote, setContentNote] = useState('')
+  const [personaNote, setPersonaNote] = useState('')
+  const personaSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const personaLength = personaDraft.trim().length
   const personaPreview = useMemo(() => {
     const lines = personaDraft
@@ -70,11 +73,42 @@ export function ProfilePage() {
     return lines.length > 0 ? lines : ['ยังไม่ได้ตั้งค่าตัวตน ผู้ช่วยจะใช้บริบทพื้นฐานของผู้ใช้']
   }, [personaDraft])
 
+  useEffect(() => {
+    if (!personaUpdatedAt) return
+    setSavedAt(personaUpdatedAt)
+    if (typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, personaUpdatedAt)
+  }, [personaUpdatedAt])
+
+  useEffect(
+    () => () => {
+      if (personaSaveTimer.current) clearTimeout(personaSaveTimer.current)
+    },
+    [],
+  )
+
+  const schedulePersonaCloudSave = (value: string, savedAtValue: string) => {
+    if (personaSaveTimer.current) clearTimeout(personaSaveTimer.current)
+    setPersonaNote('กำลังบันทึกตัวตน...')
+    personaSaveTimer.current = setTimeout(() => {
+      void dispatch(savePersonaDraftToCloud(value))
+        .unwrap()
+        .then((saved) => {
+          setPersonaNote('บันทึกตัวตนลงบัญชีแล้ว')
+          if (saved.updatedAt && typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, saved.updatedAt)
+        })
+        .catch(() => {
+          setPersonaNote('บันทึกลงบัญชีไม่ได้ แต่ดราฟต์ในเครื่องยังอยู่')
+          if (typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, savedAtValue)
+        })
+    }, 700)
+  }
+
   const updatePersona = (value: string) => {
     const nextSavedAt = new Date().toISOString()
     dispatch(savePersonaDraft(value))
     setSavedAt(nextSavedAt)
     if (typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, nextSavedAt)
+    schedulePersonaCloudSave(value, nextSavedAt)
   }
 
   const updateContentMode = async (mode: (typeof contentModes)[number]) => {
@@ -118,7 +152,7 @@ export function ProfilePage() {
             ล้างข้อมูล
           </button>
           <div className="flex min-h-10 items-center rounded-lg bg-slate-50 px-3 text-sm font-bold text-slate-500" data-testid="profile-persona-count">
-            {personaLength.toLocaleString()} ตัวอักษร
+            {personaLength.toLocaleString()}/2,000 ตัวอักษร
           </div>
         </div>
 
@@ -127,6 +161,7 @@ export function ProfilePage() {
           <textarea
             className="mt-2 min-h-56 w-full resize-y rounded-lg border border-slate-900/10 p-4 text-sm leading-7 outline-none focus:border-blue-500"
             data-testid="profile-persona-textarea"
+            maxLength={2000}
             onChange={(event) => updatePersona(event.target.value)}
             placeholder="ชื่อ สรรพนาม บุคลิก บทบาท ขอบเขตที่ไม่ต้องการ..."
             value={personaDraft}
@@ -135,6 +170,11 @@ export function ProfilePage() {
         <div className="mt-4 rounded-lg border border-blue-500/15 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
           เขียนให้กระชับจะได้ผลดีที่สุด เน้นตัวตน สไตล์การเล่น และขอบเขตสำคัญ มากกว่าประวัติยาวๆ
         </div>
+        {personaNote && (
+          <p className="m-0 mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500" data-testid="profile-persona-note">
+            {personaNote}
+          </p>
+        )}
 
         <section className="mt-5 rounded-lg border border-slate-900/10 bg-slate-50 p-4">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">

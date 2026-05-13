@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "relationship-rules",
+  "updatedAt": "2026-05-13",
+  "presetSeeds": [
+    {
+      "id": "stranger",
+      "label": "Stranger",
+      "intent": "Start neutral with low trust and room for discovery."
+    },
+    {
+      "id": "warm-close-friend",
+      "label": "Warm close friend",
+      "intent": "Start with trust and comfort while preserving slow-burn progression."
+    },
+    {
+      "id": "hidden-enemy-crush",
+      "label": "Hidden enemy crush",
+      "intent": "Start tense, guarded, and emotionally charged."
+    }
+  ],
+  "runtimeRules": [
+    "Relationship seeds set the starting tone but user behavior should still matter more over time.",
+    "Do not force romance when no-romance constraints are active.",
+    "Major relationship events should be optional and surfaced as pending events before entering scene mode.",
+    "Cooldowns should prevent repeating confession, break, or fear-lock events too often."
+  ]
+}

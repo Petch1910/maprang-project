@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises'
+import { access, readFile, readdir } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import ts from 'typescript'
 
@@ -125,6 +125,22 @@ function auditButtonsWithAst(content: string, file: string) {
 
 const sourceFiles = await collectSourceFiles(frontendSrc)
 const findings: Finding[] = []
+const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
+
+await Promise.all(
+  staleTemplateFiles.map(async (path) => {
+    try {
+      await access(join(root, path))
+      findings.push({
+        file: path,
+        line: 1,
+        message: 'stale Vite starter template file should not be kept in production UI',
+      })
+    } catch {
+      // File is absent, which is what we want.
+    }
+  }),
+)
 
 for (const file of sourceFiles) {
   const content = await readFile(file, 'utf8')
@@ -139,7 +155,10 @@ for (const file of sourceFiles) {
     { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'button/link has an empty onClick handler' },
     { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'throws not implemented in frontend source' },
     { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
-    { pattern: /เร็วๆ นี้/g, message: 'contains Thai coming-soon placeholder copy' },
+    { pattern: /เร็ว\s*ๆ\s*นี้/g, message: 'contains Thai coming-soon placeholder copy' },
+    { pattern: /�/g, message: 'contains replacement character, likely broken text encoding' },
+    { pattern: /[\u0080-\u009F]/g, message: 'contains C1 control character, likely mojibake' },
+    { pattern: /(?:Ã|Â|à¸|à¹)/g, message: 'contains common UTF-8 mojibake sequence' },
   ]
 
   for (const item of suspiciousPatterns) {

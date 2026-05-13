@@ -228,7 +228,7 @@ function SidebarChatRow({
           </button>
           <button type="button" className={actionButtonClass} data-testid={`chat-row-pin-${chat.id}`} onClick={onTogglePin} role="menuitem">
             {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
-            {isPinned ? 'เอาออกจากปักหมุดแชท' : 'ปักหมุดแชท'}
+            {isPinned ? 'ถอนหมุดแชท' : 'ปักหมุดแชท'}
           </button>
           <button type="button" className={actionButtonClass} data-testid={`chat-row-archive-${chat.id}`} onClick={onArchive} role="menuitem">
             <Archive size={14} />

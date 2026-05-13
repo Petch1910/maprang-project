@@ -28,8 +28,29 @@ type ReadinessPayload = {
     missingRecommended?: string[]
     invalid?: string[]
   }
+  knowledge?: {
+    structured?: {
+      ok?: boolean
+      fileCount?: number
+      missing?: string[]
+      errors?: string[]
+    }
+  }
   model?: {
     name?: string
+    chatProvider?: {
+      configured?: boolean
+      liveVerified?: boolean
+      productionReady?: boolean
+      status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
+    }
+    imageGeneration?: {
+      configured?: boolean
+      liveVerified?: boolean
+      productionReady?: boolean
+      status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
+      model?: string
+    }
   }
 }
 
@@ -61,12 +82,23 @@ console.log(
       failures,
       checks: payload.checks,
       envMode: payload.env?.mode,
+      missingRequired: payload.env?.missingRequired,
+      invalidEnv: payload.env?.invalid,
+      structuredKnowledge: payload.knowledge?.structured?.ok,
+      structuredKnowledgeFileCount: payload.knowledge?.structured?.fileCount,
       authMode: payload.security?.authMode,
       adminGuard: payload.security?.adminGuard,
       avatarStorage: payload.security?.avatarStorage,
       avatarStorageAccess: payload.security?.avatarStorageAccess,
       signedUrlExpiresIn: payload.security?.signedUrlExpiresIn,
       model: payload.model?.name,
+      chatStatus: payload.model?.chatProvider?.status,
+      chatLiveVerified: payload.model?.chatProvider?.liveVerified,
+      chatProductionReady: payload.model?.chatProvider?.productionReady,
+      imageModel: payload.model?.imageGeneration?.model,
+      imageStatus: payload.model?.imageGeneration?.status,
+      imageLiveVerified: payload.model?.imageGeneration?.liveVerified,
+      imageProductionReady: payload.model?.imageGeneration?.productionReady,
     },
     null,
     2,

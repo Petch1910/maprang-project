@@ -41,6 +41,7 @@ export function EventsInboxPage() {
   const isLoading = useAppSelector(selectChatsLoading)
   const error = useAppSelector(selectChatsError)
   const [search, setSearch] = useState('')
+  type PendingSceneSummary = (typeof events)[number]
   const normalizedSearch = search.trim().toLowerCase()
   const visibleEvents = useMemo(() => {
     if (!normalizedSearch) return events
@@ -51,6 +52,39 @@ export function EventsInboxPage() {
         .includes(normalizedSearch),
     )
   }, [events, normalizedSearch])
+  const eventGroups = useMemo<Array<{
+    key: string
+    title: string
+    prompt: string
+    relationshipStatus: string
+    events: PendingSceneSummary[]
+  }>>(() => {
+    const groups = new Map<string, {
+      key: string
+      title: string
+      prompt: string
+      relationshipStatus: string
+      events: PendingSceneSummary[]
+    }>()
+
+    for (const event of visibleEvents) {
+      const key = `${event.title}::${event.prompt}::${event.relationshipStatus}`
+      const group = groups.get(key)
+      if (group) {
+        group.events.push(event)
+        continue
+      }
+      groups.set(key, {
+        key,
+        title: event.title,
+        prompt: event.prompt,
+        relationshipStatus: event.relationshipStatus,
+        events: [event],
+      })
+    }
+
+    return [...groups.values()]
+  }, [visibleEvents])
 
   useEffect(() => {
     dispatch(loadChatSummaries())
@@ -120,49 +154,64 @@ export function EventsInboxPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-3">
-          {visibleEvents.map((event, index) => {
+        <div className="grid gap-3" data-testid="events-scene-list">
+          {eventGroups.map((group, index) => {
             const tone = eventTones[index % eventTones.length]
             return (
-            <Link
-              className={`group rounded-2xl border border-l-4 border-slate-900/10 ${tone.border} bg-white p-4 text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900/20 hover:shadow-md`}
-              key={event.id}
-              to={`/chat/${event.chatId}`}
-            >
-              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                <div className="flex min-w-0 gap-3">
-                  <span className={`mt-0.5 grid size-10 flex-none place-items-center rounded-xl ${tone.icon}`}>
-                    <Sparkles size={18} />
-                  </span>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="m-0 text-xs font-black tracking-widest text-slate-500 uppercase">ฉากพร้อมเข้า</p>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-black ${tone.chip}`}>
-                        {relationshipLabels[event.relationshipStatus] ?? event.relationshipStatus}
-                      </span>
+              <section
+                className={`overflow-hidden rounded-2xl border border-l-4 border-slate-900/10 ${tone.border} bg-white text-slate-950 shadow-sm`}
+                data-testid="events-scene-group"
+                key={group.key}
+              >
+                <div className="grid gap-3 border-b border-slate-900/10 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                  <div className="flex min-w-0 gap-3">
+                    <span className={`mt-0.5 grid size-10 flex-none place-items-center rounded-xl ${tone.icon}`}>
+                      <Sparkles size={18} />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="m-0 text-xs font-black tracking-widest text-slate-500 uppercase">ฉากพร้อมเข้า</p>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-black ${tone.chip}`}>
+                          {relationshipLabels[group.relationshipStatus] ?? group.relationshipStatus}
+                        </span>
+                      </div>
+                      <h2 className="mt-1 line-clamp-1 text-lg font-black">{group.title}</h2>
+                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{group.prompt}</p>
                     </div>
-                    <h2 className="mt-1 line-clamp-1 text-lg font-black">{event.title}</h2>
-                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{event.prompt}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-900/10 bg-slate-50 px-3 py-2 text-center text-xs font-black text-slate-600">
+                    {group.events.length.toLocaleString()} แชทที่พร้อมเข้า
                   </div>
                 </div>
-                <div className="grid gap-2 sm:min-w-52">
-                  <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-slate-50 px-3 text-xs font-black text-slate-600">
-                    <MessageCircle size={14} />
-                    <span className="truncate">{event.characterName}</span>
-                  </span>
-                  <span className="inline-flex min-h-8 items-center gap-2 rounded-full bg-slate-50 px-3 text-xs font-black text-slate-600">
-                    <Clock3 size={14} />
-                    เหลือถึงเทิร์น {event.expiresAtTurn}
-                  </span>
+
+                <div className="divide-y divide-slate-900/10">
+                  {group.events.map((event) => (
+                    <Link
+                      className="group grid gap-3 px-4 py-3 text-slate-950 transition hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                      data-testid="events-scene-row"
+                      key={event.id}
+                      to={`/chat/${event.chatId}`}
+                    >
+                      <div className="min-w-0">
+                        <p className="m-0 truncate text-sm font-black">{event.chatTitle}</p>
+                        <p className="m-0 mt-1 flex min-w-0 flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
+                          <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <MessageCircle size={13} />
+                            <span className="truncate">{event.characterName}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <Clock3 size={13} />
+                            เหลือถึงเทิร์น {event.expiresAtTurn}
+                          </span>
+                        </p>
+                      </div>
+                      <span className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-3 text-xs font-black text-white transition group-hover:translate-x-0.5">
+                        เปิดแชท <ArrowRight size={14} />
+                      </span>
+                    </Link>
+                  ))}
                 </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-900/10 pt-3">
-                <p className="m-0 min-w-0 truncate text-xs font-bold text-slate-500">{event.chatTitle}</p>
-                <span className="inline-flex flex-none items-center gap-1.5 text-xs font-black text-slate-700 transition group-hover:translate-x-0.5">
-                  เปิดแชท <ArrowRight size={14} />
-                </span>
-              </div>
-            </Link>
+              </section>
             )
           })}
         </div>

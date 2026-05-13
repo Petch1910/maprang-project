@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "scene-rules",
+  "updatedAt": "2026-05-13",
+  "sceneMode": {
+    "defaultMode": "sandbox",
+    "entryRule": "Enter scene mode only after a pending event is available and the user accepts it.",
+    "exitRule": "Return to sandbox after the objective resolves, expires, or the user exits.",
+    "uiExpectation": "Dim or frame the chat subtly, show the scene objective, and avoid rerendering the entire chat."
+  },
+  "eventTypes": [
+    "soft_confession_available",
+    "devotion_shift",
+    "relationship_break",
+    "fear_lock",
+    "unfinished_business_surfaces",
+    "constraint_guard"
+  ],
+  "runtimeRules": [
+    "Scene objectives should be clear and focused.",
+    "Scene outcomes should update relationship state and timeline.",
+    "Declined or held events should not punish the user.",
+    "Sandbox conversation should continue naturally after a scene ends."
+  ]
+}

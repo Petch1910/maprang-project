@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { avatarExtension, avatarUrl, safeAvatarFilename, supabaseStorageAccess } from './storage.service'
+import { avatarExtension, avatarUrl, normalizeSupabaseSignedUrl, safeAvatarFilename, supabaseStorageAccess } from './storage.service'
 
 describe('storage service', () => {
   test('normalizes supported avatar extensions', () => {
@@ -25,5 +25,16 @@ describe('storage service', () => {
 
   test('defaults Supabase storage access to signed URLs', () => {
     expect(supabaseStorageAccess).toBe('signed')
+  })
+
+  test('normalizes Supabase signed URL response paths', () => {
+    const supabaseUrl = 'https://example.supabase.co'
+    expect(normalizeSupabaseSignedUrl(supabaseUrl, 'https://cdn.example.com/avatar.png')).toBe('https://cdn.example.com/avatar.png')
+    expect(normalizeSupabaseSignedUrl(supabaseUrl, '/storage/v1/object/sign/avatars/a.png?token=abc')).toBe(
+      'https://example.supabase.co/storage/v1/object/sign/avatars/a.png?token=abc',
+    )
+    expect(normalizeSupabaseSignedUrl(supabaseUrl, '/object/sign/avatars/a.png?token=abc')).toBe(
+      'https://example.supabase.co/storage/v1/object/sign/avatars/a.png?token=abc',
+    )
   })
 })
