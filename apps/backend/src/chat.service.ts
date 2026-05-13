@@ -47,6 +47,7 @@ import {
   type SceneEvent,
   type SceneOutcome,
 } from './scene.runtime'
+import { buildWorldStatePrompt, coerceWorldState, type WorldState } from './world-state.service'
 
 const openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
@@ -87,6 +88,7 @@ type ChatRuntimeState = {
     facts: string[]
     relationshipTimeline: RelationshipTimelineEntry[]
     emotionalMomentum: EmotionalMomentum
+    worldState: WorldState
     turnCount: number
     updatedAt: string
   }
@@ -436,12 +438,14 @@ async function loadRuntimeContext(
   })
   const facts = asStringArray(memory.facts).slice(-4)
   const momentum = asRecord(memory.emotionalMomentum)
+  const worldStatePrompt = buildWorldStatePrompt(memory.worldState)
   const timeline = (Array.isArray(memory.relationshipTimeline) ? memory.relationshipTimeline : [])
     .filter((entry): entry is RelationshipTimelineEntry => entry && typeof entry === 'object')
     .slice(-4)
   const lines = [
     typeof memory.summary === 'string' && memory.summary ? `Memory summary: ${memory.summary}` : '',
     facts.length > 0 ? `Known user facts: ${facts.join(' | ')}` : '',
+    worldStatePrompt,
     typeof momentum.direction === 'string' ? `Emotional momentum: ${momentum.direction}` : '',
     timeline.length > 0 ? `Relationship timeline: ${timeline.map((entry) => entry.summary).join(' | ')}` : '',
     typeof sceneState.lastUserIntent === 'string' ? `Previous intent: ${sceneState.lastUserIntent}` : '',
@@ -662,6 +666,7 @@ export function updateRuntimeState({
   const nextFact = clip(userMessage, 120)
   const nextFacts = nextFact ? [...facts.filter((fact) => fact !== nextFact), nextFact].slice(-8) : facts.slice(-8)
   const turnCount = typeof memory.turnCount === 'number' ? memory.turnCount + 1 : 1
+  const worldState = coerceWorldState(memory.worldState, now)
   const previousSummary = typeof memory.summary === 'string' ? memory.summary : ''
   const summarySeed = [previousSummary, `User: ${clip(userMessage, 90)}`, `AI: ${clip(reply, 90)}`]
     .filter(Boolean)
@@ -709,6 +714,7 @@ export function updateRuntimeState({
       facts: nextFacts,
       relationshipTimeline: timeline,
       emotionalMomentum,
+      worldState,
       turnCount,
       updatedAt: now,
     },

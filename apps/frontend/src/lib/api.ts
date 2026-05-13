@@ -147,6 +147,17 @@ export type ChatResponse = {
   }
 }
 
+export type WorldState = {
+  timeOfDay: string
+  location: string
+  weather: string
+  mood: string
+  sceneNotes: string[]
+  updatedAt: string
+}
+
+export type WorldStateInput = Partial<Pick<WorldState, 'timeOfDay' | 'location' | 'weather' | 'mood' | 'sceneNotes'>>
+
 export type ChatRuntimeState = {
   memory: {
     summary: string
@@ -166,6 +177,7 @@ export type ChatRuntimeState = {
       threatening: number
       updatedAt: string
     }
+    worldState?: WorldState
     turnCount: number
     updatedAt: string
   }
@@ -849,6 +861,17 @@ export async function fetchChats(options: { archived?: boolean } = {}) {
 
 export async function fetchChatMessages(chatId: string) {
   return requestJson<{ chat?: SavedChat }>(`/chats/${chatId}/messages`)
+}
+
+export async function fetchChatWorldState(chatId: string) {
+  return requestJson<{ chatId: string; worldState: WorldState }>(`/chats/${chatId}/world-state`)
+}
+
+export async function updateChatWorldState(chatId: string, input: WorldStateInput) {
+  return requestJson<{ chatId: string; worldState: WorldState }>(`/chats/${chatId}/world-state`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
 }
 
 export async function archiveChat(chatId: string) {

@@ -43,6 +43,7 @@ function chatRuntimeMemory(chat: {
     chatSummary: chat.summary,
     memorySummary: typeof memory.summary === 'string' ? memory.summary : '',
     knownFacts: asStringArray(memory.facts).slice(-6),
+    worldState: asRecord(memory.worldState),
     emotionalMomentum: asRecord(memory.emotionalMomentum).direction,
     relationshipTimeline: timeline,
     relationshipStatus: relationshipState.status,

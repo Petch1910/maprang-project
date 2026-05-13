@@ -1,6 +1,6 @@
 # QA Status
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 ## Latest Local Gate
 
@@ -17,8 +17,8 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 118 pass, 0 fail.
-- API smoke: 24 pass, 0 fail, 1 skip for live chat in local mode.
+- Backend tests: 121 pass, 0 fail.
+- API smoke: 25 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.
@@ -30,6 +30,7 @@ Results:
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - API smoke now covers admin-only prompt inspector snapshots, prompt diffs, and deterministic local evals.
 - Route/menu audit now covers 14 surfaces including `/admin/prompt-inspector` and `/admin/evals`.
+- API smoke and E2E now cover chat world state save/read persistence.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 
 ## Production Gate
@@ -55,4 +56,5 @@ Checked:
 - `bun run production:check` guidance is visible.
 - Refresh interaction works.
 - `/chat` read mode toggles and shows the reading-mode notice.
+- `/chat/:id` world state panel opens from the right rail, saves location/notes, and persists after reload.
 - Console errors/warnings: none relevant.

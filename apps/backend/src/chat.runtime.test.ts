@@ -7,6 +7,7 @@ import {
   updateRuntimeState,
 } from './chat.service'
 import { contentRatingFromTags, ratingAllowed } from './content-rating'
+import { buildWorldStatePrompt, coerceWorldState, mergeWorldState } from './world-state.service'
 
 describe('chat runtime state', () => {
   test('persists emotional momentum and relationship timeline from user pressure', () => {
@@ -21,6 +22,10 @@ describe('chat runtime state', () => {
 
     expect(runtime.memory.turnCount).toBe(1)
     expect(runtime.memory.emotionalMomentum.direction).toBe('warming')
+    expect(runtime.memory.worldState).toMatchObject({
+      location: '',
+      sceneNotes: [],
+    })
     expect(runtime.memory.relationshipTimeline.at(-1)?.label).toBe('vulnerability')
     expect(runtime.relationshipState.affinity).toBeGreaterThan(0)
     expect(runtime.relationshipState.trust).toBeGreaterThan(0)
@@ -86,6 +91,30 @@ describe('chat runtime state', () => {
     expect(runtime.relationshipState.affinity).toBeGreaterThan(60)
     expect(runtime.relationshipState.trust).toBeGreaterThan(60)
     expect(runtime.memory.relationshipTimeline.at(-1)?.type).toBe('scene')
+  })
+
+  test('preserves explicit world state in runtime prompt context', () => {
+    const worldState = mergeWorldState(null, {
+      timeOfDay: 'after midnight',
+      location: 'rainy rooftop',
+      weather: 'light rain',
+      mood: 'quiet tension',
+      sceneNotes: ['The player has not entered the confession scene yet.'],
+    })
+    const runtime = updateRuntimeState({
+      previousMemory: { worldState, turnCount: 4 },
+      previousSceneState: null,
+      previousRelationshipState: null,
+      character: null,
+      userMessage: 'Stay with the same place.',
+      reply: 'I stay close to the railing.',
+    })
+    const prompt = buildWorldStatePrompt(runtime.memory.worldState)
+
+    expect(coerceWorldState(runtime.memory.worldState).location).toBe('rainy rooftop')
+    expect(prompt).toContain('World state')
+    expect(prompt).toContain('rainy rooftop')
+    expect(prompt).toContain('confession scene')
   })
 })
 

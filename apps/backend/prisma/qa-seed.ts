@@ -88,6 +88,14 @@ async function cleanupPreviousBrowserSmokeArtifacts() {
 const runtimeMemory = {
   summary: 'บทสนทนาที่ค้างไว้ในจังหวะความสัมพันธ์เริ่มอุ่นขึ้น มีฉากสำคัญรอให้ผู้เล่นเลือกเข้าเมื่อพร้อม',
   facts: ['ผู้เล่นเพิ่งเริ่มไว้ใจตัวละครมากขึ้น', 'ตัวละครตอบโทนช้า ลึก และเก็บรายละเอียด'],
+  worldState: {
+    timeOfDay: 'late evening',
+    location: 'quiet cafe by the window',
+    weather: 'soft rain outside',
+    mood: 'slow-burn trust check',
+    sceneNotes: ['Keep the conversation in the cafe until the player clearly moves the scene.'],
+    updatedAt: now.toISOString(),
+  },
   relationshipTimeline: [
     {
       turn: 1,

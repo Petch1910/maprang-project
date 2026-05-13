@@ -489,8 +489,40 @@ if (activeChats.length > 0) {
     if (!Array.isArray(payload.chat.messages)) throw new Error('missing messages array')
     return `${payload.chat.messages.length} messages`
   })
+
+  await check('PATCH/GET /chats/:id/world-state', async () => {
+    const location = `api-smoke-room-${Date.now()}`
+    const patchPayload = await readJson<{
+      chatId?: string
+      worldState?: { location?: string; sceneNotes?: string[] }
+    }>(`/chats/${activeChats[0].id}/world-state`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({
+        timeOfDay: 'api smoke evening',
+        location,
+        weather: 'dry run',
+        mood: 'stable QA',
+        sceneNotes: ['API smoke should persist world state without changing messages.'],
+      }),
+    })
+    if (patchPayload.chatId !== activeChats[0].id) throw new Error('world state patch returned wrong chat')
+    if (patchPayload.worldState?.location !== location) throw new Error('world state location was not patched')
+    if (!patchPayload.worldState.sceneNotes?.length) throw new Error('world state notes were not patched')
+
+    const getPayload = await readJson<{
+      chatId?: string
+      worldState?: { location?: string; mood?: string }
+    }>(`/chats/${activeChats[0].id}/world-state`, {
+      headers: authHeaders,
+    })
+    if (getPayload.chatId !== activeChats[0].id) throw new Error('world state get returned wrong chat')
+    if (getPayload.worldState?.location !== location) throw new Error('world state get did not return patched location')
+    return getPayload.worldState.mood ?? 'world-state-updated'
+  })
 } else {
   record('GET /chats/:id/messages', 'skip', 'no active chats returned')
+  record('PATCH/GET /chats/:id/world-state', 'skip', 'no active chats returned')
 }
 
 await check('GET /characters/:id/lore', async () => {

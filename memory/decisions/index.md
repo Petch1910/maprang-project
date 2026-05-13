@@ -1,6 +1,6 @@
 # Decision Log
 
-Last updated: 2026-05-13
+Last updated: 2026-05-14
 
 - [0001 - Use SocratiCode as local codebase intelligence](./0001-use-socraticode-local-tool.md)
 - [0002 - Add Markdown memory vault](./0002-add-markdown-memory-vault.md)
@@ -12,3 +12,4 @@ Last updated: 2026-05-13
 - [0008 - Stage background and observability tooling](./0008-stage-background-observability-tooling.md)
 - [0009 - Add admin prompt inspector](./0009-add-admin-prompt-inspector.md)
 - [0010 - Add admin automated evals](./0010-add-admin-automated-evals.md)
+- [0011 - Add chat world state controller](./0011-add-chat-world-state-controller.md)

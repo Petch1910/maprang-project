@@ -445,6 +445,22 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.getByTestId('chat-read-mode').click()
   await expect(page.getByTestId('chat-read-mode')).toHaveAttribute('aria-pressed', 'false')
 
+  if (!isMobile) {
+    await page.getByTestId('chat-right-panel-world').click()
+    await expect(page.getByTestId('chat-world-state-panel')).toBeVisible()
+    await page.getByTestId('chat-world-state-time').fill('e2e late night')
+    await page.getByTestId('chat-world-state-location').fill('e2e rooftop')
+    await page.getByTestId('chat-world-state-weather').fill('e2e soft rain')
+    await page.getByTestId('chat-world-state-mood').fill('e2e careful tension')
+    await page.getByTestId('chat-world-state-notes').fill('Keep this location stable during QA')
+    await page.getByTestId('chat-world-state-save').click()
+    await expect(page.getByTestId('chat-world-state-save')).toBeEnabled()
+    await page.reload()
+    await page.getByTestId('chat-right-panel-world').click()
+    await expect(page.getByTestId('chat-world-state-location')).toHaveValue('e2e rooftop')
+    await expect(page.getByTestId('chat-world-state-notes')).toHaveValue('Keep this location stable during QA')
+  }
+
   await page.getByTestId('chat-report-character').click()
   await expect(page.getByTestId('report-dialog')).toBeVisible()
   await expect(page.getByTestId('report-submit')).toBeEnabled()

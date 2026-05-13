@@ -26,6 +26,7 @@ import {
   streamChatMessage,
   trackCharacterView,
   updateCharacter,
+  updateChatWorldState as updateSavedChatWorldState,
   updateChatTitle as updateSavedChatTitle,
   updateLoreEntry,
   ApiError,
@@ -40,6 +41,7 @@ import {
   type HealthStatus,
   type LoreEntry,
   type LoreInput,
+  type WorldStateInput,
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
@@ -93,6 +95,15 @@ function defaultSceneState(): ChatRuntimeState['sceneState'] {
     eventCooldowns: {},
     consumedEvents: [],
     declinedEvents: [],
+    updatedAt: '',
+  }
+}
+
+function defaultMemoryState(): ChatRuntimeState['memory'] {
+  return {
+    summary: '',
+    facts: [],
+    turnCount: 0,
     updatedAt: '',
   }
 }
@@ -159,6 +170,7 @@ export function WorkspacePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [isLoreLoading, setIsLoreLoading] = useState(false)
+  const [isWorldStateSaving, setIsWorldStateSaving] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSavingCharacter, setIsSavingCharacter] = useState(false)
   const [isSavingLore, setIsSavingLore] = useState(false)
@@ -346,12 +358,7 @@ export function WorkspacePage() {
       setChatId(data.chat.id)
       setLastUsage((current) => (lastUsageChatIdRef.current === data.chat!.id ? current : null))
       setRuntimeState({
-        memory: data.chat.memory ?? {
-          summary: '',
-          facts: [],
-          turnCount: 0,
-          updatedAt: '',
-        },
+        memory: { ...defaultMemoryState(), ...(data.chat.memory ?? {}) },
         sceneState: { ...defaultSceneState(), ...(data.chat.sceneState ?? {}) },
         relationshipState: data.chat.relationshipState ?? {
           ...defaultRelationshipState(),
@@ -764,18 +771,41 @@ export function WorkspacePage() {
     sendMessage(command)
   }
 
+  const saveWorldState = async (input: WorldStateInput) => {
+    if (!chatId) {
+      setConnectionNote('ต้องเริ่มแชทให้ระบบสร้างห้องก่อน แล้วค่อยบันทึกสถานะโลก')
+      return
+    }
+
+    setIsWorldStateSaving(true)
+    try {
+      const data = await updateSavedChatWorldState(chatId, input)
+      setRuntimeState((current) => ({
+        memory: {
+          ...defaultMemoryState(),
+          ...(current?.memory ?? {}),
+          worldState: data.worldState,
+        },
+        sceneState: current?.sceneState ?? defaultSceneState(),
+        relationshipState: current?.relationshipState ?? defaultRelationshipState(),
+      }))
+      setConnectionNote('บันทึกสถานะโลกของแชทนี้แล้ว')
+    } catch (error) {
+      logUnexpectedWorkspaceError('Save world state error:', error)
+      setConnectionNote(apiErrorMessage(error, 'บันทึกสถานะโลกไม่สำเร็จ กรุณาลองใหม่'))
+      throw error
+    } finally {
+      setIsWorldStateSaving(false)
+    }
+  }
+
   const syncOpenChatMessages = async (id: string) => {
     try {
       const data = await fetchChatMessages(id)
       if (!data.chat) return
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
       setRuntimeState({
-        memory: data.chat.memory ?? {
-          summary: '',
-          facts: [],
-          turnCount: 0,
-          updatedAt: '',
-        },
+        memory: { ...defaultMemoryState(), ...(data.chat.memory ?? {}) },
         sceneState: { ...defaultSceneState(), ...(data.chat.sceneState ?? {}) },
         relationshipState: data.chat.relationshipState ?? {
           ...defaultRelationshipState(),
@@ -901,6 +931,7 @@ export function WorkspacePage() {
         tokenBalance={tokenBalance}
         runtimeState={runtimeState}
         message={message}
+        isWorldStateSaving={isWorldStateSaving}
         onMessageChange={updateMessageDraft}
         onFavoriteCharacter={toggleFavorite}
         onOpenCharacterProfile={() => navigate(`/characters/${character.id}`)}
@@ -909,6 +940,7 @@ export function WorkspacePage() {
         onOpenMenu={() => setIsMobileMenuOpen(true)}
         onReportCharacter={openCharacterReport}
         onReportMessage={openMessageReport}
+        onSaveWorldState={saveWorldState}
         onSceneAction={handleSceneAction}
         onSendMessage={sendMessage}
         onStartNewChat={startNewChat}

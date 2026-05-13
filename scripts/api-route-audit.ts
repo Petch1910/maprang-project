@@ -176,6 +176,16 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['smoke', 'e2e', 'backend-test'],
     note: 'api-smoke and Chat Room browser smoke load seeded chat messages',
   },
+  'GET /chats/:id/world-state': {
+    owner: 'chat/context',
+    coverage: ['smoke', 'e2e', 'backend-test'],
+    note: 'api-smoke, Chat Room browser smoke, and route security tests cover world state reads',
+  },
+  'PATCH /chats/:id/world-state': {
+    owner: 'chat/context',
+    coverage: ['smoke', 'e2e', 'backend-test'],
+    note: 'api-smoke, Chat Room browser smoke, and persistence tests cover owner-scoped world state updates',
+  },
   'PATCH /chats/:id': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],

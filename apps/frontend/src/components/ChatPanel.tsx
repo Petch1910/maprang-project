@@ -1,4 +1,4 @@
-import { useMemo, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useState, type RefObject } from 'react'
 import {
   Archive,
   BookOpen,
@@ -9,6 +9,7 @@ import {
   Flag,
   Heart,
   Image,
+  MapPin,
   Menu,
   MessageSquare,
   Music,
@@ -18,7 +19,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import heroImage from '../assets/hero.png'
-import type { Character, ChatMessage, ChatResponse, ChatRuntimeState } from '../lib/api'
+import type { Character, ChatMessage, ChatResponse, ChatRuntimeState, WorldStateInput } from '../lib/api'
 import { displayCharacterDetail, displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { Composer } from './Composer'
 import { MessageBubble } from './MessageBubble'
@@ -32,6 +33,7 @@ type ChatPanelProps = {
   chatLog: ChatMessage[]
   isLoading: boolean
   isWalletLoading?: boolean
+  isWorldStateSaving?: boolean
   lastUsage: ChatUsage | null
   tokenBalance: number
   runtimeState: ChatRuntimeState | null
@@ -44,6 +46,7 @@ type ChatPanelProps = {
   onOpenWallet: () => void
   onReportCharacter: () => void
   onReportMessage?: (chat: ChatMessage) => void
+  onSaveWorldState?: (input: WorldStateInput) => Promise<void> | void
   onSceneAction: (
     action: 'enter' | 'hold' | 'decline' | 'exit' | 'resolve' | 'accept' | 'reject',
     code?: string,
@@ -303,23 +306,29 @@ function QuickStartPrompts({
 }
 
 function RightRail({
+  chatId,
   character,
   onFavoriteCharacter,
   onOpenCharacterProfile,
   onOpenChats,
   onReportCharacter,
+  onSaveWorldState,
   onStartNewChat,
+  isWorldStateSaving,
   isReadMode,
   onToggleReadMode,
   runtimeState,
   usage,
 }: {
+  chatId: string | null
   character: Character
   onFavoriteCharacter?: (characterId: string, favorite: boolean) => Promise<void> | void
   onOpenCharacterProfile: () => void
   onOpenChats: () => void
   onReportCharacter: () => void
+  onSaveWorldState?: (input: WorldStateInput) => Promise<void> | void
   onStartNewChat: () => void
+  isWorldStateSaving: boolean
   isReadMode: boolean
   onToggleReadMode: () => void
   runtimeState: ChatRuntimeState | null
@@ -330,7 +339,15 @@ function RightRail({
   const [isSoundOn, setIsSoundOn] = useState(false)
   const [notice, setNotice] = useState('')
   const [isFavoritePending, setIsFavoritePending] = useState(false)
+  const [worldDraft, setWorldDraft] = useState({
+    timeOfDay: '',
+    location: '',
+    weather: '',
+    mood: '',
+    sceneNotes: '',
+  })
   const menuItems = [
+    { key: 'world', label: 'สถานะโลก', icon: MapPin },
     { key: 'role', label: 'บทบาท', icon: UserRound },
     { key: 'scene', label: 'สถานการณ์', icon: BookOpen },
     { key: 'personality', label: 'นิสัยตัวละคร', icon: Archive },
@@ -343,6 +360,17 @@ function RightRail({
   ]
   const activeScene = runtimeState?.sceneState.activeScene
   const pendingEvents = runtimeState?.sceneState.pendingEvents?.filter((event) => event.status === 'pending') ?? []
+  const worldState = runtimeState?.memory.worldState
+
+  useEffect(() => {
+    setWorldDraft({
+      timeOfDay: worldState?.timeOfDay ?? '',
+      location: worldState?.location ?? '',
+      weather: worldState?.weather ?? '',
+      mood: worldState?.mood ?? '',
+      sceneNotes: worldState?.sceneNotes?.join('\n') ?? '',
+    })
+  }, [worldState?.timeOfDay, worldState?.location, worldState?.weather, worldState?.mood, worldState?.sceneNotes])
 
   const showNotice = (message: string) => {
     setNotice(message)
@@ -370,6 +398,26 @@ function RightRail({
     }
   }
 
+  const saveWorldDraft = async () => {
+    if (!onSaveWorldState || !chatId || isWorldStateSaving) return
+    try {
+      await onSaveWorldState({
+        timeOfDay: worldDraft.timeOfDay,
+        location: worldDraft.location,
+        weather: worldDraft.weather,
+        mood: worldDraft.mood,
+        sceneNotes: worldDraft.sceneNotes
+          .split('\n')
+          .map((note) => note.trim())
+          .filter(Boolean)
+          .slice(0, 5),
+      })
+      showNotice('บันทึกสถานะโลกแล้ว')
+    } catch {
+      showNotice('บันทึกสถานะโลกไม่สำเร็จ')
+    }
+  }
+
   const renderPanel = () => {
     if (activePanel === 'role') {
       return (
@@ -378,6 +426,81 @@ function RightRail({
           <InfoLine label="สถานะเผยแพร่" value={character.status ?? 'DRAFT'} />
           <InfoLine label="การมองเห็น" value={character.visibility ?? 'PRIVATE'} />
         </>
+      )
+    }
+    if (activePanel === 'world') {
+      return (
+        <div className="space-y-3" data-testid="chat-world-state-panel">
+          <p className="m-0 text-sm leading-6 text-white/65">
+            ใช้ล็อกเวลา สถานที่ อากาศ และอารมณ์ฉากปัจจุบัน เพื่อให้ AI ไม่หลุดบริบทเวลาคุยยาว
+          </p>
+          <div className="grid gap-2">
+            <label className="space-y-1 text-xs font-black text-white/55">
+              <span>เวลาในเรื่อง</span>
+              <input
+                className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                data-testid="chat-world-state-time"
+                disabled={!chatId || isWorldStateSaving}
+                onChange={(event) => setWorldDraft((value) => ({ ...value, timeOfDay: event.target.value }))}
+                placeholder="เช่น เที่ยงคืน, เช้าวันฝนตก"
+                value={worldDraft.timeOfDay}
+              />
+            </label>
+            <label className="space-y-1 text-xs font-black text-white/55">
+              <span>สถานที่</span>
+              <input
+                className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                data-testid="chat-world-state-location"
+                disabled={!chatId || isWorldStateSaving}
+                onChange={(event) => setWorldDraft((value) => ({ ...value, location: event.target.value }))}
+                placeholder="เช่น ห้องสมุดชั้นสอง"
+                value={worldDraft.location}
+              />
+            </label>
+            <label className="space-y-1 text-xs font-black text-white/55">
+              <span>สภาพอากาศ</span>
+              <input
+                className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                data-testid="chat-world-state-weather"
+                disabled={!chatId || isWorldStateSaving}
+                onChange={(event) => setWorldDraft((value) => ({ ...value, weather: event.target.value }))}
+                placeholder="เช่น ฝนเบา ๆ, ร้อนอบอ้าว"
+                value={worldDraft.weather}
+              />
+            </label>
+            <label className="space-y-1 text-xs font-black text-white/55">
+              <span>อารมณ์ฉาก</span>
+              <input
+                className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                data-testid="chat-world-state-mood"
+                disabled={!chatId || isWorldStateSaving}
+                onChange={(event) => setWorldDraft((value) => ({ ...value, mood: event.target.value }))}
+                placeholder="เช่น อึดอัดแต่นุ่มนวล"
+                value={worldDraft.mood}
+              />
+            </label>
+            <label className="space-y-1 text-xs font-black text-white/55">
+              <span>โน้ตฉาก</span>
+              <textarea
+                className="min-h-20 w-full resize-none rounded-lg border border-white/10 bg-black/24 px-3 py-2 text-sm font-bold leading-6 text-white outline-none focus:border-orange-300/45"
+                data-testid="chat-world-state-notes"
+                disabled={!chatId || isWorldStateSaving}
+                onChange={(event) => setWorldDraft((value) => ({ ...value, sceneNotes: event.target.value }))}
+                placeholder="หนึ่งบรรทัดต่อหนึ่งโน้ต สูงสุด 5 รายการ"
+                value={worldDraft.sceneNotes}
+              />
+            </label>
+          </div>
+          <button
+            className="min-h-9 w-full rounded-lg bg-white px-3 text-xs font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
+            data-testid="chat-world-state-save"
+            disabled={!chatId || !onSaveWorldState || isWorldStateSaving}
+            onClick={saveWorldDraft}
+            type="button"
+          >
+            {chatId ? (isWorldStateSaving ? 'กำลังบันทึก...' : 'บันทึกสถานะโลก') : 'เริ่มแชทก่อนบันทึก'}
+          </button>
+        </div>
       )
     }
     if (activePanel === 'scene') {
@@ -563,11 +686,18 @@ function RightRail({
 
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
         <p className="mb-2 text-xs font-black text-white/35">ตั้งค่าตัวละคร</p>
+        <div className="mb-3 space-y-3 rounded-xl border border-white/10 bg-white/6 p-3">
+          <p className="m-0 text-xs font-black text-white/45">
+            {menuItems.find((item) => item.key === activePanel)?.label ?? 'รายละเอียด'}
+          </p>
+          {renderPanel()}
+        </div>
         {menuItems.map(({ key, label, icon: Icon }) => (
           <button
             className={`flex min-h-10 w-full items-center justify-between border-b border-white/6 text-left text-sm font-bold transition hover:text-white ${
               activePanel === key ? 'text-white' : 'text-white/72'
             }`}
+            data-testid={`chat-right-panel-${key}`}
             key={key}
             onClick={() => setActivePanel(key)}
             type="button"
@@ -585,12 +715,6 @@ function RightRail({
           </button>
         ))}
 
-        <div className="mt-3 space-y-3 rounded-xl border border-white/10 bg-white/6 p-3">
-          <p className="m-0 text-xs font-black text-white/45">
-            {menuItems.find((item) => item.key === activePanel)?.label ?? 'รายละเอียด'}
-          </p>
-          {renderPanel()}
-        </div>
       </div>
     </aside>
   )
@@ -612,6 +736,7 @@ export function ChatPanel({
   chatLog,
   isLoading,
   isWalletLoading = false,
+  isWorldStateSaving = false,
   lastUsage,
   tokenBalance,
   runtimeState,
@@ -624,6 +749,7 @@ export function ChatPanel({
   onOpenMenu,
   onReportCharacter,
   onReportMessage,
+  onSaveWorldState,
   onSceneAction,
   onSendMessage,
   onStartNewChat,
@@ -818,11 +944,14 @@ export function ChatPanel({
       </div>
 
       <RightRail
+        chatId={chatId}
         character={character}
+        isWorldStateSaving={isWorldStateSaving}
         onFavoriteCharacter={onFavoriteCharacter}
         onOpenCharacterProfile={onOpenCharacterProfile}
         onOpenChats={onOpenChats}
         onReportCharacter={onReportCharacter}
+        onSaveWorldState={onSaveWorldState}
         onStartNewChat={onStartNewChat}
         isReadMode={isReadMode}
         onToggleReadMode={() => setIsReadMode((value) => !value)}

@@ -3,6 +3,7 @@ import { requireDatabase } from './db'
 import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, sendChat, streamChat, updateChatTitle } from './chat.service'
 import { AuthError, isUuid, resolveRequestUserId } from './security'
 import { rejectInvalidUuid } from './route-guards'
+import { loadChatWorldState, updateChatWorldState } from './world-state.service'
 
 function responseChatId(chatId?: string) {
   return isUuid(chatId) ? chatId : null
@@ -30,6 +31,14 @@ const chatBody = t.Object({
       }),
     ),
   ),
+})
+
+const worldStateBody = t.Object({
+  timeOfDay: t.Optional(t.String({ maxLength: 80 })),
+  location: t.Optional(t.String({ maxLength: 120 })),
+  weather: t.Optional(t.String({ maxLength: 80 })),
+  mood: t.Optional(t.String({ maxLength: 80 })),
+  sceneNotes: t.Optional(t.Array(t.String({ maxLength: 180 }), { maxItems: 5 })),
 })
 
 export const chatRoutes = new Elysia()
@@ -121,6 +130,53 @@ export const chatRoutes = new Elysia()
       params: t.Object({
         id: t.String(),
       }),
+    },
+  )
+  .get(
+    '/chats/:id/world-state',
+    async ({ params, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured' }
+      const chatId = params.id ?? ''
+      const invalidId = rejectInvalidUuid(chatId, set, 'invalid_chat_id')
+      if (invalidId) return invalidId
+
+      const worldState = await loadChatWorldState(chatId, await resolveRequestUserId(request))
+      if (!worldState) {
+        set.status = 404
+        return { error: 'chat_not_found' }
+      }
+
+      return worldState
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+    },
+  )
+  .patch(
+    '/chats/:id/world-state',
+    async ({ body, params, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return { error: 'database_not_configured' }
+      const chatId = params.id ?? ''
+      const invalidId = rejectInvalidUuid(chatId, set, 'invalid_chat_id')
+      if (invalidId) return invalidId
+
+      const worldState = await updateChatWorldState(chatId, await resolveRequestUserId(request), body, prisma)
+      if (!worldState) {
+        set.status = 404
+        return { error: 'chat_not_found' }
+      }
+
+      return worldState
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      body: worldStateBody,
     },
   )
   .patch(
