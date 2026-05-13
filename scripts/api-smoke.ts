@@ -102,10 +102,11 @@ await check('GET /health', async () => {
 })
 
 await warnable('GET /ready', async () => {
-  const ready = await readJson<{ ok: boolean; readiness?: { status?: string; failures?: string[] } }>('/ready')
-  if (!ready.ok || ready.readiness?.status !== 'ready') {
+  const readyResponse = await readReadyPayload()
+  const ready = readyResponse.payload
+  if (!readyResponse.ok || !ready.ok || ready.readiness?.status !== 'ready') {
     const failures = ready.readiness?.failures ?? []
-    const reason = failures.join(', ') || 'unknown failure'
+    const reason = failures.join(', ') || `status ${readyResponse.status}`
     if (live && isOnlyLiveVerificationFailure(failures)) {
       return {
         ok: false,
@@ -790,10 +791,33 @@ async function readStreamEvents(path: string, init: RequestInit) {
   return events
 }
 
+async function readReadyPayload() {
+  const response = await fetch(`${apiBaseUrl}/ready`)
+  const raw = await response.text()
+  const payload = raw ? tryParseJson(raw) : null
+  if (!payload || typeof payload !== 'object') {
+    throw new Error(`/ready did not return JSON: ${raw.slice(0, 500) || 'empty response'}`)
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    payload: payload as { ok: boolean; readiness?: { status?: string; failures?: string[] } },
+  }
+}
+
 function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {
   const warnings = payload.warnings?.filter(Boolean).join('; ')
   const issue = warnings || payload.image?.note || 'image provider did not return a generated image'
   return `${issue}${providerFailureHint(issue)}`
+}
+
+function tryParseJson(value: string) {
+  try {
+    return JSON.parse(value) as unknown
+  } catch {
+    return null
+  }
 }
 
 function providerFailureHint(message: string) {
