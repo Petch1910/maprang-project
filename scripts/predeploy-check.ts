@@ -40,6 +40,7 @@ const requiredFiles = [
   'apps/backend/prisma/schema.prisma',
   'apps/frontend/.env.production.example',
   'apps/frontend/Dockerfile',
+  'scripts/backend-db-check.test.ts',
   'scripts/deploy-env-doctor.ts',
   'scripts/deploy-env-doctor-self-test.ts',
   'scripts/deploy-readiness.ts',
@@ -297,6 +298,7 @@ const checks: Check[] = [
         content,
         [
           '"api:audit"',
+          '"backend:check:db:test"',
           '"route-menu:audit"',
           '"memory:audit"',
           '"knowledge:audit"',
@@ -381,6 +383,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('smoke:ready:test')) {
         throw new Error('package.json qa:local must run smoke:ready:test so readiness smoke output regressions are caught')
+      }
+      if (!qaLocal.includes('backend:check:db:test')) {
+        throw new Error('package.json qa:local must run backend:check:db:test so DB-required backend check planning is caught')
       }
       if (!qaLocal.includes('deploy:status:test')) {
         throw new Error('package.json qa:local must run deploy:status:test so deploy status output regressions are caught')
@@ -580,6 +585,8 @@ const checks: Check[] = [
       requireIncludes(
         packageJson,
         [
+          '"backend:check:db:test"',
+          'backend-db-check.test.ts',
           '"security:audit"',
           'backend-security-audit.ts',
           '"api:audit"',
@@ -602,6 +609,11 @@ const checks: Check[] = [
           'readiness-smoke.test.ts',
         ],
         'package.json',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/backend-db-check.test.ts'),
+        ['DB availability before requiring DB-backed backend tests', 'REQUIRE_DB_TESTS'],
+        'scripts/backend-db-check.test.ts',
       )
       requireIncludes(
         securityAudit,
@@ -750,6 +762,7 @@ const checks: Check[] = [
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
           'bun run smoke:ready:test',
+          'bun run backend:check:db:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:status:test',
@@ -787,6 +800,7 @@ const checks: Check[] = [
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
           'bun run smoke:ready:test',
+          'bun run backend:check:db:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:readiness:test',
