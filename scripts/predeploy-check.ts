@@ -973,6 +973,7 @@ const checks: Check[] = [
       const readme = await readRepoFile('README.md')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const productionSetup = await readRepoFile('PRODUCTION_SETUP.md')
+      const e2eSmoke = await readRepoFile('tests/e2e/maprang-smoke.spec.ts')
       requireIncludes(
         audit,
         ['/admin/health', 'Route/Menu Audit', 'bun run route-menu:audit', 'bun run e2e:smoke', 'Creator Studio', 'Moderation'],
@@ -1002,6 +1003,16 @@ const checks: Check[] = [
         'DEPLOY_RENDER.md',
       )
       requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin'], 'STAGING_RUNBOOK.md')
+      requireIncludes(
+        e2eSmoke,
+        ['ตรวจเส้นทาง/เมนู', 'ตรวจพรอมป์ก่อนยิงโมเดล', 'ทดสอบคุณภาพ prompt/context', 'สรุป blocker production', 'เช็กลิสต์ deploy', 'แถบแชท'],
+        'tests/e2e/maprang-smoke.spec.ts',
+      )
+      forbidIncludes(
+        e2eSmoke,
+        ['Production blocker summary', 'Deploy checklist', 'Chat Sidebar', 'Prompt Inspector', 'Automated Evals'],
+        'tests/e2e/maprang-smoke.spec.ts',
+      )
     },
   },
   {

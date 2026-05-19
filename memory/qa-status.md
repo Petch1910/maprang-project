@@ -128,7 +128,7 @@ Checked:
 - `/admin/health` renders.
 - `/admin/prompt-inspector` renders and can call the admin prompt snapshot flow when an admin key is available.
 - `/admin/evals` renders and can run the deterministic local eval flow when an admin key is available.
-- Production blocker summary is visible.
+- สรุป blocker production is visible.
 - Chat live smoke row is visible.
 - `bun run production:check` guidance is visible.
 - Refresh interaction works.
