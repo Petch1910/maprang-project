@@ -70,6 +70,8 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const backendEnvInvalid = healthStatus?.env?.invalid ?? []
   const maxOutputTokens = model?.maxOutputTokens ?? 0
   const minRoleplayReplyChars = model?.minRoleplayReplyChars ?? 0
+  const replyBudgetMeetsBaseline = Boolean(model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320)
+  const replyBudgetMeetsRecommended = Boolean(model && maxOutputTokens >= 1600 && minRoleplayReplyChars >= 420)
   const isProductionMode = healthStatus?.env?.mode === 'production'
   const chatProductionReady = Boolean(chatProvider?.productionReady ?? chatProvider?.liveVerified)
   const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
@@ -130,14 +132,17 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
     },
     {
       label: 'งบคำตอบแชท',
-      ok: Boolean(model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320),
+      ok: replyBudgetMeetsBaseline,
       detail: model
         ? `ใช้ ${model.name}, คำตอบสูงสุด ${model.maxOutputTokens ?? 'default'} โทเคน, roleplay ขั้นต่ำ ${model.minRoleplayReplyChars ?? 'default'} ตัวอักษร, temperature ${model.temperature ?? 'default'}, retry แชท ${providerRetry?.chatAttempts ?? 'default'} ครั้ง`
         : 'รอ health response จาก backend',
-      action:
-        model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320
-          ? 'ค่าความยาวตอบกลับพร้อมสำหรับ roleplay แล้ว'
-          : 'ตั้ง MODEL_MAX_OUTPUT_TOKENS=1600 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=420 เพื่อลดคำตอบสั้นเกินไป',
+      action: !model
+        ? 'รอ backend health แล้วเช็คค่า MODEL_MAX_OUTPUT_TOKENS และ MODEL_MIN_ROLEPLAY_REPLY_CHARS'
+        : !replyBudgetMeetsBaseline
+          ? 'ตั้งอย่างน้อย MODEL_MAX_OUTPUT_TOKENS=1200 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=320 ก่อน staging'
+          : replyBudgetMeetsRecommended
+            ? 'ค่าความยาวตอบกลับอยู่ระดับแนะนำสำหรับ roleplay แล้ว'
+            : 'ผ่าน baseline แล้ว แต่แนะนำปรับเป็น MODEL_MAX_OUTPUT_TOKENS=1600 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=420 เพื่อให้บอทตอบมีเนื้อขึ้น',
       scope: 'local',
     },
     {
