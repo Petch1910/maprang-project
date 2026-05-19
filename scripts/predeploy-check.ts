@@ -486,7 +486,13 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"security:audit"', 'backend-security-audit.ts', '"api:audit"', 'api-route-audit.ts'], 'package.json')
       requireIncludes(
         securityAudit,
-        ['adminRoutePattern', 'admin route is missing requireAdminApiKey guard', '$queryRawUnsafe'],
+        [
+          'adminRoutePattern',
+          'admin route is missing requireAdminApiKey guard',
+          'uuidParamRoutePattern',
+          'route with /:id is missing rejectInvalidUuid guard',
+          '$queryRawUnsafe',
+        ],
         'scripts/backend-security-audit.ts',
       )
       requireIncludes(

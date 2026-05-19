@@ -10,6 +10,7 @@
 - Route ที่รับ resource id ต้อง validate ก่อนส่งเข้า Prisma:
   - UUID สำหรับ user, character, chat, lore, report
   - safe record id สำหรับ `Message.id` เพราะ schema ใช้ cuid ไม่ใช่ UUID
+- Static guard: `bun run security:audit` fails if a backend `/:id` route block is missing `rejectInvalidUuid`.
 - Guard อัตโนมัติ: `bun run security:audit`
 - QA ที่เกี่ยวข้อง: `chat.routes.security.test.ts`, `route-id-validation.test.ts`, `wallet.persistence.test.ts`
 
