@@ -78,6 +78,15 @@ export function extractRelativeImports(file: string, content: string) {
       node.arguments[0].text.startsWith('.')
     ) {
       imports.push(node.arguments[0].text)
+    } else if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'require' &&
+      node.arguments[0] &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      node.arguments[0].text.startsWith('.')
+    ) {
+      imports.push(node.arguments[0].text)
     }
 
     ts.forEachChild(node, visit)

@@ -27,7 +27,7 @@ To inspect app, QA script, seed, and e2e source imports for circular dependencie
 bun run import-cycle:audit
 ```
 
-`import-cycle:audit` scans relative TypeScript imports across backend, frontend, scripts, seed data, Playwright config, and e2e smoke files. It is included in `qa:local`, CI, and Production Smoke so architecture cycles cannot return silently.
+`import-cycle:audit` scans relative TypeScript imports, re-exports, dynamic imports, and CommonJS `require()` calls across backend, frontend, scripts, seed data, Playwright config, and e2e smoke files. It is included in `qa:local`, CI, and Production Smoke so architecture cycles cannot return silently.
 
 To inspect production env files before deploying, without printing secret values:
 

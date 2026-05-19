@@ -9,7 +9,7 @@ import {
 } from './import-cycle-audit'
 
 describe('import cycle audit', () => {
-  test('extracts static, dynamic, side-effect, and re-export relative imports', () => {
+  test('extracts static, dynamic, side-effect, require, and re-export relative imports', () => {
     const imports = extractRelativeImports(
       'apps/example/src/a.ts',
       `
@@ -18,10 +18,11 @@ describe('import cycle audit', () => {
         import React from 'react'
         export { thing } from '../shared/thing'
         const page = () => import('./pages/Home')
+        const helper = require('./legacy-helper')
       `,
     )
 
-    expect(imports).toEqual(['./types', './side-effect', '../shared/thing', './pages/Home'])
+    expect(imports).toEqual(['./types', './side-effect', '../shared/thing', './pages/Home', './legacy-helper'])
   })
 
   test('resolves extensionless and index imports against known source files', () => {
