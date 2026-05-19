@@ -750,8 +750,17 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/supabase-storage-setup.test.ts'),
-        ['validates production signed storage config', 'normalizes signed URL response paths'],
+        [
+          'validates production signed storage config',
+          'normalizes signed URL response paths',
+          'runs Supabase storage setup through an importable runner',
+        ],
         'scripts/supabase-storage-setup.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/supabase-storage-setup.ts'),
+        ['SupabaseStorageSetupRunnerOptions', 'runSupabaseStorageSetup', 'if (import.meta.main) process.exit(await runSupabaseStorageSetup())'],
+        'scripts/supabase-storage-setup.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/local-smoke.test.ts'),

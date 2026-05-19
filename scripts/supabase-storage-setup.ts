@@ -17,6 +17,29 @@ export type SupabaseStorageConfig = {
   authHeaders: Record<string, string>
 }
 
+export type SupabaseBucketState = {
+  exists: boolean
+  public: boolean | null
+}
+
+export type SupabaseStorageOperations = {
+  getBucket: (config: SupabaseStorageConfig) => Promise<SupabaseBucketState>
+  createBucket: (config: SupabaseStorageConfig) => Promise<void>
+  updateBucketPrivate: (config: SupabaseStorageConfig) => Promise<void>
+  uploadSmokeImage: (config: SupabaseStorageConfig, objectPath: string) => Promise<void>
+  createSignedUrl: (config: SupabaseStorageConfig, objectPath: string) => Promise<string>
+  verifySignedUrl: (signedUrl: string) => Promise<void>
+  deleteObject: (config: SupabaseStorageConfig, objectPath: string) => Promise<void>
+}
+
+export type SupabaseStorageSetupRunnerOptions = {
+  loadEnvFiles?: boolean
+  operations?: SupabaseStorageOperations
+  now?: () => number
+  writeLine?: (line: string) => void
+  writeError?: (line: string) => void
+}
+
 export function loadEnvContent(content: string, env: Record<string, string | undefined> = process.env) {
   for (const line of content.split(/\r?\n/)) {
     const trimmed = line.trim()
@@ -62,11 +85,6 @@ export function resolveSupabaseStorageConfig(
       apikey: serviceRoleKey,
     },
   }
-}
-
-function fail(message: string): never {
-  console.error(`Supabase storage setup failed: ${message}`)
-  process.exit(1)
 }
 
 export function encodedPath(path: string) {
@@ -185,66 +203,88 @@ async function deleteObject(config: SupabaseStorageConfig, objectPath: string) {
   if (!response.ok) throw new Error(`smoke avatar cleanup failed with ${response.status}: ${await parseError(response)}`)
 }
 
-export async function runSupabaseStorageSetup(env: Record<string, string | undefined> = process.env, argv: string[] = process.argv) {
-  loadEnvFile(join(backendDir, '.env'), env)
-  loadEnvFile(join(backendDir, '.env.production'), env)
-
-  const config = resolveSupabaseStorageConfig(env, argv)
-
-  const bucketState = await getBucket(config)
-  if (!bucketState.exists) {
-    if (config.checkOnly) fail(`Supabase bucket "${config.bucket}" does not exist. Run bun run supabase:storage:setup after the project is active.`)
-    await createBucket(config)
-    console.log(`createdBucket: ${config.bucket}`)
-  } else {
-    console.log(`bucket: ${config.bucket}`)
-  }
-
-  const currentBucket = await getBucket(config)
-  if (!currentBucket.exists) fail(`Supabase bucket "${config.bucket}" could not be read after setup`)
-
-  if (currentBucket.public === true) {
-    if (config.checkOnly) fail(`Supabase bucket "${config.bucket}" is public. Production expects a private bucket with signed URLs.`)
-    await updateBucketPrivate(config)
-    console.log(`updatedBucketPrivate: ${config.bucket}`)
-  }
-
-  const verifiedBucket = await getBucket(config)
-  if (verifiedBucket.public === true) fail(`Supabase bucket "${config.bucket}" is still public after update`)
-
-  const objectPath = `avatars/smoke-${Date.now()}.png`
-  await uploadSmokeImage(config, objectPath)
-  const signedUrl = await createSignedUrl(config, objectPath)
-  await verifySignedUrl(signedUrl)
-  await deleteObject(config, objectPath)
-
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        supabaseUrl: config.supabaseUrl,
-        bucket: config.bucket,
-        bucketPublic: false,
-        access: 'signed',
-        signedUrlExpiresIn: config.expiresIn,
-        checked: {
-          bucketReadable: true,
-          upload: true,
-          signedUrl: true,
-          signedUrlFetch: true,
-          cleanup: true,
-        },
-      },
-      null,
-      2,
-    ),
-  )
+export const liveSupabaseStorageOperations: SupabaseStorageOperations = {
+  getBucket,
+  createBucket,
+  updateBucketPrivate,
+  uploadSmokeImage,
+  createSignedUrl,
+  verifySignedUrl,
+  deleteObject,
 }
 
-if (import.meta.main) {
+export async function runSupabaseStorageSetup(
+  env: Record<string, string | undefined> = process.env,
+  argv: string[] = process.argv,
+  options: SupabaseStorageSetupRunnerOptions = {},
+) {
+  const operations = options.operations ?? liveSupabaseStorageOperations
+  const now = options.now ?? (() => Date.now())
+  const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+  const writeError = options.writeError ?? ((line: string) => console.error(line))
+
   try {
-    await runSupabaseStorageSetup()
+    if (options.loadEnvFiles !== false) {
+      loadEnvFile(join(backendDir, '.env'), env)
+      loadEnvFile(join(backendDir, '.env.production'), env)
+    }
+
+    const config = resolveSupabaseStorageConfig(env, argv)
+
+    const bucketState = await operations.getBucket(config)
+    if (!bucketState.exists) {
+      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" does not exist. Run bun run supabase:storage:setup after the project is active.`)
+      await operations.createBucket(config)
+      writeLine(`createdBucket: ${config.bucket}`)
+    } else {
+      writeLine(`bucket: ${config.bucket}`)
+    }
+
+    const currentBucket = await operations.getBucket(config)
+    if (!currentBucket.exists) throw new Error(`Supabase bucket "${config.bucket}" could not be read after setup`)
+
+    if (currentBucket.public === true) {
+      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" is public. Production expects a private bucket with signed URLs.`)
+      await operations.updateBucketPrivate(config)
+      writeLine(`updatedBucketPrivate: ${config.bucket}`)
+    }
+
+    const verifiedBucket = await operations.getBucket(config)
+    if (verifiedBucket.public === true) throw new Error(`Supabase bucket "${config.bucket}" is still public after update`)
+
+    const objectPath = `avatars/smoke-${now()}.png`
+    await operations.uploadSmokeImage(config, objectPath)
+    const signedUrl = await operations.createSignedUrl(config, objectPath)
+    await operations.verifySignedUrl(signedUrl)
+    await operations.deleteObject(config, objectPath)
+
+    writeLine(
+      JSON.stringify(
+        {
+          ok: true,
+          supabaseUrl: config.supabaseUrl,
+          bucket: config.bucket,
+          bucketPublic: false,
+          access: 'signed',
+          signedUrlExpiresIn: config.expiresIn,
+          checked: {
+            bucketReadable: true,
+            upload: true,
+            signedUrl: true,
+            signedUrlFetch: true,
+            cleanup: true,
+          },
+        },
+        null,
+        2,
+      ),
+    )
+    return 0
   } catch (error) {
-    fail(error instanceof Error ? error.message : String(error))
+    const message = error instanceof Error ? error.message : String(error)
+    writeError(`Supabase storage setup failed: ${message}`)
+    return 1
   }
 }
+
+if (import.meta.main) process.exit(await runSupabaseStorageSetup())
