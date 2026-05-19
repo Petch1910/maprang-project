@@ -31,6 +31,7 @@ Results:
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
 - Deploy status: pass, reports 2 staging blockers and 4 production blockers in local mode.
+- Deploy readiness now treats CORS that is empty, local, or non-https as a staging/production blocker.
 - Smoke doctor now prints ordered deploy next steps from the shared readiness evaluator.
 - Deploy status JSON now exposes top-level staging/production ready flags and blocker counts for automation.
 - Deploy readiness self-test: pass.
@@ -75,13 +76,13 @@ Status: intentionally failing until real environment is ready
 
 Known `production:check` blockers:
 - Local backend URL.
-- Local or missing production CORS.
+- Local, missing, or non-https production CORS.
 - Chat provider live smoke not marked verified.
 - Image provider live smoke not marked verified.
 
 Known `staging:verify` blockers in local mode:
 - Local backend URL.
-- Local or missing staging CORS.
+- Local, missing, or non-https staging CORS.
 
 ## Browser QA
 

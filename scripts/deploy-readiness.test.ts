@@ -3,6 +3,7 @@ import {
   buildNextDeploySteps,
   evaluateDeployReadiness,
   healthFailures,
+  isUnsafeCorsOrigin,
   isLocalOrigin,
   type HealthPayload,
 } from './deploy-readiness'
@@ -136,7 +137,7 @@ describe('deploy readiness evaluation', () => {
 
     expect(readiness.stagingReady).toBe(false)
     expect(readiness.productionReady).toBe(false)
-    expect(readiness.stagingBlockers).toEqual(['backend URL is local', 'CORS_ORIGINS is empty or local'])
+    expect(readiness.stagingBlockers).toEqual(['backend URL is local', 'CORS_ORIGINS is empty, local, or non-https'])
     expect(readiness.productionBlockers).toContain('chat provider live smoke is not marked verified')
     expect(readiness.productionBlockers).toContain('image generation live smoke is not marked verified')
     expect(nextSteps).toContain(
@@ -180,7 +181,7 @@ describe('deploy readiness evaluation', () => {
       expect.arrayContaining([
         'auth mode is not Supabase JWT',
         'avatar storage is not Supabase signed URL',
-        'CORS_ORIGINS is empty or local',
+        'CORS_ORIGINS is empty, local, or non-https',
         'structured knowledge is not valid',
         'OPENROUTER_API_KEY is missing',
         'image generation provider is missing',
@@ -211,5 +212,9 @@ describe('deploy readiness evaluation', () => {
     expect(isLocalOrigin('http://127.0.0.1:5173')).toBe(true)
     expect(isLocalOrigin('not-a-url')).toBe(true)
     expect(isLocalOrigin('https://app.example.com')).toBe(false)
+    expect(isUnsafeCorsOrigin('http://app.example.com')).toBe(true)
+    expect(isUnsafeCorsOrigin('https://localhost:5173')).toBe(true)
+    expect(isUnsafeCorsOrigin('*')).toBe(true)
+    expect(isUnsafeCorsOrigin('https://app.example.com')).toBe(false)
   })
 })

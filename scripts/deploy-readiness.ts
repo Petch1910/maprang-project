@@ -83,6 +83,15 @@ export function isLocalOrigin(origin: string) {
   }
 }
 
+export function isUnsafeCorsOrigin(origin: string) {
+  try {
+    const url = new URL(origin)
+    return url.protocol !== 'https:' || ['localhost', '127.0.0.1', '::1'].includes(url.hostname)
+  } catch {
+    return true
+  }
+}
+
 export function buildHealthRows(health: HealthPayload, apiBaseUrl: string) {
   return [
     ['backend', health.ok ? 'ok' : 'not ready'],
@@ -150,8 +159,11 @@ export function evaluateDeployReadiness(
       'run `bun run supabase:storage:setup`, then set STORAGE_PROVIDER=supabase and SUPABASE_STORAGE_ACCESS=signed on the backend',
     )
   }
-  if (!health.security?.corsOrigins?.length || health.security.corsOrigins.some(isLocalOrigin)) {
-    addProductionBlocker('CORS_ORIGINS is empty or local', 'set CORS_ORIGINS to the real frontend domain only')
+  if (!health.security?.corsOrigins?.length || health.security.corsOrigins.some(isUnsafeCorsOrigin)) {
+    addProductionBlocker(
+      'CORS_ORIGINS is empty, local, or non-https',
+      'set CORS_ORIGINS to the real https frontend domain only',
+    )
   }
   if (!health.knowledge?.structured?.ok) {
     addProductionBlocker(

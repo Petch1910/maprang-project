@@ -95,7 +95,7 @@ bun run staging:check
 - Image provider configured และต้องผ่าน live smoke พร้อมตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ถ้าจะเปิดฟีเจอร์สร้างรูปจริงใน production
 - Supabase Auth configured ทั้ง backend/frontend
 - avatar storage เป็น Supabase + signed URL
-- CORS เป็น frontend domain จริง ไม่ใช่ localhost
+- CORS เป็น frontend domain จริงแบบ `https://` ไม่ใช่ localhost หรือ `http://`
 - `production:check` ผ่านโดยไม่มี `productionBlockers`
 - `api:smoke:live` หรือ `smoke:chat` ต้องผ่านสำหรับแชท ถ้า OpenRouter คืน `usage.providerFailure` ยังห้ามถือว่าพร้อม production
 - `api:smoke:live` หรือ `smoke:image:live` ต้องผ่านสำหรับรูป ถ้า image provider ติด billing/quota ยังห้ามถือว่าพร้อม production

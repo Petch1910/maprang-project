@@ -34,6 +34,7 @@ Verified:
 - Relationship presets now expose API surfaces: `contract` for Character Lobby relationship contracts and `creator` for Creator Studio tag presets. Character Lobby loads `contract` from the backend and falls back to local copy only if the API is unavailable. Backend tests and API smoke verify that contract excludes creator-only presets while Creator Studio keeps them available.
 - Agent handoff docs are now available through `AGENTS.md` and canonical `agent.md`, and `predeploy:check` verifies the guide exists with required scope, continuation, minimum-check, commit/push, and operating sections.
 - Deploy readiness logic is shared by `smoke:doctor` and `deploy:status`, and covered by `deploy:readiness:test`, so current staging/production blockers and next steps can be printed without duplicating blocker rules.
+- Deploy readiness blocks CORS that is empty, local, or non-https; staging and production must use the real HTTPS frontend domain.
 - `smoke:doctor` now prints the same ordered deploy next steps as `deploy:status`.
 - `deploy:status --json` now exposes top-level staging/production ready flags and blocker counts for CI/dashboard automation.
 - CI runs deploy readiness self-test, and the manual Production Smoke workflow prints `deploy:status` before strict production checks.
@@ -61,7 +62,7 @@ Status: blocked by real environment and provider verification
 Known blockers:
 - Backend URL is still local in current smoke environment.
 - Frontend backend URL is still local in current smoke environment.
-- `CORS_ORIGINS` still includes local origins in current smoke environment.
+- `CORS_ORIGINS` is still local/non-production in current smoke environment.
 - Chat provider needs stable live smoke verification before setting `CHAT_PROVIDER_LIVE_VERIFIED=1`.
 - Image provider live smoke is blocked by provider billing hard limit. Keep `IMAGE_GENERATION_LIVE_VERIFIED=0`.
 - Structured knowledge must remain valid through `bun run knowledge:audit` before deploy.
@@ -70,7 +71,7 @@ Known blockers:
 ## Most Important Next Steps
 
 1. Deploy staging backend and frontend.
-2. Set real staging URLs and production-like CORS.
+2. Set real staging URLs and HTTPS-only production-like CORS.
 3. Run `staging:verify` against the deployed staging backend.
 4. Run ordered live provider smoke against staging, preferably `api:smoke:live`.
 5. Set verification flags only after live smoke passes.

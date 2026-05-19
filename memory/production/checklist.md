@@ -7,7 +7,7 @@ Last updated: 2026-05-14
 - Deploy staging backend.
 - Deploy staging frontend.
 - Set real backend URL for frontend.
-- Set real frontend domain in backend CORS.
+- Set real HTTPS frontend domain in backend CORS.
 - Run migrations against staging database.
 - Verify Supabase Auth configuration.
 - Verify private signed `avatars` bucket.

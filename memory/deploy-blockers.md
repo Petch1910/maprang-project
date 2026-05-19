@@ -10,13 +10,13 @@ Status: blocked until staging/production hosting exists
 
 Current issue:
 - Smoke environment still points at local backend/frontend URLs.
-- Latest local smoke doctor reports 2 staging blockers: backend URL is local, and CORS is empty or local.
+- Latest local smoke doctor reports 2 staging blockers: backend URL is local, and CORS is empty, local, or non-https.
 - `bun run deploy:status` now prints the same blockers plus ordered next steps without failing the local handoff.
 
 Required:
 - Set deployed backend URL for `SMOKE_API_BASE_URL`.
 - Set deployed backend URL for frontend `VITE_API_BASE_URL`.
-- Set real frontend domain in backend `CORS_ORIGINS`.
+- Set real HTTPS frontend domain in backend `CORS_ORIGINS`.
 - Run `bun run staging:verify` with `SMOKE_API_BASE_URL` and `SMOKE_ADMIN_API_KEY` after staging domains exist.
 
 ### Chat provider live verification
