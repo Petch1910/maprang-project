@@ -149,6 +149,7 @@ const checks: Check[] = [
           'Scene Runtime',
           'Prompt/Context Engine',
           'QA Commands',
+          'bun run import-cycle:audit',
           'Production Blockers',
           'Definition Of Done',
           'Backend URL เป็น deployed HTTPS URL จริง',
