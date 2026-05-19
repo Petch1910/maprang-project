@@ -238,7 +238,8 @@ Expected result:
 - Frontend TypeScript and Vite build pass.
 - Smoke doctor confirms the backend is reachable and the database is connected.
 - Readiness smoke confirms the backend is ready for traffic, including OpenRouter configuration, production hardening, and live chat/image verification when `NODE_ENV=production`.
-- Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
+- Local smoke confirms backend root identity, health, seeded Maprang data, relationship preview, and avatar upload.
+- API smoke confirms backend root identity before deeper route checks.
 - API smoke confirms temporary character creation/edit/view/favorite/duplicate/reset/delete and temporary lore create/edit/delete.
 - API smoke confirms `/relationship/presets` returns the full preset set, `/relationship/presets?surface=contract` returns only player-facing relationship contracts, and `/relationship/presets?surface=creator` keeps creator-only presets available for Creator Studio.
 - API smoke confirms chat menu mutations by renaming one seeded chat, archiving it, verifying the archived list, and restoring it back to active chats.
