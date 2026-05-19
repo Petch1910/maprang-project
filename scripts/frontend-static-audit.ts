@@ -157,6 +157,11 @@ export const suspiciousPatterns = [
     message: 'contains mixed Admin Health wording that should be Thai-first',
   },
   {
+    pattern:
+      /(?:System\s+prompt|รีเซ็ต\s+prompt|redacted\s+prompt|Redacted\s+final\s+prompt|Runtime\s+note|Persona\s+override|prompt\s+snapshot|diff\s+ที่\s+redact|เช็ค\s+backend|admin\s+API|snapshot\s+พรอมป์|diff\s+พรอมป์|(?<!\/)frontend\s+domain)/g,
+    message: 'contains mixed prompt/admin tooling wording that should be Thai-first',
+  },
+  {
     pattern: /(?:ระบบ relationship|anchor ตัวละคร|ยังไม่ได้รัน eval|รัน eval|hook:|ยัง fallback|fallback เป็นภาพ|เหตุผล disabled)/g,
     message: 'contains mixed English UI wording that should be Thai-first',
   },

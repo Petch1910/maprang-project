@@ -39,7 +39,7 @@ function apiErrorMessage(error: unknown) {
     return 'ต้องบันทึก ADMIN_API_KEY ก่อนตรวจพรอมป์'
   }
   if (error instanceof ApiError && error.status === 404) return 'ไม่พบตัวละครที่เลือก'
-  return 'ตรวจพรอมป์ไม่สำเร็จ ลองรีเฟรชตัวละครหรือเช็ค backend'
+  return 'ตรวจพรอมป์ไม่สำเร็จ ลองรีเฟรชตัวละครหรือเช็คระบบหลังบ้าน'
 }
 
 function diffStatusLabel(status: PromptInspectorDiff['changedSections'][number]['status']) {
@@ -252,7 +252,7 @@ export function AdminPromptInspectorPage() {
   async function copyPrompt() {
     if (!result?.snapshot.prompt || typeof navigator === 'undefined' || !navigator.clipboard) return
     await navigator.clipboard.writeText(result.snapshot.prompt)
-    setNote('คัดลอก redacted prompt แล้ว')
+    setNote('คัดลอกพรอมป์ที่ปิดข้อมูลลับแล้ว')
   }
 
   return (
@@ -266,7 +266,7 @@ export function AdminPromptInspectorPage() {
             </p>
             <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">ตรวจพรอมป์ก่อนยิงโมเดล</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              ตรวจ snapshot พรอมป์, งบโทเคน, lore ที่ดึงมาใช้ และ diff ของ context เพื่อหาสาเหตุเวลาบอทตอบสั้นหรือหลุดบุคลิก
+              ตรวจภาพรวมพรอมป์ งบโทเคน lore ที่ดึงมาใช้ และส่วนต่างของบริบท เพื่อหาสาเหตุเวลาบอทตอบสั้นหรือหลุดบุคลิก
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] xl:w-[560px]">
@@ -309,7 +309,7 @@ export function AdminPromptInspectorPage() {
             }`}
           >
             {hasAdminKey ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
-            {hasAdminKey ? 'พร้อมเรียก admin API' : 'ต้องใช้ ADMIN_API_KEY'}
+            {hasAdminKey ? 'พร้อมเรียก API ผู้ดูแล' : 'ต้องใช้ ADMIN_API_KEY'}
           </span>
         </div>
       </section>
@@ -393,7 +393,7 @@ export function AdminPromptInspectorPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-xs font-black text-slate-500">Runtime note</span>
+            <span className="mb-1 block text-xs font-black text-slate-500">โน้ต runtime</span>
             <textarea
               className="min-h-24 w-full resize-y rounded-xl border border-slate-900/10 px-3 py-3 text-sm font-bold leading-6 text-slate-700 outline-none focus:border-amber-500"
               data-testid="prompt-inspector-runtime-note"
@@ -411,12 +411,12 @@ export function AdminPromptInspectorPage() {
             />
             <span>
               <span className="block text-sm font-black text-slate-950">แนบ persona ที่บันทึกไว้</span>
-              <span className="block text-xs font-bold leading-5 text-slate-500">ใช้ค่า server ถ้าไม่ได้กรอก persona override ด้านล่าง</span>
+              <span className="block text-xs font-bold leading-5 text-slate-500">ใช้ค่าจากระบบหลังบ้าน ถ้าไม่ได้กรอก persona ชั่วคราวด้านล่าง</span>
             </span>
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-xs font-black text-slate-500">Persona override</span>
+            <span className="mb-1 block text-xs font-black text-slate-500">Persona ชั่วคราว</span>
             <textarea
               className="min-h-24 w-full resize-y rounded-xl border border-slate-900/10 px-3 py-3 text-sm font-bold leading-6 text-slate-700 outline-none focus:border-amber-500"
               data-testid="prompt-inspector-user-persona"
@@ -468,7 +468,7 @@ export function AdminPromptInspectorPage() {
                   <div>
                     <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
                       <ShieldCheck size={17} />
-                      Redacted final prompt
+                      พรอมป์สุดท้ายที่ปิดข้อมูลลับแล้ว
                     </p>
                     <p className="m-0 mt-1 text-xs font-bold text-slate-500">
                       สร้างเมื่อ {new Date(result.snapshot.generatedAt).toLocaleString('th-TH')}
@@ -494,8 +494,8 @@ export function AdminPromptInspectorPage() {
               <section className="space-y-3">
                 <div className="flex items-end justify-between gap-3">
                   <div>
-                    <p className="m-0 text-sm font-black text-slate-950">Section budget</p>
-                    <p className="m-0 mt-1 text-xs font-bold text-slate-500">เปิดแต่ละ section เพื่อดูข้อความที่ถูกส่งเข้าพรอมป์</p>
+                    <p className="m-0 text-sm font-black text-slate-950">งบแต่ละส่วน</p>
+                    <p className="m-0 mt-1 text-xs font-bold text-slate-500">เปิดแต่ละส่วนเพื่อดูข้อความที่ถูกส่งเข้าพรอมป์</p>
                   </div>
                 </div>
                 {result.snapshot.sections.map((section) => (
@@ -517,11 +517,11 @@ export function AdminPromptInspectorPage() {
                             <p className="m-0 mt-1 text-xs font-bold leading-5 text-slate-500">{entry.preview}</p>
                           </div>
                           <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-black text-slate-600">
-                            priority {entry.priority}
+                            ความสำคัญ {entry.priority}
                           </span>
                         </div>
                         {entry.aliases.length > 0 && (
-                          <p className="m-0 mt-2 text-xs font-bold text-slate-400">aliases: {entry.aliases.join(', ')}</p>
+                          <p className="m-0 mt-2 text-xs font-bold text-slate-400">ชื่อเรียกอื่น: {entry.aliases.join(', ')}</p>
                         )}
                       </article>
                     ))}
@@ -537,7 +537,7 @@ export function AdminPromptInspectorPage() {
                 </span>
                 <h2 className="m-0 mt-4 text-xl font-black text-slate-950">ยังไม่ได้ตรวจพรอมป์</h2>
                 <p className="m-0 mt-2 text-sm font-bold leading-6 text-slate-500">
-                  เลือกตัวละคร ใส่ข้อความ แล้วกดตรวจ ระบบจะแสดง prompt snapshot และ diff ที่ redact แล้ว
+                  เลือกตัวละคร ใส่ข้อความ แล้วกดตรวจ ระบบจะแสดงภาพรวมพรอมป์และส่วนต่างที่ปิดข้อมูลลับแล้ว
                 </p>
               </div>
             </section>

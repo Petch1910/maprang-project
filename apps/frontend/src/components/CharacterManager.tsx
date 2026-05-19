@@ -189,7 +189,7 @@ export function CharacterManager({
           type="file"
         />
 
-        <Field label="System prompt / บุคลิก">
+        <Field label="พรอมป์ระบบ / บุคลิก">
           <textarea
             className={`${textareaClass} min-h-36`}
             value={systemPrompt}
@@ -230,7 +230,7 @@ export function CharacterManager({
             className={inputClass}
             value={tags}
             onChange={(event) => setTags(event.target.value)}
-            placeholder="thai, assistant, friendly"
+            placeholder="ไทย, ผู้ช่วย, เป็นมิตร"
           />
         </Field>
         <CreatorReadinessPanel analysis={tagAnalysis} />
@@ -302,7 +302,7 @@ export function CharacterManager({
             onClick={onResetPrompt}
             disabled={isSaving}
           >
-            รีเซ็ต prompt
+            รีเซ็ตพรอมป์
           </button>
           <button type="button"
             className="min-h-10 rounded-xl border border-red-500/25 bg-red-50 px-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"

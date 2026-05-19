@@ -115,9 +115,9 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'ตัวตรวจพรอมป์',
     route: '/admin/prompt-inspector',
-    control: 'ADMIN_API_KEY, เลือกตัวละคร, ข้อความปัจจุบัน, ข้อความก่อนหน้า, note runtime, persona override, ตรวจพรอมป์, คัดลอกพรอมป์ที่ปิดข้อมูลลับ',
+    control: 'ADMIN_API_KEY, เลือกตัวละคร, ข้อความปัจจุบัน, ข้อความก่อนหน้า, โน้ต runtime, persona ชั่วคราว, ตรวจพรอมป์, คัดลอกพรอมป์ที่ปิดข้อมูลลับ',
     result:
-      'เรียก admin API เพื่อตรวจ snapshot พรอมป์แบบปิดข้อมูลลับ, งบโทเคนรายส่วน, lore ที่ดึงมาใช้, คำเตือน และ diff พรอมป์ โดยไม่ยิงโมเดลจริง',
+      'เรียก API ผู้ดูแลเพื่อตรวจภาพรวมพรอมป์แบบปิดข้อมูลลับ, งบโทเคนรายส่วน, lore ที่ดึงมาใช้, คำเตือน และส่วนต่างของพรอมป์ โดยไม่ยิงโมเดลจริง',
     disabledReason: 'ปุ่มตรวจถูกปิดเมื่อไม่มี ADMIN_API_KEY, ยังไม่เลือกตัวละคร, ข้อความว่าง หรือกำลังตรวจอยู่',
     emptyState: 'แสดงสถานะยังไม่ได้ตรวจพรอมป์และบอกให้เลือกตัวละคร/ข้อความก่อนตรวจ',
     status: 'guarded',
@@ -127,7 +127,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     route: '/admin/evals',
     control: 'ADMIN_API_KEY, ปุ่มรันชุดทดสอบ, แผงพับชุดทดสอบ, ผลเช็ก, สรุปจุดไม่ผ่าน',
     result:
-      'เรียก admin API เพื่อรันชุด roleplay แบบผลซ้ำได้ ตรวจกฎคุมพรอมป์ คลังความรู้ ความต่อเนื่องของความสัมพันธ์/ฉาก และงบโทเคน โดยไม่ยิงโมเดลจริง',
+      'เรียก API ผู้ดูแลเพื่อรันชุดโรลเพลย์แบบผลซ้ำได้ ตรวจกฎคุมพรอมป์ คลังความรู้ ความต่อเนื่องของความสัมพันธ์/ฉาก และงบโทเคน โดยไม่ยิงโมเดลจริง',
     disabledReason: 'ปุ่มรันชุดทดสอบถูกปิดเมื่อไม่มี ADMIN_API_KEY หรือกำลังรันอยู่',
     emptyState: 'แสดงสถานะยังไม่ได้รันชุดทดสอบ และอธิบายว่าจะเห็นชุดทดสอบ/ผลเช็ก/จุดไม่ผ่านหลังรัน',
     status: 'guarded',
@@ -135,7 +135,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'สเตจจิงจริง',
     route: 'โดเมน staging จริง',
-    control: 'Supabase จริง, backend บน Render/Railway, frontend domain, CORS จริง, e2e smoke',
+    control: 'Supabase จริง, ระบบหลังบ้านบน Render/Railway, โดเมนหน้าบ้าน, CORS จริง, e2e smoke',
     result: 'ต้อง deploy staging ก่อน production และรัน migration/smoke กับ DB staging จริง',
     disabledReason: 'ยังไม่ใช่ปุ่มใน local app เพราะต้องใช้บัญชีและ domain จริง',
     emptyState: 'ใช้ STAGING_RUNBOOK.md และ checklist ใน /admin/health เป็นตัวบอกงานที่ค้าง',

@@ -543,7 +543,7 @@ export function WorkspacePage() {
       setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
     } catch (error) {
       logUnexpectedWorkspaceError('Reset prompt error:', error)
-      setConnectionNote(apiErrorMessage(error, 'รีเซ็ต prompt ไม่สำเร็จ กรุณาลองใหม่'))
+      setConnectionNote(apiErrorMessage(error, 'รีเซ็ตพรอมป์ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
     }

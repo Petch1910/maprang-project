@@ -184,6 +184,28 @@ describe('frontend static audit', () => {
     )
   })
 
+  test('reports mixed prompt and admin tooling wording regressions', () => {
+    const findings = auditSuspiciousPatterns(
+      [
+        '<Field label="System prompt / บุคลิก" />',
+        '<button>รีเซ็ต prompt</button>',
+        '<p>คัดลอก redacted prompt แล้ว</p>',
+        '<p>Redacted final prompt</p>',
+        '<span>Runtime note</span>',
+        '<span>Persona override</span>',
+        '<p>ระบบจะแสดง prompt snapshot และ diff ที่ redact แล้ว</p>',
+        '<p>ตรวจพรอมป์ไม่สำเร็จ ลองเช็ค backend</p>',
+        '<p>เรียก admin API เพื่อตรวจ snapshot พรอมป์และ diff พรอมป์</p>',
+        '<p>frontend domain ทดลอง</p>',
+      ].join('\n'),
+      'PromptToolingFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual(
+      Array.from({ length: 13 }, () => 'contains mixed prompt/admin tooling wording that should be Thai-first'),
+    )
+  })
+
   test('combines accessibility and placeholder findings with stable line numbers', () => {
     const content = `
       export function Fixture() {
