@@ -228,13 +228,13 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
   'PATCH /admin/reports/:id': {
     owner: 'moderation',
-    coverage: ['backend-test'],
-    note: 'report service tests cover status validation and audit logging',
+    coverage: ['admin-smoke', 'backend-test'],
+    note: 'api-smoke --require-admin verifies non-mutating invalid-id guard; report service tests cover status mutation and audit logging',
   },
   'POST /admin/reports/:id/actions': {
     owner: 'moderation',
-    coverage: ['backend-test'],
-    note: 'report service tests cover hide character/archive message actions and audit logging',
+    coverage: ['admin-smoke', 'backend-test'],
+    note: 'api-smoke --require-admin verifies non-mutating invalid-id guard; report service tests cover hide character/archive message actions and audit logging',
   },
   'GET /admin/summary': {
     owner: 'admin',

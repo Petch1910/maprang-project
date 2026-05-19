@@ -722,6 +722,28 @@ if (adminHeaders) {
     return `${payload.reports.length} reports`
   })
 
+  await check('PATCH/POST /admin/reports validation', async () => {
+    const patch = await readExpectedError('/admin/reports/not-a-uuid', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...adminHeaders },
+      body: JSON.stringify({ status: 'REVIEWED' }),
+    })
+    if (patch.status !== 400 || patch.payload.error !== 'invalid_report_id') {
+      throw new Error(`PATCH invalid id expected invalid_report_id 400, got ${patch.status} ${patch.payload.error ?? 'unknown'}`)
+    }
+
+    const action = await readExpectedError('/admin/reports/not-a-uuid/actions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...adminHeaders },
+      body: JSON.stringify({ action: 'ARCHIVE_MESSAGE' }),
+    })
+    if (action.status !== 400 || action.payload.error !== 'invalid_report_id') {
+      throw new Error(`POST action invalid id expected invalid_report_id 400, got ${action.status} ${action.payload.error ?? 'unknown'}`)
+    }
+
+    return 'invalid admin report ids rejected before mutation'
+  })
+
   await check('GET /admin/audit-logs', async () => {
     const payload = await readJson<{ logs?: unknown[] }>('/admin/audit-logs?limit=5', { headers: adminHeaders })
     if (!payload.logs) throw new Error('missing audit logs array')
@@ -734,6 +756,7 @@ if (adminHeaders) {
   record('POST /admin/prompt-inspector', status, detail)
   record('GET /admin/evals/local', status, detail)
   record('GET /admin/reports', status, detail)
+  record('PATCH/POST /admin/reports validation', status, detail)
   record('GET /admin/audit-logs', status, detail)
 }
 
@@ -812,6 +835,22 @@ async function readReadyPayload() {
     ok: response.ok,
     status: response.status,
     payload: payload as { ok: boolean; readiness?: { status?: string; failures?: string[] } },
+  }
+}
+
+async function readExpectedError(path: string, init: RequestInit) {
+  const response = await fetch(`${apiBaseUrl}${path}`, init)
+  const raw = await response.text()
+  const parsed = raw ? tryParseJson(raw) : null
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error(`${path} did not return a JSON error payload: ${raw.slice(0, 500) || 'empty response'}`)
+  }
+
+  if (response.ok) throw new Error(`${path} unexpectedly succeeded`)
+
+  return {
+    status: response.status,
+    payload: parsed as { error?: string },
   }
 }
 

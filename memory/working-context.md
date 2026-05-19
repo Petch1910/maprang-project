@@ -58,6 +58,7 @@ Verified:
 - Security audit regression tests now cover unsafe raw SQL helpers, tagged raw SQL allowance, missing admin guards, and missing UUID guards, and run in local QA, CI, and Production Smoke.
 - Manual Production Smoke now runs predeploy and release handoff guards before validating deployed smoke secrets or spending provider credits.
 - Manual Production Smoke also runs secrets, secret pattern tests, memory, knowledge, eval, security, API route, and route/menu audits before deployed smoke validation.
+- API smoke with admin auth now covers non-mutating admin report PATCH/action validation so moderation admin routes are exercised without resolving or hiding real production records.
 
 ## Current Production Status
 
