@@ -695,7 +695,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         smokeDoctorTest,
-        ['buildSmokeDoctorReport', 'strict staging gate fails', 'backend health failures'],
+        [
+          'buildSmokeDoctorReport',
+          'strict staging gate fails',
+          'backend health failures',
+          'warns when roleplay reply budget passes baseline but is below recommendation',
+        ],
         'scripts/smoke-doctor.test.ts',
       )
       requireIncludes(

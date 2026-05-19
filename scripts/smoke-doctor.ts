@@ -7,6 +7,9 @@ import {
   type HealthPayload,
 } from './deploy-readiness'
 
+const recommendedRoleplayMaxOutputTokens = 1600
+const recommendedMinRoleplayReplyChars = 420
+
 export type SmokeDoctorReport = {
   exitCode: number
   stdout: string[]
@@ -52,6 +55,20 @@ export function buildSmokeDoctorReport(
   }
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
     warnings.push('Warning: image generation provider is not configured. Creator Studio will use placeholder avatars.')
+  }
+  if (health.model) {
+    const maxOutputTokens = health.model.maxOutputTokens ?? 0
+    const minRoleplayReplyChars = health.model.minRoleplayReplyChars ?? 0
+    if (
+      maxOutputTokens > 0 &&
+      minRoleplayReplyChars > 0 &&
+      (maxOutputTokens < recommendedRoleplayMaxOutputTokens ||
+        minRoleplayReplyChars < recommendedMinRoleplayReplyChars)
+    ) {
+      warnings.push(
+        `Warning: roleplay reply budget is below the recommended ${recommendedRoleplayMaxOutputTokens}/${recommendedMinRoleplayReplyChars}. Current MODEL_MAX_OUTPUT_TOKENS=${maxOutputTokens}, MODEL_MIN_ROLEPLAY_REPLY_CHARS=${minRoleplayReplyChars}.`,
+      )
+    }
   }
 
   const {

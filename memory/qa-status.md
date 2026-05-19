@@ -78,6 +78,7 @@ Results:
 - Production reply budget env guard: pass via `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`; deploy doctor now fails values below 1200 output tokens or 320 roleplay reply characters.
 - Runtime env reply-budget guard: pass via `env.test`, `health.service.test`, and `predeploy:check`; production `/health` now reports reply-budget values below 1200/320 as invalid env.
 - Deploy readiness reply-budget propagation: pass via `deploy:readiness:test`; invalid `/health` roleplay budget entries now become staging/production blockers and next-step fixes.
+- Smoke doctor reply-budget recommendation warning: pass via `smoke:doctor:test`; environments at 1200/320 still pass baseline but emit a CLI warning to move toward 1600/420.
 - Admin Health reply-budget recommendation UI: pass via `frontend:check`, `predeploy:check`, and `e2e:smoke:test`.
 - Production readiness now blocks on both chat provider and image provider live verification flags.
 - Smoke doctor now reports separate staging blockers and production blockers; `--strict-staging` rejects local backend/CORS before provider verification.

@@ -95,4 +95,38 @@ describe('smoke doctor report', () => {
     expect(report.stderr.join('\n')).toContain('database is not connected')
     expect(report.stderr.join('\n')).toContain('Deploy fix:')
   })
+
+  test('warns when roleplay reply budget passes baseline but is below recommendation', () => {
+    const report = buildSmokeDoctorReport(
+      healthyPayload({
+        model: {
+          name: 'google/gemini-2.0-flash-001',
+          maxOutputTokens: 1200,
+          minRoleplayReplyChars: 320,
+          chatProvider: {
+            configured: true,
+            liveVerified: true,
+            productionReady: true,
+            status: 'verified',
+          },
+          imageGeneration: {
+            configured: true,
+            liveVerified: true,
+            productionReady: true,
+            status: 'verified',
+            model: 'gpt-image-1.5',
+          },
+        },
+      }),
+      {
+        apiBaseUrl: 'https://api.maprang.example',
+        isLocalSmokeTarget: false,
+      },
+    )
+
+    expect(report.exitCode).toBe(0)
+    expect(report.warnings).toContain(
+      'Warning: roleplay reply budget is below the recommended 1600/420. Current MODEL_MAX_OUTPUT_TOKENS=1200, MODEL_MIN_ROLEPLAY_REPLY_CHARS=320.',
+    )
+  })
 })

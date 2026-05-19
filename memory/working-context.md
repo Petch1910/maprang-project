@@ -38,6 +38,7 @@ Verified:
 - Deploy env doctor now fails production/staging envs with roleplay reply budget below the production baseline `MODEL_MAX_OUTPUT_TOKENS=1200` or `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320`.
 - Runtime production env validation now applies the same reply-budget baseline, so `/health`, `deploy:status`, and `production:check` surface thin-reply model settings even if `deploy:doctor` was not run first.
 - Deploy readiness regression coverage now proves `/health` invalid env entries for thin roleplay reply budgets become staging and production blockers with concrete next-step output.
+- `smoke:doctor` now warns when roleplay reply budget passes the 1200/320 production baseline but remains below the richer 1600/420 recommendation, making short-reply risk visible in CLI handoff output.
 - Admin Health now distinguishes the minimum reply-budget baseline from the recommended richer roleplay target, so environments at 1200/320 still get a next action to move toward 1600/420.
 - Relationship ladder now supports the expanded Thai seed set from hostile to committed routes: enemy, disliked, rival, bickering rival, acquaintance, friend, close friend, ride-or-die, crush, friend-crush, dating trial, talking stage, partner, toxic partner, lover, life partner, spouse, toxic spouse, and soulmate.
 - Frontend relationship status labels are centralized so Explore, Chat, My Chats, Events, Relationship preview, and debug panels use the same Thai display names.
