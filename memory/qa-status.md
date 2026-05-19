@@ -67,6 +67,7 @@ Results:
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, admin/system/relationship English UI label regressions, mixed English debug copy regressions, Thai text/mojibake regressions, and the importable static audit runner.
 - `frontend:static:audit:test` now also blocks stale English Redux fallback errors such as `Could not load chats` and `Could not load characters`.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.
+- `frontend:static:audit:test` now also blocks stale English chat-selection accessibility labels such as `Select chat`.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link, navigate route regressions, and the importable route audit runner.
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document, runtime row alignment, stale mixed-language audit copy, and the importable doc-check runner.
 - `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior and shared backend root identity validation.

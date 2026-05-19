@@ -178,7 +178,7 @@ function SidebarChatRow({
     >
       {isSelectionMode && (
         <button
-          aria-label="Select chat"
+          aria-label="เลือกแชท"
           aria-pressed={isSelected}
           className="grid size-8 place-items-center rounded-lg text-white/55 transition hover:bg-white/8 hover:text-white"
           data-testid={`chat-row-checkbox-${chat.id}`}

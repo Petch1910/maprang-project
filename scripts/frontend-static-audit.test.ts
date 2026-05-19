@@ -88,11 +88,13 @@ describe('frontend static audit', () => {
         '<p>Teen romance</p>',
         '<p>Mature 18+</p>',
         '<p>Restricted 18+</p>',
+        '<button aria-label="Select chat" />',
       ].join('\n'),
       'EnglishUiFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
+      'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',

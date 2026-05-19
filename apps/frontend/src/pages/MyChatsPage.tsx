@@ -466,7 +466,7 @@ export function MyChatsPage() {
                 <div className="relative flex min-h-10 min-w-0 items-start gap-3 pr-24 sm:pr-32">
                   {isSelectionMode && (
                     <button
-                      aria-label="Select chat"
+                      aria-label="เลือกแชท"
                       aria-pressed={selectedChatIds.includes(chat.id)}
                       className="mt-0.5 grid size-9 flex-none place-items-center rounded-lg border border-slate-900/10 bg-white text-slate-600 transition hover:border-slate-950 hover:text-slate-950"
                       data-testid={`my-chat-checkbox-${chat.id}`}
