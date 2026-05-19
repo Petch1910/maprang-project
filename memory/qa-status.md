@@ -60,7 +60,7 @@ Results:
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, Thai text/mojibake regressions, and the importable static audit runner.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link, navigate route regressions, and the importable route audit runner.
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document, runtime row alignment, and the importable doc-check runner.
-- `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior.
+- `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior and shared backend root identity validation.
 - `provider:smoke:guards:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat/image smoke verification helpers.
 - `smoke:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard smoke doctor blocker and strict-gate output.
 - `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard `/ready` summary output and the importable readiness smoke runner.

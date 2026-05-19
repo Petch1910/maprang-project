@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
 import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
-import { apiBaseUrl, readJson, smokeAuthHeaders } from './smoke-helpers'
+import { apiBaseUrl, readJson, smokeAuthHeaders, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 
 export type ApiSmokeStatus = 'pass' | 'warn' | 'fail' | 'skip'
 
@@ -60,11 +60,6 @@ type HealthSmokePayload = {
     promptBudgetTokens?: number
     promptHistoryMaxMessages?: number
   }
-}
-
-type RootSmokePayload = {
-  ok: boolean
-  service?: string
 }
 
 export type ApiSmokeRunnerOptions = {
@@ -132,9 +127,8 @@ async function warnable(name: string, fn: () => Promise<{ ok: boolean; detail: s
 }
 
 await check('GET /', async () => {
-  const payload = await readJson<RootSmokePayload>('/')
-  if (!payload.ok) throw new Error('root ok=false')
-  if (payload.service !== 'maprang-backend') throw new Error('unexpected backend service identity')
+  const payload = await readJson<RootIdentityPayload>('/')
+  validateBackendRootIdentity(payload)
   return payload.service
 })
 

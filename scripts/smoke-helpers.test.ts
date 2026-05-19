@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { buildSmokeAuthHeaders, formatPayload, smokeApiBaseUrl, smokeTargetIsLocal, tryParseJson } from './smoke-helpers'
+import {
+  buildSmokeAuthHeaders,
+  formatPayload,
+  smokeApiBaseUrl,
+  smokeTargetIsLocal,
+  tryParseJson,
+  validateBackendRootIdentity,
+} from './smoke-helpers'
 
 describe('smoke helpers', () => {
   test('defaults to local backend and local smoke user', () => {
@@ -35,5 +42,11 @@ describe('smoke helpers', () => {
     expect(tryParseJson('not json')).toBeNull()
     expect(formatPayload({ ok: false }, 'fallback')).toBe('{"ok":false}')
     expect(formatPayload(null, 'x'.repeat(600))).toHaveLength(500)
+  })
+
+  test('validates backend root identity payloads', () => {
+    expect(() => validateBackendRootIdentity({ ok: true, service: 'maprang-backend' })).not.toThrow()
+    expect(() => validateBackendRootIdentity({ ok: false, service: 'maprang-backend' })).toThrow('ok=false')
+    expect(() => validateBackendRootIdentity({ ok: true, service: 'wrong' })).toThrow('unexpected service name')
   })
 })

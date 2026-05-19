@@ -1,16 +1,18 @@
 import { unlink } from 'node:fs/promises'
 import { join } from 'node:path'
-import { apiBaseUrl, isLocalSmokeTarget, readJson, smokeAuthHeaders } from './smoke-helpers'
+import {
+  apiBaseUrl,
+  isLocalSmokeTarget,
+  readJson,
+  smokeAuthHeaders,
+  validateBackendRootIdentity,
+  type RootIdentityPayload,
+} from './smoke-helpers'
 
 export type HealthPayload = {
   ok: boolean
   checks: { databaseConnected: boolean; openRouterConfigured: boolean }
   security: { avatarStorage: 'local' | 'supabase' }
-}
-
-export type RootPayload = {
-  ok: boolean
-  service?: string
 }
 
 export type SmokeCharacter = { id: string; name: string; tags: string[] }
@@ -52,11 +54,6 @@ export function validateAvatarUpload(upload: AvatarUploadPayload, baseUrl: strin
   }
 }
 
-export function validateBackendRootIdentity(root: RootPayload) {
-  if (!root.ok) throw new Error('Backend root identity returned ok=false')
-  if (root.service !== 'maprang-backend') throw new Error('Backend root identity returned an unexpected service name')
-}
-
 export function buildLocalSmokeSummary(input: {
   apiBaseUrl: string
   health: HealthPayload
@@ -94,7 +91,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
   const writeError = options.writeError ?? ((line: string) => console.error(line))
 
   try {
-    const root = await jsonReader<RootPayload>('/')
+    const root = await jsonReader<RootIdentityPayload>('/')
     validateBackendRootIdentity(root)
 
     const health = await jsonReader<HealthPayload>('/health')

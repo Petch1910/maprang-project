@@ -89,6 +89,7 @@ Verified:
 - Frontend route audit regression tests now cover declared React Router paths, dynamic route matching, static link normalization, missing route detection for `to`, `href`, and `navigate`, and the importable route audit runner.
 - Route/menu doc-check regression tests now cover Markdown table parsing, route/menu/app/preload alignment, missing navigation coverage, empty field detection, status label guards, and the importable route/menu doc-check runner.
 - Smoke helper regression tests now cover local target defaults, deployed target auth behavior, explicit smoke user/token/admin headers, and JSON payload formatting.
+- Smoke helper regression tests now also centralize backend root identity validation used by API smoke and local smoke.
 - Provider smoke guard regression tests now cover live chat minimum token thresholds, provider failure messaging, live image opt-in detection, and image provider failure hints before any verification flag can be set.
 - Deploy status regression tests now cover JSON readiness counts, text blocker output, health failure reporting, and the importable deploy status runner without calling a live backend.
 - Readiness smoke regression tests now cover `/ready` summary output, failure visibility, readiness status fallback, and the importable readiness smoke runner without calling a live backend.

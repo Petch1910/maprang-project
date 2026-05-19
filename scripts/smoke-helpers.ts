@@ -5,6 +5,11 @@ export type SmokeEnv = {
   SMOKE_ADMIN_API_KEY?: string
 }
 
+export type RootIdentityPayload = {
+  ok: boolean
+  service?: string
+}
+
 export function smokeApiBaseUrl(env: SmokeEnv = process.env) {
   return env.SMOKE_API_BASE_URL ?? 'http://127.0.0.1:3000'
 }
@@ -31,6 +36,11 @@ export function buildSmokeAuthHeaders(env: SmokeEnv = process.env, localTarget =
 
 export function smokeAuthHeaders() {
   return buildSmokeAuthHeaders(process.env, isLocalSmokeTarget)
+}
+
+export function validateBackendRootIdentity(root: RootIdentityPayload) {
+  if (!root.ok) throw new Error('Backend root identity returned ok=false')
+  if (root.service !== 'maprang-backend') throw new Error('Backend root identity returned an unexpected service name')
 }
 
 export async function readJson<T>(path: string, init?: RequestInit): Promise<T> {

@@ -4,9 +4,9 @@ import {
   pickSmokeCharacter,
   runLocalSmoke,
   validateAvatarUpload,
-  validateBackendRootIdentity,
   type LocalSmokeJsonReader,
 } from './local-smoke'
+import { validateBackendRootIdentity } from './smoke-helpers'
 
 describe('local smoke helpers', () => {
   test('prefers MIKA, then Maprang, then the first available character', () => {

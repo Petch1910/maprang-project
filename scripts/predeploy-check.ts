@@ -935,7 +935,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-smoke.ts'),
-        ['GET /', 'maprang-backend', 'ApiSmokeRunnerOptions', 'buildApiSmokeSummary', 'runApiSmoke', 'if (import.meta.main) process.exit(await runApiSmoke())'],
+        ['GET /', 'validateBackendRootIdentity', 'ApiSmokeRunnerOptions', 'buildApiSmokeSummary', 'runApiSmoke', 'if (import.meta.main) process.exit(await runApiSmoke())'],
         'scripts/api-smoke.ts',
       )
       requireIncludes(
@@ -980,8 +980,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.test.ts'),
-        ['defaults to local backend', 'does not impersonate a user by default against deployed targets'],
+        ['defaults to local backend', 'does not impersonate a user by default against deployed targets', 'validates backend root identity payloads'],
         'scripts/smoke-helpers.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/smoke-helpers.ts'),
+        ['validateBackendRootIdentity', 'maprang-backend'],
+        'scripts/smoke-helpers.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/provider-smoke-guards.test.ts'),
