@@ -44,7 +44,7 @@ Results:
 - Route/menu audit now covers 14 surfaces including `/admin/prompt-inspector` and `/admin/evals`.
 - API smoke and E2E now cover chat world state save/read persistence.
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
-- API smoke with `--require-admin` now passes 30 checks plus 1 local live-chat skip, including uncharged chat validation, non-mutating report creation, admin wallet, and admin report PATCH/action validation.
+- API smoke with `--require-admin` now passes 31 checks plus 1 local live-chat skip, including uncharged chat validation, non-mutating chat delete/report creation, admin wallet, and admin report PATCH/action validation.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.

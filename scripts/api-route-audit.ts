@@ -203,8 +203,8 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
   'DELETE /chats/:id': {
     owner: 'chat',
-    coverage: ['e2e', 'backend-test'],
-    note: 'browser smoke covers confirm delete and bulk delete; tests cover owner guard',
+    coverage: ['smoke', 'e2e', 'backend-test'],
+    note: 'api-smoke verifies non-mutating invalid-id validation; browser smoke covers confirm delete and bulk delete; tests cover owner guard',
   },
   'POST /uploads/avatar': {
     owner: 'storage',

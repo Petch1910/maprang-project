@@ -618,6 +618,17 @@ if (activeChats.length > 0) {
   record('PATCH/GET /chats/:id/world-state', 'skip', 'no active chats returned')
 }
 
+await check('DELETE /chats/:id validation', async () => {
+  const payload = await readExpectedError('/chats/not-a-uuid', {
+    method: 'DELETE',
+    headers: authHeaders,
+  })
+  if (payload.status !== 400 || payload.payload.error !== 'invalid_chat_id') {
+    throw new Error(`expected invalid_chat_id 400, got ${payload.status} ${payload.payload.error ?? 'unknown'}`)
+  }
+  return 'invalid chat id rejected before delete'
+})
+
 await check('GET /characters/:id/lore', async () => {
   const payload = await readJson<{ loreEntries?: unknown[] }>(`/characters/${primaryCharacter.id}/lore`, {
     headers: authHeaders,

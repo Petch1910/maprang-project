@@ -62,6 +62,7 @@ Verified:
 - API smoke with admin auth now covers non-mutating wallet token route validation so the admin wallet route is exercised without changing balances.
 - API smoke now covers non-mutating report creation validation with SQL-like character ids before persistence.
 - API smoke now covers the uncharged `POST /chat` validation path before the live-provider-only chat smoke.
+- API smoke now covers non-mutating delete-chat validation so the delete route is exercised without removing real chats.
 
 ## Current Production Status
 
