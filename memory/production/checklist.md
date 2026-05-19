@@ -17,6 +17,7 @@ Last updated: 2026-05-14
 - Set provider live verification flags only after successful live smoke.
 - Run `bun run production:check`.
 - Fill `RELEASE_HANDOFF.md` after `production:check` passes, without secrets or private database URLs.
+- Run `bun run release:handoff:check -- --filled` before sharing the handoff.
 - Use `/admin/health` to follow the next action shown on every blocker before rerunning the final gate.
 
 ## Commands

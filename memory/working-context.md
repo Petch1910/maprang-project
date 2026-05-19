@@ -35,6 +35,7 @@ Verified:
 - Deploy readiness logic is shared by `smoke:doctor` and `deploy:status`, and covered by `deploy:readiness:test`, so current staging/production blockers and next steps can be printed without duplicating blocker rules.
 - CI runs deploy readiness self-test, and the manual Production Smoke workflow prints `deploy:status` before strict production checks.
 - `RELEASE_HANDOFF.md` is available as the no-secrets final release handoff template, and predeploy checks verify it stays documented.
+- `release:handoff:check` verifies the release handoff template and can require all handoff fields with `--filled` before sharing a real release note.
 
 ## Current Production Status
 

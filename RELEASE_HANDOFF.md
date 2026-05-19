@@ -3,6 +3,18 @@
 Use this template after `production:check` passes and before sending real users to the release. Do not paste secrets,
 tokens, private database URLs, service role keys, or raw user data into this file.
 
+Check the template before commit:
+
+```bash
+bun run release:handoff:check
+```
+
+After filling every field for a real release, run:
+
+```bash
+bun run release:handoff:check -- --filled
+```
+
 ## Release Identity
 
 - Release date:

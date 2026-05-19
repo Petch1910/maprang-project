@@ -48,6 +48,7 @@ const requiredFiles = [
   'scripts/eval-local.ts',
   'scripts/knowledge-audit.ts',
   'scripts/memory-audit.ts',
+  'scripts/release-handoff-check.ts',
   'scripts/route-menu-doc-check.ts',
   'scripts/supabase-storage-setup.ts',
 ]
@@ -227,6 +228,8 @@ const checks: Check[] = [
     run: async () => {
       const handoff = await readRepoFile('RELEASE_HANDOFF.md')
       const readme = await readRepoFile('README.md')
+      const packageJson = await readRepoFile('package.json')
+      const script = await readRepoFile('scripts/release-handoff-check.ts')
       requireIncludes(
         handoff,
         [
@@ -244,6 +247,8 @@ const checks: Check[] = [
         'RELEASE_HANDOFF.md',
       )
       requireIncludes(readme, ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users'], 'README.md')
+      requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
+      requireIncludes(script, ['--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
     },
   },
   {
@@ -268,6 +273,7 @@ const checks: Check[] = [
           '"deploy:readiness:test"',
           '"deploy:doctor"',
           '"deploy:doctor:self-test"',
+          '"release:handoff:check"',
           '"qa:seed"',
           '"e2e:smoke"',
           '"qa:full"',
