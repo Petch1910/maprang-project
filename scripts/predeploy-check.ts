@@ -194,6 +194,8 @@ const checks: Check[] = [
       const contextService = await readRepoFile('apps/backend/src/context.service.ts')
       const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
       const chatStyleGuide = await readRepoFile('knowledge/structured/chat-style-guide.json')
+      const backendEnv = await readRepoFile('apps/backend/src/env.ts')
+      const backendEnvTest = await readRepoFile('apps/backend/src/env.test.ts')
       requireIncludes(
         contextService,
         ['write 4-6 short paragraphs', 'at least 5 complete sentences', '8-14 sentences'],
@@ -215,6 +217,16 @@ const checks: Check[] = [
         chatStyleGuide,
         ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences'],
         'knowledge/structured/chat-style-guide.json',
+      )
+      requireIncludes(
+        backendEnv,
+        ['MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies'],
+        'apps/backend/src/env.ts',
+      )
+      requireIncludes(
+        backendEnvTest,
+        ['rejects production roleplay reply budget below baseline', 'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies'],
+        'apps/backend/src/env.test.ts',
       )
     },
   },

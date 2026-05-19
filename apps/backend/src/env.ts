@@ -207,12 +207,16 @@ function invalidProductionValues() {
     const maxTokens = Number(process.env.MODEL_MAX_OUTPUT_TOKENS)
     if (!Number.isFinite(maxTokens) || !Number.isInteger(maxTokens) || maxTokens < 128 || maxTokens > 2400) {
       invalid.push('MODEL_MAX_OUTPUT_TOKENS must be an integer from 128 to 2400')
+    } else if (maxTokens < 1200) {
+      invalid.push('MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies')
     }
   }
   if (present('MODEL_MIN_ROLEPLAY_REPLY_CHARS')) {
     const minChars = Number(process.env.MODEL_MIN_ROLEPLAY_REPLY_CHARS)
     if (!Number.isFinite(minChars) || !Number.isInteger(minChars) || minChars < 0 || minChars > 1200) {
       invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be an integer from 0 to 1200')
+    } else if (minChars < 320) {
+      invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies')
     }
   }
   if (present('PROMPT_BUDGET_TOKENS')) {

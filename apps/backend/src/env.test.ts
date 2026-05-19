@@ -144,6 +144,15 @@ describe('runtime env validation', () => {
     expect(() => validateRuntimeEnv()).toThrow('CREATOR_DRAFT_RETRY_DELAY_MS must be an integer from 0 to 5000')
   })
 
+  test('rejects production roleplay reply budget below baseline', () => {
+    setCompleteProductionEnv()
+    process.env.MODEL_MAX_OUTPUT_TOKENS = '1199'
+    process.env.MODEL_MIN_ROLEPLAY_REPLY_CHARS = '319'
+
+    expect(() => validateRuntimeEnv()).toThrow('MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies')
+    expect(() => validateRuntimeEnv()).toThrow('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies')
+  })
+
   test('rejects placeholder and local production database URLs', () => {
     setCompleteProductionEnv()
     process.env.DATABASE_URL = 'postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require'
