@@ -46,6 +46,7 @@ const requiredFiles = [
   'scripts/deploy-readiness.test.ts',
   'scripts/deploy-status.ts',
   'scripts/eval-local.ts',
+  'scripts/check-frontend-bundles.test.ts',
   'scripts/knowledge-audit.ts',
   'scripts/memory-audit.ts',
   'scripts/api-route-audit.test.ts',
@@ -298,6 +299,7 @@ const checks: Check[] = [
           '"security:audit"',
           '"security:audit:test"',
           '"api:audit:test"',
+          '"frontend:bundle:test"',
           '"frontend:static:audit:test"',
           '"frontend:route:audit:test"',
           '"route-menu:audit:test"',
@@ -344,6 +346,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('api:audit:test')) {
         throw new Error('package.json qa:local must run api:audit:test so route audit regressions are caught')
+      }
+      if (!qaLocal.includes('frontend:bundle:test')) {
+        throw new Error('package.json qa:local must run frontend:bundle:test so bundle budget regressions are caught')
       }
       if (!qaLocal.includes('frontend:static:audit:test')) {
         throw new Error('package.json qa:local must run frontend:static:audit:test so frontend static audit regressions are caught')
@@ -542,6 +547,8 @@ const checks: Check[] = [
           'api-route-audit.ts',
           '"api:audit:test"',
           'api-route-audit.test.ts',
+          '"frontend:bundle:test"',
+          'check-frontend-bundles.test.ts',
           '"frontend:static:audit:test"',
           'frontend-static-audit.test.ts',
           '"frontend:route:audit:test"',
@@ -576,6 +583,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/api-route-audit.test.ts'),
         ['discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries'],
         'scripts/api-route-audit.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/check-frontend-bundles.test.ts'),
+        ['passes when main, chat, and lazy chunks stay under budget', 'reports missing split chunks'],
+        'scripts/check-frontend-bundles.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.test.ts'),
@@ -669,6 +681,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run frontend:bundle:test',
           'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
@@ -700,6 +713,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run frontend:bundle:test',
           'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
