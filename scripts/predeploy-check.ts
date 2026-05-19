@@ -75,7 +75,24 @@ const checks: Check[] = [
     run: async () => {
       const agentEntry = await readRepoFile('AGENTS.md')
       const agentGuide = await readRepoFile('agent.md')
-      requireIncludes(agentEntry, ['agent.md', 'memory/working-context.md', 'memory/qa-status.md', 'Do not commit secrets'], 'AGENTS.md')
+      requireIncludes(
+        agentEntry,
+        [
+          'agent.md',
+          'Scope',
+          'When The User Says "ทำต่อ"',
+          'memory/working-context.md',
+          'memory/deploy-blockers.md',
+          'Minimum Checks',
+          'bun run predeploy:check',
+          'bun run secrets:check',
+          'git diff --check',
+          'Commit And Push',
+          'git status --short',
+          'Do not commit secrets',
+        ],
+        'AGENTS.md',
+      )
       requireIncludes(
         agentGuide,
         [
