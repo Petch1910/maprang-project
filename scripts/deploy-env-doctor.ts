@@ -482,21 +482,21 @@ function auditIntegerRangeWithRecommendedMin(value: string | undefined, area: Ar
   if (!hasRealValue(value)) return
   const number = Number(value)
   if (!Number.isInteger(number) || number < min || number > max) {
-    fail(area, check, `must be an integer in range ${min}-${max}`)
+    fail(area, check, `ต้องเป็นจำนวนเต็มในช่วง ${min}-${max}`)
     return
   }
   if (number < recommendedMin) {
-    fail(area, check, `should be at least ${recommendedMin} for production roleplay replies`)
+    fail(area, check, `ควรตั้งอย่างน้อย ${recommendedMin} สำหรับคำตอบ roleplay ใน production`)
     return
   }
-  pass(area, check, `integer in range ${min}-${max} and at least production baseline ${recommendedMin}`)
+  pass(area, check, `เป็นจำนวนเต็มในช่วง ${min}-${max} และถึง baseline production ${recommendedMin}`)
 }
 
 function auditPreferredIntegerMin(value: string | undefined, area: Area, check: string, baselineMin: number, preferredMin: number) {
   if (!hasRealValue(value)) return
   const number = Number(value)
   if (Number.isInteger(number) && number >= baselineMin && number < preferredMin) {
-    warn(area, check, `passes production baseline ${baselineMin}, but recommended is ${preferredMin} for richer roleplay replies`)
+    warn(area, check, `ผ่าน baseline production ${baselineMin} แล้ว แต่แนะนำ ${preferredMin} เพื่อให้ roleplay ตอบได้มีมิติมากขึ้น`)
   }
 }
 

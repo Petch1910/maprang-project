@@ -108,6 +108,7 @@ Results:
 - Runtime prompt depth alignment: pass via `context.service.test`, `chat.runtime.test`, `knowledge:audit`, and `predeploy:check`; predeploy now blocks stale shorter 3-6/4-sentence/7-12-sentence guidance from returning.
 - Production reply budget env guard: pass via `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`; deploy doctor now fails values below 1200 output tokens or 320 roleplay reply characters.
 - Deploy doctor reply-budget recommendation warning: pass via `deploy:doctor:test`; envs at 1200/320 now warn to move toward 1600/420 without failing the baseline gate.
+- Deploy doctor roleplay reply-budget wording now passes Thai-first coverage via `deploy:doctor:test` and `predeploy:check`.
 - Runtime env reply-budget guard: pass via `env.test`, `health.service.test`, and `predeploy:check`; production `/health` now reports reply-budget values below 1200/320 as invalid env.
 - Deploy readiness reply-budget propagation: pass via `deploy:readiness:test`; invalid `/health` roleplay budget entries now become staging/production blockers and next-step fixes.
 - Smoke doctor reply-budget recommendation warning: pass via `smoke:doctor:test`; environments at 1200/320 still pass baseline but emit a CLI warning to move toward 1600/420, while below-baseline values rely on readiness blockers instead of duplicate warnings.

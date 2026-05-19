@@ -179,7 +179,7 @@ describe('deploy env doctor helpers', () => {
           area: 'backend',
           status: 'fail',
           check: 'MODEL_MAX_OUTPUT_TOKENS',
-          detail: 'should be at least 1200 for production roleplay replies',
+          detail: 'ควรตั้งอย่างน้อย 1200 สำหรับคำตอบ roleplay ใน production',
         }),
       )
       expect(result.findings).toContainEqual(
@@ -187,7 +187,7 @@ describe('deploy env doctor helpers', () => {
           area: 'backend',
           status: 'fail',
           check: 'MODEL_MIN_ROLEPLAY_REPLY_CHARS',
-          detail: 'should be at least 320 for production roleplay replies',
+          detail: 'ควรตั้งอย่างน้อย 320 สำหรับคำตอบ roleplay ใน production',
         }),
       )
       expect(lines.join('\n')).not.toContain(anonKey)
@@ -255,7 +255,7 @@ describe('deploy env doctor helpers', () => {
           area: 'backend',
           status: 'warn',
           check: 'MODEL_MAX_OUTPUT_TOKENS',
-          detail: 'passes production baseline 1200, but recommended is 1600 for richer roleplay replies',
+          detail: 'ผ่าน baseline production 1200 แล้ว แต่แนะนำ 1600 เพื่อให้ roleplay ตอบได้มีมิติมากขึ้น',
         }),
       )
       expect(result.findings).toContainEqual(
@@ -263,7 +263,7 @@ describe('deploy env doctor helpers', () => {
           area: 'backend',
           status: 'warn',
           check: 'MODEL_MIN_ROLEPLAY_REPLY_CHARS',
-          detail: 'passes production baseline 320, but recommended is 420 for richer roleplay replies',
+          detail: 'ผ่าน baseline production 320 แล้ว แต่แนะนำ 420 เพื่อให้ roleplay ตอบได้มีมิติมากขึ้น',
         }),
       )
     } finally {
