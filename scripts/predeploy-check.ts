@@ -995,12 +995,23 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/readiness-smoke.test.ts'),
-        ['summarizes a ready payload', 'keeps readiness failures visible', 'runs readiness smoke through an importable runner'],
+        [
+          'summarizes a ready payload',
+          'keeps readiness failures visible',
+          'validates backend root identity before readiness',
+          'runs readiness smoke through an importable runner',
+        ],
         'scripts/readiness-smoke.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/readiness-smoke.ts'),
-        ['ReadinessSmokeRunnerOptions', 'runReadinessSmoke', 'if (import.meta.main) process.exit(await runReadinessSmoke())'],
+        [
+          'ReadinessSmokeRunnerOptions',
+          'readBackendRootIdentity',
+          'validateBackendRootIdentity',
+          'runReadinessSmoke',
+          'if (import.meta.main) process.exit(await runReadinessSmoke())',
+        ],
         'scripts/readiness-smoke.ts',
       )
       requireIncludes(

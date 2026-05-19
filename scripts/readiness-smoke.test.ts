@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { buildReadinessSummary, formatReadinessSummary, runReadinessSmoke, type ReadinessPayload } from './readiness-smoke'
+import {
+  buildReadinessSummary,
+  formatReadinessSummary,
+  readBackendRootIdentity,
+  runReadinessSmoke,
+  type ReadinessPayload,
+} from './readiness-smoke'
 
 function readyPayload(overrides: Partial<ReadinessPayload> = {}): ReadinessPayload {
   return {
@@ -41,9 +47,11 @@ describe('readiness smoke summary', () => {
       apiBaseUrl: 'https://api.example.com',
       responseOk: true,
       statusCode: 200,
+      rootIdentity: { ok: true, service: 'maprang-backend' },
     })
 
     expect(summary.ok).toBe(true)
+    expect(summary.rootIdentityService).toBe('maprang-backend')
     expect(summary.readiness).toBe('ready')
     expect(summary.authMode).toBe('supabase-jwt')
     expect(summary.avatarStorageAccess).toBe('signed')
@@ -88,6 +96,7 @@ describe('readiness smoke summary', () => {
     const errors: string[] = []
     const exitCode = await runReadinessSmoke({
       apiBaseUrl: 'https://api.example.com',
+      rootIdentityReader: async () => ({ ok: true, service: 'maprang-backend' }),
       readinessReader: async () => ({
         response: { ok: true, status: 200 },
         payload: readyPayload(),
@@ -99,8 +108,34 @@ describe('readiness smoke summary', () => {
     const summary = JSON.parse(lines.join('\n'))
     expect(exitCode).toBe(0)
     expect(summary.ok).toBe(true)
+    expect(summary.rootIdentityOk).toBe(true)
+    expect(summary.rootIdentityService).toBe('maprang-backend')
     expect(summary.apiBaseUrl).toBe('https://api.example.com')
     expect(errors).toEqual([])
+  })
+
+  test('validates backend root identity before readiness', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    let readinessRead = false
+    const exitCode = await runReadinessSmoke({
+      apiBaseUrl: 'https://api.example.com',
+      rootIdentityReader: async () => ({ ok: true, service: 'wrong-service' }),
+      readinessReader: async () => {
+        readinessRead = true
+        return {
+          response: { ok: true, status: 200 },
+          payload: readyPayload(),
+        }
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(readinessRead).toBe(false)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('unexpected service name')
   })
 
   test('returns a failure code without exiting when readiness is not ready', async () => {
@@ -108,6 +143,7 @@ describe('readiness smoke summary', () => {
     const errors: string[] = []
     const exitCode = await runReadinessSmoke({
       apiBaseUrl: 'https://api.example.com',
+      rootIdentityReader: async () => ({ ok: true, service: 'maprang-backend' }),
       readinessReader: async () => ({
         response: { ok: false, status: 503 },
         payload: readyPayload({
@@ -122,5 +158,14 @@ describe('readiness smoke summary', () => {
     expect(exitCode).toBe(1)
     expect(JSON.parse(lines.join('\n')).failures).toEqual(['database is not connected'])
     expect(errors).toEqual(['Readiness smoke failed: database is not connected'])
+  })
+
+  test('reads and validates backend root identity without reading readiness payload', async () => {
+    const payload = await readBackendRootIdentity('https://api.example.com', async (url) => {
+      expect(url).toBe('https://api.example.com/')
+      return new Response(JSON.stringify({ ok: true, service: 'maprang-backend' }), { status: 200 })
+    })
+
+    expect(payload).toEqual({ ok: true, service: 'maprang-backend' })
   })
 })

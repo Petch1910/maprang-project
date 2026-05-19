@@ -237,7 +237,7 @@ Expected result:
 - Backend tests pass.
 - Frontend TypeScript and Vite build pass.
 - Smoke doctor confirms the backend is reachable and the database is connected.
-- Readiness smoke confirms the backend is ready for traffic, including OpenRouter configuration, production hardening, and live chat/image verification when `NODE_ENV=production`.
+- Readiness smoke confirms the backend root identity before `/ready`, then verifies traffic readiness including OpenRouter configuration, production hardening, and live chat/image verification when `NODE_ENV=production`.
 - Local smoke confirms backend root identity, health, seeded Maprang data, relationship preview, and avatar upload.
 - API smoke confirms backend root identity before deeper route checks.
 - API smoke confirms temporary character creation/edit/view/favorite/duplicate/reset/delete and temporary lore create/edit/delete.

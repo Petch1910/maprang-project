@@ -281,6 +281,8 @@ bun run smoke:doctor
 bun run smoke:ready
 ```
 
+`smoke:ready` checks the backend root identity first, then `/ready`, so deployed smoke fails early if `SMOKE_API_BASE_URL` points at the wrong service or a frontend/static proxy instead of `maprang-backend`.
+
 ```bash
 bun run smoke:local
 ```

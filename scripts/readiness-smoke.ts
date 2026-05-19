@@ -1,4 +1,4 @@
-import { apiBaseUrl } from './smoke-helpers'
+import { apiBaseUrl, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 
 export type ReadinessPayload = {
   ok: boolean
@@ -79,6 +79,8 @@ export type ReadinessSummary = {
   imageStatus: string | undefined
   imageLiveVerified: boolean | undefined
   imageProductionReady: boolean | undefined
+  rootIdentityOk: boolean | undefined
+  rootIdentityService: string | undefined
 }
 
 export type ReadinessSmokeReadResult = {
@@ -88,6 +90,7 @@ export type ReadinessSmokeReadResult = {
 
 export type ReadinessSmokeRunnerOptions = {
   apiBaseUrl?: string
+  rootIdentityReader?: (apiBaseUrl: string) => Promise<RootIdentityPayload>
   readinessReader?: (apiBaseUrl: string) => Promise<ReadinessSmokeReadResult>
   writeLine?: (line: string) => void
   writeError?: (line: string) => void
@@ -95,7 +98,7 @@ export type ReadinessSmokeRunnerOptions = {
 
 export function buildReadinessSummary(
   payload: ReadinessPayload,
-  options: { apiBaseUrl: string; responseOk: boolean; statusCode: number },
+  options: { apiBaseUrl: string; responseOk: boolean; statusCode: number; rootIdentity?: RootIdentityPayload },
 ): ReadinessSummary {
   const failures = payload.readiness?.failures ?? []
 
@@ -124,6 +127,8 @@ export function buildReadinessSummary(
     imageStatus: payload.model?.imageGeneration?.status,
     imageLiveVerified: payload.model?.imageGeneration?.liveVerified,
     imageProductionReady: payload.model?.imageGeneration?.productionReady,
+    rootIdentityOk: options.rootIdentity?.ok,
+    rootIdentityService: options.rootIdentity?.service,
   }
 }
 
@@ -151,11 +156,44 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
   return { response, payload }
 }
 
+export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: typeof fetch = fetch) {
+  let response: Response
+  try {
+    response = await fetchImpl(`${apiBase}/`)
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error)
+    throw new Error(`Could not reach backend root identity at ${apiBase}/ (${reason})`)
+  }
+
+  const raw = await response.text()
+  let payload: RootIdentityPayload
+  try {
+    payload = JSON.parse(raw) as RootIdentityPayload
+  } catch {
+    throw new Error(`/ did not return JSON: ${raw.slice(0, 300) || 'empty response'}`)
+  }
+
+  if (!response.ok) throw new Error(`/ failed with ${response.status}: ${raw.slice(0, 300) || response.statusText}`)
+  validateBackendRootIdentity(payload)
+  return payload
+}
+
 export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {}) {
   const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
+  const rootIdentityReader = options.rootIdentityReader ?? readBackendRootIdentity
   const readinessReader = options.readinessReader ?? readReadiness
   const writeLine = options.writeLine ?? ((line: string) => console.log(line))
   const writeError = options.writeError ?? ((line: string) => console.error(line))
+
+  let rootIdentity: RootIdentityPayload
+  try {
+    rootIdentity = await rootIdentityReader(currentApiBaseUrl)
+    validateBackendRootIdentity(rootIdentity)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    writeError(`Readiness smoke failed: ${message}`)
+    return 1
+  }
 
   let result: ReadinessSmokeReadResult
   try {
@@ -171,6 +209,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
     apiBaseUrl: currentApiBaseUrl,
     responseOk: response.ok,
     statusCode: response.status,
+    rootIdentity,
   })
 
   writeLine(formatReadinessSummary(summary))
