@@ -63,6 +63,7 @@ Verified:
 - API smoke now covers non-mutating report creation validation with SQL-like character ids before persistence.
 - API smoke now covers the uncharged `POST /chat` validation path before the live-provider-only chat smoke.
 - API smoke now covers non-mutating delete-chat validation so the delete route is exercised without removing real chats.
+- API route audit regression tests now cover route discovery plus missing, stale, and empty coverage entries, and run in local QA, CI, and Production Smoke.
 
 ## Current Production Status
 

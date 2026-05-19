@@ -3,12 +3,12 @@ import { join } from 'node:path'
 
 const root = join(import.meta.dir, '..')
 
-type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
-type CoverageLevel = 'smoke' | 'e2e' | 'backend-test' | 'live-smoke' | 'admin-smoke' | 'manual-production'
+export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+export type CoverageLevel = 'smoke' | 'e2e' | 'backend-test' | 'live-smoke' | 'admin-smoke' | 'manual-production'
 
-type RouteKey = `${HttpMethod} ${string}`
+export type RouteKey = `${HttpMethod} ${string}`
 
-type RouteCoverage = {
+export type RouteCoverage = {
   owner: string
   coverage: CoverageLevel[]
   note: string
@@ -25,7 +25,7 @@ const routeFiles = [
   'apps/backend/src/user.routes.ts',
 ]
 
-const routeCoverage: Record<RouteKey, RouteCoverage> = {
+export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /health': {
     owner: 'platform',
     coverage: ['smoke', 'e2e'],
@@ -263,66 +263,94 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
 }
 
-type DiscoveredRoute = {
+export type DiscoveredRoute = {
   key: RouteKey
   file: string
 }
 
-const discoveredRoutes = await discoverRoutes()
-const discoveredKeys = new Set(discoveredRoutes.map((route) => route.key))
-const coveredKeys = new Set(Object.keys(routeCoverage) as RouteKey[])
-const missingCoverage = discoveredRoutes.filter((route) => !coveredKeys.has(route.key))
-const staleCoverage = [...coveredKeys].filter((key) => !discoveredKeys.has(key))
-const weakCoverage = discoveredRoutes.filter((route) => {
-  const coverage = routeCoverage[route.key]?.coverage ?? []
-  return coverage.length === 0
-})
-
-const byOwner = new Map<string, number>()
-for (const route of discoveredRoutes) {
-  const owner = routeCoverage[route.key]?.owner ?? 'unknown'
-  byOwner.set(owner, (byOwner.get(owner) ?? 0) + 1)
+export function summarizeRoutesByOwner(discoveredRoutes: DiscoveredRoute[], coverage = routeCoverage) {
+  const byOwner = new Map<string, number>()
+  for (const route of discoveredRoutes) {
+    const owner = coverage[route.key]?.owner ?? 'unknown'
+    byOwner.set(owner, (byOwner.get(owner) ?? 0) + 1)
+  }
+  return byOwner
 }
 
-console.log(`API route audit: ${discoveredRoutes.length} routes discovered`)
-for (const [owner, count] of [...byOwner.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-  console.log(`- ${owner}: ${count}`)
+export function auditRouteCoverage(discoveredRoutes: DiscoveredRoute[], coverage = routeCoverage) {
+  const discoveredKeys = new Set(discoveredRoutes.map((route) => route.key))
+  const coveredKeys = new Set(Object.keys(coverage) as RouteKey[])
+  const missingCoverage = discoveredRoutes.filter((route) => !coveredKeys.has(route.key))
+  const staleCoverage = [...coveredKeys].filter((key) => !discoveredKeys.has(key))
+  const weakCoverage = discoveredRoutes.filter((route) => {
+    const entry = coverage[route.key]
+    if (!entry) return false
+    const levels = entry.coverage
+    return levels.length === 0
+  })
+
+  return {
+    missingCoverage,
+    staleCoverage,
+    weakCoverage,
+    byOwner: summarizeRoutesByOwner(discoveredRoutes, coverage),
+  }
 }
 
-if (missingCoverage.length > 0) {
-  console.error('API route audit failed: missing coverage map entries')
-  for (const route of missingCoverage) console.error(`- ${route.key} (${route.file})`)
-}
-
-if (staleCoverage.length > 0) {
-  console.error('API route audit failed: stale coverage map entries')
-  for (const key of staleCoverage) console.error(`- ${key}`)
-}
-
-if (weakCoverage.length > 0) {
-  console.error('API route audit failed: routes with no coverage levels')
-  for (const route of weakCoverage) console.error(`- ${route.key}`)
-}
-
-if (missingCoverage.length > 0 || staleCoverage.length > 0 || weakCoverage.length > 0) {
-  process.exit(1)
-}
-
-console.log('ok - backend API route audit passed')
-
-async function discoverRoutes() {
+export function discoverRoutesFromSource(file: string, content: string) {
   const routes: DiscoveredRoute[] = []
   const routePattern = /\.(get|post|patch|put|delete)\(\s*(['"`])([^'"`]+)\2/g
 
-  for (const file of routeFiles) {
-    const content = await readFile(join(root, file), 'utf8')
-    for (const match of content.matchAll(routePattern)) {
-      const method = match[1].toUpperCase() as HttpMethod
-      const path = match[3]
-      if (!path.startsWith('/')) continue
-      routes.push({ key: `${method} ${path}`, file })
-    }
+  for (const match of content.matchAll(routePattern)) {
+    const method = match[1].toUpperCase() as HttpMethod
+    const path = match[3]
+    if (!path.startsWith('/')) continue
+    routes.push({ key: `${method} ${path}`, file })
+  }
+
+  return routes
+}
+
+export async function discoverRoutes(files = routeFiles, rootDir = root) {
+  const routes: DiscoveredRoute[] = []
+
+  for (const file of files) {
+    const content = await readFile(join(rootDir, file), 'utf8')
+    routes.push(...discoverRoutesFromSource(file, content))
   }
 
   return routes.sort((a, b) => a.key.localeCompare(b.key))
 }
+
+export async function runApiRouteAudit() {
+  const discoveredRoutes = await discoverRoutes()
+  const { missingCoverage, staleCoverage, weakCoverage, byOwner } = auditRouteCoverage(discoveredRoutes)
+
+  console.log(`API route audit: ${discoveredRoutes.length} routes discovered`)
+  for (const [owner, count] of [...byOwner.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    console.log(`- ${owner}: ${count}`)
+  }
+
+  if (missingCoverage.length > 0) {
+    console.error('API route audit failed: missing coverage map entries')
+    for (const route of missingCoverage) console.error(`- ${route.key} (${route.file})`)
+  }
+
+  if (staleCoverage.length > 0) {
+    console.error('API route audit failed: stale coverage map entries')
+    for (const key of staleCoverage) console.error(`- ${key}`)
+  }
+
+  if (weakCoverage.length > 0) {
+    console.error('API route audit failed: routes with no coverage levels')
+    for (const route of weakCoverage) console.error(`- ${route.key}`)
+  }
+
+  if (missingCoverage.length > 0 || staleCoverage.length > 0 || weakCoverage.length > 0) {
+    process.exit(1)
+  }
+
+  console.log('ok - backend API route audit passed')
+}
+
+if (import.meta.main) await runApiRouteAudit()
