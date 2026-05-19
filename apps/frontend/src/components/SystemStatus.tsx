@@ -29,6 +29,13 @@ function storageAccessLabel(access?: NonNullable<HealthStatus['security']>['avat
   return 'ยังไม่ทราบ'
 }
 
+function providerStatusLabel(status?: string) {
+  if (status === 'verified') return 'ยืนยันแล้ว'
+  if (status === 'needs_live_smoke') return 'รอทดสอบจริง'
+  if (status === 'missing_provider') return 'ยังไม่ตั้งค่า'
+  return status ?? 'ยังไม่ทราบ'
+}
+
 export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
   const checks = healthStatus?.checks
   const frontendWarnings = frontendEnvWarnings()
@@ -88,9 +95,9 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2">
             <Dot ok={Boolean(structuredKnowledge?.ok)} />
-            Knowledge pack
+            คลังความรู้
           </span>
-          <span>{structuredKnowledge?.ok ? `${structuredKnowledge.fileCount} files` : 'needs check'}</span>
+          <span>{structuredKnowledge?.ok ? `${structuredKnowledge.fileCount} ไฟล์` : 'ต้องตรวจ'}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2">
@@ -123,7 +130,7 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
             <span>ขาออก ${healthStatus.model.outputCostPer1M}/1M</span>
             <span>สูงสุด {healthStatus.model.maxInputChars.toLocaleString()} ตัวอักษร</span>
             {typeof healthStatus.model.minRoleplayReplyChars === 'number' && (
-              <span>roleplay ขั้นต่ำ {healthStatus.model.minRoleplayReplyChars.toLocaleString()} ตัวอักษร</span>
+              <span>บทบาทสมมุติขั้นต่ำ {healthStatus.model.minRoleplayReplyChars.toLocaleString()} ตัวอักษร</span>
             )}
             {typeof healthStatus.model.promptBudgetTokens === 'number' && (
               <span>งบพรอมป์ {healthStatus.model.promptBudgetTokens.toLocaleString()} โทเคน</span>
@@ -133,15 +140,17 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
             )}
             {healthStatus.model.providerRetry && (
               <span>
-                retry แชท {healthStatus.model.providerRetry.chatAttempts} ครั้ง / ดราฟต์{' '}
+                ลองซ้ำแชท {healthStatus.model.providerRetry.chatAttempts} ครั้ง / ดราฟต์{' '}
                 {healthStatus.model.providerRetry.creatorDraftAttempts} ครั้ง
               </span>
             )}
-            {healthStatus.model.chatProvider?.status && <span>แชท {healthStatus.model.chatProvider.status}</span>}
+            {healthStatus.model.chatProvider?.status && <span>แชท {providerStatusLabel(healthStatus.model.chatProvider.status)}</span>}
             <span>รูป {healthStatus.model.imageGeneration?.model ?? 'ยังไม่ตั้งค่า'}</span>
-            {healthStatus.model.imageGeneration?.status && <span>{healthStatus.model.imageGeneration.status}</span>}
-            {structuredKnowledge && <span>knowledge {structuredKnowledge.ok ? 'ready' : 'not ready'}</span>}
-            {healthStatus.security?.signedUrlExpiresIn && <span>signed {healthStatus.security.signedUrlExpiresIn}s</span>}
+            {healthStatus.model.imageGeneration?.status && (
+              <span>สถานะรูป {providerStatusLabel(healthStatus.model.imageGeneration.status)}</span>
+            )}
+            {structuredKnowledge && <span>คลังความรู้ {structuredKnowledge.ok ? 'พร้อม' : 'ต้องตรวจ'}</span>}
+            {healthStatus.security?.signedUrlExpiresIn && <span>signed URL {healthStatus.security.signedUrlExpiresIn} วินาที</span>}
           </div>
         </div>
       )}
@@ -169,10 +178,10 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
 
       {structuredKnowledge && !structuredKnowledge.ok && (
         <div className="mt-3 rounded-lg border border-rose-500/20 bg-rose-50 p-3 text-xs leading-relaxed text-rose-800">
-          <p className="m-0 font-black">Knowledge pack needs repair</p>
+          <p className="m-0 font-black">คลังความรู้ต้องแก้ไข</p>
           <p className="m-0 mt-1">
-            {[...structuredKnowledge.missing.map((name) => `missing ${name}`), ...structuredKnowledge.errors].join(' / ') ||
-              'run bun run knowledge:audit'}
+            {[...structuredKnowledge.missing.map((name) => `ขาด ${name}`), ...structuredKnowledge.errors].join(' / ') ||
+              'รัน bun run knowledge:audit'}
           </p>
         </div>
       )}

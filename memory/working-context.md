@@ -87,6 +87,7 @@ Verified:
 - Frontend bundle budget regression tests now cover main/chat chunk detection, split-route missing failures, oversized chunk reporting, human-readable KB formatting, and the importable bundle budget runner.
 - Frontend static audit regression tests now cover button type/accessible-name rules plus placeholder links, empty handlers, not-implemented errors, line-number reporting, and the importable static audit runner.
 - Frontend static audit now has explicit regression coverage for Thai coming-soon placeholder copy, replacement characters, C1 control characters, and common Thai UTF-8 mojibake sequences before they can reach frontend source.
+- Admin Health/System Status UI copy now removes leftover English operational labels such as Knowledge pack, Production gates, Local readiness, and staging/future gate, with frontend static audit coverage guarding those Thai-first labels.
 - Frontend route audit regression tests now cover declared React Router paths, dynamic route matching, static link normalization, missing route detection for `to`, `href`, and `navigate`, and the importable route audit runner.
 - Route/menu doc-check regression tests now cover Markdown table parsing, route/menu/app/preload alignment, missing navigation coverage, empty field detection, status label guards, and the importable route/menu doc-check runner.
 - Smoke helper regression tests now cover local target defaults, deployed target auth behavior, explicit smoke user/token/admin headers, and JSON payload formatting.

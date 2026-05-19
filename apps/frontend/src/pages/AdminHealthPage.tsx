@@ -35,9 +35,9 @@ function auditStatusClass(status: RouteMenuAuditStatus) {
 }
 
 function checkScopeLabel(scope: DeployCheck['scope']) {
-  if (scope === 'local') return 'local'
-  if (scope === 'frontend') return 'frontend'
-  return 'production'
+  if (scope === 'local') return 'เครื่องนี้'
+  if (scope === 'frontend') return 'หน้าบ้าน'
+  return 'โปรดักชัน'
 }
 
 function checkScopeClass(scope: DeployCheck['scope']) {
@@ -78,14 +78,14 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
 
   return [
     {
-      label: 'DB connected',
+      label: 'ฐานข้อมูลเชื่อมต่อ',
       ok: Boolean(checks?.databaseConfigured && checks.databaseConnected),
       detail: checks?.databaseConnected ? 'backend ต่อฐานข้อมูลได้แล้ว' : 'ตั้ง DATABASE_URL แล้วรัน migration/smoke กับ DB จริง',
       action: checks?.databaseConnected ? 'เช็คซ้ำด้วย bun run smoke:local ก่อนส่ง staging' : 'ตั้ง DATABASE_URL, รัน bunx prisma migrate deploy แล้วรัน bun run smoke:local',
       scope: 'local',
     },
     {
-      label: 'Backend env validation',
+      label: 'ตรวจค่า env หลังบ้าน',
       ok: backendEnvMissing.length === 0 && backendEnvInvalid.length === 0,
       detail:
         backendEnvMissing.length === 0 && backendEnvInvalid.length === 0
@@ -98,10 +98,10 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'production',
     },
     {
-      label: 'Structured knowledge',
+      label: 'คลังความรู้',
       ok: Boolean(structuredKnowledge?.ok),
       detail: structuredKnowledge?.ok
-        ? `runtime knowledge packs ready (${structuredKnowledge.fileCount} files)`
+        ? `คลังความรู้พร้อมใช้งาน (${structuredKnowledge.fileCount} ไฟล์)`
         : structuredKnowledge
           ? [...structuredKnowledge.missing.map((name) => `missing ${name}`), ...structuredKnowledge.errors].join(' / ')
           : 'waiting for backend health response',
@@ -134,7 +134,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       label: 'งบคำตอบแชท',
       ok: replyBudgetMeetsBaseline,
       detail: model
-        ? `ใช้ ${model.name}, คำตอบสูงสุด ${model.maxOutputTokens ?? 'default'} โทเคน, roleplay ขั้นต่ำ ${model.minRoleplayReplyChars ?? 'default'} ตัวอักษร, temperature ${model.temperature ?? 'default'}, retry แชท ${providerRetry?.chatAttempts ?? 'default'} ครั้ง`
+        ? `ใช้ ${model.name}, คำตอบสูงสุด ${model.maxOutputTokens ?? 'ค่าเริ่มต้น'} โทเคน, บทบาทสมมุติขั้นต่ำ ${model.minRoleplayReplyChars ?? 'ค่าเริ่มต้น'} ตัวอักษร, ความสุ่ม ${model.temperature ?? 'ค่าเริ่มต้น'}, ลองซ้ำแชท ${providerRetry?.chatAttempts ?? 'ค่าเริ่มต้น'} ครั้ง`
         : 'รอ health response จาก backend',
       action: !model
         ? 'รอ backend health แล้วเช็คค่า MODEL_MAX_OUTPUT_TOKENS และ MODEL_MIN_ROLEPLAY_REPLY_CHARS'
@@ -326,7 +326,7 @@ export function AdminHealthPage() {
 
       <section className="grid gap-3 md:grid-cols-3">
         <article className="rounded-2xl border border-emerald-500/20 bg-emerald-50 p-4 text-emerald-950">
-          <p className="m-0 text-xs font-black tracking-widest uppercase">Local readiness</p>
+          <p className="m-0 text-xs font-black tracking-widest uppercase">ความพร้อมเครื่องนี้</p>
           <p className="m-0 mt-2 text-2xl font-black">
             {localReadyCount}/{localChecks.length}
           </p>
@@ -335,7 +335,7 @@ export function AdminHealthPage() {
           </p>
         </article>
         <article className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-amber-950">
-          <p className="m-0 text-xs font-black tracking-widest uppercase">Production gates</p>
+          <p className="m-0 text-xs font-black tracking-widest uppercase">ด่านก่อนโปรดักชัน</p>
           <p className="m-0 mt-2 text-2xl font-black">
             {productionReadyCount}/{productionChecks.length}
           </p>
@@ -346,7 +346,7 @@ export function AdminHealthPage() {
           </p>
         </article>
         <article className="rounded-2xl border border-sky-500/20 bg-sky-50 p-4 text-sky-950">
-          <p className="m-0 text-xs font-black tracking-widest uppercase">QA gate</p>
+          <p className="m-0 text-xs font-black tracking-widest uppercase">ด่าน QA</p>
           <p className="m-0 mt-2 text-2xl font-black">qa:full</p>
           <p className="m-0 mt-1 text-sm font-bold leading-6">
             ใช้เช็ค backend, frontend, smoke, route, console error และ mobile overflow ก่อนส่ง staging
@@ -469,7 +469,7 @@ export function AdminHealthPage() {
           <div>
             <p className="m-0 text-sm font-black text-slate-950">ตรวจเส้นทาง/เมนู</p>
             <p className="m-0 mt-1 text-xs font-bold text-slate-400">
-              ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็น staging/future gate
+              ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็นด่าน staging หรือฟีเจอร์เผื่ออนาคต
             </p>
           </div>
           <span className="inline-flex min-h-9 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700">
@@ -511,7 +511,7 @@ export function AdminHealthPage() {
       </section>
 
       <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-        <p className="m-0 font-black">Staging gate ก่อน production</p>
+        <p className="m-0 font-black">ด่าน staging ก่อนโปรดักชัน</p>
         <p className="m-0 mt-1">
           ใช้ Supabase project จริงสำหรับ staging, bucket avatars แบบ private + signed URL, backend บน Render/Railway,
           frontend domain ทดลอง, CORS domain จริง แล้วรัน `bun run qa:full` และ `bun run production:check` กับ staging URL
