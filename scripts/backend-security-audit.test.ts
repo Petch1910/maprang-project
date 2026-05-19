@@ -1,11 +1,33 @@
 import { describe, expect, test } from 'bun:test'
-import { collectBackendSecurityFindings, collectBackendSecurityFindingsFromSource, runBackendSecurityAudit } from './backend-security-audit'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { collectBackendSecurityFindings, collectBackendSecurityFindingsFromSource, collectSourceFiles, runBackendSecurityAudit } from './backend-security-audit'
 
 function messagesFor(content: string) {
   return collectBackendSecurityFindingsFromSource('fixture.ts', content).map((finding) => finding.message)
 }
 
 describe('backend security audit', () => {
+  test('collects direct source-file targets and skips test fixtures', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'maprang-security-audit-'))
+    try {
+      const source = join(dir, 'index.ts')
+      const testSource = join(dir, 'index.test.ts')
+      const nestedDir = join(dir, 'src')
+      const nestedSource = join(nestedDir, 'route.ts')
+      await mkdir(nestedDir)
+      await writeFile(source, 'export const ok = true')
+      await writeFile(testSource, 'export const skipped = true')
+      await writeFile(nestedSource, 'export const nested = true')
+
+      expect(await collectSourceFiles(source)).toEqual([source])
+      expect((await collectSourceFiles(dir)).sort()).toEqual([source, nestedSource].sort())
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  })
+
   test('catches unsafe raw SQL helpers', () => {
     const messages = messagesFor(`
       await prisma.$queryRawUnsafe('select * from "User" where id = ' + userId)

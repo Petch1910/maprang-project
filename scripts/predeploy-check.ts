@@ -895,6 +895,8 @@ const checks: Check[] = [
       requireIncludes(
         securityAudit,
         [
+          'apps/backend/index.ts',
+          'scannedTargets',
           'adminRoutePattern',
           'admin route is missing requireAdminApiKey guard',
           'uuidParamRoutePattern',
@@ -907,6 +909,7 @@ const checks: Check[] = [
       requireIncludes(
         await readRepoFile('scripts/backend-security-audit.test.ts'),
         [
+          'collects direct source-file targets and skips test fixtures',
           'catches unsafe raw SQL helpers',
           'allows tagged raw SQL parameterization',
           'catches admin routes without admin api key guards',

@@ -1,8 +1,8 @@
-import { readFile, readdir } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 
 const root = join(import.meta.dir, '..')
-const scannedDirs = ['apps/backend/src', 'apps/backend/prisma']
+const scannedTargets = ['apps/backend/index.ts', 'apps/backend/src', 'apps/backend/prisma']
 
 export type BackendSecurityFinding = {
   file: string
@@ -10,15 +10,23 @@ export type BackendSecurityFinding = {
   message: string
 }
 
-export async function collectSourceFiles(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true })
+function shouldScanSourceFile(file: string) {
+  if (!/\.(ts|tsx)$/.test(file)) return false
+  if (/\.(test|spec)\.(ts|tsx)$/.test(file)) return false
+  return true
+}
+
+export async function collectSourceFiles(target: string): Promise<string[]> {
+  const targetStat = await stat(target)
+  if (targetStat.isFile()) return shouldScanSourceFile(target) ? [target] : []
+  if (!targetStat.isDirectory()) return []
+
+  const entries = await readdir(target, { withFileTypes: true })
   const nested = await Promise.all(
     entries.map(async (entry) => {
-      const fullPath = join(dir, entry.name)
+      const fullPath = join(target, entry.name)
       if (entry.isDirectory()) return collectSourceFiles(fullPath)
-      if (/\.(test|spec)\.(ts|tsx)$/.test(entry.name)) return []
-      if (/\.(ts|tsx)$/.test(entry.name)) return [fullPath]
-      return []
+      return shouldScanSourceFile(fullPath) ? [fullPath] : []
     }),
   )
   return nested.flat()
@@ -91,7 +99,7 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
 }
 
 export async function collectBackendSecurityFindings() {
-  const files = (await Promise.all(scannedDirs.map((dir) => collectSourceFiles(join(root, dir))))).flat()
+  const files = (await Promise.all(scannedTargets.map((target) => collectSourceFiles(join(root, target))))).flat()
   const findings: BackendSecurityFinding[] = []
 
   for (const file of files) {
