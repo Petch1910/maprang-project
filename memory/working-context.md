@@ -38,6 +38,7 @@ Verified:
 - `release:handoff:check` verifies the release handoff template and can require all handoff fields with `--filled` before sharing a real release note.
 - `release:handoff:test` covers filled handoff validation, blank-field detection, and secret-shaped value detection for the release handoff guard.
 - CI predeploy now runs the release handoff check and self-test directly, not only through `qa:local`.
+- CI predeploy now runs security, API route, and route/menu static audits directly before deploy checks.
 
 ## Current Production Status
 
