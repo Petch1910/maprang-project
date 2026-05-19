@@ -27,9 +27,9 @@ const chatsSlice = createSlice({
         state.isLoading = false
         state.items = action.payload
       })
-      .addCase(loadChatSummaries.rejected, (state, action) => {
+      .addCase(loadChatSummaries.rejected, (state) => {
         state.isLoading = false
-        state.error = action.error.message ?? 'โหลดรายการแชทไม่ได้'
+        state.error = 'โหลดรายการแชทไม่ได้'
       })
   },
 })

@@ -9,6 +9,13 @@ type AuthPanelProps = {
 const inputClass =
   'min-h-10 rounded-xl border border-slate-900/15 bg-white px-3 text-sm font-normal text-slate-900 outline-none focus:border-blue-500/60 focus:ring-4 focus:ring-blue-500/15'
 
+function signInErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : ''
+  if (message.includes('invalid') || message.includes('credentials')) return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+  if (message.includes('email not confirmed')) return 'ยังไม่ได้ยืนยันอีเมล'
+  return 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจอีเมล รหัสผ่าน หรือสถานะ Supabase แล้วลองใหม่'
+}
+
 export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   const [authState, setAuthState] = useState<AuthState>({ isConfigured: false, session: null, user: null })
   const [email, setEmail] = useState('')
@@ -57,7 +64,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
       await onAuthChanged()
       setNote('เข้าสู่ระบบแล้ว')
     } catch (error) {
-      setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
+      setNote(signInErrorMessage(error))
     } finally {
       setIsBusy(false)
     }

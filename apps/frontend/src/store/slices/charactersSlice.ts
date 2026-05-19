@@ -30,9 +30,9 @@ const charactersSlice = createSlice({
         state.isLoading = false
         state.items = action.payload
       })
-      .addCase(loadExploreCharacters.rejected, (state, action) => {
+      .addCase(loadExploreCharacters.rejected, (state) => {
         state.isLoading = false
-        state.error = action.error.message ?? 'โหลดรายการตัวละครไม่ได้'
+        state.error = 'โหลดรายการตัวละครไม่ได้'
       })
   },
 })
