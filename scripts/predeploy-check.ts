@@ -60,6 +60,7 @@ const requiredFiles = [
   'scripts/backend-security-audit.test.ts',
   'scripts/smoke-helpers.test.ts',
   'scripts/provider-smoke-guards.test.ts',
+  'scripts/readiness-smoke.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -308,6 +309,7 @@ const checks: Check[] = [
           '"route-menu:audit:test"',
           '"smoke:helpers:test"',
           '"provider:smoke:guards:test"',
+          '"smoke:ready:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -370,6 +372,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('provider:smoke:guards:test')) {
         throw new Error('package.json qa:local must run provider:smoke:guards:test so provider smoke guard regressions are caught')
+      }
+      if (!qaLocal.includes('smoke:ready:test')) {
+        throw new Error('package.json qa:local must run smoke:ready:test so readiness smoke output regressions are caught')
       }
       if (!qaLocal.includes('deploy:status:test')) {
         throw new Error('package.json qa:local must run deploy:status:test so deploy status output regressions are caught')
@@ -581,6 +586,8 @@ const checks: Check[] = [
           'smoke-helpers.test.ts',
           '"provider:smoke:guards:test"',
           'provider-smoke-guards.test.ts',
+          '"smoke:ready:test"',
+          'readiness-smoke.test.ts',
         ],
         'package.json',
       )
@@ -639,6 +646,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/provider-smoke-guards.test.ts'),
         ['formats provider failure messages', 'maps image provider failures to actionable fixes'],
         'scripts/provider-smoke-guards.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/readiness-smoke.test.ts'),
+        ['summarizes a ready payload', 'keeps readiness failures visible'],
+        'scripts/readiness-smoke.test.ts',
       )
       requireIncludes(
         promptInspector,
@@ -724,6 +736,7 @@ const checks: Check[] = [
           'bun run route-menu:audit:test',
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
+          'bun run smoke:ready:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:status:test',
@@ -759,6 +772,7 @@ const checks: Check[] = [
           'bun run route-menu:audit:test',
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
+          'bun run smoke:ready:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:readiness:test',

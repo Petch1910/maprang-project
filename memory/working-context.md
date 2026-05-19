@@ -71,6 +71,7 @@ Verified:
 - Smoke helper regression tests now cover local target defaults, deployed target auth behavior, explicit smoke user/token/admin headers, and JSON payload formatting.
 - Provider smoke guard regression tests now cover live chat minimum token thresholds, provider failure messaging, live image opt-in detection, and image provider failure hints before any verification flag can be set.
 - Deploy status regression tests now cover JSON readiness counts, text blocker output, and health failure reporting without calling a live backend.
+- Readiness smoke regression tests now cover `/ready` summary output, failure visibility, and readiness status fallback without calling a live backend.
 
 ## Current Production Status
 

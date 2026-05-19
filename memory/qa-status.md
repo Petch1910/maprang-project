@@ -52,6 +52,7 @@ Results:
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document and runtime row alignment.
 - `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior.
 - `provider:smoke:guards:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat/image smoke verification helpers.
+- `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard `/ready` summary output.
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
