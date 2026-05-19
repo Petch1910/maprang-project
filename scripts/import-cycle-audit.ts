@@ -70,6 +70,8 @@ export function extractRelativeImports(file: string, content: string) {
       collectModuleSpecifier(node.moduleSpecifier)
     } else if (ts.isExportDeclaration(node)) {
       collectModuleSpecifier(node.moduleSpecifier)
+    } else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) {
+      collectModuleSpecifier(node.moduleReference.expression)
     } else if (
       ts.isCallExpression(node) &&
       node.expression.kind === ts.SyntaxKind.ImportKeyword &&

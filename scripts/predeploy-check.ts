@@ -445,10 +445,10 @@ const checks: Check[] = [
       )
       requireIncludes(
         importCycleAuditTest,
-        ["require('./legacy-helper')", 'extracts static, dynamic, side-effect, require, and re-export relative imports'],
+        ["require('./legacy-helper')", "import legacy = require('./legacy-module')"],
         'scripts/import-cycle-audit.test.ts',
       )
-      requireIncludes(deploymentQa, ['CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
+      requireIncludes(deploymentQa, ['TypeScript import-equals `require()`', 'CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
       const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
