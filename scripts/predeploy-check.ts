@@ -1145,7 +1145,7 @@ const checks: Check[] = [
       requireIncludes(e2eSmoke, ['expectBackendRootIdentity', 'maprang-backend'], 'tests/e2e/maprang-smoke.spec.ts')
       forbidIncludes(
         e2eSmoke,
-        ['Production blocker summary', 'Deploy checklist', 'Chat Sidebar', 'Prompt Inspector', 'Automated Evals'],
+        ['Production blocker summary', 'Deploy checklist', 'Chat Sidebar', 'Prompt Inspector', 'Automated Evals', 'prompt/context'],
         'tests/e2e/maprang-smoke.spec.ts',
       )
     },
