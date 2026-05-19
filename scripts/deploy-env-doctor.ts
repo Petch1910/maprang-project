@@ -110,8 +110,10 @@ function auditBackendEnv(env: EnvMap) {
   auditNumberRange(env.get('MODEL_TEMPERATURE'), 'backend', 'MODEL_TEMPERATURE', 0, 2)
   expectPresent(env, 'MODEL_MAX_OUTPUT_TOKENS', 'backend', 'ต้องตั้ง MODEL_MAX_OUTPUT_TOKENS เพื่อให้บอทมีพื้นที่ตอบยาวพอ')
   auditIntegerRangeWithRecommendedMin(env.get('MODEL_MAX_OUTPUT_TOKENS'), 'backend', 'MODEL_MAX_OUTPUT_TOKENS', 128, 2400, 1200)
+  auditPreferredIntegerMin(env.get('MODEL_MAX_OUTPUT_TOKENS'), 'backend', 'MODEL_MAX_OUTPUT_TOKENS', 1200, 1600)
   expectPresent(env, 'MODEL_MIN_ROLEPLAY_REPLY_CHARS', 'backend', 'ต้องตั้ง MODEL_MIN_ROLEPLAY_REPLY_CHARS เพื่อกันคำตอบ roleplay สั้นเกินไป')
   auditIntegerRangeWithRecommendedMin(env.get('MODEL_MIN_ROLEPLAY_REPLY_CHARS'), 'backend', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS', 0, 1200, 320)
+  auditPreferredIntegerMin(env.get('MODEL_MIN_ROLEPLAY_REPLY_CHARS'), 'backend', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS', 320, 420)
   expectPresent(env, 'CHAT_PROVIDER_RETRY_ATTEMPTS', 'backend', 'ตั้งจำนวน retry ของ chat provider เพื่อกัน provider ล่มชั่วคราว')
   auditIntegerRange(env.get('CHAT_PROVIDER_RETRY_ATTEMPTS'), 'backend', 'CHAT_PROVIDER_RETRY_ATTEMPTS', 1, 5)
   expectPresent(env, 'CHAT_PROVIDER_RETRY_DELAY_MS', 'backend', 'ตั้ง delay retry ของ chat provider')
@@ -488,6 +490,14 @@ function auditIntegerRangeWithRecommendedMin(value: string | undefined, area: Ar
     return
   }
   pass(area, check, `integer in range ${min}-${max} and at least production baseline ${recommendedMin}`)
+}
+
+function auditPreferredIntegerMin(value: string | undefined, area: Area, check: string, baselineMin: number, preferredMin: number) {
+  if (!hasRealValue(value)) return
+  const number = Number(value)
+  if (Number.isInteger(number) && number >= baselineMin && number < preferredMin) {
+    warn(area, check, `passes production baseline ${baselineMin}, but recommended is ${preferredMin} for richer roleplay replies`)
+  }
 }
 
 function expectPresent(env: EnvMap, key: string, area: Area, detail: string) {

@@ -736,7 +736,15 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployEnvDoctor,
-        ['runDeployEnvDoctor', 'writeLine', 'DeployEnvDoctorResult', 'findings: [...findings]', 'auditIntegerRangeWithRecommendedMin', 'production roleplay replies'],
+        [
+          'runDeployEnvDoctor',
+          'writeLine',
+          'DeployEnvDoctorResult',
+          'findings: [...findings]',
+          'auditIntegerRangeWithRecommendedMin',
+          'auditPreferredIntegerMin',
+          'production roleplay replies',
+        ],
         'scripts/deploy-env-doctor.ts',
       )
       requireIncludes(
@@ -746,8 +754,10 @@ const checks: Check[] = [
           'importable function without exiting',
           'Supabase URL match',
           'fails production env when roleplay reply budget is below baseline',
+          'warns when production env uses baseline roleplay reply budget below richer recommendation',
           'should be at least 1200 for production roleplay replies',
           'should be at least 320 for production roleplay replies',
+          'recommended is 1600 for richer roleplay replies',
           'imports the deploy doctor self-test without executing it',
         ],
         'scripts/deploy-env-doctor.test.ts',
