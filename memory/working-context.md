@@ -79,6 +79,7 @@ Verified:
 - Browser e2e smoke now exports a testable command plan, and `e2e:smoke:test` guards seed reset, Playwright execution, and seed restore ordering without launching the browser.
 - Secret scanning now exports path-rule helpers, and `secrets:check:test` guards tracked `.env` rejection plus source/docs/config scan selection.
 - Local eval CLI now exports output formatting helpers, and `eval:local:test` guards pass/fail summary output without rerunning the deterministic prompt suite.
+- Smoke doctor now exports a report builder, and `smoke:doctor:test` guards staging blocker next steps, strict staging failure, and backend health failure output without calling a live backend.
 
 ## Current Production Status
 

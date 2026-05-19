@@ -42,6 +42,7 @@ jobs:
       - run: bun run route-menu:audit:test
       - run: bun run smoke:helpers:test
       - run: bun run provider:smoke:guards:test
+      - run: bun run smoke:doctor:test
       - run: bun run smoke:ready:test
       - run: bun run smoke:local:test
       - run: bun run e2e:smoke:test

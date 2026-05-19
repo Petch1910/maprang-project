@@ -64,6 +64,7 @@ const requiredFiles = [
   'scripts/backend-security-audit.test.ts',
   'scripts/smoke-helpers.test.ts',
   'scripts/provider-smoke-guards.test.ts',
+  'scripts/smoke-doctor.test.ts',
   'scripts/readiness-smoke.test.ts',
   'scripts/local-smoke.test.ts',
   'scripts/e2e-smoke.test.ts',
@@ -320,6 +321,7 @@ const checks: Check[] = [
           '"route-menu:audit:test"',
           '"smoke:helpers:test"',
           '"provider:smoke:guards:test"',
+          '"smoke:doctor:test"',
           '"smoke:ready:test"',
           '"smoke:local:test"',
           '"e2e:smoke:test"',
@@ -396,6 +398,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('provider:smoke:guards:test')) {
         throw new Error('package.json qa:local must run provider:smoke:guards:test so provider smoke guard regressions are caught')
+      }
+      if (!qaLocal.includes('smoke:doctor:test')) {
+        throw new Error('package.json qa:local must run smoke:doctor:test so smoke doctor blocker output regressions are caught')
       }
       if (!qaLocal.includes('smoke:ready:test')) {
         throw new Error('package.json qa:local must run smoke:ready:test so readiness smoke output regressions are caught')
@@ -559,6 +564,7 @@ const checks: Check[] = [
     run: async () => {
       const packageJson = await readRepoFile('package.json')
       const smokeDoctor = await readRepoFile('scripts/smoke-doctor.ts')
+      const smokeDoctorTest = await readRepoFile('scripts/smoke-doctor.test.ts')
       const deployStatus = await readRepoFile('scripts/deploy-status.ts')
       const deployStatusTest = await readRepoFile('scripts/deploy-status.test.ts')
       const deployReadiness = await readRepoFile('scripts/deploy-readiness.ts')
@@ -566,12 +572,18 @@ const checks: Check[] = [
       const readme = await readRepoFile('README.md')
       const stagingRunbook = await readRepoFile('STAGING_RUNBOOK.md')
       requireIncludes(packageJson, ['"deploy:status"', 'bun scripts/deploy-status.ts'], 'package.json')
+      requireIncludes(packageJson, ['"smoke:doctor:test"', 'bun test scripts/smoke-doctor.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:status:test"', 'bun test scripts/deploy-status.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:readiness:test"', 'bun test scripts/deploy-readiness.test.ts'], 'package.json')
       requireIncludes(
         smokeDoctor,
         ['evaluateDeployReadiness', 'buildHealthRows', 'buildNextDeploySteps', 'healthFailures', 'nextSteps:'],
         'scripts/smoke-doctor.ts',
+      )
+      requireIncludes(
+        smokeDoctorTest,
+        ['buildSmokeDoctorReport', 'strict staging gate fails', 'backend health failures'],
+        'scripts/smoke-doctor.test.ts',
       )
       requireIncludes(
         deployStatus,
@@ -636,6 +648,8 @@ const checks: Check[] = [
           'smoke-helpers.test.ts',
           '"provider:smoke:guards:test"',
           'provider-smoke-guards.test.ts',
+          '"smoke:doctor:test"',
+          'smoke-doctor.test.ts',
           '"smoke:ready:test"',
           'readiness-smoke.test.ts',
           '"smoke:local:test"',
@@ -806,6 +820,7 @@ const checks: Check[] = [
           'bun run route-menu:audit:test',
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
+          'bun run smoke:doctor:test',
           'bun run smoke:ready:test',
           'bun run smoke:local:test',
           'bun run e2e:smoke:test',
@@ -849,6 +864,7 @@ const checks: Check[] = [
           'bun run route-menu:audit:test',
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
+          'bun run smoke:doctor:test',
           'bun run smoke:ready:test',
           'bun run smoke:local:test',
           'bun run e2e:smoke:test',
