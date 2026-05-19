@@ -64,6 +64,7 @@ const requiredFiles = [
   'scripts/smoke-helpers.test.ts',
   'scripts/provider-smoke-guards.test.ts',
   'scripts/readiness-smoke.test.ts',
+  'scripts/local-smoke.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -316,6 +317,7 @@ const checks: Check[] = [
           '"smoke:helpers:test"',
           '"provider:smoke:guards:test"',
           '"smoke:ready:test"',
+          '"smoke:local:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -385,6 +387,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('smoke:ready:test')) {
         throw new Error('package.json qa:local must run smoke:ready:test so readiness smoke output regressions are caught')
+      }
+      if (!qaLocal.includes('smoke:local:test')) {
+        throw new Error('package.json qa:local must run smoke:local:test so local smoke helper regressions are caught')
       }
       if (!qaLocal.includes('backend:check:db:test')) {
         throw new Error('package.json qa:local must run backend:check:db:test so DB-required backend check planning is caught')
@@ -614,6 +619,8 @@ const checks: Check[] = [
           'provider-smoke-guards.test.ts',
           '"smoke:ready:test"',
           'readiness-smoke.test.ts',
+          '"smoke:local:test"',
+          'local-smoke.test.ts',
         ],
         'package.json',
       )
@@ -626,6 +633,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/supabase-storage-setup.test.ts'),
         ['validates production signed storage config', 'normalizes signed URL response paths'],
         'scripts/supabase-storage-setup.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/local-smoke.test.ts'),
+        ['prefers MIKA', 'validates avatar upload shape', 'formats local smoke summary'],
+        'scripts/local-smoke.test.ts',
       )
       requireIncludes(
         securityAudit,
@@ -774,6 +786,7 @@ const checks: Check[] = [
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
           'bun run smoke:ready:test',
+          'bun run smoke:local:test',
           'bun run backend:check:db:test',
           'bun run supabase:storage:test',
           'bun run release:handoff:check',
@@ -813,6 +826,7 @@ const checks: Check[] = [
           'bun run smoke:helpers:test',
           'bun run provider:smoke:guards:test',
           'bun run smoke:ready:test',
+          'bun run smoke:local:test',
           'bun run backend:check:db:test',
           'bun run supabase:storage:test',
           'bun run release:handoff:check',

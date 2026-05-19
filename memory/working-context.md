@@ -75,6 +75,7 @@ Verified:
 - Memory/knowledge vault audits now share Markdown link/include helpers, with regression tests for required snippets, local link collection, and vault-boundary checks.
 - Backend DB check planning is covered by `backend:check:db:test`, ensuring DB availability is checked before backend tests run with `REQUIRE_DB_TESTS=true`.
 - Supabase signed-storage setup now exports testable helpers for env loading, config validation, signed URL normalization, and object path encoding; `supabase:storage:test` covers them without hitting Supabase.
+- Local smoke now exports testable helpers for smoke character selection, avatar upload validation, and QA summary formatting; `smoke:local:test` covers them without hitting the backend.
 
 ## Current Production Status
 

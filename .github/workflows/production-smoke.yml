@@ -60,6 +60,7 @@ jobs:
       - run: bun run smoke:helpers:test
       - run: bun run provider:smoke:guards:test
       - run: bun run smoke:ready:test
+      - run: bun run smoke:local:test
       - run: bun run backend:check:db:test
       - run: bun run supabase:storage:test
       - run: bun run release:handoff:check
