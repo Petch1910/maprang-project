@@ -200,16 +200,16 @@ function promptWarnings({
   const estimatedTokens = estimatePromptTokens(prompt)
   const normalizedMessage = userMessage.toLowerCase()
 
-  if (redactionCount > 0) warnings.push('Secret-shaped values were redacted from the inspector output.')
-  if (estimatedTokens > 6000) warnings.push(`Estimated prompt is large (${estimatedTokens} tokens). Consider summary/RAG trimming.`)
+  if (redactionCount > 0) warnings.push('พบค่าที่มีรูปแบบคล้ายข้อมูลลับ ระบบปิดข้อมูลส่วนนี้ออกจากผลตรวจแล้ว')
+  if (estimatedTokens > 6000) warnings.push(`พรอมป์มีขนาดใหญ่ประมาณ ${estimatedTokens} โทเคน ควรสรุปความจำหรือคัดบริบทจากคลังความรู้ให้สั้นลง`)
   if (!sections.some((section) => section.title === 'Platform prompt-control policy')) {
-    warnings.push('Platform prompt-control policy section is missing or not first.')
+    warnings.push('ไม่พบกฎคุมพรอมป์ของแพลตฟอร์ม หรือไม่ได้อยู่ลำดับแรก')
   }
   if (!sections.some((section) => section.title === 'Runtime instructions')) {
-    warnings.push('Runtime instructions section is missing.')
+    warnings.push('ไม่พบส่วนคำสั่งขณะรัน')
   }
   if (injectionHints.some((hint) => normalizedMessage.includes(hint))) {
-    warnings.push('User message contains prompt-control or admin/secret-seeking language; verify refusal behavior.')
+    warnings.push('ข้อความผู้ใช้มีสัญญาณขอแก้คำสั่งหรือขอข้อมูลผู้ดูแล/ข้อมูลลับ ควรตรวจว่าระบบปฏิเสธอย่างถูกต้อง')
   }
 
   return warnings

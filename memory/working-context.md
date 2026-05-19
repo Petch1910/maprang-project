@@ -11,7 +11,7 @@ Bring Maprang AI to a production-ready state before deploy. The local system sho
 Status: local QA ready
 
 Verified:
-- Backend tests pass: 130 pass, 0 fail.
+- Backend tests pass: 131 pass, 0 fail.
 - Frontend deploy check passes.
 - Local API smoke passes: 32 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
@@ -27,6 +27,7 @@ Verified:
 - Browser smoke assertions now use Thai-first admin UI labels for Admin Health, Prompt Inspector, and Automated Evals, and the frontend static audit also blocks English admin checklist labels from returning.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.
 - Prompt Inspector now redacts secret-shaped values in retrieved lore keyword/alias/preview as well as final prompt and section content.
+- Prompt Inspector warning messages returned to the admin UI are now Thai-first for redaction, oversized prompt, missing policy/runtime sections, and prompt-injection review hints.
 - Frontend Prompt Inspector page is available at `/admin/prompt-inspector` and is included in route/menu audit.
 - Automated Evals are available through `/admin/evals` and `GET /admin/evals/local` using the same deterministic suite as `bun run eval:local`.
 - Admin Health page renders production blockers and has no browser console errors.

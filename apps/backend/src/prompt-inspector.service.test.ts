@@ -52,8 +52,10 @@ describe('prompt inspector service', () => {
     expect(snapshot.retrieval.lore[0]?.aliases.join(' ')).toContain('[REDACTED_SECRET]')
     expect(snapshot.retrieval.lore[0]?.preview).toContain('[REDACTED_SECRET]')
     expect(snapshot.retrieval.lore[0]?.preview).not.toContain(fakeDatabaseUrl)
-    expect(snapshot.warnings).toContain('Secret-shaped values were redacted from the inspector output.')
-    expect(snapshot.warnings).toContain('User message contains prompt-control or admin/secret-seeking language; verify refusal behavior.')
+    expect(snapshot.warnings).toContain('พบค่าที่มีรูปแบบคล้ายข้อมูลลับ ระบบปิดข้อมูลส่วนนี้ออกจากผลตรวจแล้ว')
+    expect(snapshot.warnings).toContain('ข้อความผู้ใช้มีสัญญาณขอแก้คำสั่งหรือขอข้อมูลผู้ดูแล/ข้อมูลลับ ควรตรวจว่าระบบปฏิเสธอย่างถูกต้อง')
+    expect(snapshot.warnings.join(' ')).not.toContain('Secret-shaped values')
+    expect(snapshot.warnings.join(' ')).not.toContain('User message contains prompt-control')
   })
 
   test('diffs prompt snapshots by changed sections and token delta', () => {
@@ -80,6 +82,17 @@ describe('prompt inspector service', () => {
     expect(diff.estimatedTokenDelta).toBeGreaterThan(0)
     expect(diff.changedSections.some((section) => section.title.includes('Relevant lorebook entries'))).toBe(true)
     expect(diff.changedSections.some((section) => section.title.includes('User message'))).toBe(true)
+  })
+
+  test('keeps prompt inspector warnings Thai-first for large prompts', () => {
+    const snapshot = buildPromptInspectorSnapshot({
+      character: fixtureCharacter,
+      loreEntries: [],
+      userMessage: 'ทดสอบบริบท '.repeat(9000),
+    })
+
+    expect(snapshot.warnings.some((warning) => warning.includes('พรอมป์มีขนาดใหญ่ประมาณ'))).toBe(true)
+    expect(snapshot.warnings.join(' ')).not.toContain('Estimated prompt is large')
   })
 
   test('uses the same rough token estimator as local evals', () => {

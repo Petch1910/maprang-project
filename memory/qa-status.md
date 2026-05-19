@@ -20,7 +20,7 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 130 pass, 0 fail.
+- Backend tests: 131 pass, 0 fail.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
@@ -55,6 +55,7 @@ Results:
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - API smoke now covers admin-only prompt inspector snapshots, prompt diffs, and deterministic local evals.
 - Prompt Inspector service tests now cover secret redaction in retrieved lore previews and aliases.
+- Prompt Inspector service tests now also guard Thai-first warning copy for redaction, injection review hints, and oversized prompt warnings.
 - Route/menu audit now covers 14 surfaces including `/admin/prompt-inspector` and `/admin/evals`.
 - API smoke and E2E now cover chat world state save/read persistence.
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
