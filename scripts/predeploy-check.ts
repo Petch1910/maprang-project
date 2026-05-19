@@ -532,6 +532,9 @@ const checks: Check[] = [
     run: async () => {
       const audit = await readRepoFile('ROUTE_MENU_AUDIT.md')
       const staging = await readRepoFile('STAGING_RUNBOOK.md')
+      const readme = await readRepoFile('README.md')
+      const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+      const productionSetup = await readRepoFile('PRODUCTION_SETUP.md')
       requireIncludes(
         audit,
         ['/admin/health', 'Route/Menu Audit', 'bun run route-menu:audit', 'bun run e2e:smoke', 'Creator Studio', 'Moderation'],
@@ -548,9 +551,13 @@ const checks: Check[] = [
           'E2E_BASE_URL',
           '/ready',
           'bun run staging:verify',
+          'https://',
         ],
         'STAGING_RUNBOOK.md',
       )
+      requireIncludes(readme, ['local/non-https CORS'], 'README.md')
+      requireIncludes(deploymentQa, ['local/non-https CORS'], 'DEPLOYMENT_QA.md')
+      requireIncludes(productionSetup, ['CORS is local or non-https'], 'PRODUCTION_SETUP.md')
     },
   },
   {

@@ -245,7 +245,7 @@ After staging backend/frontend domains exist, run the deployed staging gate:
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
-`staging:verify` prints `bun run deploy:status` first, then rejects localhost backend URLs, local CORS, missing Supabase signed storage, failed `/ready`, and missing admin smoke coverage. It intentionally allows chat/image live verification flags to stay pending so you can run live provider smoke next, then use `production:check` as the final go/no-go.
+`staging:verify` prints `bun run deploy:status` first, then rejects localhost backend URLs, local/non-https CORS, missing Supabase signed storage, failed `/ready`, and missing admin smoke coverage. It intentionally allows chat/image live verification flags to stay pending so you can run live provider smoke next, then use `production:check` as the final go/no-go.
 
 Or run each check separately:
 

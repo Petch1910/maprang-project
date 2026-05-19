@@ -185,7 +185,7 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
-`production:check` is the hard final gate. It prints `bun run deploy:status` first so the blocker summary and next steps are visible before the strict smoke gates fail. It fails if the backend URL is still local, auth is not Supabase JWT, avatar storage is not Supabase signed URL, the real `avatars` bucket cannot upload/fetch through signed URLs, CORS still points at localhost, OpenRouter is missing, the image generation provider is missing, or live chat/image provider calls fail.
+`production:check` is the hard final gate. It prints `bun run deploy:status` first so the blocker summary and next steps are visible before the strict smoke gates fail. It fails if the backend URL is still local, auth is not Supabase JWT, avatar storage is not Supabase signed URL, the real `avatars` bucket cannot upload/fetch through signed URLs, CORS is local or non-https, OpenRouter is missing, the image generation provider is missing, or live chat/image provider calls fail.
 
 Before that final gate, use `staging:verify` against the deployed staging backend:
 
