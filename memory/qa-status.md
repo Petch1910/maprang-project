@@ -1,6 +1,6 @@
 # QA Status
 
-Last updated: 2026-05-14
+Last updated: 2026-05-19
 
 ## Latest Local Gate
 
@@ -9,6 +9,7 @@ Status: passing
 Commands verified:
 - `bun run qa:local`
 - `bun run e2e:smoke`
+- `bunx prisma migrate deploy`
 - `bun run predeploy:check`
 - `bun run memory:audit`
 - `bun run knowledge:audit`
@@ -17,7 +18,7 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 124 pass, 0 fail.
+- Backend tests: 126 pass, 0 fail.
 - API smoke: 26 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
@@ -39,6 +40,9 @@ Results:
 - Production readiness now blocks on both chat provider and image provider live verification flags.
 - Smoke doctor now reports separate staging blockers and production blockers; `--strict-staging` rejects local backend/CORS before provider verification.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
+- Relationship engine focused test passes for the expanded Thai ladder: 11 pass, 0 fail.
+- Current delta gate passes: `backend:check`, `frontend:check`, and `knowledge:audit`.
+- Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.
 
 ## Production Gate
 

@@ -9,6 +9,7 @@ The relationship engine turns tags, seeds, user behavior, and scene outcomes int
 - Momentum: short-term warming, cooling, volatile, or steady direction.
 - Timeline: compact history of emotionally meaningful turns.
 - Scene event: optional moment unlocked by relationship conditions.
+- Expanded ladder: ศัตรู, ไม่ถูกกัน, คู่ปรับ, คู่กัด, คนรู้จัก, เพื่อน, เพื่อนสนิท, เพื่อนตาย, แอบชอบ, เพื่อนสนิทคิดไม่ซื่อ, ลองคุย, คนคุย, แฟน, แฟน Toxic, คนรัก, คู่ชีวิต, คู่ครอง, คู่ครอง Toxic, คู่แท้.
 
 ## Runtime Direction
 

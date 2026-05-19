@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Clock3, MessageCircle, RefreshCw, Search, Sparkles } from 'lucide-react'
+import { relationshipStatusLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
   loadChatSummaries,
@@ -8,14 +9,6 @@ import {
   selectChatsLoading,
   selectPendingSceneSummaries,
 } from '../store/slices/chatsSlice'
-
-const relationshipLabels: Record<string, string> = {
-  RIVAL: 'คู่แข่ง',
-  NEUTRAL: 'เป็นกลาง',
-  CLOSE: 'ใกล้ชิด',
-  TRUSTED: 'ไว้ใจ',
-  ROMANTIC: 'โรแมนติก',
-}
 
 const eventTones = [
   {
@@ -172,7 +165,7 @@ export function EventsInboxPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="m-0 text-xs font-black tracking-widest text-slate-500 uppercase">ฉากพร้อมเข้า</p>
                         <span className={`rounded-full px-2.5 py-1 text-xs font-black ${tone.chip}`}>
-                          {relationshipLabels[group.relationshipStatus] ?? group.relationshipStatus}
+                          {relationshipStatusLabel(group.relationshipStatus)}
                         </span>
                       </div>
                       <h2 className="mt-1 line-clamp-1 text-lg font-black">{group.title}</h2>

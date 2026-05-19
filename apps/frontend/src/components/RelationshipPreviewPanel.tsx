@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { previewRelationship, type RelationshipPreview } from '../lib/api'
+import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { parseTags } from '../lib/tagAnalysis'
 
 export function RelationshipPreviewPanel({
@@ -59,7 +60,7 @@ export function RelationshipPreviewPanel({
       {preview && (
         <div className="mt-2 space-y-2">
           <p className="m-0 font-bold text-slate-900">
-            seed: {preview.seed.status} / {preview.seed.arcStage} / {preview.seed.tier} / {preview.seed.tone}
+            seed: {relationshipStatusLabel(preview.seed.status)} / {preview.seed.arcStage} / {relationshipTierLabel(preview.seed.tier)} / {preview.seed.tone}
           </p>
           {preview.validationIssues.map((issue) => (
             <p
@@ -74,7 +75,7 @@ export function RelationshipPreviewPanel({
               <strong className="text-slate-900">เทิร์น {turn.turn}</strong>
               <p className="m-0">{turn.message}</p>
               <p className="m-0">
-                {turn.status} / {turn.tier} / {turn.tone} | ผูกพัน {turn.stats.affinity}, ไว้ใจ {turn.stats.trust}
+                {relationshipStatusLabel(turn.status)} / {relationshipTierLabel(turn.tier)} / {turn.tone} | ผูกพัน {turn.stats.affinity}, ไว้ใจ {turn.stats.trust}
               </p>
               {turn.events.length > 0 && <p className="m-0">hook: {turn.events.map((event) => event.label).join(', ')}</p>}
             </div>

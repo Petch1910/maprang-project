@@ -18,26 +18,9 @@ import {
 import { displayMessageContent } from '../lib/characterDisplay'
 import { archiveChat, deleteChat, fetchChats, restoreChat, updateChatTitle, type ChatSummary } from '../lib/api'
 import { loadPinnedChatIds, savePinnedChatIds, togglePinnedChatId } from '../lib/pinnedChats'
+import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadChatSummaries, selectChatsError, selectChatsLoading, selectPlayableChatSummaries } from '../store/slices/chatsSlice'
-
-const relationshipLabels: Record<string, string> = {
-  RIVAL: 'คู่แข่ง',
-  NEUTRAL: 'เป็นกลาง',
-  CLOSE: 'ใกล้ชิด',
-  TRUSTED: 'ไว้ใจ',
-  ROMANTIC: 'โรแมนติก',
-}
-
-const tierLabels: Record<string, string> = {
-  neutral: 'โหมดอิสระ',
-  cold: 'ระยะห่าง',
-  warm: 'อบอุ่น',
-  close: 'ใกล้ชิด',
-  trusted: 'ไว้ใจ',
-  intimate: 'ลึกซึ้ง',
-  volatile: 'ผันผวน',
-}
 
 export function MyChatsPage() {
   const dispatch = useAppDispatch()
@@ -608,11 +591,11 @@ export function MyChatsPage() {
                 <div className={`mt-3 flex flex-wrap gap-2 ${openMenuChatId === chat.id ? 'pointer-events-none' : ''}`}>
                   <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-700">{chat.characterName}</span>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">
-                    {relationshipLabels[relationshipStatus] ?? relationshipStatus}
+                    {relationshipStatusLabel(relationshipStatus)}
                   </span>
                   {relationship?.tier && (
                     <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
-                      {tierLabels[relationship.tier.toLowerCase()] ?? relationship.tier}
+                      {relationshipTierLabel(relationship.tier)}
                     </span>
                   )}
                   {activeScene && (

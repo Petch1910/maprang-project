@@ -1,4 +1,5 @@
 import type { ChatRuntimeState } from '../lib/api'
+import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { analyzeTags } from '../lib/tagAnalysis'
 
 export function RelationshipExplainability({
@@ -54,7 +55,8 @@ export function RelationshipExplainability({
       {relationship && (
         <div className="mt-3 space-y-2 text-xs leading-relaxed text-slate-600">
           <p className="m-0">
-            <strong className="text-slate-900">{relationship.status}</strong> / {relationship.arcStage} / {relationship.tier} / โทน{' '}
+            <strong className="text-slate-900">{relationshipStatusLabel(relationship.status)}</strong> / {relationship.arcStage} /{' '}
+            {relationshipTierLabel(relationship.tier)} / โทน{' '}
             {relationship.tone}
           </p>
           {relationship.constraints.length > 0 && <p className="m-0">ข้อคุมระบบ: {relationship.constraints.join(', ')}</p>}

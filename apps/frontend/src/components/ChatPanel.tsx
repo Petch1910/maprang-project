@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react'
+﻿import { useEffect, useMemo, useState, type RefObject } from 'react'
 import {
   Archive,
   BookOpen,
@@ -21,6 +21,7 @@ import {
 import heroImage from '../assets/hero.png'
 import type { Character, ChatMessage, ChatResponse, ChatRuntimeState, WorldStateInput } from '../lib/api'
 import { displayCharacterDetail, displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
+import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { Composer } from './Composer'
 import { MessageBubble } from './MessageBubble'
 
@@ -53,33 +54,6 @@ type ChatPanelProps = {
   ) => void
   onSendMessage: (message?: string) => void
   onStartNewChat: () => void
-}
-
-function relationshipLabel(status?: string) {
-  const labels: Record<string, string> = {
-    RIVAL: 'คู่แข่ง',
-    NEUTRAL: 'เริ่มต้น',
-    CLOSE: 'ใกล้ชิด',
-    TRUSTED: 'ไว้ใจ',
-    ROMANTIC: 'โรแมนติก',
-  }
-  return status ? labels[status] ?? status.toLowerCase() : 'เริ่มต้น'
-}
-
-function relationshipTierLabel(tier?: string) {
-  const labels: Record<string, string> = {
-    neutral: 'โหมดอิสระ',
-    cold: 'ระยะห่าง',
-    warm: 'อบอุ่น',
-    warming: 'อบอุ่นขึ้น',
-    cooling: 'เย็นลง',
-    steady: 'คงที่',
-    close: 'ใกล้ชิด',
-    trusted: 'ไว้ใจ',
-    intimate: 'ลึกซึ้ง',
-    volatile: 'ผันผวน',
-  }
-  return tier ? labels[tier.toLowerCase()] ?? tier : 'โหมดอิสระ'
 }
 
 function usageLabel(usage: ChatUsage | null) {
@@ -154,7 +128,7 @@ function CharacterStage({
         <div className="grid grid-cols-3 gap-2 text-xs font-bold text-white/62">
           <span className="rounded-lg border border-white/10 bg-white/6 px-3 py-2">
             <span className="block text-white/35">สถานะ</span>
-            <span className="mt-0.5 block truncate text-white">{relationshipLabel(relationship?.status)}</span>
+            <span className="mt-0.5 block truncate text-white">{relationshipStatusLabel(relationship?.status)}</span>
           </span>
           <span className="rounded-lg border border-white/10 bg-white/6 px-3 py-2">
             <span className="block text-white/35">ฉาก</span>
@@ -250,7 +224,7 @@ function MobileQuickActions({
         onClick={onOpenCharacterProfile}
       >
         <span className="block truncate text-white/42">ความสัมพันธ์</span>
-        <span className="mt-0.5 block truncate">{relationshipLabel(relationship?.status)}</span>
+        <span className="mt-0.5 block truncate">{relationshipStatusLabel(relationship?.status)}</span>
       </button>
       <button type="button"
         className="min-w-0 rounded-xl border border-white/10 bg-black/32 px-3 py-2 text-left text-xs font-black text-white backdrop-blur-xl"
@@ -693,7 +667,7 @@ function RightRail({
       <div className="mt-4 rounded-xl border border-white/10 bg-white/6 p-3">
         <p className="m-0 text-xs font-black text-white/45">ความสัมพันธ์</p>
         <div className="mt-2 flex items-center justify-between gap-3">
-          <span className="text-sm font-black">{relationshipLabel(relationship?.status)}</span>
+          <span className="text-sm font-black">{relationshipStatusLabel(relationship?.status)}</span>
           <span className="rounded-full bg-white/12 px-2 py-1 text-xs font-bold text-white/70">{relationshipTierLabel(relationship?.tier)}</span>
         </div>
       </div>
@@ -833,7 +807,7 @@ export function ChatPanel({
             <div className="flex min-w-0 items-center gap-2">
               <h1 className="m-0 truncate text-sm font-black text-white">{character.name}</h1>
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-black text-white/70">
-                {relationshipLabel(runtimeState?.relationshipState.status)}
+                {relationshipStatusLabel(runtimeState?.relationshipState.status)}
               </span>
             </div>
             <p className="m-0 mt-0.5 truncate text-xs text-white/45">

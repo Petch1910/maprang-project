@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   RELATIONSHIP_PRESETS,
   applyRelationshipDelta,
+  analyzeRelationshipTags,
   buildRelationshipSeedFromTags,
   simulateRelationshipPreview,
   validateRelationshipTags,
@@ -56,6 +57,83 @@ describe('relationship tag validation', () => {
 })
 
 describe('relationship seed', () => {
+  test('normalizes the expanded Thai relationship ladder', () => {
+    const profile = analyzeRelationshipTags([
+      'ศัตรู',
+      'ไม่ถูกกัน',
+      'คู่ปรับ',
+      'คู่กัด',
+      'คนรู้จัก',
+      'เพื่อน',
+      'เพื่อนสนิท',
+      'เพื่อนตาย',
+      'แอบชอบ',
+      'เพื่อนสนิทคิดไม่ซื่อ',
+      'ลองคุย',
+      'คนคุย',
+      'แฟน',
+      'แฟน Toxic',
+      'คนรัก',
+      'คู่ชีวิต',
+      'คู่ครอง',
+      'คู่ครอง Toxic',
+      'คู่แท้',
+    ])
+
+    expect(profile.unknown).toEqual([])
+    expect(profile.engine).toEqual(
+      expect.arrayContaining([
+        'enemy',
+        'disliked',
+        'rival',
+        'bickering-rival',
+        'acquaintance',
+        'friend',
+        'close-friend',
+        'ride-or-die',
+        'crush',
+        'friend-crush',
+        'dating-trial',
+        'talking-stage',
+        'partner',
+        'toxic-partner',
+        'lover',
+        'life-partner',
+        'spouse',
+        'toxic-spouse',
+        'soulmate',
+      ]),
+    )
+  })
+
+  test('creates distinct seed statuses for the expanded ladder', () => {
+    const cases: Array<[string, string]> = [
+      ['ศัตรู', 'ENEMY'],
+      ['ไม่ถูกกัน', 'DISLIKED'],
+      ['คู่ปรับ', 'RIVAL'],
+      ['คู่กัด', 'BICKERING_RIVAL'],
+      ['คนรู้จัก', 'ACQUAINTANCE'],
+      ['เพื่อน', 'FRIEND'],
+      ['เพื่อนสนิท', 'CLOSE_FRIEND'],
+      ['เพื่อนตาย', 'RIDE_OR_DIE'],
+      ['แอบชอบ', 'CRUSH'],
+      ['เพื่อนสนิทคิดไม่ซื่อ', 'FRIEND_CRUSH'],
+      ['ลองคุย', 'DATING_TRIAL'],
+      ['คนคุย', 'TALKING_STAGE'],
+      ['แฟน', 'PARTNER'],
+      ['แฟน Toxic', 'TOXIC_PARTNER'],
+      ['คนรัก', 'LOVER'],
+      ['คู่ชีวิต', 'LIFE_PARTNER'],
+      ['คู่ครอง', 'SPOUSE'],
+      ['คู่ครอง Toxic', 'TOXIC_SPOUSE'],
+      ['คู่แท้', 'SOULMATE'],
+    ]
+
+    for (const [tag, status] of cases) {
+      expect(buildRelationshipSeedFromTags([tag]).status).toBe(status)
+    }
+  })
+
   test('creates a safety-locked family route', () => {
     const seed = buildRelationshipSeedFromTags(['family', 'no-romance', 'slice-of-life'])
 

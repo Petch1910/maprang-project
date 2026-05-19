@@ -1,6 +1,6 @@
 # Working Context
 
-Last updated: 2026-05-14
+Last updated: 2026-05-19
 
 ## Current Goal
 
@@ -11,10 +11,11 @@ Bring Maprang AI to a production-ready state before deploy. The local system sho
 Status: local QA ready
 
 Verified:
-- Backend tests pass: 124 pass, 0 fail.
+- Backend tests pass: 126 pass, 0 fail.
 - Frontend deploy check passes.
 - Local API smoke passes: 26 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
+- Local Postgres is reachable through Docker and migrations are applied.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.
 - Frontend Prompt Inspector page is available at `/admin/prompt-inspector` and is included in route/menu audit.
@@ -27,6 +28,8 @@ Verified:
 - Project memory, runtime knowledge, and deterministic prompt/context evals are part of the local QA gate.
 - Backend health/readiness now reports structured knowledge pack status.
 - Chat provider failures are typed as `providerFailure`, returned with zero usage/cost, surfaced in Chat UI, and read directly by live smoke scripts.
+- Relationship ladder now supports the expanded Thai seed set from hostile to committed routes: enemy, disliked, rival, bickering rival, acquaintance, friend, close friend, ride-or-die, crush, friend-crush, dating trial, talking stage, partner, toxic partner, lover, life partner, spouse, toxic spouse, and soulmate.
+- Frontend relationship status labels are centralized so Explore, Chat, My Chats, Events, Relationship preview, and debug panels use the same Thai display names.
 
 ## Current Production Status
 

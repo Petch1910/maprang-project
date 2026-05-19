@@ -23,6 +23,7 @@ import type { Character, CharacterListFilters } from '../lib/api'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { buildGeneratedAvatarDataUrl } from '../lib/characterDraft'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
+import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadChatSummaries, selectChatsLoading, selectPlayableChatSummaries } from '../store/slices/chatsSlice'
 import {
@@ -220,17 +221,6 @@ function getBadges(character: Character) {
   if (character.contentRating && character.contentRating !== 'general') badges.add(ratingLabel(character.contentRating))
   if (badges.size === 0) badges.add('ออริจินัล')
   return [...badges].slice(0, 2)
-}
-
-function relationshipStatusLabel(status?: string) {
-  const labels: Record<string, string> = {
-    RIVAL: 'คู่แข่ง',
-    NEUTRAL: 'เริ่มต้น',
-    CLOSE: 'ใกล้ชิด',
-    TRUSTED: 'ไว้ใจ',
-    ROMANTIC: 'โรแมนติก',
-  }
-  return status ? labels[status] ?? status : 'เริ่มต้น'
 }
 
 function SidebarAvatar({ character }: { character: Character }) {
@@ -551,7 +541,7 @@ function ContinueChattingRail({
                   </span>
                   {chat.relationshipState?.tier && (
                     <span className="rounded-full bg-emerald-400/12 px-2 py-1 text-[11px] font-black text-emerald-100">
-                      {chat.relationshipState.tier}
+                      {relationshipTierLabel(chat.relationshipState.tier)}
                     </span>
                   )}
                   {pendingCount > 0 && (

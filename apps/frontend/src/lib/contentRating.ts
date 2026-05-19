@@ -11,9 +11,48 @@ const ratingRank: Record<ContentRating, number> = {
 export function characterRating(character: Pick<Character, 'tags' | 'contentRating'>): ContentRating {
   if ('contentRating' in character && character.contentRating) return character.contentRating
   const tags = new Set(character.tags.map((tag) => tag.toLowerCase()))
-  if (tags.has('nc') || tags.has('red-flag')) return 'restricted_18'
-  if (tags.has('mafia') || tags.has('vampire') || tags.has('enemy') || tags.has('hostile')) return 'mature_18'
-  if (tags.has('romance') || tags.has('lover') || tags.has('crush') || tags.has('slow-burn')) return 'teen_romance'
+  if (
+    tags.has('nc') ||
+    tags.has('red-flag') ||
+    tags.has('toxic-partner') ||
+    tags.has('toxic-spouse') ||
+    tags.has('แฟน toxic') ||
+    tags.has('คู่ครอง toxic')
+  ) {
+    return 'restricted_18'
+  }
+  if (
+    tags.has('mafia') ||
+    tags.has('vampire') ||
+    tags.has('enemy') ||
+    tags.has('hostile') ||
+    tags.has('disliked') ||
+    tags.has('ศัตรู') ||
+    tags.has('ไม่ถูกกัน')
+  ) {
+    return 'mature_18'
+  }
+  if (
+    tags.has('romance') ||
+    tags.has('lover') ||
+    tags.has('crush') ||
+    tags.has('friend-crush') ||
+    tags.has('dating-trial') ||
+    tags.has('talking-stage') ||
+    tags.has('partner') ||
+    tags.has('life-partner') ||
+    tags.has('spouse') ||
+    tags.has('soulmate') ||
+    tags.has('slow-burn') ||
+    tags.has('แอบชอบ') ||
+    tags.has('แฟน') ||
+    tags.has('คนรัก') ||
+    tags.has('คู่ชีวิต') ||
+    tags.has('คู่ครอง') ||
+    tags.has('คู่แท้')
+  ) {
+    return 'teen_romance'
+  }
   return 'general'
 }
 

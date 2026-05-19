@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "relationship-rules",
-  "updatedAt": "2026-05-13",
+  "updatedAt": "2026-05-19",
   "presetSeeds": [
     {
       "id": "stranger",
@@ -9,14 +9,69 @@
       "intent": "Start neutral with low trust and room for discovery."
     },
     {
+      "id": "enemy",
+      "label": "ศัตรู",
+      "intent": "Start hostile with low trust and visible opposition."
+    },
+    {
+      "id": "disliked",
+      "label": "ไม่ถูกกัน",
+      "intent": "Start with friction and bias, but less severe than enemy."
+    },
+    {
+      "id": "rival",
+      "label": "คู่ปรับ",
+      "intent": "Start competitive with some respect and emotional pressure."
+    },
+    {
+      "id": "bickering-rival",
+      "label": "คู่กัด",
+      "intent": "Start with banter, teasing friction, and push-pull chemistry."
+    },
+    {
+      "id": "acquaintance",
+      "label": "คนรู้จัก",
+      "intent": "Start familiar but not close, with low emotional assumption."
+    },
+    {
       "id": "warm-close-friend",
       "label": "Warm close friend",
       "intent": "Start with trust and comfort while preserving slow-burn progression."
     },
     {
+      "id": "ride-or-die",
+      "label": "เพื่อนตาย",
+      "intent": "Start with deep trust, loyalty, and shared history."
+    },
+    {
       "id": "hidden-enemy-crush",
       "label": "Hidden enemy crush",
       "intent": "Start tense, guarded, and emotionally charged."
+    },
+    {
+      "id": "friend-crush",
+      "label": "เพื่อนสนิทคิดไม่ซื่อ",
+      "intent": "Preserve friendship comfort while hiding romantic tension."
+    },
+    {
+      "id": "dating-trial",
+      "label": "ลองคุย",
+      "intent": "Start exploratory and uncommitted, testing chemistry."
+    },
+    {
+      "id": "talking-stage",
+      "label": "คนคุย",
+      "intent": "Start with stronger mutual expectation than casual dating."
+    },
+    {
+      "id": "toxic-partner",
+      "label": "แฟน Toxic",
+      "intent": "Start romantically attached but low-trust and volatile; portray as conflict, not healthy romance."
+    },
+    {
+      "id": "soulmate",
+      "label": "คู่แท้",
+      "intent": "Start with deep alignment and high trust while keeping user turns meaningful."
     }
   ],
   "runtimeRules": [

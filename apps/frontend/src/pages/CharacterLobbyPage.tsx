@@ -9,10 +9,26 @@ import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/
 import { saveContentSettings, selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
 
 const seeds = [
-  { id: 'stranger', label: 'คนแปลกหน้า', tone: 'ระวังตัว แต่ยังเปิดใจ', color: 'bg-blue-600' },
-  { id: 'ally', label: 'คนไว้ใจ', tone: 'อบอุ่น คุ้นเคย และร่วมมือกัน', color: 'bg-emerald-600' },
-  { id: 'rival', label: 'คู่แข่ง', tone: 'คม เข้ม และมีแรงปะทะทางอารมณ์', color: 'bg-rose-600' },
-  { id: 'crush', label: 'แอบชอบ', tone: 'ละมุน มีแรงดึงดูดแบบเขินๆ', color: 'bg-fuchsia-600' },
+  { id: 'stranger', label: 'คนแปลกหน้า', tone: 'ยังไม่รู้จักกัน ระวังตัวแต่มีพื้นที่ให้เริ่มใหม่', color: 'bg-blue-600' },
+  { id: 'enemy', label: 'ศัตรู', tone: 'แรงต้านสูง ไม่ไว้ใจ และพร้อมปะทะ', color: 'bg-red-700' },
+  { id: 'disliked', label: 'ไม่ถูกกัน', tone: 'ไม่ถึงขั้นศัตรู แต่มีอคติและความติดขัด', color: 'bg-orange-700' },
+  { id: 'rival', label: 'คู่ปรับ', tone: 'แข่งขัน คม และมีแรงปะทะทางอารมณ์', color: 'bg-rose-600' },
+  { id: 'bickering-rival', label: 'คู่กัด', tone: 'กัดกันด้วยคำพูด มี push-pull และจังหวะหยอกแรง', color: 'bg-pink-700' },
+  { id: 'acquaintance', label: 'คนรู้จัก', tone: 'คุ้นหน้าแต่ยังไม่สนิท ต้องค่อย ๆ เปิดบทสนทนา', color: 'bg-slate-600' },
+  { id: 'friend', label: 'เพื่อน', tone: 'เป็นมิตร คุยง่าย และไว้ใจกันระดับหนึ่ง', color: 'bg-sky-600' },
+  { id: 'close-friend', label: 'เพื่อนสนิท', tone: 'สบายใจ อบอุ่น และมีพื้นที่ปลอดภัย', color: 'bg-emerald-600' },
+  { id: 'ride-or-die', label: 'เพื่อนตาย', tone: 'ไว้ใจกันลึก ผ่านอะไรด้วยกัน และพร้อมยืนข้างกัน', color: 'bg-teal-700' },
+  { id: 'crush', label: 'แอบชอบ', tone: 'ละมุน เขิน และมีแรงดึงดูดที่ยังไม่กล้าพูดตรง ๆ', color: 'bg-fuchsia-600' },
+  { id: 'friend-crush', label: 'เพื่อนสนิทคิดไม่ซื่อ', tone: 'สนิทแบบเดิม แต่มีความรู้สึกเกินเพื่อนซ่อนอยู่', color: 'bg-violet-700' },
+  { id: 'dating-trial', label: 'ลองคุย', tone: 'กำลังเปิดใจ ยังไม่ผูกมัดและยังวัดใจกัน', color: 'bg-indigo-600' },
+  { id: 'talking-stage', label: 'คนคุย', tone: 'ใกล้กว่าแค่ลองคุย มีความคาดหวังและเคมีชัดขึ้น', color: 'bg-purple-700' },
+  { id: 'partner', label: 'แฟน', tone: 'เป็นความสัมพันธ์แล้ว มีความใกล้ชิดและข้อตกลงร่วมกัน', color: 'bg-rose-700' },
+  { id: 'toxic-partner', label: 'แฟน Toxic', tone: 'ดึงดูดสูงแต่ trust ต่ำ ตึงและต้องค่อย ๆ ซ่อมความไว้ใจ', color: 'bg-red-800' },
+  { id: 'lover', label: 'คนรัก', tone: 'รักชัดเจน อบอุ่น และพร้อมเข้าสู่ฉากสำคัญ', color: 'bg-pink-600' },
+  { id: 'life-partner', label: 'คู่ชีวิต', tone: 'ผูกพันระยะยาว เชื่อใจกันสูง และมีเป้าหมายร่วมกัน', color: 'bg-emerald-700' },
+  { id: 'spouse', label: 'คู่ครอง', tone: 'ผูกมัด มีประวัติร่วมกัน และมีความรับผิดชอบร่วมกัน', color: 'bg-cyan-700' },
+  { id: 'toxic-spouse', label: 'คู่ครอง Toxic', tone: 'ผูกมัดแต่มีแรงกดดันสูง ต้องคุมโทนให้เห็นรอยร้าว', color: 'bg-stone-700' },
+  { id: 'soulmate', label: 'คู่แท้', tone: 'ผูกพันลึก เหมือนเข้าใจกันโดยธรรมชาติ แต่ยังเล่นต่อได้', color: 'bg-amber-600' },
 ]
 
 export function CharacterLobbyPage() {

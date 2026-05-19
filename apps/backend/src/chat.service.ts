@@ -691,9 +691,26 @@ function relationshipSeedTags(seedId?: string) {
 
   const aliases: Record<string, string[]> = {
     stranger: [],
-    ally: ['close-friend', 'green-flag'],
+    ally: ['friend', 'green-flag'],
     rival: ['rival', 'hard-to-get'],
     crush: ['crush', 'shy', 'slow-burn'],
+    enemy: ['enemy', 'hard-to-get'],
+    disliked: ['disliked', 'guarded'],
+    'bickering-rival': ['bickering-rival', 'tsundere'],
+    acquaintance: ['acquaintance'],
+    friend: ['friend', 'green-flag'],
+    'close-friend': ['close-friend', 'green-flag'],
+    'ride-or-die': ['ride-or-die', 'loyal', 'green-flag'],
+    'friend-crush': ['friend-crush', 'close-friend', 'crush', 'slow-burn'],
+    'dating-trial': ['dating-trial', 'slow-burn', 'romance'],
+    'talking-stage': ['talking-stage', 'romance'],
+    partner: ['partner', 'romance'],
+    'toxic-partner': ['toxic-partner', 'red-flag', 'romance'],
+    lover: ['lover', 'romance', 'green-flag'],
+    'life-partner': ['life-partner', 'romance', 'loyal'],
+    spouse: ['spouse', 'romance', 'loyal'],
+    'toxic-spouse': ['toxic-spouse', 'red-flag', 'romance'],
+    soulmate: ['soulmate', 'romance', 'green-flag', 'loyal'],
   }
   return aliases[seedId] ?? []
 }
