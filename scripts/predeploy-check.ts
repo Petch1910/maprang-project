@@ -45,6 +45,7 @@ const requiredFiles = [
   'scripts/deploy-readiness.ts',
   'scripts/deploy-readiness.test.ts',
   'scripts/deploy-status.ts',
+  'scripts/deploy-status.test.ts',
   'scripts/eval-local.ts',
   'scripts/check-frontend-bundles.test.ts',
   'scripts/knowledge-audit.ts',
@@ -310,6 +311,7 @@ const checks: Check[] = [
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
+          '"deploy:status:test"',
           '"deploy:readiness:test"',
           '"deploy:doctor"',
           '"deploy:doctor:self-test"',
@@ -368,6 +370,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('provider:smoke:guards:test')) {
         throw new Error('package.json qa:local must run provider:smoke:guards:test so provider smoke guard regressions are caught')
+      }
+      if (!qaLocal.includes('deploy:status:test')) {
+        throw new Error('package.json qa:local must run deploy:status:test so deploy status output regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -504,11 +509,13 @@ const checks: Check[] = [
       const packageJson = await readRepoFile('package.json')
       const smokeDoctor = await readRepoFile('scripts/smoke-doctor.ts')
       const deployStatus = await readRepoFile('scripts/deploy-status.ts')
+      const deployStatusTest = await readRepoFile('scripts/deploy-status.test.ts')
       const deployReadiness = await readRepoFile('scripts/deploy-readiness.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const readme = await readRepoFile('README.md')
       const stagingRunbook = await readRepoFile('STAGING_RUNBOOK.md')
       requireIncludes(packageJson, ['"deploy:status"', 'bun scripts/deploy-status.ts'], 'package.json')
+      requireIncludes(packageJson, ['"deploy:status:test"', 'bun test scripts/deploy-status.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:readiness:test"', 'bun test scripts/deploy-readiness.test.ts'], 'package.json')
       requireIncludes(
         smokeDoctor,
@@ -519,6 +526,11 @@ const checks: Check[] = [
         deployStatus,
         ['evaluateDeployReadiness', 'buildNextDeploySteps', '--json', 'stagingBlockerCount', 'productionBlockerCount', 'Maprang Deploy Status'],
         'scripts/deploy-status.ts',
+      )
+      requireIncludes(
+        deployStatusTest,
+        ['buildDeployStatusPayload', 'formatDeployStatusText', 'top-level readiness counts', 'local URL and CORS blockers'],
+        'scripts/deploy-status.test.ts',
       )
       requireIncludes(
         deployReadiness,
@@ -714,6 +726,7 @@ const checks: Check[] = [
           'bun run provider:smoke:guards:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
+          'bun run deploy:status:test',
           'bun run deploy:status',
           'bun scripts/smoke-doctor.ts --strict-production',
           'bun run supabase:storage:check',
@@ -749,6 +762,7 @@ const checks: Check[] = [
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:readiness:test',
+          'bun run deploy:status:test',
         ],
         '.github/workflows/ci.yml',
       )
