@@ -71,6 +71,23 @@ describe('frontend static audit', () => {
     )
   })
 
+  test('reports English UI label regressions for Thai-first surfaces', () => {
+    const findings = auditSuspiciousPatterns(
+      [
+        '<p>Prompt Inspector</p>',
+        '<span>Admin Health</span>',
+        '<InfoLine label="Chat reply budget" value="1200 tokens" />',
+      ].join('\n'),
+      'EnglishUiFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
+    ])
+  })
+
   test('combines accessibility and placeholder findings with stable line numbers', () => {
     const content = `
       export function Fixture() {

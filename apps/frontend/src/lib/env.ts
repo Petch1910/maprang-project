@@ -55,7 +55,7 @@ export function frontendEnvWarnings() {
   }
 
   if (import.meta.env.PROD && (!hasSupabaseUrl || !hasSupabaseAnonKey)) {
-    warnings.push('หน้าเว็บใช้งานจริงยังไม่ได้ตั้งค่า Supabase Auth')
+    warnings.push('หน้าเว็บใช้งานจริงยังไม่ได้ตั้งค่าการยืนยันตัวตน Supabase')
   }
 
   if (hasSupabaseUrl) {

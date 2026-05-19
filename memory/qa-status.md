@@ -27,6 +27,7 @@ Results:
 - Bundle budget: pass.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
+- Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Secrets check: pass.
 - Memory audit: pass.
 - Knowledge audit: pass.

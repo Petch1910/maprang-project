@@ -163,7 +163,7 @@ export function CreatorStudioPage() {
       <section className="flex flex-col gap-3 rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)] sm:p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs font-black text-orange-600">
           <Sparkles size={16} />
-          <span>Creator Studio</span>
+          <span>สตูดิโอสร้างตัวละคร</span>
           <span className="rounded-full bg-orange-50 px-2.5 py-1 text-orange-700">ฟอร์มคุ้นมือ + ระบบช่วยตรวจ Maprang</span>
         </div>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">

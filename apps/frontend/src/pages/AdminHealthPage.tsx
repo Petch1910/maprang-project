@@ -170,7 +170,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
     {
       label: 'ยืนยันตัวตน Supabase',
       ok: Boolean(checks?.supabaseAuthConfigured && hasFrontendSupabase),
-      detail: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'backend/frontend มีค่า Supabase Auth แล้ว' : 'ต้องมี SUPABASE_URL/JWT issuer และ VITE_SUPABASE_*',
+      detail: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'backend/frontend มีค่าการยืนยันตัวตน Supabase แล้ว' : 'ต้องมี SUPABASE_URL/JWT issuer และ VITE_SUPABASE_*',
       action:
         checks?.supabaseAuthConfigured && hasFrontendSupabase
           ? 'ทดสอบ login/session กับ staging domain อีกครั้ง'

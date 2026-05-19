@@ -142,7 +142,7 @@ export function CharacterLobbyPage() {
         targetType: 'CHARACTER',
         characterId: character.id,
         reason,
-        details: details || `Reported from Character Lobby. Rating: ${ratingLabel(rating)}.`,
+        details: details || `รายงานจากหน้าโปรไฟล์ตัวละคร ระดับเนื้อหา: ${ratingLabel(rating)}.`,
         metadata: {
           contentRating: rating,
           tags: character.tags,

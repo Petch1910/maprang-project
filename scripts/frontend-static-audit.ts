@@ -134,6 +134,11 @@ export const suspiciousPatterns = [
   { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'button/link has an empty onClick handler' },
   { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'throws not implemented in frontend source' },
   { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
+  {
+    pattern:
+      /\b(?:Admin Health|Prompt Inspector|Automated Evals|Prompt diff|Route\/Menu Audit|Frontend backend URL|Frontend env warnings|Chat live smoke|Chat reply budget|Image provider configured|Image live smoke|Supabase Auth|Signed avatar storage|Production CORS|Cancel chat selection|Explore \/ Home|Character Lobby|Chat Room|Chat Sidebar|Creator Studio|My Chats|Events Inbox|Profile \/ Persona|Staging Gate)\b/g,
+    message: 'contains English UI label that should be Thai-first',
+  },
   { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'contains Thai coming-soon placeholder copy' },
   { pattern: /\uFFFD/g, message: 'contains replacement character, likely broken text encoding' },
   { pattern: /[\u0080-\u009F]/g, message: 'contains C1 control character, likely mojibake' },

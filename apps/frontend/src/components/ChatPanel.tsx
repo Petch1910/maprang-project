@@ -548,7 +548,7 @@ function RightRail({
     if (activePanel === 'media') {
       return (
         <>
-          <InfoLine label="รูปหลัก" value={character.avatarUrl ? 'มีรูปตัวละครแล้ว' : 'ยังไม่มีรูป อัปโหลดได้ที่ Creator Studio'} />
+          <InfoLine label="รูปหลัก" value={character.avatarUrl ? 'มีรูปตัวละครแล้ว' : 'ยังไม่มีรูป อัปโหลดได้ที่หน้าสร้างตัวละคร'} />
           <InfoLine label="เพลงประกอบ" value={isSoundOn ? 'เปิดอยู่' : 'ปิดอยู่'} />
           <button className="min-h-9 rounded-lg bg-white/10 px-3 text-xs font-black text-white" onClick={() => setIsSoundOn((value) => !value)} type="button">
             {isSoundOn ? 'ปิดเพลงประกอบ' : 'เปิดเพลงประกอบ'}
