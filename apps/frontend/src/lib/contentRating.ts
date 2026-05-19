@@ -62,10 +62,10 @@ export function canViewRating(rating: ContentRating, maxRating: ContentRating) {
 
 export function ratingLabel(rating: ContentRating) {
   const labels: Record<ContentRating, string> = {
-    general: 'General',
-    teen_romance: 'Teen romance',
-    mature_18: 'Mature 18+',
-    restricted_18: 'Restricted 18+',
+    general: 'ทั่วไป',
+    teen_romance: 'โรแมนซ์เบาๆ',
+    mature_18: 'ผู้ใหญ่ 18+',
+    restricted_18: 'จำกัด 18+',
   }
   return labels[rating]
 }
