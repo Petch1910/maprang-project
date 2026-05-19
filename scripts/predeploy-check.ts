@@ -49,6 +49,7 @@ const requiredFiles = [
   'scripts/knowledge-audit.ts',
   'scripts/memory-audit.ts',
   'scripts/release-handoff-check.ts',
+  'scripts/release-handoff-check.test.ts',
   'scripts/route-menu-doc-check.ts',
   'scripts/supabase-storage-setup.ts',
 ]
@@ -230,6 +231,7 @@ const checks: Check[] = [
       const readme = await readRepoFile('README.md')
       const packageJson = await readRepoFile('package.json')
       const script = await readRepoFile('scripts/release-handoff-check.ts')
+      const test = await readRepoFile('scripts/release-handoff-check.test.ts')
       requireIncludes(
         handoff,
         [
@@ -248,7 +250,9 @@ const checks: Check[] = [
       )
       requireIncludes(readme, ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users'], 'README.md')
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
-      requireIncludes(script, ['--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
+      requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
+      requireIncludes(script, ['checkReleaseHandoffContent', '--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
+      requireIncludes(test, ['accepts a filled release handoff', 'secret-shaped values', 'requireFilled: true'], 'scripts/release-handoff-check.test.ts')
     },
   },
   {
@@ -274,6 +278,7 @@ const checks: Check[] = [
           '"deploy:doctor"',
           '"deploy:doctor:self-test"',
           '"release:handoff:check"',
+          '"release:handoff:test"',
           '"qa:seed"',
           '"e2e:smoke"',
           '"qa:full"',
