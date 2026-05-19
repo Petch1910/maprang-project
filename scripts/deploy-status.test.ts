@@ -91,6 +91,35 @@ describe('deploy status formatting', () => {
     expect(payload.productionReady).toBe(true)
   })
 
+  test('surfaces invalid roleplay reply budget env in JSON and text readiness output', () => {
+    const health = baseHealth({
+      env: {
+        mode: 'production',
+        invalid: ['MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies'],
+      },
+    })
+
+    const payload = buildDeployStatusPayload(health, {
+      apiBaseUrl: 'https://api.example.com',
+      isLocalSmokeTarget: false,
+    })
+    const text = formatDeployStatusText(health, {
+      apiBaseUrl: 'https://api.example.com',
+      isLocalSmokeTarget: false,
+    })
+
+    expect(payload.ok).toBe(true)
+    expect(payload.stagingReady).toBe(false)
+    expect(payload.productionReady).toBe(false)
+    expect(payload.readiness.productionBlockers).toContain(
+      'invalid env: MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+    )
+    expect(text).toContain(
+      'invalidEnv: MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+    )
+    expect(text).toContain('productionReady: false')
+  })
+
   test('runs deploy status JSON through an importable runner', async () => {
     const lines: string[] = []
     const errors: string[] = []

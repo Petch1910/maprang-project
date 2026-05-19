@@ -719,7 +719,14 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployStatusTest,
-        ['buildDeployStatusPayload', 'formatDeployStatusText', 'top-level readiness counts', 'local URL and CORS blockers', 'runs deploy status JSON through an importable runner'],
+        [
+          'buildDeployStatusPayload',
+          'formatDeployStatusText',
+          'top-level readiness counts',
+          'local URL and CORS blockers',
+          'surfaces invalid roleplay reply budget env in JSON and text readiness output',
+          'runs deploy status JSON through an importable runner',
+        ],
         'scripts/deploy-status.test.ts',
       )
       requireIncludes(
