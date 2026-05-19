@@ -559,6 +559,7 @@ const checks: Check[] = [
           'bun install --frozen-lockfile',
           'bun run predeploy:check',
           'bun run secrets:check',
+          'bun run secrets:patterns:test',
           'bun run memory:audit',
           'bun run knowledge:audit',
           'bun run eval:local',
@@ -583,6 +584,7 @@ const checks: Check[] = [
         ciWorkflow,
         [
           'bun run predeploy:check',
+          'bun run secrets:patterns:test',
           'bun run deploy:doctor:self-test',
           'bun run memory:audit',
           'bun run knowledge:audit',

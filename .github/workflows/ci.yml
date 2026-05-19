@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun run secrets:check
+      - run: bun run secrets:patterns:test
       - run: bun run memory:audit
       - run: bun run knowledge:audit
       - run: bun run eval:local
@@ -23,6 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun run predeploy:check
+      - run: bun run secrets:patterns:test
       - run: bun run security:audit
       - run: bun run api:audit
       - run: bun run route-menu:audit

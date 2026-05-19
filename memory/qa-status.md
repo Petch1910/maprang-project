@@ -52,13 +52,13 @@ Results:
 - `release:handoff:check` is part of `qa:local` and checks release handoff sections plus secret-shaped values.
 - `release:handoff:test` is part of `qa:local` and verifies filled-mode and secret detection behavior.
 - Secret audits now share `scripts/secret-patterns.ts` and cover private key blocks, GitHub tokens, Google API keys, and Slack tokens in addition to project-specific keys.
-- `secrets:patterns:test` is part of `qa:local` and verifies repo scans allow documentation placeholders while memory/release handoff scans still reject sensitive values.
-- CI predeploy now runs `release:handoff:check` and `release:handoff:test` as explicit gates.
+- `secrets:patterns:test` is part of `qa:local`, CI, and Production Smoke; it verifies repo scans allow documentation placeholders while memory/release handoff scans still reject sensitive values.
+- CI predeploy now runs `release:handoff:check`, `release:handoff:test`, and `secrets:patterns:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.
 - Security audit now fails if a backend `/:id` route block is missing `rejectInvalidUuid`.
 - Production Smoke workflow now runs predeploy and release handoff guards before deployed smoke validation.
-- Production Smoke workflow now runs secrets, memory, knowledge, eval, security, API, and route/menu audits before deployed smoke validation.
+- Production Smoke workflow now runs secrets, secret-pattern tests, memory, knowledge, eval, security, API, and route/menu audits before deployed smoke validation.
 - `staging:verify` and `production:check` now print `deploy:status` before strict smoke gates so failed deployed checks show blockers and next steps directly.
 - Predeploy now verifies README/STAGING_RUNBOOK documentation stays aligned with deploy-status-first CLI gates.
 - Relationship engine focused test passes for the expanded Thai ladder and preset surface split: 12 pass, 0 fail.
