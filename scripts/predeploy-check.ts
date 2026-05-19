@@ -377,6 +377,9 @@ const checks: Check[] = [
     run: async () => {
       const content = await readRepoFile('package.json')
       const frontendPackage = await readRepoFile('apps/frontend/package.json')
+      const importCycleAudit = await readRepoFile('scripts/import-cycle-audit.ts')
+      const importCycleAuditTest = await readRepoFile('scripts/import-cycle-audit.test.ts')
+      const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const packageJson = JSON.parse(content) as { scripts?: Record<string, string> }
       requireIncludes(
         content,
@@ -435,6 +438,17 @@ const checks: Check[] = [
         ],
         'package.json',
       )
+      requireIncludes(
+        importCycleAudit,
+        ["node.expression.text === 'require'", 'extractRelativeImports'],
+        'scripts/import-cycle-audit.ts',
+      )
+      requireIncludes(
+        importCycleAuditTest,
+        ["require('./legacy-helper')", 'extracts static, dynamic, side-effect, require, and re-export relative imports'],
+        'scripts/import-cycle-audit.test.ts',
+      )
+      requireIncludes(deploymentQa, ['CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
       const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
