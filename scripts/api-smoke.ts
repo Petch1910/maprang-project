@@ -62,6 +62,11 @@ type HealthSmokePayload = {
   }
 }
 
+type RootSmokePayload = {
+  ok: boolean
+  service?: string
+}
+
 export type ApiSmokeRunnerOptions = {
   argv?: string[]
   writeLine?: (line: string) => void
@@ -125,6 +130,13 @@ async function warnable(name: string, fn: () => Promise<{ ok: boolean; detail: s
     record(name, 'fail', error instanceof Error ? error.message : String(error))
   }
 }
+
+await check('GET /', async () => {
+  const payload = await readJson<RootSmokePayload>('/')
+  if (!payload.ok) throw new Error('root ok=false')
+  if (payload.service !== 'maprang-backend') throw new Error('unexpected backend service identity')
+  return payload.service
+})
 
 await check('GET /health', async () => {
   healthStatus = await readJson<HealthSmokePayload>('/health')

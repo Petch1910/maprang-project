@@ -935,7 +935,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-smoke.ts'),
-        ['ApiSmokeRunnerOptions', 'buildApiSmokeSummary', 'runApiSmoke', 'if (import.meta.main) process.exit(await runApiSmoke())'],
+        ['GET /', 'maprang-backend', 'ApiSmokeRunnerOptions', 'buildApiSmokeSummary', 'runApiSmoke', 'if (import.meta.main) process.exit(await runApiSmoke())'],
         'scripts/api-smoke.ts',
       )
       requireIncludes(

@@ -21,7 +21,7 @@ Commands verified:
 
 Results:
 - Backend tests: 130 pass, 0 fail.
-- API smoke: 31 pass, 0 fail, 1 skip for live chat in local mode.
+- API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.
@@ -52,7 +52,7 @@ Results:
 - Route/menu audit now covers 14 surfaces including `/admin/prompt-inspector` and `/admin/evals`.
 - API smoke and E2E now cover chat world state save/read persistence.
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
-- API smoke with `--require-admin` now passes 31 checks plus 1 local live-chat skip, including uncharged chat validation, non-mutating chat delete/report creation, admin wallet, and admin report PATCH/action validation.
+- API smoke with `--require-admin` now passes 32 checks plus 1 local live-chat skip, including backend root identity, uncharged chat validation, non-mutating chat delete/report creation, admin wallet, and admin report PATCH/action validation.
 - `api:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard route discovery, coverage-map regressions, and the importable route audit runner.
 - `import-cycle:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard relative import extraction, extension/index resolution, cycle detection, and the importable architecture audit runner.
 - `api:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard API smoke readiness/image helper regressions, summary counts, and API smoke runner import safety without calling a backend.
@@ -103,7 +103,7 @@ Results:
 - Predeploy now verifies the shared secret pattern source, its regression test, and the matching QA documentation remain present.
 - CI predeploy now runs `release:handoff:check`, `release:handoff:test`, and `secrets:patterns:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
-- API route audit now scans `apps/backend/index.ts` and covers `GET /`.
+- API route audit now scans `apps/backend/index.ts`, covers `GET /`, and API smoke verifies the root `maprang-backend` identity response.
 - Security audit now scans `apps/backend/index.ts` plus backend source/prisma files.
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.
 - Security audit now fails if a backend `/:id` route block is missing `rejectInvalidUuid`.
