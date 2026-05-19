@@ -28,6 +28,17 @@ export type CreatorDraftPayload = {
   warnings?: string[]
 }
 
+export type ImageSmokeRunnerOptions = {
+  argv?: string[]
+  env?: Record<string, string | undefined>
+  apiBaseUrl?: string
+  readHealth?: () => Promise<ImageSmokeHealthPayload>
+  readCreatorDraft?: () => Promise<CreatorDraftPayload>
+  now?: () => number
+  writeLine?: (line: string) => void
+  writeError?: (line: string) => void
+}
+
 export function imageGenerationIsConfigured(health: ImageSmokeHealthPayload) {
   return Boolean(health.checks?.imageGenerationConfigured || health.model?.imageGeneration?.configured)
 }
@@ -112,49 +123,77 @@ export function buildLiveImageSmokePayload(
   }
 }
 
-export async function runImageSmoke() {
-  const live = shouldRunLiveImageSmoke()
-  const health = await readJson<ImageSmokeHealthPayload>('/health')
+export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
+  const argv = options.argv ?? process.argv
+  const env = options.env ?? process.env
+  const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
+  const now = options.now ?? (() => Date.now())
+  const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+  const writeError = options.writeError ?? ((line: string) => console.error(line))
+  const live = shouldRunLiveImageSmoke(argv, env)
+
+  let health: ImageSmokeHealthPayload
+  try {
+    health = await (options.readHealth ?? (() => readJson<ImageSmokeHealthPayload>('/health')))()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    writeError(`Image smoke failed: ${message}`)
+    return 1
+  }
+
   const imageConfigured = imageGenerationIsConfigured(health)
 
   if (!imageConfigured) {
-    throw new Error(
-      'Image generation provider is not configured on the backend. Set IMAGE_GENERATION_API_KEY or OPENAI_API_KEY before production.',
-    )
+    writeError('Image generation provider is not configured on the backend. Set IMAGE_GENERATION_API_KEY or OPENAI_API_KEY before production.')
+    return 1
   }
 
   if (!live) {
-    console.log(JSON.stringify(buildSkippedImageSmokePayload(health), null, 2))
-    return
+    writeLine(JSON.stringify(buildSkippedImageSmokePayload(health, currentApiBaseUrl), null, 2))
+    return 0
   }
 
-  const startedAt = Date.now()
-  const draft = await readJson<CreatorDraftPayload>('/creator/ai-draft', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      brief:
-        'Create a safe original Thai roleplay character for staging QA: a mysterious cafe owner with a slow-burn relationship arc.',
-      imagePrompt:
-        'original Thai roleplay character avatar, mysterious cafe owner, cinematic portrait, warm cafe light, tasteful outfit, no text, no watermark',
-      current: {
-        tags: 'roleplay, thai, mystery, slow-burn, staging-qa',
-      },
-    }),
-  })
+  const startedAt = now()
+  let draft: CreatorDraftPayload
+  try {
+    draft = await (options.readCreatorDraft ??
+      (() =>
+        readJson<CreatorDraftPayload>('/creator/ai-draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brief:
+              'Create a safe original Thai roleplay character for staging QA: a mysterious cafe owner with a slow-burn relationship arc.',
+            imagePrompt:
+              'original Thai roleplay character avatar, mysterious cafe owner, cinematic portrait, warm cafe light, tasteful outfit, no text, no watermark',
+            current: {
+              tags: 'roleplay, thai, mystery, slow-burn, staging-qa',
+            },
+          }),
+        })))()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    writeError(`Image smoke failed: ${message}`)
+    return 1
+  }
 
   const failure = liveImageDraftFailure(draft)
-  if (failure) throw new Error(failure)
+  if (failure) {
+    writeError(failure)
+    return 1
+  }
 
-  console.log(
+  writeLine(
     JSON.stringify(
       buildLiveImageSmokePayload(draft, health, {
-        elapsedMs: Date.now() - startedAt,
+        baseUrl: currentApiBaseUrl,
+        elapsedMs: now() - startedAt,
       }),
       null,
       2,
     ),
   )
+  return 0
 }
 
-if (import.meta.main) await runImageSmoke()
+if (import.meta.main) process.exit(await runImageSmoke())

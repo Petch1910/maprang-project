@@ -852,6 +852,16 @@ const checks: Check[] = [
         'scripts/readiness-smoke.ts',
       )
       requireIncludes(
+        await readRepoFile('scripts/image-smoke.test.ts'),
+        ['builds skipped live-image payload', 'reports placeholder, missing URL, and SVG placeholder failures', 'runs skipped image smoke through an importable runner'],
+        'scripts/image-smoke.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/image-smoke.ts'),
+        ['ImageSmokeRunnerOptions', 'runImageSmoke', 'if (import.meta.main) process.exit(await runImageSmoke())'],
+        'scripts/image-smoke.ts',
+      )
+      requireIncludes(
         promptInspector,
         ['redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map'],
         'apps/backend/src/prompt-inspector.service.ts',

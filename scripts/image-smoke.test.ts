@@ -4,6 +4,8 @@ import {
   buildSkippedImageSmokePayload,
   imageGenerationIsConfigured,
   liveImageDraftFailure,
+  runImageSmoke,
+  type CreatorDraftPayload,
   type ImageSmokeHealthPayload,
 } from './image-smoke'
 
@@ -89,5 +91,75 @@ describe('image smoke helpers', () => {
       elapsedMs: 1200,
       warnings: ['minor warning'],
     })
+  })
+
+  test('runs skipped image smoke through an importable runner', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runImageSmoke({
+      argv: ['bun', 'image-smoke.ts'],
+      env: {},
+      apiBaseUrl: 'https://api.maprang.example',
+      readHealth: async () => health(),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    const payload = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(0)
+    expect(payload.live).toBe(false)
+    expect(payload.apiBaseUrl).toBe('https://api.maprang.example')
+    expect(errors).toEqual([])
+  })
+
+  test('runs live image smoke through an importable runner without provider calls', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    let now = 1000
+    const draft: CreatorDraftPayload = {
+      source: 'ai',
+      modelName: 'gpt-image-1.5',
+      image: { provider: 'configured', url: 'https://cdn.example/avatar.png' },
+    }
+
+    const exitCode = await runImageSmoke({
+      argv: ['bun', 'image-smoke.ts', '--live'],
+      env: {},
+      apiBaseUrl: 'https://api.maprang.example',
+      readHealth: async () => health(),
+      readCreatorDraft: async () => draft,
+      now: () => {
+        now += 250
+        return now
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    const payload = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(0)
+    expect(payload.live).toBe(true)
+    expect(payload.imageUrlKind).toBe('remote-or-upload-url')
+    expect(payload.elapsedMs).toBe(250)
+    expect(errors).toEqual([])
+  })
+
+  test('returns a failure code when live image smoke falls back to placeholder', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runImageSmoke({
+      argv: ['bun', 'image-smoke.ts', '--live'],
+      env: {},
+      readHealth: async () => health(),
+      readCreatorDraft: async () => ({
+        image: { provider: 'placeholder', note: 'billing_hard_limit_reached' },
+      }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('billing limit')
   })
 })
