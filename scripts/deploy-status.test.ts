@@ -49,6 +49,7 @@ describe('deploy status formatting', () => {
     expect(payload.productionReady).toBe(true)
     expect(payload.productionBlockerCount).toBe(0)
     expect(payload.health.chatStatus).toBe('verified')
+    expect(payload.rootIdentity.service).toBe('maprang-backend')
     expect(payload.nextSteps.join('\n')).toContain('production:check')
   })
 
@@ -66,6 +67,7 @@ describe('deploy status formatting', () => {
     )
 
     expect(text).toContain('Maprang Deploy Status')
+    expect(text).toContain('rootIdentity: maprang-backend')
     expect(text).toContain('stagingBlockerCount: 2')
     expect(text).toContain('backend URL is local')
     expect(text).toContain('CORS_ORIGINS is empty, local, or non-https')
@@ -127,6 +129,7 @@ describe('deploy status formatting', () => {
       argv: ['bun', 'deploy-status.ts', '--json'],
       currentApiBaseUrl: 'https://api.example.com',
       currentIsLocalSmokeTarget: false,
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       readHealth: async () => baseHealth(),
       writeLine: (line) => lines.push(line),
       writeError: (line) => errors.push(line),
@@ -136,8 +139,33 @@ describe('deploy status formatting', () => {
     expect(exitCode).toBe(0)
     expect(payload.ok).toBe(true)
     expect(payload.apiBaseUrl).toBe('https://api.example.com')
+    expect(payload.rootIdentity.service).toBe('maprang-backend')
     expect(payload.productionReady).toBe(true)
     expect(errors).toEqual([])
+  })
+
+  test('validates backend root identity before health status', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    let healthRead = false
+    const exitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts'],
+      currentApiBaseUrl: 'https://api.example.com',
+      currentIsLocalSmokeTarget: false,
+      readRootIdentity: async () => ({ ok: true, service: 'wrong-service' }),
+      readHealth: async () => {
+        healthRead = true
+        return baseHealth()
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(healthRead).toBe(false)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('unexpected service name')
+    expect(errors.join('\n')).toContain('not a frontend/static proxy')
   })
 
   test('returns a failure code without exiting when health cannot be read', async () => {
@@ -147,6 +175,7 @@ describe('deploy status formatting', () => {
       argv: ['bun', 'deploy-status.ts'],
       currentApiBaseUrl: 'http://127.0.0.1:3000',
       currentIsLocalSmokeTarget: true,
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       readHealth: async () => {
         throw new Error('backend unavailable')
       },

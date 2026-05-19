@@ -1,4 +1,4 @@
-import { apiBaseUrl, isLocalSmokeTarget, readJson } from './smoke-helpers'
+import { apiBaseUrl, isLocalSmokeTarget, readJson, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 import {
   buildHealthRows,
   buildNextDeploySteps,
@@ -30,10 +30,15 @@ type DeployStatusPayload = {
   readiness: DeployReadiness
   nextSteps: string[]
   failures: string[]
+  rootIdentity: {
+    ok: boolean
+    service?: string
+  }
 }
 
 export type DeployStatusRunnerOptions = {
   argv?: string[]
+  readRootIdentity?: () => Promise<RootIdentityPayload>
   readHealth?: () => Promise<HealthPayload>
   currentApiBaseUrl?: string
   currentIsLocalSmokeTarget?: boolean
@@ -43,7 +48,7 @@ export type DeployStatusRunnerOptions = {
 
 export function buildDeployStatusPayload(
   health: HealthPayload,
-  options: { apiBaseUrl: string; isLocalSmokeTarget: boolean },
+  options: { apiBaseUrl: string; isLocalSmokeTarget: boolean; rootIdentity?: RootIdentityPayload },
 ): DeployStatusPayload {
   const readiness = evaluateDeployReadiness(health, { isLocalSmokeTarget: options.isLocalSmokeTarget })
   const nextSteps = buildNextDeploySteps(readiness)
@@ -71,12 +76,16 @@ export function buildDeployStatusPayload(
     readiness,
     nextSteps,
     failures,
+    rootIdentity: {
+      ok: options.rootIdentity?.ok ?? true,
+      service: options.rootIdentity?.service ?? 'maprang-backend',
+    },
   }
 }
 
 export function formatDeployStatusText(
   health: HealthPayload,
-  options: { apiBaseUrl: string; isLocalSmokeTarget: boolean },
+  options: { apiBaseUrl: string; isLocalSmokeTarget: boolean; rootIdentity?: RootIdentityPayload },
 ) {
   const payload = buildDeployStatusPayload(health, options)
   const { readiness, nextSteps, failures } = payload
@@ -85,6 +94,7 @@ export function formatDeployStatusText(
   for (const [name, value] of buildHealthRows(health, options.apiBaseUrl)) {
     lines.push(`${name}: ${value}`)
   }
+  lines.push(`rootIdentity: ${payload.rootIdentity.service ?? 'unknown'}`)
 
   if (health.env?.missingRequired?.length) lines.push(`missingRequired: ${health.env.missingRequired.join(', ')}`)
   if (health.env?.missingRecommended?.length) lines.push(`missingRecommended: ${health.env.missingRecommended.join(', ')}`)
@@ -134,9 +144,26 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
   const currentIsLocalSmokeTarget = normalized.currentIsLocalSmokeTarget ?? isLocalSmokeTarget
   const writeLine = normalized.writeLine ?? ((line: string) => console.log(line))
   const writeError = normalized.writeError ?? ((line: string) => console.error(line))
+  const readRootIdentity = normalized.readRootIdentity ?? (() => readJson<RootIdentityPayload>('/'))
   const readHealth = normalized.readHealth ?? (() => readJson<HealthPayload>('/health'))
   const jsonMode = argv.includes('--json')
+  let rootIdentity: RootIdentityPayload
   let health: HealthPayload
+
+  try {
+    rootIdentity = await readRootIdentity()
+    validateBackendRootIdentity(rootIdentity)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (jsonMode) {
+      writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
+    } else {
+      writeError(`Deploy status failed: ${message}`)
+      writeError('Local fix: start the backend and confirm GET / returns the maprang-backend identity payload.')
+      writeError('Staging fix: set SMOKE_API_BASE_URL to the deployed backend URL, not a frontend/static proxy.')
+    }
+    return 1
+  }
 
   try {
     health = await readHealth()
@@ -156,6 +183,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
     const payload = buildDeployStatusPayload(health, {
       apiBaseUrl: currentApiBaseUrl,
       isLocalSmokeTarget: currentIsLocalSmokeTarget,
+      rootIdentity,
     })
     writeLine(JSON.stringify(payload, null, 2))
     return payload.failures.length > 0 ? 1 : 0
@@ -164,6 +192,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
   const text = formatDeployStatusText(health, {
     apiBaseUrl: currentApiBaseUrl,
     isLocalSmokeTarget: currentIsLocalSmokeTarget,
+    rootIdentity,
   })
   writeLine(text)
   return healthFailures(health).length > 0 ? 1 : 0

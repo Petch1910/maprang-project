@@ -90,7 +90,7 @@ After staging domains exist, run the strict deployed staging gate:
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
-`staging:verify` prints `bun run deploy:status` first, then runs `smoke-doctor --strict-staging`, Supabase signed-storage check, `/ready`, and admin-required API smoke against the deployed backend. It fails on localhost URLs, local/non-https CORS, missing signed storage, broken readiness, or missing admin smoke auth, but it does not require `CHAT_PROVIDER_LIVE_VERIFIED=1` or `IMAGE_GENERATION_LIVE_VERIFIED=1` yet.
+`staging:verify` prints `bun run deploy:status` first, and deploy status checks backend root identity before health. It then runs `smoke-doctor --strict-staging`, Supabase signed-storage check, `/ready`, and admin-required API smoke against the deployed backend. It fails on localhost URLs, local/non-https CORS, missing signed storage, broken readiness, or missing admin smoke auth, but it does not require `CHAT_PROVIDER_LIVE_VERIFIED=1` or `IMAGE_GENERATION_LIVE_VERIFIED=1` yet.
 
 Run the full local or staging provider gate only when the backend is allowed to reach OpenRouter:
 
