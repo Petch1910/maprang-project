@@ -21,7 +21,7 @@ Commands verified:
 
 Results:
 - Backend tests: 128 pass, 0 fail.
-- API smoke: 26 pass, 0 fail, 1 skip for live chat in local mode.
+- API smoke: 31 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.

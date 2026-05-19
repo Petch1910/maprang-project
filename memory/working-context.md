@@ -13,7 +13,7 @@ Status: local QA ready
 Verified:
 - Backend tests pass: 128 pass, 0 fail.
 - Frontend deploy check passes.
-- Local API smoke passes: 26 pass, 0 fail, 1 live chat skip.
+- Local API smoke passes: 31 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
 - Local Postgres is reachable through Docker and migrations are applied.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
