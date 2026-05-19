@@ -747,7 +747,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/deploy-readiness.test.ts'),
-        ['separates staging blockers from live provider verification blockers', 'passes a production-ready health payload'],
+        [
+          'separates staging blockers from live provider verification blockers',
+          'passes a production-ready health payload',
+          'turns production roleplay reply budget env errors into blockers',
+          'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
+        ],
         'scripts/deploy-readiness.test.ts',
       )
       requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json'], 'DEPLOYMENT_QA.md')

@@ -191,6 +191,32 @@ describe('deploy readiness evaluation', () => {
     )
   })
 
+  test('turns production roleplay reply budget env errors into blockers', () => {
+    const lowBudgetHealth = cloneHealth({
+      env: {
+        invalid: [
+          'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
+          'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+        ],
+      },
+    })
+
+    const readiness = evaluateDeployReadiness(lowBudgetHealth, { isLocalSmokeTarget: false })
+    const nextSteps = buildNextDeploySteps(readiness)
+
+    expect(readiness.stagingReady).toBe(false)
+    expect(readiness.productionReady).toBe(false)
+    expect(readiness.stagingBlockers).toEqual(
+      expect.arrayContaining([
+        'invalid env: MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
+        'invalid env: MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+      ]),
+    )
+    expect(nextSteps).toContain(
+      'invalid env: MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies: fix the backend production environment value reported by /health',
+    )
+  })
+
   test('reports health failures before deploy gates', () => {
     const brokenHealth = cloneHealth({
       ok: false,
