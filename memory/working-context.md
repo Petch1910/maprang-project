@@ -37,6 +37,7 @@ Verified:
 - Deploy readiness blocks CORS that is empty, local, or non-https; staging and production must use the real HTTPS frontend domain.
 - Render deploy documentation now uses HTTPS-only frontend/backend placeholders and predeploy verifies the Render CORS warning cannot drift back to localhost/http/wildcard examples.
 - Staging and production setup docs now use the same local/non-https CORS language that deploy readiness enforces.
+- Canonical agent guide production blockers now require deployed HTTPS backend and frontend CORS origins, and predeploy checks the wording.
 - `smoke:doctor` now prints the same ordered deploy next steps as `deploy:status`.
 - `deploy:status --json` now exposes top-level staging/production ready flags and blocker counts for CI/dashboard automation.
 - CI runs deploy readiness self-test, and the manual Production Smoke workflow prints `deploy:status` before strict production checks.

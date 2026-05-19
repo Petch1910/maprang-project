@@ -118,6 +118,8 @@ const checks: Check[] = [
           'QA Commands',
           'Production Blockers',
           'Definition Of Done',
+          'Backend URL เป็น deployed HTTPS URL จริง',
+          '`CORS_ORIGINS` เป็น frontend HTTPS domain จริง',
         ],
         'agent.md',
       )

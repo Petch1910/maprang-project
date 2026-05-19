@@ -34,6 +34,7 @@ Results:
 - Deploy readiness now treats CORS that is empty, local, or non-https as a staging/production blocker.
 - Predeploy now verifies `DEPLOY_RENDER.md` keeps HTTPS-only CORS/frontend-backend URL guidance for Render staging/production.
 - Predeploy now also checks staging and production docs mention local/non-https CORS blockers consistently.
+- Predeploy now verifies the canonical agent guide keeps deployed HTTPS backend/CORS blocker wording.
 - Smoke doctor now prints ordered deploy next steps from the shared readiness evaluator.
 - Deploy status JSON now exposes top-level staging/production ready flags and blocker counts for automation.
 - Deploy readiness self-test: pass.
