@@ -49,6 +49,7 @@ jobs:
       - run: bun run knowledge:audit
       - run: bun run vault:audit:test
       - run: bun run eval:local
+      - run: bun run eval:local:test
       - run: bun run security:audit
       - run: bun run security:audit:test
       - run: bun run api:audit

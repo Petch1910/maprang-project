@@ -75,6 +75,7 @@ Results:
 - `secrets:check:test` now runs in `qa:local`, CI, and Production Smoke to guard tracked env-file and scan path rules.
 - `.gitignore` now ignores real `.env.*` files while allowing example templates, and predeploy verifies that rule.
 - `secrets:patterns:test` is part of `qa:local`, CI, and Production Smoke; it verifies repo scans allow documentation placeholders while memory/release handoff scans still reject sensitive values.
+- `eval:local:test` now runs in `qa:local`, CI, and Production Smoke to guard local eval CLI pass/fail output formatting.
 - Predeploy now verifies the shared secret pattern source, its regression test, and the matching QA documentation remain present.
 - CI predeploy now runs `release:handoff:check`, `release:handoff:test`, and `secrets:patterns:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.

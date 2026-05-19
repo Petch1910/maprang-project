@@ -1,15 +1,27 @@
-import { runLocalEvalSuite } from '../apps/backend/src/eval.service'
+import { runLocalEvalSuite, type LocalEvalRun } from '../apps/backend/src/eval.service'
 
-const run = await runLocalEvalSuite()
+export function formatLocalEvalRun(run: Pick<LocalEvalRun, 'passed' | 'scenarioCount' | 'failures' | 'results'>) {
+  const stdout = run.results.map((result) => `eval - ${result.id}: ${result.estimatedTokens} estimated prompt tokens`)
+  const stderr: string[] = []
 
-for (const result of run.results) {
-  console.log(`eval - ${result.id}: ${result.estimatedTokens} estimated prompt tokens`)
+  if (!run.passed) {
+    stderr.push('Local eval failed:')
+    for (const failure of run.failures) stderr.push(`- ${failure}`)
+    return { exitCode: 1, stdout, stderr }
+  }
+
+  stdout.push(`ok - local eval passed (${run.scenarioCount} scenarios)`)
+  return { exitCode: 0, stdout, stderr }
 }
 
-if (!run.passed) {
-  console.error('Local eval failed:')
-  for (const failure of run.failures) console.error(`- ${failure}`)
-  process.exit(1)
+export async function runEvalLocal() {
+  const run = await runLocalEvalSuite()
+  const output = formatLocalEvalRun(run)
+  for (const line of output.stdout) console.log(line)
+  for (const line of output.stderr) console.error(line)
+  return output.exitCode
 }
 
-console.log(`ok - local eval passed (${run.scenarioCount} scenarios)`)
+if (import.meta.main) {
+  process.exit(await runEvalLocal())
+}

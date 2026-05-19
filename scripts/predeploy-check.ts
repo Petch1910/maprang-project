@@ -48,6 +48,7 @@ const requiredFiles = [
   'scripts/deploy-status.ts',
   'scripts/deploy-status.test.ts',
   'scripts/eval-local.ts',
+  'scripts/eval-local.test.ts',
   'scripts/check-frontend-bundles.test.ts',
   'scripts/knowledge-audit.ts',
   'scripts/markdown-audit-helpers.ts',
@@ -308,6 +309,7 @@ const checks: Check[] = [
           '"knowledge:audit"',
           '"vault:audit:test"',
           '"eval:local"',
+          '"eval:local:test"',
           '"eval:promptfoo"',
           '"security:audit"',
           '"security:audit:test"',
@@ -367,6 +369,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('vault:audit:test')) {
         throw new Error('package.json qa:local must run vault:audit:test so memory/knowledge audit helper regressions are caught')
+      }
+      if (!qaLocal.includes('eval:local:test')) {
+        throw new Error('package.json qa:local must run eval:local:test so local eval output regressions are caught')
       }
       if (!qaLocal.includes('security:audit:test')) {
         throw new Error('package.json qa:local must run security:audit:test so backend security audit regressions are caught')
@@ -487,7 +492,11 @@ const checks: Check[] = [
       const evalReadme = await readRepoFile('evals/README.md')
       const golden = await readRepoFile('evals/golden-roleplay.json')
       const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
-      requireIncludes(packageJson, ['"eval:local"', 'bun scripts/eval-local.ts', '"eval:promptfoo"'], 'package.json')
+      requireIncludes(
+        packageJson,
+        ['"eval:local"', 'bun scripts/eval-local.ts', '"eval:local:test"', 'bun test scripts/eval-local.test.ts', '"eval:promptfoo"'],
+        'package.json',
+      )
       requireIncludes(readme, ['Evaluation Layer', 'bun run eval:local', 'evals/golden-roleplay.json'], 'README.md')
       requireIncludes(deploymentQa, ['bun run eval:local', 'deterministic prompt assembly'], 'DEPLOYMENT_QA.md')
       requireIncludes(evalReadme, ['Golden Dataset', 'Promptfoo', 'No secrets'], 'evals/README.md')
@@ -496,7 +505,7 @@ const checks: Check[] = [
         ['roleplay-depth-and-knowledge', 'prompt-injection-defense', 'relationship-scene-continuity'],
         'evals/golden-roleplay.json',
       )
-      requireIncludes(ciWorkflow, ['bun run eval:local'], '.github/workflows/ci.yml')
+      requireIncludes(ciWorkflow, ['bun run eval:local', 'bun run eval:local:test'], '.github/workflows/ci.yml')
     },
   },
   {
@@ -785,6 +794,7 @@ const checks: Check[] = [
           'bun run knowledge:audit',
           'bun run vault:audit:test',
           'bun run eval:local',
+          'bun run eval:local:test',
           'bun run security:audit',
           'bun run security:audit:test',
           'bun run api:audit',
@@ -827,6 +837,7 @@ const checks: Check[] = [
           'bun run memory:audit',
           'bun run knowledge:audit',
           'bun run eval:local',
+          'bun run eval:local:test',
           'bun run security:audit',
           'bun run security:audit:test',
           'bun run api:audit',
