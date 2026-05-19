@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type APIRequestContext } from '@playwright/test'
 
 const backendUrl = process.env.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'
 const defaultUserId = process.env.E2E_USER_ID ?? '550e8400-e29b-41d4-a716-446655440000'
@@ -91,6 +91,12 @@ function collectBrowserErrors(page: Parameters<typeof test>[0]['page']) {
   return errors
 }
 
+async function expectBackendRootIdentity(request: APIRequestContext, label: string) {
+  const root = await request.get(`${backendUrl}/`)
+  expect(root.ok(), `backend root should be reachable before ${label}`).toBeTruthy()
+  await expect(root.json()).resolves.toMatchObject({ ok: true, service: 'maprang-backend' })
+}
+
 async function expectNoHorizontalOverflow(page: Parameters<typeof test>[0]['page']) {
   const overflow = await page.evaluate(() => {
     const viewportWidth = window.innerWidth
@@ -132,6 +138,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   const myChatsDeleteChatId = isMobile ? seededMyChatsDeleteMobileChatId : seededMyChatsDeleteDesktopChatId
   const myChatsBulkArchiveChatId = isMobile ? seededMyChatsBulkArchiveMobileChatId : seededMyChatsBulkArchiveDesktopChatId
   const myChatsBulkDeleteChatId = isMobile ? seededMyChatsBulkDeleteMobileChatId : seededMyChatsBulkDeleteDesktopChatId
+  await expectBackendRootIdentity(request, 'browser smoke')
   const health = await request.get(`${backendUrl}/health`)
   expect(health.ok(), 'backend /health should be reachable before browser smoke').toBeTruthy()
 
@@ -549,6 +556,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
 })
 
 test('all primary routes render without console errors or horizontal overflow', async ({ page, request }) => {
+  await expectBackendRootIdentity(request, 'route audit smoke')
   const health = await request.get(`${backendUrl}/health`)
   expect(health.ok(), 'backend /health should be reachable before route audit smoke').toBeTruthy()
 

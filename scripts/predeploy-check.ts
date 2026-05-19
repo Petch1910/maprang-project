@@ -1073,6 +1073,7 @@ const checks: Check[] = [
         ['ตรวจเส้นทาง/เมนู', 'ตรวจพรอมป์ก่อนยิงโมเดล', 'ทดสอบคุณภาพ prompt/context', 'สรุป blocker production', 'เช็กลิสต์ deploy', 'แถบแชท'],
         'tests/e2e/maprang-smoke.spec.ts',
       )
+      requireIncludes(e2eSmoke, ['expectBackendRootIdentity', 'maprang-backend'], 'tests/e2e/maprang-smoke.spec.ts')
       forbidIncludes(
         e2eSmoke,
         ['Production blocker summary', 'Deploy checklist', 'Chat Sidebar', 'Prompt Inspector', 'Automated Evals'],
