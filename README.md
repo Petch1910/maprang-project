@@ -98,6 +98,8 @@ Use JSON mode for CI logs or dashboards:
 bun scripts/deploy-status.ts --json
 ```
 
+JSON output includes top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, and `productionBlockerCount` fields for automation, plus detailed `readiness` and ordered `nextSteps`.
+
 ## Knowledge Layer
 
 Runtime product knowledge lives in [`knowledge/README.md`](./knowledge/README.md). This is separate from session memory:
@@ -263,7 +265,7 @@ bun run frontend:check
 bun run smoke:doctor
 ```
 
-`smoke:doctor` reports local health plus `productionReady`, `productionBlockerCount`, and `productionBlockers`; clear those blockers on staging before deploy.
+`smoke:doctor` reports local health plus `productionReady`, `productionBlockerCount`, `productionBlockers`, and ordered `nextSteps`; clear those blockers on staging before deploy.
 
 ```bash
 bun run smoke:ready

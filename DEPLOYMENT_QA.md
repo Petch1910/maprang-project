@@ -40,6 +40,8 @@ For CI logs or dashboards that need structured output:
 bun scripts/deploy-status.ts --json
 ```
 
+The JSON response exposes top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, and `productionBlockerCount` fields so automation does not need to parse nested readiness details.
+
 The underlying readiness rules have a deterministic self-test:
 
 ```bash

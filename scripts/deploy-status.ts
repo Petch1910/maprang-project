@@ -35,6 +35,10 @@ if (jsonMode) {
       {
         ok: failures.length === 0,
         apiBaseUrl,
+        stagingReady: readiness.stagingReady,
+        stagingBlockerCount: readiness.stagingBlockers.length,
+        productionReady: readiness.productionReady,
+        productionBlockerCount: readiness.productionBlockers.length,
         health: {
           backend: health.ok,
           databaseConfigured: health.checks.databaseConfigured,

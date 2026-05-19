@@ -34,6 +34,7 @@ Verified:
 - Agent handoff docs are now available through `AGENTS.md` and canonical `agent.md`, and `predeploy:check` verifies the guide exists with required scope, continuation, minimum-check, commit/push, and operating sections.
 - Deploy readiness logic is shared by `smoke:doctor` and `deploy:status`, and covered by `deploy:readiness:test`, so current staging/production blockers and next steps can be printed without duplicating blocker rules.
 - `smoke:doctor` now prints the same ordered deploy next steps as `deploy:status`.
+- `deploy:status --json` now exposes top-level staging/production ready flags and blocker counts for CI/dashboard automation.
 - CI runs deploy readiness self-test, and the manual Production Smoke workflow prints `deploy:status` before strict production checks.
 - Local `staging:verify` and `production:check` now print `deploy:status` before strict smoke gates, so failed staging/production runs include blocker details and next steps in the same CLI log.
 - README and predeploy guard now document and enforce the same deploy-status-first behavior for CLI staging/production gates.

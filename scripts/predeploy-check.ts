@@ -452,7 +452,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployStatus,
-        ['evaluateDeployReadiness', 'buildNextDeploySteps', '--json', 'Maprang Deploy Status'],
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', '--json', 'stagingBlockerCount', 'productionBlockerCount', 'Maprang Deploy Status'],
         'scripts/deploy-status.ts',
       )
       requireIncludes(
@@ -466,7 +466,7 @@ const checks: Check[] = [
         'scripts/deploy-readiness.test.ts',
       )
       requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json'], 'DEPLOYMENT_QA.md')
-      requireIncludes(readme, ['bun run deploy:status', '`staging:verify` prints', 'blocker summary and next steps'], 'README.md')
+      requireIncludes(readme, ['bun run deploy:status', '`staging:verify` prints', 'stagingBlockerCount', 'blocker summary and next steps'], 'README.md')
       requireIncludes(stagingRunbook, ['bun run deploy:status', 'bun run staging:verify', 'bun run production:check'], 'STAGING_RUNBOOK.md')
     },
   },
