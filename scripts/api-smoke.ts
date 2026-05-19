@@ -4,9 +4,9 @@ import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from '
 import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
 import { apiBaseUrl, readJson, smokeAuthHeaders } from './smoke-helpers'
 
-type ApiSmokeStatus = 'pass' | 'warn' | 'fail' | 'skip'
+export type ApiSmokeStatus = 'pass' | 'warn' | 'fail' | 'skip'
 
-type ApiSmokeResult = {
+export type ApiSmokeResult = {
   name: string
   status: ApiSmokeStatus
   detail: string
@@ -66,6 +66,28 @@ export type ApiSmokeRunnerOptions = {
   argv?: string[]
   writeLine?: (line: string) => void
   writeWarn?: (line: string) => void
+}
+
+export function buildApiSmokeSummary(
+  results: ApiSmokeResult[],
+  options: {
+    apiBaseUrl: string
+    live: boolean
+    requireLiveImage: boolean
+    requireAdmin: boolean
+  },
+) {
+  return {
+    ok: results.every((result) => result.status !== 'fail'),
+    apiBaseUrl: options.apiBaseUrl,
+    live: options.live,
+    requireLiveImage: options.requireLiveImage,
+    requireAdmin: options.requireAdmin,
+    pass: results.filter((result) => result.status === 'pass').length,
+    warn: results.filter((result) => result.status === 'warn').length,
+    skip: results.filter((result) => result.status === 'skip').length,
+    fail: results.filter((result) => result.status === 'fail').length,
+  }
 }
 
 export async function runApiSmoke(options: ApiSmokeRunnerOptions = {}) {
@@ -829,28 +851,22 @@ for (const result of results) {
   writeLine(`${result.status.toUpperCase()} - ${result.name}: ${result.detail}`)
 }
 
-const failed = results.filter((result) => result.status === 'fail')
-const warned = results.filter((result) => result.status === 'warn')
+const summary = buildApiSmokeSummary(results, {
+  apiBaseUrl,
+  live,
+  requireLiveImage,
+  requireAdmin,
+})
 
 writeLine(
   JSON.stringify(
-    {
-      ok: failed.length === 0,
-      apiBaseUrl,
-      live,
-      requireLiveImage,
-      requireAdmin,
-      pass: results.filter((result) => result.status === 'pass').length,
-      warn: warned.length,
-      skip: results.filter((result) => result.status === 'skip').length,
-      fail: failed.length,
-    },
+    summary,
     null,
     2,
   ),
 )
 
-const exitCode = failed.length > 0 ? 1 : 0
+const exitCode = summary.ok ? 0 : 1
 
 async function runRequired<T>(name: string, fn: () => Promise<T>) {
   try {
