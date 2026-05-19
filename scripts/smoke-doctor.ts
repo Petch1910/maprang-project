@@ -63,17 +63,17 @@ export function buildSmokeDoctorReport(
   const failures = healthFailures(health)
 
   if (failures.length > 0) {
-    stderr.push(`Smoke doctor failed: ${failures.join('; ')}`)
-    stderr.push('Local fix: start Docker Desktop, run `docker compose up -d postgres`, run migrations, then start the backend.')
-    stderr.push('Deploy fix: check DATABASE_URL, migrations, and networking for the backend service.')
+    stderr.push(`Smoke doctor ไม่ผ่าน: ${failures.join('; ')}`)
+    stderr.push('วิธีแก้ local: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่ม backend')
+    stderr.push('วิธีแก้ deploy: ตรวจ DATABASE_URL, migrations, และ network ของ backend service')
     return { exitCode: 1, stdout, stderr, warnings }
   }
 
   if (!health.checks.openRouterConfigured) {
-    warnings.push('Warning: OPENROUTER_API_KEY is not configured. `smoke:local` can still pass, but `smoke:chat` will fail.')
+    warnings.push('คำเตือน: OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า `smoke:local` อาจผ่านได้ แต่ `smoke:chat` จะไม่ผ่าน')
   }
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
-    warnings.push('Warning: image generation provider is not configured. Creator Studio will use placeholder avatars.')
+    warnings.push('คำเตือน: image generation provider ยังไม่ได้ตั้งค่า Creator Studio จะใช้ avatar placeholder')
   }
   if (health.model) {
     const maxOutputTokens = health.model.maxOutputTokens ?? 0
@@ -109,7 +109,7 @@ export function buildSmokeDoctorReport(
     for (const fix of stagingFixes) stdout.push(`- ${fix}`)
     stdout.push('stagingGate: run `bun run staging:verify` against the deployed staging backend before production verification.')
     if (options.strictStagingGate) {
-      stderr.push('Staging gate failed. Fix the staging blockers above, then rerun with a deployed backend URL.')
+      stderr.push('Staging gate ไม่ผ่าน: แก้ staging blockers ด้านบน แล้วรันใหม่ด้วย deployed backend URL')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
@@ -125,7 +125,7 @@ export function buildSmokeDoctorReport(
     for (const fix of productionFixes) stdout.push(`- ${fix}`)
     stdout.push('productionGate: run `bun run production:check` against the staging/production backend before deploy.')
     if (options.strictProductionGate) {
-      stderr.push('Production gate failed. Fix the production blockers above, then rerun with a deployed backend URL.')
+      stderr.push('Production gate ไม่ผ่าน: แก้ production blockers ด้านบน แล้วรันใหม่ด้วย deployed backend URL')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
@@ -165,9 +165,9 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
   try {
     validateBackendRootIdentity(await rootIdentityReader())
   } catch (error) {
-    writeError(`Smoke doctor failed: ${error instanceof Error ? error.message : String(error)}`)
-    writeError('Local fix: start the backend and confirm GET / returns the maprang-backend identity payload.')
-    writeError('Deploy fix: check SMOKE_API_BASE_URL and confirm the deployed backend root is not a frontend/static proxy.')
+    writeError(`Smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
+    writeError('วิธีแก้ local: เริ่ม backend แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
+    writeError('วิธีแก้ deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า backend root ที่ deploy ไม่ใช่ frontend/static proxy')
     return 1
   }
 
@@ -175,9 +175,9 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
   try {
     health = await healthReader()
   } catch (error) {
-    writeError(`Smoke doctor failed: ${error instanceof Error ? error.message : String(error)}`)
-    writeError('Local fix: start Docker Desktop, run `docker compose up -d postgres`, run migrations, then start the backend.')
-    writeError('Deploy fix: check SMOKE_API_BASE_URL and confirm the deployed backend is reachable.')
+    writeError(`Smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
+    writeError('วิธีแก้ local: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่ม backend')
+    writeError('วิธีแก้ deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า deployed backend เข้าถึงได้')
     return 1
   }
 

@@ -70,7 +70,7 @@ describe('smoke doctor report', () => {
     expect(report.exitCode).toBe(1)
     expect(report.stdout).toContain('stagingReady: false')
     expect(report.stdout.some((line) => line.startsWith('productionReady:'))).toBe(false)
-    expect(report.stderr).toContain('Staging gate failed. Fix the staging blockers above, then rerun with a deployed backend URL.')
+    expect(report.stderr).toContain('Staging gate ไม่ผ่าน: แก้ staging blockers ด้านบน แล้วรันใหม่ด้วย deployed backend URL')
   })
 
   test('reports backend health failures with local and deploy fixes', () => {
@@ -93,7 +93,7 @@ describe('smoke doctor report', () => {
     expect(report.exitCode).toBe(1)
     expect(report.stderr.join('\n')).toContain('backend health คืน ok=false')
     expect(report.stderr.join('\n')).toContain('ฐานข้อมูลยังเชื่อมต่อไม่ได้')
-    expect(report.stderr.join('\n')).toContain('Deploy fix:')
+    expect(report.stderr.join('\n')).toContain('วิธีแก้ deploy:')
   })
 
   test('warns when roleplay reply budget passes baseline but is below recommendation', () => {
@@ -196,7 +196,7 @@ describe('smoke doctor report', () => {
     expect(lines).toEqual([])
     expect(warnings).toEqual([])
     expect(errors.join('\n')).toContain('unexpected service name')
-    expect(errors.join('\n')).toContain('backend root is not a frontend/static proxy')
+    expect(errors.join('\n')).toContain('backend root ที่ deploy ไม่ใช่ frontend/static proxy')
   })
 
   test('runs smoke doctor through an importable runner', async () => {

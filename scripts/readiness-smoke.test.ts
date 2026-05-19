@@ -65,7 +65,7 @@ describe('readiness smoke summary', () => {
         ok: false,
         readiness: {
           status: 'not_ready',
-          failures: ['database is not connected', 'structured knowledge is invalid'],
+          failures: ['ฐานข้อมูลยังเชื่อมต่อไม่ได้', 'คลังความรู้ structured ยังไม่ผ่าน'],
         },
       }),
       { apiBaseUrl: 'https://api.example.com', responseOk: false, statusCode: 503 },
@@ -73,7 +73,7 @@ describe('readiness smoke summary', () => {
 
     expect(summary.ok).toBe(false)
     expect(summary.statusCode).toBe(503)
-    expect(summary.failures).toEqual(['database is not connected', 'structured knowledge is invalid'])
+    expect(summary.failures).toEqual(['ฐานข้อมูลยังเชื่อมต่อไม่ได้', 'คลังความรู้ structured ยังไม่ผ่าน'])
     expect(formatReadinessSummary(summary)).toContain('"readiness": "not_ready"')
   })
 
@@ -148,7 +148,7 @@ describe('readiness smoke summary', () => {
         response: { ok: false, status: 503 },
         payload: readyPayload({
           ok: false,
-          readiness: { status: 'not_ready', failures: ['database is not connected'] },
+          readiness: { status: 'not_ready', failures: ['ฐานข้อมูลยังเชื่อมต่อไม่ได้'] },
         }),
       }),
       writeLine: (line) => lines.push(line),
@@ -156,8 +156,8 @@ describe('readiness smoke summary', () => {
     })
 
     expect(exitCode).toBe(1)
-    expect(JSON.parse(lines.join('\n')).failures).toEqual(['database is not connected'])
-    expect(errors).toEqual(['Readiness smoke failed: database is not connected'])
+    expect(JSON.parse(lines.join('\n')).failures).toEqual(['ฐานข้อมูลยังเชื่อมต่อไม่ได้'])
+    expect(errors).toEqual(['Readiness smoke ไม่ผ่าน: ฐานข้อมูลยังเชื่อมต่อไม่ได้'])
   })
 
   test('reads and validates backend root identity without reading readiness payload', async () => {

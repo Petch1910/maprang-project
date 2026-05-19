@@ -142,7 +142,7 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
     response = await fetchImpl(`${apiBase}/ready`)
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
-    throw new Error(`Could not reach readiness endpoint at ${apiBase}/ready (${reason})`)
+    throw new Error(`ติดต่อ readiness endpoint ที่ ${apiBase}/ready ไม่ได้ (${reason})`)
   }
 
   const raw = await response.text()
@@ -150,7 +150,7 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
   try {
     payload = JSON.parse(raw) as ReadinessPayload
   } catch {
-    throw new Error(`/ready did not return JSON: ${raw.slice(0, 300) || 'empty response'}`)
+    throw new Error(`/ready ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'empty response'}`)
   }
 
   return { response, payload }
@@ -162,7 +162,7 @@ export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: t
     response = await fetchImpl(`${apiBase}/`)
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
-    throw new Error(`Could not reach backend root identity at ${apiBase}/ (${reason})`)
+    throw new Error(`ติดต่อ backend root identity ที่ ${apiBase}/ ไม่ได้ (${reason})`)
   }
 
   const raw = await response.text()
@@ -170,10 +170,10 @@ export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: t
   try {
     payload = JSON.parse(raw) as RootIdentityPayload
   } catch {
-    throw new Error(`/ did not return JSON: ${raw.slice(0, 300) || 'empty response'}`)
+    throw new Error(`/ ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'empty response'}`)
   }
 
-  if (!response.ok) throw new Error(`/ failed with ${response.status}: ${raw.slice(0, 300) || response.statusText}`)
+  if (!response.ok) throw new Error(`/ ตอบ ${response.status}: ${raw.slice(0, 300) || response.statusText}`)
   validateBackendRootIdentity(payload)
   return payload
 }
@@ -191,7 +191,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
     validateBackendRootIdentity(rootIdentity)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Readiness smoke failed: ${message}`)
+    writeError(`Readiness smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 
@@ -200,7 +200,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
     result = await readinessReader(currentApiBaseUrl)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Readiness smoke failed: ${message}`)
+    writeError(`Readiness smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 
@@ -216,7 +216,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
 
   if (!summary.ok) {
     const reason = summary.failures.length > 0 ? summary.failures.join('; ') : `status ${response.status}`
-    writeError(`Readiness smoke failed: ${reason}`)
+    writeError(`Readiness smoke ไม่ผ่าน: ${reason}`)
     return 1
   }
 

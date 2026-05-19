@@ -33,6 +33,7 @@ Verified:
 - Backend relationship tag validation messages now return Thai-first creator warnings for adult-mode conflicts, no-romance/romance conflicts, progression-speed conflicts, safety-tone conflicts, and too-many-engine-tag guidance.
 - Backend character quality review notes now return Thai-first creator guidance for missing name/tagline/description/biography/scenario/system prompt/compact prompt/greeting/tags.
 - Backend runtime env validation, health readiness failures, security posture details, deploy readiness blockers, deploy status output, and smoke doctor blocker output now use Thai-first copy while preserving exact env names, commands, and provider names.
+- Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
 - Prompt tooling UI copy now uses Thai-first labels for system prompt reset, redacted prompt snapshots, runtime/persona inputs, section budget, and route/menu audit descriptions.
 - Profile content settings, tag conflict helper warnings, Prompt Inspector helper labels, and route/menu staging rows now avoid mixed `backend`, `prompt`, `runtime`, `persona`, and staging/deploy wording in user-facing Thai copy; frontend static audit and predeploy guard those stale phrases.
 - Predeploy now has its own regression test and is wired into local QA, CI, and Production Smoke so critical predeploy/e2e wording guards cannot drift silently.

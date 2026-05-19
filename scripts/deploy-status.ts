@@ -158,9 +158,9 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
     if (jsonMode) {
       writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
     } else {
-      writeError(`Deploy status failed: ${message}`)
-      writeError('Local fix: start the backend and confirm GET / returns the maprang-backend identity payload.')
-      writeError('Staging fix: set SMOKE_API_BASE_URL to the deployed backend URL, not a frontend/static proxy.')
+      writeError(`Deploy status ไม่ผ่าน: ${message}`)
+      writeError('วิธีแก้ local: เริ่ม backend แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
+      writeError('วิธีแก้ staging: ตั้ง SMOKE_API_BASE_URL เป็น deployed backend URL ไม่ใช่ frontend/static proxy')
     }
     return 1
   }
@@ -172,9 +172,9 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
     if (jsonMode) {
       writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
     } else {
-      writeError(`Deploy status failed: ${message}`)
-      writeError('Local fix: start the backend and database, then rerun `bun run deploy:status`.')
-      writeError('Staging fix: set SMOKE_API_BASE_URL to the deployed backend URL.')
+      writeError(`Deploy status ไม่ผ่าน: ${message}`)
+      writeError('วิธีแก้ local: เริ่ม backend และ database แล้วรัน `bun run deploy:status` ใหม่')
+      writeError('วิธีแก้ staging: ตั้ง SMOKE_API_BASE_URL เป็น deployed backend URL')
     }
     return 1
   }
