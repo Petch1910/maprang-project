@@ -5,13 +5,13 @@ import ts from 'typescript'
 const root = join(import.meta.dir, '..')
 const frontendSrc = join(root, 'apps/frontend/src')
 
-type Finding = {
+export type Finding = {
   file: string
   line: number
   message: string
 }
 
-async function collectSourceFiles(dir: string): Promise<string[]> {
+export async function collectSourceFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true })
   const nested = await Promise.all(
     entries.map(async (entry) => {
@@ -24,15 +24,15 @@ async function collectSourceFiles(dir: string): Promise<string[]> {
   return nested.flat()
 }
 
-function lineFor(content: string, index: number) {
+export function lineFor(content: string, index: number) {
   return content.slice(0, index).split(/\r?\n/).length
 }
 
-function compact(value: string) {
+export function compact(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
 
-function jsxAttributeValue(attribute: ts.JsxAttribute) {
+export function jsxAttributeValue(attribute: ts.JsxAttribute) {
   const initializer = attribute.initializer
   if (!initializer) return ''
   if (ts.isStringLiteral(initializer)) return initializer.text.trim()
@@ -45,14 +45,14 @@ function jsxAttributeValue(attribute: ts.JsxAttribute) {
   return ''
 }
 
-function getJsxAttribute(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement, sourceFile: ts.SourceFile, name: string) {
+export function getJsxAttribute(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement, sourceFile: ts.SourceFile, name: string) {
   return node.attributes.properties.find(
     (attribute): attribute is ts.JsxAttribute =>
       ts.isJsxAttribute(attribute) && attribute.name.getText(sourceFile) === name,
   )
 }
 
-function expressionMayRenderText(expression: ts.Expression) {
+export function expressionMayRenderText(expression: ts.Expression) {
   if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) return expression.text.trim().length > 0
   if (ts.isNumericLiteral(expression)) return true
   if (ts.isIdentifier(expression) || ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression)) return true
@@ -64,7 +64,7 @@ function expressionMayRenderText(expression: ts.Expression) {
   return false
 }
 
-function jsxNodeMayRenderText(node: ts.Node): boolean {
+export function jsxNodeMayRenderText(node: ts.Node): boolean {
   if (ts.isJsxText(node)) return node.getText().replace(/[{}]/g, '').trim().length > 0
   if (ts.isJsxExpression(node) && node.expression) return expressionMayRenderText(node.expression)
   if (ts.isJsxElement(node)) {
@@ -75,8 +75,9 @@ function jsxNodeMayRenderText(node: ts.Node): boolean {
   return false
 }
 
-function auditButtonsWithAst(content: string, file: string) {
+export function auditButtonsWithAst(content: string, file: string) {
   const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const findings: Finding[] = []
 
   function visit(node: ts.Node) {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
@@ -121,61 +122,78 @@ function auditButtonsWithAst(content: string, file: string) {
   }
 
   visit(sourceFile)
+  return findings
 }
 
-const sourceFiles = await collectSourceFiles(frontendSrc)
-const findings: Finding[] = []
-const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
+export const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
 
-await Promise.all(
-  staleTemplateFiles.map(async (path) => {
-    try {
-      await access(join(root, path))
-      findings.push({
-        file: path,
-        line: 1,
-        message: 'stale Vite starter template file should not be kept in production UI',
-      })
-    } catch {
-      // File is absent, which is what we want.
-    }
-  }),
-)
+export const suspiciousPatterns = [
+  { pattern: /href=(["'])#\1/g, message: 'link uses href="#" placeholder' },
+  { pattern: /to=(["'])#\1/g, message: 'router link uses to="#" placeholder' },
+  { pattern: /to=\{\s*(["'])#\1\s*\}/g, message: 'router link uses to={"#"} placeholder' },
+  { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'button/link has an empty onClick handler' },
+  { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'throws not implemented in frontend source' },
+  { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
+  { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'contains Thai coming-soon placeholder copy' },
+  { pattern: /\u0e4f\u0e1f\u0e1d/g, message: 'contains replacement character, likely broken text encoding' },
+  { pattern: /[\u0080-\u009F]/g, message: 'contains C1 control character, likely mojibake' },
+  { pattern: /(?:\u0e23\u0083|\u0e23\u0082|\u0e23\u00a0\u0e22\u0e18|\u0e23\u00a0\u0e22\u0e19)/g, message: 'contains common UTF-8 mojibake sequence' },
+]
 
-for (const file of sourceFiles) {
-  const content = await readFile(file, 'utf8')
-  const relativeFile = relative(root, file).replaceAll('\\', '/')
+export async function auditStaleTemplateFiles(paths = staleTemplateFiles) {
+  const findings: Finding[] = []
+  await Promise.all(
+    paths.map(async (path) => {
+      try {
+        await access(join(root, path))
+        findings.push({
+          file: path,
+          line: 1,
+          message: 'stale Vite starter template file should not be kept in production UI',
+        })
+      } catch {
+        // File is absent, which is what we want.
+      }
+    }),
+  )
+  return findings
+}
 
-  auditButtonsWithAst(content, relativeFile)
-
-  const suspiciousPatterns = [
-    { pattern: /href=(["'])#\1/g, message: 'link uses href="#" placeholder' },
-    { pattern: /to=(["'])#\1/g, message: 'router link uses to="#" placeholder' },
-    { pattern: /to=\{\s*(["'])#\1\s*\}/g, message: 'router link uses to={"#"} placeholder' },
-    { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'button/link has an empty onClick handler' },
-    { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'throws not implemented in frontend source' },
-    { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
-    { pattern: /เร็ว\s*ๆ\s*นี้/g, message: 'contains Thai coming-soon placeholder copy' },
-    { pattern: /�/g, message: 'contains replacement character, likely broken text encoding' },
-    { pattern: /[\u0080-\u009F]/g, message: 'contains C1 control character, likely mojibake' },
-    { pattern: /(?:Ã|Â|à¸|à¹)/g, message: 'contains common UTF-8 mojibake sequence' },
-  ]
-
+export function auditSuspiciousPatterns(content: string, file: string) {
+  const findings: Finding[] = []
   for (const item of suspiciousPatterns) {
     for (const match of content.matchAll(item.pattern)) {
       findings.push({
-        file: relativeFile,
+        file,
         line: lineFor(content, match.index ?? 0),
         message: item.message,
       })
     }
   }
+  return findings
 }
 
-if (findings.length > 0) {
-  console.error('Frontend static audit failed:')
-  for (const finding of findings) console.error(`- ${finding.file}:${finding.line} ${finding.message}`)
-  process.exit(1)
+export function auditFrontendSourceFile(content: string, file: string) {
+  return [...auditButtonsWithAst(content, file), ...auditSuspiciousPatterns(content, file)]
 }
 
-console.log('ok - frontend static audit passed')
+export async function runFrontendStaticAudit() {
+  const sourceFiles = await collectSourceFiles(frontendSrc)
+  const findings: Finding[] = await auditStaleTemplateFiles()
+
+  for (const file of sourceFiles) {
+    const content = await readFile(file, 'utf8')
+    const relativeFile = relative(root, file).replaceAll('\\', '/')
+    findings.push(...auditFrontendSourceFile(content, relativeFile))
+  }
+
+  if (findings.length > 0) {
+    console.error('Frontend static audit failed:')
+    for (const finding of findings) console.error(`- ${finding.file}:${finding.line} ${finding.message}`)
+    process.exit(1)
+  }
+
+  console.log('ok - frontend static audit passed')
+}
+
+if (import.meta.main) await runFrontendStaticAudit()

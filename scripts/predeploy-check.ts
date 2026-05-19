@@ -51,6 +51,7 @@ const requiredFiles = [
   'scripts/api-route-audit.test.ts',
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
+  'scripts/frontend-static-audit.test.ts',
   'scripts/frontend-route-audit.test.ts',
   'scripts/route-menu-doc-check.ts',
   'scripts/route-menu-doc-check.test.ts',
@@ -297,6 +298,7 @@ const checks: Check[] = [
           '"security:audit"',
           '"security:audit:test"',
           '"api:audit:test"',
+          '"frontend:static:audit:test"',
           '"frontend:route:audit:test"',
           '"route-menu:audit:test"',
           '"api:smoke"',
@@ -342,6 +344,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('api:audit:test')) {
         throw new Error('package.json qa:local must run api:audit:test so route audit regressions are caught')
+      }
+      if (!qaLocal.includes('frontend:static:audit:test')) {
+        throw new Error('package.json qa:local must run frontend:static:audit:test so frontend static audit regressions are caught')
       }
       if (!qaLocal.includes('frontend:route:audit:test')) {
         throw new Error('package.json qa:local must run frontend:route:audit:test so frontend route audit regressions are caught')
@@ -537,6 +542,8 @@ const checks: Check[] = [
           'api-route-audit.ts',
           '"api:audit:test"',
           'api-route-audit.test.ts',
+          '"frontend:static:audit:test"',
+          'frontend-static-audit.test.ts',
           '"frontend:route:audit:test"',
           'frontend-route-audit.test.ts',
           '"route-menu:audit:test"',
@@ -569,6 +576,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/api-route-audit.test.ts'),
         ['discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries'],
         'scripts/api-route-audit.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-static-audit.test.ts'),
+        ['reports buttons without explicit type', 'reports placeholder links'],
+        'scripts/frontend-static-audit.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-route-audit.test.ts'),
@@ -657,6 +669,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
           'bun run route-menu:audit:test',
@@ -687,6 +700,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
           'bun run route-menu:audit:test',
