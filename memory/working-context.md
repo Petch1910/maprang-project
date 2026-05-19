@@ -77,6 +77,7 @@ Verified:
 - Supabase signed-storage setup now exports testable helpers for env loading, config validation, signed URL normalization, and object path encoding; `supabase:storage:test` covers them without hitting Supabase.
 - Local smoke now exports testable helpers for smoke character selection, avatar upload validation, and QA summary formatting; `smoke:local:test` covers them without hitting the backend.
 - Browser e2e smoke now exports a testable command plan, and `e2e:smoke:test` guards seed reset, Playwright execution, and seed restore ordering without launching the browser.
+- Secret scanning now exports path-rule helpers, and `secrets:check:test` guards tracked `.env` rejection plus source/docs/config scan selection.
 
 ## Current Production Status
 

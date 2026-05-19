@@ -20,10 +20,19 @@ export function isUnsafeTrackedEnvPath(path: string) {
   return fileName.startsWith('.env') && !fileName.endsWith('.example')
 }
 
-function shouldCheck(path: string) {
+export function shouldCheckSecretPath(
+  path: string,
+  options: {
+    rootDir?: string
+    selfRelativePath?: string
+  } = {},
+) {
+  const rootDir = options.rootDir ?? root
+  const selfRelativePath = options.selfRelativePath ?? selfFile
   const normalized = path.replaceAll('\\', '/')
   if (isUnsafeTrackedEnvPath(normalized)) return false
-  if (relative(root, path) === selfFile) return false
+  const relativePath = relative(rootDir, path).replaceAll('\\', '/')
+  if (relativePath === selfRelativePath.replaceAll('\\', '/')) return false
   if (normalized.includes('/.env')) return true
   const dot = normalized.lastIndexOf('.')
   const extension = dot >= 0 ? normalized.slice(dot) : ''
@@ -37,7 +46,7 @@ async function walk(dir: string, files: string[] = []) {
     const info = await stat(path)
     if (info.isDirectory()) {
       await walk(path, files)
-    } else if (!ignoredFiles.has(entry) && shouldCheck(path)) {
+    } else if (!ignoredFiles.has(entry) && shouldCheckSecretPath(path)) {
       files.push(path)
     }
   }

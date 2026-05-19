@@ -66,6 +66,7 @@ const requiredFiles = [
   'scripts/readiness-smoke.test.ts',
   'scripts/local-smoke.test.ts',
   'scripts/e2e-smoke.test.ts',
+  'scripts/check-secrets.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -329,6 +330,7 @@ const checks: Check[] = [
           '"deploy:doctor:self-test"',
           '"release:handoff:check"',
           '"release:handoff:test"',
+          '"secrets:check:test"',
           '"secrets:patterns:test"',
           '"qa:seed"',
           '"e2e:smoke"',
@@ -359,6 +361,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('secrets:patterns:test')) {
         throw new Error('package.json qa:local must run secrets:patterns:test so shared secret pattern regressions are caught')
+      }
+      if (!qaLocal.includes('secrets:check:test')) {
+        throw new Error('package.json qa:local must run secrets:check:test so committed secret scan path regressions are caught')
       }
       if (!qaLocal.includes('vault:audit:test')) {
         throw new Error('package.json qa:local must run vault:audit:test so memory/knowledge audit helper regressions are caught')
@@ -774,6 +779,7 @@ const checks: Check[] = [
           'bun install --frozen-lockfile',
           'bun run predeploy:check',
           'bun run secrets:check',
+          'bun run secrets:check:test',
           'bun run secrets:patterns:test',
           'bun run memory:audit',
           'bun run knowledge:audit',
@@ -814,6 +820,7 @@ const checks: Check[] = [
         ciWorkflow,
         [
           'bun run predeploy:check',
+          'bun run secrets:check:test',
           'bun run secrets:patterns:test',
           'bun run vault:audit:test',
           'bun run deploy:doctor:self-test',
