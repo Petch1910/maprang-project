@@ -111,6 +111,7 @@ describe('frontend static audit', () => {
         '<p>รัน eval</p>',
         '<p>ยังไม่ได้รัน eval</p>',
         '<p>hook: unfinished business</p>',
+        '<p>ยัง fallback เป็นภาพตัวอย่าง</p>',
       ].join('\n'),
       'MixedEnglishUiFixture.tsx',
     )
@@ -121,6 +122,7 @@ describe('frontend static audit', () => {
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
+      'contains mixed English UI wording that should be Thai-first',
       'contains mixed English UI wording that should be Thai-first',
       'contains mixed English UI wording that should be Thai-first',
       'contains mixed English UI wording that should be Thai-first',

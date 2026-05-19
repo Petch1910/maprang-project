@@ -151,7 +151,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail:
         checks?.imageGenerationConfigured || imageGeneration?.configured
           ? `ตั้งค่า ${imageGeneration?.model ?? 'provider'} แล้ว สถานะ ${imageGeneration?.status ?? 'needs_live_smoke'} ต้องผ่านการทดสอบจริงเพื่อยืนยัน billing/quota ก่อน production`
-          : 'ยัง fallback เป็นภาพตัวอย่าง ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อน production',
+          : 'ยังใช้ภาพตัวอย่างสำรอง ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อน production',
       action:
         checks?.imageGenerationConfigured || imageGeneration?.configured
           ? 'รัน bun run smoke:image:live เพื่อยืนยันว่า provider สร้างภาพจริง'
