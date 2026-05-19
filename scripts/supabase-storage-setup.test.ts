@@ -47,21 +47,24 @@ describe('Supabase storage setup helpers', () => {
   })
 
   test('rejects unsafe storage config before network calls', () => {
-    expect(() => resolveSupabaseStorageConfig({ SUPABASE_SERVICE_ROLE_KEY: 'service-role' })).toThrow('SUPABASE_URL is missing')
+    expect(() => resolveSupabaseStorageConfig({ SUPABASE_SERVICE_ROLE_KEY: 'service-role' })).toThrow('SUPABASE_URL ยังไม่ได้ตั้งค่า')
+    expect(() => resolveSupabaseStorageConfig({ SUPABASE_URL: 'https://project-ref.supabase.co' })).toThrow(
+      'SUPABASE_SERVICE_ROLE_KEY ยังไม่ได้ตั้งค่า',
+    )
     expect(() =>
       resolveSupabaseStorageConfig({
         SUPABASE_URL: 'https://project-ref.supabase.co',
         SUPABASE_SERVICE_ROLE_KEY: 'service-role',
         SUPABASE_STORAGE_ACCESS: 'public',
       }),
-    ).toThrow('SUPABASE_STORAGE_ACCESS must be signed')
+    ).toThrow('SUPABASE_STORAGE_ACCESS ต้องเป็น signed')
     expect(() =>
       resolveSupabaseStorageConfig({
         SUPABASE_URL: 'https://project-ref.supabase.co',
         SUPABASE_SERVICE_ROLE_KEY: 'service-role',
         SUPABASE_SIGNED_URL_EXPIRES_IN: '30',
       }),
-    ).toThrow('at least 60 seconds')
+    ).toThrow('ไม่น้อยกว่า 60 วินาที')
   })
 
   test('normalizes signed URL response paths and encoded object paths', () => {
@@ -174,6 +177,6 @@ describe('Supabase storage setup helpers', () => {
 
     expect(exitCode).toBe(1)
     expect(lines).toEqual(['bucket: avatars'])
-    expect(errors.join('\n')).toContain('Production expects a private bucket')
+    expect(errors.join('\n')).toContain('production ต้องใช้ private bucket พร้อม signed URL')
   })
 })

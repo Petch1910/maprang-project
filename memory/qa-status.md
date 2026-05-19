@@ -98,6 +98,7 @@ Results:
 - `vault:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard shared memory/knowledge Markdown audit helpers plus importable memory and knowledge audit runners.
 - `backend:check:db:test` now runs in `qa:local`, CI, and Production Smoke to guard DB-required backend check command planning and the importable DB check runner.
 - `supabase:storage:test` now runs in `qa:local`, CI, and Production Smoke to guard signed-storage setup helpers plus the importable setup runner without calling Supabase.
+- Supabase signed-storage setup failure guidance now passes Thai-first coverage via `supabase:storage:test`.
 - `smoke:local:test` now runs in `qa:local`, CI, and Production Smoke to guard local smoke helper behavior and the importable local smoke runner without calling the backend.
 - `e2e:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard browser smoke seed reset/restore command ordering without launching Playwright.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.

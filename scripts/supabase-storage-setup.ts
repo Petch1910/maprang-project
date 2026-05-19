@@ -68,10 +68,10 @@ export function resolveSupabaseStorageConfig(
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY
   const storageAccess = env.SUPABASE_STORAGE_ACCESS || 'signed'
 
-  if (!supabaseUrl) throw new Error('SUPABASE_URL is missing')
-  if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing')
-  if (storageAccess !== 'signed') throw new Error('SUPABASE_STORAGE_ACCESS must be signed for production avatar storage')
-  if (!Number.isFinite(expiresIn) || expiresIn < 60) throw new Error('SUPABASE_SIGNED_URL_EXPIRES_IN must be at least 60 seconds')
+  if (!supabaseUrl) throw new Error('SUPABASE_URL ยังไม่ได้ตั้งค่า')
+  if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY ยังไม่ได้ตั้งค่า')
+  if (storageAccess !== 'signed') throw new Error('SUPABASE_STORAGE_ACCESS ต้องเป็น signed สำหรับ production avatar storage')
+  if (!Number.isFinite(expiresIn) || expiresIn < 60) throw new Error('SUPABASE_SIGNED_URL_EXPIRES_IN ต้องไม่น้อยกว่า 60 วินาที')
 
   return {
     checkOnly,
@@ -113,7 +113,7 @@ async function storageRequest(config: SupabaseStorageConfig, path: string, init:
     })
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
-    throw new Error(`could not reach Supabase Storage at ${config.supabaseUrl}: ${reason}`)
+    throw new Error(`ติดต่อ Supabase Storage ที่ ${config.supabaseUrl} ไม่สำเร็จ: ${reason}`)
   } finally {
     clearTimeout(timeoutId)
   }
@@ -127,7 +127,7 @@ async function parseError(response: Response) {
 async function getBucket(config: SupabaseStorageConfig) {
   const response = await storageRequest(config, `/bucket/${encodeURIComponent(config.bucket)}`)
   if (response.status === 404) return { exists: false as const, public: null }
-  if (!response.ok) throw new Error(`bucket read failed with ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`อ่าน bucket ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
   const payload = (await response.json()) as { public?: boolean; id?: string; name?: string }
   return { exists: true as const, public: payload.public === true }
 }
@@ -145,7 +145,7 @@ async function createBucket(config: SupabaseStorageConfig) {
     }),
   })
   if (!response.ok && response.status !== 409) {
-    throw new Error(`bucket create failed with ${response.status}: ${await parseError(response)}`)
+    throw new Error(`สร้าง bucket ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
   }
 }
 
@@ -159,7 +159,7 @@ async function updateBucketPrivate(config: SupabaseStorageConfig) {
       allowed_mime_types: allowedMimeTypes,
     }),
   })
-  if (!response.ok) throw new Error(`bucket privacy update failed with ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`ปรับ bucket ให้เป็น private ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
 }
 
 async function uploadSmokeImage(config: SupabaseStorageConfig, objectPath: string) {
@@ -173,7 +173,7 @@ async function uploadSmokeImage(config: SupabaseStorageConfig, objectPath: strin
     },
     body: bytes,
   })
-  if (!response.ok) throw new Error(`smoke avatar upload failed with ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`อัปโหลด smoke avatar ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
 }
 
 async function createSignedUrl(config: SupabaseStorageConfig, objectPath: string) {
@@ -182,16 +182,16 @@ async function createSignedUrl(config: SupabaseStorageConfig, objectPath: string
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ expiresIn: config.expiresIn }),
   })
-  if (!response.ok) throw new Error(`signed URL create failed with ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`สร้าง signed URL ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
   const payload = (await response.json()) as { signedURL?: string; signedUrl?: string }
   const signedPath = payload.signedURL ?? payload.signedUrl
-  if (!signedPath) throw new Error('signed URL response did not include signedURL')
+  if (!signedPath) throw new Error('ผลลัพธ์ signed URL ไม่มี signedURL')
   return normalizeSignedUrl(signedPath, config.supabaseUrl)
 }
 
 async function verifySignedUrl(signedUrl: string) {
   const response = await fetch(signedUrl)
-  if (!response.ok) throw new Error(`signed URL fetch failed with ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`เรียก signed URL ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
 }
 
 async function deleteObject(config: SupabaseStorageConfig, objectPath: string) {
@@ -200,7 +200,7 @@ async function deleteObject(config: SupabaseStorageConfig, objectPath: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prefixes: [objectPath] }),
   })
-  if (!response.ok) throw new Error(`smoke avatar cleanup failed with ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`ลบ smoke avatar ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
 }
 
 export const liveSupabaseStorageOperations: SupabaseStorageOperations = {
@@ -233,7 +233,7 @@ export async function runSupabaseStorageSetup(
 
     const bucketState = await operations.getBucket(config)
     if (!bucketState.exists) {
-      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" does not exist. Run bun run supabase:storage:setup after the project is active.`)
+      if (config.checkOnly) throw new Error(`ไม่พบ Supabase bucket "${config.bucket}" ให้รัน bun run supabase:storage:setup หลัง project พร้อมใช้งาน`)
       await operations.createBucket(config)
       writeLine(`createdBucket: ${config.bucket}`)
     } else {
@@ -241,16 +241,16 @@ export async function runSupabaseStorageSetup(
     }
 
     const currentBucket = await operations.getBucket(config)
-    if (!currentBucket.exists) throw new Error(`Supabase bucket "${config.bucket}" could not be read after setup`)
+    if (!currentBucket.exists) throw new Error(`อ่าน Supabase bucket "${config.bucket}" หลัง setup ไม่สำเร็จ`)
 
     if (currentBucket.public === true) {
-      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" is public. Production expects a private bucket with signed URLs.`)
+      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public; production ต้องใช้ private bucket พร้อม signed URL`)
       await operations.updateBucketPrivate(config)
       writeLine(`updatedBucketPrivate: ${config.bucket}`)
     }
 
     const verifiedBucket = await operations.getBucket(config)
-    if (verifiedBucket.public === true) throw new Error(`Supabase bucket "${config.bucket}" is still public after update`)
+    if (verifiedBucket.public === true) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public หลัง update`)
 
     const objectPath = `avatars/smoke-${now()}.png`
     await operations.uploadSmokeImage(config, objectPath)
@@ -282,7 +282,7 @@ export async function runSupabaseStorageSetup(
     return 0
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Supabase storage setup failed: ${message}`)
+    writeError(`ตั้งค่า Supabase storage ไม่ผ่าน: ${message}`)
     return 1
   }
 }
