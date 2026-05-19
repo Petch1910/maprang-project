@@ -77,11 +77,15 @@ describe('frontend static audit', () => {
         '<p>Prompt Inspector</p>',
         '<span>Admin Health</span>',
         '<InfoLine label="Chat reply budget" value="1200 tokens" />',
+        '<p>Production blocker summary</p>',
+        '<h2>Deploy checklist</h2>',
       ].join('\n'),
       'EnglishUiFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',

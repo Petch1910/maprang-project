@@ -361,7 +361,7 @@ export function AdminHealthPage() {
       >
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <p className="m-0 text-sm font-black">Production blocker summary</p>
+            <p className="m-0 text-sm font-black">สรุป blocker production</p>
             <p className="m-0 mt-1 text-sm font-bold leading-6">
               {productionReady
                 ? 'พร้อมสำหรับ final gate แล้ว ให้รัน production smoke กับ backend/frontend domain จริงอีกครั้ง'
@@ -432,7 +432,7 @@ export function AdminHealthPage() {
             <div>
               <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
                 <Activity size={17} />
-                Deploy checklist
+                เช็กลิสต์ deploy
               </p>
               <p className="m-0 mt-1 text-xs font-bold text-slate-400">
                 พร้อมแล้ว {readyCount}/{deployChecks.length} ข้อ

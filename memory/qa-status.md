@@ -26,6 +26,7 @@ Results:
 - Frontend build: pass.
 - Bundle budget: pass.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
+- Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Secrets check: pass.

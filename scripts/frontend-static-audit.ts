@@ -136,7 +136,7 @@ export const suspiciousPatterns = [
   { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
   {
     pattern:
-      /\b(?:Admin Health|Prompt Inspector|Automated Evals|Prompt diff|Route\/Menu Audit|Frontend backend URL|Frontend env warnings|Chat live smoke|Chat reply budget|Image provider configured|Image live smoke|Supabase Auth|Signed avatar storage|Production CORS|Cancel chat selection|Explore \/ Home|Character Lobby|Chat Room|Chat Sidebar|Creator Studio|My Chats|Events Inbox|Profile \/ Persona|Staging Gate)\b/g,
+      /\b(?:Admin Health|Prompt Inspector|Automated Evals|Prompt diff|Route\/Menu Audit|Production blocker summary|Deploy checklist|Frontend backend URL|Frontend env warnings|Chat live smoke|Chat reply budget|Image provider configured|Image live smoke|Supabase Auth|Signed avatar storage|Production CORS|Cancel chat selection|Explore \/ Home|Character Lobby|Chat Room|Chat Sidebar|Creator Studio|My Chats|Events Inbox|Profile \/ Persona|Staging Gate)\b/g,
     message: 'contains English UI label that should be Thai-first',
   },
   { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'contains Thai coming-soon placeholder copy' },

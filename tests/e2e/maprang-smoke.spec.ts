@@ -28,9 +28,9 @@ const routeSmokeTargets = [
   { path: '/profile', text: 'ตัวตนผู้เล่น' },
   { path: '/wallet', text: 'โทเคน' },
   { path: '/moderation', text: adminKey ? 'คิวรายงาน' : 'ADMIN_API_KEY' },
-  { path: '/admin/health', text: 'Route/Menu Audit' },
-  { path: '/admin/prompt-inspector', text: adminKey ? 'Prompt Inspector' : 'ADMIN_API_KEY' },
-  { path: '/admin/evals', text: adminKey ? 'Automated Evals' : 'ADMIN_API_KEY' },
+  { path: '/admin/health', text: 'ตรวจเส้นทาง/เมนู' },
+  { path: '/admin/prompt-inspector', text: adminKey ? 'ตรวจพรอมป์ก่อนยิงโมเดล' : 'ADMIN_API_KEY' },
+  { path: '/admin/evals', text: adminKey ? 'ทดสอบคุณภาพ prompt/context' : 'ADMIN_API_KEY' },
 ]
 
 function persistedReduxState() {
@@ -516,14 +516,14 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   expect(await page.getByTestId('events-scene-row').count()).toBeGreaterThan(0)
 
   await page.goto('/admin/health')
-  await expect(page.locator('body')).toContainText('Production blocker summary')
+  await expect(page.locator('body')).toContainText('สรุป blocker production')
   await expect(page.locator('body')).toContainText('bun run production:check')
-  await expect(page.locator('body')).toContainText('Deploy checklist')
-  await expect(page.locator('body')).toContainText('Route/Menu Audit')
-  await expect(page.locator('body')).toContainText('Chat Sidebar')
+  await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
+  await expect(page.locator('body')).toContainText('ตรวจเส้นทาง/เมนู')
+  await expect(page.locator('body')).toContainText('แถบแชท')
 
   await page.goto('/admin/prompt-inspector')
-  await expect(page.locator('body')).toContainText('Prompt Inspector')
+  await expect(page.locator('body')).toContainText('ตรวจพรอมป์ก่อนยิงโมเดล')
   if (adminKey) {
     await expect(page.getByTestId('prompt-inspector-character-select')).toBeEnabled()
     await page.getByTestId('prompt-inspector-message').fill('ช่วยตรวจว่าพรอมป์ยังคุมบุคลิกและตอบยาวพอไหม')
@@ -536,7 +536,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   }
 
   await page.goto('/admin/evals')
-  await expect(page.locator('body')).toContainText('Automated Evals')
+  await expect(page.locator('body')).toContainText('ทดสอบคุณภาพ prompt/context')
   if (adminKey) {
     await expect(page.getByTestId('admin-evals-output')).toContainText('maprang-golden-roleplay')
     await expect(page.getByTestId('admin-evals-run')).toBeEnabled()
