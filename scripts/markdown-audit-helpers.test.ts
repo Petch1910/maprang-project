@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { join, resolve } from 'node:path'
 import { collectLocalMarkdownLinks, missingIncludes, pathIsInside } from './markdown-audit-helpers'
+import { collectMemoryAuditResult, runMemoryAudit } from './memory-audit'
 
 describe('markdown audit helpers', () => {
   test('reports missing required snippets without throwing', () => {
@@ -26,5 +27,18 @@ describe('markdown audit helpers', () => {
     expect(pathIsInside(parent, parent)).toBe(true)
     expect(pathIsInside(parent, join(parent, 'working-context.md'))).toBe(true)
     expect(pathIsInside(parent, resolve('README.md'))).toBe(false)
+  })
+
+  test('runs the memory audit through an importable runner', async () => {
+    const result = await collectMemoryAuditResult()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runMemoryAudit((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(result.ok).toBe(true)
+    expect(result.files).toBeGreaterThan(0)
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toContain('ok - memory audit passed')
+    expect(errors).toEqual([])
   })
 })

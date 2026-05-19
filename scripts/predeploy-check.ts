@@ -477,6 +477,7 @@ const checks: Check[] = [
       const memoryReadme = await readRepoFile('memory/README.md')
       const workingContext = await readRepoFile('memory/working-context.md')
       const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
+      const memoryAudit = await readRepoFile('scripts/memory-audit.ts')
       requireIncludes(packageJson, ['"memory:audit"', 'bun scripts/memory-audit.ts', 'bun run memory:audit'], 'package.json')
       requireIncludes(packageJson, ['"vault:audit:test"', 'bun test scripts/markdown-audit-helpers.test.ts'], 'package.json')
       requireIncludes(readme, ['memory/README.md', 'Project Memory'], 'README.md')
@@ -485,8 +486,13 @@ const checks: Check[] = [
       requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
       requireIncludes(
         await readRepoFile('scripts/markdown-audit-helpers.test.ts'),
-        ['collects only local markdown links', 'checks whether a resolved path stays inside a vault'],
+        ['collects only local markdown links', 'checks whether a resolved path stays inside a vault', 'runs the memory audit through an importable runner'],
         'scripts/markdown-audit-helpers.test.ts',
+      )
+      requireIncludes(
+        memoryAudit,
+        ['collectMemoryAuditResult', 'runMemoryAudit', 'MemoryAuditResult', 'if (import.meta.main) process.exit(await runMemoryAudit())'],
+        'scripts/memory-audit.ts',
       )
     },
   },

@@ -73,7 +73,7 @@ Verified:
 - Provider smoke guard regression tests now cover live chat minimum token thresholds, provider failure messaging, live image opt-in detection, and image provider failure hints before any verification flag can be set.
 - Deploy status regression tests now cover JSON readiness counts, text blocker output, and health failure reporting without calling a live backend.
 - Readiness smoke regression tests now cover `/ready` summary output, failure visibility, and readiness status fallback without calling a live backend.
-- Memory/knowledge vault audits now share Markdown link/include helpers, with regression tests for required snippets, local link collection, and vault-boundary checks.
+- Memory/knowledge vault audits now share Markdown link/include helpers, and memory audit exports an importable runner covered by regression tests for required snippets, local link collection, vault-boundary checks, and full memory audit output.
 - Backend DB check planning is covered by `backend:check:db:test`, ensuring DB availability is checked before backend tests run with `REQUIRE_DB_TESTS=true`.
 - Supabase signed-storage setup now exports testable helpers for env loading, config validation, signed URL normalization, and object path encoding; `supabase:storage:test` covers them without hitting Supabase.
 - Local smoke now exports testable helpers for smoke character selection, avatar upload validation, and QA summary formatting; `smoke:local:test` covers them without hitting the backend.

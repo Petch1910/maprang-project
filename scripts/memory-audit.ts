@@ -19,6 +19,12 @@ const requiredFiles = [
   'memory/production/checklist.md',
 ]
 
+export type MemoryAuditResult = {
+  ok: boolean
+  files: number
+  findings: string[]
+}
+
 async function assertFile(path: string) {
   await access(join(root, path))
 }
@@ -47,52 +53,65 @@ function requireIncludes(content: string, values: string[], file: string) {
   }
 }
 
-const findings: string[] = []
+export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
+  const findings: string[] = []
 
-for (const file of requiredFiles) {
-  await assertFile(file).catch(() => findings.push(`missing required memory file: ${file}`))
-}
+  for (const file of requiredFiles) {
+    await assertFile(file).catch(() => findings.push(`missing required memory file: ${file}`))
+  }
 
-const readme = await readRepoFile('memory/README.md')
-requireIncludes(
-  readme,
-  ['Never store secrets', 'Update Protocol', '[Working Context](./working-context.md)', '[Deploy Blockers](./deploy-blockers.md)'],
-  'memory/README.md',
-)
+  const readme = await readRepoFile('memory/README.md')
+  requireIncludes(
+    readme,
+    ['Never store secrets', 'Update Protocol', '[Working Context](./working-context.md)', '[Deploy Blockers](./deploy-blockers.md)'],
+    'memory/README.md',
+  )
 
-const workingContext = await readRepoFile('memory/working-context.md')
-requireIncludes(workingContext, ['Last updated:', 'Current Goal', 'Current Local Status', 'Current Production Status'], 'memory/working-context.md')
+  const workingContext = await readRepoFile('memory/working-context.md')
+  requireIncludes(workingContext, ['Last updated:', 'Current Goal', 'Current Local Status', 'Current Production Status'], 'memory/working-context.md')
 
-const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
-requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'smoke:chat', 'smoke:image:live'], 'memory/deploy-blockers.md')
+  const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
+  requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'smoke:chat', 'smoke:image:live'], 'memory/deploy-blockers.md')
 
-const qaStatus = await readRepoFile('memory/qa-status.md')
-requireIncludes(qaStatus, ['bun run qa:local', 'Backend tests:', 'API smoke:', 'Production Gate'], 'memory/qa-status.md')
+  const qaStatus = await readRepoFile('memory/qa-status.md')
+  requireIncludes(qaStatus, ['bun run qa:local', 'Backend tests:', 'API smoke:', 'Production Gate'], 'memory/qa-status.md')
 
-const files = await walkMarkdown(memoryRoot)
-for (const file of files) {
-  const relativePath = relative(root, file)
-  const content = await readFile(file, 'utf8')
-  for (const forbidden of secretPatterns) {
-    if (forbidden.pattern.test(content)) {
-      findings.push(`${relativePath}: contains ${forbidden.name}`)
+  const files = await walkMarkdown(memoryRoot)
+  for (const file of files) {
+    const relativePath = relative(root, file)
+    const content = await readFile(file, 'utf8')
+    for (const forbidden of secretPatterns) {
+      if (forbidden.pattern.test(content)) {
+        findings.push(`${relativePath}: contains ${forbidden.name}`)
+      }
+    }
+
+    for (const target of collectLocalMarkdownLinks(content)) {
+      const resolved = resolve(dirname(file), target)
+      if (!pathIsInside(memoryRoot, resolved)) {
+        findings.push(`${relativePath}: link escapes memory vault: ${target}`)
+        continue
+      }
+      await access(resolved).catch(() => findings.push(`${relativePath}: broken local link: ${target}`))
     }
   }
 
-  for (const target of collectLocalMarkdownLinks(content)) {
-    const resolved = resolve(dirname(file), target)
-    if (!pathIsInside(memoryRoot, resolved)) {
-      findings.push(`${relativePath}: link escapes memory vault: ${target}`)
-      continue
-    }
-    await access(resolved).catch(() => findings.push(`${relativePath}: broken local link: ${target}`))
+  return { ok: findings.length === 0, files: files.length, findings }
+}
+
+export async function runMemoryAudit(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const result = await collectMemoryAuditResult()
+  if (!result.ok) {
+    writeError('Memory audit failed:')
+    for (const finding of result.findings) writeError(`- ${finding}`)
+    return 1
   }
+
+  writeLine(`ok - memory audit passed (${result.files} markdown files)`)
+  return 0
 }
 
-if (findings.length > 0) {
-  console.error('Memory audit failed:')
-  for (const finding of findings) console.error(`- ${finding}`)
-  process.exit(1)
-}
-
-console.log(`ok - memory audit passed (${files.length} markdown files)`)
+if (import.meta.main) process.exit(await runMemoryAudit())
