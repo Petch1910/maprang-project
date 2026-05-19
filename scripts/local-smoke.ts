@@ -8,6 +8,11 @@ export type HealthPayload = {
   security: { avatarStorage: 'local' | 'supabase' }
 }
 
+export type RootPayload = {
+  ok: boolean
+  service?: string
+}
+
 export type SmokeCharacter = { id: string; name: string; tags: string[] }
 
 export type AvatarUploadPayload = {
@@ -47,6 +52,11 @@ export function validateAvatarUpload(upload: AvatarUploadPayload, baseUrl: strin
   }
 }
 
+export function validateBackendRootIdentity(root: RootPayload) {
+  if (!root.ok) throw new Error('Backend root identity returned ok=false')
+  if (root.service !== 'maprang-backend') throw new Error('Backend root identity returned an unexpected service name')
+}
+
 export function buildLocalSmokeSummary(input: {
   apiBaseUrl: string
   health: HealthPayload
@@ -84,6 +94,9 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
   const writeError = options.writeError ?? ((line: string) => console.error(line))
 
   try {
+    const root = await jsonReader<RootPayload>('/')
+    validateBackendRootIdentity(root)
+
     const health = await jsonReader<HealthPayload>('/health')
 
     if (!health.ok || !health.checks.databaseConnected) {

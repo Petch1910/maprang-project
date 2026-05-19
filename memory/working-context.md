@@ -69,7 +69,7 @@ Verified:
 - `predeploy:check` verifies the shared secret pattern source, regression test, and QA documentation so secret-audit wiring cannot drift silently.
 - CI predeploy now runs the release handoff check, self-test, and secret pattern regression test directly, not only through `qa:local`.
 - CI predeploy now runs security, API route, and route/menu static audits directly before deploy checks.
-- API route audit now auto-discovers `apps/backend/index.ts` plus backend `*.routes.ts` files and covers `GET /`, while API smoke and browser e2e smoke verify the backend root identity response before `/health`, so new route files and the backend root endpoint cannot drift outside the coverage map; route audit regression tests lock this behavior.
+- API route audit now auto-discovers `apps/backend/index.ts` plus backend `*.routes.ts` files and covers `GET /`, while API smoke, local smoke, and browser e2e smoke verify the backend root identity response before deeper checks, so new route files and the backend root endpoint cannot drift outside the coverage map; route audit regression tests lock this behavior.
 - Security audit now scans the backend entrypoint as well as backend source/prisma files, so route/security logic added to `apps/backend/index.ts` is covered before deploy.
 - Security audit now also checks that every backend `/admin` route block contains `requireAdminApiKey`, catching missing admin guards before deploy.
 - Security audit now also checks that backend `/:id` route blocks contain `rejectInvalidUuid` before resource access.

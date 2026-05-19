@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { buildLocalSmokeSummary, pickSmokeCharacter, runLocalSmoke, validateAvatarUpload, type LocalSmokeJsonReader } from './local-smoke'
+import {
+  buildLocalSmokeSummary,
+  pickSmokeCharacter,
+  runLocalSmoke,
+  validateAvatarUpload,
+  validateBackendRootIdentity,
+  type LocalSmokeJsonReader,
+} from './local-smoke'
 
 describe('local smoke helpers', () => {
   test('prefers MIKA, then Maprang, then the first available character', () => {
@@ -29,6 +36,12 @@ describe('local smoke helpers', () => {
     expect(() => validateAvatarUpload({ ...upload, url: 'https://cdn.example.com/avatar.png' }, 'http://127.0.0.1:3000')).toThrow(
       'non-backend URL',
     )
+  })
+
+  test('validates backend root identity before deeper smoke work', () => {
+    expect(() => validateBackendRootIdentity({ ok: true, service: 'maprang-backend' })).not.toThrow()
+    expect(() => validateBackendRootIdentity({ ok: false, service: 'maprang-backend' })).toThrow('ok=false')
+    expect(() => validateBackendRootIdentity({ ok: true, service: 'other-service' })).toThrow('unexpected service name')
   })
 
   test('formats local smoke summary fields used by QA logs', () => {
@@ -68,6 +81,7 @@ describe('local smoke helpers', () => {
     const cleaned: string[] = []
     const reader: LocalSmokeJsonReader = async (path) => {
       calls.push(path)
+      if (path === '/') return { ok: true, service: 'maprang-backend' } as never
       if (path === '/health') {
         return {
           ok: true,
@@ -106,7 +120,7 @@ describe('local smoke helpers', () => {
 
     const summary = JSON.parse(lines.join('\n'))
     expect(exitCode).toBe(0)
-    expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/characters/mika/lore', '/relationship/preview', '/uploads/avatar'])
+    expect(calls).toEqual(['/', '/health', '/characters?view=admin&limit=10', '/characters/mika/lore', '/relationship/preview', '/uploads/avatar'])
     expect(cleaned).toEqual(['avatar.png'])
     expect(summary.character).toBe('มิกะ | MIKA')
     expect(summary.loreCount).toBe(1)
@@ -118,6 +132,7 @@ describe('local smoke helpers', () => {
     const lines: string[] = []
     const errors: string[] = []
     const reader: LocalSmokeJsonReader = async (path) => {
+      if (path === '/') return { ok: true, service: 'maprang-backend' } as never
       if (path === '/health') {
         return {
           ok: true,
