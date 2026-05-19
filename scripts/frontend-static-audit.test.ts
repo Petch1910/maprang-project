@@ -39,6 +39,8 @@ describe('frontend static audit', () => {
         <NavLink to={"#"}>Placeholder</NavLink>
         <button type="button" onClick={() => {}}>No-op</button>
         throw new Error('not implemented')
+        setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
+        state.error = action.error.message
       `,
       'Fixture.tsx',
     )
@@ -48,6 +50,8 @@ describe('frontend static audit', () => {
       'router link uses to={"#"} placeholder',
       'button/link has an empty onClick handler',
       'throws not implemented in frontend source',
+      'surfaces raw auth/provider error message to users',
+      'surfaces raw Redux async error message to users',
     ])
   })
 

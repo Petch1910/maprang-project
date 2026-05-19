@@ -135,6 +135,14 @@ export const suspiciousPatterns = [
   { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'throws not implemented in frontend source' },
   { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
   {
+    pattern: /setNote\(\s*error\s+instanceof\s+Error\s*\?\s*error\.message/g,
+    message: 'surfaces raw auth/provider error message to users',
+  },
+  {
+    pattern: /state\.error\s*=\s*action\.error\.message/g,
+    message: 'surfaces raw Redux async error message to users',
+  },
+  {
     pattern:
       /\b(?:Admin Health|Prompt Inspector|Automated Evals|Prompt diff|Route\/Menu Audit|Production blocker summary|Deploy checklist|Frontend backend URL|Frontend env warnings|Chat live smoke|Chat reply budget|Image provider configured|Image live smoke|Supabase Auth|Signed avatar storage|Production CORS|Cancel chat selection|Select chat|Explore \/ Home|Character Lobby|Relationship Contract|Chat Room|Chat Sidebar|Creator Studio|My Chats|Events Inbox|Profile \/ Persona|Staging Gate|Knowledge pack|Local readiness|Production gates|QA gate|runtime knowledge packs ready|needs check|staging\/future gate|Could not load chats|Could not load characters|Teen romance|Mature 18|Restricted 18|prompt-control|prompt\/context|token budget|relationship state|scene state|Deterministic prompt\/context)\b/g,
     message: 'contains English UI label that should be Thai-first',

@@ -977,6 +977,8 @@ const checks: Check[] = [
           'reports Thai placeholder and mojibake text regressions',
           'reports English UI label regressions for Thai-first surfaces',
           'reports mixed English debug copy regressions for Thai-first surfaces',
+          'surfaces raw auth/provider error message to users',
+          'surfaces raw Redux async error message to users',
           'Relationship Contract',
           'prompt-control',
           'ยัง fallback',
@@ -994,6 +996,8 @@ const checks: Check[] = [
         await readRepoFile('scripts/frontend-static-audit.ts'),
         [
           'collectFrontendStaticFindings',
+          'setNote\\(\\s*error\\s+instanceof\\s+Error\\s*\\?\\s*error\\.message',
+          'state\\.error\\s*=\\s*action\\.error\\.message',
           'Relationship Contract',
           'prompt-control',
           'ระบบ relationship',

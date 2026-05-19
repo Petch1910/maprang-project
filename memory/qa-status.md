@@ -66,7 +66,7 @@ Results:
 - `frontend:bundle:test` now runs in `qa:local`, CI, and Production Smoke to guard code-splitting, bundle budget regressions, and the importable bundle budget runner.
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, admin/system/relationship English UI label regressions, mixed English debug copy regressions, Thai text/mojibake regressions, and the importable static audit runner.
 - `frontend:static:audit:test` now also blocks stale English Redux fallback errors such as `Could not load chats` and `Could not load characters`.
-- Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users.
+- Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.
 - `frontend:static:audit:test` now also blocks stale English chat-selection accessibility labels such as `Select chat`.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link, navigate route regressions, and the importable route audit runner.
