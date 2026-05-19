@@ -54,6 +54,7 @@ Results:
 - `provider:smoke:guards:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat/image smoke verification helpers.
 - `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard `/ready` summary output.
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output.
+- `vault:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard shared memory/knowledge Markdown audit helpers.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.

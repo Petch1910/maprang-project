@@ -49,6 +49,8 @@ const requiredFiles = [
   'scripts/eval-local.ts',
   'scripts/check-frontend-bundles.test.ts',
   'scripts/knowledge-audit.ts',
+  'scripts/markdown-audit-helpers.ts',
+  'scripts/markdown-audit-helpers.test.ts',
   'scripts/memory-audit.ts',
   'scripts/api-route-audit.test.ts',
   'scripts/release-handoff-check.ts',
@@ -298,6 +300,7 @@ const checks: Check[] = [
           '"route-menu:audit"',
           '"memory:audit"',
           '"knowledge:audit"',
+          '"vault:audit:test"',
           '"eval:local"',
           '"eval:promptfoo"',
           '"security:audit"',
@@ -348,6 +351,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('secrets:patterns:test')) {
         throw new Error('package.json qa:local must run secrets:patterns:test so shared secret pattern regressions are caught')
+      }
+      if (!qaLocal.includes('vault:audit:test')) {
+        throw new Error('package.json qa:local must run vault:audit:test so memory/knowledge audit helper regressions are caught')
       }
       if (!qaLocal.includes('security:audit:test')) {
         throw new Error('package.json qa:local must run security:audit:test so backend security audit regressions are caught')
@@ -416,10 +422,16 @@ const checks: Check[] = [
       const workingContext = await readRepoFile('memory/working-context.md')
       const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
       requireIncludes(packageJson, ['"memory:audit"', 'bun scripts/memory-audit.ts', 'bun run memory:audit'], 'package.json')
+      requireIncludes(packageJson, ['"vault:audit:test"', 'bun test scripts/markdown-audit-helpers.test.ts'], 'package.json')
       requireIncludes(readme, ['memory/README.md', 'Project Memory'], 'README.md')
       requireIncludes(memoryReadme, ['Never store secrets', 'Update Protocol', 'Working Context', 'Deploy Blockers'], 'memory/README.md')
       requireIncludes(workingContext, ['Current Local Status', 'Current Production Status'], 'memory/working-context.md')
       requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
+      requireIncludes(
+        await readRepoFile('scripts/markdown-audit-helpers.test.ts'),
+        ['collects only local markdown links', 'checks whether a resolved path stays inside a vault'],
+        'scripts/markdown-audit-helpers.test.ts',
+      )
     },
   },
   {
@@ -724,6 +736,7 @@ const checks: Check[] = [
           'bun run secrets:patterns:test',
           'bun run memory:audit',
           'bun run knowledge:audit',
+          'bun run vault:audit:test',
           'bun run eval:local',
           'bun run security:audit',
           'bun run security:audit:test',
@@ -757,6 +770,7 @@ const checks: Check[] = [
         [
           'bun run predeploy:check',
           'bun run secrets:patterns:test',
+          'bun run vault:audit:test',
           'bun run deploy:doctor:self-test',
           'bun run memory:audit',
           'bun run knowledge:audit',

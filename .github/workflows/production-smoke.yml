@@ -46,6 +46,7 @@ jobs:
       - run: bun run secrets:patterns:test
       - run: bun run memory:audit
       - run: bun run knowledge:audit
+      - run: bun run vault:audit:test
       - run: bun run eval:local
       - run: bun run security:audit
       - run: bun run security:audit:test

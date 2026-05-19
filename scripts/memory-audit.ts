@@ -1,5 +1,6 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
-import { dirname, join, normalize, relative, resolve } from 'node:path'
+import { dirname, join, relative, resolve } from 'node:path'
+import { collectLocalMarkdownLinks, missingIncludes, pathIsInside } from './markdown-audit-helpers'
 import { secretPatterns } from './secret-patterns'
 
 const root = join(import.meta.dir, '..')
@@ -40,28 +41,10 @@ async function walkMarkdown(dir: string, files: string[] = []) {
 }
 
 function requireIncludes(content: string, values: string[], file: string) {
-  const missing = values.filter((value) => !content.includes(value))
+  const missing = missingIncludes(content, values)
   if (missing.length > 0) {
     throw new Error(`${file} is missing ${missing.join(', ')}`)
   }
-}
-
-function localMarkdownLinks(content: string) {
-  const links: string[] = []
-  const linkPattern = /\[[^\]]+\]\(([^)]+)\)/g
-  for (const match of content.matchAll(linkPattern)) {
-    const target = match[1]?.trim()
-    if (!target || target.startsWith('http://') || target.startsWith('https://') || target.startsWith('#')) continue
-    if (target.startsWith('mailto:') || target.includes('://')) continue
-    links.push(target.split('#')[0] ?? target)
-  }
-  return links
-}
-
-function isInside(parent: string, child: string) {
-  const normalizedParent = normalize(parent)
-  const normalizedChild = normalize(child)
-  return normalizedChild === normalizedParent || normalizedChild.startsWith(`${normalizedParent}\\`) || normalizedChild.startsWith(`${normalizedParent}/`)
 }
 
 const findings: string[] = []
@@ -96,9 +79,9 @@ for (const file of files) {
     }
   }
 
-  for (const target of localMarkdownLinks(content)) {
+  for (const target of collectLocalMarkdownLinks(content)) {
     const resolved = resolve(dirname(file), target)
-    if (!isInside(memoryRoot, resolved)) {
+    if (!pathIsInside(memoryRoot, resolved)) {
       findings.push(`${relativePath}: link escapes memory vault: ${target}`)
       continue
     }
