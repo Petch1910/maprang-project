@@ -30,7 +30,7 @@ const routeSmokeTargets = [
   { path: '/moderation', text: adminKey ? 'คิวรายงาน' : 'ADMIN_API_KEY' },
   { path: '/admin/health', text: 'ตรวจเส้นทาง/เมนู' },
   { path: '/admin/prompt-inspector', text: adminKey ? 'ตรวจพรอมป์ก่อนยิงโมเดล' : 'ADMIN_API_KEY' },
-  { path: '/admin/evals', text: adminKey ? 'ทดสอบคุณภาพ prompt/context' : 'ADMIN_API_KEY' },
+  { path: '/admin/evals', text: adminKey ? 'ทดสอบคุณภาพพรอมป์และบริบท' : 'ADMIN_API_KEY' },
 ]
 
 function persistedReduxState() {
@@ -543,7 +543,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   }
 
   await page.goto('/admin/evals')
-  await expect(page.locator('body')).toContainText('ทดสอบคุณภาพ prompt/context')
+  await expect(page.locator('body')).toContainText('ทดสอบคุณภาพพรอมป์และบริบท')
   if (adminKey) {
     await expect(page.getByTestId('admin-evals-output')).toContainText('maprang-golden-roleplay')
     await expect(page.getByTestId('admin-evals-run')).toBeEnabled()
