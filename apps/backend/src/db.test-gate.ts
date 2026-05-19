@@ -15,14 +15,14 @@ function summarizeDbGateError(error: unknown) {
       .map((line) => line.trim())
       .find((line) => line && !/^Invalid\b.*prisma.*invocation/i.test(line)) ?? error.name
 
-  const detail = usefulLine && usefulLine !== error.name ? usefulLine : 'database connection failed'
+  const detail = usefulLine && usefulLine !== error.name ? usefulLine : 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ'
   return `${error.name}${code}: ${detail}`
 }
 
 export function createDbTestGate(prisma: PrismaClient | null, suiteName: string) {
   let checked = false
   let available = false
-  let reason = 'database_not_checked'
+  let reason = 'ยังไม่ได้ตรวจฐานข้อมูล'
   let announced = false
 
   async function checkDb() {
@@ -30,7 +30,7 @@ export function createDbTestGate(prisma: PrismaClient | null, suiteName: string)
     checked = true
 
     if (!prisma) {
-      reason = 'DATABASE_URL is not configured'
+      reason = 'DATABASE_URL ยังไม่ได้ตั้งค่า'
       return
     }
 
@@ -47,7 +47,7 @@ export function createDbTestGate(prisma: PrismaClient | null, suiteName: string)
     await checkDb()
     if (available) return true
 
-    const message = `[db-test-skip] ${suiteName} requires a reachable Postgres database: ${reason}`
+    const message = `[db-test-skip] ${suiteName} ต้องใช้ Postgres database ที่เชื่อมต่อได้: ${reason}`
     if (!options.silent && (process.env.CI === 'true' || process.env.REQUIRE_DB_TESTS === 'true')) {
       throw new Error(message)
     }
