@@ -207,7 +207,7 @@ Expected result:
 - Readiness smoke confirms the backend is ready for traffic, including OpenRouter configuration, production hardening, and live chat/image verification when `NODE_ENV=production`.
 - Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
 - API smoke confirms temporary character creation/edit/view/favorite/duplicate/reset/delete and temporary lore create/edit/delete.
-- API smoke confirms `/relationship/presets` returns the full creator preset set and `/relationship/presets?surface=contract` returns only player-facing relationship contracts.
+- API smoke confirms `/relationship/presets` returns the full preset set, `/relationship/presets?surface=contract` returns only player-facing relationship contracts, and `/relationship/presets?surface=creator` keeps creator-only presets available for Creator Studio.
 - API smoke confirms chat menu mutations by renaming one seeded chat, archiving it, verifying the archived list, and restoring it back to active chats.
 - API smoke confirms admin prompt inspection returns redacted prompt snapshots, section accounting, and prompt diffs.
 - Image smoke confirms Creator Studio image generation is configured, and live opt-in confirms generated avatars do not fall back to placeholders.
@@ -296,6 +296,7 @@ Run one pass at 390x844 and one pass at 430x932, or the closest real devices ava
 
 - Open `/health` and confirm `ok=true`, `databaseConnected=true`, and the expected `avatarStorage`.
 - Open `/relationship/presets?surface=contract` and confirm it returns player-facing relationship contracts only. It should include `soulmate` and exclude creator-only presets such as `safe-family-bond`.
+- Open `/relationship/presets?surface=creator` and confirm it still includes creator-only presets such as `safe-family-bond` for Creator Studio.
 - Create a character as the owner.
 - Edit the character and confirm validation notes update.
 - Upload a PNG/WebP avatar and confirm it renders after refresh.

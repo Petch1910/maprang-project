@@ -18,7 +18,7 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 127 pass, 0 fail.
+- Backend tests: 128 pass, 0 fail.
 - API smoke: 26 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
@@ -40,10 +40,10 @@ Results:
 - Production readiness now blocks on both chat provider and image provider live verification flags.
 - Smoke doctor now reports separate staging blockers and production blockers; `--strict-staging` rejects local backend/CORS before provider verification.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
-- Relationship engine focused test passes for the expanded Thai ladder: 11 pass, 0 fail.
+- Relationship engine focused test passes for the expanded Thai ladder and preset surface split: 12 pass, 0 fail.
 - Current delta gate passes: `backend:check`, `frontend:check`, and `knowledge:audit`.
 - Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.
-- Relationship preset API smoke now verifies 24 creator presets and 19 player contract presets.
+- Relationship preset API smoke now verifies 24 full presets, 19 player contract presets, and 24 Creator Studio presets.
 
 ## Production Gate
 

@@ -69,16 +69,34 @@ describe('character quality relationship validation', () => {
 
 describe('relationship route endpoints', () => {
   test('filters relationship presets by surface', async () => {
-    const response = await characterRoutes.handle(new Request('http://localhost/relationship/presets?surface=contract'))
-    const body = (await response.json()) as {
+    const allResponse = await characterRoutes.handle(new Request('http://localhost/relationship/presets'))
+    const allBody = (await allResponse.json()) as {
+      presets: Array<{ id: string; surfaces: string[] }>
+    }
+    const contractResponse = await characterRoutes.handle(
+      new Request('http://localhost/relationship/presets?surface=contract'),
+    )
+    const contractBody = (await contractResponse.json()) as {
+      presets: Array<{ id: string; surfaces: string[] }>
+    }
+    const creatorResponse = await characterRoutes.handle(
+      new Request('http://localhost/relationship/presets?surface=creator'),
+    )
+    const creatorBody = (await creatorResponse.json()) as {
       presets: Array<{ id: string; surfaces: string[] }>
     }
 
-    expect(response.status).toBe(200)
-    expect(body.presets).toHaveLength(19)
-    expect(body.presets.every((preset) => preset.surfaces.includes('contract'))).toBe(true)
-    expect(body.presets.map((preset) => preset.id)).toContain('soulmate')
-    expect(body.presets.map((preset) => preset.id)).not.toContain('safe-family-bond')
+    expect(allResponse.status).toBe(200)
+    expect(contractResponse.status).toBe(200)
+    expect(creatorResponse.status).toBe(200)
+    expect(allBody.presets).toHaveLength(24)
+    expect(contractBody.presets).toHaveLength(19)
+    expect(creatorBody.presets).toHaveLength(24)
+    expect(contractBody.presets.every((preset) => preset.surfaces.includes('contract'))).toBe(true)
+    expect(creatorBody.presets.every((preset) => preset.surfaces.includes('creator'))).toBe(true)
+    expect(contractBody.presets.map((preset) => preset.id)).toContain('soulmate')
+    expect(contractBody.presets.map((preset) => preset.id)).not.toContain('safe-family-bond')
+    expect(creatorBody.presets.map((preset) => preset.id)).toContain('safe-family-bond')
   })
 
   test('validates relationship tags through HTTP route', async () => {

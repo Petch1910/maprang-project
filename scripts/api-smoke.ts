@@ -189,13 +189,17 @@ await check('GET/PATCH /me/persona', async () => {
 
 await check('GET /relationship/presets', async () => {
   const payload = await readJson<{ presets?: unknown[] }>('/relationship/presets')
-  if (!payload.presets?.length) throw new Error('no presets returned')
+  if (payload.presets?.length !== 24) throw new Error(`all presets expected 24, got ${payload.presets?.length ?? 0}`)
   const contractPayload = await readJson<{ presets?: Array<{ id?: string; surfaces?: string[] }> }>('/relationship/presets?surface=contract')
+  const creatorPayload = await readJson<{ presets?: Array<{ id?: string; surfaces?: string[] }> }>('/relationship/presets?surface=creator')
   if (contractPayload.presets?.length !== 19) throw new Error(`contract presets expected 19, got ${contractPayload.presets?.length ?? 0}`)
+  if (creatorPayload.presets?.length !== 24) throw new Error(`creator presets expected 24, got ${creatorPayload.presets?.length ?? 0}`)
   if (!contractPayload.presets.some((preset) => preset.id === 'soulmate')) throw new Error('contract presets missing soulmate')
   if (contractPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('contract presets include creator-only preset')
+  if (!creatorPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('creator presets missing safe-family-bond')
   if (!contractPayload.presets.every((preset) => preset.surfaces?.includes('contract'))) throw new Error('contract preset surface missing')
-  return `${payload.presets.length} presets, ${contractPayload.presets.length} contract`
+  if (!creatorPayload.presets.every((preset) => preset.surfaces?.includes('creator'))) throw new Error('creator preset surface missing')
+  return `${payload.presets.length} presets, ${contractPayload.presets.length} contract, ${creatorPayload.presets.length} creator`
 })
 
 await check('POST /relationship/preview', async () => {

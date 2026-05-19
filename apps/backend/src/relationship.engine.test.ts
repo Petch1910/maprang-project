@@ -4,6 +4,7 @@ import {
   applyRelationshipDelta,
   analyzeRelationshipTags,
   buildRelationshipSeedFromTags,
+  listRelationshipPresets,
   simulateRelationshipPreview,
   validateRelationshipTags,
 } from './relationship.engine'
@@ -190,5 +191,21 @@ describe('relationship preview simulator', () => {
       expect(preview.seed.tagProfile.engine.length + preview.seed.tagProfile.safety.length).toBeGreaterThan(0)
       expect(preview.turns.length).toBeGreaterThan(0)
     }
+  })
+
+  test('splits relationship presets by player contract and creator surfaces', () => {
+    const allPresets = listRelationshipPresets()
+    const contractPresets = listRelationshipPresets('contract')
+    const creatorPresets = listRelationshipPresets('creator')
+
+    expect(allPresets).toHaveLength(RELATIONSHIP_PRESETS.length)
+    expect(contractPresets).toHaveLength(19)
+    expect(creatorPresets).toHaveLength(RELATIONSHIP_PRESETS.length)
+
+    expect(contractPresets.every((preset) => preset.surfaces.includes('contract'))).toBe(true)
+    expect(creatorPresets.every((preset) => preset.surfaces.includes('creator'))).toBe(true)
+    expect(contractPresets.map((preset) => preset.id)).toContain('soulmate')
+    expect(contractPresets.map((preset) => preset.id)).not.toContain('safe-family-bond')
+    expect(creatorPresets.map((preset) => preset.id)).toContain('safe-family-bond')
   })
 })
