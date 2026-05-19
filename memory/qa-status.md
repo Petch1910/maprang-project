@@ -26,6 +26,7 @@ Results:
 - Frontend build: pass.
 - Bundle budget: pass.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
+- Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
 - Secrets check: pass.
 - Memory audit: pass.
 - Knowledge audit: pass.
