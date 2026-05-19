@@ -52,7 +52,7 @@ Required:
 
 ## Not Blockers
 
-- Local backend test suite currently passes: 128 pass, 0 fail.
+- Local backend test suite currently passes: 130 pass, 0 fail.
 - Local API smoke currently passes.
 - Frontend build and bundle budget currently pass.
 - Desktop/mobile e2e smoke currently passes.
