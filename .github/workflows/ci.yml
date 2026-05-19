@@ -23,6 +23,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun run predeploy:check
+      - run: bun run release:handoff:check
+      - run: bun run release:handoff:test
       - run: bun run deploy:readiness:test
       - run: bun run deploy:doctor:self-test
 

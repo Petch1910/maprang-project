@@ -537,6 +537,8 @@ const checks: Check[] = [
           'bun run memory:audit',
           'bun run knowledge:audit',
           'bun run eval:local',
+          'bun run release:handoff:check',
+          'bun run release:handoff:test',
           'bun run deploy:readiness:test',
         ],
         '.github/workflows/ci.yml',
