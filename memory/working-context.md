@@ -68,7 +68,7 @@ Verified:
 - Frontend bundle budget regression tests now cover main/chat chunk detection, split-route missing failures, oversized chunk reporting, human-readable KB formatting, and the importable bundle budget runner.
 - Frontend static audit regression tests now cover button type/accessible-name rules plus placeholder links, empty handlers, not-implemented errors, line-number reporting, and the importable static audit runner.
 - Frontend route audit regression tests now cover declared React Router paths, dynamic route matching, static link normalization, missing route detection for `to`, `href`, and `navigate`, and the importable route audit runner.
-- Route/menu doc-check regression tests now cover Markdown table parsing, route/menu/app/preload alignment, missing navigation coverage, empty field detection, and status label guards.
+- Route/menu doc-check regression tests now cover Markdown table parsing, route/menu/app/preload alignment, missing navigation coverage, empty field detection, status label guards, and the importable route/menu doc-check runner.
 - Smoke helper regression tests now cover local target defaults, deployed target auth behavior, explicit smoke user/token/admin headers, and JSON payload formatting.
 - Provider smoke guard regression tests now cover live chat minimum token thresholds, provider failure messaging, live image opt-in detection, and image provider failure hints before any verification flag can be set.
 - Deploy status regression tests now cover JSON readiness counts, text blocker output, and health failure reporting without calling a live backend.

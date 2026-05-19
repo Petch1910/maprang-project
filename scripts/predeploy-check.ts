@@ -809,8 +809,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.test.ts'),
-        ['passes when documented rows, routes, navigation, and preloads align', 'reports missing navigation coverage'],
+        ['passes when documented rows, routes, navigation, and preloads align', 'reports missing navigation coverage', 'runs the committed route/menu doc check through an importable runner'],
         'scripts/route-menu-doc-check.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/route-menu-doc-check.ts'),
+        ['collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
+        'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.test.ts'),

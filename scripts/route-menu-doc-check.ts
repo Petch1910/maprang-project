@@ -139,6 +139,11 @@ export type RouteMenuAuditCheckOptions = {
   statusLabel?: (status: RouteMenuAuditStatus) => string | undefined
 }
 
+export type RouteMenuDocCheckResult = {
+  auditedSurfaces: number
+  findings: string[]
+}
+
 export function auditRouteMenuDocumentation({
   markdown,
   appContent,
@@ -223,18 +228,31 @@ export function auditRouteMenuDocumentation({
   return findings
 }
 
-export async function runRouteMenuDocCheck() {
+export async function collectRouteMenuDocCheckResult(): Promise<RouteMenuDocCheckResult> {
   const markdown = await readFile(join(root, 'ROUTE_MENU_AUDIT.md'), 'utf8')
   const appContent = await readFile(join(root, 'apps/frontend/src/App.tsx'), 'utf8')
   const findings = auditRouteMenuDocumentation({ markdown, appContent })
 
-  if (findings.length > 0) {
-    console.error('Route/menu document check failed:')
-    for (const finding of findings) console.error(`- ${finding}`)
-    process.exit(1)
+  return {
+    auditedSurfaces: routeMenuAuditRows.length,
+    findings,
   }
-
-  console.log(`ok - route/menu document check passed (${routeMenuAuditRows.length} audited surfaces)`)
 }
 
-if (import.meta.main) await runRouteMenuDocCheck()
+export async function runRouteMenuDocCheck(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const result = await collectRouteMenuDocCheckResult()
+
+  if (result.findings.length > 0) {
+    writeError('Route/menu document check failed:')
+    for (const finding of result.findings) writeError(`- ${finding}`)
+    return 1
+  }
+
+  writeLine(`ok - route/menu document check passed (${result.auditedSurfaces} audited surfaces)`)
+  return 0
+}
+
+if (import.meta.main) process.exit(await runRouteMenuDocCheck())

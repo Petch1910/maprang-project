@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'bun:test'
 import type { RouteMenuAuditRow, RouteMenuAuditStatus } from '../apps/frontend/src/lib/routeMenuAudit.ts'
-import { auditRouteMenuDocumentation, collectAuditRows } from './route-menu-doc-check'
+import {
+  auditRouteMenuDocumentation,
+  collectAuditRows,
+  collectRouteMenuDocCheckResult,
+  runRouteMenuDocCheck,
+} from './route-menu-doc-check'
 
 function row(overrides: Partial<RouteMenuAuditRow> = {}): RouteMenuAuditRow {
   return {
@@ -93,5 +98,18 @@ describe('route menu doc check', () => {
         'routeMenuAuditStatusLabel("ready") is missing a user-facing label',
       ]),
     )
+  })
+
+  test('runs the committed route/menu doc check through an importable runner', async () => {
+    const result = await collectRouteMenuDocCheckResult()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runRouteMenuDocCheck((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(result.auditedSurfaces).toBeGreaterThan(0)
+    expect(result.findings).toEqual([])
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toContain('ok - route/menu document check passed')
+    expect(errors).toEqual([])
   })
 })
