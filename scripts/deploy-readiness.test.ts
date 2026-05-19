@@ -107,6 +107,9 @@ describe('deploy readiness evaluation', () => {
     expect(buildNextDeploySteps(readiness)).toContain(
       'Run `bun run production:check` one final time against the production backend and frontend domains.',
     )
+    expect(buildNextDeploySteps(readiness)).toContain(
+      'Fill `RELEASE_HANDOFF.md` with deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, and go/no-go notes.',
+    )
   })
 
   test('separates staging blockers from live provider verification blockers', () => {

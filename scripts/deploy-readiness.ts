@@ -223,7 +223,7 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
     steps.push('Rerun `bun run production:check` against the staging/production backend.')
   } else {
     steps.push('Run `bun run production:check` one final time against the production backend and frontend domains.')
-    steps.push('Record the release notes with backend URL, frontend URL, migration status, storage provider, and known limitations.')
+    steps.push('Fill `RELEASE_HANDOFF.md` with deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, and go/no-go notes.')
   }
 
   return steps

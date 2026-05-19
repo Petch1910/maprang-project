@@ -208,7 +208,7 @@ For the hard production gate, run `bun run production:check` with the same `SMOK
 
 Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless you intentionally want the automated persistence tests to create and archive test records there. Use those gates with local or staging databases.
 
-10. Complete manual QA from `DEPLOYMENT_QA.md`.
+10. Complete manual QA from `DEPLOYMENT_QA.md`, then fill `RELEASE_HANDOFF.md` with the deployed frontend/backend URLs, migration result, storage/auth/CORS posture, live smoke results, known limitations, and go/no-go decision.
 
 You can also run the manual GitHub Actions workflow `Production Smoke` after each deploy.
 Configure repository secrets `SMOKE_API_BASE_URL`, `SMOKE_ADMIN_API_KEY`, and either `SMOKE_ACCESS_TOKEN` or `SMOKE_USER_ID`.

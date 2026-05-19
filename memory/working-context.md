@@ -34,6 +34,7 @@ Verified:
 - Agent handoff docs are now available through `AGENTS.md` and canonical `agent.md`, and `predeploy:check` verifies the guide exists with required scope, continuation, minimum-check, commit/push, and operating sections.
 - Deploy readiness logic is shared by `smoke:doctor` and `deploy:status`, and covered by `deploy:readiness:test`, so current staging/production blockers and next steps can be printed without duplicating blocker rules.
 - CI runs deploy readiness self-test, and the manual Production Smoke workflow prints `deploy:status` before strict production checks.
+- `RELEASE_HANDOFF.md` is available as the no-secrets final release handoff template, and predeploy checks verify it stays documented.
 
 ## Current Production Status
 

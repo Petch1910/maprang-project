@@ -14,6 +14,7 @@ const requiredFiles = [
   'DEPLOY_RENDER.md',
   'DEPLOYMENT_QA.md',
   'PRODUCTION_SETUP.md',
+  'RELEASE_HANDOFF.md',
   'ROUTE_MENU_AUDIT.md',
   'SECURITY_CHECKLIST.md',
   'STAGING_RUNBOOK.md',
@@ -202,6 +203,7 @@ const checks: Check[] = [
           'bun run supabase:storage:setup',
           'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY',
           'private bucket with `SUPABASE_STORAGE_ACCESS=signed`',
+          'RELEASE_HANDOFF.md',
           '/ready',
         ],
         'PRODUCTION_SETUP.md',
@@ -218,6 +220,30 @@ const checks: Check[] = [
         ],
         'DEPLOY_RENDER.md',
       )
+    },
+  },
+  {
+    name: 'release handoff template is available',
+    run: async () => {
+      const handoff = await readRepoFile('RELEASE_HANDOFF.md')
+      const readme = await readRepoFile('README.md')
+      requireIncludes(
+        handoff,
+        [
+          'Release Handoff Template',
+          'Do not paste secrets',
+          'Deployed URLs',
+          'Database And Migrations',
+          'Auth, Storage, And CORS',
+          'AI Provider Verification',
+          'QA Gates',
+          'Admin Checks',
+          'Known Limitations',
+          'Release Decision',
+        ],
+        'RELEASE_HANDOFF.md',
+      )
+      requireIncludes(readme, ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users'], 'README.md')
     },
   },
   {
@@ -414,7 +440,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployReadiness,
-        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'chat provider live smoke is not marked verified'],
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'chat provider live smoke is not marked verified', 'RELEASE_HANDOFF.md'],
         'scripts/deploy-readiness.ts',
       )
       requireIncludes(
