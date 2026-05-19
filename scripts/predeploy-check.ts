@@ -1059,8 +1059,8 @@ const checks: Check[] = [
         ],
         'STAGING_RUNBOOK.md',
       )
-      requireIncludes(readme, ['local/non-https CORS'], 'README.md')
-      requireIncludes(deploymentQa, ['local/non-https CORS'], 'DEPLOYMENT_QA.md')
+      requireIncludes(readme, ['local/non-https CORS', 'backend root identity'], 'README.md')
+      requireIncludes(deploymentQa, ['local/non-https CORS', 'backend root identity'], 'DEPLOYMENT_QA.md')
       requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS is local or non-https', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
       requireIncludes(
         await readRepoFile('DEPLOY_RENDER.md'),
