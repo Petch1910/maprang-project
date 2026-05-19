@@ -74,6 +74,7 @@ Verified:
 - Readiness smoke regression tests now cover `/ready` summary output, failure visibility, and readiness status fallback without calling a live backend.
 - Memory/knowledge vault audits now share Markdown link/include helpers, with regression tests for required snippets, local link collection, and vault-boundary checks.
 - Backend DB check planning is covered by `backend:check:db:test`, ensuring DB availability is checked before backend tests run with `REQUIRE_DB_TESTS=true`.
+- Supabase signed-storage setup now exports testable helpers for env loading, config validation, signed URL normalization, and object path encoding; `supabase:storage:test` covers them without hitting Supabase.
 
 ## Current Production Status
 

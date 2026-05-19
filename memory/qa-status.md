@@ -56,6 +56,7 @@ Results:
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output.
 - `vault:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard shared memory/knowledge Markdown audit helpers.
 - `backend:check:db:test` now runs in `qa:local`, CI, and Production Smoke to guard DB-required backend check command planning.
+- `supabase:storage:test` now runs in `qa:local`, CI, and Production Smoke to guard signed-storage setup helpers without calling Supabase.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.
