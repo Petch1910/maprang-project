@@ -84,6 +84,20 @@ bun run memory:audit
 `memory:audit` checks required memory files, local Markdown links, provider verification notes, and common secret-shaped
 values. It also runs inside `qa:local`.
 
+## Deploy Status
+
+Use this before staging handoff when you want the current blockers and next actions in one place:
+
+```bash
+bun run deploy:status
+```
+
+Use JSON mode for CI logs or dashboards:
+
+```bash
+bun scripts/deploy-status.ts --json
+```
+
 ## Knowledge Layer
 
 Runtime product knowledge lives in [`knowledge/README.md`](./knowledge/README.md). This is separate from session memory:

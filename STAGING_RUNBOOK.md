@@ -63,6 +63,7 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 ก่อนรัน `production:check` ให้เครื่องหรือ CI ที่รัน smoke มี `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET=avatars`, `SUPABASE_STORAGE_ACCESS=signed`, และ `SUPABASE_SIGNED_URL_EXPIRES_IN=3600` เพื่อให้ตรวจ bucket จริงได้
 
 ```bash
+bun run deploy:status
 SMOKE_API_BASE_URL=https://<backend-staging-domain> bun run smoke:doctor
 SMOKE_API_BASE_URL=https://<backend-staging-domain> bun run smoke:ready
 SMOKE_API_BASE_URL=https://<backend-staging-domain> SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify

@@ -11,6 +11,7 @@ Commands verified:
 - `bun run e2e:smoke`
 - `bunx prisma migrate deploy`
 - `bun run predeploy:check`
+- `bun run deploy:status`
 - `bun run memory:audit`
 - `bun run knowledge:audit`
 - `bun run eval:local`
@@ -28,6 +29,7 @@ Results:
 - Knowledge audit: pass.
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
+- Deploy status: pass, reports 2 staging blockers and 4 production blockers in local mode.
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - API smoke now covers admin-only prompt inspector snapshots, prompt diffs, and deterministic local evals.
 - Route/menu audit now covers 14 surfaces including `/admin/prompt-inspector` and `/admin/evals`.

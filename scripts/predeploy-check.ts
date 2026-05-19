@@ -41,6 +41,8 @@ const requiredFiles = [
   'apps/frontend/Dockerfile',
   'scripts/deploy-env-doctor.ts',
   'scripts/deploy-env-doctor-self-test.ts',
+  'scripts/deploy-readiness.ts',
+  'scripts/deploy-status.ts',
   'scripts/eval-local.ts',
   'scripts/knowledge-audit.ts',
   'scripts/memory-audit.ts',
@@ -235,6 +237,7 @@ const checks: Check[] = [
           '"security:audit"',
           '"api:smoke"',
           '"api:smoke:live"',
+          '"deploy:status"',
           '"deploy:doctor"',
           '"deploy:doctor:self-test"',
           '"qa:seed"',
@@ -385,6 +388,33 @@ const checks: Check[] = [
       if (!packageJson.scripts?.['staging:verify']?.includes('bun scripts/smoke-doctor.ts --strict-staging')) {
         throw new Error('package.json staging:verify must run smoke-doctor in strict staging mode')
       }
+    },
+  },
+  {
+    name: 'deploy status shares readiness logic',
+    run: async () => {
+      const packageJson = await readRepoFile('package.json')
+      const smokeDoctor = await readRepoFile('scripts/smoke-doctor.ts')
+      const deployStatus = await readRepoFile('scripts/deploy-status.ts')
+      const deployReadiness = await readRepoFile('scripts/deploy-readiness.ts')
+      const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+      requireIncludes(packageJson, ['"deploy:status"', 'bun scripts/deploy-status.ts'], 'package.json')
+      requireIncludes(
+        smokeDoctor,
+        ['evaluateDeployReadiness', 'buildHealthRows', 'healthFailures'],
+        'scripts/smoke-doctor.ts',
+      )
+      requireIncludes(
+        deployStatus,
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', '--json', 'Maprang Deploy Status'],
+        'scripts/deploy-status.ts',
+      )
+      requireIncludes(
+        deployReadiness,
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'chat provider live smoke is not marked verified'],
+        'scripts/deploy-readiness.ts',
+      )
+      requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json'], 'DEPLOYMENT_QA.md')
     },
   },
   {

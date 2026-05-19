@@ -17,6 +17,7 @@
     "api:smoke": "bun scripts/api-smoke.ts",
     "api:smoke:live": "bun scripts/api-smoke.ts --live --require-live-image",
     "predeploy:check": "bun scripts/predeploy-check.ts",
+    "deploy:status": "bun scripts/deploy-status.ts",
     "deploy:doctor": "bun scripts/deploy-env-doctor.ts",
     "deploy:doctor:self-test": "bun scripts/deploy-env-doctor-self-test.ts",
     "secrets:check": "bun scripts/check-secrets.ts",

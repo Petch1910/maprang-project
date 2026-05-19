@@ -28,6 +28,18 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 
 For early staging only, add `--allow-unverified-image` until the live image smoke passes and `IMAGE_GENERATION_LIVE_VERIFIED=1` is set.
 
+To summarize the current backend deploy readiness and next steps without failing on expected staging/provider blockers:
+
+```bash
+bun run deploy:status
+```
+
+For CI logs or dashboards that need structured output:
+
+```bash
+bun scripts/deploy-status.ts --json
+```
+
 To seed repeatable browser QA data and run the Playwright end-to-end smoke over desktop and mobile viewports:
 
 ```bash

@@ -11,6 +11,7 @@ Status: blocked until staging/production hosting exists
 Current issue:
 - Smoke environment still points at local backend/frontend URLs.
 - Latest local smoke doctor reports 2 staging blockers: backend URL is local, and CORS is empty or local.
+- `bun run deploy:status` now prints the same blockers plus ordered next steps without failing the local handoff.
 
 Required:
 - Set deployed backend URL for `SMOKE_API_BASE_URL`.
