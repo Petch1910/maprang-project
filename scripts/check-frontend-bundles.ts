@@ -75,21 +75,26 @@ export async function readFrontendBundleSizes(dir = assetsDir) {
   )
 }
 
-export async function runFrontendBundleCheck() {
-  const sizes = await readFrontendBundleSizes()
+export async function runFrontendBundleCheck(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+  readSizes: () => Promise<BundleSize[]> = readFrontendBundleSizes,
+) {
+  const sizes = await readSizes()
   const result = evaluateFrontendBundleBudgets(sizes)
 
-  console.log('Frontend bundle budget:')
-  console.log(`- main index: ${result.mainIndex ? formatKb(result.mainIndex.bytes) : 'missing'} / ${budgets.mainIndexKb}KB`)
-  console.log(`- chat route: ${result.chatRoom ? formatKb(result.chatRoom.bytes) : 'missing'} / ${budgets.chatRoomKb}KB`)
-  console.log(`- largest chunks: ${result.largest.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`)
+  writeLine('Frontend bundle budget:')
+  writeLine(`- main index: ${result.mainIndex ? formatKb(result.mainIndex.bytes) : 'missing'} / ${budgets.mainIndexKb}KB`)
+  writeLine(`- chat route: ${result.chatRoom ? formatKb(result.chatRoom.bytes) : 'missing'} / ${budgets.chatRoomKb}KB`)
+  writeLine(`- largest chunks: ${result.largest.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`)
 
   if (result.failures.length > 0) {
-    for (const failure of result.failures) console.error(`fail - ${failure}`)
-    process.exit(1)
+    for (const failure of result.failures) writeError(`fail - ${failure}`)
+    return 1
   }
 
-  console.log('ok - frontend bundle budget passed')
+  writeLine('ok - frontend bundle budget passed')
+  return 0
 }
 
-if (import.meta.main) await runFrontendBundleCheck()
+if (import.meta.main) process.exit(await runFrontendBundleCheck())

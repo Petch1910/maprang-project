@@ -779,8 +779,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/check-frontend-bundles.test.ts'),
-        ['passes when main, chat, and lazy chunks stay under budget', 'reports missing split chunks'],
+        ['passes when main, chat, and lazy chunks stay under budget', 'reports missing split chunks', 'runs the bundle budget checker through an importable runner'],
         'scripts/check-frontend-bundles.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/check-frontend-bundles.ts'),
+        ['runFrontendBundleCheck', 'writeLine', 'writeError', 'if (import.meta.main) process.exit(await runFrontendBundleCheck())'],
+        'scripts/check-frontend-bundles.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.test.ts'),

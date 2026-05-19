@@ -47,7 +47,7 @@ Results:
 - API smoke with `--require-admin` now passes 31 checks plus 1 local live-chat skip, including uncharged chat validation, non-mutating chat delete/report creation, admin wallet, and admin report PATCH/action validation.
 - `api:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard route discovery, coverage-map regressions, and the importable route audit runner.
 - `api:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard API smoke readiness/image helper regressions without calling a backend.
-- `frontend:bundle:test` now runs in `qa:local`, CI, and Production Smoke to guard code-splitting and bundle budget regressions.
+- `frontend:bundle:test` now runs in `qa:local`, CI, and Production Smoke to guard code-splitting, bundle budget regressions, and the importable bundle budget runner.
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility and placeholder-copy regressions.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link and navigate route regressions.
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document and runtime row alignment.

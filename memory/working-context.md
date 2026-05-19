@@ -65,7 +65,7 @@ Verified:
 - API smoke now covers the uncharged `POST /chat` validation path before the live-provider-only chat smoke.
 - API smoke now covers non-mutating delete-chat validation so the delete route is exercised without removing real chats.
 - API route audit regression tests now cover route discovery, missing/stale/empty coverage entries, and the importable route audit runner, and run in local QA, CI, and Production Smoke.
-- Frontend bundle budget regression tests now cover main/chat chunk detection, split-route missing failures, oversized chunk reporting, and human-readable KB formatting.
+- Frontend bundle budget regression tests now cover main/chat chunk detection, split-route missing failures, oversized chunk reporting, human-readable KB formatting, and the importable bundle budget runner.
 - Frontend static audit regression tests now cover button type/accessible-name rules plus placeholder links, empty handlers, not-implemented errors, and line-number reporting.
 - Frontend route audit regression tests now cover declared React Router paths, dynamic route matching, static link normalization, and missing route detection for `to`, `href`, and `navigate`.
 - Route/menu doc-check regression tests now cover Markdown table parsing, route/menu/app/preload alignment, missing navigation coverage, empty field detection, and status label guards.
