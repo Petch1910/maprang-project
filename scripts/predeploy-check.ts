@@ -67,6 +67,7 @@ const requiredFiles = [
   'scripts/smoke-doctor.test.ts',
   'scripts/readiness-smoke.test.ts',
   'scripts/image-smoke.test.ts',
+  'scripts/live-chat-smoke.test.ts',
   'scripts/local-smoke.test.ts',
   'scripts/e2e-smoke.test.ts',
   'scripts/check-secrets.test.ts',
@@ -325,6 +326,7 @@ const checks: Check[] = [
           '"smoke:doctor:test"',
           '"smoke:ready:test"',
           '"smoke:image:test"',
+          '"smoke:chat:test"',
           '"smoke:local:test"',
           '"e2e:smoke:test"',
           '"api:smoke"',
@@ -409,6 +411,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('smoke:image:test')) {
         throw new Error('package.json qa:local must run smoke:image:test so image smoke fallback regressions are caught')
+      }
+      if (!qaLocal.includes('smoke:chat:test')) {
+        throw new Error('package.json qa:local must run smoke:chat:test so live chat smoke validation regressions are caught')
       }
       if (!qaLocal.includes('smoke:local:test')) {
         throw new Error('package.json qa:local must run smoke:local:test so local smoke helper regressions are caught')
@@ -659,6 +664,8 @@ const checks: Check[] = [
           'readiness-smoke.test.ts',
           '"smoke:image:test"',
           'image-smoke.test.ts',
+          '"smoke:chat:test"',
+          'live-chat-smoke.test.ts',
           '"smoke:local:test"',
           'local-smoke.test.ts',
         ],
@@ -830,6 +837,7 @@ const checks: Check[] = [
           'bun run smoke:doctor:test',
           'bun run smoke:ready:test',
           'bun run smoke:image:test',
+          'bun run smoke:chat:test',
           'bun run smoke:local:test',
           'bun run e2e:smoke:test',
           'bun run backend:check:db:test',
@@ -875,6 +883,7 @@ const checks: Check[] = [
           'bun run smoke:doctor:test',
           'bun run smoke:ready:test',
           'bun run smoke:image:test',
+          'bun run smoke:chat:test',
           'bun run smoke:local:test',
           'bun run e2e:smoke:test',
           'bun run backend:check:db:test',

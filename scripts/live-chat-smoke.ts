@@ -2,6 +2,34 @@ import { apiBaseUrl, readJson, smokeAuthHeaders } from './smoke-helpers'
 
 type ProviderFailure = { code?: string; retryable?: boolean; userMessage?: string }
 
+export type LiveChatSmokeHealthPayload = {
+  ok: boolean
+  checks: { databaseConnected: boolean; openRouterConfigured: boolean }
+  model?: { name: string; minRoleplayReplyChars?: number }
+}
+
+export type LiveChatSmokeCharacter = {
+  id: string
+  name: string
+}
+
+export type LiveChatSmokeResponse = {
+  reply?: string
+  chatId?: string | null
+  usage?: {
+    totalTokens?: number
+    modelName?: string
+    providerFailure?: ProviderFailure
+  }
+}
+
+export type LiveChatWalletTransaction = {
+  id: string
+  type: string
+  amount: number
+  balanceAfter: number
+}
+
 export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000') {
   const value = Number(rawValue)
 
@@ -18,14 +46,90 @@ export function providerFailureIssue(failure: ProviderFailure) {
   return `Live chat reached the backend, but the AI provider returned ${failure.code ?? 'unknown'}.${retry}${userMessage} Check outbound network access to OpenRouter, OPENROUTER_API_KEY, provider credits/quota, rate limits, model access, and backend logs before setting CHAT_PROVIDER_LIVE_VERIFIED=1.`
 }
 
+export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[]) {
+  return (
+    characters.find((character) => character.name.includes('MIKA')) ??
+    characters.find((character) => character.name === 'Maprang') ??
+    characters[0] ??
+    null
+  )
+}
+
+export function assertSmokeUserHasTokenBalance(tokenBalance: number, minSmokeTokenBalance: number) {
+  if (tokenBalance < minSmokeTokenBalance) {
+    throw new Error(
+      `Smoke user has ${tokenBalance} tokens, below SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance}. Top up the smoke user before running live chat smoke.`,
+    )
+  }
+}
+
+export function validateLiveChatSmokeResponse(chat: LiveChatSmokeResponse, minRoleplayReplyChars: number) {
+  if (chat.usage?.providerFailure) {
+    throw new Error(providerFailureIssue(chat.usage.providerFailure))
+  }
+
+  if (!chat.reply) {
+    throw new Error('Live chat did not return an AI reply: empty reply')
+  }
+
+  if (!chat.chatId) throw new Error('Live chat did not create a chat id')
+  if (!chat.usage?.totalTokens) throw new Error('Live chat did not return token usage')
+  if (chat.reply.length < minRoleplayReplyChars) {
+    throw new Error(`Live chat reply is too short for roleplay QA. Expected at least ${minRoleplayReplyChars} characters. Reply: ${chat.reply}`)
+  }
+
+  return {
+    chatId: chat.chatId,
+    modelName: chat.usage.modelName ?? null,
+    reply: chat.reply,
+    replyChars: chat.reply.length,
+    totalTokens: chat.usage.totalTokens,
+  }
+}
+
+export function findMatchingChatDebit(transactions: LiveChatWalletTransaction[] | undefined, totalTokens: number) {
+  return transactions?.find((transaction) => transaction.type === 'CHAT_USAGE' && transaction.amount === -totalTokens) ?? null
+}
+
+export function buildLiveChatSmokePayload({
+  baseUrl = apiBaseUrl,
+  characterName,
+  chatId,
+  model,
+  totalTokens,
+  chatDebit,
+  reply,
+  minRoleplayReplyChars,
+}: {
+  baseUrl?: string
+  characterName: string
+  chatId: string
+  model: string | null
+  totalTokens: number
+  chatDebit: LiveChatWalletTransaction
+  reply: string
+  minRoleplayReplyChars: number
+}) {
+  return {
+    ok: true,
+    apiBaseUrl: baseUrl,
+    character: characterName,
+    chatId,
+    model,
+    totalTokens,
+    walletTransactionId: chatDebit.id,
+    balanceAfter: chatDebit.balanceAfter,
+    replyChars: reply.length,
+    minRoleplayReplyChars,
+    nextStep: 'Set CHAT_PROVIDER_LIVE_VERIFIED=1 in this target environment, then rerun production:check.',
+    replyPreview: reply.slice(0, 120),
+  }
+}
+
 export async function runLiveChatSmoke() {
   const minSmokeTokenBalance = parseMinSmokeTokenBalance()
 
-  const health = await readJson<{
-    ok: boolean
-    checks: { databaseConnected: boolean; openRouterConfigured: boolean }
-    model?: { name: string; minRoleplayReplyChars?: number }
-  }>('/health')
+  const health = await readJson<LiveChatSmokeHealthPayload>('/health')
   const minRoleplayReplyChars = Math.max(320, health.model?.minRoleplayReplyChars ?? 320)
 
   if (!health.ok || !health.checks.databaseConnected) {
@@ -37,15 +141,12 @@ export async function runLiveChatSmoke() {
   }
 
   const characters = await readJson<{
-    characters?: Array<{ id: string; name: string }>
+    characters?: LiveChatSmokeCharacter[]
   }>('/characters?view=admin&limit=10', {
     headers: smokeAuthHeaders(),
   })
 
-  const smokeCharacter =
-    characters.characters?.find((character) => character.name.includes('MIKA')) ??
-    characters.characters?.find((character) => character.name === 'Maprang') ??
-    characters.characters?.[0]
+  const smokeCharacter = selectLiveChatSmokeCharacter(characters.characters ?? [])
   if (!smokeCharacter) throw new Error('Seeded smoke character was not found')
 
   const walletBefore = await readJson<{
@@ -54,21 +155,9 @@ export async function runLiveChatSmoke() {
     headers: smokeAuthHeaders(),
   })
 
-  if (walletBefore.user.tokenBalance < minSmokeTokenBalance) {
-    throw new Error(
-      `Smoke user has ${walletBefore.user.tokenBalance} tokens, below SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance}. Top up the smoke user before running live chat smoke.`,
-    )
-  }
+  assertSmokeUserHasTokenBalance(walletBefore.user.tokenBalance, minSmokeTokenBalance)
 
-  const chat = await readJson<{
-    reply?: string
-    chatId?: string | null
-    usage?: {
-      totalTokens?: number
-      modelName?: string
-      providerFailure?: ProviderFailure
-    }
-  }>('/chat', {
+  const chat = await readJson<LiveChatSmokeResponse>('/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -83,37 +172,17 @@ export async function runLiveChatSmoke() {
         'I sit across from you, set a cup of tea near your hand, and softly ask what has been weighing on you today. Reply as an atmospheric roleplay scene with feeling, pacing, and room for me to answer.',
     }),
   })
-
-  if (!chat.reply) {
-    throw new Error('Live chat did not return an AI reply: empty reply')
-  }
-
-  if (chat.usage?.providerFailure) {
-    throw new Error(providerFailureIssue(chat.usage.providerFailure))
-  }
-
-  if (!chat.chatId) throw new Error('Live chat did not create a chat id')
-  if (!chat.usage?.totalTokens) throw new Error('Live chat did not return token usage')
-  if (chat.reply.length < minRoleplayReplyChars) {
-    throw new Error(`Live chat reply is too short for roleplay QA. Expected at least ${minRoleplayReplyChars} characters. Reply: ${chat.reply}`)
-  }
+  const chatResult = validateLiveChatSmokeResponse(chat, minRoleplayReplyChars)
 
   const walletAfter = await readJson<{
     wallet?: {
-      transactions?: Array<{
-        id: string
-        type: string
-        amount: number
-        balanceAfter: number
-      }>
+      transactions?: LiveChatWalletTransaction[]
     }
   }>('/me/usage', {
     headers: smokeAuthHeaders(),
   })
 
-  const chatDebit = walletAfter.wallet?.transactions?.find(
-    (transaction) => transaction.type === 'CHAT_USAGE' && transaction.amount === -chat.usage!.totalTokens,
-  )
+  const chatDebit = findMatchingChatDebit(walletAfter.wallet?.transactions, chatResult.totalTokens)
 
   if (!chatDebit) {
     throw new Error('Live chat returned token usage, but no matching CHAT_USAGE wallet transaction was found')
@@ -121,20 +190,16 @@ export async function runLiveChatSmoke() {
 
   console.log(
     JSON.stringify(
-      {
-        ok: true,
-        apiBaseUrl,
-        character: smokeCharacter.name,
-        chatId: chat.chatId,
-        model: chat.usage.modelName ?? health.model?.name ?? null,
-        totalTokens: chat.usage.totalTokens,
-        walletTransactionId: chatDebit.id,
-        balanceAfter: chatDebit.balanceAfter,
-        replyChars: chat.reply.length,
+      buildLiveChatSmokePayload({
+        baseUrl: apiBaseUrl,
+        characterName: smokeCharacter.name,
+        chatId: chatResult.chatId,
+        model: chatResult.modelName ?? health.model?.name ?? null,
+        totalTokens: chatResult.totalTokens,
+        chatDebit,
+        reply: chatResult.reply,
         minRoleplayReplyChars,
-        nextStep: 'Set CHAT_PROVIDER_LIVE_VERIFIED=1 in this target environment, then rerun production:check.',
-        replyPreview: chat.reply.slice(0, 120),
-      },
+      }),
       null,
       2,
     ),
