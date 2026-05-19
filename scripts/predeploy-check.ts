@@ -80,7 +80,7 @@ const checks: Check[] = [
         [
           'agent.md',
           'Scope',
-          'When The User Says "ทำต่อ"',
+          'Continue Requests',
           'memory/working-context.md',
           'memory/deploy-blockers.md',
           'Minimum Checks',

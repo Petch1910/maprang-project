@@ -16,9 +16,9 @@ Quick start:
 4. Run the relevant QA gate before committing.
 5. Update memory, knowledge, or docs when system status changes.
 
-## When The User Says "ทำต่อ"
+## Continue Requests
 
-Start from `memory/working-context.md`, then `memory/deploy-blockers.md`, then pick the highest-priority local task that can be completed without real staging credentials. If a blocker requires external services, make the blocker explicit and close the next repo-owned task instead.
+When the user asks to continue, start from `memory/working-context.md`, then `memory/deploy-blockers.md`, then pick the highest-priority local task that can be completed without real staging credentials. If a blocker requires external services, make the blocker explicit and close the next repo-owned task instead.
 
 ## Minimum Checks
 
