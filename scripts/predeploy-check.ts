@@ -660,7 +660,7 @@ const checks: Check[] = [
         ],
         'DEPLOYMENT_QA.md',
       )
-      requireIncludes(routeMenuAudit, ['Relationship Contract', 'relationship_seed'], 'apps/frontend/src/lib/routeMenuAudit.ts')
+      requireIncludes(routeMenuAudit, ['สัญญาความสัมพันธ์', 'relationship_seed'], 'apps/frontend/src/lib/routeMenuAudit.ts')
       requireIncludes(e2eSmoke, ['character-seed-rival', 'relationship_seed=rival'], 'tests/e2e/maprang-smoke.spec.ts')
     },
   },

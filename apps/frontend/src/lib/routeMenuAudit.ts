@@ -23,7 +23,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
   {
     area: 'หน้าโปรไฟล์ตัวละคร',
     route: '/characters/:characterId',
-    control: 'สัญญาความสัมพันธ์ (Relationship Contract), เริ่มแชท, คัดลอกลิงก์, รายงาน',
+    control: 'สัญญาความสัมพันธ์, เริ่มแชท, คัดลอกลิงก์, รายงาน',
     result: 'เลือก seed แล้วปุ่มเริ่มแชทพาไป /chat พร้อม relationship_seed, รายงานเปิด dialog',
     disabledReason: 'ปุ่มรายงาน disabled ระหว่างส่งรายงานหรือยังไม่มีข้อมูลตัวละคร',
     emptyState: 'ถ้าไม่พบตัวละครจะแสดง note โหลด/ผิดพลาดแทนหน้าว่าง',
@@ -133,9 +133,9 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     status: 'guarded',
   },
   {
-    area: 'Staging จริง',
-    route: 'external staging domain',
-    control: 'Supabase จริง, Render/Railway backend, frontend domain, CORS จริง, e2e smoke',
+    area: 'สเตจจิงจริง',
+    route: 'โดเมน staging จริง',
+    control: 'Supabase จริง, backend บน Render/Railway, frontend domain, CORS จริง, e2e smoke',
     result: 'ต้อง deploy staging ก่อน production และรัน migration/smoke กับ DB staging จริง',
     disabledReason: 'ยังไม่ใช่ปุ่มใน local app เพราะต้องใช้บัญชีและ domain จริง',
     emptyState: 'ใช้ STAGING_RUNBOOK.md และ checklist ใน /admin/health เป็นตัวบอกงานที่ค้าง',
