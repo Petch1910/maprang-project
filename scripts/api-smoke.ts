@@ -667,6 +667,18 @@ if (adminHeaders) {
     return `users=${payload.totals.users}, characters=${payload.totals.characters ?? 0}`
   })
 
+  await check('PATCH /admin/users/:id/tokens validation', async () => {
+    const payload = await readExpectedError('/admin/users/not-a-uuid/tokens', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...adminHeaders },
+      body: JSON.stringify({ amount: 1, reason: 'non-mutating smoke validation' }),
+    })
+    if (payload.status !== 400 || payload.payload.error !== 'invalid_user_id') {
+      throw new Error(`expected invalid_user_id 400, got ${payload.status} ${payload.payload.error ?? 'unknown'}`)
+    }
+    return 'invalid admin wallet user id rejected before mutation'
+  })
+
   await check('POST /admin/prompt-inspector', async () => {
     const payload = await readJson<{
       snapshot?: {
@@ -753,6 +765,7 @@ if (adminHeaders) {
   const status: ApiSmokeStatus = requireAdmin ? 'fail' : 'skip'
   const detail = 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available'
   record('GET /admin/summary', status, detail)
+  record('PATCH /admin/users/:id/tokens validation', status, detail)
   record('POST /admin/prompt-inspector', status, detail)
   record('GET /admin/evals/local', status, detail)
   record('GET /admin/reports', status, detail)

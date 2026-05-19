@@ -246,7 +246,7 @@ Set repository secrets `SMOKE_API_BASE_URL`, `SMOKE_ADMIN_API_KEY`, and either `
 The workflow rejects local or non-https backend URLs and requires signed Supabase storage smoke secrets before it reaches provider-spending steps.
 It also runs `bun run predeploy:check`, secrets/secret-pattern/memory/knowledge/eval/security/API/menu audits, `bun run release:handoff:check`, and `bun run release:handoff:test` before validating smoke configuration, so repository drift is caught before provider or storage checks.
 It prints `bun run deploy:status` before the strict production doctor so the workflow log shows blocker details and next steps in one place.
-Admin summary, moderation reports, non-mutating admin report validation, and audit logs are verified on every workflow run through `SMOKE_ADMIN_API_KEY`. The optional `run_chat` input also verifies the live AI provider path and uses provider credits. The workflow input `min_token_balance_for_chat` maps to `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` and defaults to `1000`.
+Admin summary, non-mutating wallet token validation, moderation reports, non-mutating admin report validation, and audit logs are verified on every workflow run through `SMOKE_ADMIN_API_KEY`. The optional `run_chat` input also verifies the live AI provider path and uses provider credits. The workflow input `min_token_balance_for_chat` maps to `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` and defaults to `1000`.
 The optional `run_image` input verifies the live image provider path and uses image provider credits.
 When `run_chat` and `run_image` are both enabled, the workflow uses one combined `api:smoke:live` pass so chat and image are checked together without duplicate provider calls.
 

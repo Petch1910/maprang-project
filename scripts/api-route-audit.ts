@@ -253,8 +253,8 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
   'PATCH /admin/users/:id/tokens': {
     owner: 'wallet/admin',
-    coverage: ['backend-test'],
-    note: 'wallet/admin tests cover bounded adjustments and ledger records without spending production smoke data',
+    coverage: ['admin-smoke', 'backend-test'],
+    note: 'api-smoke --require-admin verifies non-mutating invalid-id guard; wallet/admin tests cover bounded adjustments and ledger records without spending production smoke data',
   },
   'GET /admin/audit-logs': {
     owner: 'admin',
