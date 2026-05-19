@@ -48,7 +48,7 @@ IMAGE_GENERATION_SIZE=1024x1536
 IMAGE_GENERATION_QUALITY=medium
 IMAGE_GENERATION_OUTPUT_FORMAT=webp
 IMAGE_GENERATION_OUTPUT_COMPRESSION=85
-CORS_ORIGINS=<frontend-url>
+CORS_ORIGINS=https://<frontend-domain>
 ADMIN_API_KEY=<long-random-admin-key>
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_JWT_ISSUER=https://<project-ref>.supabase.co/auth/v1
@@ -61,6 +61,8 @@ SUPABASE_SIGNED_URL_EXPIRES_IN=3600
 ```
 
 Do not set `PORT` unless Render asks for it. Render injects `PORT`.
+
+`CORS_ORIGINS` must be the deployed frontend HTTPS origin only. Do not include localhost, `http://` origins, wildcard origins, or the backend URL in staging or production.
 
 After the backend deploys, run migrations from a local terminal with production env loaded, or from a Render shell:
 
@@ -84,12 +86,12 @@ Settings:
 Frontend environment:
 
 ```bash
-VITE_API_BASE_URL=<backend-url>
+VITE_API_BASE_URL=https://<backend-domain>
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY=<supabase-anon-key>
 ```
 
-After the frontend URL is known, update backend `CORS_ORIGINS` to exactly that origin.
+After the frontend URL is known, update backend `CORS_ORIGINS` to exactly that HTTPS origin.
 
 ## 4. Supabase Storage
 
@@ -105,8 +107,8 @@ Backend will return stable URLs under `/uploads/avatars/<filename>` and redirect
 Use a real Supabase access token or a known UUID user id:
 
 ```bash
-SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local
-SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
+SMOKE_API_BASE_URL=https://<backend-domain> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local
+SMOKE_API_BASE_URL=https://<backend-domain> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
 Before `smoke:chat` calls OpenRouter, it verifies the smoke user has at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`. Top up that user through the admin wallet flow before running live production smoke. If you smoke with `SMOKE_USER_ID` instead of a real Supabase token, set `SMOKE_ADMIN_API_KEY` too.

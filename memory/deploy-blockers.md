@@ -19,6 +19,9 @@ Required:
 - Set real HTTPS frontend domain in backend `CORS_ORIGINS`.
 - Run `bun run staging:verify` with `SMOKE_API_BASE_URL` and `SMOKE_ADMIN_API_KEY` after staging domains exist.
 
+Repo guard:
+- `DEPLOY_RENDER.md` now documents HTTPS-only Render backend/frontend placeholders and forbids localhost, `http://`, wildcard origins, or the backend URL in `CORS_ORIGINS`; `bun run predeploy:check` enforces this wording.
+
 ### Chat provider live verification
 
 Status: needs verification

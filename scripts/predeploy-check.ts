@@ -223,6 +223,9 @@ const checks: Check[] = [
           'SUPABASE_STORAGE_ACCESS=signed',
           'IMAGE_GENERATION_API_KEY',
           'imageGenerationConfigured=true',
+          'CORS_ORIGINS=https://<frontend-domain>',
+          'Do not include localhost, `http://` origins, wildcard origins, or the backend URL',
+          'VITE_API_BASE_URL=https://<backend-domain>',
         ],
         'DEPLOY_RENDER.md',
       )
@@ -558,6 +561,11 @@ const checks: Check[] = [
       requireIncludes(readme, ['local/non-https CORS'], 'README.md')
       requireIncludes(deploymentQa, ['local/non-https CORS'], 'DEPLOYMENT_QA.md')
       requireIncludes(productionSetup, ['CORS is local or non-https'], 'PRODUCTION_SETUP.md')
+      requireIncludes(
+        await readRepoFile('DEPLOY_RENDER.md'),
+        ['CORS_ORIGINS=https://<frontend-domain>', 'Do not include localhost, `http://` origins, wildcard origins, or the backend URL'],
+        'DEPLOY_RENDER.md',
+      )
     },
   },
   {

@@ -32,6 +32,7 @@ Results:
 - Route/menu audit: pass.
 - Deploy status: pass, reports 2 staging blockers and 4 production blockers in local mode.
 - Deploy readiness now treats CORS that is empty, local, or non-https as a staging/production blocker.
+- Predeploy now verifies `DEPLOY_RENDER.md` keeps HTTPS-only CORS/frontend-backend URL guidance for Render staging/production.
 - Smoke doctor now prints ordered deploy next steps from the shared readiness evaluator.
 - Deploy status JSON now exposes top-level staging/production ready flags and blocker counts for automation.
 - Deploy readiness self-test: pass.
