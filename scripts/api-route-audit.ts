@@ -163,8 +163,8 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
   'POST /chat': {
     owner: 'chat',
-    coverage: ['live-smoke', 'backend-test'],
-    note: 'api:smoke:live verifies provider call; runtime tests cover relationship/scene state',
+    coverage: ['smoke', 'live-smoke', 'backend-test'],
+    note: 'api-smoke verifies uncharged validation path; api:smoke:live verifies provider call; runtime tests cover relationship/scene state',
   },
   'POST /chat/stream': {
     owner: 'chat',

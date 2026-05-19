@@ -401,6 +401,31 @@ await warnable('POST /creator/ai-draft', async () => {
   return { ok: true, detail }
 })
 
+await check('POST /chat validation', async () => {
+  const payload = await readJson<{
+    reply?: string
+    chatId?: string | null
+    usage?: {
+      totalTokens?: number
+      providerFailure?: { code?: string }
+    }
+  }>('/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({
+      characterId: "' OR 1=1 --",
+      message: 'chat validation smoke should never call the live provider',
+      history: [],
+    }),
+  })
+
+  if (!payload.reply?.includes('Invalid character id')) throw new Error('chat validation did not return invalid character id')
+  if (payload.chatId !== null && payload.chatId !== undefined) throw new Error('chat validation should not return a chatId')
+  if ((payload.usage?.totalTokens ?? 0) !== 0) throw new Error('chat validation path should not use tokens')
+  if (payload.usage?.providerFailure) throw new Error(`chat validation path returned provider failure: ${payload.usage.providerFailure.code}`)
+  return 'invalid character id rejected before provider call'
+})
+
 if (live) {
   await check('POST /chat', async () => {
     const minSmokeTokenBalance = parseMinSmokeTokenBalance()
