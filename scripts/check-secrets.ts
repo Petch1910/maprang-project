@@ -22,7 +22,7 @@ export function isUnsafeTrackedEnvPath(path: string) {
 
 function shouldCheck(path: string) {
   const normalized = path.replaceAll('\\', '/')
-  if (normalized.endsWith('.env')) return false
+  if (isUnsafeTrackedEnvPath(normalized)) return false
   if (relative(root, path) === selfFile) return false
   if (normalized.includes('/.env')) return true
   const dot = normalized.lastIndexOf('.')
