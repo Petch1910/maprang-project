@@ -27,11 +27,12 @@ export type DeployEnvDoctorResult = {
 let requireImageLiveVerified = true
 let findings: Finding[] = []
 
-if (import.meta.main) {
-const args = parseArgs(process.argv.slice(2))
+export async function runDeployEnvDoctor(argv = process.argv.slice(2), writeLine: (line: string) => void = (line) => console.log(line)): Promise<DeployEnvDoctorResult> {
+const args = parseArgs(argv)
 const backendEnvPath = resolveFromRoot(args.get('backend-env') ?? 'apps/backend/.env')
 const frontendEnvPath = resolveFromRoot(args.get('frontend-env') ?? 'apps/frontend/.env')
 requireImageLiveVerified = !args.has('allow-unverified-image')
+findings = []
 
 let backendEnv: EnvMap
 let frontendEnv: EnvMap
@@ -54,35 +55,49 @@ auditBackendEnv(backendEnv)
 auditFrontendEnv(frontendEnv)
 auditCrossEnv(backendEnv, frontendEnv)
 
-console.log(`Deploy env doctor`)
-console.log(`backendEnv: ${displayPath(backendEnvPath)}`)
-console.log(`frontendEnv: ${displayPath(frontendEnvPath)}`)
+writeLine(`Deploy env doctor`)
+writeLine(`backendEnv: ${displayPath(backendEnvPath)}`)
+writeLine(`frontendEnv: ${displayPath(frontendEnvPath)}`)
 
 for (const finding of findings) {
   const label = finding.status === 'pass' ? 'PASS' : finding.status === 'warn' ? 'WARN' : 'FAIL'
-  console.log(`${label} - ${finding.area} ${finding.check}: ${finding.detail}`)
+  writeLine(`${label} - ${finding.area} ${finding.check}: ${finding.detail}`)
 }
 
 const failCount = findings.filter((finding) => finding.status === 'fail').length
 const warnCount = findings.filter((finding) => finding.status === 'warn').length
 const passCount = findings.filter((finding) => finding.status === 'pass').length
+const result: DeployEnvDoctorResult = {
+  ok: failCount === 0,
+  pass: passCount,
+  warn: warnCount,
+  fail: failCount,
+  backendEnv: displayPath(backendEnvPath),
+  frontendEnv: displayPath(frontendEnvPath),
+  findings: [...findings],
+}
 
-console.log(
+writeLine(
   JSON.stringify(
     {
-      ok: failCount === 0,
-      pass: passCount,
-      warn: warnCount,
-      fail: failCount,
-      backendEnv: displayPath(backendEnvPath),
-      frontendEnv: displayPath(frontendEnvPath),
+      ok: result.ok,
+      pass: result.pass,
+      warn: result.warn,
+      fail: result.fail,
+      backendEnv: result.backendEnv,
+      frontendEnv: result.frontendEnv,
     },
     null,
     2,
   ),
 )
 
-if (failCount > 0) process.exit(1)
+return result
+}
+
+if (import.meta.main) {
+  const result = await runDeployEnvDoctor()
+  if (!result.ok) process.exit(1)
 }
 
 function auditBackendEnv(env: EnvMap) {

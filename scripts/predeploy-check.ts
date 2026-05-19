@@ -589,6 +589,8 @@ const checks: Check[] = [
       const deployStatus = await readRepoFile('scripts/deploy-status.ts')
       const deployStatusTest = await readRepoFile('scripts/deploy-status.test.ts')
       const deployReadiness = await readRepoFile('scripts/deploy-readiness.ts')
+      const deployEnvDoctor = await readRepoFile('scripts/deploy-env-doctor.ts')
+      const deployEnvDoctorTest = await readRepoFile('scripts/deploy-env-doctor.test.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const readme = await readRepoFile('README.md')
       const stagingRunbook = await readRepoFile('STAGING_RUNBOOK.md')
@@ -621,6 +623,16 @@ const checks: Check[] = [
         deployReadiness,
         ['evaluateDeployReadiness', 'buildNextDeploySteps', 'chat provider live smoke is not marked verified', 'RELEASE_HANDOFF.md'],
         'scripts/deploy-readiness.ts',
+      )
+      requireIncludes(
+        deployEnvDoctor,
+        ['runDeployEnvDoctor', 'writeLine', 'DeployEnvDoctorResult', 'findings: [...findings]'],
+        'scripts/deploy-env-doctor.ts',
+      )
+      requireIncludes(
+        deployEnvDoctorTest,
+        ['runDeployEnvDoctor', 'importable function without exiting', 'Supabase URL match'],
+        'scripts/deploy-env-doctor.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/deploy-readiness.test.ts'),

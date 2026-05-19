@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
-import { hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile } from './deploy-env-doctor'
+import { hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile, runDeployEnvDoctor } from './deploy-env-doctor'
 
 const tempDir = join(import.meta.dir, '..', '.tmp', 'deploy-env-doctor-unit')
 
@@ -54,6 +54,69 @@ describe('deploy env doctor helpers', () => {
     expect(jwtRole(fakeJwt('anon'))).toBe('anon')
     expect(jwtRole(fakeJwt('service_role'))).toBe('service_role')
     expect(jwtRole('not-a-jwt')).toBeNull()
+  })
+
+  test('runs the full doctor through an importable function without exiting', async () => {
+    const runnerDir = join(tempDir, 'runner')
+    await rm(runnerDir, { recursive: true, force: true })
+    await mkdir(runnerDir, { recursive: true })
+
+    const anonKey = fakeJwt('anon')
+    const serviceRoleKey = fakeJwt('service_role')
+    const backendEnv = join(runnerDir, 'backend.env')
+    const frontendEnv = join(runnerDir, 'frontend.env')
+
+    try {
+      await writeFile(
+        backendEnv,
+        [
+          'NODE_ENV=production',
+          'DATABASE_URL=postgresql://maprang_user:very-secret-password@db.maprang.example:5432/maprang?sslmode=require',
+          'OPENROUTER_API_KEY=sk-or-test-key-1234567890',
+          'MODEL_TEMPERATURE=0.85',
+          'MODEL_MAX_OUTPUT_TOKENS=1200',
+          'MODEL_MIN_ROLEPLAY_REPLY_CHARS=320',
+          'CHAT_PROVIDER_RETRY_ATTEMPTS=2',
+          'CHAT_PROVIDER_RETRY_DELAY_MS=350',
+          'CREATOR_DRAFT_RETRY_ATTEMPTS=3',
+          'CREATOR_DRAFT_RETRY_DELAY_MS=350',
+          'CORS_ORIGINS=https://app.maprang.example',
+          'ADMIN_API_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+          'SUPABASE_URL=https://abcdefghijklmnopqrst.supabase.co',
+          'SUPABASE_JWT_ISSUER=https://abcdefghijklmnopqrst.supabase.co/auth/v1',
+          `SUPABASE_ANON_KEY=${anonKey}`,
+          `SUPABASE_SERVICE_ROLE_KEY=${serviceRoleKey}`,
+          'STORAGE_PROVIDER=supabase',
+          'SUPABASE_STORAGE_BUCKET=avatars',
+          'SUPABASE_STORAGE_ACCESS=signed',
+          'SUPABASE_SIGNED_URL_EXPIRES_IN=3600',
+          'IMAGE_GENERATION_API_KEY=sk-test-image-key-1234567890',
+          'IMAGE_GENERATION_LIVE_VERIFIED=1',
+          '',
+        ].join('\n'),
+      )
+      await writeFile(
+        frontendEnv,
+        [
+          'VITE_API_BASE_URL=https://api.maprang.example',
+          'VITE_SUPABASE_URL=https://abcdefghijklmnopqrst.supabase.co',
+          `VITE_SUPABASE_ANON_KEY=${anonKey}`,
+          '',
+        ].join('\n'),
+      )
+
+      const lines: string[] = []
+      const result = await runDeployEnvDoctor(['--backend-env', backendEnv, '--frontend-env', frontendEnv], (line) => lines.push(line))
+
+      expect(result.ok).toBe(true)
+      expect(result.fail).toBe(0)
+      expect(result.findings.some((finding) => finding.area === 'cross-check' && finding.check === 'Supabase URL match' && finding.status === 'pass')).toBe(true)
+      expect(lines[0]).toBe('Deploy env doctor')
+      expect(lines.join('\n')).not.toContain(anonKey)
+      expect(lines.join('\n')).not.toContain(serviceRoleKey)
+    } finally {
+      await rm(runnerDir, { recursive: true, force: true })
+    }
   })
 })
 

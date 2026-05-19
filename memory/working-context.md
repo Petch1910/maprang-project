@@ -83,7 +83,7 @@ Verified:
 - Smoke doctor now exports a report builder, and `smoke:doctor:test` guards staging blocker next steps, strict staging failure, and backend health failure output without calling a live backend.
 - Image smoke now exports fallback/live payload helpers, and `smoke:image:test` guards skipped live-image output plus placeholder/no-URL/SVG failure handling without spending provider credits.
 - Live chat smoke now exports validation/payload helpers, and `smoke:chat:test` guards provider-failure precedence, token threshold checks, wallet debit matching, and success payload formatting without spending provider credits.
-- Deploy env doctor now keeps core parsing/env/JWT helpers import-safe, and `deploy:doctor:test` guards those helpers without reading real production env files.
+- Deploy env doctor now keeps core parsing/env/JWT helpers import-safe, exports a callable `runDeployEnvDoctor` runner for dashboard/admin reuse, and `deploy:doctor:test` guards both helpers and full-run output without reading real production env files.
 - API smoke now reuses the shared live chat/image provider helpers so live chat provider failures are reported before empty-reply checks and image failure hints stay aligned across smoke scripts.
 - API smoke readiness/image helper logic now lives in `scripts/api-smoke-helpers.ts`, with `api:smoke:test` guarding live-verification-only readiness, image provider hints, and safe JSON parsing without hitting a backend.
 
