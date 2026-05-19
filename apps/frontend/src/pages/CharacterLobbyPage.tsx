@@ -1,14 +1,28 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ReportDialog, type ReportDialogSubmit } from '../components/ReportDialog'
-import { createReport, fetchCharacter, type Character } from '../lib/api'
+import {
+  createReport,
+  fetchCharacter,
+  fetchRelationshipPresets,
+  shouldLogUnexpectedError,
+  type Character,
+  type RelationshipPreset,
+} from '../lib/api'
 import { displayCharacterDetail } from '../lib/characterDisplay'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/charactersSlice'
 import { saveContentSettings, selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
 
-const seeds = [
+type RelationshipContractSeed = {
+  id: string
+  label: string
+  tone: string
+  color: string
+}
+
+const fallbackRelationshipSeeds: RelationshipContractSeed[] = [
   { id: 'stranger', label: 'คนแปลกหน้า', tone: 'ยังไม่รู้จักกัน ระวังตัวแต่มีพื้นที่ให้เริ่มใหม่', color: 'bg-blue-600' },
   { id: 'enemy', label: 'ศัตรู', tone: 'แรงต้านสูง ไม่ไว้ใจ และพร้อมปะทะ', color: 'bg-red-700' },
   { id: 'disliked', label: 'ไม่ถูกกัน', tone: 'ไม่ถึงขั้นศัตรู แต่มีอคติและความติดขัด', color: 'bg-orange-700' },
@@ -31,12 +45,30 @@ const seeds = [
   { id: 'soulmate', label: 'คู่แท้', tone: 'ผูกพันลึก เหมือนเข้าใจกันโดยธรรมชาติ แต่ยังเล่นต่อได้', color: 'bg-amber-600' },
 ]
 
+const seedColorById = new Map(fallbackRelationshipSeeds.map((seed) => [seed.id, seed.color]))
+
+function contractSeedsFromPresets(presets: RelationshipPreset[]) {
+  if (presets.length === 0) return fallbackRelationshipSeeds
+  return [
+    fallbackRelationshipSeeds[0],
+    ...presets.map((preset) => ({
+      id: preset.id,
+      label: preset.name,
+      tone: preset.description,
+      color: seedColorById.get(preset.id) ?? 'bg-slate-600',
+    })),
+  ]
+}
+
 export function CharacterLobbyPage() {
   const dispatch = useAppDispatch()
   const { characterId } = useParams()
   const characters = useAppSelector(selectExploreCharacters)
   const content = useAppSelector(selectContentSettings)
-  const [seed, setSeed] = useState(seeds[0])
+  const [contractSeeds, setContractSeeds] = useState<RelationshipContractSeed[]>(fallbackRelationshipSeeds)
+  const [selectedSeedId, setSelectedSeedId] = useState(fallbackRelationshipSeeds[0].id)
+  const [isPresetLoading, setIsPresetLoading] = useState(true)
+  const [presetError, setPresetError] = useState('')
   const [detailCharacter, setDetailCharacter] = useState<Character | null>(null)
   const [isLoadingDetail, setIsLoadingDetail] = useState(false)
   const [detailError, setDetailError] = useState('')
@@ -51,6 +83,28 @@ export function CharacterLobbyPage() {
   useEffect(() => {
     if (characters.length === 0) dispatch(loadExploreCharacters({ maxRating: content.maxRating }))
   }, [characters.length, content.maxRating, dispatch])
+
+  useEffect(() => {
+    let cancelled = false
+    setIsPresetLoading(true)
+    setPresetError('')
+    fetchRelationshipPresets('contract')
+      .then((data) => {
+        if (cancelled) return
+        setContractSeeds(contractSeedsFromPresets(data.presets))
+      })
+      .catch((error) => {
+        if (cancelled) return
+        setPresetError('ใช้รายการความสัมพันธ์สำรองในเครื่องอยู่')
+        if (shouldLogUnexpectedError(error)) console.error('Load relationship contract presets error:', error)
+      })
+      .finally(() => {
+        if (!cancelled) setIsPresetLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!characterId) return
@@ -77,6 +131,7 @@ export function CharacterLobbyPage() {
   const rating = character ? characterRating(character) : 'general'
   const canView = canViewRating(rating, content.maxRating)
   const canStartChat = Boolean(character) && canView
+  const seed = contractSeeds.find((item) => item.id === selectedSeedId) ?? contractSeeds[0] ?? fallbackRelationshipSeeds[0]
 
   const reportCharacter = async ({ reason, details }: ReportDialogSubmit) => {
     if (!character || isReporting) return
@@ -219,8 +274,13 @@ export function CharacterLobbyPage() {
             <section className="rounded-2xl border border-white/10 bg-white/6 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <h2 className="text-lg font-black text-white">สัญญาความสัมพันธ์</h2>
               <p className="mt-1 text-sm text-white/52">เลือกจุดเริ่มต้นทางอารมณ์ก่อนส่งข้อความแรก</p>
+              {(isPresetLoading || presetError) && (
+                <p className="mt-2 text-xs font-bold text-white/40">
+                  {isPresetLoading ? 'กำลังเชื่อมรายการความสัมพันธ์จากระบบ...' : presetError}
+                </p>
+              )}
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {seeds.map((item) => (
+                {contractSeeds.map((item) => (
                   <button
                     aria-pressed={seed.id === item.id}
                     className={`rounded-2xl border p-4 text-left transition ${
@@ -230,7 +290,7 @@ export function CharacterLobbyPage() {
                     }`}
                     data-testid={`character-seed-${item.id}`}
                     key={item.id}
-                    onClick={() => setSeed(item)}
+                    onClick={() => setSelectedSeedId(item.id)}
                     type="button"
                   >
                     <p className="font-black text-white">{item.label}</p>

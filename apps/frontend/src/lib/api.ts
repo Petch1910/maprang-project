@@ -696,6 +696,7 @@ export type RelationshipPreset = {
   name: string
   description: string
   tags: string[]
+  surfaces?: Array<'contract' | 'creator'>
 }
 
 export type RelationshipPreview = {
@@ -717,8 +718,11 @@ export type RelationshipPreview = {
   }>
 }
 
-export async function fetchRelationshipPresets() {
-  return requestJson<{ presets: RelationshipPreset[] }>('/relationship/presets')
+export async function fetchRelationshipPresets(surface?: 'contract' | 'creator') {
+  const params = new URLSearchParams()
+  if (surface) params.set('surface', surface)
+  const query = params.toString()
+  return requestJson<{ presets: RelationshipPreset[] }>(`/relationship/presets${query ? `?${query}` : ''}`)
 }
 
 export async function previewRelationship(tags: string[], messages?: string[]) {

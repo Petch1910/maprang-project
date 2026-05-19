@@ -68,6 +68,19 @@ describe('character quality relationship validation', () => {
 })
 
 describe('relationship route endpoints', () => {
+  test('filters relationship presets by surface', async () => {
+    const response = await characterRoutes.handle(new Request('http://localhost/relationship/presets?surface=contract'))
+    const body = (await response.json()) as {
+      presets: Array<{ id: string; surfaces: string[] }>
+    }
+
+    expect(response.status).toBe(200)
+    expect(body.presets).toHaveLength(19)
+    expect(body.presets.every((preset) => preset.surfaces.includes('contract'))).toBe(true)
+    expect(body.presets.map((preset) => preset.id)).toContain('soulmate')
+    expect(body.presets.map((preset) => preset.id)).not.toContain('safe-family-bond')
+  })
+
   test('validates relationship tags through HTTP route', async () => {
     const response = await characterRoutes.handle(
       new Request('http://localhost/relationship/validate', {

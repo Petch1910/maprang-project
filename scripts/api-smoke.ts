@@ -190,7 +190,12 @@ await check('GET/PATCH /me/persona', async () => {
 await check('GET /relationship/presets', async () => {
   const payload = await readJson<{ presets?: unknown[] }>('/relationship/presets')
   if (!payload.presets?.length) throw new Error('no presets returned')
-  return `${payload.presets.length} presets`
+  const contractPayload = await readJson<{ presets?: Array<{ id?: string; surfaces?: string[] }> }>('/relationship/presets?surface=contract')
+  if (contractPayload.presets?.length !== 19) throw new Error(`contract presets expected 19, got ${contractPayload.presets?.length ?? 0}`)
+  if (!contractPayload.presets.some((preset) => preset.id === 'soulmate')) throw new Error('contract presets missing soulmate')
+  if (contractPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('contract presets include creator-only preset')
+  if (!contractPayload.presets.every((preset) => preset.surfaces?.includes('contract'))) throw new Error('contract preset surface missing')
+  return `${payload.presets.length} presets, ${contractPayload.presets.length} contract`
 })
 
 await check('POST /relationship/preview', async () => {

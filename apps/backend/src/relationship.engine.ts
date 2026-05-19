@@ -44,6 +44,12 @@ export type RelationshipPreset = {
   tags: string[]
 }
 
+export type RelationshipPresetSurface = 'contract' | 'creator'
+
+export type RelationshipPresetResponse = RelationshipPreset & {
+  surfaces: RelationshipPresetSurface[]
+}
+
 export type RelationshipState = RelationshipStats & {
   route: string
   arcStage: string
@@ -260,6 +266,37 @@ export const RELATIONSHIP_PRESETS: RelationshipPreset[] = [
     tags: ['family', 'no-romance', 'slice-of-life', 'green-flag'],
   },
 ]
+
+const RELATIONSHIP_CONTRACT_PRESET_IDS = new Set([
+  'enemy',
+  'disliked',
+  'rival',
+  'bickering-rival',
+  'acquaintance',
+  'friend',
+  'close-friend',
+  'ride-or-die',
+  'crush',
+  'friend-crush',
+  'dating-trial',
+  'talking-stage',
+  'partner',
+  'toxic-partner',
+  'lover',
+  'life-partner',
+  'spouse',
+  'toxic-spouse',
+  'soulmate',
+])
+
+export function listRelationshipPresets(surface?: RelationshipPresetSurface): RelationshipPresetResponse[] {
+  return RELATIONSHIP_PRESETS.map((preset) => ({
+    ...preset,
+    surfaces: RELATIONSHIP_CONTRACT_PRESET_IDS.has(preset.id)
+      ? (['contract', 'creator'] satisfies RelationshipPresetSurface[])
+      : (['creator'] satisfies RelationshipPresetSurface[]),
+  })).filter((preset) => (surface ? preset.surfaces.includes(surface) : true))
+}
 
 const TAG_RULES: Record<string, TagRule> = {
   enemy: { kind: 'engine', offsets: { affinity: -80, trust: -60, respect: -10 }, status: 'ENEMY', flags: ['hostile'] },

@@ -18,8 +18,8 @@ import {
   type CharacterInput,
 } from './character.service'
 import {
-  RELATIONSHIP_PRESETS,
   buildRelationshipSeedFromTags,
+  listRelationshipPresets,
   simulateRelationshipPreview,
   validateRelationshipTags,
 } from './relationship.engine'
@@ -123,7 +123,11 @@ export const characterRoutes = new Elysia()
   .post('/creator/ai-draft', ({ body, request }) => generateCreatorDraft({ ...body, origin: new URL(request.url).origin }), {
     body: creatorDraftBody,
   })
-  .get('/relationship/presets', () => ({ presets: RELATIONSHIP_PRESETS }))
+  .get('/relationship/presets', ({ query }) => ({ presets: listRelationshipPresets(query.surface) }), {
+    query: t.Object({
+      surface: t.Optional(t.Union([t.Literal('contract'), t.Literal('creator')])),
+    }),
+  })
   .post(
     '/relationship/preview',
     ({ body }) => ({
