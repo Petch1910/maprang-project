@@ -103,14 +103,20 @@ export async function collectBackendSecurityFindings() {
   return findings
 }
 
-if (import.meta.main) {
+export async function runBackendSecurityAudit(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
   const findings = await collectBackendSecurityFindings()
 
   if (findings.length > 0) {
-    console.error('Backend security audit failed:')
-    for (const finding of findings) console.error(`- ${finding.file}:${finding.line} ${finding.message}`)
-    process.exit(1)
+    writeError('Backend security audit failed:')
+    for (const finding of findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
+    return 1
   }
 
-  console.log('ok - backend security audit passed')
+  writeLine('ok - backend security audit passed')
+  return 0
 }
+
+if (import.meta.main) process.exit(await runBackendSecurityAudit())

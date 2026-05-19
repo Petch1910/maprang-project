@@ -751,6 +751,7 @@ const checks: Check[] = [
           'admin route is missing requireAdminApiKey guard',
           'uuidParamRoutePattern',
           'route with /:id is missing rejectInvalidUuid guard',
+          'runBackendSecurityAudit',
           '$queryRawUnsafe',
         ],
         'scripts/backend-security-audit.ts',
@@ -762,6 +763,7 @@ const checks: Check[] = [
           'allows tagged raw SQL parameterization',
           'catches admin routes without admin api key guards',
           'catches resource id routes without UUID guards',
+          'runs the committed backend security audit through an importable runner',
         ],
         'scripts/backend-security-audit.test.ts',
       )

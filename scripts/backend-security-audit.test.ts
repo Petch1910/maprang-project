@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { collectBackendSecurityFindingsFromSource } from './backend-security-audit'
+import { collectBackendSecurityFindings, collectBackendSecurityFindingsFromSource, runBackendSecurityAudit } from './backend-security-audit'
 
 function messagesFor(content: string) {
   return collectBackendSecurityFindingsFromSource('fixture.ts', content).map((finding) => finding.message)
@@ -82,5 +82,17 @@ describe('backend security audit', () => {
           })
       `),
     ).toEqual([])
+  })
+
+  test('runs the committed backend security audit through an importable runner', async () => {
+    const findings = await collectBackendSecurityFindings()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runBackendSecurityAudit((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(findings).toEqual([])
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toBe('ok - backend security audit passed')
+    expect(errors).toEqual([])
   })
 })
