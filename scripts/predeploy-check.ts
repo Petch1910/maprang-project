@@ -789,13 +789,23 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.test.ts'),
-        ['reports buttons without explicit type', 'reports placeholder links'],
+        ['reports buttons without explicit type', 'reports placeholder links', 'runs the committed frontend static audit through an importable runner'],
         'scripts/frontend-static-audit.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-route-audit.test.ts'),
-        ['collects declared React Router paths', 'reports static links and navigate calls'],
+        ['collects declared React Router paths', 'reports static links and navigate calls', 'runs the committed frontend route audit through an importable runner'],
         'scripts/frontend-route-audit.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-static-audit.ts'),
+        ['collectFrontendStaticFindings', 'runFrontendStaticAudit', 'if (import.meta.main) process.exit(await runFrontendStaticAudit())'],
+        'scripts/frontend-static-audit.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-route-audit.ts'),
+        ['collectFrontendRouteAuditResult', 'runFrontendRouteAudit', 'if (import.meta.main) process.exit(await runFrontendRouteAudit())'],
+        'scripts/frontend-route-audit.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.test.ts'),

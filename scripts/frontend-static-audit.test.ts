@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { auditButtonsWithAst, auditFrontendSourceFile, auditSuspiciousPatterns, lineFor } from './frontend-static-audit'
+import {
+  auditButtonsWithAst,
+  auditFrontendSourceFile,
+  auditSuspiciousPatterns,
+  collectFrontendStaticFindings,
+  lineFor,
+  runFrontendStaticAudit,
+} from './frontend-static-audit'
 
 describe('frontend static audit', () => {
   test('reports buttons without explicit type and icon-only labels', () => {
@@ -61,5 +68,17 @@ describe('frontend static audit', () => {
         'button/link has an empty onClick handler',
       ]),
     )
+  })
+
+  test('runs the committed frontend static audit through an importable runner', async () => {
+    const findings = await collectFrontendStaticFindings()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runFrontendStaticAudit((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(findings).toEqual([])
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toBe('ok - frontend static audit passed')
+    expect(errors).toEqual([])
   })
 })

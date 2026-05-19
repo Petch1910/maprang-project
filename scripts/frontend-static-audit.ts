@@ -177,7 +177,7 @@ export function auditFrontendSourceFile(content: string, file: string) {
   return [...auditButtonsWithAst(content, file), ...auditSuspiciousPatterns(content, file)]
 }
 
-export async function runFrontendStaticAudit() {
+export async function collectFrontendStaticFindings() {
   const sourceFiles = await collectSourceFiles(frontendSrc)
   const findings: Finding[] = await auditStaleTemplateFiles()
 
@@ -187,13 +187,23 @@ export async function runFrontendStaticAudit() {
     findings.push(...auditFrontendSourceFile(content, relativeFile))
   }
 
-  if (findings.length > 0) {
-    console.error('Frontend static audit failed:')
-    for (const finding of findings) console.error(`- ${finding.file}:${finding.line} ${finding.message}`)
-    process.exit(1)
-  }
-
-  console.log('ok - frontend static audit passed')
+  return findings
 }
 
-if (import.meta.main) await runFrontendStaticAudit()
+export async function runFrontendStaticAudit(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const findings = await collectFrontendStaticFindings()
+
+  if (findings.length > 0) {
+    writeError('Frontend static audit failed:')
+    for (const finding of findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
+    return 1
+  }
+
+  writeLine('ok - frontend static audit passed')
+  return 0
+}
+
+if (import.meta.main) process.exit(await runFrontendStaticAudit())

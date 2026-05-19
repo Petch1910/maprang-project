@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { auditFile, collectRoutesFromApp, isCoveredByRoute, normalizeStaticPath } from './frontend-route-audit'
+import {
+  auditFile,
+  collectFrontendRouteAuditResult,
+  collectRoutesFromApp,
+  isCoveredByRoute,
+  normalizeStaticPath,
+  runFrontendRouteAudit,
+} from './frontend-route-audit'
 
 describe('frontend route audit', () => {
   test('collects declared React Router paths and matches dynamic routes', () => {
@@ -48,5 +55,19 @@ describe('frontend route audit', () => {
       'navigate call points to /missing, but App.tsx has no matching Route',
       'to attribute points to /ghost, but App.tsx has no matching Route',
     ])
+  })
+
+  test('runs the committed frontend route audit through an importable runner', async () => {
+    const result = await collectFrontendRouteAuditResult()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runFrontendRouteAudit((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(result.ok).toBe(true)
+    expect(result.declaredRoutes.length).toBeGreaterThan(0)
+    expect(result.findings).toEqual([])
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toContain('ok - frontend route audit passed')
+    expect(errors).toEqual([])
   })
 })

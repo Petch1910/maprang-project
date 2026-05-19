@@ -12,6 +12,13 @@ export type Finding = {
   message: string
 }
 
+export type FrontendRouteAuditResult = {
+  ok: boolean
+  declaredRoutes: string[]
+  findings: Finding[]
+  failure?: string
+}
+
 export async function collectSourceFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true })
   const nested = await Promise.all(
@@ -133,12 +140,16 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
   return findings
 }
 
-export async function runFrontendRouteAudit() {
+export async function collectFrontendRouteAuditResult(): Promise<FrontendRouteAuditResult> {
   const appContent = await readFile(appFile, 'utf8')
   const declaredRoutes = collectRoutesFromApp(appContent)
   if (declaredRoutes.length === 0) {
-    console.error('Frontend route audit failed: no <Route path="..."> entries found in App.tsx')
-    process.exit(1)
+    return {
+      ok: false,
+      declaredRoutes,
+      findings: [],
+      failure: 'Frontend route audit failed: no <Route path="..."> entries found in App.tsx',
+    }
   }
 
   const sourceFiles = await collectSourceFiles(frontendSrc)
@@ -151,13 +162,32 @@ export async function runFrontendRouteAudit() {
     )
   ).flat()
 
-  if (findings.length > 0) {
-    console.error('Frontend route audit failed:')
-    for (const finding of findings) console.error(`- ${finding.file}:${finding.line} ${finding.message}`)
-    process.exit(1)
+  return {
+    ok: findings.length === 0,
+    declaredRoutes,
+    findings,
   }
-
-  console.log(`ok - frontend route audit passed (${declaredRoutes.length} declared routes)`)
 }
 
-if (import.meta.main) await runFrontendRouteAudit()
+export async function runFrontendRouteAudit(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const result = await collectFrontendRouteAuditResult()
+
+  if (!result.ok) {
+    if (result.failure) {
+      writeError(result.failure)
+      return 1
+    }
+
+    writeError('Frontend route audit failed:')
+    for (const finding of result.findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
+    return 1
+  }
+
+  writeLine(`ok - frontend route audit passed (${result.declaredRoutes.length} declared routes)`)
+  return 0
+}
+
+if (import.meta.main) process.exit(await runFrontendRouteAudit())
