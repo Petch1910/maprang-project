@@ -32,6 +32,15 @@ type DeployStatusPayload = {
   failures: string[]
 }
 
+export type DeployStatusRunnerOptions = {
+  argv?: string[]
+  readHealth?: () => Promise<HealthPayload>
+  currentApiBaseUrl?: string
+  currentIsLocalSmokeTarget?: boolean
+  writeLine?: (line: string) => void
+  writeError?: (line: string) => void
+}
+
 export function buildDeployStatusPayload(
   health: HealthPayload,
   options: { apiBaseUrl: string; isLocalSmokeTarget: boolean },
@@ -118,33 +127,46 @@ export function formatDeployStatusText(
   return lines.join('\n')
 }
 
-export async function runDeployStatus(argv = process.argv) {
+export async function runDeployStatus(options: DeployStatusRunnerOptions | string[] = {}) {
+  const normalized = Array.isArray(options) ? { argv: options } : options
+  const argv = normalized.argv ?? process.argv
+  const currentApiBaseUrl = normalized.currentApiBaseUrl ?? apiBaseUrl
+  const currentIsLocalSmokeTarget = normalized.currentIsLocalSmokeTarget ?? isLocalSmokeTarget
+  const writeLine = normalized.writeLine ?? ((line: string) => console.log(line))
+  const writeError = normalized.writeError ?? ((line: string) => console.error(line))
+  const readHealth = normalized.readHealth ?? (() => readJson<HealthPayload>('/health'))
   const jsonMode = argv.includes('--json')
   let health: HealthPayload
 
   try {
-    health = await readJson<HealthPayload>('/health')
+    health = await readHealth()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     if (jsonMode) {
-      console.log(JSON.stringify({ ok: false, apiBaseUrl, error: message }, null, 2))
+      writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
     } else {
-      console.error(`Deploy status failed: ${message}`)
-      console.error('Local fix: start the backend and database, then rerun `bun run deploy:status`.')
-      console.error('Staging fix: set SMOKE_API_BASE_URL to the deployed backend URL.')
+      writeError(`Deploy status failed: ${message}`)
+      writeError('Local fix: start the backend and database, then rerun `bun run deploy:status`.')
+      writeError('Staging fix: set SMOKE_API_BASE_URL to the deployed backend URL.')
     }
-    process.exit(1)
+    return 1
   }
 
   if (jsonMode) {
-    const payload = buildDeployStatusPayload(health, { apiBaseUrl, isLocalSmokeTarget })
-    console.log(JSON.stringify(payload, null, 2))
-    process.exit(payload.failures.length > 0 ? 1 : 0)
+    const payload = buildDeployStatusPayload(health, {
+      apiBaseUrl: currentApiBaseUrl,
+      isLocalSmokeTarget: currentIsLocalSmokeTarget,
+    })
+    writeLine(JSON.stringify(payload, null, 2))
+    return payload.failures.length > 0 ? 1 : 0
   }
 
-  const text = formatDeployStatusText(health, { apiBaseUrl, isLocalSmokeTarget })
-  console.log(text)
-  if (healthFailures(health).length > 0) process.exit(1)
+  const text = formatDeployStatusText(health, {
+    apiBaseUrl: currentApiBaseUrl,
+    isLocalSmokeTarget: currentIsLocalSmokeTarget,
+  })
+  writeLine(text)
+  return healthFailures(health).length > 0 ? 1 : 0
 }
 
-if (import.meta.main) await runDeployStatus()
+if (import.meta.main) process.exit(await runDeployStatus())

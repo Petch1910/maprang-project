@@ -57,7 +57,7 @@ Results:
 - `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard `/ready` summary output.
 - `smoke:image:test` now runs in `qa:local`, CI, and Production Smoke to guard image smoke skip/fallback/live payload helpers without provider calls.
 - `smoke:chat:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat smoke validation and success payload helpers without provider calls.
-- `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output.
+- `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output and the importable deploy status runner.
 - `deploy:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy env parsing/JWT helpers plus the importable full doctor runner without reading real production env files.
 - `vault:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard shared memory/knowledge Markdown audit helpers plus importable memory and knowledge audit runners.
 - `backend:check:db:test` now runs in `qa:local`, CI, and Production Smoke to guard DB-required backend check command planning and the importable DB check runner.

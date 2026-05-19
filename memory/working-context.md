@@ -71,7 +71,7 @@ Verified:
 - Route/menu doc-check regression tests now cover Markdown table parsing, route/menu/app/preload alignment, missing navigation coverage, empty field detection, status label guards, and the importable route/menu doc-check runner.
 - Smoke helper regression tests now cover local target defaults, deployed target auth behavior, explicit smoke user/token/admin headers, and JSON payload formatting.
 - Provider smoke guard regression tests now cover live chat minimum token thresholds, provider failure messaging, live image opt-in detection, and image provider failure hints before any verification flag can be set.
-- Deploy status regression tests now cover JSON readiness counts, text blocker output, and health failure reporting without calling a live backend.
+- Deploy status regression tests now cover JSON readiness counts, text blocker output, health failure reporting, and the importable deploy status runner without calling a live backend.
 - Readiness smoke regression tests now cover `/ready` summary output, failure visibility, and readiness status fallback without calling a live backend.
 - Memory/knowledge vault audits now share Markdown link/include helpers, and both memory and knowledge audits export importable runners covered by regression tests for required snippets, local link collection, vault-boundary checks, full memory audit output, and full knowledge audit output.
 - Backend DB check planning is covered by `backend:check:db:test`, ensuring DB availability is checked before backend tests run with `REQUIRE_DB_TESTS=true`, and the DB check command plan has an importable runner for CI/dashboard reuse.

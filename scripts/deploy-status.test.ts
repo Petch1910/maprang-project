@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildDeployStatusPayload, formatDeployStatusText } from './deploy-status'
+import { buildDeployStatusPayload, formatDeployStatusText, runDeployStatus } from './deploy-status'
 import type { HealthPayload } from './deploy-readiness'
 
 function baseHealth(overrides: Partial<HealthPayload> = {}): HealthPayload {
@@ -89,5 +89,45 @@ describe('deploy status formatting', () => {
     expect(payload.ok).toBe(false)
     expect(payload.failures).toEqual(['backend health returned ok=false', 'database is not connected'])
     expect(payload.productionReady).toBe(true)
+  })
+
+  test('runs deploy status JSON through an importable runner', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts', '--json'],
+      currentApiBaseUrl: 'https://api.example.com',
+      currentIsLocalSmokeTarget: false,
+      readHealth: async () => baseHealth(),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    const payload = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(0)
+    expect(payload.ok).toBe(true)
+    expect(payload.apiBaseUrl).toBe('https://api.example.com')
+    expect(payload.productionReady).toBe(true)
+    expect(errors).toEqual([])
+  })
+
+  test('returns a failure code without exiting when health cannot be read', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts'],
+      currentApiBaseUrl: 'http://127.0.0.1:3000',
+      currentIsLocalSmokeTarget: true,
+      readHealth: async () => {
+        throw new Error('backend unavailable')
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('Deploy status failed: backend unavailable')
+    expect(errors.join('\n')).toContain('Local fix:')
   })
 })

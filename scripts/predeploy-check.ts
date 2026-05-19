@@ -643,12 +643,21 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployStatus,
-        ['evaluateDeployReadiness', 'buildNextDeploySteps', '--json', 'stagingBlockerCount', 'productionBlockerCount', 'Maprang Deploy Status'],
+        [
+          'evaluateDeployReadiness',
+          'buildNextDeploySteps',
+          '--json',
+          'stagingBlockerCount',
+          'productionBlockerCount',
+          'Maprang Deploy Status',
+          'DeployStatusRunnerOptions',
+          'if (import.meta.main) process.exit(await runDeployStatus())',
+        ],
         'scripts/deploy-status.ts',
       )
       requireIncludes(
         deployStatusTest,
-        ['buildDeployStatusPayload', 'formatDeployStatusText', 'top-level readiness counts', 'local URL and CORS blockers'],
+        ['buildDeployStatusPayload', 'formatDeployStatusText', 'top-level readiness counts', 'local URL and CORS blockers', 'runs deploy status JSON through an importable runner'],
         'scripts/deploy-status.test.ts',
       )
       requireIncludes(
