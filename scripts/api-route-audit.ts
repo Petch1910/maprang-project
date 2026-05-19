@@ -1,5 +1,5 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { readFile, readdir, stat } from 'node:fs/promises'
+import { join, relative } from 'node:path'
 
 const root = join(import.meta.dir, '..')
 
@@ -14,17 +14,7 @@ export type RouteCoverage = {
   note: string
 }
 
-const routeFiles = [
-  'apps/backend/index.ts',
-  'apps/backend/src/admin.routes.ts',
-  'apps/backend/src/character.routes.ts',
-  'apps/backend/src/chat.routes.ts',
-  'apps/backend/src/health.routes.ts',
-  'apps/backend/src/lore.routes.ts',
-  'apps/backend/src/report.routes.ts',
-  'apps/backend/src/upload.routes.ts',
-  'apps/backend/src/user.routes.ts',
-]
+const routeFileTargets = ['apps/backend/index.ts', 'apps/backend/src']
 
 export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /': {
@@ -317,10 +307,42 @@ export function discoverRoutesFromSource(file: string, content: string) {
   return routes
 }
 
-export async function discoverRoutes(files = routeFiles, rootDir = root) {
+function normalizeRepoPath(value: string) {
+  return value.replaceAll('\\', '/')
+}
+
+function shouldScanRouteFile(file: string) {
+  const normalized = normalizeRepoPath(file)
+  return normalized === 'apps/backend/index.ts' || /\.routes\.tsx?$/.test(normalized)
+}
+
+async function collectRouteFilesFromTarget(target: string, rootDir: string): Promise<string[]> {
+  const absoluteTarget = join(rootDir, target)
+  const targetStat = await stat(absoluteTarget)
+  if (targetStat.isFile()) return shouldScanRouteFile(target) ? [normalizeRepoPath(target)] : []
+  if (!targetStat.isDirectory()) return []
+
+  const entries = await readdir(absoluteTarget, { withFileTypes: true })
+  const nested = await Promise.all(
+    entries.map((entry) => {
+      const absoluteEntry = join(absoluteTarget, entry.name)
+      const relativeEntry = normalizeRepoPath(relative(rootDir, absoluteEntry))
+      if (entry.isDirectory()) return collectRouteFilesFromTarget(relativeEntry, rootDir)
+      return shouldScanRouteFile(relativeEntry) ? [relativeEntry] : []
+    }),
+  )
+  return nested.flat()
+}
+
+export async function collectRouteFiles(rootDir = root, targets = routeFileTargets) {
+  return [...new Set((await Promise.all(targets.map((target) => collectRouteFilesFromTarget(target, rootDir)))).flat())].sort()
+}
+
+export async function discoverRoutes(files?: string[], rootDir = root) {
+  const routeFiles = files ?? (await collectRouteFiles(rootDir))
   const routes: DiscoveredRoute[] = []
 
-  for (const file of files) {
+  for (const file of routeFiles) {
     const content = await readFile(join(rootDir, file), 'utf8')
     routes.push(...discoverRoutesFromSource(file, content))
   }

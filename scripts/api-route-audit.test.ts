@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'bun:test'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import {
   auditRouteCoverage,
+  collectRouteFiles,
   discoverRoutes,
   discoverRoutesFromSource,
   routeCoverage,
@@ -11,6 +15,25 @@ import {
 } from './api-route-audit'
 
 describe('api route audit', () => {
+  test('collects backend index and route files automatically', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'maprang-api-route-audit-'))
+    try {
+      await mkdir(join(root, 'apps/backend/src/nested'), { recursive: true })
+      await writeFile(join(root, 'apps/backend/index.ts'), 'new Elysia().get("/", () => ({}))')
+      await writeFile(join(root, 'apps/backend/src/chat.routes.ts'), 'new Elysia().post("/chat", () => ({}))')
+      await writeFile(join(root, 'apps/backend/src/nested/lore.routes.ts'), 'new Elysia().get("/lore", () => ({}))')
+      await writeFile(join(root, 'apps/backend/src/not-a-route.ts'), 'new Elysia().get("/hidden", () => ({}))')
+
+      expect(await collectRouteFiles(root)).toEqual([
+        'apps/backend/index.ts',
+        'apps/backend/src/chat.routes.ts',
+        'apps/backend/src/nested/lore.routes.ts',
+      ])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
   test('discovers Elysia routes from source and ignores non-route paths', () => {
     const routes = discoverRoutesFromSource(
       'fixture.routes.ts',
