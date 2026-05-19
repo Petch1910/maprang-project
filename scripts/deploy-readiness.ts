@@ -70,8 +70,8 @@ export type DeployReadiness = {
 }
 
 const liveVerificationBlockers = new Set([
-  'chat provider live smoke is not marked verified',
-  'image generation live smoke is not marked verified',
+  'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน',
+  'live smoke ของ image generation ยังไม่ได้ยืนยันผ่าน',
 ])
 
 export function isLocalOrigin(origin: string) {
@@ -143,58 +143,58 @@ export function evaluateDeployReadiness(
 
   if (options.isLocalSmokeTarget) {
     addProductionBlocker(
-      'backend URL is local',
-      'set SMOKE_API_BASE_URL and frontend VITE_API_BASE_URL to the deployed backend URL',
+      'backend URL ยังเป็น local',
+      'ตั้ง SMOKE_API_BASE_URL และ frontend VITE_API_BASE_URL เป็น deployed backend URL',
     )
   }
   if (health.security?.authMode !== 'supabase-jwt') {
     addProductionBlocker(
-      'auth mode is not Supabase JWT',
-      'set SUPABASE_URL, SUPABASE_JWT_ISSUER, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY in the backend',
+      'auth mode ยังไม่ใช่ Supabase JWT',
+      'ตั้ง SUPABASE_URL, SUPABASE_JWT_ISSUER, SUPABASE_ANON_KEY, และ SUPABASE_SERVICE_ROLE_KEY ใน backend',
     )
   }
   if (health.security?.avatarStorage !== 'supabase' || health.security?.avatarStorageAccess !== 'signed') {
     addProductionBlocker(
-      'avatar storage is not Supabase signed URL',
-      'run `bun run supabase:storage:setup`, then set STORAGE_PROVIDER=supabase and SUPABASE_STORAGE_ACCESS=signed on the backend',
+      'avatar storage ยังไม่ใช่ Supabase signed URL',
+      'รัน `bun run supabase:storage:setup` แล้วตั้ง STORAGE_PROVIDER=supabase และ SUPABASE_STORAGE_ACCESS=signed บน backend',
     )
   }
   if (!health.security?.corsOrigins?.length || health.security.corsOrigins.some(isUnsafeCorsOrigin)) {
     addProductionBlocker(
-      'CORS_ORIGINS is empty, local, or non-https',
-      'set CORS_ORIGINS to the real https frontend domain only',
+      'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https',
+      'ตั้ง CORS_ORIGINS เป็น frontend domain จริงแบบ https เท่านั้น',
     )
   }
   if (!health.knowledge?.structured?.ok) {
     addProductionBlocker(
-      'structured knowledge is not valid',
-      'run `bun run knowledge:audit`, fix missing or invalid files in knowledge/structured, then rerun smoke doctor',
+      'คลังความรู้ structured ยังไม่ผ่าน',
+      'รัน `bun run knowledge:audit`, แก้ไฟล์ที่หายหรือไม่ถูกต้องใน knowledge/structured แล้วรัน smoke doctor ใหม่',
     )
   }
   if (!health.checks.openRouterConfigured) {
-    addProductionBlocker('OPENROUTER_API_KEY is missing', 'set OPENROUTER_API_KEY in the backend host secrets')
+    addProductionBlocker('OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า', 'ตั้ง OPENROUTER_API_KEY ใน backend host secrets')
   } else if (!(health.model?.chatProvider?.productionReady ?? health.model?.chatProvider?.liveVerified)) {
     addProductionBlocker(
-      'chat provider live smoke is not marked verified',
-      `run \`${health.model?.chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'}\` or \`bun run api:smoke:live\` against staging/production and set CHAT_PROVIDER_LIVE_VERIFIED=1 after it passes`,
+      'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน',
+      `รัน \`${health.model?.chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'}\` หรือ \`bun run api:smoke:live\` กับ staging/production แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน`,
     )
   }
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
     addProductionBlocker(
-      'image generation provider is missing',
-      'set IMAGE_GENERATION_API_KEY or OPENAI_API_KEY in the backend host secrets',
+      'image generation provider ยังไม่ได้ตั้งค่า',
+      'ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ใน backend host secrets',
     )
   } else if (!(health.model?.imageGeneration?.productionReady ?? health.model?.imageGeneration?.liveVerified)) {
     addProductionBlocker(
-      'image generation live smoke is not marked verified',
-      `run \`${health.model?.imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'}\` or \`bun run api:smoke:live\` against staging/production and set IMAGE_GENERATION_LIVE_VERIFIED=1 after it passes`,
+      'live smoke ของ image generation ยังไม่ได้ยืนยันผ่าน',
+      `รัน \`${health.model?.imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'}\` หรือ \`bun run api:smoke:live\` กับ staging/production แล้วตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1 หลังผ่าน`,
     )
   }
   for (const name of health.env?.missingRequired ?? []) {
-    addProductionBlocker(`${name} is missing`, `set ${name} in the backend host secrets or fix the placeholder value`)
+    addProductionBlocker(`${name} ยังไม่ได้ตั้งค่า`, `ตั้ง ${name} ใน backend host secrets หรือแก้ placeholder value`)
   }
   for (const issue of health.env?.invalid ?? []) {
-    addProductionBlocker(`invalid env: ${issue}`, 'fix the backend production environment value reported by /health')
+    addProductionBlocker(`production env ไม่ถูกต้อง: ${issue}`, 'แก้ค่า backend production environment ที่ /health รายงาน')
   }
 
   const productionReady = productionBlockers.length === 0
@@ -218,9 +218,9 @@ export function evaluateDeployReadiness(
 
 export function healthFailures(health: HealthPayload) {
   const failures: string[] = []
-  if (!health.ok) failures.push('backend health returned ok=false')
-  if (!health.checks.databaseConfigured) failures.push('DATABASE_URL is not configured')
-  if (!health.checks.databaseConnected) failures.push('database is not connected')
+  if (!health.ok) failures.push('backend health คืน ok=false')
+  if (!health.checks.databaseConfigured) failures.push('DATABASE_URL ยังไม่ได้ตั้งค่า')
+  if (!health.checks.databaseConnected) failures.push('ฐานข้อมูลยังเชื่อมต่อไม่ได้')
   return failures
 }
 
@@ -229,13 +229,13 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
 
   if (!readiness.stagingReady) {
     for (const fix of readiness.stagingFixes) steps.push(fix)
-    steps.push('Run `bun run staging:verify` with SMOKE_API_BASE_URL and SMOKE_ADMIN_API_KEY.')
+    steps.push('รัน `bun run staging:verify` พร้อม SMOKE_API_BASE_URL และ SMOKE_ADMIN_API_KEY')
   } else if (!readiness.productionReady) {
     for (const fix of readiness.productionFixes) steps.push(fix)
-    steps.push('Rerun `bun run production:check` against the staging/production backend.')
+    steps.push('รัน `bun run production:check` ใหม่กับ staging/production backend')
   } else {
-    steps.push('Run `bun run production:check` one final time against the production backend and frontend domains.')
-    steps.push('Fill `RELEASE_HANDOFF.md` with deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, and go/no-go notes.')
+    steps.push('รัน `bun run production:check` รอบสุดท้ายกับ production backend และ frontend domains')
+    steps.push('กรอก `RELEASE_HANDOFF.md` ด้วย deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, และ go/no-go notes')
   }
 
   return steps

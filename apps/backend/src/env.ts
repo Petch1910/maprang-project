@@ -82,44 +82,44 @@ function invalidProductionValues() {
     try {
       const url = new URL(origin)
       if (url.protocol !== 'https:') {
-        invalid.push('CORS_ORIGINS must use https origins in production')
+        invalid.push('CORS_ORIGINS ต้องเป็น https origin ใน production')
         break
       }
       if (['localhost', '127.0.0.1', '::1'].includes(url.hostname)) {
-        invalid.push('CORS_ORIGINS must not include local origins in production')
+        invalid.push('CORS_ORIGINS ห้ามใส่ localhost/127.0.0.1/::1 ใน production')
         break
       }
     } catch {
-      invalid.push('CORS_ORIGINS must be a comma-separated list of valid origins')
+      invalid.push('CORS_ORIGINS ต้องเป็นรายการ origin ที่ถูกต้องและคั่นด้วย comma')
       break
     }
   }
 
   if (present('ADMIN_API_KEY') && process.env.ADMIN_API_KEY!.trim().length < 32) {
-    invalid.push('ADMIN_API_KEY must be at least 32 characters')
+    invalid.push('ADMIN_API_KEY ต้องยาวอย่างน้อย 32 ตัวอักษร')
   }
 
   if (present('OPENROUTER_API_KEY') && process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-proj-')) {
-    invalid.push('OPENROUTER_API_KEY appears to be an OpenAI project key, not an OpenRouter key')
+    invalid.push('OPENROUTER_API_KEY ดูเหมือนเป็น OpenAI project key ไม่ใช่ OpenRouter key')
   }
   if (present('OPENROUTER_API_KEY') && !process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-or-')) {
-    invalid.push('OPENROUTER_API_KEY must look like an OpenRouter key starting with sk-or-')
+    invalid.push('OPENROUTER_API_KEY ต้องเป็น OpenRouter key ที่ขึ้นต้นด้วย sk-or-')
   }
   if (present('IMAGE_GENERATION_API_KEY') && process.env.IMAGE_GENERATION_API_KEY!.trim().startsWith('sk-or-')) {
-    invalid.push('IMAGE_GENERATION_API_KEY appears to be an OpenRouter key, not an OpenAI image key')
+    invalid.push('IMAGE_GENERATION_API_KEY ดูเหมือนเป็น OpenRouter key ไม่ใช่ OpenAI image key')
   }
   if (present('OPENAI_API_KEY') && process.env.OPENAI_API_KEY!.trim().startsWith('sk-or-')) {
-    invalid.push('OPENAI_API_KEY appears to be an OpenRouter key, not an OpenAI image key')
+    invalid.push('OPENAI_API_KEY ดูเหมือนเป็น OpenRouter key ไม่ใช่ OpenAI image key')
   }
 
   if (present('SUPABASE_URL')) {
     try {
       const supabaseUrl = new URL(process.env.SUPABASE_URL!.trim())
       if (supabaseUrl.protocol !== 'https:' || !supabaseUrl.hostname.endsWith('.supabase.co')) {
-        invalid.push('SUPABASE_URL must be a https://<project-ref>.supabase.co URL')
+        invalid.push('SUPABASE_URL ต้องเป็น URL รูปแบบ https://<project-ref>.supabase.co')
       }
     } catch {
-      invalid.push('SUPABASE_URL must be a valid URL')
+      invalid.push('SUPABASE_URL ต้องเป็น URL ที่ถูกต้อง')
     }
   }
 
@@ -127,64 +127,64 @@ function invalidProductionValues() {
     try {
       const databaseUrl = new URL(process.env.DATABASE_URL!.trim())
       if (!['postgres:', 'postgresql:'].includes(databaseUrl.protocol)) {
-        invalid.push('DATABASE_URL must be a Postgres connection string')
+        invalid.push('DATABASE_URL ต้องเป็น Postgres connection string')
       }
       if (['localhost', '127.0.0.1', '::1'].includes(databaseUrl.hostname)) {
-        invalid.push('DATABASE_URL must not point to localhost in production')
+        invalid.push('DATABASE_URL ห้ามชี้ไป localhost ใน production')
       }
       const user = decodeURIComponent(databaseUrl.username).toLowerCase()
       const password = decodeURIComponent(databaseUrl.password).toLowerCase()
       const databaseName = databaseUrl.pathname.replace(/^\//, '').toLowerCase()
       if (['user', 'username'].includes(user) || ['password', 'pass'].includes(password) || ['database', 'db'].includes(databaseName)) {
-        invalid.push('DATABASE_URL still contains placeholder credentials or database name')
+        invalid.push('DATABASE_URL ยังมี placeholder ของ user/password/database')
       }
       if (databaseUrl.searchParams.get('sslmode') !== 'require') {
-        invalid.push('DATABASE_URL must include sslmode=require in production')
+        invalid.push('DATABASE_URL ต้องมี sslmode=require ใน production')
       }
     } catch {
-      invalid.push('DATABASE_URL must be a valid Postgres connection string')
+      invalid.push('DATABASE_URL ต้องเป็น Postgres connection string ที่ถูกต้อง')
     }
   }
 
   if (present('SUPABASE_URL') && present('SUPABASE_JWT_ISSUER')) {
     const expectedIssuer = `${normalizeUrl(process.env.SUPABASE_URL!)}/auth/v1`
     if (normalizeUrl(process.env.SUPABASE_JWT_ISSUER!) !== expectedIssuer) {
-      invalid.push('SUPABASE_JWT_ISSUER must equal SUPABASE_URL + /auth/v1')
+      invalid.push('SUPABASE_JWT_ISSUER ต้องเท่ากับ SUPABASE_URL + /auth/v1')
     }
   }
 
   if (present('SUPABASE_SERVICE_ROLE_KEY')) {
     const role = jwtRole(process.env.SUPABASE_SERVICE_ROLE_KEY!.trim())
     if (role && role !== 'service_role') {
-      invalid.push('SUPABASE_SERVICE_ROLE_KEY must use a service_role key')
+      invalid.push('SUPABASE_SERVICE_ROLE_KEY ต้องใช้ key role service_role')
     }
   }
 
   if (present('STORAGE_PROVIDER') && process.env.STORAGE_PROVIDER !== 'supabase') {
-    invalid.push('STORAGE_PROVIDER must be supabase in production')
+    invalid.push('STORAGE_PROVIDER ต้องเป็น supabase ใน production')
   }
   if (present('SUPABASE_STORAGE_ACCESS') && process.env.SUPABASE_STORAGE_ACCESS !== 'signed') {
-    invalid.push('SUPABASE_STORAGE_ACCESS must be signed in production')
+    invalid.push('SUPABASE_STORAGE_ACCESS ต้องเป็น signed ใน production')
   }
   if (present('SUPABASE_SIGNED_URL_EXPIRES_IN')) {
     const expiresIn = Number(process.env.SUPABASE_SIGNED_URL_EXPIRES_IN)
     if (!Number.isFinite(expiresIn) || !Number.isInteger(expiresIn) || expiresIn <= 0) {
-      invalid.push('SUPABASE_SIGNED_URL_EXPIRES_IN must be a positive integer')
+      invalid.push('SUPABASE_SIGNED_URL_EXPIRES_IN ต้องเป็นจำนวนเต็มบวก')
     }
   }
   if (present('IMAGE_GENERATION_SIZE') && !/^\d+x\d+$/.test(process.env.IMAGE_GENERATION_SIZE!.trim())) {
-    invalid.push('IMAGE_GENERATION_SIZE must use WIDTHxHEIGHT format')
+    invalid.push('IMAGE_GENERATION_SIZE ต้องใช้รูปแบบ WIDTHxHEIGHT')
   }
   if (present('IMAGE_GENERATION_OUTPUT_FORMAT')) {
     const format = process.env.IMAGE_GENERATION_OUTPUT_FORMAT!.trim()
     if (!['png', 'jpeg', 'webp'].includes(format)) {
-      invalid.push('IMAGE_GENERATION_OUTPUT_FORMAT must be png, jpeg, or webp')
+      invalid.push('IMAGE_GENERATION_OUTPUT_FORMAT ต้องเป็น png, jpeg, หรือ webp')
     }
   }
   if (present('IMAGE_GENERATION_OUTPUT_COMPRESSION')) {
     const compression = Number(process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION)
     if (!Number.isFinite(compression) || !Number.isInteger(compression) || compression < 0 || compression > 100) {
-      invalid.push('IMAGE_GENERATION_OUTPUT_COMPRESSION must be an integer from 0 to 100')
+      invalid.push('IMAGE_GENERATION_OUTPUT_COMPRESSION ต้องเป็นจำนวนเต็มตั้งแต่ 0 ถึง 100')
     }
   }
 
@@ -192,7 +192,7 @@ function invalidProductionValues() {
     if (present(name)) {
       const cost = Number(process.env[name])
       if (!Number.isFinite(cost) || cost < 0) {
-        invalid.push(`${name} must be a non-negative number`)
+        invalid.push(`${name} ต้องเป็นตัวเลข 0 หรือมากกว่า`)
       }
     }
   }
@@ -200,59 +200,59 @@ function invalidProductionValues() {
   if (present('MODEL_TEMPERATURE')) {
     const temperature = Number(process.env.MODEL_TEMPERATURE)
     if (!Number.isFinite(temperature) || temperature < 0 || temperature > 2) {
-      invalid.push('MODEL_TEMPERATURE must be between 0 and 2')
+      invalid.push('MODEL_TEMPERATURE ต้องอยู่ระหว่าง 0 ถึง 2')
     }
   }
   if (present('MODEL_MAX_OUTPUT_TOKENS')) {
     const maxTokens = Number(process.env.MODEL_MAX_OUTPUT_TOKENS)
     if (!Number.isFinite(maxTokens) || !Number.isInteger(maxTokens) || maxTokens < 128 || maxTokens > 2400) {
-      invalid.push('MODEL_MAX_OUTPUT_TOKENS must be an integer from 128 to 2400')
+      invalid.push('MODEL_MAX_OUTPUT_TOKENS ต้องเป็นจำนวนเต็มตั้งแต่ 128 ถึง 2400')
     } else if (maxTokens < 1200) {
-      invalid.push('MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies')
+      invalid.push('MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production')
     }
   }
   if (present('MODEL_MIN_ROLEPLAY_REPLY_CHARS')) {
     const minChars = Number(process.env.MODEL_MIN_ROLEPLAY_REPLY_CHARS)
     if (!Number.isFinite(minChars) || !Number.isInteger(minChars) || minChars < 0 || minChars > 1200) {
-      invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be an integer from 0 to 1200')
+      invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องเป็นจำนวนเต็มตั้งแต่ 0 ถึง 1200')
     } else if (minChars < 320) {
-      invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies')
+      invalid.push('MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production')
     }
   }
   if (present('PROMPT_BUDGET_TOKENS')) {
     const budget = Number(process.env.PROMPT_BUDGET_TOKENS)
     if (!Number.isFinite(budget) || !Number.isInteger(budget) || budget < 1200 || budget > 20000) {
-      invalid.push('PROMPT_BUDGET_TOKENS must be an integer from 1200 to 20000')
+      invalid.push('PROMPT_BUDGET_TOKENS ต้องเป็นจำนวนเต็มตั้งแต่ 1200 ถึง 20000')
     }
   }
   if (present('PROMPT_HISTORY_MAX_MESSAGES')) {
     const messages = Number(process.env.PROMPT_HISTORY_MAX_MESSAGES)
     if (!Number.isFinite(messages) || !Number.isInteger(messages) || messages < 0 || messages > 40) {
-      invalid.push('PROMPT_HISTORY_MAX_MESSAGES must be an integer from 0 to 40')
+      invalid.push('PROMPT_HISTORY_MAX_MESSAGES ต้องเป็นจำนวนเต็มตั้งแต่ 0 ถึง 40')
     }
   }
   if (present('CHAT_PROVIDER_RETRY_ATTEMPTS')) {
     const attempts = Number(process.env.CHAT_PROVIDER_RETRY_ATTEMPTS)
     if (!Number.isFinite(attempts) || !Number.isInteger(attempts) || attempts < 1 || attempts > 5) {
-      invalid.push('CHAT_PROVIDER_RETRY_ATTEMPTS must be an integer from 1 to 5')
+      invalid.push('CHAT_PROVIDER_RETRY_ATTEMPTS ต้องเป็นจำนวนเต็มตั้งแต่ 1 ถึง 5')
     }
   }
   if (present('CHAT_PROVIDER_RETRY_DELAY_MS')) {
     const delayMs = Number(process.env.CHAT_PROVIDER_RETRY_DELAY_MS)
     if (!Number.isFinite(delayMs) || !Number.isInteger(delayMs) || delayMs < 0 || delayMs > 5000) {
-      invalid.push('CHAT_PROVIDER_RETRY_DELAY_MS must be an integer from 0 to 5000')
+      invalid.push('CHAT_PROVIDER_RETRY_DELAY_MS ต้องเป็นจำนวนเต็มตั้งแต่ 0 ถึง 5000')
     }
   }
   if (present('CREATOR_DRAFT_RETRY_ATTEMPTS')) {
     const attempts = Number(process.env.CREATOR_DRAFT_RETRY_ATTEMPTS)
     if (!Number.isFinite(attempts) || !Number.isInteger(attempts) || attempts < 1 || attempts > 5) {
-      invalid.push('CREATOR_DRAFT_RETRY_ATTEMPTS must be an integer from 1 to 5')
+      invalid.push('CREATOR_DRAFT_RETRY_ATTEMPTS ต้องเป็นจำนวนเต็มตั้งแต่ 1 ถึง 5')
     }
   }
   if (present('CREATOR_DRAFT_RETRY_DELAY_MS')) {
     const delayMs = Number(process.env.CREATOR_DRAFT_RETRY_DELAY_MS)
     if (!Number.isFinite(delayMs) || !Number.isInteger(delayMs) || delayMs < 0 || delayMs > 5000) {
-      invalid.push('CREATOR_DRAFT_RETRY_DELAY_MS must be an integer from 0 to 5000')
+      invalid.push('CREATOR_DRAFT_RETRY_DELAY_MS ต้องเป็นจำนวนเต็มตั้งแต่ 0 ถึง 5000')
     }
   }
 
@@ -274,10 +274,10 @@ export function validateRuntimeEnv(options: { throwOnError?: boolean } = {}) {
   }
 
   if (shouldThrow && mode === 'production' && missingRequired.length > 0) {
-    throw new Error(`Missing required production env: ${missingRequired.join(', ')}`)
+    throw new Error(`ขาด production env ที่จำเป็น: ${missingRequired.join(', ')}`)
   }
   if (shouldThrow && mode === 'production' && invalid.length > 0) {
-    throw new Error(`Invalid production env: ${invalid.join(', ')}`)
+    throw new Error(`production env ไม่ถูกต้อง: ${invalid.join(', ')}`)
   }
 
   return {
@@ -292,19 +292,19 @@ export function validateRuntimeEnv(options: { throwOnError?: boolean } = {}) {
 export function logRuntimeEnvStatus() {
   const status = validateRuntimeEnv({ throwOnError: false })
   if (status.missingRequired.length > 0) {
-    console.warn(`[env] Missing required env for production: ${status.missingRequired.join(', ')}`)
+    console.warn(`[env] ขาด production env ที่จำเป็น: ${status.missingRequired.join(', ')}`)
   }
   if (status.missingRecommended.length > 0) {
-    console.warn(`[env] Missing recommended production env: ${status.missingRecommended.join(', ')}`)
+    console.warn(`[env] ขาด production env ที่แนะนำ: ${status.missingRecommended.join(', ')}`)
   }
   if (status.invalid.length > 0) {
-    console.warn(`[env] Invalid production env: ${status.invalid.join(', ')}`)
+    console.warn(`[env] production env ไม่ถูกต้อง: ${status.invalid.join(', ')}`)
   }
   if (status.mode === 'production' && status.missingRequired.length > 0) {
-    throw new Error(`Missing required production env: ${status.missingRequired.join(', ')}`)
+    throw new Error(`ขาด production env ที่จำเป็น: ${status.missingRequired.join(', ')}`)
   }
   if (status.mode === 'production' && status.invalid.length > 0) {
-    throw new Error(`Invalid production env: ${status.invalid.join(', ')}`)
+    throw new Error(`production env ไม่ถูกต้อง: ${status.invalid.join(', ')}`)
   }
   return status
 }

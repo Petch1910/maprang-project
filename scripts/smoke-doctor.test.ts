@@ -55,8 +55,8 @@ describe('smoke doctor report', () => {
 
     expect(report.exitCode).toBe(0)
     expect(report.stdout).toContain('stagingReady: false')
-    expect(report.stdout.join('\n')).toContain('backend URL is local')
-    expect(report.stdout.join('\n')).toContain('Run `bun run staging:verify`')
+    expect(report.stdout.join('\n')).toContain('backend URL ยังเป็น local')
+    expect(report.stdout.join('\n')).toContain('รัน `bun run staging:verify`')
     expect(report.stdout.at(-1)).toBe('Smoke doctor passed.')
   })
 
@@ -91,8 +91,8 @@ describe('smoke doctor report', () => {
     )
 
     expect(report.exitCode).toBe(1)
-    expect(report.stderr.join('\n')).toContain('backend health returned ok=false')
-    expect(report.stderr.join('\n')).toContain('database is not connected')
+    expect(report.stderr.join('\n')).toContain('backend health คืน ok=false')
+    expect(report.stderr.join('\n')).toContain('ฐานข้อมูลยังเชื่อมต่อไม่ได้')
     expect(report.stderr.join('\n')).toContain('Deploy fix:')
   })
 
@@ -153,8 +153,8 @@ describe('smoke doctor report', () => {
         },
         env: {
           invalid: [
-            'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
-            'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+            'MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
+            'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
           ],
         },
       }),
@@ -166,7 +166,7 @@ describe('smoke doctor report', () => {
 
     expect(report.exitCode).toBe(0)
     expect(report.stdout.join('\n')).toContain(
-      'invalid env: MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
+      'production env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
     )
     expect(report.warnings.join('\n')).not.toContain('roleplay reply budget is below the recommended 1600/420')
   })

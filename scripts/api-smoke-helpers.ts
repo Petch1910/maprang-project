@@ -13,7 +13,9 @@ export function isOnlyLiveVerificationFailure(failures: string[]) {
       const normalized = failure.toLowerCase()
       return (
         normalized.includes('chat provider live smoke has not been verified') ||
-        normalized.includes('image generation live smoke has not been verified')
+        normalized.includes('image generation live smoke has not been verified') ||
+        normalized.includes('live smoke ของ chat provider ยังไม่ผ่านการยืนยัน') ||
+        normalized.includes('live smoke ของ image generation ยังไม่ผ่านการยืนยัน')
       )
     })
   )

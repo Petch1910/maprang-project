@@ -106,10 +106,10 @@ describe('deploy readiness evaluation', () => {
     expect(readiness.stagingBlockers).toEqual([])
     expect(readiness.productionBlockers).toEqual([])
     expect(buildNextDeploySteps(readiness)).toContain(
-      'Run `bun run production:check` one final time against the production backend and frontend domains.',
+      'รัน `bun run production:check` รอบสุดท้ายกับ production backend และ frontend domains',
     )
     expect(buildNextDeploySteps(readiness)).toContain(
-      'Fill `RELEASE_HANDOFF.md` with deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, and go/no-go notes.',
+      'กรอก `RELEASE_HANDOFF.md` ด้วย deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, และ go/no-go notes',
     )
   })
 
@@ -137,14 +137,14 @@ describe('deploy readiness evaluation', () => {
 
     expect(readiness.stagingReady).toBe(false)
     expect(readiness.productionReady).toBe(false)
-    expect(readiness.stagingBlockers).toEqual(['backend URL is local', 'CORS_ORIGINS is empty, local, or non-https'])
-    expect(readiness.productionBlockers).toContain('chat provider live smoke is not marked verified')
-    expect(readiness.productionBlockers).toContain('image generation live smoke is not marked verified')
+    expect(readiness.stagingBlockers).toEqual(['backend URL ยังเป็น local', 'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https'])
+    expect(readiness.productionBlockers).toContain('live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน')
+    expect(readiness.productionBlockers).toContain('live smoke ของ image generation ยังไม่ได้ยืนยันผ่าน')
     expect(nextSteps).toContain(
-      'backend URL is local: set SMOKE_API_BASE_URL and frontend VITE_API_BASE_URL to the deployed backend URL',
+      'backend URL ยังเป็น local: ตั้ง SMOKE_API_BASE_URL และ frontend VITE_API_BASE_URL เป็น deployed backend URL',
     )
     expect(nextSteps).not.toContain(
-      'chat provider live smoke is not marked verified: run `bun run smoke:chat` or `bun run api:smoke:live` against staging/production and set CHAT_PROVIDER_LIVE_VERIFIED=1 after it passes',
+      'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน: รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging/production แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน',
     )
   })
 
@@ -170,7 +170,7 @@ describe('deploy readiness evaluation', () => {
       },
       env: {
         missingRequired: ['DATABASE_URL'],
-        invalid: ['CORS_ORIGINS must use https origins in production'],
+        invalid: ['CORS_ORIGINS ต้องเป็น https origin ใน production'],
       },
     })
 
@@ -179,14 +179,14 @@ describe('deploy readiness evaluation', () => {
     expect(readiness.stagingReady).toBe(false)
     expect(readiness.stagingBlockers).toEqual(
       expect.arrayContaining([
-        'auth mode is not Supabase JWT',
-        'avatar storage is not Supabase signed URL',
-        'CORS_ORIGINS is empty, local, or non-https',
-        'structured knowledge is not valid',
-        'OPENROUTER_API_KEY is missing',
-        'image generation provider is missing',
-        'DATABASE_URL is missing',
-        'invalid env: CORS_ORIGINS must use https origins in production',
+        'auth mode ยังไม่ใช่ Supabase JWT',
+        'avatar storage ยังไม่ใช่ Supabase signed URL',
+        'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https',
+        'คลังความรู้ structured ยังไม่ผ่าน',
+        'OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า',
+        'image generation provider ยังไม่ได้ตั้งค่า',
+        'DATABASE_URL ยังไม่ได้ตั้งค่า',
+        'production env ไม่ถูกต้อง: CORS_ORIGINS ต้องเป็น https origin ใน production',
       ]),
     )
   })
@@ -195,8 +195,8 @@ describe('deploy readiness evaluation', () => {
     const lowBudgetHealth = cloneHealth({
       env: {
         invalid: [
-          'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
-          'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+          'MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
+          'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
         ],
       },
     })
@@ -208,12 +208,12 @@ describe('deploy readiness evaluation', () => {
     expect(readiness.productionReady).toBe(false)
     expect(readiness.stagingBlockers).toEqual(
       expect.arrayContaining([
-        'invalid env: MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
-        'invalid env: MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+        'production env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
+        'production env ไม่ถูกต้อง: MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
       ]),
     )
     expect(nextSteps).toContain(
-      'invalid env: MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies: fix the backend production environment value reported by /health',
+      'production env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production: แก้ค่า backend production environment ที่ /health รายงาน',
     )
   })
 
@@ -227,9 +227,9 @@ describe('deploy readiness evaluation', () => {
     })
 
     expect(healthFailures(brokenHealth)).toEqual([
-      'backend health returned ok=false',
-      'DATABASE_URL is not configured',
-      'database is not connected',
+      'backend health คืน ok=false',
+      'DATABASE_URL ยังไม่ได้ตั้งค่า',
+      'ฐานข้อมูลยังเชื่อมต่อไม่ได้',
     ])
   })
 

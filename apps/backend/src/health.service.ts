@@ -26,7 +26,7 @@ import { structuredKnowledgeHealth } from './knowledge.service'
 import { supabaseSignedUrlExpiresInSeconds, supabaseStorageAccess } from './storage.service'
 
 export function summarizeDatabaseError(error: unknown) {
-  if (!(error instanceof Error)) return 'Unknown database error'
+  if (!(error instanceof Error)) return 'ข้อผิดพลาดฐานข้อมูลไม่ทราบสาเหตุ'
 
   const errorWithCode = error as Error & { code?: unknown }
   const code = typeof errorWithCode.code === 'string' ? errorWithCode.code : ''
@@ -35,7 +35,7 @@ export function summarizeDatabaseError(error: unknown) {
       .split('\n')
       .map((line) => line.trim())
       .find((line) => line && !/^Invalid\b.*prisma.*invocation/i.test(line)) ?? ''
-  const detail = firstUsefulLine && firstUsefulLine !== error.name ? firstUsefulLine : 'database connection failed'
+  const detail = firstUsefulLine && firstUsefulLine !== error.name ? firstUsefulLine : 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ'
   const suffix = code ? ` (${code})` : ''
 
   return `${error.name}${suffix}: ${detail}`
@@ -51,29 +51,29 @@ function securityPosture({
   return {
     confidentiality: {
       ok: supabaseAuthConfigured && adminAuthConfigured,
-      detail: supabaseAuthConfigured && adminAuthConfigured ? 'Supabase JWT and admin API key are configured.' : 'Supabase JWT and admin API key must be configured for protected data.',
+      detail: supabaseAuthConfigured && adminAuthConfigured ? 'ตั้งค่า Supabase JWT และ admin API key แล้ว' : 'ข้อมูลที่ป้องกันไว้ต้องมี Supabase JWT และ admin API key',
     },
     integrity: {
       ok: databaseConnected,
       detail: databaseConnected
-        ? 'Prisma query builder, route id validation, owner guards, and migration-backed schema are active.'
-        : 'Database connectivity must pass before data integrity can be trusted.',
+        ? 'Prisma query builder, route id validation, owner guards, และ schema จาก migration พร้อมใช้งาน'
+        : 'ต้องเชื่อมต่อฐานข้อมูลให้ผ่านก่อนจึงจะเชื่อถือ data integrity ได้',
     },
     availability: {
       ok: databaseConnected && openRouterConfigured,
-      detail: databaseConnected && openRouterConfigured ? 'Database, rate-limit buckets, health/readiness, and model provider checks are available.' : 'Database and OpenRouter must both be reachable for stable service.',
+      detail: databaseConnected && openRouterConfigured ? 'ฐานข้อมูล, rate-limit buckets, health/readiness, และ model provider checks พร้อมใช้งาน' : 'บริการจะนิ่งได้เมื่อฐานข้อมูลและ OpenRouter เข้าถึงได้ทั้งคู่',
     },
     authentication: {
       ok: supabaseAuthConfigured,
-      detail: supabaseAuthConfigured ? 'Supabase JWT authentication is configured.' : 'Production must authenticate users with Supabase JWT.',
+      detail: supabaseAuthConfigured ? 'ตั้งค่า Supabase JWT authentication แล้ว' : 'Production ต้องยืนยันผู้ใช้ด้วย Supabase JWT',
     },
     authorization: {
       ok: true,
-      detail: 'Owner/admin checks cover chat, character, lore, report, wallet, and admin actions.',
+      detail: 'Owner/admin checks ครอบคลุม chat, character, lore, report, wallet, และ admin actions',
     },
     accounting: {
       ok: adminAuthConfigured && databaseConnected,
-      detail: adminAuthConfigured && databaseConnected ? 'Usage ledger, token transactions, reports, and admin audit logs are available.' : 'Admin audit/accounting requires admin guard and database connectivity.',
+      detail: adminAuthConfigured && databaseConnected ? 'Usage ledger, token transactions, reports, และ admin audit logs พร้อมใช้งาน' : 'Admin audit/accounting ต้องมี admin guard และฐานข้อมูลที่เชื่อมต่อได้',
     },
   }
 }
@@ -198,33 +198,33 @@ export type HealthStatus = Awaited<ReturnType<typeof loadHealthStatus>>
 export function readinessFailures(health: HealthStatus) {
   const failures: string[] = []
 
-  if (!health.ok) failures.push('backend health is not ok')
-  if (!health.checks.databaseConfigured) failures.push('DATABASE_URL is not configured')
-  if (!health.checks.databaseConnected) failures.push('database is not connected')
-  if (!health.checks.openRouterConfigured) failures.push('OPENROUTER_API_KEY is not configured')
-  if (!health.knowledge.structured.ok) failures.push('structured knowledge is not valid')
+  if (!health.ok) failures.push('สถานะ backend ยังไม่พร้อม')
+  if (!health.checks.databaseConfigured) failures.push('DATABASE_URL ยังไม่ได้ตั้งค่า')
+  if (!health.checks.databaseConnected) failures.push('ฐานข้อมูลยังเชื่อมต่อไม่ได้')
+  if (!health.checks.openRouterConfigured) failures.push('OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า')
+  if (!health.knowledge.structured.ok) failures.push('คลังความรู้ structured ยังไม่ผ่านการตรวจ')
 
   for (const name of health.env.missingRequired) {
-    failures.push(`${name} is missing`)
+    failures.push(`${name} ยังไม่ได้ตั้งค่า`)
   }
   for (const issue of health.env.invalid) {
     failures.push(issue)
   }
 
   if (health.env.mode === 'production') {
-    if (!health.checks.supabaseAuthConfigured) failures.push('Supabase auth is not configured')
-    if (!health.checks.adminAuthConfigured) failures.push('ADMIN_API_KEY is not configured')
-    if (!health.checks.imageGenerationConfigured) failures.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY is not configured')
+    if (!health.checks.supabaseAuthConfigured) failures.push('Supabase Auth ยังไม่ได้ตั้งค่า')
+    if (!health.checks.adminAuthConfigured) failures.push('ADMIN_API_KEY ยังไม่ได้ตั้งค่า')
+    if (!health.checks.imageGenerationConfigured) failures.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY ยังไม่ได้ตั้งค่า')
     if (!health.model.chatProvider.liveVerified) {
-      failures.push('chat provider live smoke has not been verified')
+      failures.push('live smoke ของ chat provider ยังไม่ผ่านการยืนยัน')
     }
     if (!health.model.imageGeneration.liveVerified) {
-      failures.push('image generation live smoke has not been verified')
+      failures.push('live smoke ของ image generation ยังไม่ผ่านการยืนยัน')
     }
-    if (health.security.avatarStorage !== 'supabase') failures.push('production avatar storage must use Supabase')
-    if (health.security.avatarStorageAccess !== 'signed') failures.push('production avatar storage access must use signed URLs')
-    if (health.security.authMode !== 'supabase-jwt') failures.push('production auth mode must use Supabase JWT')
-    if (health.security.adminGuard !== 'api-key') failures.push('production admin guard must use an API key')
+    if (health.security.avatarStorage !== 'supabase') failures.push('production avatar storage ต้องใช้ Supabase')
+    if (health.security.avatarStorageAccess !== 'signed') failures.push('production avatar storage access ต้องใช้ signed URL')
+    if (health.security.authMode !== 'supabase-jwt') failures.push('production auth mode ต้องใช้ Supabase JWT')
+    if (health.security.adminGuard !== 'api-key') failures.push('production admin guard ต้องใช้ API key')
   }
 
   return failures

@@ -224,12 +224,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         backendEnv,
-        ['MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies'],
+        ['MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production'],
         'apps/backend/src/env.ts',
       )
       requireIncludes(
         backendEnvTest,
-        ['rejects production roleplay reply budget below baseline', 'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies'],
+        ['rejects production roleplay reply budget below baseline', 'MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production'],
         'apps/backend/src/env.test.ts',
       )
     },
@@ -775,7 +775,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployReadiness,
-        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'chat provider live smoke is not marked verified', 'RELEASE_HANDOFF.md'],
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน', 'RELEASE_HANDOFF.md'],
         'scripts/deploy-readiness.ts',
       )
       requireIncludes(
@@ -817,7 +817,7 @@ const checks: Check[] = [
           'separates staging blockers from live provider verification blockers',
           'passes a production-ready health payload',
           'turns production roleplay reply budget env errors into blockers',
-          'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
+          'MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
         ],
         'scripts/deploy-readiness.test.ts',
       )

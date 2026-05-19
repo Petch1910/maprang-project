@@ -89,8 +89,8 @@ describe('deploy status formatting', () => {
     expect(text).toContain('Maprang Deploy Status')
     expect(text).toContain('rootIdentity: maprang-backend')
     expect(text).toContain('stagingBlockerCount: 2')
-    expect(text).toContain('backend URL is local')
-    expect(text).toContain('CORS_ORIGINS is empty, local, or non-https')
+    expect(text).toContain('backend URL ยังเป็น local')
+    expect(text).toContain('CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https')
     expect(text).toContain('nextSteps:')
   })
 
@@ -109,7 +109,7 @@ describe('deploy status formatting', () => {
     )
 
     expect(payload.ok).toBe(false)
-    expect(payload.failures).toEqual(['backend health returned ok=false', 'database is not connected'])
+    expect(payload.failures).toEqual(['backend health คืน ok=false', 'ฐานข้อมูลยังเชื่อมต่อไม่ได้'])
     expect(payload.productionReady).toBe(true)
   })
 
@@ -117,7 +117,7 @@ describe('deploy status formatting', () => {
     const health = baseHealth({
       env: {
         mode: 'production',
-        invalid: ['MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies'],
+        invalid: ['MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production'],
       },
     })
 
@@ -134,10 +134,10 @@ describe('deploy status formatting', () => {
     expect(payload.stagingReady).toBe(false)
     expect(payload.productionReady).toBe(false)
     expect(payload.readiness.productionBlockers).toContain(
-      'invalid env: MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+      'production env ไม่ถูกต้อง: MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
     )
     expect(text).toContain(
-      'invalidEnv: MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+      'invalidEnv: MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
     )
     expect(text).toContain('productionReady: false')
   })

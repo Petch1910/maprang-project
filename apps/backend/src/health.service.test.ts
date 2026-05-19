@@ -138,11 +138,11 @@ describe('readiness gate', () => {
       ),
     ).toEqual(
       expect.arrayContaining([
-        'backend health is not ok',
-        'DATABASE_URL is not configured',
-        'database is not connected',
-        'OPENROUTER_API_KEY is not configured',
-        'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY is not configured',
+        'สถานะ backend ยังไม่พร้อม',
+        'DATABASE_URL ยังไม่ได้ตั้งค่า',
+        'ฐานข้อมูลยังเชื่อมต่อไม่ได้',
+        'OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า',
+        'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY ยังไม่ได้ตั้งค่า',
       ]),
     )
   })
@@ -162,7 +162,7 @@ describe('readiness gate', () => {
           },
         }),
       ),
-    ).toEqual(expect.arrayContaining(['structured knowledge is not valid']))
+    ).toEqual(expect.arrayContaining(['คลังความรู้ structured ยังไม่ผ่านการตรวจ']))
   })
 
   test('requires production auth and storage hardening', () => {
@@ -183,12 +183,12 @@ describe('readiness gate', () => {
       ),
     ).toEqual(
       expect.arrayContaining([
-        'Supabase auth is not configured',
-        'ADMIN_API_KEY is not configured',
-        'production avatar storage must use Supabase',
-        'production avatar storage access must use signed URLs',
-        'production auth mode must use Supabase JWT',
-        'production admin guard must use an API key',
+        'Supabase Auth ยังไม่ได้ตั้งค่า',
+        'ADMIN_API_KEY ยังไม่ได้ตั้งค่า',
+        'production avatar storage ต้องใช้ Supabase',
+        'production avatar storage access ต้องใช้ signed URL',
+        'production auth mode ต้องใช้ Supabase JWT',
+        'production admin guard ต้องใช้ API key',
       ]),
     )
   })
@@ -218,8 +218,8 @@ describe('readiness gate', () => {
       ),
     ).toEqual(
       expect.arrayContaining([
-        'chat provider live smoke has not been verified',
-        'image generation live smoke has not been verified',
+        'live smoke ของ chat provider ยังไม่ผ่านการยืนยัน',
+        'live smoke ของ image generation ยังไม่ผ่านการยืนยัน',
       ]),
     )
   })
@@ -230,14 +230,14 @@ describe('readiness gate', () => {
         health({
           env: {
             missingRequired: ['SUPABASE_SERVICE_ROLE_KEY'],
-            invalid: ['CORS_ORIGINS must use https origins in production'],
+            invalid: ['CORS_ORIGINS ต้องเป็น https origin ใน production'],
           },
         }),
       ),
     ).toEqual(
       expect.arrayContaining([
-        'SUPABASE_SERVICE_ROLE_KEY is missing',
-        'CORS_ORIGINS must use https origins in production',
+        'SUPABASE_SERVICE_ROLE_KEY ยังไม่ได้ตั้งค่า',
+        'CORS_ORIGINS ต้องเป็น https origin ใน production',
       ]),
     )
   })
