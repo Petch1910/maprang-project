@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 import {
   auditRouteCoverage,
+  discoverRoutes,
   discoverRoutesFromSource,
+  runApiRouteAudit,
   type DiscoveredRoute,
   type RouteCoverage,
   type RouteKey,
@@ -42,5 +44,18 @@ describe('api route audit', () => {
     expect(result.weakCoverage.map((route) => route.key)).toEqual(['PATCH /characters/:id'])
     expect(result.byOwner.get('platform')).toBe(1)
     expect(result.byOwner.get('unknown')).toBe(1)
+  })
+
+  test('runs the committed API route audit through an importable runner', async () => {
+    const routes = await discoverRoutes()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runApiRouteAudit((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(routes.length).toBeGreaterThan(0)
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toContain('API route audit:')
+    expect(lines.at(-1)).toBe('ok - backend API route audit passed')
+    expect(errors).toEqual([])
   })
 })

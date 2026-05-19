@@ -322,35 +322,39 @@ export async function discoverRoutes(files = routeFiles, rootDir = root) {
   return routes.sort((a, b) => a.key.localeCompare(b.key))
 }
 
-export async function runApiRouteAudit() {
+export async function runApiRouteAudit(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
   const discoveredRoutes = await discoverRoutes()
   const { missingCoverage, staleCoverage, weakCoverage, byOwner } = auditRouteCoverage(discoveredRoutes)
 
-  console.log(`API route audit: ${discoveredRoutes.length} routes discovered`)
+  writeLine(`API route audit: ${discoveredRoutes.length} routes discovered`)
   for (const [owner, count] of [...byOwner.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-    console.log(`- ${owner}: ${count}`)
+    writeLine(`- ${owner}: ${count}`)
   }
 
   if (missingCoverage.length > 0) {
-    console.error('API route audit failed: missing coverage map entries')
-    for (const route of missingCoverage) console.error(`- ${route.key} (${route.file})`)
+    writeError('API route audit failed: missing coverage map entries')
+    for (const route of missingCoverage) writeError(`- ${route.key} (${route.file})`)
   }
 
   if (staleCoverage.length > 0) {
-    console.error('API route audit failed: stale coverage map entries')
-    for (const key of staleCoverage) console.error(`- ${key}`)
+    writeError('API route audit failed: stale coverage map entries')
+    for (const key of staleCoverage) writeError(`- ${key}`)
   }
 
   if (weakCoverage.length > 0) {
-    console.error('API route audit failed: routes with no coverage levels')
-    for (const route of weakCoverage) console.error(`- ${route.key}`)
+    writeError('API route audit failed: routes with no coverage levels')
+    for (const route of weakCoverage) writeError(`- ${route.key}`)
   }
 
   if (missingCoverage.length > 0 || staleCoverage.length > 0 || weakCoverage.length > 0) {
-    process.exit(1)
+    return 1
   }
 
-  console.log('ok - backend API route audit passed')
+  writeLine('ok - backend API route audit passed')
+  return 0
 }
 
-if (import.meta.main) await runApiRouteAudit()
+if (import.meta.main) process.exit(await runApiRouteAudit())

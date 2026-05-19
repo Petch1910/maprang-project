@@ -769,8 +769,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-route-audit.test.ts'),
-        ['discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries'],
+        ['discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries', 'runs the committed API route audit through an importable runner'],
         'scripts/api-route-audit.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/api-route-audit.ts'),
+        ['runApiRouteAudit', 'writeLine', 'writeError', 'if (import.meta.main) process.exit(await runApiRouteAudit())'],
+        'scripts/api-route-audit.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/check-frontend-bundles.test.ts'),
