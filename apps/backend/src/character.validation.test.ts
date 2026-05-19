@@ -33,6 +33,35 @@ describe('character quality relationship validation', () => {
     expect(quality.relationshipIssues).toHaveLength(0)
   })
 
+  test('keeps quality review notes Thai-first', () => {
+    const quality = reviewCharacterQuality({
+      name: 'A',
+      tagline: '',
+      description: '',
+      biography: '',
+      scenario: '',
+      systemPrompt: '',
+      compactPrompt: '',
+      greeting: '',
+      tags: [],
+      status: CharacterStatus.DRAFT,
+    })
+    const copy = quality.notes.join('\n')
+
+    expect(quality.passes).toBe(false)
+    expect(quality.notes).toEqual(
+      expect.arrayContaining([
+        'ชื่อตัวละครควรมีอย่างน้อย 2 ตัวอักษร',
+        'เพิ่มคำโปรยให้ชัดเจน',
+        'พรอมป์ระบบควรอธิบายบุคลิก พฤติกรรม และขอบเขตให้ชัด',
+        'ต้องมีพรอมป์ย่อเพื่อใช้เป็นบริบทแบบกระชับตอนรันแชท',
+        'ข้อความทักทายยังขาดหรือสั้นเกินไป',
+        'เพิ่มแท็กค้นหาอย่างน้อยหนึ่งแท็ก',
+      ]),
+    )
+    expect(copy).not.toMatch(/Name should|Add a clear|Description should|Biography is short|System prompt|Compact prompt|Greeting is missing|discovery tag/i)
+  })
+
   test('passes adult-mode relationship conflicts as creator warnings', () => {
     const quality = reviewCharacterQuality({
       ...strongCharacter,
