@@ -1,6 +1,6 @@
 # Deploy Blockers
 
-Last updated: 2026-05-19
+Last updated: 2026-05-20
 
 ## Active Blockers
 
@@ -10,7 +10,7 @@ Status: blocked until staging/production hosting exists
 
 Current issue:
 - Smoke environment still points at local backend/frontend URLs.
-- Latest local smoke doctor reports 2 staging blockers: backend URL is local, and CORS is empty, local, or non-https.
+- Latest local smoke doctor reports 2 staging blockers: backend URL is local, and CORS is empty, local, or non-https, with Thai-first next-step guidance in the CLI.
 - `bun run deploy:status` now prints the same blockers plus ordered next steps without failing the local handoff.
 
 Required:
@@ -52,7 +52,7 @@ Required:
 
 ## Not Blockers
 
-- Local backend test suite currently passes: 131 pass, 0 fail.
+- Local backend test suite currently passes: 135 pass, 0 fail.
 - Local API smoke currently passes.
 - Frontend build and bundle budget currently pass.
 - Desktop/mobile e2e smoke currently passes.

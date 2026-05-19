@@ -35,6 +35,7 @@ Verified:
 - Backend runtime env validation, health readiness failures, security posture details, deploy readiness blockers, deploy status output, and smoke doctor blocker output now use Thai-first copy while preserving exact env names, commands, and provider names.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
 - Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.
+- Local smoke helper failures for backend health, avatar upload shape/access, missing seed character, and relationship preview now use Thai-first CLI output, with `smoke:local:test` guarding the messages.
 - Backend DB-required check CLI now uses Thai-first failure/local/deploy guidance, with regression coverage in `backend:check:db:test`.
 - Backend DB test gate skip/forced-failure guidance now uses Thai-first output for optional persistence suites, with focused regression coverage in `db.test-gate.test.ts`.
 - Prompt tooling UI copy now uses Thai-first labels for system prompt reset, redacted prompt snapshots, runtime/persona inputs, section budget, and route/menu audit descriptions.

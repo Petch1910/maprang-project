@@ -78,6 +78,7 @@ Results:
 - Backend runtime env/readiness copy now passes Thai-first coverage via `bun test apps\backend\src\env.test.ts apps\backend\src\health.service.test.ts scripts\deploy-readiness.test.ts scripts\deploy-status.test.ts scripts\smoke-doctor.test.ts scripts\api-smoke-helpers.test.ts`, `backend:check`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.
 - Live provider smoke guidance now passes Thai-first coverage via `bun run smoke:image:test`, `bun run smoke:chat:test`, `bun run provider:smoke:guards:test`, `bun run api:smoke:test`, and `predeploy:check`.
+- Local smoke failure guidance now passes Thai-first coverage via `bun run smoke:local:test`.
 - Backend DB-required check guidance now passes Thai-first coverage via `bun run backend:check:db:test`.
 - Backend DB test gate guidance now passes Thai-first coverage via `bun test apps\backend\src\db.test-gate.test.ts` and full `backend:check` with 135 pass.
 - Profile/tag helper and route/menu staging copy now pass Thai-first coverage via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, `route-menu:audit:test`, and `predeploy:check`; the static audit also blocks stale `backend`/`prompt`/`runtime`/`persona` helper wording from returning.

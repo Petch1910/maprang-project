@@ -47,10 +47,10 @@ export function pickSmokeCharacter(characters: SmokeCharacter[] = []) {
 }
 
 export function validateAvatarUpload(upload: AvatarUploadPayload, baseUrl: string) {
-  if (upload.contentType !== 'image/png') throw new Error('Avatar upload returned an unexpected content type')
-  if (!upload.access) throw new Error('Avatar upload response is missing storage access')
+  if (upload.contentType !== 'image/png') throw new Error('อัปโหลด avatar คืน content type ไม่ถูกต้อง')
+  if (!upload.access) throw new Error('ผลอัปโหลด avatar ไม่ระบุ storage access')
   if (!upload.url.startsWith(`${baseUrl}/uploads/avatars/`)) {
-    throw new Error(`Avatar upload returned a non-backend URL: ${upload.url}`)
+    throw new Error(`อัปโหลด avatar คืน URL ที่ไม่ได้มาจาก backend: ${upload.url}`)
   }
 }
 
@@ -97,7 +97,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
     const health = await jsonReader<HealthPayload>('/health')
 
     if (!health.ok || !health.checks.databaseConnected) {
-      throw new Error('Backend health check failed')
+      throw new Error('ตรวจสุขภาพ backend ไม่ผ่าน')
     }
 
     const characters = await jsonReader<{
@@ -107,7 +107,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
     })
 
     const smokeCharacter = pickSmokeCharacter(characters.characters)
-    if (!smokeCharacter) throw new Error('No seeded smoke character was found')
+    if (!smokeCharacter) throw new Error('ไม่พบตัวละคร seed สำหรับ smoke')
 
     const lore = await jsonReader<{ loreEntries?: Array<{ id: string; keyword: string }> }>(`/characters/${smokeCharacter.id}/lore`)
 
@@ -120,7 +120,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
       }),
     })
 
-    if (!preview.preview?.turns?.length) throw new Error('Relationship preview did not return turns')
+    if (!preview.preview?.turns?.length) throw new Error('Relationship preview ไม่คืน turn ทดสอบ')
 
     const form = new FormData()
     form.append('file', new File([new Uint8Array([137, 80, 78, 71])], 'qa.png', { type: 'image/png' }))
@@ -154,7 +154,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
     return 0
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Local smoke failed: ${message}`)
+    writeError(`ตรวจระบบ local ไม่ผ่าน: ${message}`)
     return 1
   }
 }

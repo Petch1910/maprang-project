@@ -31,10 +31,13 @@ describe('local smoke helpers', () => {
 
     expect(() => validateAvatarUpload(upload, 'http://127.0.0.1:3000')).not.toThrow()
     expect(() => validateAvatarUpload({ ...upload, contentType: 'text/plain' }, 'http://127.0.0.1:3000')).toThrow(
-      'unexpected content type',
+      'content type ไม่ถูกต้อง',
     )
     expect(() => validateAvatarUpload({ ...upload, url: 'https://cdn.example.com/avatar.png' }, 'http://127.0.0.1:3000')).toThrow(
-      'non-backend URL',
+      'URL ที่ไม่ได้มาจาก backend',
+    )
+    expect(() => validateAvatarUpload({ ...upload, access: undefined as never }, 'http://127.0.0.1:3000')).toThrow(
+      'ไม่ระบุ storage access',
     )
   })
 
@@ -157,6 +160,6 @@ describe('local smoke helpers', () => {
 
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
-    expect(errors).toEqual(['Local smoke failed: Relationship preview did not return turns'])
+    expect(errors).toEqual(['ตรวจระบบ local ไม่ผ่าน: Relationship preview ไม่คืน turn ทดสอบ'])
   })
 })
