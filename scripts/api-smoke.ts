@@ -601,6 +601,22 @@ await check('GET /characters/:id/lore', async () => {
   return `${payload.loreEntries.length} lore entries`
 })
 
+await check('POST /reports validation', async () => {
+  const payload = await readExpectedError('/reports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({
+      targetType: 'CHARACTER',
+      characterId: "' OR 1=1 --",
+      reason: 'non-mutating report validation smoke',
+    }),
+  })
+  if (payload.status !== 400 || payload.payload.error !== 'invalid_character_id') {
+    throw new Error(`expected invalid_character_id 400, got ${payload.status} ${payload.payload.error ?? 'unknown'}`)
+  }
+  return 'SQL-like report character id rejected before persistence'
+})
+
 await check('PATCH /me/content-settings', async () => {
   const current = await readJson<{ contentSettings?: { isAdult?: boolean; maxRating?: string } }>('/me/content-settings', {
     headers: authHeaders,

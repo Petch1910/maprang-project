@@ -218,8 +218,8 @@ const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
   'POST /reports': {
     owner: 'moderation',
-    coverage: ['e2e', 'backend-test'],
-    note: 'browser smoke opens report dialog; persistence tests cover report creation and access guards',
+    coverage: ['smoke', 'e2e', 'backend-test'],
+    note: 'api-smoke verifies non-mutating invalid-id validation; browser smoke opens report dialog; persistence tests cover report creation and access guards',
   },
   'GET /admin/reports': {
     owner: 'moderation',

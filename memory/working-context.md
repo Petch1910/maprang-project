@@ -60,6 +60,7 @@ Verified:
 - Manual Production Smoke also runs secrets, secret pattern tests, memory, knowledge, eval, security, API route, and route/menu audits before deployed smoke validation.
 - API smoke with admin auth now covers non-mutating admin report PATCH/action validation so moderation admin routes are exercised without resolving or hiding real production records.
 - API smoke with admin auth now covers non-mutating wallet token route validation so the admin wallet route is exercised without changing balances.
+- API smoke now covers non-mutating report creation validation with SQL-like character ids before persistence.
 
 ## Current Production Status
 
