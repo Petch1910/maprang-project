@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 import { backendDbCheckSteps, runBackendDbCheck, type BackendDbCheckStep } from './backend-db-check'
 
@@ -38,5 +40,16 @@ describe('backend db check command plan', () => {
 
     expect(exitCode).toBe(17)
     expect(steps.map((step) => step.command)).toEqual([['bun', 'src/db.required-check.ts']])
+  })
+
+  test('keeps DB check failure guidance Thai-first', async () => {
+    const source = await readFile(join(import.meta.dir, '../apps/backend/src/db.required-check.ts'), 'utf8')
+
+    expect(source).toContain('Database check ไม่ผ่าน')
+    expect(source).toContain('วิธีแก้ local')
+    expect(source).toContain('วิธีแก้ deploy')
+    expect(source).not.toContain('Database check failed')
+    expect(source).not.toContain('Local fix:')
+    expect(source).not.toContain('Deploy fix:')
   })
 })

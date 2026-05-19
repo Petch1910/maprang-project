@@ -11,7 +11,7 @@ function summarizeDatabaseError(error: unknown) {
       .split('\n')
       .map((line) => line.trim())
       .find((line) => line && !/^Invalid\b.*prisma.*invocation/i.test(line)) ?? error.name
-  const detail = usefulLine && usefulLine !== error.name ? usefulLine : 'database connection failed'
+  const detail = usefulLine && usefulLine !== error.name ? usefulLine : 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ'
 
   return `${error.name}${code}: ${detail}`
 }
@@ -19,18 +19,18 @@ function summarizeDatabaseError(error: unknown) {
 const prisma = getPrisma()
 
 if (!prisma) {
-  console.error('Database check failed: DATABASE_URL is not configured.')
+  console.error('Database check ไม่ผ่าน: DATABASE_URL ยังไม่ได้ตั้งค่า')
   process.exit(1)
 }
 
 try {
   await prisma.$queryRaw`SELECT 1`
-  console.log('Database check passed.')
+  console.log('Database check ผ่าน')
   await prisma.$disconnect()
 } catch (error) {
-  console.error(`Database check failed: ${summarizeDatabaseError(error)}`)
-  console.error('Local fix: start Docker Desktop, run `docker compose up -d postgres`, then run migrations.')
-  console.error('Deploy fix: verify DATABASE_URL, migrations, and network access from the backend service.')
+  console.error(`Database check ไม่ผ่าน: ${summarizeDatabaseError(error)}`)
+  console.error('วิธีแก้ local: เปิด Docker Desktop, รัน `docker compose up -d postgres`, แล้วรัน migrations')
+  console.error('วิธีแก้ deploy: ตรวจ DATABASE_URL, migrations, และ network access จาก backend service')
   await prisma.$disconnect().catch(() => undefined)
   process.exit(1)
 }
