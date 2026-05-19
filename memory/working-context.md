@@ -83,6 +83,7 @@ Verified:
 - Image smoke now exports fallback/live payload helpers, and `smoke:image:test` guards skipped live-image output plus placeholder/no-URL/SVG failure handling without spending provider credits.
 - Live chat smoke now exports validation/payload helpers, and `smoke:chat:test` guards provider-failure precedence, token threshold checks, wallet debit matching, and success payload formatting without spending provider credits.
 - Deploy env doctor now keeps core parsing/env/JWT helpers import-safe, and `deploy:doctor:test` guards those helpers without reading real production env files.
+- API smoke now reuses the shared live chat/image provider helpers so live chat provider failures are reported before empty-reply checks and image failure hints stay aligned across smoke scripts.
 
 ## Current Production Status
 

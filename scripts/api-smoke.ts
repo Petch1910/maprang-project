@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { providerFailureHint } from './image-smoke'
+import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
 import { apiBaseUrl, readJson, smokeAuthHeaders } from './smoke-helpers'
 
 type ApiSmokeStatus = 'pass' | 'warn' | 'fail' | 'skip'
@@ -430,11 +432,7 @@ if (live) {
   await check('POST /chat', async () => {
     const minSmokeTokenBalance = parseMinSmokeTokenBalance()
     const wallet = await readJson<{ user?: { tokenBalance?: number } }>('/me/usage', { headers: authHeaders })
-    if ((wallet.user?.tokenBalance ?? 0) < minSmokeTokenBalance) {
-      throw new Error(
-        `Smoke user has ${wallet.user?.tokenBalance ?? 0} tokens, below SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance}. Top up the smoke user before running live API smoke.`,
-      )
-    }
+    assertSmokeUserHasTokenBalance(wallet.user?.tokenBalance ?? 0, minSmokeTokenBalance)
 
     const payload = await readJson<{
       reply?: string
@@ -455,17 +453,9 @@ if (live) {
           'ฉันนั่งลงตรงข้ามเธอแล้ววางแก้วชาไว้ใกล้มือเธอ ก่อนถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า เล่าเป็นฉากโรลเพลย์ที่มีบรรยากาศ ความรู้สึก และจังหวะให้ฉันตอบต่อ',
       }),
     })
-    if (!payload.reply) throw new Error('chat provider returned empty reply')
-    if (payload.usage?.providerFailure) {
-      throw new Error(providerFailureIssue(payload.usage.providerFailure))
-    }
-    if (!payload.chatId) throw new Error('missing chatId')
-    if (!payload.usage?.totalTokens) throw new Error('missing token usage')
     const minRoleplayReplyChars = Math.max(320, healthStatus?.model?.minRoleplayReplyChars ?? 320)
-    if (payload.reply.length < minRoleplayReplyChars) {
-      throw new Error(`reply too short for roleplay QA; expected at least ${minRoleplayReplyChars} chars: ${payload.reply}`)
-    }
-    return `chatId=${payload.chatId}, tokens=${payload.usage.totalTokens}, minBalance=${minSmokeTokenBalance}, replyChars=${payload.reply.length}, minRoleplayReplyChars=${minRoleplayReplyChars}`
+    const chatResult = validateLiveChatSmokeResponse(payload, minRoleplayReplyChars)
+    return `chatId=${chatResult.chatId}, tokens=${chatResult.totalTokens}, minBalance=${minSmokeTokenBalance}, replyChars=${chatResult.replyChars}, minRoleplayReplyChars=${minRoleplayReplyChars}`
   })
 } else {
   record('POST /chat', 'skip', 'live model call skipped; run `bun run api:smoke:live`')
@@ -933,29 +923,6 @@ function tryParseJson(value: string) {
   }
 }
 
-function providerFailureHint(message: string) {
-  const normalized = message.toLowerCase()
-  if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
-    return ' | Fix: increase or reset the image provider billing limit, then rerun `bun run api:smoke:live`.'
-  }
-  if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
-    return ' | Fix: add image provider credits/quota, then rerun `bun run api:smoke:live`.'
-  }
-  if (normalized.includes('401') || normalized.includes('403') || normalized.includes('invalid api key')) {
-    return ' | Fix: replace IMAGE_GENERATION_API_KEY/OPENAI_API_KEY with a valid backend-only image provider key.'
-  }
-  if (normalized.includes('model')) {
-    return ' | Fix: check IMAGE_GENERATION_MODEL and whether the provider account can use that image model.'
-  }
-  return ''
-}
-
-function providerFailureIssue(failure: { code?: string; retryable?: boolean; userMessage?: string }) {
-  const userMessage = failure.userMessage ? ` Message: ${failure.userMessage}` : ''
-  const retry = failure.retryable ? ' Retryable after cooldown.' : ' Requires configuration/quota/admin fix.'
-  return `chat provider failure: ${failure.code ?? 'unknown'}.${retry}${userMessage} Fix: check OpenRouter key, provider credits/quota, rate limits, model access, and outbound network before setting CHAT_PROVIDER_LIVE_VERIFIED=1.`
-}
-
 function isOnlyLiveVerificationFailure(failures: string[]) {
   return (
     failures.length > 0 &&
@@ -967,17 +934,6 @@ function isOnlyLiveVerificationFailure(failures: string[]) {
       )
     })
   )
-}
-
-function parseMinSmokeTokenBalance() {
-  const rawValue = process.env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000'
-  const value = Number(rawValue)
-
-  if (!Number.isInteger(value) || value < 1) {
-    throw new Error(`SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT must be a positive integer. Received: ${rawValue}`)
-  }
-
-  return value
 }
 
 async function loadAdminKey() {
