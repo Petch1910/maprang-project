@@ -76,6 +76,8 @@ const checks: Check[] = [
     name: 'required deploy files exist',
     run: async () => {
       await Promise.all(requiredFiles.map(assertFile))
+      const gitignore = await readRepoFile('.gitignore')
+      requireIncludes(gitignore, ['.env.*', '!.env.example', '!.env.production.example'], '.gitignore')
     },
   },
   {
