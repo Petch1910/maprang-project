@@ -23,8 +23,8 @@ Required:
 - `OPENROUTER_API_KEY`
 - `CHAT_PROVIDER_LIVE_VERIFIED=1` only after live chat smoke passes
 - `MODEL_TEMPERATURE=0.85`
-- `MODEL_MAX_OUTPUT_TOKENS=1200`
-- `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320`
+- `MODEL_MAX_OUTPUT_TOKENS=1600`
+- `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420`
 - `CHAT_PROVIDER_RETRY_ATTEMPTS=2`
 - `CHAT_PROVIDER_RETRY_DELAY_MS=350`
 - `CREATOR_DRAFT_RETRY_ATTEMPTS=3`
@@ -55,7 +55,7 @@ Required for production Creator Studio image generation:
 
 `OPENROUTER_API_KEY` powers creator text drafting and chat responses. It must be an OpenRouter key that starts with `sk-or-`, not an OpenAI `sk-proj-` key. Having a valid-looking key is not enough for production readiness: run `bun run smoke:chat` or `bun run api:smoke:live` against staging first, then set `CHAT_PROVIDER_LIVE_VERIFIED=1` only after the backend returns a real model reply with usage accounting. Real creator avatar generation is a separate image-provider path; if `IMAGE_GENERATION_API_KEY` is not configured, Creator Studio will still draft Thai character content but will label the avatar as a temporary system placeholder.
 
-`MODEL_TEMPERATURE`, `MODEL_MAX_OUTPUT_TOKENS`, and `MODEL_MIN_ROLEPLAY_REPLY_CHARS` control chat feel. Keep `MODEL_MAX_OUTPUT_TOKENS` around `1200` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS` around `320` for roleplay so bots have room to answer with 2-5 short paragraphs instead of one-line replies. If a character response is shorter than this guard and the player did not ask for brevity, the backend makes one continuation pass and charges the combined usage.
+`MODEL_TEMPERATURE`, `MODEL_MAX_OUTPUT_TOKENS`, and `MODEL_MIN_ROLEPLAY_REPLY_CHARS` control chat feel. Keep `MODEL_MAX_OUTPUT_TOKENS` around `1600` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS` around `420` for roleplay so bots have room to answer with 3-6 short paragraphs instead of one-line replies. If a character response is shorter than this guard and the player did not ask for brevity, the backend makes one continuation pass and charges the combined usage.
 
 `CHAT_PROVIDER_RETRY_*` and `CREATOR_DRAFT_RETRY_*` make provider failures less brittle during traffic spikes or truncated JSON responses. The defaults retry chat twice and creator drafting three times with a short delay, while still failing fast for credential, billing, and policy errors.
 

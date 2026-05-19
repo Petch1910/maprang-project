@@ -664,7 +664,7 @@ async function extendShortRoleplayReply({
       { role: 'assistant', content: reply },
       { role: 'user', content: buildRoleplayContinuationInstruction(reply) },
     ],
-    max_tokens: Math.min(modelMaxOutputTokens, 900),
+    max_tokens: Math.min(modelMaxOutputTokens, 1100),
     temperature: Math.min(modelTemperature + 0.1, 2),
   })
   const continuation = completion.choices[0]?.message?.content?.trim() ?? ''

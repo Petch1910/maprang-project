@@ -149,7 +149,7 @@ Local API smoke covers this endpoint and `/admin/evals/local` when `ADMIN_API_KE
 - Fill `RELEASE_HANDOFF.md` after `bun run production:check` passes and before sending real users to the release. Run `bun run release:handoff:check -- --filled` after filling it.
 - Set backend env from `apps/backend/.env.production.example`.
 - Set frontend env from `apps/frontend/.env.production.example`.
-- Keep `MODEL_MAX_OUTPUT_TOKENS=1200` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320` for richer roleplay replies; short character turns get one backend continuation pass unless the player asks for brevity.
+- Keep `MODEL_MAX_OUTPUT_TOKENS=1600` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420` for richer roleplay replies; short character turns get one backend continuation pass unless the player asks for brevity.
 - Keep the default provider retry env values unless staging shows repeated transient 5xx/timeout errors.
 - Run live chat smoke before production and set `CHAT_PROVIDER_LIVE_VERIFIED=1` only after the backend returns a real model reply with token usage.
 - Set `IMAGE_GENERATION_API_KEY` if Creator Studio should generate real avatar images instead of placeholders. Before production, run live image smoke and set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after billing/quota passes.

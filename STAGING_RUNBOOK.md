@@ -26,7 +26,7 @@
 - Deploy backend บน Render หรือ Railway
 - ตั้ง `DATABASE_URL` เป็น Postgres staging จริง พร้อม `sslmode=require`
 - ตั้ง `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, token cost และ rate-limit env
-- ตั้ง `MODEL_TEMPERATURE=0.85`, `MODEL_MAX_OUTPUT_TOKENS=1200`, `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320` และใช้ค่า retry default เพื่อให้แชท roleplay ไม่ตอบสั้นเกินและทน provider timeout ชั่วคราวได้ดีขึ้น
+- ตั้ง `MODEL_TEMPERATURE=0.85`, `MODEL_MAX_OUTPUT_TOKENS=1600`, `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420` และใช้ค่า retry default เพื่อให้แชท roleplay ไม่ตอบสั้นเกินและทน provider timeout ชั่วคราวได้ดีขึ้น
 - ตั้ง `IMAGE_GENERATION_API_KEY` หรือ provider จริง ถ้าต้องการให้ Creator Studio สร้างรูปจริง
 - รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging ให้ผ่านก่อน แล้วค่อยตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`
 - รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging ให้ผ่านก่อน แล้วค่อยตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`

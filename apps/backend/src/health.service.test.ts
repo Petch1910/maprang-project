@@ -28,7 +28,7 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
       outputCostPer1M: 0.4,
       temperature: 0.85,
       maxOutputTokens: 900,
-      minRoleplayReplyChars: 320,
+      minRoleplayReplyChars: 420,
       promptBudgetTokens: 6000,
       promptHistoryMaxMessages: 12,
       maxInputChars: 4000,

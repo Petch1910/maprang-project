@@ -47,10 +47,10 @@ describe('live chat smoke helpers', () => {
   })
 
   test('rejects incomplete or too-short live chat responses', () => {
-    expect(() => validateLiveChatSmokeResponse({ reply: 'hello', usage: { totalTokens: 42 } }, 320)).toThrow(
+    expect(() => validateLiveChatSmokeResponse({ reply: 'hello', usage: { totalTokens: 42 } }, 420)).toThrow(
       'did not create a chat id',
     )
-    expect(() => validateLiveChatSmokeResponse({ reply: 'hello', chatId: 'chat-1', usage: { totalTokens: 42 } }, 320)).toThrow(
+    expect(() => validateLiveChatSmokeResponse({ reply: 'hello', chatId: 'chat-1', usage: { totalTokens: 42 } }, 420)).toThrow(
       'too short',
     )
   })
@@ -58,11 +58,11 @@ describe('live chat smoke helpers', () => {
   test('matches wallet debit and formats success payload', () => {
     const chat = validateLiveChatSmokeResponse(
       {
-        reply: 'ก'.repeat(340),
+        reply: 'ก'.repeat(440),
         chatId: 'chat-1',
         usage: { totalTokens: 88, modelName: 'openrouter/test-model' },
       },
-      320,
+      420,
     )
     const debit = findMatchingChatDebit(
       [
@@ -82,7 +82,7 @@ describe('live chat smoke helpers', () => {
         totalTokens: chat.totalTokens,
         chatDebit: debit!,
         reply: chat.reply,
-        minRoleplayReplyChars: 320,
+        minRoleplayReplyChars: 420,
       }),
     ).toEqual({
       ok: true,
@@ -93,8 +93,8 @@ describe('live chat smoke helpers', () => {
       totalTokens: 88,
       walletTransactionId: 'debit',
       balanceAfter: 1112,
-      replyChars: 340,
-      minRoleplayReplyChars: 320,
+      replyChars: 440,
+      minRoleplayReplyChars: 420,
       nextStep: 'Set CHAT_PROVIDER_LIVE_VERIFIED=1 in this target environment, then rerun production:check.',
       replyPreview: 'ก'.repeat(120),
     })
@@ -111,7 +111,7 @@ describe('live chat smoke helpers', () => {
         return {
           ok: true,
           checks: { databaseConnected: true, openRouterConfigured: true },
-          model: { name: 'openrouter/test-model', minRoleplayReplyChars: 320 },
+          model: { name: 'openrouter/test-model', minRoleplayReplyChars: 420 },
         } as never
       }
       if (path === '/characters?view=admin&limit=10') {
@@ -124,7 +124,7 @@ describe('live chat smoke helpers', () => {
       }
       if (path === '/chat') {
         return {
-          reply: 'ก'.repeat(340),
+          reply: 'ก'.repeat(440),
           chatId: 'chat-1',
           usage: { totalTokens: 88, modelName: 'openrouter/test-model' },
         } as never
@@ -159,7 +159,7 @@ describe('live chat smoke helpers', () => {
         return {
           ok: true,
           checks: { databaseConnected: true, openRouterConfigured: true },
-          model: { name: 'openrouter/test-model', minRoleplayReplyChars: 320 },
+          model: { name: 'openrouter/test-model', minRoleplayReplyChars: 420 },
         } as never
       }
       if (path === '/characters?view=admin&limit=10') {

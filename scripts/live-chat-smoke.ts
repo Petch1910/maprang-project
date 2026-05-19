@@ -149,7 +149,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     const minSmokeTokenBalance = parseMinSmokeTokenBalance(env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000')
 
     const health = await jsonReader<LiveChatSmokeHealthPayload>('/health')
-    const minRoleplayReplyChars = Math.max(320, health.model?.minRoleplayReplyChars ?? 320)
+    const minRoleplayReplyChars = Math.max(420, health.model?.minRoleplayReplyChars ?? 420)
 
     if (!health.ok || !health.checks.databaseConnected) {
       throw new Error('Backend health check failed')

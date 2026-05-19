@@ -485,7 +485,7 @@ if (live) {
           'ฉันนั่งลงตรงข้ามเธอแล้ววางแก้วชาไว้ใกล้มือเธอ ก่อนถามเบาๆว่า วันนี้ดูเหนื่อยนะ เกิดอะไรขึ้นหรือเปล่า เล่าเป็นฉากโรลเพลย์ที่มีบรรยากาศ ความรู้สึก และจังหวะให้ฉันตอบต่อ',
       }),
     })
-    const minRoleplayReplyChars = Math.max(320, healthStatus?.model?.minRoleplayReplyChars ?? 320)
+    const minRoleplayReplyChars = Math.max(420, healthStatus?.model?.minRoleplayReplyChars ?? 420)
     const chatResult = validateLiveChatSmokeResponse(payload, minRoleplayReplyChars)
     return `chatId=${chatResult.chatId}, tokens=${chatResult.totalTokens}, minBalance=${minSmokeTokenBalance}, replyChars=${chatResult.replyChars}, minRoleplayReplyChars=${minRoleplayReplyChars}`
   })

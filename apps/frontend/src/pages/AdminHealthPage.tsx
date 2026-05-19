@@ -130,14 +130,14 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
     },
     {
       label: 'งบคำตอบแชท',
-      ok: Boolean(model && maxOutputTokens >= 700 && minRoleplayReplyChars >= 240),
+      ok: Boolean(model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320),
       detail: model
         ? `ใช้ ${model.name}, คำตอบสูงสุด ${model.maxOutputTokens ?? 'default'} โทเคน, roleplay ขั้นต่ำ ${model.minRoleplayReplyChars ?? 'default'} ตัวอักษร, temperature ${model.temperature ?? 'default'}, retry แชท ${providerRetry?.chatAttempts ?? 'default'} ครั้ง`
         : 'รอ health response จาก backend',
       action:
-        model && maxOutputTokens >= 700 && minRoleplayReplyChars >= 240
+        model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320
           ? 'ค่าความยาวตอบกลับพร้อมสำหรับ roleplay แล้ว'
-          : 'ตั้ง MODEL_MAX_OUTPUT_TOKENS=1200 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=320 เพื่อลดคำตอบสั้นเกินไป',
+          : 'ตั้ง MODEL_MAX_OUTPUT_TOKENS=1600 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=420 เพื่อลดคำตอบสั้นเกินไป',
       scope: 'local',
     },
     {

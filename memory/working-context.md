@@ -32,6 +32,7 @@ Verified:
 - Project memory, runtime knowledge, and deterministic prompt/context evals are part of the local QA gate.
 - Backend health/readiness now reports structured knowledge pack status.
 - Chat provider failures are typed as `providerFailure`, returned with zero usage/cost, surfaced in Chat UI, and read directly by live smoke scripts.
+- Roleplay reply depth defaults now favor longer Thai roleplay turns: `MODEL_MAX_OUTPUT_TOKENS=1600`, `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420`, stronger default system prompt guidance, and a larger continuation budget when the first reply is too short.
 - Relationship ladder now supports the expanded Thai seed set from hostile to committed routes: enemy, disliked, rival, bickering rival, acquaintance, friend, close friend, ride-or-die, crush, friend-crush, dating trial, talking stage, partner, toxic partner, lover, life partner, spouse, toxic spouse, and soulmate.
 - Frontend relationship status labels are centralized so Explore, Chat, My Chats, Events, Relationship preview, and debug panels use the same Thai display names.
 - Relationship presets now expose API surfaces: `contract` for Character Lobby relationship contracts and `creator` for Creator Studio tag presets. Character Lobby loads `contract` from the backend and falls back to local copy only if the API is unavailable. Backend tests and API smoke verify that contract excludes creator-only presets while Creator Studio keeps them available.

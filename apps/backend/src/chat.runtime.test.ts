@@ -195,7 +195,7 @@ describe('roleplay reply quality guard', () => {
   })
 
   test('builds continuation instruction that avoids repeating the previous answer', () => {
-    const instruction = buildRoleplayContinuationInstruction('เธอหลบตา', 320)
+    const instruction = buildRoleplayContinuationInstruction('เธอหลบตา', 420)
 
     expect(instruction).toContain('Do not repeat')
     expect(instruction).toContain('2-4 short paragraphs')
