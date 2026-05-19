@@ -42,6 +42,7 @@ const requiredFiles = [
   'scripts/deploy-env-doctor.ts',
   'scripts/deploy-env-doctor-self-test.ts',
   'scripts/deploy-readiness.ts',
+  'scripts/deploy-readiness.test.ts',
   'scripts/deploy-status.ts',
   'scripts/eval-local.ts',
   'scripts/knowledge-audit.ts',
@@ -238,6 +239,7 @@ const checks: Check[] = [
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
+          '"deploy:readiness:test"',
           '"deploy:doctor"',
           '"deploy:doctor:self-test"',
           '"qa:seed"',
@@ -399,6 +401,7 @@ const checks: Check[] = [
       const deployReadiness = await readRepoFile('scripts/deploy-readiness.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       requireIncludes(packageJson, ['"deploy:status"', 'bun scripts/deploy-status.ts'], 'package.json')
+      requireIncludes(packageJson, ['"deploy:readiness:test"', 'bun test scripts/deploy-readiness.test.ts'], 'package.json')
       requireIncludes(
         smokeDoctor,
         ['evaluateDeployReadiness', 'buildHealthRows', 'healthFailures'],
@@ -413,6 +416,11 @@ const checks: Check[] = [
         deployReadiness,
         ['evaluateDeployReadiness', 'buildNextDeploySteps', 'chat provider live smoke is not marked verified'],
         'scripts/deploy-readiness.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/deploy-readiness.test.ts'),
+        ['separates staging blockers from live provider verification blockers', 'passes a production-ready health payload'],
+        'scripts/deploy-readiness.test.ts',
       )
       requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json'], 'DEPLOYMENT_QA.md')
     },

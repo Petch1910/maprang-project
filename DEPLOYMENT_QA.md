@@ -40,6 +40,12 @@ For CI logs or dashboards that need structured output:
 bun scripts/deploy-status.ts --json
 ```
 
+The underlying readiness rules have a deterministic self-test:
+
+```bash
+bun run deploy:readiness:test
+```
+
 To seed repeatable browser QA data and run the Playwright end-to-end smoke over desktop and mobile viewports:
 
 ```bash
