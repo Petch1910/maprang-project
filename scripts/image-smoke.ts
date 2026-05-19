@@ -1,6 +1,6 @@
 import { apiBaseUrl, readJson } from './smoke-helpers'
 
-type HealthPayload = {
+export type ImageSmokeHealthPayload = {
   ok: boolean
   checks?: {
     imageGenerationConfigured?: boolean
@@ -16,7 +16,7 @@ type HealthPayload = {
   }
 }
 
-type CreatorDraftPayload = {
+export type CreatorDraftPayload = {
   source?: 'ai' | 'fallback'
   modelName?: string
   image?: {
@@ -26,6 +26,10 @@ type CreatorDraftPayload = {
     note?: string
   }
   warnings?: string[]
+}
+
+export function imageGenerationIsConfigured(health: ImageSmokeHealthPayload) {
+  return Boolean(health.checks?.imageGenerationConfigured || health.model?.imageGeneration?.configured)
 }
 
 export function shouldRunLiveImageSmoke(argv = process.argv, env = process.env) {
@@ -53,10 +57,65 @@ export function providerFailureHint(message: string) {
   return ''
 }
 
+export function buildSkippedImageSmokePayload(health: ImageSmokeHealthPayload, baseUrl = apiBaseUrl) {
+  return {
+    ok: true,
+    apiBaseUrl: baseUrl,
+    live: false,
+    imageGenerationConfigured: true,
+    imageModel: health.model?.imageGeneration?.model ?? null,
+    imageStatus: health.model?.imageGeneration?.status ?? null,
+    imageProductionReady: health.model?.imageGeneration?.productionReady ?? false,
+    skipped:
+      'Live provider call was skipped. Set SMOKE_IMAGE_LIVE=1 or run `bun run smoke:image:live` to generate a real image during staging/production QA.',
+  }
+}
+
+export function liveImageDraftFailure(draft: CreatorDraftPayload) {
+  if (draft.image?.provider !== 'configured') {
+    const warnings = draft.warnings?.filter(Boolean).join('; ')
+    const issue = warnings || draft.image?.note || 'no warnings'
+    return `Image smoke fell back to placeholder: ${issue}${providerFailureHint(issue)}`
+  }
+
+  if (!draft.image.url) {
+    return 'Image smoke returned configured provider but no image URL'
+  }
+
+  if (draft.image.url.startsWith('data:image/svg+xml')) {
+    return 'Image smoke returned the local placeholder SVG instead of a generated image'
+  }
+
+  return null
+}
+
+export function buildLiveImageSmokePayload(
+  draft: CreatorDraftPayload,
+  health: ImageSmokeHealthPayload,
+  options: {
+    baseUrl?: string
+    elapsedMs: number
+  },
+) {
+  return {
+    ok: true,
+    apiBaseUrl: options.baseUrl ?? apiBaseUrl,
+    live: true,
+    source: draft.source ?? null,
+    modelName: draft.modelName ?? null,
+    imageModel: health.model?.imageGeneration?.model ?? null,
+    imageStatus: health.model?.imageGeneration?.status ?? null,
+    imageProvider: draft.image?.provider,
+    imageUrlKind: draft.image?.url?.startsWith('data:') ? 'data-url' : 'remote-or-upload-url',
+    elapsedMs: options.elapsedMs,
+    warnings: draft.warnings ?? [],
+  }
+}
+
 export async function runImageSmoke() {
   const live = shouldRunLiveImageSmoke()
-  const health = await readJson<HealthPayload>('/health')
-  const imageConfigured = Boolean(health.checks?.imageGenerationConfigured || health.model?.imageGeneration?.configured)
+  const health = await readJson<ImageSmokeHealthPayload>('/health')
+  const imageConfigured = imageGenerationIsConfigured(health)
 
   if (!imageConfigured) {
     throw new Error(
@@ -65,23 +124,7 @@ export async function runImageSmoke() {
   }
 
   if (!live) {
-    console.log(
-      JSON.stringify(
-        {
-          ok: true,
-          apiBaseUrl,
-          live: false,
-          imageGenerationConfigured: true,
-          imageModel: health.model?.imageGeneration?.model ?? null,
-          imageStatus: health.model?.imageGeneration?.status ?? null,
-          imageProductionReady: health.model?.imageGeneration?.productionReady ?? false,
-          skipped:
-            'Live provider call was skipped. Set SMOKE_IMAGE_LIVE=1 or run `bun run smoke:image:live` to generate a real image during staging/production QA.',
-        },
-        null,
-        2,
-      ),
-    )
+    console.log(JSON.stringify(buildSkippedImageSmokePayload(health), null, 2))
     return
   }
 
@@ -100,35 +143,14 @@ export async function runImageSmoke() {
     }),
   })
 
-  if (draft.image?.provider !== 'configured') {
-    const warnings = draft.warnings?.filter(Boolean).join('; ')
-    const issue = warnings || draft.image?.note || 'no warnings'
-    throw new Error(`Image smoke fell back to placeholder: ${issue}${providerFailureHint(issue)}`)
-  }
-
-  if (!draft.image.url) {
-    throw new Error('Image smoke returned configured provider but no image URL')
-  }
-
-  if (draft.image.url.startsWith('data:image/svg+xml')) {
-    throw new Error('Image smoke returned the local placeholder SVG instead of a generated image')
-  }
+  const failure = liveImageDraftFailure(draft)
+  if (failure) throw new Error(failure)
 
   console.log(
     JSON.stringify(
-      {
-        ok: true,
-        apiBaseUrl,
-        live: true,
-        source: draft.source ?? null,
-        modelName: draft.modelName ?? null,
-        imageModel: health.model?.imageGeneration?.model ?? null,
-        imageStatus: health.model?.imageGeneration?.status ?? null,
-        imageProvider: draft.image.provider,
-        imageUrlKind: draft.image.url.startsWith('data:') ? 'data-url' : 'remote-or-upload-url',
+      buildLiveImageSmokePayload(draft, health, {
         elapsedMs: Date.now() - startedAt,
-        warnings: draft.warnings ?? [],
-      },
+      }),
       null,
       2,
     ),

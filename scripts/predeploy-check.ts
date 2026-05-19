@@ -66,6 +66,7 @@ const requiredFiles = [
   'scripts/provider-smoke-guards.test.ts',
   'scripts/smoke-doctor.test.ts',
   'scripts/readiness-smoke.test.ts',
+  'scripts/image-smoke.test.ts',
   'scripts/local-smoke.test.ts',
   'scripts/e2e-smoke.test.ts',
   'scripts/check-secrets.test.ts',
@@ -323,6 +324,7 @@ const checks: Check[] = [
           '"provider:smoke:guards:test"',
           '"smoke:doctor:test"',
           '"smoke:ready:test"',
+          '"smoke:image:test"',
           '"smoke:local:test"',
           '"e2e:smoke:test"',
           '"api:smoke"',
@@ -404,6 +406,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('smoke:ready:test')) {
         throw new Error('package.json qa:local must run smoke:ready:test so readiness smoke output regressions are caught')
+      }
+      if (!qaLocal.includes('smoke:image:test')) {
+        throw new Error('package.json qa:local must run smoke:image:test so image smoke fallback regressions are caught')
       }
       if (!qaLocal.includes('smoke:local:test')) {
         throw new Error('package.json qa:local must run smoke:local:test so local smoke helper regressions are caught')
@@ -652,6 +657,8 @@ const checks: Check[] = [
           'smoke-doctor.test.ts',
           '"smoke:ready:test"',
           'readiness-smoke.test.ts',
+          '"smoke:image:test"',
+          'image-smoke.test.ts',
           '"smoke:local:test"',
           'local-smoke.test.ts',
         ],
@@ -822,6 +829,7 @@ const checks: Check[] = [
           'bun run provider:smoke:guards:test',
           'bun run smoke:doctor:test',
           'bun run smoke:ready:test',
+          'bun run smoke:image:test',
           'bun run smoke:local:test',
           'bun run e2e:smoke:test',
           'bun run backend:check:db:test',
@@ -866,6 +874,7 @@ const checks: Check[] = [
           'bun run provider:smoke:guards:test',
           'bun run smoke:doctor:test',
           'bun run smoke:ready:test',
+          'bun run smoke:image:test',
           'bun run smoke:local:test',
           'bun run e2e:smoke:test',
           'bun run backend:check:db:test',

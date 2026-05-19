@@ -63,6 +63,7 @@ jobs:
       - run: bun run provider:smoke:guards:test
       - run: bun run smoke:doctor:test
       - run: bun run smoke:ready:test
+      - run: bun run smoke:image:test
       - run: bun run smoke:local:test
       - run: bun run e2e:smoke:test
       - run: bun run backend:check:db:test
