@@ -833,7 +833,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.test.ts'),
-        ['reports buttons without explicit type', 'reports placeholder links', 'runs the committed frontend static audit through an importable runner'],
+        ['reports buttons without explicit type', 'reports placeholder links', 'reports Thai placeholder and mojibake text regressions', 'runs the committed frontend static audit through an importable runner'],
         'scripts/frontend-static-audit.test.ts',
       )
       requireIncludes(

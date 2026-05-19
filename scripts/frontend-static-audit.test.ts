@@ -51,6 +51,26 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports Thai placeholder and mojibake text regressions', () => {
+    const findings = auditSuspiciousPatterns(
+      [
+        '<p>เร็วๆ นี้</p>',
+        '<p>broken\uFFFDtext</p>',
+        '<p>\u0e40\u0e18\u2022\u0e40\u0e19\u0089องเปิดเมนู</p>',
+      ].join('\n'),
+      'ThaiFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual(
+      expect.arrayContaining([
+        'contains Thai coming-soon placeholder copy',
+        'contains replacement character, likely broken text encoding',
+        'contains C1 control character, likely mojibake',
+        'contains common Thai UTF-8 mojibake sequence',
+      ]),
+    )
+  })
+
   test('combines accessibility and placeholder findings with stable line numbers', () => {
     const content = `
       export function Fixture() {

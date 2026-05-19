@@ -135,8 +135,12 @@ export const suspiciousPatterns = [
   { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'throws not implemented in frontend source' },
   { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
   { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'contains Thai coming-soon placeholder copy' },
-  { pattern: /\u0e4f\u0e1f\u0e1d/g, message: 'contains replacement character, likely broken text encoding' },
+  { pattern: /\uFFFD/g, message: 'contains replacement character, likely broken text encoding' },
   { pattern: /[\u0080-\u009F]/g, message: 'contains C1 control character, likely mojibake' },
+  {
+    pattern: /(?:\u0e40\u0e18[\u2022\u0084\u0081\u0099\u0088]|\u0e40\u0e19[\u20ac\u0089\u0088]|\u0e42\u0e40\u0e18)/g,
+    message: 'contains common Thai UTF-8 mojibake sequence',
+  },
   { pattern: /(?:\u0e23\u0083|\u0e23\u0082|\u0e23\u00a0\u0e22\u0e18|\u0e23\u00a0\u0e22\u0e19)/g, message: 'contains common UTF-8 mojibake sequence' },
 ]
 
