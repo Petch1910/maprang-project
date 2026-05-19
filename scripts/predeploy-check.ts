@@ -480,6 +480,7 @@ const checks: Check[] = [
           'SUPABASE_SERVICE_ROLE_KEY',
           '--require-admin',
           'bun install --frozen-lockfile',
+          'bun run deploy:status',
           'bun scripts/smoke-doctor.ts --strict-production',
           'bun run supabase:storage:check',
           'bun scripts/api-smoke.ts --require-admin',
@@ -499,6 +500,7 @@ const checks: Check[] = [
           'bun run memory:audit',
           'bun run knowledge:audit',
           'bun run eval:local',
+          'bun run deploy:readiness:test',
         ],
         '.github/workflows/ci.yml',
       )

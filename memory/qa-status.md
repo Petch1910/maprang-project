@@ -44,6 +44,7 @@ Results:
 - Production readiness now blocks on both chat provider and image provider live verification flags.
 - Smoke doctor now reports separate staging blockers and production blockers; `--strict-staging` rejects local backend/CORS before provider verification.
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
+- CI and Production Smoke workflows now run deploy readiness self-test/status output before strict gates.
 - Relationship engine focused test passes for the expanded Thai ladder and preset surface split: 12 pass, 0 fail.
 - Current delta gate passes: `backend:check`, `frontend:check`, and `knowledge:audit`.
 - Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.

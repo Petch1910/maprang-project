@@ -77,6 +77,8 @@ jobs:
             echo "Set repository secret SUPABASE_SIGNED_URL_EXPIRES_IN, normally 3600."
             exit 1
           fi
+      - name: Print deploy readiness status
+        run: bun run deploy:status
       - run: bun scripts/smoke-doctor.ts --strict-production
       - name: Verify Supabase signed avatar storage
         run: bun run supabase:storage:check
