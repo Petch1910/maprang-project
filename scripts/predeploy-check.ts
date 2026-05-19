@@ -57,6 +57,7 @@ const requiredFiles = [
   'scripts/route-menu-doc-check.ts',
   'scripts/route-menu-doc-check.test.ts',
   'scripts/backend-security-audit.test.ts',
+  'scripts/smoke-helpers.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -303,6 +304,7 @@ const checks: Check[] = [
           '"frontend:static:audit:test"',
           '"frontend:route:audit:test"',
           '"route-menu:audit:test"',
+          '"smoke:helpers:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -358,6 +360,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('route-menu:audit:test')) {
         throw new Error('package.json qa:local must run route-menu:audit:test so route/menu doc regressions are caught')
+      }
+      if (!qaLocal.includes('smoke:helpers:test')) {
+        throw new Error('package.json qa:local must run smoke:helpers:test so smoke auth/url regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -555,6 +560,8 @@ const checks: Check[] = [
           'frontend-route-audit.test.ts',
           '"route-menu:audit:test"',
           'route-menu-doc-check.test.ts',
+          '"smoke:helpers:test"',
+          'smoke-helpers.test.ts',
         ],
         'package.json',
       )
@@ -603,6 +610,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/route-menu-doc-check.test.ts'),
         ['passes when documented rows, routes, navigation, and preloads align', 'reports missing navigation coverage'],
         'scripts/route-menu-doc-check.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/smoke-helpers.test.ts'),
+        ['defaults to local backend', 'does not impersonate a user by default against deployed targets'],
+        'scripts/smoke-helpers.test.ts',
       )
       requireIncludes(
         promptInspector,
@@ -686,6 +698,7 @@ const checks: Check[] = [
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
           'bun run route-menu:audit:test',
+          'bun run smoke:helpers:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:status',
@@ -718,6 +731,7 @@ const checks: Check[] = [
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
           'bun run route-menu:audit:test',
+          'bun run smoke:helpers:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:readiness:test',

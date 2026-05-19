@@ -1,17 +1,36 @@
-export const apiBaseUrl = process.env.SMOKE_API_BASE_URL ?? 'http://127.0.0.1:3000'
-export const isLocalSmokeTarget = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/?$/i.test(apiBaseUrl)
+export type SmokeEnv = {
+  SMOKE_API_BASE_URL?: string
+  SMOKE_USER_ID?: string
+  SMOKE_ACCESS_TOKEN?: string
+  SMOKE_ADMIN_API_KEY?: string
+}
 
-export function smokeAuthHeaders() {
+export function smokeApiBaseUrl(env: SmokeEnv = process.env) {
+  return env.SMOKE_API_BASE_URL ?? 'http://127.0.0.1:3000'
+}
+
+export function smokeTargetIsLocal(baseUrl: string) {
+  return /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/?$/i.test(baseUrl)
+}
+
+export const apiBaseUrl = smokeApiBaseUrl()
+export const isLocalSmokeTarget = smokeTargetIsLocal(apiBaseUrl)
+
+export function buildSmokeAuthHeaders(env: SmokeEnv = process.env, localTarget = smokeTargetIsLocal(smokeApiBaseUrl(env))) {
   const headers: Record<string, string> = {}
-  const userId = process.env.SMOKE_USER_ID ?? (isLocalSmokeTarget ? 'dev-user' : '')
-  const accessToken = process.env.SMOKE_ACCESS_TOKEN
-  const adminKey = process.env.SMOKE_ADMIN_API_KEY
+  const userId = env.SMOKE_USER_ID ?? (localTarget ? 'dev-user' : '')
+  const accessToken = env.SMOKE_ACCESS_TOKEN
+  const adminKey = env.SMOKE_ADMIN_API_KEY
 
   if (userId) headers['x-user-id'] = userId
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`
   if (adminKey) headers['x-admin-key'] = adminKey
 
   return headers
+}
+
+export function smokeAuthHeaders() {
+  return buildSmokeAuthHeaders(process.env, isLocalSmokeTarget)
 }
 
 export async function readJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -36,7 +55,7 @@ export async function readJson<T>(path: string, init?: RequestInit): Promise<T> 
   return payload as T
 }
 
-function tryParseJson(value: string) {
+export function tryParseJson(value: string) {
   try {
     return JSON.parse(value) as unknown
   } catch {
@@ -44,7 +63,7 @@ function tryParseJson(value: string) {
   }
 }
 
-function formatPayload(payload: unknown, fallback: string) {
+export function formatPayload(payload: unknown, fallback: string) {
   if (payload) return JSON.stringify(payload)
   return fallback.slice(0, 500)
 }

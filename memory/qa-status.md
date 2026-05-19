@@ -50,6 +50,7 @@ Results:
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility and placeholder-copy regressions.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link and navigate route regressions.
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document and runtime row alignment.
+- `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.
