@@ -71,8 +71,10 @@ jobs:
       - run: bun run supabase:storage:test
       - run: bun run release:handoff:check
       - run: bun run release:handoff:test
+      - run: bun run deploy:readiness:test
       - run: bun run deploy:status:test
       - run: bun run deploy:doctor:test
+      - run: bun run deploy:doctor:self-test
       - name: Validate smoke configuration
         run: |
           if [ -z "$SMOKE_API_BASE_URL" ]; then

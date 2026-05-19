@@ -88,6 +88,7 @@ Results:
 - `security:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard the backend security audit rules themselves.
 - Production Smoke workflow now runs predeploy and release handoff guards before deployed smoke validation.
 - Production Smoke workflow now runs secrets, secret-pattern tests, memory, knowledge, eval, security, API, and route/menu audits before deployed smoke validation.
+- Production Smoke workflow now runs deploy readiness/status and deploy env doctor regression/self-tests before deployed smoke validation.
 - `staging:verify` and `production:check` now print `deploy:status` before strict smoke gates so failed deployed checks show blockers and next steps directly.
 - Predeploy now verifies README/STAGING_RUNBOOK documentation stays aligned with deploy-status-first CLI gates.
 - Relationship engine focused test passes for the expanded Thai ladder and preset surface split: 12 pass, 0 fail.
