@@ -51,6 +51,8 @@ const requiredFiles = [
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
   'scripts/route-menu-doc-check.ts',
+  'scripts/secret-patterns.ts',
+  'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
 ]
 
@@ -228,11 +230,13 @@ const checks: Check[] = [
     name: 'release handoff template is available',
     run: async () => {
       const handoff = await readRepoFile('RELEASE_HANDOFF.md')
+      const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const readme = await readRepoFile('README.md')
       const packageJson = await readRepoFile('package.json')
       const script = await readRepoFile('scripts/release-handoff-check.ts')
       const test = await readRepoFile('scripts/release-handoff-check.test.ts')
       const secretPatterns = await readRepoFile('scripts/secret-patterns.ts')
+      const secretPatternsTest = await readRepoFile('scripts/secret-patterns.test.ts')
       requireIncludes(
         handoff,
         [
@@ -249,13 +253,15 @@ const checks: Check[] = [
         ],
         'RELEASE_HANDOFF.md',
       )
-      requireIncludes(readme, ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users'], 'README.md')
+      requireIncludes(readme, ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users', 'secret-pattern regression tests'], 'README.md')
+      requireIncludes(deploymentQa, ['bun run secrets:patterns:test', 'secrets/secret-pattern/memory'], 'DEPLOYMENT_QA.md')
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
       requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')
       requireIncludes(script, ['checkReleaseHandoffContent', '--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
       requireIncludes(test, ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true'], 'scripts/release-handoff-check.test.ts')
       requireIncludes(secretPatterns, ['GitHub token', 'Google API key', 'Slack token', 'Private key block'], 'scripts/secret-patterns.ts')
+      requireIncludes(secretPatternsTest, ['repo scan allows placeholder docs', 'handoff and memory scans inherit repo secret coverage'], 'scripts/secret-patterns.test.ts')
     },
   },
   {
