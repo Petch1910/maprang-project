@@ -73,7 +73,7 @@ Results:
 - CI workflow includes `memory:audit`, `knowledge:audit`, and `eval:local`.
 - CI and Production Smoke workflows now run deploy readiness self-test/status output before strict gates.
 - Predeploy check now verifies `RELEASE_HANDOFF.md` exists and remains linked from production docs.
-- `release:handoff:check` is part of `qa:local` and checks release handoff sections plus secret-shaped values.
+- `release:handoff:check` is part of `qa:local` and checks release handoff sections plus secret-shaped values through an importable runner.
 - `release:handoff:test` is part of `qa:local` and verifies filled-mode and secret detection behavior.
 - Secret audits now share `scripts/secret-patterns.ts` and cover private key blocks, GitHub tokens, Google API keys, and Slack tokens in addition to project-specific keys.
 - `secrets:check` now fails on tracked `.env`/`.env.*` files while still ignoring untracked local env files used for development.

@@ -23,6 +23,12 @@ const forbiddenPatterns = [
   { name: 'raw access token', pattern: /\b(access|refresh|service)[_-]?token\s*:\s*\S{16,}/i },
 ]
 
+export type ReleaseHandoffCheckResult = {
+  ok: boolean
+  requireFilled: boolean
+  findings: string[]
+}
+
 export function checkReleaseHandoffContent(content: string, options: { requireFilled?: boolean } = {}) {
   const findings: string[] = []
 
@@ -45,15 +51,25 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
   return findings
 }
 
-if (import.meta.main) {
-  const requireFilled = process.argv.includes('--filled')
+export async function collectReleaseHandoffCheckResult(requireFilled = false): Promise<ReleaseHandoffCheckResult> {
   const findings = checkReleaseHandoffContent(await readFile(file, 'utf8'), { requireFilled })
+  return { ok: findings.length === 0, requireFilled, findings }
+}
 
-  if (findings.length > 0) {
-    console.error('Release handoff check failed:')
-    for (const finding of findings) console.error(`- ${finding}`)
-    process.exit(1)
+export async function runReleaseHandoffCheck(
+  argv = process.argv.slice(2),
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const result = await collectReleaseHandoffCheckResult(argv.includes('--filled'))
+  if (!result.ok) {
+    writeError('Release handoff check failed:')
+    for (const finding of result.findings) writeError(`- ${finding}`)
+    return 1
   }
 
-  console.log(`ok - release handoff is ${requireFilled ? 'filled and ' : ''}safe to commit`)
+  writeLine(`ok - release handoff is ${result.requireFilled ? 'filled and ' : ''}safe to commit`)
+  return 0
 }
+
+if (import.meta.main) process.exit(await runReleaseHandoffCheck())

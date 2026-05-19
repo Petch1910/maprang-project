@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { checkReleaseHandoffContent } from './release-handoff-check'
+import { checkReleaseHandoffContent, collectReleaseHandoffCheckResult, runReleaseHandoffCheck } from './release-handoff-check'
 
 const filledHandoff = [
   '# Release Handoff Template',
@@ -92,5 +92,18 @@ describe('release handoff check', () => {
     expect(checkReleaseHandoffContent(unsafe)).toEqual(
       expect.arrayContaining(['missing section: Release Decision', 'contains OpenRouter key', 'contains GitHub token']),
     )
+  })
+
+  test('runs the committed handoff template through an importable runner', async () => {
+    const result = await collectReleaseHandoffCheckResult()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runReleaseHandoffCheck([], (line) => lines.push(line), (line) => errors.push(line))
+
+    expect(result.ok).toBe(true)
+    expect(result.requireFilled).toBe(false)
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toBe('ok - release handoff is safe to commit')
+    expect(errors).toEqual([])
   })
 })

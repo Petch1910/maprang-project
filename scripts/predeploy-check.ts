@@ -293,8 +293,16 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
       requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')
-      requireIncludes(script, ['checkReleaseHandoffContent', '--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
-      requireIncludes(test, ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true'], 'scripts/release-handoff-check.test.ts')
+      requireIncludes(
+        script,
+        ['checkReleaseHandoffContent', 'collectReleaseHandoffCheckResult', 'runReleaseHandoffCheck', '--filled', 'forbiddenPatterns', 'Release handoff check failed'],
+        'scripts/release-handoff-check.ts',
+      )
+      requireIncludes(
+        test,
+        ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true', 'importable runner'],
+        'scripts/release-handoff-check.test.ts',
+      )
       requireIncludes(secretPatterns, ['GitHub token', 'Google API key', 'Slack token', 'Private key block'], 'scripts/secret-patterns.ts')
       requireIncludes(secretPatternsTest, ['repo scan allows placeholder docs', 'handoff and memory scans inherit repo secret coverage'], 'scripts/secret-patterns.test.ts')
     },

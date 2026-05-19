@@ -45,7 +45,7 @@ Verified:
 - README and predeploy guard now document and enforce the same deploy-status-first behavior for CLI staging/production gates.
 - `RELEASE_HANDOFF.md` is available as the no-secrets final release handoff template, and predeploy checks verify it stays documented.
 - `release:handoff:check` verifies the release handoff template and can require all handoff fields with `--filled` before sharing a real release note.
-- `release:handoff:test` covers filled handoff validation, blank-field detection, and secret-shaped value detection for the release handoff guard.
+- `release:handoff:test` covers filled handoff validation, blank-field detection, secret-shaped value detection, and the importable release handoff runner.
 - Secret audits share `scripts/secret-patterns.ts` and catch private key blocks, GitHub tokens, Google API keys, and Slack tokens across repo, memory, knowledge, and release handoff checks.
 - `secrets:check` now fails on tracked `.env`/`.env.*` files while still ignoring untracked local env files used for development.
 - `.gitignore` ignores real `.env.*` files while allowing `.env.example` and `.env.production.example` templates; predeploy verifies this rule.
