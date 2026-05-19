@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { join, resolve } from 'node:path'
+import { collectKnowledgeAuditResult, runKnowledgeAudit } from './knowledge-audit'
 import { collectLocalMarkdownLinks, missingIncludes, pathIsInside } from './markdown-audit-helpers'
 import { collectMemoryAuditResult, runMemoryAudit } from './memory-audit'
 
@@ -39,6 +40,20 @@ describe('markdown audit helpers', () => {
     expect(result.files).toBeGreaterThan(0)
     expect(exitCode).toBe(0)
     expect(lines[0]).toContain('ok - memory audit passed')
+    expect(errors).toEqual([])
+  })
+
+  test('runs the knowledge audit through an importable runner', async () => {
+    const result = await collectKnowledgeAuditResult()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runKnowledgeAudit((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(result.ok).toBe(true)
+    expect(result.files).toBeGreaterThan(0)
+    expect(result.structuredPacks).toBeGreaterThan(0)
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toContain('ok - knowledge audit passed')
     expect(errors).toEqual([])
   })
 })

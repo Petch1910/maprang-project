@@ -486,7 +486,7 @@ const checks: Check[] = [
       requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
       requireIncludes(
         await readRepoFile('scripts/markdown-audit-helpers.test.ts'),
-        ['collects only local markdown links', 'checks whether a resolved path stays inside a vault', 'runs the memory audit through an importable runner'],
+        ['collects only local markdown links', 'checks whether a resolved path stays inside a vault', 'runs the memory audit through an importable runner', 'runs the knowledge audit through an importable runner'],
         'scripts/markdown-audit-helpers.test.ts',
       )
       requireIncludes(
@@ -504,6 +504,7 @@ const checks: Check[] = [
       const knowledgeReadme = await readRepoFile('knowledge/README.md')
       const wikiIndex = await readRepoFile('knowledge/wiki/INDEX.md')
       const backendKnowledge = await readRepoFile('apps/backend/src/knowledge.service.ts')
+      const knowledgeAudit = await readRepoFile('scripts/knowledge-audit.ts')
       requireIncludes(packageJson, ['"knowledge:audit"', 'bun scripts/knowledge-audit.ts', 'bun run knowledge:audit'], 'package.json')
       requireIncludes(readme, ['Knowledge Layer', 'knowledge/README.md', 'bun run knowledge:audit'], 'README.md')
       requireIncludes(knowledgeReadme, ['Runtime Usage', 'Structured Packs', 'Never store secrets'], 'knowledge/README.md')
@@ -512,6 +513,11 @@ const checks: Check[] = [
         backendKnowledge,
         ['buildChatKnowledgePrompt', 'buildCreatorKnowledgePrompt', 'structuredKnowledgeHealth'],
         'apps/backend/src/knowledge.service.ts',
+      )
+      requireIncludes(
+        knowledgeAudit,
+        ['collectKnowledgeAuditResult', 'runKnowledgeAudit', 'KnowledgeAuditResult', 'if (import.meta.main) process.exit(await runKnowledgeAudit())'],
+        'scripts/knowledge-audit.ts',
       )
     },
   },

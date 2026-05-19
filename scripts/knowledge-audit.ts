@@ -22,6 +22,13 @@ const requiredFiles = [
   'knowledge/structured/content-policy.json',
 ]
 
+export type KnowledgeAuditResult = {
+  ok: boolean
+  files: number
+  structuredPacks: number
+  findings: string[]
+}
+
 async function assertFile(path: string) {
   await access(join(root, path))
 }
@@ -48,61 +55,79 @@ function requireIncludes(content: string, values: string[], file: string, findin
   if (missing.length > 0) findings.push(`${file} is missing ${missing.join(', ')}`)
 }
 
-const findings: string[] = []
+export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResult> {
+  const findings: string[] = []
 
-for (const file of requiredFiles) {
-  await assertFile(file).catch(() => findings.push(`missing required knowledge file: ${file}`))
-}
-
-const readme = await readRepoFile('knowledge/README.md')
-requireIncludes(
-  readme,
-  ['Runtime Usage', 'Structured Packs', 'Never store secrets', '[Wiki Index](./wiki/INDEX.md)'],
-  'knowledge/README.md',
-  findings,
-)
-
-const wikiIndex = await readRepoFile('knowledge/wiki/INDEX.md')
-requireIncludes(
-  wikiIndex,
-  ['Maprang Product', 'Relationship Engine', 'Creator Studio', 'Production Deploy'],
-  'knowledge/wiki/INDEX.md',
-  findings,
-)
-
-const files = await walkKnowledgeFiles(knowledgeRoot)
-for (const file of files) {
-  const relativePath = relative(root, file)
-  const content = await readFile(file, 'utf8')
-
-  for (const forbidden of secretPatterns) {
-    if (forbidden.pattern.test(content)) {
-      findings.push(`${relativePath}: contains ${forbidden.name}`)
-    }
+  for (const file of requiredFiles) {
+    await assertFile(file).catch(() => findings.push(`missing required knowledge file: ${file}`))
   }
 
-  if (file.endsWith('.md')) {
-    for (const target of collectLocalMarkdownLinks(content)) {
-      const resolved = resolve(dirname(file), target)
-      if (!pathIsInside(knowledgeRoot, resolved)) {
-        findings.push(`${relativePath}: link escapes knowledge vault: ${target}`)
-        continue
+  const readme = await readRepoFile('knowledge/README.md')
+  requireIncludes(
+    readme,
+    ['Runtime Usage', 'Structured Packs', 'Never store secrets', '[Wiki Index](./wiki/INDEX.md)'],
+    'knowledge/README.md',
+    findings,
+  )
+
+  const wikiIndex = await readRepoFile('knowledge/wiki/INDEX.md')
+  requireIncludes(
+    wikiIndex,
+    ['Maprang Product', 'Relationship Engine', 'Creator Studio', 'Production Deploy'],
+    'knowledge/wiki/INDEX.md',
+    findings,
+  )
+
+  const files = await walkKnowledgeFiles(knowledgeRoot)
+  for (const file of files) {
+    const relativePath = relative(root, file)
+    const content = await readFile(file, 'utf8')
+
+    for (const forbidden of secretPatterns) {
+      if (forbidden.pattern.test(content)) {
+        findings.push(`${relativePath}: contains ${forbidden.name}`)
       }
-      await access(resolved).catch(() => findings.push(`${relativePath}: broken local link: ${target}`))
     }
+
+    if (file.endsWith('.md')) {
+      for (const target of collectLocalMarkdownLinks(content)) {
+        const resolved = resolve(dirname(file), target)
+        if (!pathIsInside(knowledgeRoot, resolved)) {
+          findings.push(`${relativePath}: link escapes knowledge vault: ${target}`)
+          continue
+        }
+        await access(resolved).catch(() => findings.push(`${relativePath}: broken local link: ${target}`))
+      }
+    }
+  }
+
+  const structured = loadStructuredKnowledge({ force: true }).status
+  if (!structured.ok) {
+    for (const missing of structured.missing) findings.push(`structured knowledge missing: ${missing}`)
+    for (const error of structured.errors) findings.push(`structured knowledge invalid: ${error}`)
+  }
+
+  return {
+    ok: findings.length === 0,
+    files: files.length,
+    structuredPacks: structured.files.length,
+    findings,
   }
 }
 
-const structured = loadStructuredKnowledge({ force: true }).status
-if (!structured.ok) {
-  for (const missing of structured.missing) findings.push(`structured knowledge missing: ${missing}`)
-  for (const error of structured.errors) findings.push(`structured knowledge invalid: ${error}`)
+export async function runKnowledgeAudit(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const result = await collectKnowledgeAuditResult()
+  if (!result.ok) {
+    writeError('Knowledge audit failed:')
+    for (const finding of result.findings) writeError(`- ${finding}`)
+    return 1
+  }
+
+  writeLine(`ok - knowledge audit passed (${result.files} knowledge files, ${result.structuredPacks} structured packs)`)
+  return 0
 }
 
-if (findings.length > 0) {
-  console.error('Knowledge audit failed:')
-  for (const finding of findings) console.error(`- ${finding}`)
-  process.exit(1)
-}
-
-console.log(`ok - knowledge audit passed (${files.length} knowledge files, ${structured.files.length} structured packs)`)
+if (import.meta.main) process.exit(await runKnowledgeAudit())
