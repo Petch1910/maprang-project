@@ -275,7 +275,7 @@ bun run frontend:check
 bun run smoke:doctor
 ```
 
-`smoke:doctor` reports local health plus `productionReady`, `productionBlockerCount`, `productionBlockers`, and ordered `nextSteps`; clear those blockers on staging before deploy.
+`smoke:doctor` verifies the backend root identity, then reports local health plus `productionReady`, `productionBlockerCount`, `productionBlockers`, and ordered `nextSteps`; clear those blockers on staging before deploy.
 
 ```bash
 bun run smoke:ready

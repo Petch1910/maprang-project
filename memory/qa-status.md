@@ -62,7 +62,7 @@ Results:
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document, runtime row alignment, and the importable doc-check runner.
 - `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior and shared backend root identity validation.
 - `provider:smoke:guards:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat/image smoke verification helpers.
-- `smoke:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard smoke doctor blocker and strict-gate output.
+- `smoke:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, smoke doctor blocker output, and strict-gate output.
 - `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, `/ready` summary output, and the importable readiness smoke runner.
 - `smoke:image:test` now runs in `qa:local`, CI, and Production Smoke to guard image smoke skip/fallback/live payload helpers and the importable image smoke runner without provider calls.
 - `smoke:chat:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat smoke validation, success payload helpers, and the importable live chat smoke runner without provider calls.

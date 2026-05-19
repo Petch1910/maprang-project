@@ -1,4 +1,10 @@
-import { apiBaseUrl, isLocalSmokeTarget, readJson } from './smoke-helpers'
+import {
+  apiBaseUrl,
+  isLocalSmokeTarget,
+  readJson,
+  validateBackendRootIdentity,
+  type RootIdentityPayload,
+} from './smoke-helpers'
 import {
   buildHealthRows,
   buildNextDeploySteps,
@@ -17,6 +23,17 @@ export type SmokeDoctorReport = {
   stdout: string[]
   stderr: string[]
   warnings: string[]
+}
+
+export type SmokeDoctorRunnerOptions = {
+  argv?: string[]
+  apiBaseUrl?: string
+  isLocalSmokeTarget?: boolean
+  rootIdentityReader?: () => Promise<RootIdentityPayload>
+  healthReader?: () => Promise<HealthPayload>
+  writeLine?: (line: string) => void
+  writeWarning?: (line: string) => void
+  writeError?: (line: string) => void
 }
 
 export function buildSmokeDoctorReport(
@@ -132,30 +149,48 @@ export function buildSmokeDoctorReport(
   return { exitCode: 0, stdout, stderr, warnings }
 }
 
-export async function runSmokeDoctor(argv = process.argv) {
+export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunnerOptions = process.argv) {
+  const options: SmokeDoctorRunnerOptions = Array.isArray(argvOrOptions) ? { argv: argvOrOptions } : argvOrOptions
+  const argv = options.argv ?? process.argv
   const strictProductionGate = argv.includes('--strict-production') || process.env.STRICT_PRODUCTION_GATE === '1'
   const strictStagingGate = argv.includes('--strict-staging') || process.env.STRICT_STAGING_GATE === '1'
+  const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
+  const currentIsLocalSmokeTarget = options.isLocalSmokeTarget ?? isLocalSmokeTarget
+  const rootIdentityReader = options.rootIdentityReader ?? (() => readJson<RootIdentityPayload>('/'))
+  const healthReader = options.healthReader ?? (() => readJson<HealthPayload>('/health'))
+  const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+  const writeWarning = options.writeWarning ?? ((line: string) => console.warn(line))
+  const writeError = options.writeError ?? ((line: string) => console.error(line))
+
+  try {
+    validateBackendRootIdentity(await rootIdentityReader())
+  } catch (error) {
+    writeError(`Smoke doctor failed: ${error instanceof Error ? error.message : String(error)}`)
+    writeError('Local fix: start the backend and confirm GET / returns the maprang-backend identity payload.')
+    writeError('Deploy fix: check SMOKE_API_BASE_URL and confirm the deployed backend root is not a frontend/static proxy.')
+    return 1
+  }
 
   let health: HealthPayload
   try {
-    health = await readJson<HealthPayload>('/health')
+    health = await healthReader()
   } catch (error) {
-    console.error(`Smoke doctor failed: ${error instanceof Error ? error.message : String(error)}`)
-    console.error('Local fix: start Docker Desktop, run `docker compose up -d postgres`, run migrations, then start the backend.')
-    console.error('Deploy fix: check SMOKE_API_BASE_URL and confirm the deployed backend is reachable.')
+    writeError(`Smoke doctor failed: ${error instanceof Error ? error.message : String(error)}`)
+    writeError('Local fix: start Docker Desktop, run `docker compose up -d postgres`, run migrations, then start the backend.')
+    writeError('Deploy fix: check SMOKE_API_BASE_URL and confirm the deployed backend is reachable.')
     return 1
   }
 
   const report = buildSmokeDoctorReport(health, {
-    apiBaseUrl,
-    isLocalSmokeTarget,
+    apiBaseUrl: currentApiBaseUrl,
+    isLocalSmokeTarget: currentIsLocalSmokeTarget,
     strictProductionGate,
     strictStagingGate,
   })
 
-  for (const line of report.stdout) console.log(line)
-  for (const warning of report.warnings) console.warn(warning)
-  for (const line of report.stderr) console.error(line)
+  for (const line of report.stdout) writeLine(line)
+  for (const warning of report.warnings) writeWarning(warning)
+  for (const line of report.stderr) writeError(line)
 
   return report.exitCode
 }

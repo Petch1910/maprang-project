@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildSmokeDoctorReport } from './smoke-doctor'
+import { buildSmokeDoctorReport, runSmokeDoctor } from './smoke-doctor'
 import type { HealthPayload } from './deploy-readiness'
 
 function healthyPayload(overrides: Partial<HealthPayload> = {}): HealthPayload {
@@ -169,5 +169,56 @@ describe('smoke doctor report', () => {
       'invalid env: MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
     )
     expect(report.warnings.join('\n')).not.toContain('roleplay reply budget is below the recommended 1600/420')
+  })
+
+  test('validates backend root identity before health checks', async () => {
+    const lines: string[] = []
+    const warnings: string[] = []
+    const errors: string[] = []
+    let healthRead = false
+
+    const exitCode = await runSmokeDoctor({
+      argv: ['bun', 'scripts/smoke-doctor.ts'],
+      apiBaseUrl: 'https://api.maprang.example',
+      isLocalSmokeTarget: false,
+      rootIdentityReader: async () => ({ ok: true, service: 'static-frontend' }),
+      healthReader: async () => {
+        healthRead = true
+        return healthyPayload()
+      },
+      writeLine: (line) => lines.push(line),
+      writeWarning: (line) => warnings.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(healthRead).toBe(false)
+    expect(lines).toEqual([])
+    expect(warnings).toEqual([])
+    expect(errors.join('\n')).toContain('unexpected service name')
+    expect(errors.join('\n')).toContain('backend root is not a frontend/static proxy')
+  })
+
+  test('runs smoke doctor through an importable runner', async () => {
+    const lines: string[] = []
+    const warnings: string[] = []
+    const errors: string[] = []
+
+    const exitCode = await runSmokeDoctor({
+      argv: ['bun', 'scripts/smoke-doctor.ts'],
+      apiBaseUrl: 'https://api.maprang.example',
+      isLocalSmokeTarget: false,
+      rootIdentityReader: async () => ({ ok: true, service: 'maprang-backend' }),
+      healthReader: async () => healthyPayload(),
+      writeLine: (line) => lines.push(line),
+      writeWarning: (line) => warnings.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(0)
+    expect(lines).toContain('productionReady: true')
+    expect(lines.at(-1)).toBe('Smoke doctor passed.')
+    expect(warnings).toEqual([])
+    expect(errors).toEqual([])
   })
 })

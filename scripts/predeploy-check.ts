@@ -712,13 +712,23 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"deploy:doctor:test"', 'bun test scripts/deploy-env-doctor.test.ts'], 'package.json')
       requireIncludes(
         smokeDoctor,
-        ['evaluateDeployReadiness', 'buildHealthRows', 'buildNextDeploySteps', 'healthFailures', 'nextSteps:'],
+        [
+          'evaluateDeployReadiness',
+          'buildHealthRows',
+          'buildNextDeploySteps',
+          'healthFailures',
+          'validateBackendRootIdentity',
+          'SmokeDoctorRunnerOptions',
+          'nextSteps:',
+        ],
         'scripts/smoke-doctor.ts',
       )
       requireIncludes(
         smokeDoctorTest,
         [
           'buildSmokeDoctorReport',
+          'validates backend root identity before health checks',
+          'runs smoke doctor through an importable runner',
           'strict staging gate fails',
           'backend health failures',
           'warns when roleplay reply budget passes baseline but is below recommendation',
