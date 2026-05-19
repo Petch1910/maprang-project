@@ -3,22 +3,35 @@ import { isAbsolute, join, relative, resolve } from 'node:path'
 
 const root = join(import.meta.dir, '..')
 
-type EnvMap = Map<string, string>
-type Status = 'pass' | 'warn' | 'fail'
-type Area = 'backend' | 'frontend' | 'cross-check'
+export type EnvMap = Map<string, string>
+export type Status = 'pass' | 'warn' | 'fail'
+export type Area = 'backend' | 'frontend' | 'cross-check'
 
-type Finding = {
+export type Finding = {
   area: Area
   status: Status
   check: string
   detail: string
 }
 
+export type DeployEnvDoctorResult = {
+  ok: boolean
+  pass: number
+  warn: number
+  fail: number
+  backendEnv: string
+  frontendEnv: string
+  findings: Finding[]
+}
+
+let requireImageLiveVerified = true
+let findings: Finding[] = []
+
+if (import.meta.main) {
 const args = parseArgs(process.argv.slice(2))
 const backendEnvPath = resolveFromRoot(args.get('backend-env') ?? 'apps/backend/.env')
 const frontendEnvPath = resolveFromRoot(args.get('frontend-env') ?? 'apps/frontend/.env')
-const requireImageLiveVerified = !args.has('allow-unverified-image')
-const findings: Finding[] = []
+requireImageLiveVerified = !args.has('allow-unverified-image')
 
 let backendEnv: EnvMap
 let frontendEnv: EnvMap
@@ -70,6 +83,7 @@ console.log(
 )
 
 if (failCount > 0) process.exit(1)
+}
 
 function auditBackendEnv(env: EnvMap) {
   expectExact(env, 'NODE_ENV', 'production', 'backend', 'ต้องเป็น production ก่อน deploy จริง')
@@ -177,7 +191,7 @@ function auditCrossEnv(backend: EnvMap, frontend: EnvMap) {
   }
 }
 
-function parseArgs(values: string[]) {
+export function parseArgs(values: string[]) {
   const map = new Map<string, string>()
   for (let index = 0; index < values.length; index += 1) {
     const item = values[index]
@@ -194,7 +208,7 @@ function parseArgs(values: string[]) {
   return map
 }
 
-async function readEnvFile(path: string) {
+export async function readEnvFile(path: string) {
   const content = await readFile(path, 'utf8')
   const env = new Map<string, string>()
 
@@ -229,7 +243,7 @@ function displayPath(path: string) {
   return relative(root, path).replaceAll('\\', '/') || '.'
 }
 
-function hasRealValue(value: string | undefined) {
+export function hasRealValue(value: string | undefined) {
   const normalized = value?.trim().toLowerCase()
   if (!normalized) return false
   const placeholderFragments = [
@@ -245,7 +259,7 @@ function hasRealValue(value: string | undefined) {
   return !placeholderFragments.some((fragment) => normalized.includes(fragment)) && !placeholderTokens.includes(normalized)
 }
 
-function normalizeUrl(value: string | undefined) {
+export function normalizeUrl(value: string | undefined) {
   if (!hasRealValue(value)) return null
   try {
     return new URL(value!.trim()).toString().replace(/\/+$/, '')
@@ -270,7 +284,7 @@ function csv(value: string | undefined) {
     .filter(Boolean) ?? []
 }
 
-function jwtRole(value: string | undefined) {
+export function jwtRole(value: string | undefined) {
   if (!hasRealValue(value) || !value!.startsWith('eyJ')) return null
   const [, payload] = value!.split('.')
   if (!payload) return null

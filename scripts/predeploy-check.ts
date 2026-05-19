@@ -42,6 +42,7 @@ const requiredFiles = [
   'apps/frontend/Dockerfile',
   'scripts/backend-db-check.test.ts',
   'scripts/deploy-env-doctor.ts',
+  'scripts/deploy-env-doctor.test.ts',
   'scripts/deploy-env-doctor-self-test.ts',
   'scripts/deploy-readiness.ts',
   'scripts/deploy-readiness.test.ts',
@@ -335,6 +336,7 @@ const checks: Check[] = [
           '"deploy:status:test"',
           '"deploy:readiness:test"',
           '"deploy:doctor"',
+          '"deploy:doctor:test"',
           '"deploy:doctor:self-test"',
           '"release:handoff:check"',
           '"release:handoff:test"',
@@ -429,6 +431,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('deploy:status:test')) {
         throw new Error('package.json qa:local must run deploy:status:test so deploy status output regressions are caught')
+      }
+      if (!qaLocal.includes('deploy:doctor:test')) {
+        throw new Error('package.json qa:local must run deploy:doctor:test so deploy env helper regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -585,6 +590,7 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"smoke:doctor:test"', 'bun test scripts/smoke-doctor.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:status:test"', 'bun test scripts/deploy-status.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:readiness:test"', 'bun test scripts/deploy-readiness.test.ts'], 'package.json')
+      requireIncludes(packageJson, ['"deploy:doctor:test"', 'bun test scripts/deploy-env-doctor.test.ts'], 'package.json')
       requireIncludes(
         smokeDoctor,
         ['evaluateDeployReadiness', 'buildHealthRows', 'buildNextDeploySteps', 'healthFailures', 'nextSteps:'],
@@ -845,6 +851,7 @@ const checks: Check[] = [
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:status:test',
+          'bun run deploy:doctor:test',
           'bun run deploy:status',
           'bun scripts/smoke-doctor.ts --strict-production',
           'bun run supabase:storage:check',
@@ -864,6 +871,7 @@ const checks: Check[] = [
           'bun run secrets:check:test',
           'bun run secrets:patterns:test',
           'bun run vault:audit:test',
+          'bun run deploy:doctor:test',
           'bun run deploy:doctor:self-test',
           'bun run memory:audit',
           'bun run knowledge:audit',
@@ -892,6 +900,7 @@ const checks: Check[] = [
           'bun run release:handoff:test',
           'bun run deploy:readiness:test',
           'bun run deploy:status:test',
+          'bun run deploy:doctor:test',
         ],
         '.github/workflows/ci.yml',
       )

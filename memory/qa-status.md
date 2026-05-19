@@ -57,6 +57,7 @@ Results:
 - `smoke:image:test` now runs in `qa:local`, CI, and Production Smoke to guard image smoke skip/fallback/live payload helpers without provider calls.
 - `smoke:chat:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat smoke validation and success payload helpers without provider calls.
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output.
+- `deploy:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy env parsing/JWT helper behavior without reading real production env files.
 - `vault:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard shared memory/knowledge Markdown audit helpers.
 - `backend:check:db:test` now runs in `qa:local`, CI, and Production Smoke to guard DB-required backend check command planning.
 - `supabase:storage:test` now runs in `qa:local`, CI, and Production Smoke to guard signed-storage setup helpers without calling Supabase.
