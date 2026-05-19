@@ -441,6 +441,8 @@ const checks: Check[] = [
       const deployStatus = await readRepoFile('scripts/deploy-status.ts')
       const deployReadiness = await readRepoFile('scripts/deploy-readiness.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+      const readme = await readRepoFile('README.md')
+      const stagingRunbook = await readRepoFile('STAGING_RUNBOOK.md')
       requireIncludes(packageJson, ['"deploy:status"', 'bun scripts/deploy-status.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:readiness:test"', 'bun test scripts/deploy-readiness.test.ts'], 'package.json')
       requireIncludes(
@@ -464,6 +466,8 @@ const checks: Check[] = [
         'scripts/deploy-readiness.test.ts',
       )
       requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json'], 'DEPLOYMENT_QA.md')
+      requireIncludes(readme, ['bun run deploy:status', '`staging:verify` prints', 'blocker summary and next steps'], 'README.md')
+      requireIncludes(stagingRunbook, ['bun run deploy:status', 'bun run staging:verify', 'bun run production:check'], 'STAGING_RUNBOOK.md')
     },
   },
   {

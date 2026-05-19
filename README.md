@@ -225,6 +225,7 @@ bun run production:check
 ```
 
 This runs the strict production health gate, Supabase signed-avatar storage smoke, and live API smoke, including real chat and real image-generation checks. It will fail if the `avatars` bucket cannot issue signed URLs or if image generation falls back to a placeholder because of billing or quota limits.
+The script prints `bun run deploy:status` first, so the blocker summary and next steps appear before the strict gate fails.
 
 When you want to verify all repo-owned surfaces before the final live provider/domain gate, run:
 
@@ -240,7 +241,7 @@ After staging backend/frontend domains exist, run the deployed staging gate:
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
-`staging:verify` rejects localhost backend URLs, local CORS, missing Supabase signed storage, failed `/ready`, and missing admin smoke coverage. It intentionally allows chat/image live verification flags to stay pending so you can run live provider smoke next, then use `production:check` as the final go/no-go.
+`staging:verify` prints `bun run deploy:status` first, then rejects localhost backend URLs, local CORS, missing Supabase signed storage, failed `/ready`, and missing admin smoke coverage. It intentionally allows chat/image live verification flags to stay pending so you can run live provider smoke next, then use `production:check` as the final go/no-go.
 
 Or run each check separately:
 
