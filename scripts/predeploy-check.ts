@@ -476,9 +476,11 @@ const checks: Check[] = [
       const checklist = await readRepoFile('SECURITY_CHECKLIST.md')
       const packageJson = await readRepoFile('package.json')
       const securityAudit = await readRepoFile('scripts/backend-security-audit.ts')
+      const promptInspector = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
+      const promptInspectorTest = await readRepoFile('apps/backend/src/prompt-inspector.service.test.ts')
       requireIncludes(
         checklist,
-        ['SQL Injection', 'Broken Access Control', 'Prompt Control', 'bun run security:audit', 'requireAdminApiKey', 'Production Must-Pass'],
+        ['SQL Injection', 'Broken Access Control', 'Prompt Control', 'bun run security:audit', 'requireAdminApiKey', 'retrieved lore preview', 'Production Must-Pass'],
         'SECURITY_CHECKLIST.md',
       )
       requireIncludes(packageJson, ['"security:audit"', 'backend-security-audit.ts', '"api:audit"', 'api-route-audit.ts'], 'package.json')
@@ -486,6 +488,16 @@ const checks: Check[] = [
         securityAudit,
         ['adminRoutePattern', 'admin route is missing requireAdminApiKey guard', '$queryRawUnsafe'],
         'scripts/backend-security-audit.ts',
+      )
+      requireIncludes(
+        promptInspector,
+        ['redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map'],
+        'apps/backend/src/prompt-inspector.service.ts',
+      )
+      requireIncludes(
+        promptInspectorTest,
+        ['fakeDatabaseUrl', 'retrieval.lore', 'not.toContain(fakeDatabaseUrl)'],
+        'apps/backend/src/prompt-inspector.service.test.ts',
       )
     },
   },

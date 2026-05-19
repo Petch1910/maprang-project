@@ -112,6 +112,22 @@ function redactSecrets(value: string): RedactionResult {
   return { text, count }
 }
 
+function redactLoreForInspector(entry: LoreForContext) {
+  const keyword = redactSecrets(entry.keyword)
+  const aliases = entry.aliases.map(redactSecrets)
+  const content = redactSecrets(entry.content)
+
+  return {
+    lore: {
+      keyword: keyword.text,
+      aliases: aliases.map((alias) => alias.text),
+      priority: entry.priority,
+      preview: clip(content.text),
+    },
+    redactionCount: keyword.count + aliases.reduce((sum, alias) => sum + alias.count, 0) + content.count,
+  }
+}
+
 function fingerprint(value: string) {
   let hash = 2166136261
   for (let index = 0; index < value.length; index += 1) {
@@ -210,6 +226,8 @@ export function buildPromptInspectorSnapshot(input: PromptInspectorInput): Promp
   const prompt = blocks.join('\n\n')
   const redacted = redactSecrets(prompt)
   const sections = blocks.map(toSection)
+  const redactedLore = loreEntries.map(redactLoreForInspector)
+  const retrievalRedactionCount = redactedLore.reduce((sum, entry) => sum + entry.redactionCount, 0)
 
   return {
     generatedAt: new Date().toISOString(),
@@ -227,16 +245,11 @@ export function buildPromptInspectorSnapshot(input: PromptInspectorInput): Promp
     sections,
     retrieval: {
       loreCount: loreEntries.length,
-      lore: loreEntries.map((entry) => ({
-        keyword: entry.keyword,
-        aliases: entry.aliases,
-        priority: entry.priority,
-        preview: clip(entry.content),
-      })),
+      lore: redactedLore.map((entry) => entry.lore),
     },
     warnings: promptWarnings({
       prompt,
-      redactionCount: redacted.count,
+      redactionCount: redacted.count + retrievalRedactionCount,
       sections,
       userMessage: input.userMessage,
     }),

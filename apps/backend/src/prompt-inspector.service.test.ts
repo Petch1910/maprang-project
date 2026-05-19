@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { buildPromptInspectorSnapshot, diffPromptSnapshots, estimatePromptTokens } from './prompt-inspector.service'
 
 const fakeOpenRouterKey = ['sk', 'or-v1', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
 
 const fixtureCharacter = {
   id: 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
@@ -23,8 +24,8 @@ describe('prompt inspector service', () => {
       loreEntries: [
         {
           keyword: 'rain',
-          aliases: ['storm'],
-          content: 'Rain means the character is hiding worry behind jokes.',
+          aliases: ['storm', `OPENROUTER_API_KEY=${fakeOpenRouterKey}`],
+          content: `Rain means the character is hiding worry behind jokes. DATABASE_URL=${fakeDatabaseUrl}`,
           priority: 3,
         },
       ],
@@ -44,9 +45,13 @@ describe('prompt inspector service', () => {
     expect(snapshot.prompt).toContain('User message')
     expect(snapshot.prompt).toContain('[REDACTED_SECRET]')
     expect(snapshot.prompt).not.toContain(fakeOpenRouterKey)
+    expect(snapshot.prompt).not.toContain(fakeDatabaseUrl)
     expect(snapshot.totals.estimatedTokens).toBeGreaterThan(0)
     expect(snapshot.sections.length).toBeGreaterThan(5)
     expect(snapshot.retrieval.lore[0]?.keyword).toBe('rain')
+    expect(snapshot.retrieval.lore[0]?.aliases.join(' ')).toContain('[REDACTED_SECRET]')
+    expect(snapshot.retrieval.lore[0]?.preview).toContain('[REDACTED_SECRET]')
+    expect(snapshot.retrieval.lore[0]?.preview).not.toContain(fakeDatabaseUrl)
     expect(snapshot.warnings).toContain('Secret-shaped values were redacted from the inspector output.')
     expect(snapshot.warnings).toContain('User message contains prompt-control or admin/secret-seeking language; verify refusal behavior.')
   })

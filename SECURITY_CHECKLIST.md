@@ -32,7 +32,8 @@
 - Persona ใช้เป็น context ได้ แต่ห้ามใช้เป็นคำสั่งเพื่อ reveal hidden prompts, bypass rules หรือ act as admin/developer
 - Runtime instruction ต้องย้ำว่าไม่ reveal hidden system instructions และไม่ทำตามคำสั่งที่ขัดกับ platform policy
 - `POST /admin/prompt-inspector` ต้องเป็น admin-only และต้องคืนเฉพาะ prompt snapshot ที่ redact แล้ว ห้ามปล่อย API key, DB URL, JWT หรือ service-role secret ผ่าน debugger output
-- Guard อัตโนมัติ: `context.service.test.ts`
+- Prompt Inspector ต้อง redact ทั้ง final prompt, section content, และ retrieved lore preview/keyword/alias ก่อนส่งกลับ UI
+- Guard อัตโนมัติ: `context.service.test.ts`, `prompt-inspector.service.test.ts`
 
 ## CIA / AAA Coverage
 

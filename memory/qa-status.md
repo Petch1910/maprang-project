@@ -36,6 +36,7 @@ Results:
 - Deploy readiness self-test: pass.
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - API smoke now covers admin-only prompt inspector snapshots, prompt diffs, and deterministic local evals.
+- Prompt Inspector service tests now cover secret redaction in retrieved lore previews and aliases.
 - Route/menu audit now covers 14 surfaces including `/admin/prompt-inspector` and `/admin/evals`.
 - API smoke and E2E now cover chat world state save/read persistence.
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.

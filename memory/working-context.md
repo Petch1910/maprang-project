@@ -18,6 +18,7 @@ Verified:
 - Local Postgres is reachable through Docker and migrations are applied.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.
+- Prompt Inspector now redacts secret-shaped values in retrieved lore keyword/alias/preview as well as final prompt and section content.
 - Frontend Prompt Inspector page is available at `/admin/prompt-inspector` and is included in route/menu audit.
 - Automated Evals are available through `/admin/evals` and `GET /admin/evals/local` using the same deterministic suite as `bun run eval:local`.
 - Admin Health page renders production blockers and has no browser console errors.
