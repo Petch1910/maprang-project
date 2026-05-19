@@ -1,31 +1,75 @@
-async function runStep(label: string, command: string[]) {
-  console.log(`\n${label}`)
-  const proc = Bun.spawn(command, {
+export type E2eSmokeStep = {
+  label: string
+  command: string[]
+  alwaysRun?: boolean
+}
+
+export type E2eSmokeRunner = (step: E2eSmokeStep) => Promise<number>
+export type E2eSmokeLogger = Pick<typeof console, 'log' | 'error'>
+
+export function e2eSmokeSteps(): E2eSmokeStep[] {
+  return [
+    {
+      label: 'QA seed: reset before browser smoke',
+      command: ['bun', 'run', 'qa:seed'],
+    },
+    {
+      label: 'Playwright smoke: desktop and mobile routes',
+      command: ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'],
+    },
+    {
+      label: 'QA seed: restore demo data after browser smoke',
+      command: ['bun', 'run', 'qa:seed'],
+      alwaysRun: true,
+    },
+  ]
+}
+
+async function spawnStep(step: E2eSmokeStep) {
+  const proc = Bun.spawn(step.command, {
     env: process.env,
     stdio: ['inherit', 'inherit', 'inherit'],
   })
-  const exitCode = await proc.exited
+  return proc.exited
+}
+
+async function runStep(step: E2eSmokeStep, runner: E2eSmokeRunner, logger: E2eSmokeLogger) {
+  logger.log(`\n${step.label}`)
+  const exitCode = await runner(step)
   if (exitCode !== 0) {
-    throw new Error(`${label} failed with exit code ${exitCode}`)
+    throw new Error(`${step.label} failed with exit code ${exitCode}`)
   }
 }
 
-let exitCode = 0
+export async function runE2eSmoke(
+  runner: E2eSmokeRunner = spawnStep,
+  logger: E2eSmokeLogger = console,
+  steps: E2eSmokeStep[] = e2eSmokeSteps(),
+) {
+  const [reset, browserSmoke, restore] = steps
+  if (!reset || !browserSmoke || !restore) throw new Error('e2e smoke requires reset, browser smoke, and restore steps')
 
-await runStep('QA seed: reset before browser smoke', ['bun', 'run', 'qa:seed'])
+  let exitCode = 0
 
-try {
-  await runStep('Playwright smoke: desktop and mobile routes', ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'])
-} catch (error) {
-  exitCode = 1
-  console.error(error)
-} finally {
+  await runStep(reset, runner, logger)
+
   try {
-    await runStep('QA seed: restore demo data after browser smoke', ['bun', 'run', 'qa:seed'])
+    await runStep(browserSmoke, runner, logger)
   } catch (error) {
     exitCode = 1
-    console.error(error)
+    logger.error(error)
+  } finally {
+    try {
+      await runStep(restore, runner, logger)
+    } catch (error) {
+      exitCode = 1
+      logger.error(error)
+    }
   }
+
+  return exitCode
 }
 
-process.exit(exitCode)
+if (import.meta.main) {
+  process.exit(await runE2eSmoke())
+}

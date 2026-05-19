@@ -76,6 +76,7 @@ Verified:
 - Backend DB check planning is covered by `backend:check:db:test`, ensuring DB availability is checked before backend tests run with `REQUIRE_DB_TESTS=true`.
 - Supabase signed-storage setup now exports testable helpers for env loading, config validation, signed URL normalization, and object path encoding; `supabase:storage:test` covers them without hitting Supabase.
 - Local smoke now exports testable helpers for smoke character selection, avatar upload validation, and QA summary formatting; `smoke:local:test` covers them without hitting the backend.
+- Browser e2e smoke now exports a testable command plan, and `e2e:smoke:test` guards seed reset, Playwright execution, and seed restore ordering without launching the browser.
 
 ## Current Production Status
 

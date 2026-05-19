@@ -58,6 +58,7 @@ Results:
 - `backend:check:db:test` now runs in `qa:local`, CI, and Production Smoke to guard DB-required backend check command planning.
 - `supabase:storage:test` now runs in `qa:local`, CI, and Production Smoke to guard signed-storage setup helpers without calling Supabase.
 - `smoke:local:test` now runs in `qa:local`, CI, and Production Smoke to guard local smoke helper behavior without calling the backend.
+- `e2e:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard browser smoke seed reset/restore command ordering without launching Playwright.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.

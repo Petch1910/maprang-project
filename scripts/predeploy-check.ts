@@ -65,6 +65,7 @@ const requiredFiles = [
   'scripts/provider-smoke-guards.test.ts',
   'scripts/readiness-smoke.test.ts',
   'scripts/local-smoke.test.ts',
+  'scripts/e2e-smoke.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -318,6 +319,7 @@ const checks: Check[] = [
           '"provider:smoke:guards:test"',
           '"smoke:ready:test"',
           '"smoke:local:test"',
+          '"e2e:smoke:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -390,6 +392,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('smoke:local:test')) {
         throw new Error('package.json qa:local must run smoke:local:test so local smoke helper regressions are caught')
+      }
+      if (!qaLocal.includes('e2e:smoke:test')) {
+        throw new Error('package.json qa:local must run e2e:smoke:test so browser smoke command regressions are caught')
       }
       if (!qaLocal.includes('backend:check:db:test')) {
         throw new Error('package.json qa:local must run backend:check:db:test so DB-required backend check planning is caught')
@@ -787,6 +792,7 @@ const checks: Check[] = [
           'bun run provider:smoke:guards:test',
           'bun run smoke:ready:test',
           'bun run smoke:local:test',
+          'bun run e2e:smoke:test',
           'bun run backend:check:db:test',
           'bun run supabase:storage:test',
           'bun run release:handoff:check',
@@ -827,6 +833,7 @@ const checks: Check[] = [
           'bun run provider:smoke:guards:test',
           'bun run smoke:ready:test',
           'bun run smoke:local:test',
+          'bun run e2e:smoke:test',
           'bun run backend:check:db:test',
           'bun run supabase:storage:test',
           'bun run release:handoff:check',
