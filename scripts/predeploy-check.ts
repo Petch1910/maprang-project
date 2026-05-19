@@ -9,6 +9,8 @@ type Check = {
 }
 
 const requiredFiles = [
+  'AGENTS.md',
+  'agent.md',
   'DEPLOY_RENDER.md',
   'DEPLOYMENT_QA.md',
   'PRODUCTION_SETUP.md',
@@ -66,6 +68,31 @@ const checks: Check[] = [
     name: 'required deploy files exist',
     run: async () => {
       await Promise.all(requiredFiles.map(assertFile))
+    },
+  },
+  {
+    name: 'agent handoff guide is available',
+    run: async () => {
+      const agentEntry = await readRepoFile('AGENTS.md')
+      const agentGuide = await readRepoFile('agent.md')
+      requireIncludes(agentEntry, ['agent.md', 'memory/working-context.md', 'memory/qa-status.md', 'Do not commit secrets'], 'AGENTS.md')
+      requireIncludes(
+        agentGuide,
+        [
+          'Maprang AI Agent Guide',
+          'Current Status',
+          'Product Direction',
+          'Safety And Content Rules',
+          'Core Systems To Protect',
+          'Relationship Engine',
+          'Scene Runtime',
+          'Prompt/Context Engine',
+          'QA Commands',
+          'Production Blockers',
+          'Definition Of Done',
+        ],
+        'agent.md',
+      )
     },
   },
   {

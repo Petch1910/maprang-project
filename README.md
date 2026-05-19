@@ -71,6 +71,12 @@ Long-running project context lives in [`memory/README.md`](./memory/README.md). 
 sessions. The memory vault tracks current blockers, QA status, deploy readiness, UI/API direction, and decision logs.
 It must never contain secrets or real credentials.
 
+## Agent Handoff
+
+Future agents and developers should start with [`AGENTS.md`](./AGENTS.md), which points to the canonical
+[`agent.md`](./agent.md) operating guide. The guide summarizes the mission, product direction, QA gates, production
+blockers, and the relationship/scene/prompt systems that must stay stable.
+
 ```bash
 bun run memory:audit
 ```
