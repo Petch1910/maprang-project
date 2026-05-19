@@ -32,6 +32,7 @@ Results:
 - Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
+- Full local QA was rerun after the latest Thai UI copy guards and route/menu mixed-language guard; `qa:local` still passes across backend, frontend, local smoke, and API smoke.
 - Secrets check: pass.
 - Memory audit: pass.
 - Knowledge audit: pass.
