@@ -3,7 +3,9 @@ import { dirname, extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { storageProvider } from './config'
 
-export const uploadRoot = join(dirname(fileURLToPath(import.meta.url)), '..', 'uploads', 'avatars')
+const backendRoot = dirname(dirname(fileURLToPath(import.meta.url)))
+
+export const uploadRoot = join(backendRoot, 'uploads', 'avatars')
 export const maxAvatarBytes = 2 * 1024 * 1024
 export const supabaseSignedUrlExpiresInSeconds = Number(process.env.SUPABASE_SIGNED_URL_EXPIRES_IN ?? 3600)
 export const supabaseStorageAccess =

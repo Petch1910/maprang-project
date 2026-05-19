@@ -1,14 +1,11 @@
-import { CharacterStatus, type Character, type Prisma, type Visibility } from '@prisma/client'
+import { CharacterStatus, type Prisma, type Visibility } from '@prisma/client'
 import { defaultCharacterId, defaultSystemPrompt, defaultUserId } from './config'
 import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentRating } from './content-rating'
 import { getPrisma } from './db'
 import { validateRelationshipTags } from './relationship.engine'
+import type { CharacterWithTags } from './character.types'
 
-export type CharacterWithTags = Character & {
-  tags?: { tag: { name: string } }[]
-  favoritedBy?: { userId: string }[]
-  _count?: { favoritedBy: number }
-}
+export type { CharacterWithTags } from './character.types'
 
 export type CharacterInput = {
   name: string

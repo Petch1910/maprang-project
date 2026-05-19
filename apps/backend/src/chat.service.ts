@@ -5,7 +5,8 @@ import type {
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming,
 } from 'openai/resources/chat/completions'
-import { loadCharacter, publicCharacter, type CharacterWithTags } from './character.service'
+import { loadCharacter, publicCharacter } from './character.service'
+import type { CharacterWithTags } from './character.types'
 import {
   chatProviderRetryAttempts,
   chatProviderRetryDelayMs,

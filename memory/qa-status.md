@@ -26,6 +26,7 @@ Results:
 - Frontend build: pass.
 - Bundle budget: pass.
 - Frontend Redux circular dependency cleanup: pass via `frontend:check` and SocratiCode graph check; store/slice cycles dropped from six frontend chains to zero.
+- Backend circular dependency cleanup: pass via focused backend tests and SocratiCode graph check; project graph now reports no circular dependencies.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.

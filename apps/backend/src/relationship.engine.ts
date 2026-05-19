@@ -1,4 +1,4 @@
-import type { CharacterWithTags } from './character.service'
+import type { CharacterWithTags } from './character.types'
 
 export type RelationshipStats = {
   affinity: number
