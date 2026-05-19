@@ -5,16 +5,16 @@ import { parseMinSmokeTokenBalance, providerFailureIssue } from './live-chat-smo
 describe('provider smoke guard helpers', () => {
   test('validates live chat minimum token balance config', () => {
     expect(parseMinSmokeTokenBalance('1000')).toBe(1000)
-    expect(() => parseMinSmokeTokenBalance('0')).toThrow('positive integer')
-    expect(() => parseMinSmokeTokenBalance('1.5')).toThrow('positive integer')
+    expect(() => parseMinSmokeTokenBalance('0')).toThrow('จำนวนเต็มบวก')
+    expect(() => parseMinSmokeTokenBalance('1.5')).toThrow('จำนวนเต็มบวก')
   })
 
   test('formats provider failure messages without allowing verification flags too early', () => {
     expect(providerFailureIssue({ code: 'rate_limit', retryable: true, userMessage: 'try later' })).toContain(
-      'Retryable after cooldown. Message: try later',
+      'ลองใหม่ได้หลัง cooldown',
     )
     expect(providerFailureIssue({ code: 'invalid_key', retryable: false })).toContain(
-      'before setting CHAT_PROVIDER_LIVE_VERIFIED=1',
+      'ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1',
     )
   })
 
@@ -27,8 +27,8 @@ describe('provider smoke guard helpers', () => {
 
   test('maps image provider failures to actionable fixes', () => {
     expect(providerFailureHint('billing_hard_limit_reached')).toContain('billing limit')
-    expect(providerFailureHint('insufficient_quota')).toContain('credits/quota')
-    expect(providerFailureHint('403 invalid api key')).toContain('valid backend-only image provider key')
+    expect(providerFailureHint('insufficient_quota')).toContain('เครดิต/quota')
+    expect(providerFailureHint('403 invalid api key')).toContain('backend-only image provider key ที่ถูกต้อง')
     expect(providerFailureHint('model unavailable')).toContain('IMAGE_GENERATION_MODEL')
     expect(providerFailureHint('temporary upstream error')).toBe('')
   })

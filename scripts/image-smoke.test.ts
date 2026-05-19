@@ -45,7 +45,7 @@ describe('image smoke helpers', () => {
       imageStatus: 'needs_live_smoke',
       imageProductionReady: false,
       skipped:
-        'Live provider call was skipped. Set SMOKE_IMAGE_LIVE=1 or run `bun run smoke:image:live` to generate a real image during staging/production QA.',
+        'ข้าม live provider call แล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อ generate รูปจริงตอน staging/production QA',
     })
   })
 
@@ -57,13 +57,13 @@ describe('image smoke helpers', () => {
     ).toContain('billing limit')
 
     expect(liveImageDraftFailure({ image: { provider: 'configured' } })).toBe(
-      'Image smoke returned configured provider but no image URL',
+      'Image smoke ใช้ provider ที่ตั้งค่าแล้ว แต่ไม่มี image URL',
     )
     expect(
       liveImageDraftFailure({
         image: { provider: 'configured', url: 'data:image/svg+xml;base64,abc' },
       }),
-    ).toBe('Image smoke returned the local placeholder SVG instead of a generated image')
+    ).toBe('Image smoke ได้ local placeholder SVG แทนรูปที่ generate จริง')
   })
 
   test('formats successful live-image payload and classifies generated URL kind', () => {

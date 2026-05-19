@@ -2,7 +2,7 @@ import { providerFailureHint } from './image-smoke'
 
 export function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {
   const warnings = payload.warnings?.filter(Boolean).join('; ')
-  const issue = warnings || payload.image?.note || 'image provider did not return a generated image'
+  const issue = warnings || payload.image?.note || 'image provider ไม่ได้คืนรูปที่ generate แล้ว'
   return `${issue}${providerFailureHint(issue)}`
 }
 

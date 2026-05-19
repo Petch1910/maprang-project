@@ -52,16 +52,16 @@ export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN
   const value = Number(rawValue)
 
   if (!Number.isInteger(value) || value < 1) {
-    throw new Error(`SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT must be a positive integer. Received: ${rawValue}`)
+    throw new Error(`SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ต้องเป็นจำนวนเต็มบวก ค่าที่ได้รับ: ${rawValue}`)
   }
 
   return value
 }
 
 export function providerFailureIssue(failure: ProviderFailure) {
-  const userMessage = failure.userMessage ? ` Message: ${failure.userMessage}` : ''
-  const retry = failure.retryable ? ' Retryable after cooldown.' : ' Requires configuration/quota/admin fix.'
-  return `Live chat reached the backend, but the AI provider returned ${failure.code ?? 'unknown'}.${retry}${userMessage} Check outbound network access to OpenRouter, OPENROUTER_API_KEY, provider credits/quota, rate limits, model access, and backend logs before setting CHAT_PROVIDER_LIVE_VERIFIED=1.`
+  const userMessage = failure.userMessage ? ` ข้อความจาก provider: ${failure.userMessage}` : ''
+  const retry = failure.retryable ? ' ลองใหม่ได้หลัง cooldown' : ' ต้องแก้ config/quota/admin ก่อน'
+  return `Live chat ติดต่อ backend ได้แล้ว แต่ AI provider คืน ${failure.code ?? 'unknown'}.${retry}${userMessage} ตรวจ outbound network ไป OpenRouter, OPENROUTER_API_KEY, เครดิต/quota ของ provider, rate limits, model access, และ backend logs ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`
 }
 
 export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[]) {
@@ -76,7 +76,7 @@ export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[
 export function assertSmokeUserHasTokenBalance(tokenBalance: number, minSmokeTokenBalance: number) {
   if (tokenBalance < minSmokeTokenBalance) {
     throw new Error(
-      `Smoke user has ${tokenBalance} tokens, below SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance}. Top up the smoke user before running live chat smoke.`,
+      `smoke user มี ${tokenBalance} token ซึ่งต่ำกว่า SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance} เติม token ให้ smoke user ก่อนรัน live chat smoke`,
     )
   }
 }
@@ -87,13 +87,13 @@ export function validateLiveChatSmokeResponse(chat: LiveChatSmokeResponse, minRo
   }
 
   if (!chat.reply) {
-    throw new Error('Live chat did not return an AI reply: empty reply')
+    throw new Error('Live chat ไม่ได้คืน AI reply: reply ว่าง')
   }
 
-  if (!chat.chatId) throw new Error('Live chat did not create a chat id')
-  if (!chat.usage?.totalTokens) throw new Error('Live chat did not return token usage')
+  if (!chat.chatId) throw new Error('Live chat ไม่ได้สร้าง chat id')
+  if (!chat.usage?.totalTokens) throw new Error('Live chat ไม่ได้คืน token usage')
   if (chat.reply.length < minRoleplayReplyChars) {
-    throw new Error(`Live chat reply is too short for roleplay QA. Expected at least ${minRoleplayReplyChars} characters. Reply: ${chat.reply}`)
+    throw new Error(`Live chat reply สั้นเกินไปสำหรับ roleplay QA ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร Reply: ${chat.reply}`)
   }
 
   return {
@@ -139,7 +139,7 @@ export function buildLiveChatSmokePayload({
     balanceAfter: chatDebit.balanceAfter,
     replyChars: reply.length,
     minRoleplayReplyChars,
-    nextStep: 'Set CHAT_PROVIDER_LIVE_VERIFIED=1 in this target environment, then rerun production:check.',
+    nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน target environment นี้ แล้วรัน production:check ใหม่',
     replyPreview: reply.slice(0, 120),
   }
 }
@@ -161,11 +161,11 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     const minRoleplayReplyChars = Math.max(420, health.model?.minRoleplayReplyChars ?? 420)
 
     if (!health.ok || !health.checks.databaseConnected) {
-      throw new Error('Backend health check failed')
+      throw new Error('backend health check ไม่ผ่าน')
     }
 
     if (!health.checks.openRouterConfigured) {
-      throw new Error('OpenRouter is not configured on the backend')
+      throw new Error('ยังไม่ได้ตั้งค่า OpenRouter บน backend')
     }
 
     const characters = await jsonReader<{
@@ -175,7 +175,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     })
 
     const smokeCharacter = selectLiveChatSmokeCharacter(characters.characters ?? [])
-    if (!smokeCharacter) throw new Error('Seeded smoke character was not found')
+    if (!smokeCharacter) throw new Error('ไม่พบ seeded smoke character')
 
     const walletBefore = await jsonReader<{
       user: { tokenBalance: number }
@@ -213,7 +213,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     const chatDebit = findMatchingChatDebit(walletAfter.wallet?.transactions, chatResult.totalTokens)
 
     if (!chatDebit) {
-      throw new Error('Live chat returned token usage, but no matching CHAT_USAGE wallet transaction was found')
+      throw new Error('Live chat คืน token usage แล้ว แต่ไม่พบ CHAT_USAGE wallet transaction ที่ตรงกัน')
     }
 
     writeLine(
@@ -235,7 +235,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     return 0
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Live chat smoke failed: ${message}`)
+    writeError(`Live chat smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 }

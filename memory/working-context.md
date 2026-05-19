@@ -1,6 +1,6 @@
 # Working Context
 
-Last updated: 2026-05-19
+Last updated: 2026-05-20
 
 ## Current Goal
 
@@ -11,7 +11,7 @@ Bring Maprang AI to a production-ready state before deploy. The local system sho
 Status: local QA ready
 
 Verified:
-- Backend tests pass: 131 pass, 0 fail.
+- Backend tests pass: 133 pass, 0 fail.
 - Frontend deploy check passes.
 - Local API smoke passes: 32 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
@@ -34,6 +34,7 @@ Verified:
 - Backend character quality review notes now return Thai-first creator guidance for missing name/tagline/description/biography/scenario/system prompt/compact prompt/greeting/tags.
 - Backend runtime env validation, health readiness failures, security posture details, deploy readiness blockers, deploy status output, and smoke doctor blocker output now use Thai-first copy while preserving exact env names, commands, and provider names.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
+- Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.
 - Prompt tooling UI copy now uses Thai-first labels for system prompt reset, redacted prompt snapshots, runtime/persona inputs, section budget, and route/menu audit descriptions.
 - Profile content settings, tag conflict helper warnings, Prompt Inspector helper labels, and route/menu staging rows now avoid mixed `backend`, `prompt`, `runtime`, `persona`, and staging/deploy wording in user-facing Thai copy; frontend static audit and predeploy guard those stale phrases.
 - Predeploy now has its own regression test and is wired into local QA, CI, and Production Smoke so critical predeploy/e2e wording guards cannot drift silently.

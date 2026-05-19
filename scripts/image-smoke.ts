@@ -55,16 +55,16 @@ export function shouldRunLiveImageSmoke(argv = process.argv, env = process.env) 
 export function providerFailureHint(message: string) {
   const normalized = message.toLowerCase()
   if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
-    return ' | Fix: increase or reset the image provider billing limit, then rerun `bun run smoke:image:live`.'
+    return ' | วิธีแก้: เพิ่มหรือรีเซ็ต billing limit ของ image provider แล้วรัน `bun run smoke:image:live` ใหม่'
   }
   if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
-    return ' | Fix: add image provider credits/quota, then rerun `bun run smoke:image:live`.'
+    return ' | วิธีแก้: เติมเครดิต/quota ของ image provider แล้วรัน `bun run smoke:image:live` ใหม่'
   }
   if (normalized.includes('401') || normalized.includes('403') || normalized.includes('invalid api key')) {
-    return ' | Fix: replace IMAGE_GENERATION_API_KEY/OPENAI_API_KEY with a valid backend-only image provider key.'
+    return ' | วิธีแก้: เปลี่ยน IMAGE_GENERATION_API_KEY/OPENAI_API_KEY เป็น backend-only image provider key ที่ถูกต้อง'
   }
   if (normalized.includes('model')) {
-    return ' | Fix: check IMAGE_GENERATION_MODEL and whether the provider account can use that image model.'
+    return ' | วิธีแก้: ตรวจ IMAGE_GENERATION_MODEL และสิทธิ์ของบัญชี provider ว่าใช้ image model นั้นได้'
   }
   return ''
 }
@@ -79,7 +79,7 @@ export function buildSkippedImageSmokePayload(health: ImageSmokeHealthPayload, b
     imageStatus: health.model?.imageGeneration?.status ?? null,
     imageProductionReady: health.model?.imageGeneration?.productionReady ?? false,
     skipped:
-      'Live provider call was skipped. Set SMOKE_IMAGE_LIVE=1 or run `bun run smoke:image:live` to generate a real image during staging/production QA.',
+      'ข้าม live provider call แล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อ generate รูปจริงตอน staging/production QA',
   }
 }
 
@@ -87,15 +87,15 @@ export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   if (draft.image?.provider !== 'configured') {
     const warnings = draft.warnings?.filter(Boolean).join('; ')
     const issue = warnings || draft.image?.note || 'no warnings'
-    return `Image smoke fell back to placeholder: ${issue}${providerFailureHint(issue)}`
+    return `Image smoke กลับไปใช้ placeholder: ${issue}${providerFailureHint(issue)}`
   }
 
   if (!draft.image.url) {
-    return 'Image smoke returned configured provider but no image URL'
+    return 'Image smoke ใช้ provider ที่ตั้งค่าแล้ว แต่ไม่มี image URL'
   }
 
   if (draft.image.url.startsWith('data:image/svg+xml')) {
-    return 'Image smoke returned the local placeholder SVG instead of a generated image'
+    return 'Image smoke ได้ local placeholder SVG แทนรูปที่ generate จริง'
   }
 
   return null
@@ -139,14 +139,14 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
     health = await (options.readHealth ?? (() => readJson<ImageSmokeHealthPayload>('/health')))()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Image smoke failed: ${message}`)
+    writeError(`Image smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 
   const imageConfigured = imageGenerationIsConfigured(health)
 
   if (!imageConfigured) {
-    writeError('Image generation provider is not configured on the backend. Set IMAGE_GENERATION_API_KEY or OPENAI_API_KEY before production.')
+    writeError('image generation provider ยังไม่ได้ตั้งค่าบน backend ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ก่อน production')
     return 1
   }
 
@@ -175,7 +175,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
         })))()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Image smoke failed: ${message}`)
+    writeError(`Image smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 

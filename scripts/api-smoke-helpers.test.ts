@@ -23,8 +23,8 @@ describe('api smoke helpers', () => {
 
   test('builds image provider issues with actionable hints', () => {
     expect(creatorImageIssue({ warnings: ['billing_hard_limit_reached'] })).toContain('billing limit')
-    expect(creatorImageIssue({ image: { note: '403 invalid api key' } })).toContain('valid backend-only image provider key')
-    expect(creatorImageIssue({})).toBe('image provider did not return a generated image')
+    expect(creatorImageIssue({ image: { note: '403 invalid api key' } })).toContain('backend-only image provider key ที่ถูกต้อง')
+    expect(creatorImageIssue({})).toBe('image provider ไม่ได้คืนรูปที่ generate แล้ว')
   })
 
   test('parses JSON safely for API smoke response helpers', () => {
