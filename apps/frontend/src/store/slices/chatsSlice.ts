@@ -1,12 +1,6 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
-import type { RootState } from '../store'
 import { fetchChats, type ChatSummary } from '../../lib/api'
-
-type ChatsState = {
-  items: ChatSummary[]
-  isLoading: boolean
-  error: string | null
-}
+import type { ChatsState, RootState } from '../types'
 
 const initialState: ChatsState = {
   items: [],

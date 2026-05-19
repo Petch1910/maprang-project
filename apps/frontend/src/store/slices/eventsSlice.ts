@@ -1,18 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '../store'
-
-export type PendingEventSummary = {
-  id: string
-  chatId: string
-  characterName: string
-  title: string
-  relationshipStatus: string
-  expiresAtTurn?: number
-}
-
-type EventsState = {
-  pending: PendingEventSummary[]
-}
+import type { EventsState, PendingEventSummary, RootState } from '../types'
+export type { PendingEventSummary } from '../types'
 
 const initialState: EventsState = {
   pending: [],

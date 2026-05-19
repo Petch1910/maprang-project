@@ -1,15 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { fetchContentSettings, updateContentSettings } from '../../lib/api'
-import type { RootState } from '../store'
-
-export type ContentRating = 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
-
-type ContentState = {
-  isAdult: boolean
-  ageGateAnswered: boolean
-  showMature: boolean
-  maxRating: ContentRating
-}
+import type { ContentRating, ContentState, RootState } from '../types'
+export type { ContentRating } from '../types'
 
 const initialState: ContentState = {
   isAdult: false,

@@ -1,12 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '../store'
 import { fetchUsageSummary } from '../../lib/api'
-
-type WalletState = {
-  tokenBalance: number
-  lowTokenThreshold: number
-  isLoading: boolean
-}
+import type { RootState, WalletState } from '../types'
 
 const initialState: WalletState = {
   tokenBalance: 0,

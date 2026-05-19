@@ -1,13 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { fetchUserPersona, updateUserPersona } from '../../lib/api'
-import type { RootState } from '../store'
-
-type DraftsState = {
-  composerByKey: Record<string, string>
-  personaDraft: string
-  personaUpdatedAt: string | null
-  creatorDraftUpdatedAt: string | null
-}
+import type { DraftsState, RootState } from '../types'
 
 const initialState: DraftsState = {
   composerByKey: {},

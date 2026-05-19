@@ -1,5 +1,5 @@
 import type { Character } from './api'
-import type { ContentRating } from '../store/slices/contentSlice'
+import type { ContentRating } from '../store/types'
 
 const ratingRank: Record<ContentRating, number> = {
   general: 0,

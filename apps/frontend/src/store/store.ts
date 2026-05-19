@@ -5,6 +5,7 @@ import contentReducer, { hydrateContent } from './slices/contentSlice'
 import draftsReducer, { hydrateDrafts } from './slices/draftsSlice'
 import eventsReducer from './slices/eventsSlice'
 import walletReducer from './slices/walletSlice'
+export type { RootState } from './types'
 
 type PersistedState = {
   content?: ReturnType<typeof contentReducer>
@@ -51,5 +52,4 @@ if (typeof window !== 'undefined') {
   })
 }
 
-export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

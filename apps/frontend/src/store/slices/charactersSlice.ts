@@ -1,12 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import type { RootState } from '../store'
-import { fetchCharacters, type Character, type CharacterListFilters } from '../../lib/api'
-
-type CharactersState = {
-  items: Character[]
-  isLoading: boolean
-  error: string | null
-}
+import { fetchCharacters, type CharacterListFilters } from '../../lib/api'
+import type { CharactersState, RootState } from '../types'
 
 const initialState: CharactersState = {
   items: [],
