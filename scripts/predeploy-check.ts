@@ -963,7 +963,14 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.test.ts'),
-        ['reports buttons without explicit type', 'reports placeholder links', 'reports Thai placeholder and mojibake text regressions', 'runs the committed frontend static audit through an importable runner'],
+        [
+          'reports buttons without explicit type',
+          'reports placeholder links',
+          'reports Thai placeholder and mojibake text regressions',
+          'reports English UI label regressions for Thai-first surfaces',
+          'Relationship Contract',
+          'runs the committed frontend static audit through an importable runner',
+        ],
         'scripts/frontend-static-audit.test.ts',
       )
       requireIncludes(
@@ -973,7 +980,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.ts'),
-        ['collectFrontendStaticFindings', 'runFrontendStaticAudit', 'if (import.meta.main) process.exit(await runFrontendStaticAudit())'],
+        [
+          'collectFrontendStaticFindings',
+          'Relationship Contract',
+          'runFrontendStaticAudit',
+          'if (import.meta.main) process.exit(await runFrontendStaticAudit())',
+        ],
         'scripts/frontend-static-audit.ts',
       )
       requireIncludes(
