@@ -188,7 +188,7 @@ bunx prisma migrate deploy
 bun run qa:local
 ```
 
-Use this as the normal local readiness gate. It checks secrets, secret-pattern regression tests, memory and knowledge audits, deterministic prompt/context evals, API route coverage mapping, deploy wiring, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke skips the external image provider for creator draft checks so routine QA is deterministic; live avatar generation is verified only by `api:smoke:live`, `smoke:image:live`, or `production:check`.
+Use this as the normal local readiness gate. It checks secrets, secret-pattern regression tests, memory and knowledge audits, deterministic prompt/context evals, API route coverage mapping, import-cycle architecture audit, deploy wiring, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke skips the external image provider for creator draft checks so routine QA is deterministic; live avatar generation is verified only by `api:smoke:live`, `smoke:image:live`, or `production:check`.
 It also audits the project memory vault and runtime knowledge packs so long-running context cannot silently lose required files or pick up secret-shaped values.
 The secrets gate ignores untracked local env files for normal development, but it rejects tracked `.env` or `.env.*` files before commit/CI.
 
@@ -199,6 +199,14 @@ bun run api:audit
 ```
 
 This verifies that every route declared in `apps/backend/src/*.routes.ts` is accounted for by smoke, browser e2e, backend tests, live-provider smoke, admin smoke, or a manual production gate.
+
+To check import cycles across app and QA source:
+
+```bash
+bun run import-cycle:audit
+```
+
+This verifies backend, frontend, scripts, seed data, Playwright config, and e2e smoke files stay free of circular relative imports.
 
 To check production env files before deploy without printing secret values:
 

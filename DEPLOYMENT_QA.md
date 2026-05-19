@@ -10,7 +10,7 @@ Run the full local gate when Postgres, backend, and frontend are available:
 bun run qa:local
 ```
 
-This gate does not call the live AI provider. It verifies committed secrets, committed-secret scan path regressions, API route coverage mapping, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend bundle/static/route and route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, live chat smoke validation regressions, local smoke helper regressions, browser e2e smoke command-plan regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke also passes `skipImageProvider=true` for creator draft checks, so it verifies the endpoint shape without spending image credits; live image generation stays in `api:smoke:live`, `smoke:image:live`, and `production:check`.
+This gate does not call the live AI provider. It verifies committed secrets, committed-secret scan path regressions, API route coverage mapping, import-cycle architecture regressions, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend bundle/static/route and route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, live chat smoke validation regressions, local smoke helper regressions, browser e2e smoke command-plan regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke also passes `skipImageProvider=true` for creator draft checks, so it verifies the endpoint shape without spending image credits; live image generation stays in `api:smoke:live`, `smoke:image:live`, and `production:check`.
 Real `.env` and `.env.*` files must stay untracked. `secrets:check` ignores local untracked env files for developer convenience but fails if one is ever committed or tracked.
 
 To inspect backend API coverage without running the full suite:
@@ -20,6 +20,14 @@ bun run api:audit
 ```
 
 `api:audit` reads backend route files and fails if a route exists without a documented automated/manual coverage path. It is intentionally separate from `api:smoke`: the audit answers “is every endpoint accounted for?” while the smoke answers “do the high-value runtime paths work right now?”
+
+To inspect app, QA script, seed, and e2e source imports for circular dependencies:
+
+```bash
+bun run import-cycle:audit
+```
+
+`import-cycle:audit` scans relative TypeScript imports across backend, frontend, scripts, seed data, Playwright config, and e2e smoke files. It is included in `qa:local`, CI, and Production Smoke so architecture cycles cannot return silently.
 
 To inspect production env files before deploying, without printing secret values:
 
@@ -235,6 +243,7 @@ Expected result:
 - API smoke confirms `/relationship/presets` returns the full preset set, `/relationship/presets?surface=contract` returns only player-facing relationship contracts, and `/relationship/presets?surface=creator` keeps creator-only presets available for Creator Studio.
 - API smoke confirms chat menu mutations by renaming one seeded chat, archiving it, verifying the archived list, and restoring it back to active chats.
 - API smoke confirms admin prompt inspection returns redacted prompt snapshots, section accounting, and prompt diffs.
+- Import-cycle audit confirms app and QA source imports remain acyclic.
 - Image smoke confirms Creator Studio image generation is configured, and live opt-in confirms generated avatars do not fall back to placeholders.
 - Live chat smoke confirms backend-to-OpenRouter chat, chat persistence, and usage accounting.
 
