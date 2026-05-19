@@ -52,5 +52,5 @@ bun run smoke:image:live
 
 - Do not set `CHAT_PROVIDER_LIVE_VERIFIED=1` from a local skipped smoke.
 - Do not set `IMAGE_GENERATION_LIVE_VERIFIED=1` while image generation falls back to placeholder.
-- Do not deploy with local CORS.
+- Do not deploy with local or non-https CORS.
 - Do not paste secrets into memory files.

@@ -560,12 +560,13 @@ const checks: Check[] = [
       )
       requireIncludes(readme, ['local/non-https CORS'], 'README.md')
       requireIncludes(deploymentQa, ['local/non-https CORS'], 'DEPLOYMENT_QA.md')
-      requireIncludes(productionSetup, ['CORS is local or non-https'], 'PRODUCTION_SETUP.md')
+      requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS is local or non-https', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
       requireIncludes(
         await readRepoFile('DEPLOY_RENDER.md'),
         ['CORS_ORIGINS=https://<frontend-domain>', 'Do not include localhost, `http://` origins, wildcard origins, or the backend URL'],
         'DEPLOY_RENDER.md',
       )
+      requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin'], 'STAGING_RUNBOOK.md')
     },
   },
   {

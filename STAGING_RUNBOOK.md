@@ -32,6 +32,7 @@
 - รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging ให้ผ่านก่อน แล้วค่อยตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`
 - ตั้ง `ADMIN_API_KEY` เป็นค่าสุ่มยาวใหม่สำหรับ staging
 - ตั้ง `CORS_ORIGINS=https://<frontend-staging-domain>`
+- `CORS_ORIGINS` ต้องเป็น frontend HTTPS origin จริงเท่านั้น และต้องไม่ใช้ localhost, `http://`, wildcard, หรือ backend URL
 - ตั้ง health check path เป็น `/ready`
 - รัน migration:
 
@@ -76,6 +77,8 @@ E2E_BASE_URL=https://<frontend-staging-domain> E2E_API_BASE_URL=https://<backend
 ```bash
 bun run staging:check
 ```
+
+Staging CORS must pass the same `local/non-https CORS` rule as production before live provider smoke is treated as release evidence.
 
 คำสั่งนี้เช็กโค้ด, backend tests, frontend build, Playwright desktop/mobile, signed storage จริง, และ admin API smoke โดยไม่ถือว่า domain/live provider พร้อม production แทน `production:check`
 
