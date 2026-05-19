@@ -27,6 +27,7 @@ Results:
 - Bundle budget: pass.
 - Frontend Redux circular dependency cleanup: pass via `frontend:check` and SocratiCode graph check; store/slice cycles dropped from six frontend chains to zero.
 - Backend circular dependency cleanup: pass via focused backend tests and SocratiCode graph check; project graph now reports no circular dependencies.
+- Import-cycle audit: pass via `import-cycle:audit`, `import-cycle:audit:test`, and `predeploy:check`; the repo-owned audit currently checks 88 app source files and 247 relative import edges.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
@@ -53,6 +54,7 @@ Results:
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
 - API smoke with `--require-admin` now passes 31 checks plus 1 local live-chat skip, including uncharged chat validation, non-mutating chat delete/report creation, admin wallet, and admin report PATCH/action validation.
 - `api:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard route discovery, coverage-map regressions, and the importable route audit runner.
+- `import-cycle:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard relative import extraction, extension/index resolution, cycle detection, and the importable architecture audit runner.
 - `api:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard API smoke readiness/image helper regressions, summary counts, and API smoke runner import safety without calling a backend.
 - `frontend:bundle:test` now runs in `qa:local`, CI, and Production Smoke to guard code-splitting, bundle budget regressions, and the importable bundle budget runner.
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, Thai text/mojibake regressions, and the importable static audit runner.

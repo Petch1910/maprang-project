@@ -65,6 +65,8 @@ const requiredFiles = [
   'scripts/frontend-route-audit.test.ts',
   'scripts/route-menu-doc-check.ts',
   'scripts/route-menu-doc-check.test.ts',
+  'scripts/import-cycle-audit.ts',
+  'scripts/import-cycle-audit.test.ts',
   'scripts/backend-security-audit.test.ts',
   'scripts/smoke-helpers.test.ts',
   'scripts/provider-smoke-guards.test.ts',
@@ -389,6 +391,8 @@ const checks: Check[] = [
           '"eval:promptfoo"',
           '"security:audit"',
           '"security:audit:test"',
+          '"import-cycle:audit"',
+          '"import-cycle:audit:test"',
           '"api:audit:test"',
           '"api:smoke:test"',
           '"frontend:bundle:test"',
@@ -456,6 +460,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('security:audit:test')) {
         throw new Error('package.json qa:local must run security:audit:test so backend security audit regressions are caught')
+      }
+      if (!qaLocal.includes('import-cycle:audit') || !qaLocal.includes('import-cycle:audit:test')) {
+        throw new Error('package.json qa:local must run import-cycle audit and its regression test so architecture cycles are caught')
       }
       if (!qaLocal.includes('api:audit:test')) {
         throw new Error('package.json qa:local must run api:audit:test so route audit regressions are caught')
@@ -1082,6 +1089,8 @@ const checks: Check[] = [
           'bun run eval:local:test',
           'bun run security:audit',
           'bun run security:audit:test',
+          'bun run import-cycle:audit',
+          'bun run import-cycle:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
           'bun run api:smoke:test',
@@ -1133,6 +1142,8 @@ const checks: Check[] = [
           'bun run eval:local:test',
           'bun run security:audit',
           'bun run security:audit:test',
+          'bun run import-cycle:audit',
+          'bun run import-cycle:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
           'bun run api:smoke:test',
