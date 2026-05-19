@@ -475,12 +475,18 @@ const checks: Check[] = [
     run: async () => {
       const checklist = await readRepoFile('SECURITY_CHECKLIST.md')
       const packageJson = await readRepoFile('package.json')
+      const securityAudit = await readRepoFile('scripts/backend-security-audit.ts')
       requireIncludes(
         checklist,
-        ['SQL Injection', 'Broken Access Control', 'Prompt Control', 'bun run security:audit', 'Production Must-Pass'],
+        ['SQL Injection', 'Broken Access Control', 'Prompt Control', 'bun run security:audit', 'requireAdminApiKey', 'Production Must-Pass'],
         'SECURITY_CHECKLIST.md',
       )
       requireIncludes(packageJson, ['"security:audit"', 'backend-security-audit.ts', '"api:audit"', 'api-route-audit.ts'], 'package.json')
+      requireIncludes(
+        securityAudit,
+        ['adminRoutePattern', 'admin route is missing requireAdminApiKey guard', '$queryRawUnsafe'],
+        'scripts/backend-security-audit.ts',
+      )
     },
   },
   {

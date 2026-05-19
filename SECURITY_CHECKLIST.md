@@ -21,6 +21,7 @@
 - Chat actions ต้องใช้ `where: { id, userId, deletedAt: null }` สำหรับอ่าน, rename, archive, restore, delete
 - Report/message guards ต้องบล็อก report private character หรือ message ที่ไม่ได้อยู่ใน chat ของผู้รายงาน
 - Admin actions ต้องมี `ADMIN_API_KEY` และมี audit log เมื่อเปลี่ยน report/status/token หรือซ่อน content
+- Static guard: `bun run security:audit` fails if any backend `/admin` route block is missing `requireAdminApiKey`.
 - Guard อัตโนมัติ: `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
 
 ## Prompt Control

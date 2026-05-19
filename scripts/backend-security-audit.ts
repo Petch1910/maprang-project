@@ -30,6 +30,8 @@ function lineFor(content: string, index: number) {
 
 const findings: Finding[] = []
 const files = (await Promise.all(scannedDirs.map((dir) => collectSourceFiles(join(root, dir))))).flat()
+const adminRoutePattern =
+  /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/admin\b[^'"`]*\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
 
 const patterns = [
   {
@@ -65,6 +67,15 @@ for (const file of files) {
         message: item.message,
       })
     }
+  }
+
+  for (const match of content.matchAll(adminRoutePattern)) {
+    if (match[0].includes('requireAdminApiKey')) continue
+    findings.push({
+      file: relativeFile,
+      line: lineFor(content, match.index ?? 0),
+      message: 'admin route is missing requireAdminApiKey guard in the route handler block.',
+    })
   }
 }
 
