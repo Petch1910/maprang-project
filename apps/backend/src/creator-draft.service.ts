@@ -334,18 +334,18 @@ async function defaultCompletion(messages: Array<{ role: 'system' | 'user'; cont
 
 function friendlyImageFailureReason(message: string) {
   const normalized = message.toLowerCase()
-  const status = message.match(/returned\s+(\d{3})/i)?.[1]
+  const status = message.match(/(?:returned|ตอบกลับ)\s+(\d{3})/i)?.[1]
   const suffix = status ? ` (HTTP ${status})` : ''
   if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
-    return `image provider billing hard limit reached${suffix}: เพิ่มหรือรีเซ็ตวงเงิน/เพดานใช้จ่ายของ image provider แล้วรัน smoke:image:live อีกครั้ง`
+    return `ผู้ให้บริการสร้างรูปติดเพดานวงเงิน${suffix}: เพิ่มหรือรีเซ็ตวงเงิน/เพดานใช้จ่ายของผู้ให้บริการสร้างรูป แล้วรัน smoke:image:live อีกครั้ง`
   }
   if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
-    return `image provider quota is not available${suffix}: เติมเครดิตหรือเพิ่ม quota ของ image provider แล้วรัน smoke:image:live อีกครั้ง`
+    return `โควตาผู้ให้บริการสร้างรูปไม่พร้อม${suffix}: เติมเครดิตหรือเพิ่มโควตาของผู้ให้บริการสร้างรูป แล้วรัน smoke:image:live อีกครั้ง`
   }
   if (normalized.includes('invalid_api_key') || normalized.includes('incorrect api key') || normalized.includes('unauthorized')) {
-    return `image provider API key is invalid${suffix}: เปลี่ยน IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY เป็น key backend-only ที่ถูกต้อง`
+    return `คีย์ผู้ให้บริการสร้างรูปไม่ถูกต้อง${suffix}: เปลี่ยน IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY เป็นคีย์สำหรับระบบหลังบ้านที่ถูกต้อง`
   }
-  return clip(message, 180)
+  return `ผู้ให้บริการสร้างรูปตอบกลับผิดพลาด${suffix}${message ? `: ${clip(message, 140)}` : ''}`
 }
 
 async function generateConfiguredImage(prompt: string, origin?: string) {
@@ -378,7 +378,7 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '')
-    throw new Error(`image provider returned ${response.status}${detail ? `: ${clip(detail, 180)}` : ''}`)
+    throw new Error(`ผู้ให้บริการสร้างรูปตอบกลับ ${response.status}${detail ? `: ${clip(detail, 180)}` : ''}`)
   }
   const payload = (await response.json()) as { data?: Array<{ b64_json?: string; url?: string }> }
   const image = payload.data?.[0]
@@ -394,15 +394,15 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
   }
   if (image?.url && origin) {
     const imageResponse = await fetch(image.url)
-    if (!imageResponse.ok) throw new Error(`image provider URL download returned ${imageResponse.status}`)
+    if (!imageResponse.ok) throw new Error(`ดาวน์โหลด URL จากผู้ให้บริการสร้างรูปตอบกลับ ${imageResponse.status}`)
     const contentType = imageResponse.headers.get('Content-Type') || 'image/png'
     const bytes = new Uint8Array(await imageResponse.arrayBuffer())
     const uploaded = await uploadAvatarBytes({ bytes, contentType, origin })
     if (uploaded.ok) return uploaded.url
-    throw new Error('avatar upload failed after image provider response')
+    throw new Error('อัปโหลดรูป avatar ไม่สำเร็จหลังได้คำตอบจากผู้ให้บริการสร้างรูป')
   }
   if (image?.url) return image.url
-  throw new Error('image provider response did not include image data')
+  throw new Error('คำตอบจากผู้ให้บริการสร้างรูปไม่มีข้อมูลรูปภาพ')
 }
 
 export async function generateCreatorDraft(input: CreatorDraftInput, completion: CompletionFn = defaultCompletion): Promise<CreatorDraftResult> {
@@ -466,7 +466,7 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
     } catch (error) {
       const reason = error instanceof Error ? friendlyImageFailureReason(error.message) : 'unknown error'
       imageFailureReason = reason
-      warnings.push(`สร้างรูปด้วย image provider ไม่สำเร็จ จึงใช้ภาพตัวอย่างระบบ: ${reason}`)
+      warnings.push(`สร้างรูปด้วยผู้ให้บริการสร้างรูปไม่สำเร็จ จึงใช้ภาพตัวอย่างระบบ: ${reason}`)
     }
   }
 
@@ -477,17 +477,17 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
           url: configuredImage,
           provider: 'configured',
           prompt: imagePrompt,
-          note: 'สร้างรูปจาก image provider ที่ตั้งค่าไว้แล้ว',
+          note: 'สร้างรูปจากผู้ให้บริการสร้างรูปที่ตั้งค่าไว้แล้ว',
         }
       : {
           url: buildGeneratedAvatarDataUrl(imagePrompt),
           provider: 'placeholder',
           prompt: imagePrompt,
           note: safeInput.skipImageProvider
-            ? 'ข้าม image provider สำหรับ smoke/dev check จึงใช้ภาพตัวอย่างระบบชั่วคราว'
+            ? 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check จึงใช้ภาพตัวอย่างระบบชั่วคราว'
             : shouldUseImageProvider
-            ? `ตั้งค่า image provider แล้ว แต่สร้างรูปไม่สำเร็จ${imageFailureReason ? `: ${imageFailureReason}` : ''} จึงใช้ภาพตัวอย่างระบบชั่วคราว`
-            : 'ยังไม่ได้ตั้งค่า image provider จริง จึงใช้ภาพตัวอย่างระบบชั่วคราว',
+            ? `ตั้งค่าผู้ให้บริการสร้างรูปแล้ว แต่สร้างรูปไม่สำเร็จ${imageFailureReason ? `: ${imageFailureReason}` : ''} จึงใช้ภาพตัวอย่างระบบชั่วคราว`
+            : 'ยังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูปจริง จึงใช้ภาพตัวอย่างระบบชั่วคราว',
         },
     source,
     modelName,

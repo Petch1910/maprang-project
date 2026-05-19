@@ -29,6 +29,7 @@ Verified:
 - Chat selection accessibility labels in the sidebar and My Chats are now Thai-first, and the static audit blocks stale `Select chat` labels from returning.
 - Creator Studio and chat/admin status copy now avoid mixed English operational wording such as `image provider`, `production`, `backend`, `Lobby`, and raw `prompt` in user-facing Thai copy, with frontend static/predeploy guards for those stale phrases.
 - Admin Health copy now maps visible operational wording to Thai-first terms for backend/frontend/provider/environment/checklist/final-gate guidance while preserving exact env names and commands.
+- Backend Creator Draft image status and warning messages now return Thai-first user-facing copy for missing/configured/failed image provider paths while preserving actionable smoke/env guidance.
 - Predeploy now has its own regression test and is wired into local QA, CI, and Production Smoke so critical predeploy/e2e wording guards cannot drift silently.
 - Browser smoke assertions now use Thai-first admin UI labels for Admin Health, Prompt Inspector, and Automated Evals, and the frontend static audit also blocks English admin checklist labels from returning.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.

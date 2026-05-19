@@ -71,6 +71,7 @@ Results:
 - `frontend:static:audit:test` now also blocks stale English chat-selection accessibility labels such as `Select chat`.
 - `frontend:static:audit:test` now also blocks stale mixed Creator Studio copy such as `image provider`, `production ควรตั้งค่า`, `Lobby ดูน่ากด`, `แกน prompt`, and `backend ช่วยร่าง`.
 - `frontend:static:audit:test` now also blocks stale mixed Admin Health operational copy such as `backend ยังไม่พร้อมเต็ม`, `health response จาก backend`, `provider จริง`, `final gate`, and `mobile overflow`.
+- Creator Draft image-provider copy now passes focused backend coverage with Thai-first missing-provider, configured-failure, and billing-limit messages.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link, navigate route regressions, and the importable route audit runner.
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document, runtime row alignment, stale mixed-language audit copy, and the importable doc-check runner.
 - `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior and shared backend root identity validation.
