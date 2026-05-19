@@ -535,6 +535,9 @@ const checks: Check[] = [
       if (!qaLocal.includes('deploy:doctor:test')) {
         throw new Error('package.json qa:local must run deploy:doctor:test so deploy env helper regressions are caught')
       }
+      if (!qaLocal.includes('deploy:doctor:self-test')) {
+        throw new Error('package.json qa:local must run deploy:doctor:self-test so deploy env CLI self-test stays covered')
+      }
       if (!qaLocal.includes('predeploy:check:test')) {
         throw new Error('package.json qa:local must run predeploy:check:test so predeploy guard wiring regressions are caught')
       }

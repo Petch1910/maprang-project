@@ -26,7 +26,9 @@ describe('predeploy check wiring', () => {
 
     expect(packageJson.scripts?.['predeploy:check:test']).toBe('bun test scripts/predeploy-check.test.ts')
     expect(packageJson.scripts?.['qa:local']).toContain('bun run predeploy:check:test')
+    expect(packageJson.scripts?.['qa:local']).toContain('bun run deploy:doctor:self-test')
     expect(ciWorkflow).toContain('bun run predeploy:check:test')
+    expect(ciWorkflow).toContain('bun run deploy:doctor:self-test')
     expect(productionSmoke).toContain('bun run predeploy:check:test')
   })
 })
