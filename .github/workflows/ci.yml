@@ -26,6 +26,7 @@ jobs:
       - run: bun run predeploy:check
       - run: bun run secrets:patterns:test
       - run: bun run security:audit
+      - run: bun run security:audit:test
       - run: bun run api:audit
       - run: bun run route-menu:audit
       - run: bun run release:handoff:check

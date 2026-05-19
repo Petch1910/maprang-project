@@ -51,6 +51,7 @@ const requiredFiles = [
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
   'scripts/route-menu-doc-check.ts',
+  'scripts/backend-security-audit.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -289,6 +290,7 @@ const checks: Check[] = [
           '"eval:local"',
           '"eval:promptfoo"',
           '"security:audit"',
+          '"security:audit:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -326,6 +328,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('secrets:patterns:test')) {
         throw new Error('package.json qa:local must run secrets:patterns:test so shared secret pattern regressions are caught')
+      }
+      if (!qaLocal.includes('security:audit:test')) {
+        throw new Error('package.json qa:local must run security:audit:test so backend security audit regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -519,6 +524,16 @@ const checks: Check[] = [
         'scripts/backend-security-audit.ts',
       )
       requireIncludes(
+        await readRepoFile('scripts/backend-security-audit.test.ts'),
+        [
+          'catches unsafe raw SQL helpers',
+          'allows tagged raw SQL parameterization',
+          'catches admin routes without admin api key guards',
+          'catches resource id routes without UUID guards',
+        ],
+        'scripts/backend-security-audit.test.ts',
+      )
+      requireIncludes(
         promptInspector,
         ['redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map'],
         'apps/backend/src/prompt-inspector.service.ts',
@@ -592,6 +607,7 @@ const checks: Check[] = [
           'bun run knowledge:audit',
           'bun run eval:local',
           'bun run security:audit',
+          'bun run security:audit:test',
           'bun run api:audit',
           'bun run route-menu:audit',
           'bun run release:handoff:check',
@@ -618,6 +634,7 @@ const checks: Check[] = [
           'bun run knowledge:audit',
           'bun run eval:local',
           'bun run security:audit',
+          'bun run security:audit:test',
           'bun run api:audit',
           'bun run route-menu:audit',
           'bun run release:handoff:check',

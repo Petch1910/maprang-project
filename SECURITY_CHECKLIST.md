@@ -12,7 +12,7 @@
   - safe record id สำหรับ `Message.id` เพราะ schema ใช้ cuid ไม่ใช่ UUID
 - Static guard: `bun run security:audit` fails if a backend `/:id` route block is missing `rejectInvalidUuid`.
 - Guard อัตโนมัติ: `bun run security:audit`
-- QA ที่เกี่ยวข้อง: `chat.routes.security.test.ts`, `route-id-validation.test.ts`, `wallet.persistence.test.ts`
+- QA ที่เกี่ยวข้อง: `backend-security-audit.test.ts`, `chat.routes.security.test.ts`, `route-id-validation.test.ts`, `wallet.persistence.test.ts`
 
 ## Broken Access Control
 
@@ -23,7 +23,7 @@
 - Report/message guards ต้องบล็อก report private character หรือ message ที่ไม่ได้อยู่ใน chat ของผู้รายงาน
 - Admin actions ต้องมี `ADMIN_API_KEY` และมี audit log เมื่อเปลี่ยน report/status/token หรือซ่อน content
 - Static guard: `bun run security:audit` fails if any backend `/admin` route block is missing `requireAdminApiKey`.
-- Guard อัตโนมัติ: `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
+- Guard อัตโนมัติ: `backend-security-audit.test.ts`, `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
 
 ## Prompt Control
 
@@ -53,5 +53,6 @@
 - `SMOKE_API_BASE_URL=https://<backend-staging-domain> bun run smoke:doctor`
 - `SMOKE_API_BASE_URL=https://<backend-staging-domain> bun run smoke:ready`
 - Supabase Storage bucket `avatars` ต้องเป็น private + signed URL
-- `CORS_ORIGINS` ต้องเป็น frontend domain จริง ไม่ใช่ localhost
-- ทำ manual abuse QA อีกชุด: SQL-like search/chat input, cross-user resource id guessing, prompt injection asking for system prompt/secrets
+- `CORS_ORIGINS` ต้องเป็น frontend domain จริงแบบ `https://` ไม่ใช่ localhost หรือ `http://`
+- Automated abuse QA ต้องผ่าน: SQL-like id/input guard, admin route guard, owner resource guard, และ prompt injection guard ผ่าน `security:audit:test`, `backend:check`, `eval:local`, และ `api:smoke`
+- ทำ manual abuse QA เฉพาะ exploratory เพิ่มก่อนเปิดจริง: SQL-like search/chat input, cross-user resource id guessing, prompt injection asking for system prompt/secrets

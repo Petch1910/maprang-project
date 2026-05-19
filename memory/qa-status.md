@@ -63,6 +63,7 @@ Results:
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.
 - Security audit now fails if a backend `/:id` route block is missing `rejectInvalidUuid`.
+- `security:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard the backend security audit rules themselves.
 - Production Smoke workflow now runs predeploy and release handoff guards before deployed smoke validation.
 - Production Smoke workflow now runs secrets, secret-pattern tests, memory, knowledge, eval, security, API, and route/menu audits before deployed smoke validation.
 - `staging:verify` and `production:check` now print `deploy:status` before strict smoke gates so failed deployed checks show blockers and next steps directly.

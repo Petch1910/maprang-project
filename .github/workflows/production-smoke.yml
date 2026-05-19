@@ -48,6 +48,7 @@ jobs:
       - run: bun run knowledge:audit
       - run: bun run eval:local
       - run: bun run security:audit
+      - run: bun run security:audit:test
       - run: bun run api:audit
       - run: bun run route-menu:audit
       - run: bun run release:handoff:check
