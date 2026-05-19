@@ -437,7 +437,7 @@ export function buildRoleplayContinuationInstruction(reply: string, minChars = m
   return [
     'The previous assistant turn was too short for an immersive Maprang roleplay response.',
     'Continue from that exact emotional beat in Thai. Do not repeat the previous text and do not mention this instruction.',
-    `Add at least ${remainingChars} more Thai characters across 2-4 short paragraphs.`,
+    `Add at least ${remainingChars} more Thai characters across 3-5 short paragraphs.`,
     'Include action, atmosphere, subtext, and a clear hook for the player to respond to.',
     "Do not narrate the player's actions or feelings as fact.",
   ].join('\n')

@@ -96,6 +96,13 @@ function requireIncludes(content: string, values: string[], file: string) {
   }
 }
 
+function forbidIncludes(content: string, values: string[], file: string) {
+  const present = values.filter((value) => content.includes(value))
+  if (present.length > 0) {
+    throw new Error(`${file} contains stale text ${present.join(', ')}`)
+  }
+}
+
 const checks: Check[] = [
   {
     name: 'required deploy files exist',
@@ -178,6 +185,36 @@ const checks: Check[] = [
           'IMAGE_GENERATION_LIVE_VERIFIED=0',
         ],
         'apps/backend/.env.production.example',
+      )
+    },
+  },
+  {
+    name: 'roleplay depth prompt guidance matches production defaults',
+    run: async () => {
+      const contextService = await readRepoFile('apps/backend/src/context.service.ts')
+      const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
+      const chatStyleGuide = await readRepoFile('knowledge/structured/chat-style-guide.json')
+      requireIncludes(
+        contextService,
+        ['write 4-6 short paragraphs', 'at least 5 complete sentences', '8-14 sentences'],
+        'apps/backend/src/context.service.ts',
+      )
+      requireIncludes(chatService, ['3-5 short paragraphs'], 'apps/backend/src/chat.service.ts')
+      requireIncludes(
+        chatStyleGuide,
+        ['write 4-6 short paragraphs', 'at least 5 complete sentences', '8-14 sentences'],
+        'knowledge/structured/chat-style-guide.json',
+      )
+      forbidIncludes(
+        contextService,
+        ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences'],
+        'apps/backend/src/context.service.ts',
+      )
+      forbidIncludes(chatService, ['2-4 short paragraphs'], 'apps/backend/src/chat.service.ts')
+      forbidIncludes(
+        chatStyleGuide,
+        ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences'],
+        'knowledge/structured/chat-style-guide.json',
       )
     },
   },

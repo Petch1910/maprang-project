@@ -198,7 +198,7 @@ describe('roleplay reply quality guard', () => {
     const instruction = buildRoleplayContinuationInstruction('เธอหลบตา', 420)
 
     expect(instruction).toContain('Do not repeat')
-    expect(instruction).toContain('2-4 short paragraphs')
+    expect(instruction).toContain('3-5 short paragraphs')
     expect(instruction).toContain('Thai')
   })
 })
