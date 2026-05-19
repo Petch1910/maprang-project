@@ -109,9 +109,9 @@ function auditBackendEnv(env: EnvMap) {
   expectPresent(env, 'MODEL_TEMPERATURE', 'backend', 'ต้องตั้ง MODEL_TEMPERATURE เพื่อคุมโทนการตอบของแชท')
   auditNumberRange(env.get('MODEL_TEMPERATURE'), 'backend', 'MODEL_TEMPERATURE', 0, 2)
   expectPresent(env, 'MODEL_MAX_OUTPUT_TOKENS', 'backend', 'ต้องตั้ง MODEL_MAX_OUTPUT_TOKENS เพื่อให้บอทมีพื้นที่ตอบยาวพอ')
-  auditIntegerRange(env.get('MODEL_MAX_OUTPUT_TOKENS'), 'backend', 'MODEL_MAX_OUTPUT_TOKENS', 128, 2400)
+  auditIntegerRangeWithRecommendedMin(env.get('MODEL_MAX_OUTPUT_TOKENS'), 'backend', 'MODEL_MAX_OUTPUT_TOKENS', 128, 2400, 1200)
   expectPresent(env, 'MODEL_MIN_ROLEPLAY_REPLY_CHARS', 'backend', 'ต้องตั้ง MODEL_MIN_ROLEPLAY_REPLY_CHARS เพื่อกันคำตอบ roleplay สั้นเกินไป')
-  auditIntegerRange(env.get('MODEL_MIN_ROLEPLAY_REPLY_CHARS'), 'backend', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS', 0, 1200)
+  auditIntegerRangeWithRecommendedMin(env.get('MODEL_MIN_ROLEPLAY_REPLY_CHARS'), 'backend', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS', 0, 1200, 320)
   expectPresent(env, 'CHAT_PROVIDER_RETRY_ATTEMPTS', 'backend', 'ตั้งจำนวน retry ของ chat provider เพื่อกัน provider ล่มชั่วคราว')
   auditIntegerRange(env.get('CHAT_PROVIDER_RETRY_ATTEMPTS'), 'backend', 'CHAT_PROVIDER_RETRY_ATTEMPTS', 1, 5)
   expectPresent(env, 'CHAT_PROVIDER_RETRY_DELAY_MS', 'backend', 'ตั้ง delay retry ของ chat provider')
@@ -474,6 +474,20 @@ function auditIntegerRange(value: string | undefined, area: Area, check: string,
   } else {
     fail(area, check, `ต้องเป็นจำนวนเต็มในช่วง ${min}-${max}`)
   }
+}
+
+function auditIntegerRangeWithRecommendedMin(value: string | undefined, area: Area, check: string, min: number, max: number, recommendedMin: number) {
+  if (!hasRealValue(value)) return
+  const number = Number(value)
+  if (!Number.isInteger(number) || number < min || number > max) {
+    fail(area, check, `must be an integer in range ${min}-${max}`)
+    return
+  }
+  if (number < recommendedMin) {
+    fail(area, check, `should be at least ${recommendedMin} for production roleplay replies`)
+    return
+  }
+  pass(area, check, `integer in range ${min}-${max} and at least production baseline ${recommendedMin}`)
 }
 
 function expectPresent(env: EnvMap, key: string, area: Area, detail: string) {

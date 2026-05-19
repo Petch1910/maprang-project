@@ -120,6 +120,83 @@ describe('deploy env doctor helpers', () => {
     }
   })
 
+  test('fails production env when roleplay reply budget is below baseline', async () => {
+    const runnerDir = join(tempDir, 'low-reply-budget')
+    await rm(runnerDir, { recursive: true, force: true })
+    await mkdir(runnerDir, { recursive: true })
+
+    const anonKey = fakeJwt('anon')
+    const serviceRoleKey = fakeJwt('service_role')
+    const backendEnv = join(runnerDir, 'backend.env')
+    const frontendEnv = join(runnerDir, 'frontend.env')
+
+    try {
+      await writeFile(
+        backendEnv,
+        [
+          'NODE_ENV=production',
+          'DATABASE_URL=postgresql://maprang_user:very-secret-password@db.maprang.example:5432/maprang?sslmode=require',
+          'OPENROUTER_API_KEY=sk-or-test-key-1234567890',
+          'MODEL_TEMPERATURE=0.85',
+          'MODEL_MAX_OUTPUT_TOKENS=1199',
+          'MODEL_MIN_ROLEPLAY_REPLY_CHARS=319',
+          'CHAT_PROVIDER_RETRY_ATTEMPTS=2',
+          'CHAT_PROVIDER_RETRY_DELAY_MS=350',
+          'CREATOR_DRAFT_RETRY_ATTEMPTS=3',
+          'CREATOR_DRAFT_RETRY_DELAY_MS=350',
+          'CORS_ORIGINS=https://app.maprang.example',
+          'ADMIN_API_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+          'SUPABASE_URL=https://abcdefghijklmnopqrst.supabase.co',
+          'SUPABASE_JWT_ISSUER=https://abcdefghijklmnopqrst.supabase.co/auth/v1',
+          `SUPABASE_ANON_KEY=${anonKey}`,
+          `SUPABASE_SERVICE_ROLE_KEY=${serviceRoleKey}`,
+          'STORAGE_PROVIDER=supabase',
+          'SUPABASE_STORAGE_BUCKET=avatars',
+          'SUPABASE_STORAGE_ACCESS=signed',
+          'SUPABASE_SIGNED_URL_EXPIRES_IN=3600',
+          'IMAGE_GENERATION_API_KEY=sk-test-image-key-1234567890',
+          'IMAGE_GENERATION_LIVE_VERIFIED=1',
+          '',
+        ].join('\n'),
+      )
+      await writeFile(
+        frontendEnv,
+        [
+          'VITE_API_BASE_URL=https://api.maprang.example',
+          'VITE_SUPABASE_URL=https://abcdefghijklmnopqrst.supabase.co',
+          `VITE_SUPABASE_ANON_KEY=${anonKey}`,
+          '',
+        ].join('\n'),
+      )
+
+      const lines: string[] = []
+      const result = await runDeployEnvDoctor(['--backend-env', backendEnv, '--frontend-env', frontendEnv], (line) => lines.push(line))
+
+      expect(result.ok).toBe(false)
+      expect(result.fail).toBeGreaterThanOrEqual(2)
+      expect(result.findings).toContainEqual(
+        expect.objectContaining({
+          area: 'backend',
+          status: 'fail',
+          check: 'MODEL_MAX_OUTPUT_TOKENS',
+          detail: 'should be at least 1200 for production roleplay replies',
+        }),
+      )
+      expect(result.findings).toContainEqual(
+        expect.objectContaining({
+          area: 'backend',
+          status: 'fail',
+          check: 'MODEL_MIN_ROLEPLAY_REPLY_CHARS',
+          detail: 'should be at least 320 for production roleplay replies',
+        }),
+      )
+      expect(lines.join('\n')).not.toContain(anonKey)
+      expect(lines.join('\n')).not.toContain(serviceRoleKey)
+    } finally {
+      await rm(runnerDir, { recursive: true, force: true })
+    }
+  })
+
   test('imports the deploy doctor self-test without executing it', () => {
     expect(typeof runDeployEnvDoctorSelfTest).toBe('function')
   })
