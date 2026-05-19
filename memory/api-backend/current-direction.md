@@ -1,6 +1,6 @@
 # API and Backend Direction
 
-Last updated: 2026-05-14
+Last updated: 2026-05-19
 
 ## Core Direction
 
@@ -22,6 +22,9 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - Usage and cost intelligence is derived from the existing usage ledger, exposing total cost, model breakdown, daily trend, and remaining-request estimates through `/me/usage`.
 - Prompt budgeting trims oldest chat history before provider calls, records budget metadata, and exposes budget configuration through health/readiness surfaces.
 - Chat provider failures are classified into safe retry/admin states, returned with zero token usage, and exposed as `providerFailure` metadata in normal and streamed chat responses.
+- Runtime env validation, deploy env doctor, smoke doctor, deploy readiness, and deploy status now all surface roleplay reply budget risk. Values below 1200 output tokens or 320 roleplay reply characters block production; values at baseline but below 1600/420 emit CLI/UI recommendations for richer roleplay.
+- Deploy readiness is shared by smoke doctor and deploy status, so staging and production blockers plus next steps stay consistent across CLI, CI, and Admin Health handoff.
+- Local API smoke covers non-mutating validation paths for admin reports, admin wallet, report creation, chat deletion, chat streaming shape, prompt inspector, and automated evals without spending live provider credits.
 
 ## Production-Critical API Areas
 
@@ -38,6 +41,7 @@ Backend should favor explicit guards, typed validation, auditability, and determ
 - `/admin/audit-logs`
 - `/admin/prompt-inspector`
 - `/admin/evals/local`
+- deploy/smoke scripts that read `/health` and `/ready`
 
 ## Provider Policy
 

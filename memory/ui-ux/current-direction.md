@@ -1,6 +1,6 @@
 # UI/UX Direction
 
-Last updated: 2026-05-13
+Last updated: 2026-05-19
 
 ## Product Direction
 
@@ -39,3 +39,7 @@ The user has repeatedly flagged that UI must feel complete and natural. Any visi
 - E2E smoke now verifies mobile Explore navigation and Chat read mode on desktop/mobile.
 - Prompt Inspector now has a guarded admin UI at `/admin/prompt-inspector` with character selection, section budget, diff, lore retrieval, warnings, and redacted prompt copy.
 - Automated Evals now has a guarded admin UI at `/admin/evals` with suite summary, scenario accordion, per-check status, and failure summary.
+- Route/Menu Audit and Admin Health now use Thai-first labels and make every primary route/menu state explicit: ready, guarded by admin key, or waiting for real staging.
+- My Chats and the Chat sidebar both have real three-dot menu flows for rename, pin/unpin, archive/restore, delete, selection mode, and bulk actions, with desktop/mobile e2e coverage.
+- Wallet shows token balance, model cost breakdown, seven-day trend, transactions, and admin adjustment guards using backend data from QA seed.
+- Latest browser e2e smoke passed on desktop and mobile for core flows plus all primary routes without console errors or horizontal overflow.
