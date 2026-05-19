@@ -46,6 +46,7 @@ Results:
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
 - API smoke with `--require-admin` now passes 31 checks plus 1 local live-chat skip, including uncharged chat validation, non-mutating chat delete/report creation, admin wallet, and admin report PATCH/action validation.
 - `api:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard route discovery and coverage-map regressions.
+- `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link and navigate route regressions.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.

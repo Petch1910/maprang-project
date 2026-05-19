@@ -51,6 +51,7 @@ const requiredFiles = [
   'scripts/api-route-audit.test.ts',
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
+  'scripts/frontend-route-audit.test.ts',
   'scripts/route-menu-doc-check.ts',
   'scripts/backend-security-audit.test.ts',
   'scripts/secret-patterns.ts',
@@ -295,6 +296,7 @@ const checks: Check[] = [
           '"security:audit"',
           '"security:audit:test"',
           '"api:audit:test"',
+          '"frontend:route:audit:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -338,6 +340,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('api:audit:test')) {
         throw new Error('package.json qa:local must run api:audit:test so route audit regressions are caught')
+      }
+      if (!qaLocal.includes('frontend:route:audit:test')) {
+        throw new Error('package.json qa:local must run frontend:route:audit:test so frontend route audit regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -520,7 +525,16 @@ const checks: Check[] = [
       )
       requireIncludes(
         packageJson,
-        ['"security:audit"', 'backend-security-audit.ts', '"api:audit"', 'api-route-audit.ts', '"api:audit:test"', 'api-route-audit.test.ts'],
+        [
+          '"security:audit"',
+          'backend-security-audit.ts',
+          '"api:audit"',
+          'api-route-audit.ts',
+          '"api:audit:test"',
+          'api-route-audit.test.ts',
+          '"frontend:route:audit:test"',
+          'frontend-route-audit.test.ts',
+        ],
         'package.json',
       )
       requireIncludes(
@@ -548,6 +562,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/api-route-audit.test.ts'),
         ['discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries'],
         'scripts/api-route-audit.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-route-audit.test.ts'),
+        ['collects declared React Router paths', 'reports static links and navigate calls'],
+        'scripts/frontend-route-audit.test.ts',
       )
       requireIncludes(
         promptInspector,
@@ -626,6 +645,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
@@ -654,6 +674,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
