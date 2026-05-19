@@ -3,8 +3,10 @@ import {
   assertSmokeUserHasTokenBalance,
   buildLiveChatSmokePayload,
   findMatchingChatDebit,
+  runLiveChatSmoke,
   selectLiveChatSmokeCharacter,
   validateLiveChatSmokeResponse,
+  type LiveChatSmokeJsonReader,
 } from './live-chat-smoke'
 
 describe('live chat smoke helpers', () => {
@@ -96,5 +98,88 @@ describe('live chat smoke helpers', () => {
       nextStep: 'Set CHAT_PROVIDER_LIVE_VERIFIED=1 in this target environment, then rerun production:check.',
       replyPreview: 'ก'.repeat(120),
     })
+  })
+
+  test('runs live chat smoke through an importable runner without provider calls', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const calls: string[] = []
+    let usageReadCount = 0
+    const reader: LiveChatSmokeJsonReader = async (path) => {
+      calls.push(path)
+      if (path === '/health') {
+        return {
+          ok: true,
+          checks: { databaseConnected: true, openRouterConfigured: true },
+          model: { name: 'openrouter/test-model', minRoleplayReplyChars: 320 },
+        } as never
+      }
+      if (path === '/characters?view=admin&limit=10') {
+        return { characters: [{ id: 'mika', name: 'มิกะ | MIKA' }] } as never
+      }
+      if (path === '/me/usage') {
+        usageReadCount += 1
+        if (usageReadCount === 1) return { user: { tokenBalance: 2000 } } as never
+        return { wallet: { transactions: [{ id: 'debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1912 }] } } as never
+      }
+      if (path === '/chat') {
+        return {
+          reply: 'ก'.repeat(340),
+          chatId: 'chat-1',
+          usage: { totalTokens: 88, modelName: 'openrouter/test-model' },
+        } as never
+      }
+      throw new Error(`unexpected path ${path}`)
+    }
+
+    const exitCode = await runLiveChatSmoke({
+      env: { SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: '1000' },
+      apiBaseUrl: 'https://api.maprang.example',
+      readJson: reader,
+      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    const payload = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(0)
+    expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/me/usage', '/chat', '/me/usage'])
+    expect(payload.apiBaseUrl).toBe('https://api.maprang.example')
+    expect(payload.walletTransactionId).toBe('debit')
+    expect(errors).toEqual([])
+  })
+
+  test('returns a failure code without spending chat tokens when balance is too low', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const calls: string[] = []
+    const reader: LiveChatSmokeJsonReader = async (path) => {
+      calls.push(path)
+      if (path === '/health') {
+        return {
+          ok: true,
+          checks: { databaseConnected: true, openRouterConfigured: true },
+          model: { name: 'openrouter/test-model', minRoleplayReplyChars: 320 },
+        } as never
+      }
+      if (path === '/characters?view=admin&limit=10') {
+        return { characters: [{ id: 'mika', name: 'มิกะ | MIKA' }] } as never
+      }
+      if (path === '/me/usage') return { user: { tokenBalance: 10 } } as never
+      throw new Error(`unexpected path ${path}`)
+    }
+
+    const exitCode = await runLiveChatSmoke({
+      env: { SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: '1000' },
+      readJson: reader,
+      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/me/usage'])
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('Top up the smoke user')
   })
 })

@@ -30,6 +30,17 @@ export type LiveChatWalletTransaction = {
   balanceAfter: number
 }
 
+export type LiveChatSmokeJsonReader = <T>(path: string, init?: RequestInit) => Promise<T>
+
+export type LiveChatSmokeRunnerOptions = {
+  env?: Record<string, string | undefined>
+  apiBaseUrl?: string
+  readJson?: LiveChatSmokeJsonReader
+  authHeaders?: () => Record<string, string>
+  writeLine?: (line: string) => void
+  writeError?: (line: string) => void
+}
+
 export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000') {
   const value = Number(rawValue)
 
@@ -126,84 +137,98 @@ export function buildLiveChatSmokePayload({
   }
 }
 
-export async function runLiveChatSmoke() {
-  const minSmokeTokenBalance = parseMinSmokeTokenBalance()
+export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {}) {
+  const env = options.env ?? process.env
+  const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
+  const jsonReader = options.readJson ?? readJson
+  const authHeaders = options.authHeaders ?? smokeAuthHeaders
+  const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+  const writeError = options.writeError ?? ((line: string) => console.error(line))
 
-  const health = await readJson<LiveChatSmokeHealthPayload>('/health')
-  const minRoleplayReplyChars = Math.max(320, health.model?.minRoleplayReplyChars ?? 320)
+  try {
+    const minSmokeTokenBalance = parseMinSmokeTokenBalance(env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000')
 
-  if (!health.ok || !health.checks.databaseConnected) {
-    throw new Error('Backend health check failed')
-  }
+    const health = await jsonReader<LiveChatSmokeHealthPayload>('/health')
+    const minRoleplayReplyChars = Math.max(320, health.model?.minRoleplayReplyChars ?? 320)
 
-  if (!health.checks.openRouterConfigured) {
-    throw new Error('OpenRouter is not configured on the backend')
-  }
-
-  const characters = await readJson<{
-    characters?: LiveChatSmokeCharacter[]
-  }>('/characters?view=admin&limit=10', {
-    headers: smokeAuthHeaders(),
-  })
-
-  const smokeCharacter = selectLiveChatSmokeCharacter(characters.characters ?? [])
-  if (!smokeCharacter) throw new Error('Seeded smoke character was not found')
-
-  const walletBefore = await readJson<{
-    user: { tokenBalance: number }
-  }>('/me/usage', {
-    headers: smokeAuthHeaders(),
-  })
-
-  assertSmokeUserHasTokenBalance(walletBefore.user.tokenBalance, minSmokeTokenBalance)
-
-  const chat = await readJson<LiveChatSmokeResponse>('/chat', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...smokeAuthHeaders(),
-    },
-    body: JSON.stringify({
-      characterId: smokeCharacter.id,
-      relationshipSeed: 'stranger',
-      maxRating: 'restricted_18',
-      history: [],
-      message:
-        'I sit across from you, set a cup of tea near your hand, and softly ask what has been weighing on you today. Reply as an atmospheric roleplay scene with feeling, pacing, and room for me to answer.',
-    }),
-  })
-  const chatResult = validateLiveChatSmokeResponse(chat, minRoleplayReplyChars)
-
-  const walletAfter = await readJson<{
-    wallet?: {
-      transactions?: LiveChatWalletTransaction[]
+    if (!health.ok || !health.checks.databaseConnected) {
+      throw new Error('Backend health check failed')
     }
-  }>('/me/usage', {
-    headers: smokeAuthHeaders(),
-  })
 
-  const chatDebit = findMatchingChatDebit(walletAfter.wallet?.transactions, chatResult.totalTokens)
+    if (!health.checks.openRouterConfigured) {
+      throw new Error('OpenRouter is not configured on the backend')
+    }
 
-  if (!chatDebit) {
-    throw new Error('Live chat returned token usage, but no matching CHAT_USAGE wallet transaction was found')
-  }
+    const characters = await jsonReader<{
+      characters?: LiveChatSmokeCharacter[]
+    }>('/characters?view=admin&limit=10', {
+      headers: authHeaders(),
+    })
 
-  console.log(
-    JSON.stringify(
-      buildLiveChatSmokePayload({
-        baseUrl: apiBaseUrl,
-        characterName: smokeCharacter.name,
-        chatId: chatResult.chatId,
-        model: chatResult.modelName ?? health.model?.name ?? null,
-        totalTokens: chatResult.totalTokens,
-        chatDebit,
-        reply: chatResult.reply,
-        minRoleplayReplyChars,
+    const smokeCharacter = selectLiveChatSmokeCharacter(characters.characters ?? [])
+    if (!smokeCharacter) throw new Error('Seeded smoke character was not found')
+
+    const walletBefore = await jsonReader<{
+      user: { tokenBalance: number }
+    }>('/me/usage', {
+      headers: authHeaders(),
+    })
+
+    assertSmokeUserHasTokenBalance(walletBefore.user.tokenBalance, minSmokeTokenBalance)
+
+    const chat = await jsonReader<LiveChatSmokeResponse>('/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({
+        characterId: smokeCharacter.id,
+        relationshipSeed: 'stranger',
+        maxRating: 'restricted_18',
+        history: [],
+        message:
+          'I sit across from you, set a cup of tea near your hand, and softly ask what has been weighing on you today. Reply as an atmospheric roleplay scene with feeling, pacing, and room for me to answer.',
       }),
-      null,
-      2,
-    ),
-  )
+    })
+    const chatResult = validateLiveChatSmokeResponse(chat, minRoleplayReplyChars)
+
+    const walletAfter = await jsonReader<{
+      wallet?: {
+        transactions?: LiveChatWalletTransaction[]
+      }
+    }>('/me/usage', {
+      headers: authHeaders(),
+    })
+
+    const chatDebit = findMatchingChatDebit(walletAfter.wallet?.transactions, chatResult.totalTokens)
+
+    if (!chatDebit) {
+      throw new Error('Live chat returned token usage, but no matching CHAT_USAGE wallet transaction was found')
+    }
+
+    writeLine(
+      JSON.stringify(
+        buildLiveChatSmokePayload({
+          baseUrl: currentApiBaseUrl,
+          characterName: smokeCharacter.name,
+          chatId: chatResult.chatId,
+          model: chatResult.modelName ?? health.model?.name ?? null,
+          totalTokens: chatResult.totalTokens,
+          chatDebit,
+          reply: chatResult.reply,
+          minRoleplayReplyChars,
+        }),
+        null,
+        2,
+      ),
+    )
+    return 0
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    writeError(`Live chat smoke failed: ${message}`)
+    return 1
+  }
 }
 
-if (import.meta.main) await runLiveChatSmoke()
+if (import.meta.main) process.exit(await runLiveChatSmoke())

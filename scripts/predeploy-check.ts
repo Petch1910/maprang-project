@@ -862,6 +862,16 @@ const checks: Check[] = [
         'scripts/image-smoke.ts',
       )
       requireIncludes(
+        await readRepoFile('scripts/live-chat-smoke.test.ts'),
+        ['validates smoke token balance', 'matches wallet debit', 'runs live chat smoke through an importable runner'],
+        'scripts/live-chat-smoke.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/live-chat-smoke.ts'),
+        ['LiveChatSmokeRunnerOptions', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
+        'scripts/live-chat-smoke.ts',
+      )
+      requireIncludes(
         promptInspector,
         ['redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map'],
         'apps/backend/src/prompt-inspector.service.ts',
