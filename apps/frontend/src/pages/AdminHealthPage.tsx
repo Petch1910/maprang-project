@@ -484,7 +484,7 @@ export function AdminHealthPage() {
                 <th className="px-4 py-3">เส้นทาง</th>
                 <th className="px-4 py-3">ปุ่ม/เมนู</th>
                 <th className="px-4 py-3">ผลลัพธ์จริง</th>
-                <th className="px-4 py-3">เหตุผล disabled</th>
+                <th className="px-4 py-3">เงื่อนไขปิดปุ่ม</th>
                 <th className="px-4 py-3">สถานะว่าง</th>
                 <th className="px-4 py-3">สถานะ</th>
               </tr>

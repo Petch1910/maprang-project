@@ -140,7 +140,7 @@ export const suspiciousPatterns = [
     message: 'contains English UI label that should be Thai-first',
   },
   {
-    pattern: /(?:ระบบ relationship|anchor ตัวละคร|ยังไม่ได้รัน eval|รัน eval|hook:|ยัง fallback|fallback เป็นภาพ)/g,
+    pattern: /(?:ระบบ relationship|anchor ตัวละคร|ยังไม่ได้รัน eval|รัน eval|hook:|ยัง fallback|fallback เป็นภาพ|เหตุผล disabled)/g,
     message: 'contains mixed English UI wording that should be Thai-first',
   },
   { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'contains Thai coming-soon placeholder copy' },
