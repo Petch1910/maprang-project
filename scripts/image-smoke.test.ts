@@ -100,6 +100,7 @@ describe('image smoke helpers', () => {
       argv: ['bun', 'image-smoke.ts'],
       env: {},
       apiBaseUrl: 'https://api.maprang.example',
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       readHealth: async () => health(),
       writeLine: (line) => lines.push(line),
       writeError: (line) => errors.push(line),
@@ -126,6 +127,7 @@ describe('image smoke helpers', () => {
       argv: ['bun', 'image-smoke.ts', '--live'],
       env: {},
       apiBaseUrl: 'https://api.maprang.example',
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       readHealth: async () => health(),
       readCreatorDraft: async () => draft,
       now: () => {
@@ -150,6 +152,7 @@ describe('image smoke helpers', () => {
     const exitCode = await runImageSmoke({
       argv: ['bun', 'image-smoke.ts', '--live'],
       env: {},
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       readHealth: async () => health(),
       readCreatorDraft: async () => ({
         image: { provider: 'placeholder', note: 'billing_hard_limit_reached' },
@@ -161,5 +164,27 @@ describe('image smoke helpers', () => {
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
     expect(errors.join('\n')).toContain('billing limit')
+  })
+
+  test('validates backend root identity before image provider checks', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    let healthRead = false
+    const exitCode = await runImageSmoke({
+      argv: ['bun', 'image-smoke.ts', '--live'],
+      env: {},
+      readRootIdentity: async () => ({ ok: true, service: 'wrong-service' }),
+      readHealth: async () => {
+        healthRead = true
+        return health()
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(healthRead).toBe(false)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('unexpected service name')
   })
 })

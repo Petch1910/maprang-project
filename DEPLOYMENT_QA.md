@@ -245,8 +245,8 @@ Expected result:
 - API smoke confirms chat menu mutations by renaming one seeded chat, archiving it, verifying the archived list, and restoring it back to active chats.
 - API smoke confirms admin prompt inspection returns redacted prompt snapshots, section accounting, and prompt diffs.
 - Import-cycle audit confirms app and QA source imports remain acyclic.
-- Image smoke confirms Creator Studio image generation is configured, and live opt-in confirms generated avatars do not fall back to placeholders.
-- Live chat smoke confirms backend-to-OpenRouter chat, chat persistence, and usage accounting.
+- Image smoke confirms backend root identity, Creator Studio image generation config, and live opt-in generated avatars do not fall back to placeholders.
+- Live chat smoke confirms backend root identity before spending provider credits, then verifies backend-to-OpenRouter chat, chat persistence, and usage accounting.
 
 The same deploy checks also run in GitHub Actions through `.github/workflows/ci.yml`.
 CI also runs a seeded local backend smoke test and builds the backend and frontend Docker images without pushing them.

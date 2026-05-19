@@ -1,4 +1,10 @@
-import { apiBaseUrl, readJson, smokeAuthHeaders } from './smoke-helpers'
+import {
+  apiBaseUrl,
+  readJson,
+  smokeAuthHeaders,
+  validateBackendRootIdentity,
+  type RootIdentityPayload,
+} from './smoke-helpers'
 
 type ProviderFailure = { code?: string; retryable?: boolean; userMessage?: string }
 
@@ -36,6 +42,7 @@ export type LiveChatSmokeRunnerOptions = {
   env?: Record<string, string | undefined>
   apiBaseUrl?: string
   readJson?: LiveChatSmokeJsonReader
+  readRootIdentity?: () => Promise<RootIdentityPayload>
   authHeaders?: () => Record<string, string>
   writeLine?: (line: string) => void
   writeError?: (line: string) => void
@@ -147,6 +154,8 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
 
   try {
     const minSmokeTokenBalance = parseMinSmokeTokenBalance(env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000')
+
+    validateBackendRootIdentity(await (options.readRootIdentity ?? (() => jsonReader<RootIdentityPayload>('/')))())
 
     const health = await jsonReader<LiveChatSmokeHealthPayload>('/health')
     const minRoleplayReplyChars = Math.max(420, health.model?.minRoleplayReplyChars ?? 420)

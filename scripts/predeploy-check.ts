@@ -1029,22 +1029,32 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/image-smoke.test.ts'),
-        ['builds skipped live-image payload', 'reports placeholder, missing URL, and SVG placeholder failures', 'runs skipped image smoke through an importable runner'],
+        [
+          'builds skipped live-image payload',
+          'reports placeholder, missing URL, and SVG placeholder failures',
+          'validates backend root identity before image provider checks',
+          'runs skipped image smoke through an importable runner',
+        ],
         'scripts/image-smoke.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/image-smoke.ts'),
-        ['ImageSmokeRunnerOptions', 'runImageSmoke', 'if (import.meta.main) process.exit(await runImageSmoke())'],
+        ['ImageSmokeRunnerOptions', 'validateBackendRootIdentity', 'runImageSmoke', 'if (import.meta.main) process.exit(await runImageSmoke())'],
         'scripts/image-smoke.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/live-chat-smoke.test.ts'),
-        ['validates smoke token balance', 'matches wallet debit', 'runs live chat smoke through an importable runner'],
+        [
+          'validates smoke token balance',
+          'matches wallet debit',
+          'validates backend root identity before spending chat tokens',
+          'runs live chat smoke through an importable runner',
+        ],
         'scripts/live-chat-smoke.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/live-chat-smoke.ts'),
-        ['LiveChatSmokeRunnerOptions', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
+        ['LiveChatSmokeRunnerOptions', 'validateBackendRootIdentity', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
         'scripts/live-chat-smoke.ts',
       )
       requireIncludes(

@@ -1,4 +1,4 @@
-import { apiBaseUrl, readJson } from './smoke-helpers'
+import { apiBaseUrl, readJson, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 
 export type ImageSmokeHealthPayload = {
   ok: boolean
@@ -32,6 +32,7 @@ export type ImageSmokeRunnerOptions = {
   argv?: string[]
   env?: Record<string, string | undefined>
   apiBaseUrl?: string
+  readRootIdentity?: () => Promise<RootIdentityPayload>
   readHealth?: () => Promise<ImageSmokeHealthPayload>
   readCreatorDraft?: () => Promise<CreatorDraftPayload>
   now?: () => number
@@ -134,6 +135,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
 
   let health: ImageSmokeHealthPayload
   try {
+    validateBackendRootIdentity(await (options.readRootIdentity ?? (() => readJson<RootIdentityPayload>('/')))())
     health = await (options.readHealth ?? (() => readJson<ImageSmokeHealthPayload>('/health')))()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

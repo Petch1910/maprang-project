@@ -136,6 +136,7 @@ describe('live chat smoke helpers', () => {
       env: { SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: '1000' },
       apiBaseUrl: 'https://api.maprang.example',
       readJson: reader,
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       authHeaders: () => ({ Authorization: 'Bearer smoke' }),
       writeLine: (line) => lines.push(line),
       writeError: (line) => errors.push(line),
@@ -147,6 +148,31 @@ describe('live chat smoke helpers', () => {
     expect(payload.apiBaseUrl).toBe('https://api.maprang.example')
     expect(payload.walletTransactionId).toBe('debit')
     expect(errors).toEqual([])
+  })
+
+  test('validates backend root identity before spending chat tokens', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const calls: string[] = []
+    const reader: LiveChatSmokeJsonReader = async (path) => {
+      calls.push(path)
+      throw new Error(`unexpected path ${path}`)
+    }
+
+    const exitCode = await runLiveChatSmoke({
+      env: { SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: '1000' },
+      apiBaseUrl: 'https://api.maprang.example',
+      readJson: reader,
+      readRootIdentity: async () => ({ ok: true, service: 'wrong-service' }),
+      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(calls).toEqual([])
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('unexpected service name')
   })
 
   test('returns a failure code without spending chat tokens when balance is too low', async () => {
@@ -172,6 +198,7 @@ describe('live chat smoke helpers', () => {
     const exitCode = await runLiveChatSmoke({
       env: { SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: '1000' },
       readJson: reader,
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       authHeaders: () => ({ Authorization: 'Bearer smoke' }),
       writeLine: (line) => lines.push(line),
       writeError: (line) => errors.push(line),
