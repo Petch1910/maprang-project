@@ -175,7 +175,7 @@ export function analyzeTags(value: string | string[]): TagAnalysis {
     analysis.issues.push({
       level: strictConflictLevel,
       message: adultMode
-        ? `no-romance + romance ส่งสัญญาณความสัมพันธ์คนละทาง ${adultSimulationDisclosure} พฤติกรรมบอทอาจแกว่งถ้า prompt ไม่ชัด`
+        ? `no-romance + romance ส่งสัญญาณความสัมพันธ์คนละทาง ${adultSimulationDisclosure} พฤติกรรมบอทอาจแกว่งถ้าพรอมป์ไม่ชัด`
         : 'no-romance ขัดแย้งกับแท็ก romance และจะบล็อกการพัฒนาความโรแมนติก',
     })
   }

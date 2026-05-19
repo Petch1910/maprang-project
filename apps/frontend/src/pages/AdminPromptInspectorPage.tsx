@@ -393,7 +393,7 @@ export function AdminPromptInspectorPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-xs font-black text-slate-500">โน้ต runtime</span>
+            <span className="mb-1 block text-xs font-black text-slate-500">โน้ตตอนรัน</span>
             <textarea
               className="min-h-24 w-full resize-y rounded-xl border border-slate-900/10 px-3 py-3 text-sm font-bold leading-6 text-slate-700 outline-none focus:border-amber-500"
               data-testid="prompt-inspector-runtime-note"
@@ -411,7 +411,7 @@ export function AdminPromptInspectorPage() {
             />
             <span>
               <span className="block text-sm font-black text-slate-950">แนบ persona ที่บันทึกไว้</span>
-              <span className="block text-xs font-bold leading-5 text-slate-500">ใช้ค่าจากระบบหลังบ้าน ถ้าไม่ได้กรอก persona ชั่วคราวด้านล่าง</span>
+              <span className="block text-xs font-bold leading-5 text-slate-500">ใช้ค่าจากระบบหลังบ้าน ถ้าไม่ได้กรอกตัวตนชั่วคราวด้านล่าง</span>
             </span>
           </label>
 

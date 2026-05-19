@@ -31,7 +31,7 @@ const contentModes = [
   },
   {
     label: 'ผู้ใหญ่ 18+',
-    detail: 'เปิดโหมดผู้ใหญ่สำหรับเนื้อเรื่องจำลอง/สมมุติ และให้ backend จำกัดตามบัญชี',
+    detail: 'เปิดโหมดผู้ใหญ่สำหรับเนื้อเรื่องจำลอง/สมมุติ และให้ระบบหลังบ้านจำกัดตามบัญชี',
     isAdult: true,
     maxRating: 'restricted_18',
   },
@@ -117,7 +117,7 @@ export function ProfilePage() {
       await dispatch(saveContentSettings({ isAdult: mode.isAdult, maxRating: mode.maxRating })).unwrap()
       setContentNote(`บันทึกโหมด ${mode.label} แล้ว`)
     } catch {
-      setContentNote('บันทึกโหมดคอนเทนต์ไม่ได้ กรุณาเช็กการเชื่อมต่อ backend')
+      setContentNote('บันทึกโหมดคอนเทนต์ไม่ได้ กรุณาเช็กการเชื่อมต่อระบบหลังบ้าน')
     }
   }
 
@@ -181,7 +181,7 @@ export function ProfilePage() {
             <div>
               <h2 className="m-0 text-lg font-black text-slate-950">ตั้งค่าคอนเทนต์</h2>
               <p className="m-0 mt-1 text-sm leading-6 text-slate-500">
-                ใช้ควบคุมสิ่งที่หน้าสำรวจและระบบแชทอนุญาตให้เห็น โดย backend จะจำกัดซ้ำตามบัญชี
+                ใช้ควบคุมสิ่งที่หน้าสำรวจและระบบแชทอนุญาตให้เห็น โดยระบบหลังบ้านจะจำกัดซ้ำตามบัญชี
               </p>
             </div>
             <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600">

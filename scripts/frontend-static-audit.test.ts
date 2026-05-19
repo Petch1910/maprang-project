@@ -193,6 +193,8 @@ describe('frontend static audit', () => {
         '<p>Redacted final prompt</p>',
         '<span>Runtime note</span>',
         '<span>Persona override</span>',
+        '<span>โน้ต runtime</span>',
+        '<span>persona ชั่วคราว</span>',
         '<p>ระบบจะแสดง prompt snapshot และ diff ที่ redact แล้ว</p>',
         '<p>ตรวจพรอมป์ไม่สำเร็จ ลองเช็ค backend</p>',
         '<p>เรียก admin API เพื่อตรวจ snapshot พรอมป์และ diff พรอมป์</p>',
@@ -202,7 +204,23 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 13 }, () => 'contains mixed prompt/admin tooling wording that should be Thai-first'),
+      Array.from({ length: 15 }, () => 'contains mixed prompt/admin tooling wording that should be Thai-first'),
+    )
+  })
+
+  test('reports mixed profile and tag helper wording regressions', () => {
+    const findings = auditSuspiciousPatterns(
+      [
+        '<p>เปิดโหมดผู้ใหญ่สำหรับเนื้อเรื่องจำลอง/สมมุติ และให้ backend จำกัดตามบัญชี</p>',
+        '<p>บันทึกโหมดคอนเทนต์ไม่ได้ กรุณาเช็กการเชื่อมต่อ backend</p>',
+        '<p>โดย backend จะจำกัดซ้ำตามบัญชี</p>',
+        '<p>พฤติกรรมบอทอาจแกว่งถ้า prompt ไม่ชัด</p>',
+      ].join('\n'),
+      'ProfileTagFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual(
+      Array.from({ length: 4 }, () => 'contains mixed profile/tag helper wording that should be Thai-first'),
     )
   })
 
