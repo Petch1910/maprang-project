@@ -52,6 +52,7 @@ Results:
 - `release:handoff:check` is part of `qa:local` and checks release handoff sections plus secret-shaped values.
 - `release:handoff:test` is part of `qa:local` and verifies filled-mode and secret detection behavior.
 - Secret audits now share `scripts/secret-patterns.ts` and cover private key blocks, GitHub tokens, Google API keys, and Slack tokens in addition to project-specific keys.
+- `secrets:check` now fails on tracked `.env` files while still ignoring untracked local `.env` files used for development.
 - `secrets:patterns:test` is part of `qa:local`, CI, and Production Smoke; it verifies repo scans allow documentation placeholders while memory/release handoff scans still reject sensitive values.
 - Predeploy now verifies the shared secret pattern source, its regression test, and the matching QA documentation remain present.
 - CI predeploy now runs `release:handoff:check`, `release:handoff:test`, and `secrets:patterns:test` as explicit gates.

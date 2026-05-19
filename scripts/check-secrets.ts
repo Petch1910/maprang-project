@@ -14,6 +14,12 @@ const committedSecretPatterns = [
   { name: 'Known generated admin key', pattern: /920961fd9669ce7d8aaf1bf7d81450e404d3756f1ff8e64d6e5c5ed535806fc0/ },
 ]
 
+export function isUnsafeTrackedEnvPath(path: string) {
+  const normalized = path.replaceAll('\\', '/')
+  const fileName = normalized.split('/').pop() ?? normalized
+  return fileName.startsWith('.env') && !fileName.endsWith('.example')
+}
+
 function shouldCheck(path: string) {
   const normalized = path.replaceAll('\\', '/')
   if (normalized.endsWith('.env')) return false
@@ -38,22 +44,48 @@ async function walk(dir: string, files: string[] = []) {
   return files
 }
 
-const findings: Array<{ file: string; name: string }> = []
-for (const file of await walk(root)) {
-  const content = await readFile(file, 'utf8').catch(() => '')
-  for (const secret of committedSecretPatterns) {
-    if (secret.pattern.test(content)) {
-      findings.push({ file: relative(root, file), name: secret.name })
+async function gitTrackedFiles() {
+  const proc = Bun.spawn(['git', 'ls-files'], {
+    cwd: root,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
+  const stdout = await new Response(proc.stdout).text()
+  const stderr = await new Response(proc.stderr).text()
+  const exitCode = await proc.exited
+  if (exitCode !== 0) {
+    throw new Error(`git ls-files failed: ${stderr.trim() || `exit code ${exitCode}`}`)
+  }
+  return stdout.split(/\r?\n/).filter(Boolean)
+}
+
+export async function collectSecretFindings() {
+  const findings: Array<{ file: string; name: string }> = []
+  for (const file of await walk(root)) {
+    const content = await readFile(file, 'utf8').catch(() => '')
+    for (const secret of committedSecretPatterns) {
+      if (secret.pattern.test(content)) {
+        findings.push({ file: relative(root, file), name: secret.name })
+      }
     }
   }
-}
-
-if (findings.length > 0) {
-  console.error('Potential committed secrets found:')
-  for (const finding of findings) {
-    console.error(`- ${finding.file}: ${finding.name}`)
+  for (const file of await gitTrackedFiles()) {
+    if (isUnsafeTrackedEnvPath(file)) {
+      findings.push({ file, name: 'Tracked env file' })
+    }
   }
-  process.exit(1)
+  return findings
 }
 
-console.log('No obvious committed secrets found.')
+if (import.meta.main) {
+  const findings = await collectSecretFindings()
+  if (findings.length > 0) {
+    console.error('Potential committed secrets found:')
+    for (const finding of findings) {
+      console.error(`- ${finding.file}: ${finding.name}`)
+    }
+    process.exit(1)
+  }
+
+  console.log('No obvious committed secrets found.')
+}

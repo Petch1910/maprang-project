@@ -39,6 +39,7 @@
 ## CIA / AAA Coverage
 
 - Confidentiality: Supabase JWT, admin API key, hidden private prompt fields, signed avatar URLs in production, and prompt-control policy.
+- Secret hygiene: `secrets:check` scans committed source/docs for provider keys and fails if any tracked `.env` file is present; untracked local `.env` files stay usable for development.
 - Integrity: Prisma query builder, raw SQL audit, route id validation, owner/admin guards, migrations, and relationship/tag validation.
 - Availability: database readiness, OpenRouter readiness, rate-limit buckets, token guard, smoke tests, and invalid-id 400/404 handling instead of 500.
 - Authentication: Supabase JWT in production; local `x-user-id` only for dev/admin smoke.

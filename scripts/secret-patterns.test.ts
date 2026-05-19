@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { isUnsafeTrackedEnvPath } from './check-secrets'
 import { repoSecretPatterns, secretPatterns, type SecretPattern } from './secret-patterns'
 
 function namesFor(patterns: SecretPattern[], content: string) {
@@ -54,5 +55,14 @@ describe('secret pattern sets', () => {
     expect(namesFor(secretPatterns, content)).toEqual(
       expect.arrayContaining(['OpenRouter key', 'GitHub token']),
     )
+  })
+
+  test('tracked env file guard rejects real env files but allows templates', () => {
+    expect(isUnsafeTrackedEnvPath('.env')).toBe(true)
+    expect(isUnsafeTrackedEnvPath('apps/backend/.env')).toBe(true)
+    expect(isUnsafeTrackedEnvPath('apps/frontend/.env.production')).toBe(true)
+    expect(isUnsafeTrackedEnvPath('apps/frontend/.env.local')).toBe(true)
+    expect(isUnsafeTrackedEnvPath('apps/backend/.env.example')).toBe(false)
+    expect(isUnsafeTrackedEnvPath('apps/frontend/.env.production.example')).toBe(false)
   })
 })
