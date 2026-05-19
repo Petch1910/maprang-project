@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
-import { isUnsafeTrackedEnvPath, shouldCheckSecretPath } from './check-secrets'
+import { collectSecretFindings, isUnsafeTrackedEnvPath, runSecretsCheck, shouldCheckSecretPath } from './check-secrets'
 
 const root = join(process.cwd(), '.secret-scan-test-root')
 
@@ -58,5 +58,17 @@ describe('committed secret scan path rules', () => {
         selfRelativePath: 'scripts/check-secrets.ts',
       }),
     ).toBe(false)
+  })
+
+  test('runs the committed secret scan through an importable runner', async () => {
+    const findings = await collectSecretFindings()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runSecretsCheck((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(findings).toEqual([])
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toBe('No obvious committed secrets found.')
+    expect(errors).toEqual([])
   })
 })

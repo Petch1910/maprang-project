@@ -266,6 +266,8 @@ const checks: Check[] = [
       const packageJson = await readRepoFile('package.json')
       const script = await readRepoFile('scripts/release-handoff-check.ts')
       const test = await readRepoFile('scripts/release-handoff-check.test.ts')
+      const checkSecrets = await readRepoFile('scripts/check-secrets.ts')
+      const checkSecretsTest = await readRepoFile('scripts/check-secrets.test.ts')
       const secretPatterns = await readRepoFile('scripts/secret-patterns.ts')
       const secretPatternsTest = await readRepoFile('scripts/secret-patterns.test.ts')
       requireIncludes(
@@ -302,6 +304,16 @@ const checks: Check[] = [
         test,
         ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
+      )
+      requireIncludes(
+        checkSecrets,
+        ['collectSecretFindings', 'runSecretsCheck', 'SecretFinding', 'if (import.meta.main) process.exit(await runSecretsCheck())'],
+        'scripts/check-secrets.ts',
+      )
+      requireIncludes(
+        checkSecretsTest,
+        ['tracked real env files', 'runs the committed secret scan through an importable runner'],
+        'scripts/check-secrets.test.ts',
       )
       requireIncludes(secretPatterns, ['GitHub token', 'Google API key', 'Slack token', 'Private key block'], 'scripts/secret-patterns.ts')
       requireIncludes(secretPatternsTest, ['repo scan allows placeholder docs', 'handoff and memory scans inherit repo secret coverage'], 'scripts/secret-patterns.test.ts')

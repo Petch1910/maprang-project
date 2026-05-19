@@ -77,7 +77,7 @@ Results:
 - `release:handoff:test` is part of `qa:local` and verifies filled-mode and secret detection behavior.
 - Secret audits now share `scripts/secret-patterns.ts` and cover private key blocks, GitHub tokens, Google API keys, and Slack tokens in addition to project-specific keys.
 - `secrets:check` now fails on tracked `.env`/`.env.*` files while still ignoring untracked local env files used for development.
-- `secrets:check:test` now runs in `qa:local`, CI, and Production Smoke to guard tracked env-file and scan path rules.
+- `secrets:check:test` now runs in `qa:local`, CI, and Production Smoke to guard tracked env-file rules, scan path rules, and the importable committed secret scanner runner.
 - `.gitignore` now ignores real `.env.*` files while allowing example templates, and predeploy verifies that rule.
 - `secrets:patterns:test` is part of `qa:local`, CI, and Production Smoke; it verifies repo scans allow documentation placeholders while memory/release handoff scans still reject sensitive values.
 - `eval:local:test` now runs in `qa:local`, CI, and Production Smoke to guard local eval CLI pass/fail output formatting.

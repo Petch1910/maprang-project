@@ -14,6 +14,8 @@ const committedSecretPatterns = [
   { name: 'Known generated admin key', pattern: /920961fd9669ce7d8aaf1bf7d81450e404d3756f1ff8e64d6e5c5ed535806fc0/ },
 ]
 
+export type SecretFinding = { file: string; name: string }
+
 export function isUnsafeTrackedEnvPath(path: string) {
   const normalized = path.replaceAll('\\', '/')
   const fileName = normalized.split('/').pop() ?? normalized
@@ -68,8 +70,8 @@ async function gitTrackedFiles() {
   return stdout.split(/\r?\n/).filter(Boolean)
 }
 
-export async function collectSecretFindings() {
-  const findings: Array<{ file: string; name: string }> = []
+export async function collectSecretFindings(): Promise<SecretFinding[]> {
+  const findings: SecretFinding[] = []
   for (const file of await walk(root)) {
     const content = await readFile(file, 'utf8').catch(() => '')
     for (const secret of committedSecretPatterns) {
@@ -86,15 +88,21 @@ export async function collectSecretFindings() {
   return findings
 }
 
-if (import.meta.main) {
+export async function runSecretsCheck(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
   const findings = await collectSecretFindings()
   if (findings.length > 0) {
-    console.error('Potential committed secrets found:')
+    writeError('Potential committed secrets found:')
     for (const finding of findings) {
-      console.error(`- ${finding.file}: ${finding.name}`)
+      writeError(`- ${finding.file}: ${finding.name}`)
     }
-    process.exit(1)
+    return 1
   }
 
-  console.log('No obvious committed secrets found.')
+  writeLine('No obvious committed secrets found.')
+  return 0
 }
+
+if (import.meta.main) process.exit(await runSecretsCheck())
