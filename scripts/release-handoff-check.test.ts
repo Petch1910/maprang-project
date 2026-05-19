@@ -84,12 +84,13 @@ describe('release handoff check', () => {
 
   test('reports missing sections and secret-shaped values', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef'].join('-')
+    const fakeGithubToken = `ghp_${'a'.repeat(36)}`
     const unsafe = filledHandoff
       .replace('## Release Decision', '## Decision')
-      .replace('project-ref-only', fakeOpenRouterKey)
+      .replace('project-ref-only', `${fakeOpenRouterKey}\n- Debug token: ${fakeGithubToken}`)
 
     expect(checkReleaseHandoffContent(unsafe)).toEqual(
-      expect.arrayContaining(['missing section: Release Decision', 'contains OpenRouter key']),
+      expect.arrayContaining(['missing section: Release Decision', 'contains OpenRouter key', 'contains GitHub token']),
     )
   })
 })

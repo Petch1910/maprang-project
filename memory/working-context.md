@@ -42,6 +42,7 @@ Verified:
 - `RELEASE_HANDOFF.md` is available as the no-secrets final release handoff template, and predeploy checks verify it stays documented.
 - `release:handoff:check` verifies the release handoff template and can require all handoff fields with `--filled` before sharing a real release note.
 - `release:handoff:test` covers filled handoff validation, blank-field detection, and secret-shaped value detection for the release handoff guard.
+- Secret audits now also catch private key blocks, GitHub tokens, Google API keys, and Slack tokens across repo, memory, knowledge, and release handoff checks.
 - CI predeploy now runs the release handoff check and self-test directly, not only through `qa:local`.
 - CI predeploy now runs security, API route, and route/menu static audits directly before deploy checks.
 - Security audit now also checks that every backend `/admin` route block contains `requireAdminApiKey`, catching missing admin guards before deploy.

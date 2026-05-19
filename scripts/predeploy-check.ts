@@ -252,7 +252,7 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
       requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
       requireIncludes(script, ['checkReleaseHandoffContent', '--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
-      requireIncludes(test, ['accepts a filled release handoff', 'secret-shaped values', 'requireFilled: true'], 'scripts/release-handoff-check.test.ts')
+      requireIncludes(test, ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true'], 'scripts/release-handoff-check.test.ts')
     },
   },
   {

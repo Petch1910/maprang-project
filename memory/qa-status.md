@@ -51,6 +51,7 @@ Results:
 - Predeploy check now verifies `RELEASE_HANDOFF.md` exists and remains linked from production docs.
 - `release:handoff:check` is part of `qa:local` and checks release handoff sections plus secret-shaped values.
 - `release:handoff:test` is part of `qa:local` and verifies filled-mode and secret detection behavior.
+- Secret audits now cover private key blocks, GitHub tokens, Google API keys, and Slack tokens in addition to project-specific keys.
 - CI predeploy now runs `release:handoff:check` and `release:handoff:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.

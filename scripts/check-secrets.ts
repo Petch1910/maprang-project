@@ -11,6 +11,10 @@ const secretPatterns = [
   { name: 'OpenRouter key', pattern: /sk-or-v1-[A-Za-z0-9_-]{16,}/ },
   { name: 'OpenAI project key', pattern: /sk-proj-[A-Za-z0-9_-]{16,}/ },
   { name: 'JWT-like key', pattern: /eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/ },
+  { name: 'Private key block', pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
+  { name: 'GitHub token', pattern: /\b(?:gh[pousr]_[A-Za-z0-9_]{36,}|github_pat_[A-Za-z0-9_]{20,})\b/ },
+  { name: 'Google API key', pattern: /\bAIza[A-Za-z0-9_-]{35}\b/ },
+  { name: 'Slack token', pattern: /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/ },
   { name: 'Known Supabase project ref', pattern: /rkkdpnvoxghqydozvron/ },
   { name: 'Known generated admin key', pattern: /920961fd9669ce7d8aaf1bf7d81450e404d3756f1ff8e64d6e5c5ed535806fc0/ },
 ]
