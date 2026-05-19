@@ -90,10 +90,10 @@ function SectionBudget({ section, maxTokens }: { section: PromptInspectorSection
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-700">
-              {section.estimatedTokens.toLocaleString()} tokens
+              {section.estimatedTokens.toLocaleString()} โทเคน
             </span>
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-700">
-              {section.chars.toLocaleString()} chars
+              {section.chars.toLocaleString()} ตัวอักษร
             </span>
           </div>
         </div>
@@ -112,7 +112,7 @@ function DiffPanel({ diff }: { diff?: PromptInspectorDiff }) {
   if (!diff) {
     return (
       <div className="rounded-2xl border border-slate-900/10 bg-white p-4 text-sm font-bold text-slate-500 shadow-sm">
-        ใส่ข้อความก่อนหน้าเพื่อดู prompt diff
+        ใส่ข้อความก่อนหน้าเพื่อดูการเทียบพรอมป์
       </div>
     )
   }
@@ -123,19 +123,19 @@ function DiffPanel({ diff }: { diff?: PromptInspectorDiff }) {
         <div>
           <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
             <Diff size={17} />
-            Prompt diff
+            เทียบพรอมป์
           </p>
           <p className="m-0 mt-1 text-xs font-bold text-slate-500">
-            {diff.previousEstimatedTokens.toLocaleString()}  {diff.currentEstimatedTokens.toLocaleString()} tokens
+            เดิม {diff.previousEstimatedTokens.toLocaleString()} / ปัจจุบัน {diff.currentEstimatedTokens.toLocaleString()} โทเคน
           </p>
         </div>
         <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-black text-amber-900">
-          {signedDelta(diff.estimatedTokenDelta)} tokens
+          {signedDelta(diff.estimatedTokenDelta)} โทเคน
         </span>
       </div>
 
       {diff.changedSections.length === 0 ? (
-        <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-500">prompt shape ไม่เปลี่ยน</p>
+        <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-500">โครงพรอมป์ไม่เปลี่ยน</p>
       ) : (
         <div className="mt-4 grid gap-2">
           {diff.changedSections.map((section) => (
@@ -144,7 +144,7 @@ function DiffPanel({ diff }: { diff?: PromptInspectorDiff }) {
                 <div className="min-w-0">
                   <p className="m-0 text-sm font-black text-slate-950">{section.title}</p>
                   <p className="m-0 mt-1 text-xs font-bold text-slate-500">
-                    chars {signedDelta(section.charDelta)} / tokens {signedDelta(section.estimatedTokenDelta)}
+                    ตัวอักษร {signedDelta(section.charDelta)} / โทเคน {signedDelta(section.estimatedTokenDelta)}
                   </p>
                 </div>
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-black ${diffStatusClass(section.status)}`}>
@@ -239,7 +239,7 @@ export function AdminPromptInspectorPage() {
         userPersona: userPersona.trim() || undefined,
       })
       setResult(data)
-      setNote(`ตรวจแล้ว ${data.snapshot.totals.sectionCount} sections / ${data.snapshot.totals.estimatedTokens.toLocaleString()} tokens`)
+      setNote(`ตรวจแล้ว ${data.snapshot.totals.sectionCount} ส่วน / ${data.snapshot.totals.estimatedTokens.toLocaleString()} โทเคน`)
     } catch (error) {
       if (shouldLogUnexpectedError(error)) console.error('Inspect prompt error:', error)
       setResult(null)
@@ -262,11 +262,11 @@ export function AdminPromptInspectorPage() {
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-slate-500 uppercase">
               <FileSearch size={16} />
-              Prompt Inspector
+              ตัวตรวจพรอมป์
             </p>
             <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">ตรวจพรอมป์ก่อนยิงโมเดล</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              ตรวจ prompt snapshot, token budget, lore retrieval และ diff ของ context เพื่อหาสาเหตุเวลาบอทตอบสั้นหรือหลุดบุคลิก
+              ตรวจ snapshot พรอมป์, งบโทเคน, lore ที่ดึงมาใช้ และ diff ของ context เพื่อหาสาเหตุเวลาบอทตอบสั้นหรือหลุดบุคลิก
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] xl:w-[560px]">
@@ -441,17 +441,17 @@ export function AdminPromptInspectorPage() {
           {result ? (
             <>
               <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard label="Sections" value={result.snapshot.totals.sectionCount.toLocaleString()} tone="sky" />
-                <StatCard label="Estimated Tokens" value={result.snapshot.totals.estimatedTokens.toLocaleString()} tone="amber" />
-                <StatCard label="Chars" value={result.snapshot.totals.chars.toLocaleString()} />
-                <StatCard label="Lore" value={result.snapshot.retrieval.loreCount.toLocaleString()} tone="emerald" />
+                <StatCard label="ส่วนพรอมป์" value={result.snapshot.totals.sectionCount.toLocaleString()} tone="sky" />
+                <StatCard label="โทเคนโดยประมาณ" value={result.snapshot.totals.estimatedTokens.toLocaleString()} tone="amber" />
+                <StatCard label="ตัวอักษร" value={result.snapshot.totals.chars.toLocaleString()} />
+                <StatCard label="Lore ที่ใช้" value={result.snapshot.retrieval.loreCount.toLocaleString()} tone="emerald" />
               </section>
 
               {result.snapshot.warnings.length > 0 && (
                 <section className="rounded-2xl border border-amber-500/25 bg-amber-50 p-4 text-amber-950 shadow-sm">
                   <p className="m-0 flex items-center gap-2 text-sm font-black">
                     <AlertTriangle size={17} />
-                    Warnings
+                    คำเตือน
                   </p>
                   <ul className="m-0 mt-3 grid gap-2 pl-5 text-sm font-bold leading-6">
                     {result.snapshot.warnings.map((warning) => (
@@ -504,7 +504,7 @@ export function AdminPromptInspectorPage() {
               </section>
 
               <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
-                <p className="m-0 text-sm font-black text-slate-950">Lore retrieval</p>
+                <p className="m-0 text-sm font-black text-slate-950">Lore ที่ดึงมาใช้</p>
                 {result.snapshot.retrieval.lore.length === 0 ? (
                   <p className="m-0 mt-3 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-500">ไม่มี lore ที่ถูกดึงมาใช้ในรอบนี้</p>
                 ) : (

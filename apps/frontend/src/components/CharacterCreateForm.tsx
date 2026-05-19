@@ -812,7 +812,7 @@ export function CharacterCreateForm({
                     placeholder="นิยามสั้นๆ ที่ล็อกนิสัย น้ำเสียง และการตัดสินใจ"
                   />
                 </FieldBlock>
-                <FieldBlock label="สรุป Prompt แบบสั้น">
+                <FieldBlock label="สรุปพรอมป์แบบสั้น">
                   <textarea
                     className={textareaClass}
                     value={form.compactPrompt}
@@ -834,7 +834,7 @@ export function CharacterCreateForm({
 
           <div className="grid gap-4 p-4 sm:p-5">
             <SectionHeader
-              detail="แท็กจะถูกใช้ทั้งหน้า Explore ระบบความสัมพันธ์ และตัวกรองความเหมาะสม"
+              detail="แท็กจะถูกใช้ทั้งหน้าสำรวจ ระบบความสัมพันธ์ และตัวกรองความเหมาะสม"
               icon={Tags}
               step="4"
               title="แท็กและความสัมพันธ์"

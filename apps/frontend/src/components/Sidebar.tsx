@@ -507,7 +507,7 @@ function SidebarContent({
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="text-xs font-black text-white">เลือกไว้ {selectedChatIds.length.toLocaleString()} แชท</span>
             <button
-              aria-label="Cancel chat selection"
+              aria-label="ยกเลิกการเลือกแชท"
               className="grid size-7 place-items-center rounded-md text-white/55 transition hover:bg-white/8 hover:text-white"
               data-testid="chat-selection-cancel"
               onClick={clearSelection}

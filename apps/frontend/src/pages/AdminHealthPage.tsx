@@ -107,7 +107,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: isProductionMode ? 'production' : 'local',
     },
     {
-      label: 'OpenRouter key',
+      label: 'คีย์ OpenRouter',
       ok: Boolean(checks?.openRouterConfigured),
       detail: checks?.openRouterConfigured
         ? 'ตั้ง key แล้ว แต่ยังต้องให้ smoke:chat หรือ api:smoke:live ผ่านเพื่อยืนยัน quota/model/network จริง'
@@ -116,7 +116,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'local',
     },
     {
-      label: 'Chat live smoke',
+      label: 'ทดสอบแชทจริง',
       ok: chatProductionReady,
       detail: chatProductionReady
         ? 'ยืนยัน live chat smoke แล้ว'
@@ -129,10 +129,10 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'production',
     },
     {
-      label: 'Chat reply budget',
+      label: 'งบคำตอบแชท',
       ok: Boolean(model && maxOutputTokens >= 700 && minRoleplayReplyChars >= 240),
       detail: model
-        ? `ใช้ ${model.name}, max output ${model.maxOutputTokens ?? 'default'} tokens, min roleplay ${model.minRoleplayReplyChars ?? 'default'} chars, temperature ${model.temperature ?? 'default'}, retry แชท ${providerRetry?.chatAttempts ?? 'default'} ครั้ง`
+        ? `ใช้ ${model.name}, คำตอบสูงสุด ${model.maxOutputTokens ?? 'default'} โทเคน, roleplay ขั้นต่ำ ${model.minRoleplayReplyChars ?? 'default'} ตัวอักษร, temperature ${model.temperature ?? 'default'}, retry แชท ${providerRetry?.chatAttempts ?? 'default'} ครั้ง`
         : 'รอ health response จาก backend',
       action:
         model && maxOutputTokens >= 700 && minRoleplayReplyChars >= 240
@@ -141,11 +141,11 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'local',
     },
     {
-      label: 'Image provider configured',
+      label: 'ผู้ให้บริการรูปภาพ',
       ok: Boolean(checks?.imageGenerationConfigured || imageGeneration?.configured),
       detail:
         checks?.imageGenerationConfigured || imageGeneration?.configured
-          ? `ตั้งค่า ${imageGeneration?.model ?? 'provider'} แล้ว สถานะ ${imageGeneration?.status ?? 'needs_live_smoke'} ต้องผ่าน live smoke เพื่อยืนยัน billing/quota ก่อน production`
+          ? `ตั้งค่า ${imageGeneration?.model ?? 'provider'} แล้ว สถานะ ${imageGeneration?.status ?? 'needs_live_smoke'} ต้องผ่านการทดสอบจริงเพื่อยืนยัน billing/quota ก่อน production`
           : 'ยัง fallback เป็นภาพตัวอย่าง ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อน production',
       action:
         checks?.imageGenerationConfigured || imageGeneration?.configured
@@ -154,7 +154,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'local',
     },
     {
-      label: 'Image live smoke',
+      label: 'ทดสอบสร้างรูปจริง',
       ok: imageProductionReady,
       detail:
         imageProductionReady
@@ -168,7 +168,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'production',
     },
     {
-      label: 'Supabase Auth',
+      label: 'ยืนยันตัวตน Supabase',
       ok: Boolean(checks?.supabaseAuthConfigured && hasFrontendSupabase),
       detail: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'backend/frontend มีค่า Supabase Auth แล้ว' : 'ต้องมี SUPABASE_URL/JWT issuer และ VITE_SUPABASE_*',
       action:
@@ -178,7 +178,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'local',
     },
     {
-      label: 'Signed avatar storage',
+      label: 'คลังรูป signed URL',
       ok: security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed',
       detail:
         security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed'
@@ -191,7 +191,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'production',
     },
     {
-      label: 'Production CORS',
+      label: 'CORS ใช้งานจริง',
       ok: Boolean(security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))),
       detail:
         security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))
@@ -204,14 +204,14 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       scope: 'production',
     },
     {
-      label: 'Frontend backend URL',
+      label: 'URL หลังบ้านของหน้าเว็บ',
       ok: hasBackendUrl,
       detail: hasBackendUrl ? API_BASE_URL : 'ตั้ง VITE_API_BASE_URL เป็น URL backend staging/production จริง',
       action: hasBackendUrl ? 'เช็คด้วย browser smoke ว่า frontend เรียก backend domain จริง' : 'ตั้ง VITE_API_BASE_URL=https://<backend-domain> ใน frontend hosting env',
       scope: 'frontend',
     },
     {
-      label: 'Frontend env warnings',
+      label: 'คำเตือน env หน้าบ้าน',
       ok: frontendWarnings.length === 0,
       detail: frontendWarnings.length === 0 ? 'ไม่มี warning ฝั่ง frontend' : frontendWarnings.join(' / '),
       action:
@@ -228,12 +228,12 @@ const postureLabels: Array<{
   label: string
   group: 'CIA' | 'AAA'
 }> = [
-  { key: 'confidentiality', label: 'Confidentiality', group: 'CIA' },
-  { key: 'integrity', label: 'Integrity', group: 'CIA' },
-  { key: 'availability', label: 'Availability', group: 'CIA' },
-  { key: 'authentication', label: 'Authentication', group: 'AAA' },
-  { key: 'authorization', label: 'Authorization', group: 'AAA' },
-  { key: 'accounting', label: 'Accounting / Audit', group: 'AAA' },
+  { key: 'confidentiality', label: 'ความลับข้อมูล', group: 'CIA' },
+  { key: 'integrity', label: 'ความถูกต้องของข้อมูล', group: 'CIA' },
+  { key: 'availability', label: 'ความพร้อมใช้งาน', group: 'CIA' },
+  { key: 'authentication', label: 'การยืนยันตัวตน', group: 'AAA' },
+  { key: 'authorization', label: 'สิทธิ์การเข้าถึง', group: 'AAA' },
+  { key: 'accounting', label: 'บันทึกและตรวจสอบย้อนหลัง', group: 'AAA' },
 ]
 
 export function AdminHealthPage() {
@@ -282,13 +282,13 @@ export function AdminHealthPage() {
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-slate-500 uppercase">
               <ShieldCheck size={16} />
-              Admin Health
+              ตรวจระบบผู้ดูแล
             </p>
             <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">
               ตรวจความพร้อมก่อน staging / production
             </h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              หน้านี้รวมสถานะ backend, env, Supabase, signed storage, image provider และ Route/Menu Audit
+              หน้านี้รวมสถานะ backend, env, Supabase, signed storage, image provider และการตรวจเส้นทาง/เมนู
               เพื่อกันปุ่มหลอกหรือ config พลาดก่อน deploy จริง
             </p>
           </div>
@@ -393,14 +393,14 @@ export function AdminHealthPage() {
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
               <ShieldCheck size={17} />
-              CIA / AAA Security Posture
+              สถานะความปลอดภัย CIA / AAA
             </p>
             <p className="m-0 mt-1 text-xs font-bold text-slate-400">
               พร้อมแล้ว {postureReadyCount}/{postureRows.length} หมวด
             </p>
           </div>
           <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
-            Confidentiality / Integrity / Availability + Auth / Authz / Audit
+            ความลับ / ความถูกต้อง / ความพร้อมใช้งาน + ยืนยันตัวตน / สิทธิ์ / Audit
           </span>
         </div>
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
@@ -462,7 +462,7 @@ export function AdminHealthPage() {
       <section className="rounded-2xl border border-slate-900/10 bg-white shadow-sm">
         <div className="flex flex-col gap-2 border-b border-slate-900/10 p-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="m-0 text-sm font-black text-slate-950">Route/Menu Audit</p>
+            <p className="m-0 text-sm font-black text-slate-950">ตรวจเส้นทาง/เมนู</p>
             <p className="m-0 mt-1 text-xs font-bold text-slate-400">
               ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็น staging/future gate
             </p>
@@ -476,11 +476,11 @@ export function AdminHealthPage() {
             <thead className="bg-slate-50 text-xs font-black text-slate-500">
               <tr>
                 <th className="px-4 py-3">พื้นที่</th>
-                <th className="px-4 py-3">Route</th>
+                <th className="px-4 py-3">เส้นทาง</th>
                 <th className="px-4 py-3">ปุ่ม/เมนู</th>
                 <th className="px-4 py-3">ผลลัพธ์จริง</th>
                 <th className="px-4 py-3">เหตุผล disabled</th>
-                <th className="px-4 py-3">Empty state</th>
+                <th className="px-4 py-3">สถานะว่าง</th>
                 <th className="px-4 py-3">สถานะ</th>
               </tr>
             </thead>

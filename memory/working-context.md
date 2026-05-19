@@ -17,6 +17,7 @@ Verified:
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
 - Local Postgres is reachable through Docker and migrations are applied.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
+- Frontend Thai localization pass now covers admin utility pages, prompt/usage labels, route/menu audit table headings, chat prompt budget, System Status model budget labels, and Character Lobby/Profile/Create helper copy.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.
 - Prompt Inspector now redacts secret-shaped values in retrieved lore keyword/alias/preview as well as final prompt and section content.
 - Frontend Prompt Inspector page is available at `/admin/prompt-inspector` and is included in route/menu audit.

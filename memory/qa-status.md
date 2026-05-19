@@ -25,6 +25,7 @@ Results:
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.
+- Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Secrets check: pass.
 - Memory audit: pass.
 - Knowledge audit: pass.

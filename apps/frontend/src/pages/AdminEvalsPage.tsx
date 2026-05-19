@@ -67,14 +67,14 @@ function ScenarioCard({ result }: { result: EvalScenarioResult }) {
                 {result.passed ? 'ผ่าน' : 'ไม่ผ่าน'}
               </span>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">
-                {result.estimatedTokens.toLocaleString()} tokens
+                {result.estimatedTokens.toLocaleString()} โทเคน
               </span>
             </div>
             <p className="m-0 mt-3 text-base font-black text-slate-950">{result.title}</p>
             <p className="m-0 mt-1 font-mono text-xs font-bold text-slate-400">{result.id}</p>
           </div>
           <p className="m-0 text-sm font-bold text-slate-500">
-            {result.checks.length - failedChecks.length}/{result.checks.length} checks
+            ผ่าน {result.checks.length - failedChecks.length}/{result.checks.length} เช็ก
           </p>
         </div>
       </summary>
@@ -83,7 +83,7 @@ function ScenarioCard({ result }: { result: EvalScenarioResult }) {
         <section className="mt-4 rounded-xl border border-rose-500/20 bg-rose-50 p-3 text-rose-950">
           <p className="m-0 flex items-center gap-2 text-sm font-black">
             <AlertTriangle size={16} />
-            Failures
+            จุดที่ไม่ผ่าน
           </p>
           <ul className="m-0 mt-2 grid gap-1 pl-5 text-sm font-bold leading-6">
             {result.failures.map((failure) => (
@@ -173,7 +173,7 @@ export function AdminEvalsPage() {
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-slate-500 uppercase">
               <FlaskConical size={16} />
-              Automated Evals
+              ชุดทดสอบอัตโนมัติ
             </p>
             <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">ทดสอบคุณภาพ prompt/context</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
@@ -232,10 +232,10 @@ export function AdminEvalsPage() {
         <div className="space-y-5" data-testid="admin-evals-output">
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <StatCard label="Status" value={run.passed ? 'ผ่าน' : 'ไม่ผ่าน'} tone={run.passed ? 'emerald' : 'rose'} />
-            <StatCard label="Scenarios" value={`${run.passCount}/${run.scenarioCount}`} tone="sky" />
-            <StatCard label="Total Tokens" value={run.totalEstimatedTokens.toLocaleString()} tone="amber" />
-            <StatCard label="Max Scenario" value={run.maxEstimatedTokens.toLocaleString()} />
-            <StatCard label="Failures" value={run.failCount.toLocaleString()} tone={run.failCount > 0 ? 'rose' : 'emerald'} />
+            <StatCard label="ชุดทดสอบ" value={`${run.passCount}/${run.scenarioCount}`} tone="sky" />
+            <StatCard label="โทเคนรวม" value={run.totalEstimatedTokens.toLocaleString()} tone="amber" />
+            <StatCard label="ชุดที่ใช้สูงสุด" value={run.maxEstimatedTokens.toLocaleString()} />
+            <StatCard label="ไม่ผ่าน" value={run.failCount.toLocaleString()} tone={run.failCount > 0 ? 'rose' : 'emerald'} />
           </section>
 
           <section

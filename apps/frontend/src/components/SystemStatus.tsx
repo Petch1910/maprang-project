@@ -38,8 +38,8 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
   const chatProductionReady = Boolean(chatProvider?.productionReady ?? chatProvider?.liveVerified)
   const imageConfigured = Boolean(checks?.imageGenerationConfigured || imageGeneration?.configured)
   const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
-  const chatStatusLabel = chatProductionReady ? 'ยืนยันแล้ว' : checks?.openRouterConfigured ? 'ตั้งค่าแล้ว รอ live smoke' : 'ยังขาด'
-  const imageStatusLabel = imageProductionReady ? 'ยืนยันแล้ว' : imageConfigured ? 'ตั้งค่าแล้ว รอ live smoke' : 'ยังใช้ภาพตัวอย่าง'
+  const chatStatusLabel = chatProductionReady ? 'ยืนยันแล้ว' : checks?.openRouterConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ยังขาด'
+  const imageStatusLabel = imageProductionReady ? 'ยืนยันแล้ว' : imageConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ยังใช้ภาพตัวอย่าง'
 
   return (
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
@@ -126,14 +126,14 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
               <span>roleplay ขั้นต่ำ {healthStatus.model.minRoleplayReplyChars.toLocaleString()} ตัวอักษร</span>
             )}
             {typeof healthStatus.model.promptBudgetTokens === 'number' && (
-              <span>prompt budget {healthStatus.model.promptBudgetTokens.toLocaleString()} tokens</span>
+              <span>งบพรอมป์ {healthStatus.model.promptBudgetTokens.toLocaleString()} โทเคน</span>
             )}
             {typeof healthStatus.model.promptHistoryMaxMessages === 'number' && (
-              <span>history {healthStatus.model.promptHistoryMaxMessages.toLocaleString()} messages</span>
+              <span>ประวัติ {healthStatus.model.promptHistoryMaxMessages.toLocaleString()} ข้อความ</span>
             )}
             {healthStatus.model.providerRetry && (
               <span>
-                retry แชท {healthStatus.model.providerRetry.chatAttempts} ครั้ง / draft{' '}
+                retry แชท {healthStatus.model.providerRetry.chatAttempts} ครั้ง / ดราฟต์{' '}
                 {healthStatus.model.providerRetry.creatorDraftAttempts} ครั้ง
               </span>
             )}

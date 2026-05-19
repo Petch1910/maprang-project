@@ -229,7 +229,7 @@ export function CharacterLobbyPage() {
                 <h2 className="text-lg font-black">เปิดตัวละครนี้ไม่ได้</h2>
                 <p className="mt-1 text-sm leading-6 text-rose-100/70">{detailError}</p>
                 <Link className="mt-3 inline-flex min-h-10 items-center rounded-full bg-rose-500 px-4 text-sm font-black text-white" to="/">
-                  กลับไปหน้า Explore
+                  กลับไปหน้าสำรวจ
                 </Link>
               </section>
             )}

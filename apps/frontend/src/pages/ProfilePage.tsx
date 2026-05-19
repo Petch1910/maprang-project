@@ -181,7 +181,7 @@ export function ProfilePage() {
             <div>
               <h2 className="m-0 text-lg font-black text-slate-950">ตั้งค่าคอนเทนต์</h2>
               <p className="m-0 mt-1 text-sm leading-6 text-slate-500">
-                ใช้ควบคุมสิ่งที่หน้า Explore และระบบแชทอนุญาตให้เห็น โดย backend จะจำกัดซ้ำตามบัญชี
+                ใช้ควบคุมสิ่งที่หน้าสำรวจและระบบแชทอนุญาตให้เห็น โดย backend จะจำกัดซ้ำตามบัญชี
               </p>
             </div>
             <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600">

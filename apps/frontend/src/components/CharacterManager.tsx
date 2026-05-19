@@ -197,7 +197,7 @@ export function CharacterManager({
           />
         </Field>
 
-        <Field label="Prompt แบบย่อ">
+        <Field label="พรอมป์แบบย่อ">
           <textarea
             className={textareaClass}
             value={compactPrompt}

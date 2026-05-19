@@ -586,7 +586,7 @@ function RightRail({
         <InfoLine label="โทเคนรอบล่าสุด" value={usage ? usage.totalTokens.toLocaleString() : '0'} />
         <InfoLine label="Lore ที่ดึงมาใช้" value={String(usage?.contextLoreCount ?? 0)} />
         <InfoLine
-          label="Prompt budget"
+          label="งบพรอมป์"
           value={
             usage?.promptBudget
               ? `${usage.promptBudget.estimatedTokens.toLocaleString()} / ${usage.promptBudget.maxTokens.toLocaleString()}`
