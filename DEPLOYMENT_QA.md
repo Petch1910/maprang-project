@@ -37,7 +37,7 @@ bun run e2e:smoke
 
 `e2e:smoke` opens the home page, Character Lobby, Creator Studio, My Chats, Events, Profile, Wallet, Moderation,
 `/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, and a seeded chat on both desktop and mobile viewports. It also
-verifies the chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow when an admin key is
+verifies the Character Lobby relationship contract, the chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow when an admin key is
 available, route rendering, browser console errors, and horizontal overflow. It avoids sending a live chat message so it
 does not spend provider credits during UI smoke testing.
 
@@ -207,6 +207,7 @@ Expected result:
 - Readiness smoke confirms the backend is ready for traffic, including OpenRouter configuration, production hardening, and live chat/image verification when `NODE_ENV=production`.
 - Local smoke confirms health, seeded Maprang data, relationship preview, and avatar upload.
 - API smoke confirms temporary character creation/edit/view/favorite/duplicate/reset/delete and temporary lore create/edit/delete.
+- API smoke confirms `/relationship/presets` returns the full creator preset set and `/relationship/presets?surface=contract` returns only player-facing relationship contracts.
 - API smoke confirms chat menu mutations by renaming one seeded chat, archiving it, verifying the archived list, and restoring it back to active chats.
 - API smoke confirms admin prompt inspection returns redacted prompt snapshots, section accounting, and prompt diffs.
 - Image smoke confirms Creator Studio image generation is configured, and live opt-in confirms generated avatars do not fall back to placeholders.
@@ -294,10 +295,13 @@ Run one pass at 390x844 and one pass at 430x932, or the closest real devices ava
 ## Manual QA
 
 - Open `/health` and confirm `ok=true`, `databaseConnected=true`, and the expected `avatarStorage`.
+- Open `/relationship/presets?surface=contract` and confirm it returns player-facing relationship contracts only. It should include `soulmate` and exclude creator-only presets such as `safe-family-bond`.
 - Create a character as the owner.
 - Edit the character and confirm validation notes update.
 - Upload a PNG/WebP avatar and confirm it renders after refresh.
 - Add, edit, and delete lore.
+- Open Character Lobby and confirm relationship contracts load from the backend, selecting a contract changes the active state, and the start button includes `relationship_seed=<selected-id>`.
+- Open Creator Studio and confirm relationship preset picker still applies creator tags without changing the Character Lobby contract list.
 - Start a new chat and confirm the first AI response streams.
 - Trigger a relationship event and confirm the sandbox notification appears before entering a scene.
 - Enter a scene, accept or resolve an outcome, then confirm the timeline records it.

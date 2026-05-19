@@ -298,6 +298,26 @@ const checks: Check[] = [
     },
   },
   {
+    name: 'deployment QA covers relationship contracts',
+    run: async () => {
+      const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+      const routeMenuAudit = await readRepoFile('apps/frontend/src/lib/routeMenuAudit.ts')
+      const e2eSmoke = await readRepoFile('tests/e2e/maprang-smoke.spec.ts')
+      requireIncludes(
+        deploymentQa,
+        [
+          '/relationship/presets?surface=contract',
+          'safe-family-bond',
+          'relationship_seed=<selected-id>',
+          'relationship preset picker',
+        ],
+        'DEPLOYMENT_QA.md',
+      )
+      requireIncludes(routeMenuAudit, ['Relationship Contract', 'relationship_seed'], 'apps/frontend/src/lib/routeMenuAudit.ts')
+      requireIncludes(e2eSmoke, ['character-seed-rival', 'relationship_seed=rival'], 'tests/e2e/maprang-smoke.spec.ts')
+    },
+  },
+  {
     name: 'local smoke cannot hide live image verification',
     run: async () => {
       const packageJsonContent = await readRepoFile('package.json')
