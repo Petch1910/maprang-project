@@ -7,9 +7,15 @@ const tempDir = join(root, '.tmp', 'deploy-env-doctor-self-test')
 const anonKey = fakeJwt('anon')
 const serviceRoleKey = fakeJwt('service_role')
 
+export type DeployEnvDoctorSelfTestOptions = {
+  writeLine?: (line: string) => void
+}
+
+export async function runDeployEnvDoctorSelfTest(options: DeployEnvDoctorSelfTestOptions = {}) {
+const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+
 await rm(tempDir, { recursive: true, force: true })
 await mkdir(tempDir, { recursive: true })
-
 try {
   const validBackend = join(tempDir, 'backend.valid.env')
   const validFrontend = join(tempDir, 'frontend.valid.env')
@@ -164,9 +170,14 @@ try {
     }
   }
 
-  console.log('ok - deploy env doctor self-test passed')
+  writeLine('ok - deploy env doctor self-test passed')
 } finally {
   await rm(tempDir, { recursive: true, force: true })
+}
+}
+
+if (import.meta.main) {
+  await runDeployEnvDoctorSelfTest()
 }
 
 async function runDoctor(backendEnv: string, frontendEnv: string) {

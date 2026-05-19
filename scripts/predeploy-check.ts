@@ -623,6 +623,7 @@ const checks: Check[] = [
       const deployReadiness = await readRepoFile('scripts/deploy-readiness.ts')
       const deployEnvDoctor = await readRepoFile('scripts/deploy-env-doctor.ts')
       const deployEnvDoctorTest = await readRepoFile('scripts/deploy-env-doctor.test.ts')
+      const deployEnvDoctorSelfTest = await readRepoFile('scripts/deploy-env-doctor-self-test.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const readme = await readRepoFile('README.md')
       const stagingRunbook = await readRepoFile('STAGING_RUNBOOK.md')
@@ -672,8 +673,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployEnvDoctorTest,
-        ['runDeployEnvDoctor', 'importable function without exiting', 'Supabase URL match'],
+        ['runDeployEnvDoctor', 'importable function without exiting', 'Supabase URL match', 'imports the deploy doctor self-test without executing it'],
         'scripts/deploy-env-doctor.test.ts',
+      )
+      requireIncludes(
+        deployEnvDoctorSelfTest,
+        ['DeployEnvDoctorSelfTestOptions', 'runDeployEnvDoctorSelfTest', 'if (import.meta.main)'],
+        'scripts/deploy-env-doctor-self-test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/deploy-readiness.test.ts'),

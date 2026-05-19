@@ -2,6 +2,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 import { hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile, runDeployEnvDoctor } from './deploy-env-doctor'
+import { runDeployEnvDoctorSelfTest } from './deploy-env-doctor-self-test'
 
 const tempDir = join(import.meta.dir, '..', '.tmp', 'deploy-env-doctor-unit')
 
@@ -117,6 +118,10 @@ describe('deploy env doctor helpers', () => {
     } finally {
       await rm(runnerDir, { recursive: true, force: true })
     }
+  })
+
+  test('imports the deploy doctor self-test without executing it', () => {
+    expect(typeof runDeployEnvDoctorSelfTest).toBe('function')
   })
 })
 

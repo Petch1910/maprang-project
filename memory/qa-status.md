@@ -59,6 +59,7 @@ Results:
 - `smoke:chat:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat smoke validation, success payload helpers, and the importable live chat smoke runner without provider calls.
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output and the importable deploy status runner.
 - `deploy:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy env parsing/JWT helpers plus the importable full doctor runner without reading real production env files.
+- `deploy:doctor:test` also imports the deploy doctor self-test runner without executing it, and `deploy:doctor:self-test` remains the CLI self-test gate in `qa:local`.
 - `vault:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard shared memory/knowledge Markdown audit helpers plus importable memory and knowledge audit runners.
 - `backend:check:db:test` now runs in `qa:local`, CI, and Production Smoke to guard DB-required backend check command planning and the importable DB check runner.
 - `supabase:storage:test` now runs in `qa:local`, CI, and Production Smoke to guard signed-storage setup helpers plus the importable setup runner without calling Supabase.
