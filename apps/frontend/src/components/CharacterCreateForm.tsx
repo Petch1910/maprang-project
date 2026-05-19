@@ -393,8 +393,8 @@ export function CharacterCreateForm({
     const contentStatus = result.source === 'ai' ? 'เนื้อหาสร้างจาก AI แล้ว' : 'ใช้ดราฟต์สำรองเพราะโมเดลเนื้อหาไม่พร้อม'
     const imageStatus =
       result.image.provider === 'configured'
-        ? 'รูปถูกสร้างจาก image provider จริง'
-        : result.image.note || 'รูปยังเป็นภาพตัวอย่างระบบ เพราะ image provider ยังสร้างรูปจริงไม่สำเร็จ'
+        ? 'รูปถูกสร้างจากผู้ให้บริการสร้างรูปจริง'
+        : result.image.note || 'รูปยังเป็นภาพตัวอย่างระบบ เพราะผู้ให้บริการสร้างรูปยังสร้างรูปจริงไม่สำเร็จ'
     const warningText = result.warnings.length > 0 ? ` (${result.warnings.join(', ')})` : ''
     setNote(`${contentStatus} - ${imageStatus}${warningText}`)
   }
@@ -623,7 +623,7 @@ export function CharacterCreateForm({
                 </div>
 
                 <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs font-bold leading-5 text-slate-500">
-                  กด AI สร้างรูป + เนื้อหาเพื่อให้ backend ช่วยร่างตัวละคร ถ้ายังไม่ได้ตั้งค่า image provider จริง ระบบจะแสดงภาพตัวอย่างชั่วคราวและบอกสถานะให้เห็นชัด
+                  กด AI สร้างรูป + เนื้อหาเพื่อให้ระบบหลังบ้านช่วยร่างตัวละคร ถ้ายังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูปจริง ระบบจะแสดงภาพตัวอย่างชั่วคราวและบอกสถานะให้เห็นชัด
                 </div>
 
                 <FieldBlock
@@ -645,7 +645,7 @@ export function CharacterCreateForm({
                       <span className="min-w-0 font-bold sm:truncate">
                         {avatarSource === 'placeholder'
                           ? 'ภาพตัวอย่างระบบ (ยังไม่ใช่รูป AI จริง)'
-                          : 'รูปจาก image provider (เก็บเป็น URL ระบบแล้ว)'}
+                          : 'รูปจากผู้ให้บริการสร้างรูป (เก็บเป็น URL ระบบแล้ว)'}
                       </span>
                       <button
                         className="inline-flex min-h-9 items-center justify-center rounded-md border border-orange-500/25 bg-white px-2.5 py-1 text-xs font-black text-orange-800 transition hover:bg-orange-100"

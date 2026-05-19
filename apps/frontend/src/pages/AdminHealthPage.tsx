@@ -293,7 +293,7 @@ export function AdminHealthPage() {
               ตรวจความพร้อมก่อน staging / production
             </h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              หน้านี้รวมสถานะ backend, env, Supabase, signed storage, image provider และการตรวจเส้นทาง/เมนู
+              หน้านี้รวมสถานะระบบหลังบ้าน ค่าแวดล้อม Supabase พื้นที่เก็บรูปแบบ signed URL ผู้ให้บริการสร้างรูป และการตรวจเส้นทาง/เมนู
               เพื่อกันปุ่มหลอกหรือ config พลาดก่อน deploy จริง
             </p>
           </div>

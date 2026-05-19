@@ -123,18 +123,18 @@ export function CreatorStudioPage() {
               : 'รูปพร้อม',
         detail:
           draftStatus.avatarSource === 'placeholder'
-            ? 'ตอนนี้เป็นภาพตัวอย่างระบบ ใช้ดราฟต์ได้ แต่ production ควรตั้งค่า image provider จริง'
+            ? 'ตอนนี้เป็นภาพตัวอย่างระบบ ใช้ดราฟต์ได้ แต่ก่อนใช้งานจริงควรตั้งค่าผู้ให้บริการสร้างรูป'
             : draftStatus.avatarSource === 'provider'
-              ? 'ได้รูปจาก image provider และระบบช่วยร่างเนื้อหาแล้ว'
+              ? 'ได้รูปจากผู้ให้บริการสร้างรูป และระบบช่วยร่างเนื้อหาแล้ว'
               : draftStatus.draftGeneratedFromImage
                 ? 'มีรูปและระบบช่วยร่างเนื้อหาแล้ว'
-                : 'ใส่รูปเพื่อให้หน้าการ์ดและ Lobby ดูน่ากด',
+                : 'ใส่รูปเพื่อให้หน้าการ์ดและหน้าล็อบบี้ดูน่ากด',
         icon: ImageIcon,
       },
       {
         ready: draftStatus.hasIdentity && draftStatus.hasPrompt,
         title: 'บุคลิกต้องชัด',
-        detail: draftStatus.hasPrompt ? 'มีแกน prompt สำหรับคุมโทนตัวละคร' : 'เติมชื่อ คำโปรย และพรอมป์หลักให้ชัด',
+        detail: draftStatus.hasPrompt ? 'มีแกนพรอมป์สำหรับคุมโทนตัวละคร' : 'เติมชื่อ คำโปรย และพรอมป์หลักให้ชัด',
         icon: Bot,
       },
       {

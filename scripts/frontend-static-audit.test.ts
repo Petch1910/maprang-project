@@ -92,12 +92,14 @@ describe('frontend static audit', () => {
         '<p>Teen romance</p>',
         '<p>Mature 18+</p>',
         '<p>Restricted 18+</p>',
+        '<p>image provider</p>',
         '<button aria-label="Select chat" />',
       ].join('\n'),
       'EnglishUiFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
+      'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
@@ -129,6 +131,10 @@ describe('frontend static audit', () => {
         '<p>hook: unfinished business</p>',
         '<p>ยัง fallback เป็นภาพตัวอย่าง</p>',
         '<th>เหตุผล disabled</th>',
+        '<p>production ควรตั้งค่า image provider จริง</p>',
+        '<p>ใส่รูปเพื่อให้หน้าการ์ดและ Lobby ดูน่ากด</p>',
+        '<p>มีแกน prompt สำหรับคุมโทนตัวละคร</p>',
+        '<p>ให้ backend ช่วยร่างตัวละคร</p>',
       ].join('\n'),
       'MixedEnglishUiFixture.tsx',
     )
@@ -139,6 +145,11 @@ describe('frontend static audit', () => {
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
+      'contains mixed Creator Studio wording that should be Thai-first',
+      'contains mixed Creator Studio wording that should be Thai-first',
+      'contains mixed Creator Studio wording that should be Thai-first',
+      'contains mixed Creator Studio wording that should be Thai-first',
       'contains mixed English UI wording that should be Thai-first',
       'contains mixed English UI wording that should be Thai-first',
       'contains mixed English UI wording that should be Thai-first',

@@ -27,6 +27,7 @@ Verified:
 - Frontend auth and Redux load failures no longer surface raw provider/browser English error messages directly; they now map to Thai-first user-facing notes, and frontend static/predeploy guards block the old raw-error patterns from returning.
 - Frontend content rating labels shown in Explore/Character Lobby are now Thai-first, and the static audit blocks stale `Teen romance`, `Mature 18+`, and `Restricted 18+` labels from returning.
 - Chat selection accessibility labels in the sidebar and My Chats are now Thai-first, and the static audit blocks stale `Select chat` labels from returning.
+- Creator Studio and chat/admin status copy now avoid mixed English operational wording such as `image provider`, `production`, `backend`, `Lobby`, and raw `prompt` in user-facing Thai copy, with frontend static/predeploy guards for those stale phrases.
 - Predeploy now has its own regression test and is wired into local QA, CI, and Production Smoke so critical predeploy/e2e wording guards cannot drift silently.
 - Browser smoke assertions now use Thai-first admin UI labels for Admin Health, Prompt Inspector, and Automated Evals, and the frontend static audit also blocks English admin checklist labels from returning.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.

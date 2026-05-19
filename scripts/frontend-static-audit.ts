@@ -144,8 +144,12 @@ export const suspiciousPatterns = [
   },
   {
     pattern:
-      /\b(?:Admin Health|Prompt Inspector|Automated Evals|Prompt diff|Route\/Menu Audit|Production blocker summary|Deploy checklist|Frontend backend URL|Frontend env warnings|Chat live smoke|Chat reply budget|Image provider configured|Image live smoke|Supabase Auth|Signed avatar storage|Production CORS|Cancel chat selection|Select chat|Explore \/ Home|Character Lobby|Relationship Contract|Chat Room|Chat Sidebar|Creator Studio|My Chats|Events Inbox|Profile \/ Persona|Staging Gate|Knowledge pack|Local readiness|Production gates|QA gate|runtime knowledge packs ready|needs check|staging\/future gate|Could not load chats|Could not load characters|Teen romance|Mature 18|Restricted 18|prompt-control|prompt\/context|token budget|relationship state|scene state|Deterministic prompt\/context)\b/g,
+      /\b(?:Admin Health|Prompt Inspector|Automated Evals|Prompt diff|Route\/Menu Audit|Production blocker summary|Deploy checklist|Frontend backend URL|Frontend env warnings|Chat live smoke|Chat reply budget|Image provider configured|Image live smoke|Supabase Auth|Signed avatar storage|Production CORS|Cancel chat selection|Select chat|Explore \/ Home|Character Lobby|Relationship Contract|Chat Room|Chat Sidebar|Creator Studio|My Chats|Events Inbox|Profile \/ Persona|Staging Gate|Knowledge pack|Local readiness|Production gates|QA gate|runtime knowledge packs ready|needs check|staging\/future gate|Could not load chats|Could not load characters|Teen romance|Mature 18|Restricted 18|prompt-control|prompt\/context|token budget|relationship state|scene state|Deterministic prompt\/context|image provider)\b/g,
     message: 'contains English UI label that should be Thai-first',
+  },
+  {
+    pattern: /(?:production\s+ควรตั้งค่า|Lobby\s+ดูน่ากด|แกน\s+prompt|backend\s+ช่วยร่าง)/g,
+    message: 'contains mixed Creator Studio wording that should be Thai-first',
   },
   {
     pattern: /(?:ระบบ relationship|anchor ตัวละคร|ยังไม่ได้รัน eval|รัน eval|hook:|ยัง fallback|fallback เป็นภาพ|เหตุผล disabled)/g,

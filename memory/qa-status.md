@@ -69,6 +69,7 @@ Results:
 - Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.
 - `frontend:static:audit:test` now also blocks stale English chat-selection accessibility labels such as `Select chat`.
+- `frontend:static:audit:test` now also blocks stale mixed Creator Studio copy such as `image provider`, `production ควรตั้งค่า`, `Lobby ดูน่ากด`, `แกน prompt`, and `backend ช่วยร่าง`.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link, navigate route regressions, and the importable route audit runner.
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document, runtime row alignment, stale mixed-language audit copy, and the importable doc-check runner.
 - `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior and shared backend root identity validation.

@@ -211,7 +211,7 @@ export function WorkspacePage() {
         return
       }
       if (!health.checks.imageGenerationConfigured) {
-        setConnectionNote('แชทพร้อมแล้ว แต่ AI สร้างรูปยังใช้ภาพตัวอย่างจนกว่าจะตั้งค่า image provider')
+        setConnectionNote('แชทพร้อมแล้ว แต่ AI สร้างรูปยังใช้ภาพตัวอย่างจนกว่าจะตั้งค่าผู้ให้บริการสร้างรูป')
         return
       }
       setConnectionNote('ฐานข้อมูลและบริการ AI เชื่อมต่อแล้ว')
