@@ -925,7 +925,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-route-audit.ts'),
-        ['runApiRouteAudit', 'writeLine', 'writeError', 'if (import.meta.main) process.exit(await runApiRouteAudit())'],
+        ['apps/backend/index.ts', "'GET /'", 'runApiRouteAudit', 'writeLine', 'writeError', 'if (import.meta.main) process.exit(await runApiRouteAudit())'],
         'scripts/api-route-audit.ts',
       )
       requireIncludes(

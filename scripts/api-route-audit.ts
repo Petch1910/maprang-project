@@ -15,6 +15,7 @@ export type RouteCoverage = {
 }
 
 const routeFiles = [
+  'apps/backend/index.ts',
   'apps/backend/src/admin.routes.ts',
   'apps/backend/src/character.routes.ts',
   'apps/backend/src/chat.routes.ts',
@@ -26,6 +27,11 @@ const routeFiles = [
 ]
 
 export const routeCoverage: Record<RouteKey, RouteCoverage> = {
+  'GET /': {
+    owner: 'platform',
+    coverage: ['smoke', 'e2e'],
+    note: 'backend root identity endpoint is checked by API smoke and browser preflight as a deployed service sanity check',
+  },
   'GET /health': {
     owner: 'platform',
     coverage: ['smoke', 'e2e'],
