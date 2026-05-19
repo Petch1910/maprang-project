@@ -160,6 +160,30 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports mixed Admin Health operational copy regressions', () => {
+    const findings = auditSuspiciousPatterns(
+      [
+        '<p>backend ยังไม่พร้อมเต็ม ต้องดู checklist ด้านล่าง</p>',
+        '<p>ติดต่อ backend health ไม่ได้</p>',
+        '<p>รอ health response จาก backend</p>',
+        '<p>backend env ไม่มีค่า required ที่ขาด</p>',
+        '<p>ล็อกค่า env ชุดนี้ไว้ใน hosting secret manager</p>',
+        '<p>แก้ backend host secrets แล้วรัน production:check</p>',
+        '<p>waiting for backend health response</p>',
+        '<p>ยืนยัน provider จริง</p>',
+        '<p>พร้อมสำหรับ final gate แล้ว</p>',
+        '<p>เช็ค console error และ mobile overflow</p>',
+        '<p>production smoke กับ backend/frontend domain จริง</p>',
+        '<p>ไม่มี warning ฝั่ง frontend</p>',
+      ].join('\n'),
+      'AdminHealthFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual(
+      Array.from({ length: 12 }, () => 'contains mixed Admin Health wording that should be Thai-first'),
+    )
+  })
+
   test('combines accessibility and placeholder findings with stable line numbers', () => {
     const content = `
       export function Fixture() {

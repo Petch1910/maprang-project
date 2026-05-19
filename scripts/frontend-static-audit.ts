@@ -152,6 +152,11 @@ export const suspiciousPatterns = [
     message: 'contains mixed Creator Studio wording that should be Thai-first',
   },
   {
+    pattern:
+      /(?:backend\s+ยังไม่พร้อมเต็ม|ติดต่อ\s+backend\s+health|health\s+response\s+จาก\s+backend|backend\s+env|hosting\s+secret\s+manager|backend\s+host\s+secrets|waiting\s+for\s+backend\s+health\s+response|ยืนยัน\s+provider\s+จริง|final\s+gate|mobile\s+overflow|backend\/frontend\s+domain|warning\s+ฝั่ง\s+frontend)/g,
+    message: 'contains mixed Admin Health wording that should be Thai-first',
+  },
+  {
     pattern: /(?:ระบบ relationship|anchor ตัวละคร|ยังไม่ได้รัน eval|รัน eval|hook:|ยัง fallback|fallback เป็นภาพ|เหตุผล disabled)/g,
     message: 'contains mixed English UI wording that should be Thai-first',
   },
