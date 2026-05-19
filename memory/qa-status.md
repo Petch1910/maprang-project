@@ -57,7 +57,7 @@ Results:
 - `import-cycle:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard relative import extraction, extension/index resolution, cycle detection, and the importable architecture audit runner.
 - `api:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard API smoke readiness/image helper regressions, summary counts, and API smoke runner import safety without calling a backend.
 - `frontend:bundle:test` now runs in `qa:local`, CI, and Production Smoke to guard code-splitting, bundle budget regressions, and the importable bundle budget runner.
-- `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, admin/system/relationship English UI label regressions, Thai text/mojibake regressions, and the importable static audit runner.
+- `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, admin/system/relationship English UI label regressions, mixed English debug copy regressions, Thai text/mojibake regressions, and the importable static audit runner.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link, navigate route regressions, and the importable route audit runner.
 - `route-menu:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard Route/Menu Audit document, runtime row alignment, and the importable doc-check runner.
 - `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior and shared backend root identity validation.

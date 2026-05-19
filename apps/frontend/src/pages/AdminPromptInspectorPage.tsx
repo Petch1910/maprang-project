@@ -27,7 +27,7 @@ const defaultMessage =
   'ช่วยตอบฉากนี้ให้มีรายละเอียดมากขึ้น คงบุคลิกเดิม ใช้บรรยากาศ ความรู้สึก และทิ้งจังหวะให้ผู้เล่นตอบต่อ'
 const defaultCompareMessage = 'สวัสดี วันนี้เธอเป็นยังไงบ้าง'
 const defaultRuntimeNote =
-  'ตรวจว่า runtime memory, relationship state, scene state และ lore ถูกวางใน prompt อย่างเหมาะสมก่อนยิงโมเดลจริง'
+  'ตรวจว่าหน่วยความจำ runtime สถานะความสัมพันธ์ สถานะฉาก และคลังความรู้ถูกวางในพรอมป์อย่างเหมาะสมก่อนยิงโมเดลจริง'
 
 function getStoredAdminKey() {
   if (typeof window === 'undefined') return ''

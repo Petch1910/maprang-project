@@ -26,10 +26,10 @@ function getStoredAdminKey() {
 
 function apiErrorMessage(error: unknown) {
   if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-    return 'ต้องบันทึก ADMIN_API_KEY ก่อนรัน eval'
+    return 'ต้องบันทึก ADMIN_API_KEY ก่อนรันชุดทดสอบ'
   }
-  if (error instanceof ApiError && error.status >= 500) return 'backend รัน eval ไม่สำเร็จ ตรวจไฟล์ evals/golden-roleplay.json'
-  return 'โหลดผล eval ไม่สำเร็จ ลองรีเฟรชหรือเช็ค backend'
+  if (error instanceof ApiError && error.status >= 500) return 'หลังบ้านรันชุดทดสอบไม่สำเร็จ ตรวจไฟล์ evals/golden-roleplay.json'
+  return 'โหลดผลชุดทดสอบไม่สำเร็จ ลองรีเฟรชหรือเช็คหลังบ้าน'
 }
 
 function statusClass(passed: boolean) {
@@ -102,7 +102,7 @@ function ScenarioCard({ result }: { result: EvalScenarioResult }) {
                 <p className="m-0 mt-1 text-xs font-bold leading-5 text-slate-500">{check.detail}</p>
               </div>
               <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-black ${statusClass(check.status === 'pass')}`}>
-                {check.status === 'pass' ? 'pass' : 'fail'}
+                {check.status === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}
               </span>
             </div>
           </article>
@@ -116,14 +116,14 @@ export function AdminEvalsPage() {
   const [adminKeyInput, setAdminKeyInput] = useState(getStoredAdminKey)
   const [run, setRun] = useState<LocalEvalRun | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [note, setNote] = useState('บันทึก ADMIN_API_KEY แล้วกดรัน eval เพื่อตรวจคุณภาพ prompt/context')
+  const [note, setNote] = useState('บันทึก ADMIN_API_KEY แล้วกดรันชุดทดสอบเพื่อตรวจคุณภาพพรอมป์และบริบท')
 
   const hasAdminKey = adminKeyInput.trim().length > 0
   const failedScenarios = useMemo(() => run?.results.filter((result) => !result.passed) ?? [], [run])
 
   const loadEvals = useCallback(async () => {
     if (!hasAdminKey) {
-      setNote('ต้องบันทึก ADMIN_API_KEY ก่อนรัน eval')
+      setNote('ต้องบันทึก ADMIN_API_KEY ก่อนรันชุดทดสอบ')
       return
     }
 
@@ -131,7 +131,7 @@ export function AdminEvalsPage() {
     try {
       const data = await fetchAdminLocalEvals()
       setRun(data)
-      setNote(data.passed ? `eval ผ่าน ${data.passCount}/${data.scenarioCount} scenarios` : `eval ไม่ผ่าน ${data.failCount} scenarios`)
+      setNote(data.passed ? `ชุดทดสอบผ่าน ${data.passCount}/${data.scenarioCount} เคส` : `ชุดทดสอบไม่ผ่าน ${data.failCount} เคส`)
     } catch (error) {
       if (shouldLogUnexpectedError(error)) console.error('Load admin evals error:', error)
       setRun(null)
@@ -175,9 +175,9 @@ export function AdminEvalsPage() {
               <FlaskConical size={16} />
               ชุดทดสอบอัตโนมัติ
             </p>
-            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">ทดสอบคุณภาพ prompt/context</h1>
+            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">ทดสอบคุณภาพพรอมป์และบริบท</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              รันชุด golden roleplay แบบ deterministic เพื่อตรวจว่า prompt-control, lore, relationship, scene และ token budget
+              รันชุด golden roleplay แบบคงผลลัพธ์ เพื่อตรวจว่ากฎคุมพรอมป์ คลังความรู้ ความสัมพันธ์ ฉาก และงบโทเคน
               ยังอยู่ในกรอบเดิมก่อนแก้ระบบต่อหรือปล่อย staging
             </p>
           </div>
@@ -223,7 +223,7 @@ export function AdminEvalsPage() {
             type="button"
           >
             {isLoading ? <Loader2 className="animate-spin" size={17} /> : <RefreshCw size={17} />}
-            รัน eval
+            รันชุดทดสอบ
           </button>
         </div>
       </section>
@@ -231,7 +231,7 @@ export function AdminEvalsPage() {
       {run ? (
         <div className="space-y-5" data-testid="admin-evals-output">
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            <StatCard label="Status" value={run.passed ? 'ผ่าน' : 'ไม่ผ่าน'} tone={run.passed ? 'emerald' : 'rose'} />
+            <StatCard label="สถานะ" value={run.passed ? 'ผ่าน' : 'ไม่ผ่าน'} tone={run.passed ? 'emerald' : 'rose'} />
             <StatCard label="ชุดทดสอบ" value={`${run.passCount}/${run.scenarioCount}`} tone="sky" />
             <StatCard label="โทเคนรวม" value={run.totalEstimatedTokens.toLocaleString()} tone="amber" />
             <StatCard label="ชุดที่ใช้สูงสุด" value={run.maxEstimatedTokens.toLocaleString()} />
@@ -250,7 +250,7 @@ export function AdminEvalsPage() {
                   {run.suite.name}
                 </p>
                 <p className="m-0 mt-1 text-sm font-bold leading-6">
-                  {run.suite.description || 'Deterministic prompt/context regression suite'}
+                  {run.suite.description || 'ชุดตรวจ regression ของพรอมป์และบริบทแบบคงผลลัพธ์'}
                 </p>
               </div>
               <span className="rounded-full bg-white/75 px-3 py-1 text-xs font-black">
@@ -259,7 +259,7 @@ export function AdminEvalsPage() {
             </div>
             {failedScenarios.length > 0 && (
               <p className="m-0 mt-3 rounded-xl bg-white/70 p-3 text-sm font-bold">
-                ต้องแก้ {failedScenarios.map((scenario) => scenario.id).join(', ')} ก่อน merge หรือ deploy
+                ต้องแก้ {failedScenarios.map((scenario) => scenario.id).join(', ')} ก่อนรวมงานหรือปล่อยขึ้นระบบ
               </p>
             )}
           </section>
@@ -276,9 +276,9 @@ export function AdminEvalsPage() {
             <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-950 text-white">
               <FlaskConical size={22} />
             </span>
-            <h2 className="m-0 mt-4 text-xl font-black text-slate-950">ยังไม่ได้รัน eval</h2>
+            <h2 className="m-0 mt-4 text-xl font-black text-slate-950">ยังไม่ได้รันชุดทดสอบ</h2>
             <p className="m-0 mt-2 text-sm font-bold leading-6 text-slate-500">
-              เมื่อรันแล้วจะเห็นผลแต่ละ scenario, token budget, check ที่ผ่าน/ไม่ผ่าน และ failure ที่ต้องแก้
+              เมื่อรันแล้วจะเห็นผลแต่ละสถานการณ์ทดสอบ งบโทเคน จุดตรวจที่ผ่าน/ไม่ผ่าน และข้อผิดพลาดที่ต้องแก้
             </p>
           </div>
         </section>

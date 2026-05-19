@@ -495,7 +495,7 @@ function RightRail({
         <>
           <InfoLine label="ฉากปัจจุบัน" value={activeScene?.title ?? compactSceneLabel(runtimeState)} />
           <p className="m-0 text-sm leading-6 text-white/65">
-            {activeScene?.objective || character.scenario || 'ยังไม่มีฉากพิเศษ กดคุยต่อเพื่อให้ระบบ relationship สร้างจังหวะของเรื่อง'}
+            {activeScene?.objective || character.scenario || 'ยังไม่มีฉากพิเศษ กดคุยต่อเพื่อให้ระบบความสัมพันธ์สร้างจังหวะของเรื่อง'}
           </p>
           {pendingEvents.length > 0 && (
             <p className="m-0 rounded-lg bg-amber-300/10 p-2 text-xs font-bold text-amber-100">
@@ -509,7 +509,7 @@ function RightRail({
       return (
         <>
           <p className="m-0 text-sm leading-6 text-white/70">
-            {character.characterAnchor || character.compactPrompt || character.description || 'ยังไม่ได้ตั้ง anchor ตัวละคร'}
+            {character.characterAnchor || character.compactPrompt || character.description || 'ยังไม่ได้ตั้งแกนตัวละคร'}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {character.tags.map((tag) => (

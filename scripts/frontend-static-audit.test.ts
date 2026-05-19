@@ -101,6 +101,34 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports mixed English debug copy regressions for Thai-first surfaces', () => {
+    const findings = auditSuspiciousPatterns(
+      [
+        '<p>prompt-control, relationship state, scene state และ token budget</p>',
+        '<h1>ทดสอบคุณภาพ prompt/context</h1>',
+        '<p>ระบบ relationship สร้างจังหวะของเรื่อง</p>',
+        '<p>ยังไม่ได้ตั้ง anchor ตัวละคร</p>',
+        '<p>รัน eval</p>',
+        '<p>ยังไม่ได้รัน eval</p>',
+        '<p>hook: unfinished business</p>',
+      ].join('\n'),
+      'MixedEnglishUiFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
+      'contains mixed English UI wording that should be Thai-first',
+      'contains mixed English UI wording that should be Thai-first',
+      'contains mixed English UI wording that should be Thai-first',
+      'contains mixed English UI wording that should be Thai-first',
+      'contains mixed English UI wording that should be Thai-first',
+    ])
+  })
+
   test('combines accessibility and placeholder findings with stable line numbers', () => {
     const content = `
       export function Fixture() {

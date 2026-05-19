@@ -968,7 +968,9 @@ const checks: Check[] = [
           'reports placeholder links',
           'reports Thai placeholder and mojibake text regressions',
           'reports English UI label regressions for Thai-first surfaces',
+          'reports mixed English debug copy regressions for Thai-first surfaces',
           'Relationship Contract',
+          'prompt-control',
           'runs the committed frontend static audit through an importable runner',
         ],
         'scripts/frontend-static-audit.test.ts',
@@ -983,6 +985,8 @@ const checks: Check[] = [
         [
           'collectFrontendStaticFindings',
           'Relationship Contract',
+          'prompt-control',
+          'ระบบ relationship',
           'runFrontendStaticAudit',
           'if (import.meta.main) process.exit(await runFrontendStaticAudit())',
         ],
@@ -1113,6 +1117,11 @@ const checks: Check[] = [
       requireIncludes(readme, ['local/non-https CORS', 'backend root identity'], 'README.md')
       requireIncludes(deploymentQa, ['local/non-https CORS', 'backend root identity'], 'DEPLOYMENT_QA.md')
       requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS is local or non-https', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
+      forbidIncludes(
+        await readRepoFile('ROUTE_MENU_AUDIT.md'),
+        ['รัน eval', 'prompt-control', 'token budget', 'accordion', ' disabled '],
+        'ROUTE_MENU_AUDIT.md',
+      )
       requireIncludes(
         await readRepoFile('DEPLOY_RENDER.md'),
         ['CORS_ORIGINS=https://<frontend-domain>', 'Do not include localhost, `http://` origins, wildcard origins, or the backend URL'],

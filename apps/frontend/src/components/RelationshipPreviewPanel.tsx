@@ -77,7 +77,7 @@ export function RelationshipPreviewPanel({
               <p className="m-0">
                 {relationshipStatusLabel(turn.status)} / {relationshipTierLabel(turn.tier)} / {turn.tone} | ผูกพัน {turn.stats.affinity}, ไว้ใจ {turn.stats.trust}
               </p>
-              {turn.events.length > 0 && <p className="m-0">hook: {turn.events.map((event) => event.label).join(', ')}</p>}
+              {turn.events.length > 0 && <p className="m-0">จังหวะเรื่อง: {turn.events.map((event) => event.label).join(', ')}</p>}
             </div>
           ))}
         </div>

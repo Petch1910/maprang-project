@@ -61,7 +61,7 @@ export function RelationshipExplainability({
           </p>
           {relationship.constraints.length > 0 && <p className="m-0">ข้อคุมระบบ: {relationship.constraints.join(', ')}</p>}
           {relationship.events.length > 0 && (
-            <p className="m-0">hook: {relationship.events.map((event) => event.label).join(', ')}</p>
+            <p className="m-0">จังหวะเรื่อง: {relationship.events.map((event) => event.label).join(', ')}</p>
           )}
           {scene?.pendingEvents.length ? (
             <p className="m-0">ฉากที่รออยู่: {scene.pendingEvents.map((event) => event.title).join(', ')}</p>
