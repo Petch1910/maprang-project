@@ -3,6 +3,7 @@ import {
   auditRouteCoverage,
   discoverRoutes,
   discoverRoutesFromSource,
+  routeCoverage,
   runApiRouteAudit,
   type DiscoveredRoute,
   type RouteCoverage,
@@ -44,6 +45,20 @@ describe('api route audit', () => {
     expect(result.weakCoverage.map((route) => route.key)).toEqual(['PATCH /characters/:id'])
     expect(result.byOwner.get('platform')).toBe(1)
     expect(result.byOwner.get('unknown')).toBe(1)
+  })
+
+  test('covers the backend root identity route', () => {
+    const routes = discoverRoutesFromSource(
+      'apps/backend/index.ts',
+      `
+        export const app = new Elysia()
+          .get('/', () => ({ ok: true, service: 'maprang-backend' }))
+      `,
+    )
+
+    expect(routes.map((route) => route.key)).toEqual(['GET /'])
+    expect(routeCoverage['GET /']).toMatchObject({ owner: 'platform' })
+    expect(routeCoverage['GET /'].coverage).toEqual(expect.arrayContaining(['smoke', 'e2e']))
   })
 
   test('runs the committed API route audit through an importable runner', async () => {

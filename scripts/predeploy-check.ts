@@ -920,7 +920,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-route-audit.test.ts'),
-        ['discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries', 'runs the committed API route audit through an importable runner'],
+        ['discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries', 'covers the backend root identity route', 'runs the committed API route audit through an importable runner'],
         'scripts/api-route-audit.test.ts',
       )
       requireIncludes(
