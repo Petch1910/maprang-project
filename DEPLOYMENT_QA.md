@@ -11,6 +11,7 @@ bun run qa:local
 ```
 
 This gate does not call the live AI provider. It verifies committed secrets, API route coverage mapping, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke also passes `skipImageProvider=true` for creator draft checks, so it verifies the endpoint shape without spending image credits; live image generation stays in `api:smoke:live`, `smoke:image:live`, and `production:check`.
+Real `.env` and `.env.*` files must stay untracked. `secrets:check` ignores local untracked env files for developer convenience but fails if one is ever committed or tracked.
 
 To inspect backend API coverage without running the full suite:
 

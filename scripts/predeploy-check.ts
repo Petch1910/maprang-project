@@ -255,8 +255,12 @@ const checks: Check[] = [
         ],
         'RELEASE_HANDOFF.md',
       )
-      requireIncludes(readme, ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users', 'secret-pattern regression tests'], 'README.md')
-      requireIncludes(deploymentQa, ['bun run secrets:patterns:test', 'secrets/secret-pattern/memory'], 'DEPLOYMENT_QA.md')
+      requireIncludes(
+        readme,
+        ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users', 'secret-pattern regression tests', 'tracked `.env`'],
+        'README.md',
+      )
+      requireIncludes(deploymentQa, ['bun run secrets:patterns:test', 'secrets/secret-pattern/memory', 'Real `.env`'], 'DEPLOYMENT_QA.md')
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
       requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')

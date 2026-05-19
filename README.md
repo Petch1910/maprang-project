@@ -17,6 +17,7 @@ cp apps/backend/.env.example apps/backend/.env
 ```
 
 Fill `OPENROUTER_API_KEY`. Supabase values are optional for local dev. Avatar uploads use local disk by default and switch to Supabase Storage when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET` are set.
+Keep real `.env` and `.env.*` files untracked. The repo allows only env templates such as `.env.example` and `.env.production.example`, and `secrets:check` fails if a real env file becomes tracked.
 
 Creator Studio can draft Thai character content through OpenRouter. Real AI avatar generation is optional and needs `IMAGE_GENERATION_API_KEY`; without it the app uses a clearly labeled temporary placeholder image while still filling the character fields.
 
@@ -189,6 +190,7 @@ bun run qa:local
 
 Use this as the normal local readiness gate. It checks secrets, secret-pattern regression tests, memory and knowledge audits, deterministic prompt/context evals, API route coverage mapping, deploy wiring, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke skips the external image provider for creator draft checks so routine QA is deterministic; live avatar generation is verified only by `api:smoke:live`, `smoke:image:live`, or `production:check`.
 It also audits the project memory vault and runtime knowledge packs so long-running context cannot silently lose required files or pick up secret-shaped values.
+The secrets gate ignores untracked local env files for normal development, but it rejects tracked `.env` or `.env.*` files before commit/CI.
 
 To check only backend API route coverage:
 
