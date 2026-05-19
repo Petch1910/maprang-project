@@ -55,6 +55,28 @@ describe('relationship tag validation', () => {
       }),
     )
   })
+
+  test('keeps creator validation messages Thai-first', () => {
+    const issues = validateRelationshipTags([
+      'family',
+      'nc',
+      'no-romance',
+      'lover',
+      'crush',
+      'hard-to-get',
+      'golden',
+      'enemy',
+      'friend',
+      'red-flag',
+      'green-flag',
+    ])
+    const copy = issues.map((issue) => issue.message).join('\n')
+
+    expect(copy).toContain('เนื้อเรื่องนี้เป็นการจำลอง/สมมุติสำหรับผู้ใหญ่')
+    expect(copy).toContain('พฤติกรรมบอทอาจแกว่งถ้าพรอมป์ไม่ชัด')
+    expect(copy).toContain('แท็กระบบควรอยู่ราว 3-5 แท็ก')
+    expect(copy).not.toMatch(/This story|Engine tags|conflicts with|Bot behavior|Romance progression|Pick slow-earned|mixed safety tone/i)
+  })
 })
 
 describe('relationship seed', () => {

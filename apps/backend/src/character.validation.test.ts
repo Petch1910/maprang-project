@@ -47,7 +47,7 @@ describe('character quality relationship validation', () => {
         level: 'warning',
       }),
     )
-    expect(quality.notes.some((note) => note.includes('family conflicts'))).toBe(true)
+    expect(quality.notes.some((note) => note.includes('family ขัดแย้งกับแท็ก nc/romance'))).toBe(true)
   })
 
   test('fails publish quality when non-adult relationship tags have a danger conflict', () => {

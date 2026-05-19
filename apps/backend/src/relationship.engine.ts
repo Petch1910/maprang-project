@@ -819,14 +819,14 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
   const adultMode = profile.discovery.includes('nc')
   const strictConflictLevel: RelationshipValidationIssue['level'] = adultMode ? 'warning' : 'danger'
   const adultSimulationDisclosure =
-    'This story is fictional simulated adult roleplay. Adult mode keeps this as a creator-facing warning instead of blocking publish; define context and boundaries clearly.'
+    'เนื้อเรื่องนี้เป็นการจำลอง/สมมุติสำหรับผู้ใหญ่ โหมดผู้ใหญ่จะแสดงเป็นคำเตือนสำหรับครีเอเตอร์แทนการบล็อกการเผยแพร่ แต่ควรเขียนบริบทและขอบเขตให้ชัดเจน'
   const hasRomanticSeed = profile.engine.some((tag) => ROMANTIC_ENGINE_TAGS.has(tag))
 
   if (profile.engine.length > 5) {
     issues.push({
       level: 'warning',
       code: 'too_many_engine_tags',
-      message: 'Engine tags should stay around 3-5 items so behavior remains readable.',
+      message: 'แท็กระบบควรอยู่ราว 3-5 แท็ก เพื่อให้บุคลิกและความสัมพันธ์ยังอ่านทิศทางได้ชัด',
     })
   }
 
@@ -835,8 +835,8 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
       level: strictConflictLevel,
       code: 'family_romance_conflict',
       message: adultMode
-        ? `family conflicts with nc/romantic relationship tags. ${adultSimulationDisclosure}`
-        : 'family conflicts with romantic relationship tags. The relationship should use no-romance or remove romantic tags before publishing.',
+        ? `family ขัดแย้งกับแท็ก nc/romance ${adultSimulationDisclosure}`
+        : 'family ขัดแย้งกับแท็กความสัมพันธ์โรแมนติก ให้ใช้ no-romance หรือเอาแท็กโรแมนติกออกก่อนเผยแพร่',
     })
   }
 
@@ -845,8 +845,8 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
       level: strictConflictLevel,
       code: 'no_romance_romantic_seed',
       message: adultMode
-        ? `no-romance conflicts with romantic relationship tags. ${adultSimulationDisclosure} Bot behavior may drift unless the prompt is explicit.`
-        : 'no-romance conflicts with romantic relationship tags. Romance progression will be blocked.',
+        ? `no-romance ขัดแย้งกับแท็กความสัมพันธ์โรแมนติก ${adultSimulationDisclosure} พฤติกรรมบอทอาจแกว่งถ้าพรอมป์ไม่ชัด`
+        : 'no-romance ขัดแย้งกับแท็กความสัมพันธ์โรแมนติก และจะบล็อกการพัฒนาความโรแมนติก',
     })
   }
 
@@ -854,7 +854,7 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
     issues.push({
       level: 'warning',
       code: 'mixed_progression_speed',
-      message: 'hard-to-get and golden send opposite progression signals. Pick slow-earned or quickly approachable.',
+      message: 'hard-to-get และ golden ส่งสัญญาณจังหวะความสัมพันธ์คนละทาง ควรเลือกทางที่ค่อย ๆ ได้ใจ หรือเข้าถึงง่ายเร็วกว่า',
     })
   }
 
@@ -862,7 +862,7 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
     issues.push({
       level: 'warning',
       code: 'mixed_safety_tone',
-      message: 'red-flag and green-flag create mixed safety tone. Use yellow-flag for ambiguity.',
+      message: 'red-flag และ green-flag ทำให้โทนความปลอดภัยสับสน ถ้าต้องการความกำกวมให้ใช้ yellow-flag',
     })
   }
 

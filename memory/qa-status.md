@@ -73,6 +73,7 @@ Results:
 - `frontend:static:audit:test` now also blocks stale mixed Creator Studio copy such as `image provider`, `production ควรตั้งค่า`, `Lobby ดูน่ากด`, `แกน prompt`, and `backend ช่วยร่าง`.
 - `frontend:static:audit:test` now also blocks stale mixed Admin Health operational copy such as `backend ยังไม่พร้อมเต็ม`, `health response จาก backend`, `provider จริง`, `final gate`, and `mobile overflow`.
 - Creator Draft image-provider copy now passes focused backend coverage with Thai-first missing-provider, configured-failure, and billing-limit messages.
+- Backend relationship validation copy now passes Thai-first coverage via `bun test apps\backend\src\relationship.engine.test.ts`, focused character validation tests, and full `backend:check` with 132 pass.
 - Profile/tag helper and route/menu staging copy now pass Thai-first coverage via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, `route-menu:audit:test`, and `predeploy:check`; the static audit also blocks stale `backend`/`prompt`/`runtime`/`persona` helper wording from returning.
 - `frontend:static:audit:test` now also blocks stale mixed prompt/admin tooling copy such as `System prompt`, `redacted prompt`, `Runtime note`, `prompt snapshot`, `admin API`, and `frontend domain`.
 - `frontend:route:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard static link, navigate route regressions, and the importable route audit runner.
