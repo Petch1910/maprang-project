@@ -47,12 +47,12 @@ Verified:
 - `.gitignore` ignores real `.env.*` files while allowing `.env.example` and `.env.production.example` templates; predeploy verifies this rule.
 - `secrets:patterns:test` now locks the split between strict repo secret scanning and stricter memory/release handoff scanning, and it runs inside `qa:local`, CI, and Production Smoke.
 - `predeploy:check` verifies the shared secret pattern source, regression test, and QA documentation so secret-audit wiring cannot drift silently.
-- CI predeploy now runs the release handoff check and self-test directly, not only through `qa:local`.
+- CI predeploy now runs the release handoff check, self-test, and secret pattern regression test directly, not only through `qa:local`.
 - CI predeploy now runs security, API route, and route/menu static audits directly before deploy checks.
 - Security audit now also checks that every backend `/admin` route block contains `requireAdminApiKey`, catching missing admin guards before deploy.
 - Security audit now also checks that backend `/:id` route blocks contain `rejectInvalidUuid` before resource access.
 - Manual Production Smoke now runs predeploy and release handoff guards before validating deployed smoke secrets or spending provider credits.
-- Manual Production Smoke also runs secrets, memory, knowledge, eval, security, API route, and route/menu audits before deployed smoke validation.
+- Manual Production Smoke also runs secrets, secret pattern tests, memory, knowledge, eval, security, API route, and route/menu audits before deployed smoke validation.
 
 ## Current Production Status
 
