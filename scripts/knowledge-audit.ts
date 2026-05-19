@@ -1,6 +1,7 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { dirname, extname, join, normalize, relative, resolve } from 'node:path'
 import { loadStructuredKnowledge } from '../apps/backend/src/knowledge.service'
+import { secretPatterns } from './secret-patterns'
 
 const root = join(import.meta.dir, '..')
 const knowledgeRoot = join(root, 'knowledge')
@@ -18,18 +19,6 @@ const requiredFiles = [
   'knowledge/structured/relationship-rules.json',
   'knowledge/structured/scene-rules.json',
   'knowledge/structured/content-policy.json',
-]
-
-const forbiddenPatterns = [
-  { name: 'OpenRouter key', pattern: /sk-or-v1-[A-Za-z0-9_-]{16,}/ },
-  { name: 'OpenAI project key', pattern: /sk-proj-[A-Za-z0-9_-]{16,}/ },
-  { name: 'JWT-like key', pattern: /eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/ },
-  { name: 'Private key block', pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
-  { name: 'GitHub token', pattern: /\b(?:gh[pousr]_[A-Za-z0-9_]{36,}|github_pat_[A-Za-z0-9_]{20,})\b/ },
-  { name: 'Google API key', pattern: /\bAIza[A-Za-z0-9_-]{35}\b/ },
-  { name: 'Slack token', pattern: /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/ },
-  { name: 'Postgres URL with password', pattern: /postgres(?:ql)?:\/\/[^:\s]+:[^@\s]+@/i },
-  { name: 'Supabase service role value', pattern: /service_role[^\n]{20,}/i },
 ]
 
 async function assertFile(path: string) {
@@ -103,7 +92,7 @@ for (const file of files) {
   const relativePath = relative(root, file)
   const content = await readFile(file, 'utf8')
 
-  for (const forbidden of forbiddenPatterns) {
+  for (const forbidden of secretPatterns) {
     if (forbidden.pattern.test(content)) {
       findings.push(`${relativePath}: contains ${forbidden.name}`)
     }

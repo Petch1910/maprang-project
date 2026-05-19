@@ -232,6 +232,7 @@ const checks: Check[] = [
       const packageJson = await readRepoFile('package.json')
       const script = await readRepoFile('scripts/release-handoff-check.ts')
       const test = await readRepoFile('scripts/release-handoff-check.test.ts')
+      const secretPatterns = await readRepoFile('scripts/secret-patterns.ts')
       requireIncludes(
         handoff,
         [
@@ -253,6 +254,7 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
       requireIncludes(script, ['checkReleaseHandoffContent', '--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
       requireIncludes(test, ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true'], 'scripts/release-handoff-check.test.ts')
+      requireIncludes(secretPatterns, ['GitHub token', 'Google API key', 'Slack token', 'Private key block'], 'scripts/secret-patterns.ts')
     },
   },
   {
