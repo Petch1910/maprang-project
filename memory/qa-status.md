@@ -50,6 +50,7 @@ Results:
 - `release:handoff:test` is part of `qa:local` and verifies filled-mode and secret detection behavior.
 - CI predeploy now runs `release:handoff:check` and `release:handoff:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
+- Production Smoke workflow now runs predeploy and release handoff guards before deployed smoke validation.
 - Relationship engine focused test passes for the expanded Thai ladder and preset surface split: 12 pass, 0 fail.
 - Current delta gate passes: `backend:check`, `frontend:check`, and `knowledge:audit`.
 - Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.
