@@ -447,7 +447,7 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"deploy:readiness:test"', 'bun test scripts/deploy-readiness.test.ts'], 'package.json')
       requireIncludes(
         smokeDoctor,
-        ['evaluateDeployReadiness', 'buildHealthRows', 'healthFailures'],
+        ['evaluateDeployReadiness', 'buildHealthRows', 'buildNextDeploySteps', 'healthFailures', 'nextSteps:'],
         'scripts/smoke-doctor.ts',
       )
       requireIncludes(

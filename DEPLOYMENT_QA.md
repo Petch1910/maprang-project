@@ -151,7 +151,7 @@ With local backend and frontend running, run:
 bun run smoke:doctor
 ```
 
-`smoke:doctor` can pass for local development while still printing `productionReady`, `productionBlockerCount`, and `productionBlockers`.
+`smoke:doctor` can pass for local development while still printing `productionReady`, `productionBlockerCount`, `productionBlockers`, and ordered `nextSteps`.
 Treat those blockers as staging/production tasks, then confirm with `smoke:ready` against the real backend URL.
 It also prints `securityPosture` so you can quickly see how many CIA/AAA checks are currently ready.
 If `/health` reports invalid production env, `smoke:doctor` also prints `missingRequired` and `invalidEnv` so the fix is visible before `/ready` fails.

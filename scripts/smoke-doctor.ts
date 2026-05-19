@@ -1,5 +1,11 @@
 import { apiBaseUrl, isLocalSmokeTarget, readJson } from './smoke-helpers'
-import { buildHealthRows, evaluateDeployReadiness, healthFailures, type HealthPayload } from './deploy-readiness'
+import {
+  buildHealthRows,
+  buildNextDeploySteps,
+  evaluateDeployReadiness,
+  healthFailures,
+  type HealthPayload,
+} from './deploy-readiness'
 
 let health: HealthPayload
 const strictProductionGate =
@@ -87,6 +93,19 @@ if (productionBlockers.length > 0) {
   }
 } else {
   console.log('productionBlockers: none detected')
+}
+
+const nextSteps = buildNextDeploySteps({
+  productionReady,
+  productionBlockers,
+  productionFixes,
+  stagingReady,
+  stagingBlockers,
+  stagingFixes,
+})
+console.log('nextSteps:')
+for (const [index, step] of nextSteps.entries()) {
+  console.log(`${index + 1}. ${step}`)
 }
 
 console.log('Smoke doctor passed.')

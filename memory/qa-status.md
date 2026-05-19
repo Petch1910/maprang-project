@@ -31,6 +31,7 @@ Results:
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
 - Deploy status: pass, reports 2 staging blockers and 4 production blockers in local mode.
+- Smoke doctor now prints ordered deploy next steps from the shared readiness evaluator.
 - Deploy readiness self-test: pass.
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - API smoke now covers admin-only prompt inspector snapshots, prompt diffs, and deterministic local evals.
