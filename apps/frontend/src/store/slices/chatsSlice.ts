@@ -29,7 +29,7 @@ const chatsSlice = createSlice({
       })
       .addCase(loadChatSummaries.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.error.message ?? 'Could not load chats'
+        state.error = action.error.message ?? 'โหลดรายการแชทไม่ได้'
       })
   },
 })

@@ -23,6 +23,7 @@ Verified:
 - Frontend static audit now guards a focused set of English UI label regressions for Thai-first pages, including Admin Health, Prompt Inspector, Automated Evals, Relationship Contract, Chat budget, Supabase/Auth labels, and route/menu surface names.
 - Predeploy now verifies the Relationship Contract Thai-first regression guard remains wired into the frontend static audit source and tests.
 - Frontend Thai polish now removes mixed English debug wording such as prompt-control, token budget, relationship state, scene state, system relationship, anchor, hook, fallback, disabled, and eval from user-facing admin/chat surfaces plus route/menu docs; static audit and predeploy guard those phrases from returning.
+- Frontend Redux fallback errors for failed character/chat loading are now Thai-first, and the static audit blocks the old `Could not load...` copy from returning.
 - Predeploy now has its own regression test and is wired into local QA, CI, and Production Smoke so critical predeploy/e2e wording guards cannot drift silently.
 - Browser smoke assertions now use Thai-first admin UI labels for Admin Health, Prompt Inspector, and Automated Evals, and the frontend static audit also blocks English admin checklist labels from returning.
 - Backend Prompt Inspector now exposes an admin-only redacted prompt snapshot/diff endpoint for context debugging.

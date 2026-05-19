@@ -83,11 +83,15 @@ describe('frontend static audit', () => {
         '<p>Knowledge pack needs check</p>',
         '<p>Production gates</p>',
         '<span>staging/future gate</span>',
+        '<p>Could not load chats</p>',
+        '<p>Could not load characters</p>',
       ].join('\n'),
       'EnglishUiFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
+      'contains English UI label that should be Thai-first',
+      'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
