@@ -3,7 +3,15 @@ import { dirname, join, relative } from 'node:path'
 import ts from 'typescript'
 
 const root = join(import.meta.dir, '..')
-const scannedRoots = ['apps/backend/index.ts', 'apps/backend/src', 'apps/frontend/src']
+const scannedRoots = [
+  'apps/backend/index.ts',
+  'apps/backend/prisma',
+  'apps/backend/src',
+  'apps/frontend/src',
+  'playwright.config.ts',
+  'scripts',
+  'tests/e2e',
+]
 const sourceExtensions = ['.ts', '.tsx']
 
 export type SourceInput = {
