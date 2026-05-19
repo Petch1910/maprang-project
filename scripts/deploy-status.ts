@@ -31,7 +31,7 @@ type DeployStatusPayload = {
   nextSteps: string[]
   failures: string[]
   rootIdentity: {
-    ok: boolean
+    ok: boolean | undefined
     service?: string
   }
 }
@@ -77,8 +77,8 @@ export function buildDeployStatusPayload(
     nextSteps,
     failures,
     rootIdentity: {
-      ok: options.rootIdentity?.ok ?? true,
-      service: options.rootIdentity?.service ?? 'maprang-backend',
+      ok: options.rootIdentity?.ok,
+      service: options.rootIdentity?.service,
     },
   }
 }
@@ -94,7 +94,7 @@ export function formatDeployStatusText(
   for (const [name, value] of buildHealthRows(health, options.apiBaseUrl)) {
     lines.push(`${name}: ${value}`)
   }
-  lines.push(`rootIdentity: ${payload.rootIdentity.service ?? 'unknown'}`)
+  if (payload.rootIdentity.service) lines.push(`rootIdentity: ${payload.rootIdentity.service}`)
 
   if (health.env?.missingRequired?.length) lines.push(`missingRequired: ${health.env.missingRequired.join(', ')}`)
   if (health.env?.missingRecommended?.length) lines.push(`missingRecommended: ${health.env.missingRecommended.join(', ')}`)

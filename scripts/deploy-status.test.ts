@@ -41,6 +41,7 @@ describe('deploy status formatting', () => {
     const payload = buildDeployStatusPayload(baseHealth(), {
       apiBaseUrl: 'https://api.example.com',
       isLocalSmokeTarget: false,
+      rootIdentity: { ok: true, service: 'maprang-backend' },
     })
 
     expect(payload.ok).toBe(true)
@@ -53,6 +54,21 @@ describe('deploy status formatting', () => {
     expect(payload.nextSteps.join('\n')).toContain('production:check')
   })
 
+  test('does not default root identity when helper has no root preflight result', () => {
+    const payload = buildDeployStatusPayload(baseHealth(), {
+      apiBaseUrl: 'https://api.example.com',
+      isLocalSmokeTarget: false,
+    })
+    const text = formatDeployStatusText(baseHealth(), {
+      apiBaseUrl: 'https://api.example.com',
+      isLocalSmokeTarget: false,
+    })
+
+    expect(payload.rootIdentity.ok).toBeUndefined()
+    expect(payload.rootIdentity.service).toBeUndefined()
+    expect(text).not.toContain('rootIdentity:')
+  })
+
   test('keeps local URL and CORS blockers visible in text output', () => {
     const text = formatDeployStatusText(
       baseHealth({
@@ -63,7 +79,11 @@ describe('deploy status formatting', () => {
           corsOrigins: ['http://localhost:5173'],
         },
       }),
-      { apiBaseUrl: 'http://127.0.0.1:3000', isLocalSmokeTarget: true },
+      {
+        apiBaseUrl: 'http://127.0.0.1:3000',
+        isLocalSmokeTarget: true,
+        rootIdentity: { ok: true, service: 'maprang-backend' },
+      },
     )
 
     expect(text).toContain('Maprang Deploy Status')
