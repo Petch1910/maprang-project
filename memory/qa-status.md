@@ -32,6 +32,7 @@ Results:
 - Secrets check: pass.
 - Memory audit: pass.
 - Knowledge audit: pass.
+- Production deploy knowledge wiki: updated to reflect reply-budget gates and staging/deploy-status order.
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
 - Deploy status: pass, reports 2 staging blockers and 4 production blockers in local mode.

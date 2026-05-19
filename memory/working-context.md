@@ -102,6 +102,7 @@ Verified:
 - API smoke now reuses the shared live chat/image provider helpers so live chat provider failures are reported before empty-reply checks and image failure hints stay aligned across smoke scripts.
 - API smoke readiness/image helper logic now lives in `scripts/api-smoke-helpers.ts`, and the main smoke flow exports importable `runApiSmoke` plus `buildApiSmokeSummary` helpers so CI/dashboard code can import and summarize smoke output without executing network checks; `api:smoke:test` guards live-verification-only readiness, image provider hints, safe JSON parsing, summary counts, and runner import safety without hitting a backend.
 - Production checklist memory now includes deploy doctor/status review, live API smoke, and production-data safety guidance, and predeploy guards those handoff notes from drifting.
+- Production deploy knowledge wiki now documents reply-budget baselines/recommendations and the deploy-status-first staging gate order.
 
 ## Current Production Status
 
