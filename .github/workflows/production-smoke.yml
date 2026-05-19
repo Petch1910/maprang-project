@@ -57,6 +57,7 @@ jobs:
       - run: bun run route-menu:audit
       - run: bun run route-menu:audit:test
       - run: bun run smoke:helpers:test
+      - run: bun run provider:smoke:guards:test
       - run: bun run release:handoff:check
       - run: bun run release:handoff:test
       - name: Validate smoke configuration

@@ -58,6 +58,7 @@ const requiredFiles = [
   'scripts/route-menu-doc-check.test.ts',
   'scripts/backend-security-audit.test.ts',
   'scripts/smoke-helpers.test.ts',
+  'scripts/provider-smoke-guards.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -305,6 +306,7 @@ const checks: Check[] = [
           '"frontend:route:audit:test"',
           '"route-menu:audit:test"',
           '"smoke:helpers:test"',
+          '"provider:smoke:guards:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -363,6 +365,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('smoke:helpers:test')) {
         throw new Error('package.json qa:local must run smoke:helpers:test so smoke auth/url regressions are caught')
+      }
+      if (!qaLocal.includes('provider:smoke:guards:test')) {
+        throw new Error('package.json qa:local must run provider:smoke:guards:test so provider smoke guard regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -562,6 +567,8 @@ const checks: Check[] = [
           'route-menu-doc-check.test.ts',
           '"smoke:helpers:test"',
           'smoke-helpers.test.ts',
+          '"provider:smoke:guards:test"',
+          'provider-smoke-guards.test.ts',
         ],
         'package.json',
       )
@@ -615,6 +622,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/smoke-helpers.test.ts'),
         ['defaults to local backend', 'does not impersonate a user by default against deployed targets'],
         'scripts/smoke-helpers.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/provider-smoke-guards.test.ts'),
+        ['formats provider failure messages', 'maps image provider failures to actionable fixes'],
+        'scripts/provider-smoke-guards.test.ts',
       )
       requireIncludes(
         promptInspector,
@@ -699,6 +711,7 @@ const checks: Check[] = [
           'bun run route-menu:audit',
           'bun run route-menu:audit:test',
           'bun run smoke:helpers:test',
+          'bun run provider:smoke:guards:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:status',
@@ -732,6 +745,7 @@ const checks: Check[] = [
           'bun run route-menu:audit',
           'bun run route-menu:audit:test',
           'bun run smoke:helpers:test',
+          'bun run provider:smoke:guards:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:readiness:test',
