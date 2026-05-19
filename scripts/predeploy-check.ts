@@ -252,6 +252,7 @@ const checks: Check[] = [
       requireIncludes(readme, ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users'], 'README.md')
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
       requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
+      requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')
       requireIncludes(script, ['checkReleaseHandoffContent', '--filled', 'forbiddenPatterns', 'Release handoff check failed'], 'scripts/release-handoff-check.ts')
       requireIncludes(test, ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true'], 'scripts/release-handoff-check.test.ts')
       requireIncludes(secretPatterns, ['GitHub token', 'Google API key', 'Slack token', 'Private key block'], 'scripts/secret-patterns.ts')
@@ -281,6 +282,7 @@ const checks: Check[] = [
           '"deploy:doctor:self-test"',
           '"release:handoff:check"',
           '"release:handoff:test"',
+          '"secrets:patterns:test"',
           '"qa:seed"',
           '"e2e:smoke"',
           '"qa:full"',
@@ -297,6 +299,7 @@ const checks: Check[] = [
       )
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
+      const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
       const stagingCheck = packageJson.scripts?.['staging:check'] ?? ''
       const stagingVerify = packageJson.scripts?.['staging:verify'] ?? ''
       const productionCheck = packageJson.scripts?.['production:check'] ?? ''
@@ -305,6 +308,9 @@ const checks: Check[] = [
       }
       if (qaLive.includes('smoke:chat') || qaLive.includes('smoke:image')) {
         throw new Error('package.json qa:live should not duplicate provider calls outside api:smoke:live')
+      }
+      if (!qaLocal.includes('secrets:patterns:test')) {
+        throw new Error('package.json qa:local must run secrets:patterns:test so shared secret pattern regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')

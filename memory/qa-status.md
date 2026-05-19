@@ -52,6 +52,7 @@ Results:
 - `release:handoff:check` is part of `qa:local` and checks release handoff sections plus secret-shaped values.
 - `release:handoff:test` is part of `qa:local` and verifies filled-mode and secret detection behavior.
 - Secret audits now share `scripts/secret-patterns.ts` and cover private key blocks, GitHub tokens, Google API keys, and Slack tokens in addition to project-specific keys.
+- `secrets:patterns:test` is part of `qa:local` and verifies repo scans allow documentation placeholders while memory/release handoff scans still reject sensitive values.
 - CI predeploy now runs `release:handoff:check` and `release:handoff:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.
