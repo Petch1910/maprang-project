@@ -35,6 +35,7 @@ jobs:
       - run: bun run security:audit:test
       - run: bun run api:audit
       - run: bun run api:audit:test
+      - run: bun run api:smoke:test
       - run: bun run frontend:bundle:test
       - run: bun run frontend:static:audit:test
       - run: bun run frontend:route:audit:test

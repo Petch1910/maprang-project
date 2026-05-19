@@ -1,0 +1,28 @@
+import { providerFailureHint } from './image-smoke'
+
+export function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {
+  const warnings = payload.warnings?.filter(Boolean).join('; ')
+  const issue = warnings || payload.image?.note || 'image provider did not return a generated image'
+  return `${issue}${providerFailureHint(issue)}`
+}
+
+export function isOnlyLiveVerificationFailure(failures: string[]) {
+  return (
+    failures.length > 0 &&
+    failures.every((failure) => {
+      const normalized = failure.toLowerCase()
+      return (
+        normalized.includes('chat provider live smoke has not been verified') ||
+        normalized.includes('image generation live smoke has not been verified')
+      )
+    })
+  )
+}
+
+export function tryParseJson(value: string) {
+  try {
+    return JSON.parse(value) as unknown
+  } catch {
+    return null
+  }
+}

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { providerFailureHint } from './image-smoke'
+import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
 import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
 import { apiBaseUrl, readJson, smokeAuthHeaders } from './smoke-helpers'
 
@@ -907,33 +907,6 @@ async function readExpectedError(path: string, init: RequestInit) {
     status: response.status,
     payload: parsed as { error?: string },
   }
-}
-
-function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {
-  const warnings = payload.warnings?.filter(Boolean).join('; ')
-  const issue = warnings || payload.image?.note || 'image provider did not return a generated image'
-  return `${issue}${providerFailureHint(issue)}`
-}
-
-function tryParseJson(value: string) {
-  try {
-    return JSON.parse(value) as unknown
-  } catch {
-    return null
-  }
-}
-
-function isOnlyLiveVerificationFailure(failures: string[]) {
-  return (
-    failures.length > 0 &&
-    failures.every((failure) => {
-      const normalized = failure.toLowerCase()
-      return (
-        normalized.includes('chat provider live smoke has not been verified') ||
-        normalized.includes('image generation live smoke has not been verified')
-      )
-    })
-  )
 }
 
 async function loadAdminKey() {

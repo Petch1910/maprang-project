@@ -55,6 +55,8 @@ const requiredFiles = [
   'scripts/markdown-audit-helpers.ts',
   'scripts/markdown-audit-helpers.test.ts',
   'scripts/memory-audit.ts',
+  'scripts/api-smoke-helpers.ts',
+  'scripts/api-smoke-helpers.test.ts',
   'scripts/api-route-audit.test.ts',
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
@@ -318,6 +320,7 @@ const checks: Check[] = [
           '"security:audit"',
           '"security:audit:test"',
           '"api:audit:test"',
+          '"api:smoke:test"',
           '"frontend:bundle:test"',
           '"frontend:static:audit:test"',
           '"frontend:route:audit:test"',
@@ -386,6 +389,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('api:audit:test')) {
         throw new Error('package.json qa:local must run api:audit:test so route audit regressions are caught')
+      }
+      if (!qaLocal.includes('api:smoke:test')) {
+        throw new Error('package.json qa:local must run api:smoke:test so API smoke helper regressions are caught')
       }
       if (!qaLocal.includes('frontend:bundle:test')) {
         throw new Error('package.json qa:local must run frontend:bundle:test so bundle budget regressions are caught')
@@ -652,6 +658,8 @@ const checks: Check[] = [
           'api-route-audit.ts',
           '"api:audit:test"',
           'api-route-audit.test.ts',
+          '"api:smoke:test"',
+          'api-smoke-helpers.test.ts',
           '"frontend:bundle:test"',
           'check-frontend-bundles.test.ts',
           '"frontend:static:audit:test"',
@@ -833,6 +841,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run api:smoke:test',
           'bun run frontend:bundle:test',
           'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
@@ -883,6 +892,7 @@ const checks: Check[] = [
           'bun run security:audit:test',
           'bun run api:audit',
           'bun run api:audit:test',
+          'bun run api:smoke:test',
           'bun run frontend:bundle:test',
           'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
