@@ -130,12 +130,15 @@ const defaultRequiredSnippets = [
   'frontend-route-audit.ts',
 ]
 
+const defaultForbiddenSnippets = ['รัน eval', 'prompt-control', 'token budget', 'accordion', ' disabled ']
+
 export type RouteMenuAuditCheckOptions = {
   markdown: string
   appContent: string
   rows?: RouteMenuAuditRow[]
   minRows?: number
   requiredSnippets?: string[]
+  forbiddenSnippets?: string[]
   statusLabel?: (status: RouteMenuAuditStatus) => string | undefined
 }
 
@@ -150,6 +153,7 @@ export function auditRouteMenuDocumentation({
   rows = routeMenuAuditRows,
   minRows = 10,
   requiredSnippets = defaultRequiredSnippets,
+  forbiddenSnippets = defaultForbiddenSnippets,
   statusLabel = routeMenuAuditStatusLabel,
 }: RouteMenuAuditCheckOptions) {
   const documentedRows = collectAuditRows(markdown)
@@ -222,6 +226,12 @@ export function auditRouteMenuDocumentation({
   for (const snippet of requiredSnippets) {
     if (!markdown.includes(snippet)) {
       findings.push(`ROUTE_MENU_AUDIT.md is missing "${snippet}"`)
+    }
+  }
+
+  for (const snippet of forbiddenSnippets) {
+    if (markdown.includes(snippet)) {
+      findings.push(`ROUTE_MENU_AUDIT.md contains stale mixed-language copy "${snippet}"`)
     }
   }
 

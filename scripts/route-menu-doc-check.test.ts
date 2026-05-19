@@ -100,6 +100,34 @@ describe('route menu doc check', () => {
     )
   })
 
+  test('reports stale mixed-language copy in route menu documentation', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | เงื่อนไขปิดปุ่ม/Guard | สถานะว่าง |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | รัน eval | ตรวจ prompt-control และ token budget | ปุ่ม disabled เมื่อยังไม่พร้อม | helpful |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [row()],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy "รัน eval"',
+        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy "prompt-control"',
+        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy "token budget"',
+        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy " disabled "',
+      ]),
+    )
+  })
+
   test('runs the committed route/menu doc check through an importable runner', async () => {
     const result = await collectRouteMenuDocCheckResult()
     const lines: string[] = []
