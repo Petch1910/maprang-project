@@ -40,6 +40,7 @@ Verified:
 - CI predeploy now runs the release handoff check and self-test directly, not only through `qa:local`.
 - CI predeploy now runs security, API route, and route/menu static audits directly before deploy checks.
 - Manual Production Smoke now runs predeploy and release handoff guards before validating deployed smoke secrets or spending provider credits.
+- Manual Production Smoke also runs secrets, memory, knowledge, eval, security, API route, and route/menu audits before deployed smoke validation.
 
 ## Current Production Status
 
