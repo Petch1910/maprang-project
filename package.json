@@ -33,14 +33,14 @@
     "supabase:storage:check": "bun scripts/supabase-storage-setup.ts --check",
     "supabase:storage:setup": "bun scripts/supabase-storage-setup.ts",
     "smoke:live": "bun run smoke:doctor && bun run smoke:ready && bun run smoke:local && bun run api:smoke:live",
-    "production:check": "bun run predeploy:check && bun scripts/smoke-doctor.ts --strict-production && bun run supabase:storage:check && bun run smoke:ready && bun scripts/api-smoke.ts --live --require-live-image --require-admin",
+    "production:check": "bun run predeploy:check && bun run deploy:status && bun scripts/smoke-doctor.ts --strict-production && bun run supabase:storage:check && bun run smoke:ready && bun scripts/api-smoke.ts --live --require-live-image --require-admin",
     "qa:seed": "cd apps/backend && bun prisma/qa-seed.ts",
     "e2e:smoke": "bun scripts/e2e-smoke.ts",
     "qa:local": "bun run secrets:check && bun run memory:audit && bun run knowledge:audit && bun run eval:local && bun run security:audit && bun run api:audit && bun run route-menu:audit && bun run release:handoff:check && bun run release:handoff:test && bun run deploy:doctor:self-test && bun run deploy:readiness:test && bun run predeploy:check && bun run backend:check && bun run frontend:check && bun run smoke:doctor && bun run smoke:local && bun run api:smoke",
     "qa:full": "bun run qa:local && bun run e2e:smoke",
     "qa:live": "bun run qa:local && bun run api:smoke:live",
     "staging:check": "bun run qa:full && bun run supabase:storage:check && bun scripts/api-smoke.ts --require-admin",
-    "staging:verify": "bun run predeploy:check && bun scripts/smoke-doctor.ts --strict-staging && bun run supabase:storage:check && bun run smoke:ready && bun scripts/api-smoke.ts --require-admin"
+    "staging:verify": "bun run predeploy:check && bun run deploy:status && bun scripts/smoke-doctor.ts --strict-staging && bun run supabase:storage:check && bun run smoke:ready && bun scripts/api-smoke.ts --require-admin"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",

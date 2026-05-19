@@ -185,7 +185,7 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
-`production:check` is the hard final gate. It fails if the backend URL is still local, auth is not Supabase JWT, avatar storage is not Supabase signed URL, the real `avatars` bucket cannot upload/fetch through signed URLs, CORS still points at localhost, OpenRouter is missing, the image generation provider is missing, or live chat/image provider calls fail.
+`production:check` is the hard final gate. It prints `bun run deploy:status` first so the blocker summary and next steps are visible before the strict smoke gates fail. It fails if the backend URL is still local, auth is not Supabase JWT, avatar storage is not Supabase signed URL, the real `avatars` bucket cannot upload/fetch through signed URLs, CORS still points at localhost, OpenRouter is missing, the image generation provider is missing, or live chat/image provider calls fail.
 
 Before that final gate, use `staging:verify` against the deployed staging backend:
 
@@ -193,7 +193,7 @@ Before that final gate, use `staging:verify` against the deployed staging backen
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
-This catches local URLs, local CORS, signed-storage mistakes, `/ready` failures, and missing admin smoke coverage while still allowing chat/image live verification flags to remain pending until the dedicated provider smoke passes.
+This prints the deploy status summary first, then catches local URLs, local CORS, signed-storage mistakes, `/ready` failures, and missing admin smoke coverage while still allowing chat/image live verification flags to remain pending until the dedicated provider smoke passes.
 
 The GitHub `Production Smoke` workflow also requires repository secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` so it can verify the private `avatars` bucket instead of only trusting backend health flags.
 It also requires `SMOKE_ADMIN_API_KEY` so the smoke run verifies admin summary, moderation reports, and audit logs instead of silently skipping admin-only APIs.

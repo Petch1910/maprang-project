@@ -52,6 +52,7 @@ Results:
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
 - Production Smoke workflow now runs predeploy and release handoff guards before deployed smoke validation.
 - Production Smoke workflow now runs secrets, memory, knowledge, eval, security, API, and route/menu audits before deployed smoke validation.
+- `staging:verify` and `production:check` now print `deploy:status` before strict smoke gates so failed deployed checks show blockers and next steps directly.
 - Relationship engine focused test passes for the expanded Thai ladder and preset surface split: 12 pass, 0 fail.
 - Current delta gate passes: `backend:check`, `frontend:check`, and `knowledge:audit`.
 - Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.

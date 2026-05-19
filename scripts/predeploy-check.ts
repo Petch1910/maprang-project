@@ -309,11 +309,15 @@ const checks: Check[] = [
       }
       if (
         !stagingVerify.includes('bun scripts/smoke-doctor.ts --strict-staging') ||
+        !stagingVerify.includes('bun run deploy:status') ||
         !stagingVerify.includes('supabase:storage:check') ||
         !stagingVerify.includes('smoke:ready') ||
         !stagingVerify.includes('--require-admin')
       ) {
-        throw new Error('package.json staging:verify must require strict staging smoke doctor, Supabase storage, readiness, and admin API smoke')
+        throw new Error('package.json staging:verify must print deploy status, require strict staging smoke doctor, Supabase storage, readiness, and admin API smoke')
+      }
+      if (!productionCheck.includes('bun run deploy:status')) {
+        throw new Error('package.json production:check must print deploy status before strict production gates')
       }
       if (!productionCheck.includes('supabase:storage:check')) {
         throw new Error('package.json production:check must verify Supabase signed avatar storage')
