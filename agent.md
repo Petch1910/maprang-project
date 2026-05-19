@@ -148,6 +148,7 @@ bun run memory:audit
 bun run knowledge:audit
 bun run eval:local
 bun run security:audit
+bun run import-cycle:audit
 git diff --check
 ```
 
