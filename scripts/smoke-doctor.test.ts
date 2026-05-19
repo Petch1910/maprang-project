@@ -129,4 +129,45 @@ describe('smoke doctor report', () => {
       'Warning: roleplay reply budget is below the recommended 1600/420. Current MODEL_MAX_OUTPUT_TOKENS=1200, MODEL_MIN_ROLEPLAY_REPLY_CHARS=320.',
     )
   })
+
+  test('does not duplicate recommendation warning when roleplay reply budget is below baseline', () => {
+    const report = buildSmokeDoctorReport(
+      healthyPayload({
+        model: {
+          name: 'google/gemini-2.0-flash-001',
+          maxOutputTokens: 1199,
+          minRoleplayReplyChars: 319,
+          chatProvider: {
+            configured: true,
+            liveVerified: true,
+            productionReady: true,
+            status: 'verified',
+          },
+          imageGeneration: {
+            configured: true,
+            liveVerified: true,
+            productionReady: true,
+            status: 'verified',
+            model: 'gpt-image-1.5',
+          },
+        },
+        env: {
+          invalid: [
+            'MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
+            'MODEL_MIN_ROLEPLAY_REPLY_CHARS must be at least 320 for production roleplay replies',
+          ],
+        },
+      }),
+      {
+        apiBaseUrl: 'https://api.maprang.example',
+        isLocalSmokeTarget: false,
+      },
+    )
+
+    expect(report.exitCode).toBe(0)
+    expect(report.stdout.join('\n')).toContain(
+      'invalid env: MODEL_MAX_OUTPUT_TOKENS must be at least 1200 for production roleplay replies',
+    )
+    expect(report.warnings.join('\n')).not.toContain('roleplay reply budget is below the recommended 1600/420')
+  })
 })

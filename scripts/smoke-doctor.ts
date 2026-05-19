@@ -9,6 +9,8 @@ import {
 
 const recommendedRoleplayMaxOutputTokens = 1600
 const recommendedMinRoleplayReplyChars = 420
+const baselineRoleplayMaxOutputTokens = 1200
+const baselineMinRoleplayReplyChars = 320
 
 export type SmokeDoctorReport = {
   exitCode: number
@@ -62,6 +64,8 @@ export function buildSmokeDoctorReport(
     if (
       maxOutputTokens > 0 &&
       minRoleplayReplyChars > 0 &&
+      maxOutputTokens >= baselineRoleplayMaxOutputTokens &&
+      minRoleplayReplyChars >= baselineMinRoleplayReplyChars &&
       (maxOutputTokens < recommendedRoleplayMaxOutputTokens ||
         minRoleplayReplyChars < recommendedMinRoleplayReplyChars)
     ) {

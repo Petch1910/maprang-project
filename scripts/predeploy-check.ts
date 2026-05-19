@@ -700,6 +700,7 @@ const checks: Check[] = [
           'strict staging gate fails',
           'backend health failures',
           'warns when roleplay reply budget passes baseline but is below recommendation',
+          'does not duplicate recommendation warning when roleplay reply budget is below baseline',
         ],
         'scripts/smoke-doctor.test.ts',
       )

@@ -79,7 +79,7 @@ Results:
 - Deploy doctor reply-budget recommendation warning: pass via `deploy:doctor:test`; envs at 1200/320 now warn to move toward 1600/420 without failing the baseline gate.
 - Runtime env reply-budget guard: pass via `env.test`, `health.service.test`, and `predeploy:check`; production `/health` now reports reply-budget values below 1200/320 as invalid env.
 - Deploy readiness reply-budget propagation: pass via `deploy:readiness:test`; invalid `/health` roleplay budget entries now become staging/production blockers and next-step fixes.
-- Smoke doctor reply-budget recommendation warning: pass via `smoke:doctor:test`; environments at 1200/320 still pass baseline but emit a CLI warning to move toward 1600/420.
+- Smoke doctor reply-budget recommendation warning: pass via `smoke:doctor:test`; environments at 1200/320 still pass baseline but emit a CLI warning to move toward 1600/420, while below-baseline values rely on readiness blockers instead of duplicate warnings.
 - Deploy status reply-budget blocker output: pass via `deploy:status:test`; invalid `/health` roleplay budget entries are visible in JSON/text output and block readiness.
 - Admin Health reply-budget recommendation UI: pass via `frontend:check`, `predeploy:check`, and `e2e:smoke:test`.
 - Production readiness now blocks on both chat provider and image provider live verification flags.
