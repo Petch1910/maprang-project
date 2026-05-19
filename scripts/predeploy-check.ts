@@ -731,8 +731,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/backend-db-check.test.ts'),
-        ['DB availability before requiring DB-backed backend tests', 'REQUIRE_DB_TESTS'],
+        ['DB availability before requiring DB-backed backend tests', 'REQUIRE_DB_TESTS', 'runs the DB check command plan through an importable runner'],
         'scripts/backend-db-check.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/backend-db-check.ts'),
+        ['runBackendDbCheck', 'BackendDbCommandRunner', 'if (import.meta.main) process.exit(await runBackendDbCheck())'],
+        'scripts/backend-db-check.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/supabase-storage-setup.test.ts'),

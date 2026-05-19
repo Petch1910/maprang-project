@@ -1,8 +1,10 @@
-type BackendDbCheckStep = {
+export type BackendDbCheckStep = {
   command: string[]
   cwd?: string
   env?: Record<string, string | undefined>
 }
+
+export type BackendDbCommandRunner = (step: BackendDbCheckStep) => Promise<number>
 
 export function backendDbCheckSteps(env: Record<string, string | undefined> = process.env): BackendDbCheckStep[] {
   return [
@@ -21,22 +23,27 @@ export function backendDbCheckSteps(env: Record<string, string | undefined> = pr
   ]
 }
 
-async function run(command: string[], options: { cwd?: string; env?: Record<string, string | undefined> } = {}) {
-  const child = Bun.spawn(command, {
-    cwd: options.cwd,
+export async function runBackendDbCheckStep(step: BackendDbCheckStep) {
+  const child = Bun.spawn(step.command, {
+    cwd: step.cwd,
     stdout: 'inherit',
     stderr: 'inherit',
-    env: options.env ?? process.env,
+    env: step.env ?? process.env,
   })
 
-  const exitCode = await child.exited
-  if (exitCode !== 0) process.exit(exitCode)
+  return child.exited
 }
 
-export async function runBackendDbCheck() {
-  for (const step of backendDbCheckSteps()) {
-    await run(step.command, { cwd: step.cwd, env: step.env })
+export async function runBackendDbCheck(
+  env: Record<string, string | undefined> = process.env,
+  runStep: BackendDbCommandRunner = runBackendDbCheckStep,
+) {
+  for (const step of backendDbCheckSteps(env)) {
+    const exitCode = await runStep(step)
+    if (exitCode !== 0) return exitCode
   }
+
+  return 0
 }
 
-if (import.meta.main) await runBackendDbCheck()
+if (import.meta.main) process.exit(await runBackendDbCheck())
