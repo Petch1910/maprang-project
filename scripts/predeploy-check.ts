@@ -843,8 +843,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/readiness-smoke.test.ts'),
-        ['summarizes a ready payload', 'keeps readiness failures visible'],
+        ['summarizes a ready payload', 'keeps readiness failures visible', 'runs readiness smoke through an importable runner'],
         'scripts/readiness-smoke.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/readiness-smoke.ts'),
+        ['ReadinessSmokeRunnerOptions', 'runReadinessSmoke', 'if (import.meta.main) process.exit(await runReadinessSmoke())'],
+        'scripts/readiness-smoke.ts',
       )
       requireIncludes(
         promptInspector,

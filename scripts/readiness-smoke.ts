@@ -81,6 +81,18 @@ export type ReadinessSummary = {
   imageProductionReady: boolean | undefined
 }
 
+export type ReadinessSmokeReadResult = {
+  response: Pick<Response, 'ok' | 'status'>
+  payload: ReadinessPayload
+}
+
+export type ReadinessSmokeRunnerOptions = {
+  apiBaseUrl?: string
+  readinessReader?: (apiBaseUrl: string) => Promise<ReadinessSmokeReadResult>
+  writeLine?: (line: string) => void
+  writeError?: (line: string) => void
+}
+
 export function buildReadinessSummary(
   payload: ReadinessPayload,
   options: { apiBaseUrl: string; responseOk: boolean; statusCode: number },
@@ -139,20 +151,37 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
   return { response, payload }
 }
 
-export async function runReadinessSmoke() {
-  const { response, payload } = await readReadiness()
+export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {}) {
+  const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
+  const readinessReader = options.readinessReader ?? readReadiness
+  const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+  const writeError = options.writeError ?? ((line: string) => console.error(line))
+
+  let result: ReadinessSmokeReadResult
+  try {
+    result = await readinessReader(currentApiBaseUrl)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    writeError(`Readiness smoke failed: ${message}`)
+    return 1
+  }
+
+  const { response, payload } = result
   const summary = buildReadinessSummary(payload, {
-    apiBaseUrl,
+    apiBaseUrl: currentApiBaseUrl,
     responseOk: response.ok,
     statusCode: response.status,
   })
 
-  console.log(formatReadinessSummary(summary))
+  writeLine(formatReadinessSummary(summary))
 
   if (!summary.ok) {
     const reason = summary.failures.length > 0 ? summary.failures.join('; ') : `status ${response.status}`
-    throw new Error(`Readiness smoke failed: ${reason}`)
+    writeError(`Readiness smoke failed: ${reason}`)
+    return 1
   }
+
+  return 0
 }
 
-if (import.meta.main) await runReadinessSmoke()
+if (import.meta.main) process.exit(await runReadinessSmoke())

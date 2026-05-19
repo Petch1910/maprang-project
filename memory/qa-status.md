@@ -54,7 +54,7 @@ Results:
 - `smoke:helpers:test` now runs in `qa:local`, CI, and Production Smoke to guard local/deployed smoke auth header behavior.
 - `provider:smoke:guards:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat/image smoke verification helpers.
 - `smoke:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard smoke doctor blocker and strict-gate output.
-- `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard `/ready` summary output.
+- `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard `/ready` summary output and the importable readiness smoke runner.
 - `smoke:image:test` now runs in `qa:local`, CI, and Production Smoke to guard image smoke skip/fallback/live payload helpers without provider calls.
 - `smoke:chat:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat smoke validation and success payload helpers without provider calls.
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard deploy status JSON/text output and the importable deploy status runner.

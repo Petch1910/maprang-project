@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildReadinessSummary, formatReadinessSummary, type ReadinessPayload } from './readiness-smoke'
+import { buildReadinessSummary, formatReadinessSummary, runReadinessSmoke, type ReadinessPayload } from './readiness-smoke'
 
 function readyPayload(overrides: Partial<ReadinessPayload> = {}): ReadinessPayload {
   return {
@@ -81,5 +81,46 @@ describe('readiness smoke summary', () => {
 
     expect(readySummary.readiness).toBe('ready')
     expect(notReadySummary.readiness).toBe('not_ready')
+  })
+
+  test('runs readiness smoke through an importable runner', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runReadinessSmoke({
+      apiBaseUrl: 'https://api.example.com',
+      readinessReader: async () => ({
+        response: { ok: true, status: 200 },
+        payload: readyPayload(),
+      }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    const summary = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(0)
+    expect(summary.ok).toBe(true)
+    expect(summary.apiBaseUrl).toBe('https://api.example.com')
+    expect(errors).toEqual([])
+  })
+
+  test('returns a failure code without exiting when readiness is not ready', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runReadinessSmoke({
+      apiBaseUrl: 'https://api.example.com',
+      readinessReader: async () => ({
+        response: { ok: false, status: 503 },
+        payload: readyPayload({
+          ok: false,
+          readiness: { status: 'not_ready', failures: ['database is not connected'] },
+        }),
+      }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(JSON.parse(lines.join('\n')).failures).toEqual(['database is not connected'])
+    expect(errors).toEqual(['Readiness smoke failed: database is not connected'])
   })
 })
