@@ -82,9 +82,9 @@ Staging CORS must pass the same `local/non-https CORS` rule as production before
 
 คำสั่งนี้เช็กโค้ด, backend tests, frontend build, Playwright desktop/mobile, signed storage จริง, และ admin API smoke โดยไม่ถือว่า domain/live provider พร้อม production แทน `production:check`
 
-หลัง backend/frontend staging มี URL จริงแล้ว ให้ใช้ `bun run staging:verify` พร้อม `SMOKE_API_BASE_URL` และ `SMOKE_ADMIN_API_KEY` เพื่อตรวจว่า staging ไม่ได้ชี้ localhost, CORS ไม่ใช่ local, Supabase signed storage ใช้งานได้, `/ready` ตอบถูก และ admin smoke ผ่าน โดยยังไม่บังคับตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` / `IMAGE_GENERATION_LIVE_VERIFIED=1` จนกว่าจะผ่าน live provider smoke
+หลัง backend/frontend staging มี URL จริงแล้ว ให้ใช้ `bun run staging:verify` พร้อม `SMOKE_API_BASE_URL` และ `SMOKE_ADMIN_API_KEY` เพื่อตรวจว่า staging ไม่ได้ชี้ localhost, CORS ไม่ใช่ local/non-https, Supabase signed storage ใช้งานได้, `/ready` ตอบถูก และ admin smoke ผ่าน โดยยังไม่บังคับตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` / `IMAGE_GENERATION_LIVE_VERIFIED=1` จนกว่าจะผ่าน live provider smoke
 
-ถ้า `smoke:doctor` ยังพิมพ์ `productionBlockers` เช่น local CORS หรือ storage ไม่ใช่ signed Supabase ให้แก้ env ของ staging ก่อนถือว่าผ่าน
+ถ้า `smoke:doctor` ยังพิมพ์ `productionBlockers` เช่น local/non-https CORS หรือ storage ไม่ใช่ signed Supabase ให้แก้ env ของ staging ก่อนถือว่าผ่าน
 
 หมายเหตุ: `qa:seed` ถูกออกแบบมาสำหรับ DB ที่ทีมควบคุมอยู่ ใช้กับ staging ได้ แต่ไม่ควรรันใส่ production จริงโดยไม่ตั้งใจ
 
