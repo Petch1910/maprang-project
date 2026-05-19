@@ -32,6 +32,8 @@ Results:
 - Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Browser e2e smoke now checks the Thai-first Automated Evals heading `ทดสอบคุณภาพพรอมป์และบริบท` instead of the old mixed `prompt/context` wording, and the latest desktop/mobile run passes 4/4 again.
 - Predeploy now also blocks the stale `prompt/context` wording from returning to the e2e browser smoke spec.
+- `predeploy:check:test` now runs in local QA, CI, and Production Smoke to guard predeploy/e2e wording wiring without rerunning the full predeploy gate.
+- Full `qa:local` was rerun after wiring `predeploy:check:test`; the new predeploy regression test passed inside the full local gate.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Full local QA was rerun after the latest Thai UI copy guards and route/menu mixed-language guard; `qa:local` still passes across backend, frontend, local smoke, and API smoke.

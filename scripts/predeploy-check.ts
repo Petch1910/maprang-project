@@ -42,6 +42,7 @@ const requiredFiles = [
   'apps/frontend/.env.production.example',
   'apps/frontend/Dockerfile',
   'scripts/backend-db-check.test.ts',
+  'scripts/predeploy-check.test.ts',
   'scripts/deploy-env-doctor.ts',
   'scripts/deploy-env-doctor.test.ts',
   'scripts/deploy-env-doctor-self-test.ts',
@@ -413,6 +414,7 @@ const checks: Check[] = [
           '"e2e:smoke:test"',
           '"api:smoke"',
           '"api:smoke:live"',
+          '"predeploy:check:test"',
           '"deploy:status"',
           '"deploy:status:test"',
           '"deploy:readiness:test"',
@@ -532,6 +534,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('deploy:doctor:test')) {
         throw new Error('package.json qa:local must run deploy:doctor:test so deploy env helper regressions are caught')
+      }
+      if (!qaLocal.includes('predeploy:check:test')) {
+        throw new Error('package.json qa:local must run predeploy:check:test so predeploy guard wiring regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -1167,6 +1172,7 @@ const checks: Check[] = [
           '--require-admin',
           'bun install --frozen-lockfile',
           'bun run predeploy:check',
+          'bun run predeploy:check:test',
           'bun run secrets:check',
           'bun run secrets:check:test',
           'bun run secrets:patterns:test',
@@ -1219,6 +1225,7 @@ const checks: Check[] = [
         ciWorkflow,
         [
           'bun run predeploy:check',
+          'bun run predeploy:check:test',
           'bun run secrets:check:test',
           'bun run secrets:patterns:test',
           'bun run vault:audit:test',
