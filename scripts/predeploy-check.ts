@@ -34,6 +34,7 @@ const requiredFiles = [
   'memory/working-context.md',
   'memory/deploy-blockers.md',
   'memory/qa-status.md',
+  'memory/production/checklist.md',
   '.github/workflows/production-smoke.yml',
   'apps/backend/Dockerfile',
   'apps/backend/.env.production.example',
@@ -497,6 +498,7 @@ const checks: Check[] = [
       const memoryReadme = await readRepoFile('memory/README.md')
       const workingContext = await readRepoFile('memory/working-context.md')
       const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
+      const productionChecklist = await readRepoFile('memory/production/checklist.md')
       const memoryAudit = await readRepoFile('scripts/memory-audit.ts')
       requireIncludes(packageJson, ['"memory:audit"', 'bun scripts/memory-audit.ts', 'bun run memory:audit'], 'package.json')
       requireIncludes(packageJson, ['"vault:audit:test"', 'bun test scripts/markdown-audit-helpers.test.ts'], 'package.json')
@@ -504,6 +506,11 @@ const checks: Check[] = [
       requireIncludes(memoryReadme, ['Never store secrets', 'Update Protocol', 'Working Context', 'Deploy Blockers'], 'memory/README.md')
       requireIncludes(workingContext, ['Current Local Status', 'Current Production Status'], 'memory/working-context.md')
       requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
+      requireIncludes(
+        productionChecklist,
+        ['bun run deploy:doctor', 'bun run deploy:status', 'bun run api:smoke:live', 'Do not point `qa:local`'],
+        'memory/production/checklist.md',
+      )
       requireIncludes(
         await readRepoFile('scripts/markdown-audit-helpers.test.ts'),
         ['collects only local markdown links', 'checks whether a resolved path stays inside a vault', 'runs the memory audit through an importable runner', 'runs the knowledge audit through an importable runner'],
