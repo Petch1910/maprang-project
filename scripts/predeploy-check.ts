@@ -755,8 +755,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/local-smoke.test.ts'),
-        ['prefers MIKA', 'validates avatar upload shape', 'formats local smoke summary'],
+        ['prefers MIKA', 'validates avatar upload shape', 'formats local smoke summary', 'runs local smoke through an importable runner'],
         'scripts/local-smoke.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/local-smoke.ts'),
+        ['LocalSmokeRunnerOptions', 'runLocalSmoke', 'if (import.meta.main) process.exit(await runLocalSmoke())'],
+        'scripts/local-smoke.ts',
       )
       requireIncludes(
         securityAudit,

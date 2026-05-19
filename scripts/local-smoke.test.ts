@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildLocalSmokeSummary, pickSmokeCharacter, validateAvatarUpload } from './local-smoke'
+import { buildLocalSmokeSummary, pickSmokeCharacter, runLocalSmoke, validateAvatarUpload, type LocalSmokeJsonReader } from './local-smoke'
 
 describe('local smoke helpers', () => {
   test('prefers MIKA, then Maprang, then the first available character', () => {
@@ -59,5 +59,89 @@ describe('local smoke helpers', () => {
       previewTurns: 3,
       uploadAccess: 'signed',
     })
+  })
+
+  test('runs local smoke through an importable runner without touching storage', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const calls: string[] = []
+    const cleaned: string[] = []
+    const reader: LocalSmokeJsonReader = async (path) => {
+      calls.push(path)
+      if (path === '/health') {
+        return {
+          ok: true,
+          checks: { databaseConnected: true, openRouterConfigured: true },
+          security: { avatarStorage: 'local' },
+        } as never
+      }
+      if (path === '/characters?view=admin&limit=10') {
+        return { characters: [{ id: 'mika', name: 'มิกะ | MIKA', tags: ['qa'] }] } as never
+      }
+      if (path === '/characters/mika/lore') return { loreEntries: [{ id: 'lore-1', keyword: 'cafe' }] } as never
+      if (path === '/relationship/preview') return { preview: { turns: ['a', 'b'] } } as never
+      if (path === '/uploads/avatar') {
+        return {
+          url: 'http://127.0.0.1:3000/uploads/avatars/avatar.png',
+          filename: 'avatar.png',
+          provider: 'local',
+          access: 'local',
+          contentType: 'image/png',
+        } as never
+      }
+      throw new Error(`unexpected path ${path}`)
+    }
+
+    const exitCode = await runLocalSmoke({
+      apiBaseUrl: 'http://127.0.0.1:3000',
+      isLocalTarget: true,
+      readJson: reader,
+      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      cleanupLocalUpload: async (filename) => {
+        cleaned.push(filename)
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    const summary = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(0)
+    expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/characters/mika/lore', '/relationship/preview', '/uploads/avatar'])
+    expect(cleaned).toEqual(['avatar.png'])
+    expect(summary.character).toBe('มิกะ | MIKA')
+    expect(summary.loreCount).toBe(1)
+    expect(summary.previewTurns).toBe(2)
+    expect(errors).toEqual([])
+  })
+
+  test('returns a failure code when local smoke has no preview turns', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const reader: LocalSmokeJsonReader = async (path) => {
+      if (path === '/health') {
+        return {
+          ok: true,
+          checks: { databaseConnected: true, openRouterConfigured: true },
+          security: { avatarStorage: 'supabase' },
+        } as never
+      }
+      if (path === '/characters?view=admin&limit=10') {
+        return { characters: [{ id: 'mika', name: 'มิกะ | MIKA', tags: ['qa'] }] } as never
+      }
+      if (path === '/characters/mika/lore') return { loreEntries: [] } as never
+      if (path === '/relationship/preview') return { preview: { turns: [] } } as never
+      throw new Error(`unexpected path ${path}`)
+    }
+
+    const exitCode = await runLocalSmoke({
+      readJson: reader,
+      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(errors).toEqual(['Local smoke failed: Relationship preview did not return turns'])
   })
 })
