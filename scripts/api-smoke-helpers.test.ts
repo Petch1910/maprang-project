@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
+import { runApiSmoke } from './api-smoke'
 
 describe('api smoke helpers', () => {
   test('allows live smoke to continue only for live verification readiness failures', () => {
@@ -29,5 +30,9 @@ describe('api smoke helpers', () => {
   test('parses JSON safely for API smoke response helpers', () => {
     expect(tryParseJson('{"ok":true}')).toEqual({ ok: true })
     expect(tryParseJson('not-json')).toBeNull()
+  })
+
+  test('imports the API smoke runner without executing the smoke flow', () => {
+    expect(typeof runApiSmoke).toBe('function')
   })
 })

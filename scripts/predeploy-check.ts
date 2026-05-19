@@ -595,7 +595,7 @@ const checks: Check[] = [
 
       requireIncludes(
         apiSmoke,
-        ['const live = process.argv.includes(\'--live\')', 'const requireLiveImage = process.argv.includes(\'--require-live-image\')', 'imageOnly: !live', 'skipImageProvider: !live', 'if (requireLiveImage) throw new Error(issue)'],
+        ['const argv = options.argv ?? process.argv', "const live = argv.includes('--live')", "const requireLiveImage = argv.includes('--require-live-image')", 'imageOnly: !live', 'skipImageProvider: !live', 'if (requireLiveImage) throw new Error(issue)'],
         'scripts/api-smoke.ts',
       )
       if (apiSmoke.includes('skipImageProvider: true')) {
@@ -804,6 +804,16 @@ const checks: Check[] = [
         await readRepoFile('scripts/api-route-audit.ts'),
         ['runApiRouteAudit', 'writeLine', 'writeError', 'if (import.meta.main) process.exit(await runApiRouteAudit())'],
         'scripts/api-route-audit.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/api-smoke-helpers.test.ts'),
+        ['allows live smoke to continue only for live verification readiness failures', 'imports the API smoke runner without executing the smoke flow'],
+        'scripts/api-smoke-helpers.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/api-smoke.ts'),
+        ['ApiSmokeRunnerOptions', 'runApiSmoke', 'if (import.meta.main) process.exit(await runApiSmoke())'],
+        'scripts/api-smoke.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/check-frontend-bundles.test.ts'),

@@ -62,9 +62,19 @@ type HealthSmokePayload = {
   }
 }
 
-const live = process.argv.includes('--live')
-const requireLiveImage = process.argv.includes('--require-live-image')
-const requireAdmin = process.argv.includes('--require-admin')
+export type ApiSmokeRunnerOptions = {
+  argv?: string[]
+  writeLine?: (line: string) => void
+  writeWarn?: (line: string) => void
+}
+
+export async function runApiSmoke(options: ApiSmokeRunnerOptions = {}) {
+const argv = options.argv ?? process.argv
+const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+const writeWarn = options.writeWarn ?? ((line: string) => console.warn(line))
+const live = argv.includes('--live')
+const requireLiveImage = argv.includes('--require-live-image')
+const requireAdmin = argv.includes('--require-admin')
 const results: ApiSmokeResult[] = []
 
 const authHeaders = smokeAuthHeaders()
@@ -816,13 +826,13 @@ if (adminHeaders) {
 }
 
 for (const result of results) {
-  console.log(`${result.status.toUpperCase()} - ${result.name}: ${result.detail}`)
+  writeLine(`${result.status.toUpperCase()} - ${result.name}: ${result.detail}`)
 }
 
 const failed = results.filter((result) => result.status === 'fail')
 const warned = results.filter((result) => result.status === 'warn')
 
-console.log(
+writeLine(
   JSON.stringify(
     {
       ok: failed.length === 0,
@@ -840,7 +850,7 @@ console.log(
   ),
 )
 
-if (failed.length > 0) process.exit(1)
+const exitCode = failed.length > 0 ? 1 : 0
 
 async function runRequired<T>(name: string, fn: () => Promise<T>) {
   try {
@@ -858,7 +868,7 @@ async function bestEffort(name: string, fn: () => Promise<unknown>) {
   try {
     await fn()
   } catch (error) {
-    console.warn(`Warning: could not ${name}: ${error instanceof Error ? error.message : String(error)}`)
+    writeWarn(`Warning: could not ${name}: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
@@ -924,3 +934,8 @@ async function loadAdminKey() {
     return null
   }
 }
+
+return exitCode
+}
+
+if (import.meta.main) process.exit(await runApiSmoke())
