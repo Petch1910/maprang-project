@@ -53,6 +53,7 @@ const requiredFiles = [
   'scripts/release-handoff-check.test.ts',
   'scripts/frontend-route-audit.test.ts',
   'scripts/route-menu-doc-check.ts',
+  'scripts/route-menu-doc-check.test.ts',
   'scripts/backend-security-audit.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
@@ -297,6 +298,7 @@ const checks: Check[] = [
           '"security:audit:test"',
           '"api:audit:test"',
           '"frontend:route:audit:test"',
+          '"route-menu:audit:test"',
           '"api:smoke"',
           '"api:smoke:live"',
           '"deploy:status"',
@@ -343,6 +345,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('frontend:route:audit:test')) {
         throw new Error('package.json qa:local must run frontend:route:audit:test so frontend route audit regressions are caught')
+      }
+      if (!qaLocal.includes('route-menu:audit:test')) {
+        throw new Error('package.json qa:local must run route-menu:audit:test so route/menu doc regressions are caught')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
@@ -534,6 +539,8 @@ const checks: Check[] = [
           'api-route-audit.test.ts',
           '"frontend:route:audit:test"',
           'frontend-route-audit.test.ts',
+          '"route-menu:audit:test"',
+          'route-menu-doc-check.test.ts',
         ],
         'package.json',
       )
@@ -567,6 +574,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/frontend-route-audit.test.ts'),
         ['collects declared React Router paths', 'reports static links and navigate calls'],
         'scripts/frontend-route-audit.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/route-menu-doc-check.test.ts'),
+        ['passes when documented rows, routes, navigation, and preloads align', 'reports missing navigation coverage'],
+        'scripts/route-menu-doc-check.test.ts',
       )
       requireIncludes(
         promptInspector,
@@ -647,6 +659,7 @@ const checks: Check[] = [
           'bun run api:audit:test',
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
+          'bun run route-menu:audit:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:status',
@@ -676,6 +689,7 @@ const checks: Check[] = [
           'bun run api:audit:test',
           'bun run frontend:route:audit:test',
           'bun run route-menu:audit',
+          'bun run route-menu:audit:test',
           'bun run release:handoff:check',
           'bun run release:handoff:test',
           'bun run deploy:readiness:test',

@@ -65,6 +65,7 @@ Verified:
 - API smoke now covers non-mutating delete-chat validation so the delete route is exercised without removing real chats.
 - API route audit regression tests now cover route discovery plus missing, stale, and empty coverage entries, and run in local QA, CI, and Production Smoke.
 - Frontend route audit regression tests now cover declared React Router paths, dynamic route matching, static link normalization, and missing route detection for `to`, `href`, and `navigate`.
+- Route/menu doc-check regression tests now cover Markdown table parsing, route/menu/app/preload alignment, missing navigation coverage, empty field detection, and status label guards.
 
 ## Current Production Status
 

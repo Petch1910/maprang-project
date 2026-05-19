@@ -31,6 +31,7 @@ jobs:
       - run: bun run api:audit:test
       - run: bun run frontend:route:audit:test
       - run: bun run route-menu:audit
+      - run: bun run route-menu:audit:test
       - run: bun run release:handoff:check
       - run: bun run release:handoff:test
       - run: bun run deploy:readiness:test

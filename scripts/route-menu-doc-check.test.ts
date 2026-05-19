@@ -1,0 +1,97 @@
+import { describe, expect, test } from 'bun:test'
+import type { RouteMenuAuditRow, RouteMenuAuditStatus } from '../apps/frontend/src/lib/routeMenuAudit.ts'
+import { auditRouteMenuDocumentation, collectAuditRows } from './route-menu-doc-check'
+
+function row(overrides: Partial<RouteMenuAuditRow> = {}): RouteMenuAuditRow {
+  return {
+    area: 'Home',
+    route: '/',
+    control: 'open home',
+    result: 'home renders',
+    disabledReason: 'none',
+    emptyState: 'empty home copy',
+    status: 'ready',
+    ...overrides,
+  }
+}
+
+const okStatusLabel = (status: RouteMenuAuditStatus) => `status: ${status}`
+
+describe('route menu doc check', () => {
+  test('collects markdown audit rows and strips inline markdown', () => {
+    const rows = collectAuditRows(`
+      | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+      | --- | --- | --- | --- | --- | --- |
+      | **Home** | \`/\` | open | renders | none | helpful |
+    `)
+
+    expect(rows).toEqual([
+      {
+        area: 'Home',
+        route: '/',
+        cells: ['Home', '/', 'open', 'renders', 'none', 'helpful'],
+      },
+    ])
+  })
+
+  test('passes when documented rows, routes, navigation, and preloads align', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | open | renders | none | helpful |
+        | Chat | /chat | open chat | renders chat | none | no chats copy |
+      `,
+      appContent: `
+        const routePreloads = {
+          '/': () => import('./Home'),
+          '/chat': () => import('./Chat'),
+        }
+        const navItems = [{ to: '/' }, { to: '/chat' }]
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/chat" element={<Chat />} />
+        </Routes>
+      `,
+      rows: [row(), row({ area: 'Chat', route: '/chat', control: 'open chat', result: 'chat renders' })],
+      minRows: 2,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual([])
+  })
+
+  test('reports missing navigation coverage, empty fields, and weak status labels', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | open | renders | none | helpful |
+      `,
+      appContent: `
+        const routePreloads = {
+          '/': () => import('./Home'),
+        }
+        const navItems = [{ to: '/' }, { to: '/ghost' }]
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      `,
+      rows: [row({ control: '' })],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: (status) => status,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'navigation path /ghost has no matching App.tsx Route',
+        'navigation path /ghost is missing from routeMenuAuditRows',
+        'navigation path /ghost is missing from routePreloads',
+        'routeMenuAuditRows "Home" has an empty control',
+        'routeMenuAuditStatusLabel("ready") is missing a user-facing label',
+      ]),
+    )
+  })
+})
