@@ -44,7 +44,7 @@ describe('local smoke helpers', () => {
   test('validates backend root identity before deeper smoke work', () => {
     expect(() => validateBackendRootIdentity({ ok: true, service: 'maprang-backend' })).not.toThrow()
     expect(() => validateBackendRootIdentity({ ok: false, service: 'maprang-backend' })).toThrow('ok=false')
-    expect(() => validateBackendRootIdentity({ ok: true, service: 'other-service' })).toThrow('unexpected service name')
+    expect(() => validateBackendRootIdentity({ ok: true, service: 'other-service' })).toThrow('service name ไม่ถูกต้อง')
   })
 
   test('formats local smoke summary fields used by QA logs', () => {

@@ -184,7 +184,7 @@ describe('deploy status formatting', () => {
     expect(exitCode).toBe(1)
     expect(healthRead).toBe(false)
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('unexpected service name')
+    expect(errors.join('\n')).toContain('service name ไม่ถูกต้อง')
     expect(errors.join('\n')).toContain('ไม่ใช่ frontend/static proxy')
   })
 

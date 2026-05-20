@@ -195,7 +195,7 @@ describe('smoke doctor report', () => {
     expect(healthRead).toBe(false)
     expect(lines).toEqual([])
     expect(warnings).toEqual([])
-    expect(errors.join('\n')).toContain('unexpected service name')
+    expect(errors.join('\n')).toContain('service name ไม่ถูกต้อง')
     expect(errors.join('\n')).toContain('backend root ที่ deploy ไม่ใช่ frontend/static proxy')
   })
 

@@ -39,8 +39,8 @@ export function smokeAuthHeaders() {
 }
 
 export function validateBackendRootIdentity(root: RootIdentityPayload) {
-  if (!root.ok) throw new Error('Backend root identity returned ok=false')
-  if (root.service !== 'maprang-backend') throw new Error('Backend root identity returned an unexpected service name')
+  if (!root.ok) throw new Error('backend root identity คืน ok=false')
+  if (root.service !== 'maprang-backend') throw new Error('backend root identity คืน service name ไม่ถูกต้อง')
 }
 
 export async function readJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -51,16 +51,16 @@ export async function readJson<T>(path: string, init?: RequestInit): Promise<T> 
     response = await fetch(url, init)
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
-    throw new Error(`Could not reach backend at ${apiBaseUrl}. Start the backend, check SMOKE_API_BASE_URL, then try again. (${reason})`)
+    throw new Error(`ติดต่อ backend ที่ ${apiBaseUrl} ไม่สำเร็จ ให้เริ่ม backend ตรวจ SMOKE_API_BASE_URL แล้วลองใหม่ (${reason})`)
   }
 
   const raw = await response.text()
   const payload = raw ? tryParseJson(raw) : null
   if (!response.ok) {
-    throw new Error(`${path} failed with ${response.status}: ${formatPayload(payload, raw || response.statusText)}`)
+    throw new Error(`${path} ไม่ผ่านด้วย status ${response.status}: ${formatPayload(payload, raw || response.statusText)}`)
   }
   if (!payload) {
-    throw new Error(`${path} did not return JSON: ${raw.slice(0, 300) || 'empty response'}`)
+    throw new Error(`${path} ไม่คืน JSON: ${raw.slice(0, 300) || 'response ว่าง'}`)
   }
   return payload as T
 }

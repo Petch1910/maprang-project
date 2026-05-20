@@ -89,6 +89,7 @@ Results:
 - `provider:smoke:guards:test` now runs in `qa:local`, CI, and Production Smoke to guard live chat/image smoke verification helpers.
 - `smoke:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, smoke doctor blocker output, and strict-gate output.
 - `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, `/ready` summary output, and the importable readiness smoke runner.
+- Shared smoke helper diagnostics now pass Thai-first coverage via `smoke:helpers:test`, `smoke:local:test`, `deploy:status:test`, `smoke:image:test`, `smoke:chat:test`, `smoke:ready:test`, and `smoke:doctor:test`.
 - `smoke:image:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, image smoke skip/fallback/live payload helpers, and the importable image smoke runner without provider calls.
 - `smoke:chat:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, live chat smoke validation, success payload helpers, and the importable live chat smoke runner without provider calls.
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, deploy status JSON/text output, and the importable deploy status runner.

@@ -47,6 +47,6 @@ describe('smoke helpers', () => {
   test('validates backend root identity payloads', () => {
     expect(() => validateBackendRootIdentity({ ok: true, service: 'maprang-backend' })).not.toThrow()
     expect(() => validateBackendRootIdentity({ ok: false, service: 'maprang-backend' })).toThrow('ok=false')
-    expect(() => validateBackendRootIdentity({ ok: true, service: 'wrong' })).toThrow('unexpected service name')
+    expect(() => validateBackendRootIdentity({ ok: true, service: 'wrong' })).toThrow('service name ไม่ถูกต้อง')
   })
 })
