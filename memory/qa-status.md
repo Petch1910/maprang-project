@@ -69,7 +69,7 @@ Last updated: 2026-05-20
 - Production deploy knowledge wiki: updated to reflect reply-budget gates, staging/deploy-status order, and Thai-first gate wording for backend/frontend URLs, CORS, storage, and live provider smoke.
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
-- Deploy status: pass, reports 2 staging blockers and 4 production blockers in local mode.
+- Latest direct `bun run deploy:status` in this desktop session fails before readiness output because backend `http://127.0.0.1:3000` is not running; `deploy:status:test` still passes through `qa:repo`, so this is a runtime availability blocker, not a deploy-status regression.
 - Deploy readiness now treats CORS that is empty, local, or non-https as a staging/production blocker.
 - Predeploy now verifies `DEPLOY_RENDER.md` keeps HTTPS-only CORS/frontend-backend URL guidance for Render staging/production.
 - Render deploy guide Thai-first localization: pass via `predeploy:check:test`, `predeploy:check`, and `secrets:check`.

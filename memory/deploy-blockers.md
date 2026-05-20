@@ -11,7 +11,7 @@
 ปัญหาปัจจุบัน:
 - smoke environment ยังชี้ไปที่ URL local ของ backend/frontend.
 - smoke doctor รอบ local ล่าสุดรายงานตัวกั้น staging 2 ข้อ: backend URL ยังเป็น local และ `CORS_ORIGINS` ว่าง, เป็น local, หรือไม่ใช่ HTTPS พร้อมคำแนะนำขั้นถัดไปแบบ Thai-first ใน CLI.
-- `bun run deploy:status` แสดงตัวกั้นชุดเดียวกันพร้อมลำดับขั้นถัดไป โดยไม่ทำให้ handoff local ล้มเหลว
+- เมื่อ backend local หรือ staging ตอบได้ `bun run deploy:status` จะแสดงตัวกั้นชุดเดียวกันพร้อมลำดับขั้นถัดไป; ถ้า backend ยังไม่รัน คำสั่งจะ fail ที่ root identity preflight ก่อนอ่าน readiness
 
 สิ่งที่ต้องทำ:
 - ตั้ง URL backend ที่ deploy แล้วให้ `SMOKE_API_BASE_URL`.
