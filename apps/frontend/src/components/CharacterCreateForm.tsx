@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { generateCreatorAiDraft, uploadAvatar, fetchCreatorDraft, updateCreatorDraft, type CharacterInput, type CreatorAiDraftResponse } from '../lib/api'
 import { buildCharacterDraftFromImage, buildGeneratedAvatarDataUrl, mergeDraftTags } from '../lib/characterDraft'
-import { analyzeTags, type TagAnalysis, type TagIssue } from '../lib/tagAnalysis'
+import { analyzeTags, normalizeTag, type TagAnalysis, type TagIssue } from '../lib/tagAnalysis'
 import { CreatorReadinessPanel } from './CreatorReadinessPanel'
 import { RelationshipPreviewPanel } from './RelationshipPreviewPanel'
 import { RelationshipPresetPicker } from './RelationshipPresetPicker'
@@ -69,7 +69,7 @@ const emptyCharacter = {
   characterAnchor: '',
   constraints: '',
   greeting: '',
-  tags: 'roleplay, thai',
+  tags: 'บทบาทสมมุติ, ไทย',
 }
 
 const creatorDraftStorageKey = 'maprang:creator-draft:v1'
@@ -467,7 +467,7 @@ export function CharacterCreateForm({
         greeting: form.greeting.trim() || null,
         tags: form.tags
           .split(',')
-          .map((tag) => tag.trim())
+          .map((tag) => normalizeTag(tag))
           .filter(Boolean),
         visibility: 'PRIVATE',
         status: 'DRAFT',
@@ -840,13 +840,13 @@ export function CharacterCreateForm({
               title="แท็กและความสัมพันธ์"
             />
 
-            <FieldBlock label="แท็ก" hint="คั่นด้วย comma เช่น roleplay, thai, slow-burn, green-flag">
+            <FieldBlock label="แท็ก" hint="คั่นด้วยคอมมา เช่น บทบาทสมมุติ, ไทย, ค่อยๆพัฒนา, อบอุ่น">
               <input
                 className={inputClass}
                 data-testid="creator-tags"
                 value={form.tags}
                 onChange={(event) => update('tags', event.target.value)}
-                placeholder="roleplay, thai"
+                placeholder="บทบาทสมมุติ, ไทย"
               />
             </FieldBlock>
 

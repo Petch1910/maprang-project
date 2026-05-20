@@ -206,7 +206,7 @@ export const suspiciousPatterns = [
     message: 'พบ label ภาษาอังกฤษใน UI ที่ควรเป็น Thai-first',
   },
   {
-    pattern: /(?:production\s+ควรตั้งค่า|Lobby\s+ดูน่ากด|แกน\s+prompt|backend\s+ช่วยร่าง)/g,
+    pattern: /(?:production\s+ควรตั้งค่า|Lobby\s+ดูน่ากด|แกน\s+prompt|backend\s+ช่วยร่าง|roleplay,\s*thai)/g,
     message: 'พบข้อความ Creator Studio ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {

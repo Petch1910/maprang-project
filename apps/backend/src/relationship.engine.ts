@@ -97,6 +97,7 @@ const DEFAULT_MULTIPLIERS: RelationshipMultipliers = {
 const DISCOVERY_TAGS = new Set([
   'thai',
   'assistant',
+  'roleplay',
   'original',
   'anime',
   'manga',
@@ -407,6 +408,8 @@ const TAG_RULES: Record<string, TagRule> = {
 }
 
 const TAG_ALIASES: Record<string, string> = {
+  'บทบาทสมมุติ': 'roleplay',
+  'ไทย': 'thai',
   '18+': 'nc',
   adult: 'nc',
   mature: 'nc',

@@ -34,6 +34,14 @@ describe('relationship tag validation', () => {
     expect(issues.some((issue) => issue.level === 'danger')).toBe(false)
   })
 
+  test('normalizes Thai discovery aliases from Creator Studio defaults', () => {
+    const profile = analyzeRelationshipTags(['บทบาทสมมุติ', 'ไทย'])
+
+    expect(profile.discovery).toContain('roleplay')
+    expect(profile.discovery).toContain('thai')
+    expect(profile.unknown).toEqual([])
+  })
+
   test('keeps non-adult no-romance conflicts blocking', () => {
     const issues = validateRelationshipTags(['no-romance', 'crush'])
 

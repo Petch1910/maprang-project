@@ -179,13 +179,14 @@ describe('frontend static audit', () => {
         '<p>ใส่รูปเพื่อให้หน้าการ์ดและ Lobby ดูน่ากด</p>',
         '<p>มีแกน prompt สำหรับคุมโทนตัวละคร</p>',
         '<p>ให้ backend ช่วยร่างตัวละคร</p>',
+        '<input placeholder="roleplay, thai" />',
       ].join('\n'),
       'MixedEnglishUiFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
       ...Array.from({ length: 6 }, () => englishUiFinding),
-      ...Array.from({ length: 4 }, () => creatorMixedFinding),
+      ...Array.from({ length: 5 }, () => creatorMixedFinding),
       ...Array.from({ length: 7 }, () => mixedUiFinding),
     ])
   })

@@ -79,6 +79,8 @@ const aliases: Record<string, string> = {
   nsfw: 'nc',
   smut: 'nc',
   spicy: 'nc',
+  บทบาทสมมุติ: 'roleplay',
+  ไทย: 'thai',
   'คอนเทนต์ผู้ใหญ่': 'nc',
   ผู้ใหญ่: 'nc',
   ครอบครัว: 'family',
@@ -128,13 +130,13 @@ export function parseTags(value: string | string[]) {
   return [...new Set(tags.map((tag) => tag.trim()).filter(Boolean))]
 }
 
-function normalize(tag: string) {
+export function normalizeTag(tag: string) {
   const value = tag.trim().toLowerCase()
   return aliases[value] ?? value
 }
 
 export function analyzeTags(value: string | string[]): TagAnalysis {
-  const normalized = parseTags(value).map(normalize)
+  const normalized = parseTags(value).map(normalizeTag)
   const analysis: TagAnalysis = {
     discovery: [],
     engine: [],
