@@ -23,7 +23,7 @@ Last updated: 2026-05-20
 
 สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
-ล่าสุด `bun run qa:repo` ผ่านครบหลังแก้ Creator tag defaults และ Sidebar tagline: backend 150 pass, 0 fail, 468 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.1KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
+ล่าสุด `bun run qa:repo` ผ่านครบหลังชุด log hardening: backend 155 pass, 0 fail, 491 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.1KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
 
 คำสั่งที่ยืนยันแล้ว:
 - `bun run qa:local`
@@ -44,7 +44,7 @@ Last updated: 2026-05-20
 - GitHub Production Smoke input descriptions and config-validation errors are Thai-first, with `predeploy:check` and `predeploy:check:test` blocking the old English setup messages.
 - GitHub Actions visible CI/Production Smoke step labels are Thai-first and covered by `predeploy:check`.
 - Latest `bun run qa:local` attempt on this machine reached the final runtime smoke phase but failed because Docker Desktop/Postgres and the backend at `http://127.0.0.1:3000` were not running; all preceding static/unit/build gates in that run passed.
-- Backend tests: 150 pass, 0 fail, 468 expect calls.
+- Backend tests: 155 pass, 0 fail, 491 expect calls.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
