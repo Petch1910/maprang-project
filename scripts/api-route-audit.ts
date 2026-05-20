@@ -160,12 +160,12 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'POST /chat': {
     owner: 'chat',
     coverage: ['smoke', 'live-smoke', 'backend-test'],
-    note: 'api-smoke ตรวจ validation path ที่ไม่หักโทเคน; api:smoke:live ตรวจการเรียกผู้ให้บริการจริง; runtime tests ตรวจสถานะ relationship/scene',
+    note: 'api-smoke ตรวจเส้นทาง validation ที่ไม่หักโทเคน; api:smoke:live ตรวจการเรียกผู้ให้บริการจริง; runtime tests ตรวจสถานะ relationship/scene',
   },
   'POST /chat/stream': {
     owner: 'chat',
     coverage: ['smoke', 'backend-test', 'manual-production'],
-    note: 'api-smoke ตรวจรูปแบบ SSE บน validation path โดยไม่ใช้โทเคนผู้ให้บริการ; manual QA ตรวจ UX สตรีมจริงก่อนปล่อย',
+    note: 'api-smoke ตรวจรูปแบบ SSE บนเส้นทาง validation โดยไม่ใช้โทเคนผู้ให้บริการ; backend runtime test ตรวจ guard เดียวกัน; staging QA ตรวจ UX สตรีมจริงก่อนปล่อย',
   },
   'GET /chats/:id/messages': {
     owner: 'chat',

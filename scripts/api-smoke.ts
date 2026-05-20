@@ -471,7 +471,7 @@ await check('POST /chat validation', async () => {
 
   if (!payload.reply?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('chat validation ไม่คืนข้อความไทยสำหรับ character id ไม่ถูกต้อง')
   if (payload.chatId !== null && payload.chatId !== undefined) throw new Error('chat validation ไม่ควรคืน chatId')
-  if ((payload.usage?.totalTokens ?? 0) !== 0) throw new Error('chat validation path ไม่ควรใช้ token')
+  if ((payload.usage?.totalTokens ?? 0) !== 0) throw new Error('เส้นทางตรวจ validation ของแชทไม่ควรใช้โทเคน')
   if (payload.usage?.providerFailure) {
     throw new Error(`เส้นทางตรวจ validation ของแชทไม่ควรเรียกผู้ให้บริการ แต่พบ providerFailure: ${payload.usage.providerFailure.code}`)
   }
@@ -524,13 +524,13 @@ await check('POST /chat/stream', async () => {
 
   const delta = events.find((event): event is Extract<StreamSmokeEvent, { type: 'delta' }> => event.type === 'delta')
   const done = events.find((event): event is Extract<StreamSmokeEvent, { type: 'done' }> => event.type === 'done')
-  if (!delta?.content?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('stream ไม่คืน validation delta ภาษาไทย')
-  if (!done) throw new Error('stream ไม่คืน done event')
-  if ((done.usage?.totalTokens ?? 0) !== 0) throw new Error('stream validation path ไม่ควรใช้ token')
+  if (!delta?.content?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('สตรีมไม่คืน validation delta ภาษาไทย')
+  if (!done) throw new Error('สตรีมไม่คืน event ปิดท้าย')
+  if ((done.usage?.totalTokens ?? 0) !== 0) throw new Error('เส้นทางตรวจ validation ของสตรีมไม่ควรใช้โทเคน')
   if (done.usage?.providerFailure) {
     throw new Error(`เส้นทางตรวจ validation ของสตรีมไม่ควรเรียกผู้ให้บริการ แต่พบ providerFailure: ${done.usage.providerFailure.code}`)
   }
-  return `${events.length} SSE events, เส้นทาง validation ไม่ถูกคิดโทเคน`
+  return `${events.length} event จากสตรีม, เส้นทาง validation ไม่ถูกคิดโทเคน`
 })
 
 const activeChats = await runRequired('GET /chats', async () => {

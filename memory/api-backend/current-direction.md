@@ -24,7 +24,7 @@
 - Chat provider failures ถูกจัดประเภทเป็นสถานะ retry/admin ที่ปลอดภัย, คืน zero token usage, และแสดงเป็น `providerFailure` metadata ใน normal/streamed chat responses.
 - Runtime env validation, deploy env doctor, smoke doctor, deploy readiness, และ deploy status แสดงความเสี่ยงของ roleplay reply budget ร่วมกัน ค่าใต้ 1200 output tokens หรือ 320 roleplay reply characters จะ block production; ค่า baseline ที่ยังต่ำกว่า 1600/420 จะแสดงคำแนะนำใน CLI/UI เพื่อคำตอบ roleplay ที่แน่นขึ้น.
 - Deploy readiness ใช้ logic ร่วมกันระหว่าง smoke doctor และ deploy status ทำให้ staging/production blockers กับ next steps ตรงกันทั้ง CLI, CI, และ Admin Health handoff.
-- Local API smoke ครอบ validation paths ที่ไม่แก้ข้อมูลจริงสำหรับ admin reports, admin wallet, report creation, chat deletion, chat streaming shape, prompt inspector, และ automated evals โดยไม่ใช้ live provider credits.
+- Local API smoke ครอบเส้นทาง validation ที่ไม่แก้ข้อมูลจริงสำหรับ admin reports, admin wallet, report creation, chat deletion, รูปแบบสตรีมแชท, prompt inspector, และ automated evals โดยไม่ใช้ live provider credits.
 
 ## API สำคัญก่อน production
 
@@ -52,4 +52,4 @@
 - รักษา `knowledge/structured/*.json` ให้ deterministic, schema-versioned, และตรวจด้วย `bun run knowledge:audit`.
 - รักษา `evals/golden-roleplay.json` ให้ deterministic และตรวจด้วย `bun run eval:local` ก่อนเปลี่ยน context assembly.
 - ห้ามเปิด raw provider errors หรือ secrets ให้ผู้ใช้เห็น ให้ classify provider failures และไม่คิด token/cost สำหรับ provider attempts ที่ fail.
-- คุม `/chat/stream` ใน local smoke ผ่าน uncharged validation paths แล้วค่อย verify live streaming แบบ manual หรือกับ staging ก่อน production.
+- คุม `/chat/stream` ใน local smoke และ backend runtime test ผ่านเส้นทาง validation ที่ไม่ถูกคิดโทเคน แล้วค่อย verify live streaming กับ staging ก่อน production.

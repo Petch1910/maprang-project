@@ -370,3 +370,4 @@ Last updated: 2026-05-20
 - Supabase signed-storage wording Thai-first pass: เกลา workflow, release handoff, setup script, predeploy guard, และ deploy docs ให้ใช้ "พื้นที่เก็บรูปตัวละคร" แทน `avatar storage` ในข้อความที่ผู้ดูแลเห็น.
 - Release handoff stale storage-label guard pass: ตัวตรวจเอกสารส่งมอบ release ตอนนี้ fail ถ้า field รูปตัวละครถอยกลับไปใช้ `avatar storage` label เก่า พร้อม regression test.
 - Stream chat validation guard pass: เพิ่ม backend unit test ให้ `streamChat` คืน validation delta/done โดยไม่คิด token และไม่ใส่ providerFailure เมื่อ ID ผิดรูปแบบก่อนแตะ provider.
+- API smoke stream diagnostics Thai-first pass: เกลา `/chat` และ `/chat/stream` validation output จาก `stream validation path`/`SSE events` เป็นข้อความไทยนำ พร้อม `api:smoke:test`.
