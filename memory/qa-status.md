@@ -20,7 +20,7 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 138 pass, 0 fail.
+- Backend tests: 139 pass, 0 fail.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
@@ -84,10 +84,11 @@ Results:
 - Live provider smoke guidance now passes Thai-first coverage via `bun run smoke:image:test`, `bun run smoke:chat:test`, `bun run provider:smoke:guards:test`, `bun run api:smoke:test`, and `predeploy:check`.
 - Local smoke failure guidance now passes Thai-first coverage via `bun run smoke:local:test`.
 - Backend DB-required check guidance now passes Thai-first coverage via `bun run backend:check:db:test`.
-- Backend DB test gate guidance now passes Thai-first coverage via `bun test apps\backend\src\db.test-gate.test.ts` and full `backend:check` with 138 pass.
-- Backend chat validation/access/token/rating/empty-provider fallback copy now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts apps\backend\src\character.persistence.test.ts` and full `backend:check` with 138 pass.
-- Backend rate-limit response copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 138 pass.
-- Backend avatar storage failure copy now passes Thai-first coverage via `bun test apps\backend\src\storage.service.test.ts apps\backend\src\upload.routes.test.ts` and full `backend:check` with 138 pass.
+- Backend DB test gate guidance now passes Thai-first coverage via `bun test apps\backend\src\db.test-gate.test.ts` and full `backend:check` with 139 pass.
+- Backend chat validation/access/token/rating/empty-provider fallback copy now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts apps\backend\src\character.persistence.test.ts` and full `backend:check` with 139 pass.
+- Backend rate-limit response copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 139 pass.
+- Backend avatar storage failure copy now passes Thai-first coverage via `bun test apps\backend\src\storage.service.test.ts apps\backend\src\upload.routes.test.ts` and full `backend:check` with 139 pass.
+- Backend production auth 401 copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 139 pass.
 - Full `api:smoke` was not rerun in this delta because Docker Desktop/Postgres is not available in the local environment; `api:smoke:test` still passes and the changed smoke validation assertion now expects the Thai invalid-character reply.
 - Profile/tag helper and route/menu staging copy now pass Thai-first coverage via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, `route-menu:audit:test`, and `predeploy:check`; the static audit also blocks stale `backend`/`prompt`/`runtime`/`persona` helper wording from returning.
 - `frontend:static:audit:test` now also blocks stale mixed prompt/admin tooling copy such as `System prompt`, `redacted prompt`, `Runtime note`, `prompt snapshot`, `admin API`, and `frontend domain`.

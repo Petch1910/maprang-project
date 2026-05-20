@@ -72,6 +72,11 @@ export class AuthError extends Error {
   }
 }
 
+export const authErrorMessages = {
+  invalidAuthToken: 'โทเคนเข้าสู่ระบบของ Supabase ไม่ถูกต้องหรือหมดอายุ',
+  authRequired: 'กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้',
+}
+
 export const rateLimitReplyMessage = 'ส่งคำขอถี่เกินไป กรุณารอสักครู่แล้วลองใหม่'
 
 export function buildRateLimitErrorResponse() {
@@ -245,13 +250,13 @@ export async function resolveRequestUserId(request: Request, fallback?: string) 
     const payload = (await verifySupabaseJwt(token)) ?? (await verifySupabaseJwtWithAuthServer(token))
     if (payload?.sub) return syncSupabaseUser(payload)
     if (strictAuthEnabled()) {
-      throw new AuthError('invalid_auth_token', 'A valid Supabase access token is required.')
+      throw new AuthError('invalid_auth_token', authErrorMessages.invalidAuthToken)
     }
   }
 
   if (strictAuthEnabled()) {
     if (isAdminRequest(request)) return requestUserId(request, fallback)
-    throw new AuthError('auth_required', 'Authentication is required.')
+    throw new AuthError('auth_required', authErrorMessages.authRequired)
   }
 
   return requestUserId(request, fallback)

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { chatRoutes } from './chat.routes'
 import {
   AuthError,
+  authErrorMessages,
   buildRateLimitErrorResponse,
   rateLimitBucket,
   rateLimitKey,
@@ -169,7 +170,27 @@ describe('security helpers', () => {
         }),
         'fallback-user',
       ),
-    ).rejects.toBeInstanceOf(AuthError)
+    ).rejects.toMatchObject({ code: 'auth_required', message: authErrorMessages.authRequired })
+  })
+
+  test('production Supabase auth rejects invalid tokens with Thai-first message', async () => {
+    process.env.NODE_ENV = 'production'
+    process.env.SUPABASE_URL = 'https://project-ref.supabase.co'
+    delete process.env.SUPABASE_JWT_ISSUER
+    delete process.env.SUPABASE_ANON_KEY
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY
+    delete process.env.ADMIN_API_KEY
+
+    await expect(
+      resolveRequestUserId(
+        new Request('http://local/me/usage', {
+          headers: {
+            authorization: 'Bearer invalid-token',
+          },
+        }),
+        'fallback-user',
+      ),
+    ).rejects.toMatchObject({ code: 'invalid_auth_token', message: authErrorMessages.invalidAuthToken })
   })
 
   test('production Supabase auth allows admin-key smoke user impersonation', async () => {
@@ -208,9 +229,10 @@ describe('security helpers', () => {
         }),
       }),
     )
-    const body = (await response.json()) as { error?: string }
+    const body = (await response.json()) as { error?: string; message?: string }
 
     expect(response.status).toBe(401)
     expect(body.error).toBe('auth_required')
+    expect(body.message).toBe(authErrorMessages.authRequired)
   })
 })
