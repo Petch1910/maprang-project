@@ -89,7 +89,7 @@ export function formatDeployStatusText(
 ) {
   const payload = buildDeployStatusPayload(health, options)
   const { readiness, nextSteps, failures } = payload
-  const lines = ['Maprang Deploy Status', '=====================']
+  const lines = ['สถานะ deploy Maprang', '=====================']
 
   for (const [name, value] of buildHealthRows(health, options.apiBaseUrl)) {
     lines.push(`${name}: ${value}`)
@@ -108,10 +108,10 @@ export function formatDeployStatusText(
   lines.push(
     readiness.stagingBlockers.length > 0
       ? `stagingBlockers: ${readiness.stagingBlockers.join('; ')}`
-      : 'stagingBlockers: none detected',
+      : 'stagingBlockers: ไม่พบ',
   )
   if (readiness.stagingFixes.length > 0) {
-    lines.push('stagingFixes:')
+    lines.push('วิธีแก้ staging:')
     for (const fix of readiness.stagingFixes) lines.push(`- ${fix}`)
   }
 
@@ -121,15 +121,15 @@ export function formatDeployStatusText(
   lines.push(
     readiness.productionBlockers.length > 0
       ? `productionBlockers: ${readiness.productionBlockers.join('; ')}`
-      : 'productionBlockers: none detected',
+      : 'productionBlockers: ไม่พบ',
   )
   if (readiness.productionFixes.length > 0) {
-    lines.push('productionFixes:')
+    lines.push('วิธีแก้ production:')
     for (const fix of readiness.productionFixes) lines.push(`- ${fix}`)
   }
 
   lines.push('')
-  lines.push('nextSteps:')
+  lines.push('ขั้นตอนถัดไป:')
   for (const [index, step] of nextSteps.entries()) {
     lines.push(`${index + 1}. ${step}`)
   }

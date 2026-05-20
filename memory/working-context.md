@@ -72,6 +72,7 @@ Verified:
 - Project map, UI/UX direction, and API/backend direction handoff docs now use Thai-first guidance while preserving route names, commands, and technical identifiers.
 - Knowledge wiki core pages now use Thai-first product, creator, relationship, and production deploy guidance while preserving structured knowledge paths and gate command names.
 - Raw knowledge inbox and decision index now use Thai-first entry-point wording while preserving decision links and safety boundaries.
+- Deploy status and smoke doctor text output now use Thai-first headers, no-blocker labels, fix sections, gate guidance, and next-step labels while keeping JSON/readiness keys stable.
 - Smoke doctor now warns about missing image-generation configuration with Thai-first Creator Studio placeholder guidance.
 - Smoke doctor roleplay reply-budget recommendation warnings now use Thai-first wording while preserving exact budget values and env names.
 - Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.

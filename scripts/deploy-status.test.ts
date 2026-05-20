@@ -86,12 +86,12 @@ describe('deploy status formatting', () => {
       },
     )
 
-    expect(text).toContain('Maprang Deploy Status')
+    expect(text).toContain('สถานะ deploy Maprang')
     expect(text).toContain('rootIdentity: maprang-backend')
     expect(text).toContain('stagingBlockerCount: 2')
     expect(text).toContain('backend URL ยังเป็น local')
     expect(text).toContain('CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https')
-    expect(text).toContain('nextSteps:')
+    expect(text).toContain('ขั้นตอนถัดไป:')
   })
 
   test('reports health failures without hiding deploy readiness', () => {

@@ -55,6 +55,7 @@ describe('smoke doctor report', () => {
 
     expect(report.exitCode).toBe(0)
     expect(report.stdout).toContain('stagingReady: false')
+    expect(report.stdout).toContain('ขั้นตอนถัดไป:')
     expect(report.stdout.join('\n')).toContain('backend URL ยังเป็น local')
     expect(report.stdout.join('\n')).toContain('รัน `bun run staging:verify`')
     expect(report.stdout.at(-1)).toBe('Smoke doctor ผ่านแล้ว')

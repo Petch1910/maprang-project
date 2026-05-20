@@ -731,7 +731,7 @@ const checks: Check[] = [
           'healthFailures',
           'validateBackendRootIdentity',
           'SmokeDoctorRunnerOptions',
-          'nextSteps:',
+          'ขั้นตอนถัดไป:',
         ],
         'scripts/smoke-doctor.ts',
       )
@@ -756,7 +756,7 @@ const checks: Check[] = [
           '--json',
           'stagingBlockerCount',
           'productionBlockerCount',
-          'Maprang Deploy Status',
+          'สถานะ deploy Maprang',
           'DeployStatusRunnerOptions',
           'validateBackendRootIdentity',
           'readRootIdentity',

@@ -105,15 +105,15 @@ export function buildSmokeDoctorReport(
   stdout.push(`stagingBlockerCount: ${stagingBlockers.length}`)
   if (stagingBlockers.length > 0) {
     stdout.push(`stagingBlockers: ${stagingBlockers.join('; ')}`)
-    stdout.push('stagingFixes:')
+    stdout.push('วิธีแก้ staging:')
     for (const fix of stagingFixes) stdout.push(`- ${fix}`)
-    stdout.push('stagingGate: run `bun run staging:verify` against the deployed staging backend before production verification.')
+    stdout.push('stagingGate: รัน `bun run staging:verify` กับ deployed staging backend ก่อนยืนยัน production.')
     if (options.strictStagingGate) {
       stderr.push('Staging gate ไม่ผ่าน: แก้ staging blockers ด้านบน แล้วรันใหม่ด้วย deployed backend URL')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
-    stdout.push('stagingBlockers: none detected')
+    stdout.push('stagingBlockers: ไม่พบ')
   }
 
   stdout.push(`productionReady: ${productionReady}`)
@@ -121,15 +121,15 @@ export function buildSmokeDoctorReport(
 
   if (productionBlockers.length > 0) {
     stdout.push(`productionBlockers: ${productionBlockers.join('; ')}`)
-    stdout.push('productionFixes:')
+    stdout.push('วิธีแก้ production:')
     for (const fix of productionFixes) stdout.push(`- ${fix}`)
-    stdout.push('productionGate: run `bun run production:check` against the staging/production backend before deploy.')
+    stdout.push('productionGate: รัน `bun run production:check` กับ staging/production backend ก่อน deploy.')
     if (options.strictProductionGate) {
       stderr.push('Production gate ไม่ผ่าน: แก้ production blockers ด้านบน แล้วรันใหม่ด้วย deployed backend URL')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
-    stdout.push('productionBlockers: none detected')
+    stdout.push('productionBlockers: ไม่พบ')
   }
 
   const nextSteps = buildNextDeploySteps({
@@ -140,7 +140,7 @@ export function buildSmokeDoctorReport(
     stagingBlockers,
     stagingFixes,
   })
-  stdout.push('nextSteps:')
+  stdout.push('ขั้นตอนถัดไป:')
   for (const [index, step] of nextSteps.entries()) {
     stdout.push(`${index + 1}. ${step}`)
   }
