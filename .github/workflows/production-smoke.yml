@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       api_base_url:
-        description: Backend URL to test. Falls back to repository secret SMOKE_API_BASE_URL.
+        description: Backend URL ที่ต้องการทดสอบ ถ้าเว้นว่างจะใช้ repository secret SMOKE_API_BASE_URL
         required: false
         type: string
       run_chat:
-        description: Also run live AI chat smoke. This uses provider credits.
+        description: รัน live AI chat smoke ด้วย คำสั่งนี้ใช้เครดิตผู้ให้บริการจริง
         required: true
         default: false
         type: boolean
       run_image:
-        description: Also run live image generation smoke. This uses image provider credits.
+        description: รัน live image generation smoke ด้วย คำสั่งนี้ใช้เครดิตสร้างรูปจริง
         required: true
         default: false
         type: boolean

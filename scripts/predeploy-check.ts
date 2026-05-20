@@ -1265,6 +1265,9 @@ const checks: Check[] = [
         workflow,
         [
           'workflow_dispatch',
+          'Backend URL ที่ต้องการทดสอบ ถ้าเว้นว่างจะใช้ repository secret SMOKE_API_BASE_URL',
+          'รัน live AI chat smoke ด้วย คำสั่งนี้ใช้เครดิตผู้ให้บริการจริง',
+          'รัน live image generation smoke ด้วย คำสั่งนี้ใช้เครดิตสร้างรูปจริง',
           'SMOKE_API_BASE_URL',
           'SMOKE_ADMIN_API_KEY',
           'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT',
@@ -1337,6 +1340,9 @@ const checks: Check[] = [
           'Set repository secret SUPABASE_STORAGE_BUCKET',
           'Set repository secret SUPABASE_STORAGE_ACCESS',
           'Set repository secret SUPABASE_SIGNED_URL_EXPIRES_IN',
+          'Backend URL to test',
+          'This uses provider credits',
+          'This uses image provider credits',
         ],
         '.github/workflows/production-smoke.yml',
       )
