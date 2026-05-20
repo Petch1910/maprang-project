@@ -1,4 +1,4 @@
-# Creator Studio
+# สตูดิโอสร้างตัวละคร (Creator Studio)
 
 Creator Studio ควรรู้สึกคุ้นมือกับผู้ใช้ที่รู้จัก creation flow แนว Khuiai อยู่แล้ว แต่เพิ่มระบบ relationship และ scene ของ Maprang ให้ลึกกว่า
 

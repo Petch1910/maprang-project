@@ -1,4 +1,4 @@
-# Relationship Engine
+# ระบบความสัมพันธ์ (Relationship Engine)
 
 relationship engine แปลง tags, seeds, user behavior, และ scene outcomes ให้กลายเป็น state ที่ใช้คุมบทสนทนา
 

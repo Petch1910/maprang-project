@@ -1,4 +1,4 @@
-# Maprang Agent Entry Point
+# จุดเริ่มต้นเอเจนต์ Maprang (Maprang Agent Entry Point)
 
 Read [`agent.md`](./agent.md) before making changes in this repository.
 

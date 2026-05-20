@@ -1,4 +1,4 @@
-# Abuse QA Checklist
+# เช็กลิสต์ abuse QA (Abuse QA Checklist)
 
 ใช้หลัง automated gates ผ่านแล้ว และก่อนสรุป staging/production ว่าพร้อมเปิดจริง จุดประสงค์คือจับเคสที่ automation อาจไม่เห็น เช่น flow ข้ามบัญชี, prompt injection แบบสนทนาต่อเนื่อง, หรือ UI ที่รับข้อความยาว/แปลกจากผู้ใช้จริง
 

@@ -1,4 +1,4 @@
-# Maprang Evals
+# ชุดประเมินผล Maprang (Maprang Evals)
 
 โฟลเดอร์นี้เก็บชุดทดสอบคุณภาพแบบ deterministic และชุดที่อาจต่อกับ provider สำหรับ Maprang AI โดยเน้นตรวจการประกอบพรอมป์ บริบทโรลเพลย์ และ regression ของระบบความสัมพันธ์/ฉาก.
 

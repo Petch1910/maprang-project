@@ -1,4 +1,4 @@
-# Deploy บน Render
+# คู่มือ deploy บน Render
 
 เส้นทางนี้เหมาะเป็นเส้นทาง production แรก เพราะ Render โฮสต์ backend แบบ Docker service, frontend static site, และ managed Postgres ได้ในที่เดียว.
 

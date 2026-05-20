@@ -1,4 +1,4 @@
-# Working Context
+# บริบทงานปัจจุบัน (Working Context)
 
 Last updated: 2026-05-20
 

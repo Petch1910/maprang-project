@@ -1,4 +1,4 @@
-# Maprang Project
+# โปรเจกต์ Maprang (Maprang Project)
 
 แพลตฟอร์ม AI character chat ที่มี relationship state, scene events, creator tools, usage tracking, wallet ledger, และ production-ready auth/storage hooks.
 

@@ -1,4 +1,4 @@
-# QA Status
+# สถานะ QA (QA Status)
 
 Last updated: 2026-05-20
 
@@ -13,6 +13,7 @@ Last updated: 2026-05-20
 - Backend/frontend app README titles and env headings are Thai-first, verified with an English-only heading scan plus `memory:audit` and `predeploy:check`.
 - Memory vault and decision-record headings are Thai-first; `memory:audit` and `predeploy:check` pass, with only technical acronyms such as `API`/`URL` intentionally left as headings.
 - Render deploy guide, staging runbook, and abuse QA sign-off headings are Thai-first; heading scan, `predeploy:check`, and `memory:audit` pass.
+- Main document H1 titles are Thai-first while preserving searchable English names in parentheses; H1 scan, `predeploy:check`, `memory:audit`, and `knowledge:audit` pass.
 
 ## เกต local ล่าสุด (Gate local)
 

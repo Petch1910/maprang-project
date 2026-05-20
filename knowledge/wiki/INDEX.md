@@ -1,4 +1,4 @@
-# Wiki ความรู้ของ Maprang
+# วิกิความรู้ของ Maprang
 
 Wiki นี้คือชั้นที่มนุษย์อ่านได้ อยู่ระหว่าง raw notes และ structured runtime knowledge.
 
