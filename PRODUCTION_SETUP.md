@@ -96,12 +96,12 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 2. คัดลอก project URL ไปใส่ `SUPABASE_URL` และ `VITE_SUPABASE_URL`.
 3. ตั้ง `SUPABASE_JWT_ISSUER` เป็น `<SUPABASE_URL>/auth/v1`.
 4. คัดลอก anon public key ไปใส่ `VITE_SUPABASE_ANON_KEY` และ backend `SUPABASE_ANON_KEY`.
-5. คัดลอก service role key ไปใส่เฉพาะ backend-only `SUPABASE_SERVICE_ROLE_KEY`.
+5. คัดลอก service role key ไปใส่เฉพาะฝั่ง backend-only `SUPABASE_SERVICE_ROLE_KEY`.
 6. สร้าง storage bucket ชื่อ `avatars`.
 7. ตั้ง `SUPABASE_STORAGE_BUCKET=avatars`.
 8. เลือกรูปแบบ storage access:
    - Production: bucket private พร้อม `SUPABASE_STORAGE_ACCESS=signed`.
-   - Development only: code รองรับ public buckets ได้ แต่ production readiness จะ fail จนกว่าจะใช้ signed URLs.
+   - เฉพาะ development: code รองรับ public buckets ได้ แต่ production readiness จะล้มจนกว่าจะใช้ signed URLs.
 
 หลัง Supabase project พร้อมและ backend Supabase env ใช้ได้ในเครื่อง ให้ repo ตรวจหรือสร้าง bucket ได้ด้วย:
 
@@ -176,7 +176,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 SMOKE_API_BASE_URL=https://api.example.com bun run production:check
 ```
 
-ถ้าต้อง debug เฉพาะจุดหลัง gate fail ให้รันเฉพาะ path ที่ต้องใช้:
+ถ้าต้อง debug เฉพาะจุดหลัง gate ล้ม ให้รันเฉพาะ path ที่ต้องใช้:
 
 ```bash
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local
@@ -185,7 +185,7 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
-`production:check` คือ hard final gate. คำสั่งนี้จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้เห็น blocker summary และ next steps ก่อน strict smoke gates จะ fail. Gate นี้จะ fail ถ้า backend URL ยังเป็น local, auth ไม่ใช่ Supabase JWT, avatar storage ไม่ใช่ Supabase signed URL, bucket `avatars` จริง upload/fetch ผ่าน signed URLs ไม่ได้, CORS เป็น local หรือไม่ใช่ HTTPS, OpenRouter ยังไม่มี, image generation provider ยังไม่มี, หรือ live chat/image provider calls fail.
+`production:check` คือ gate สุดท้ายแบบเข้ม. คำสั่งนี้จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้เห็น blocker summary และ next steps ก่อน strict smoke gates จะล้ม. Gate นี้จะล้มถ้า backend URL ยังเป็น local, auth ไม่ใช่ Supabase JWT, avatar storage ไม่ใช่ Supabase signed URL, bucket `avatars` จริง upload/fetch ผ่าน signed URLs ไม่ได้, CORS เป็น local หรือไม่ใช่ HTTPS, OpenRouter ยังไม่มี, image generation provider ยังไม่มี, หรือ live chat/image provider calls ล้ม.
 
 ก่อนถึง final gate ให้ใช้ `staging:verify` กับ staging backend ที่ deploy แล้ว:
 
@@ -200,7 +200,7 @@ Workflow นี้ยังต้องมี `SMOKE_ADMIN_API_KEY` เพื่
 
 `smoke:chat` และ provider gate รวมอย่าง `api:smoke:live` จะเช็ก wallet ของผู้ใช้ smoke ก่อนเรียก OpenRouter ให้คงยอดผู้ใช้ smoke ไว้สูงกว่า `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` หรือปรับ threshold ถ้า prompt ทดสอบหนักกว่าเดิม ถ้า backend คืน `usage.providerFailure` แปลว่า route ติดต่อได้แล้ว แต่ live provider path ยังถูกบล็อกอยู่ ให้ตรวจเครดิต/โควตา OpenRouter, สิทธิ์โมเดล, ความถูกต้องของ key, outbound networking, และ backend logs ก่อน deploy.
 
-`smoke:image` ตรวจ image provider configuration โดย default จะไม่ใช้ image credits. ถ้าต้องการสร้าง avatar จริง 1 รูปบน staging/production ให้รัน `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1 bun run smoke:image`; คำสั่งนี้จะเรียก `/creator/ai-draft` และ fail ถ้า Creator Studio fallback ไปใช้ placeholder image.
+`smoke:image` ตรวจ image provider configuration โดยค่าเริ่มต้นจะไม่ใช้ image credits. ถ้าต้องการสร้าง avatar จริง 1 รูปบน staging/production ให้รัน `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1 bun run smoke:image`; คำสั่งนี้จะเรียก `/creator/ai-draft` และล้มถ้า Creator Studio fallback ไปใช้ placeholder image.
 
 สำหรับ production ให้ใช้ `SMOKE_ACCESS_TOKEN` จริงสำหรับ user flows และตั้ง `SMOKE_ADMIN_API_KEY` เสมอสำหรับ admin smoke checks. ถ้าใช้ `SMOKE_USER_ID` แทน access token ต้องตั้ง `SMOKE_ADMIN_API_KEY` ด้วย เพื่อให้ backend มอง header-based user id เป็น admin-only smoke path ไม่ใช่ public authentication.
 
