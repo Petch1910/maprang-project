@@ -1,6 +1,6 @@
 # Deploy บน Render
 
-เส้นทางนี้เหมาะเป็น production path แรก เพราะ Render โฮสต์ backend แบบ Docker service, frontend static site, และ managed Postgres ได้ในที่เดียว.
+เส้นทางนี้เหมาะเป็นเส้นทาง production แรก เพราะ Render โฮสต์ backend แบบ Docker service, frontend static site, และ managed Postgres ได้ในที่เดียว.
 
 ## 1. สร้าง Postgres
 
@@ -30,7 +30,7 @@ bun run frontend:check
 - Docker context: repository root
 - Health check path: `/ready`
 
-Backend environment:
+env ฝั่ง backend:
 
 ```bash
 NODE_ENV=production
@@ -83,7 +83,7 @@ migration set ปัจจุบันมี moderation reports และ admin 
 - Build command: `bun install --frozen-lockfile && bun run build`
 - Publish directory: `dist`
 
-Frontend environment:
+env ฝั่ง frontend:
 
 ```bash
 VITE_API_BASE_URL=https://<backend-domain>
@@ -91,7 +91,7 @@ VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY=<supabase-anon-key>
 ```
 
-หลังรู้ frontend URL แล้ว ให้ update backend `CORS_ORIGINS` ให้ตรงกับ HTTPS origin นั้นแบบ exact match.
+หลังรู้ frontend URL แล้ว ให้อัปเดต backend `CORS_ORIGINS` ให้ตรงกับ HTTPS origin นั้นแบบ exact match.
 
 ## 4. Supabase Storage
 
