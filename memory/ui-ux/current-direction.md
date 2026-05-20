@@ -8,25 +8,25 @@ Maprang ควรรู้สึกคุ้นมือสำหรับผู
 
 ## หลักการสำคัญ
 
-- Mobile-first.
-- Dark-first interface พร้อม visual language ที่ไปทางเดียวกันทั้งเว็บ.
-- Navigation หลักเป็นภาษาไทย.
+- ออกแบบมือถือก่อนเสมอ.
+- หน้าตาโทนมืดเป็นหลัก พร้อมภาษาภาพที่ไปทางเดียวกันทั้งเว็บ.
+- การนำทางหลักเป็นภาษาไทย.
 - เมนูต้องครบและกดแล้วเกิดผลจริง ไม่ใช่องค์ประกอบตกแต่ง.
-- Empty state ต้องบอกว่าผู้ใช้ควรทำอะไรต่อ.
+- สถานะว่างต้องบอกว่าผู้ใช้ควรทำอะไรต่อ.
 - Chat ต้องรู้สึกธรรมชาติและคุ้นมือ ก่อนที่ระบบขั้นสูงจะปรากฏ.
-- Relationship และ scene features ควรรู้สึกเหมือน game-layer feedback ไม่ใช่ความรกบนหน้าจอ.
+- ระบบ Relationship และ Scene ควรรู้สึกเหมือน feedback ชั้นเกม ไม่ใช่ความรกบนหน้าจอ.
 
 ## พื้นผิวหลัก
 
-- Explore: discovery, continue chatting, character rows.
-- Character Lobby: relationship seed contract ก่อนเข้าแชท.
-- Chat Room: แชทปกติต้องมาก่อน และ scene mode แสดงเฉพาะเมื่อเกี่ยวข้อง.
-- Creator Studio: creation flow ที่คุ้นแบบ Khuiai พร้อม personality clarity, tag warnings, image/content AI draft, preview simulator.
-- My Chats: จัดการแชทจริงด้วย rename, pin/unpin, archive, delete, report paths.
-- Wallet: token balance, usage, admin adjustment guard.
+- Explore: สำรวจตัวละคร, เล่นต่อจากแชทเดิม, และแถวตัวละครที่สแกนง่าย.
+- Character Lobby: เลือกจุดเริ่มต้นความสัมพันธ์ก่อนเข้าแชท.
+- Chat Room: แชทปกติต้องมาก่อน และโหมดฉากแสดงเฉพาะเมื่อเกี่ยวข้อง.
+- Creator Studio: ลำดับสร้างที่คุ้นแบบ Khuiai พร้อมบุคลิกชัด, คำเตือนแท็ก, AI ร่างรูป/เนื้อหา, และตัวลองบท.
+- My Chats: จัดการแชทจริงด้วยแก้ชื่อ, ปักหมุด/ถอนหมุด, จัดเก็บ, ลบ, และ report paths.
+- Wallet: ยอดโทเคน, ประวัติใช้งาน, และ guard สำหรับการปรับโทเคนโดยผู้ดูแล.
 - Admin Health: deploy blockers ด้วยภาษาที่อ่านง่าย.
-- Prompt Inspector: เครื่องมือ admin-only สำหรับดู prompt snapshot/diff เพื่อ debug ความลึกของคำตอบ, lore retrieval, และ context drift.
-- Automated Evals: deterministic quality checks แบบ admin-only สำหรับ regression ของ prompt/context ก่อน staging.
+- Prompt Inspector: เครื่องมือเฉพาะผู้ดูแลสำหรับดูภาพรวม/ส่วนต่างของพรอมป์ที่ปิดข้อมูลลับแล้ว เพื่อ debug ความลึกของคำตอบ, การดึงคลังความรู้, และบริบทที่เลื่อนเพี้ยน.
+- Automated Evals: ชุดทดสอบคุณภาพแบบผลซ้ำได้สำหรับผู้ดูแล เพื่อจับ regression ของพรอมป์/บริบทก่อน staging.
 
 ## UX concern ปัจจุบัน
 
@@ -36,10 +36,10 @@ Maprang ควรรู้สึกคุ้นมือสำหรับผู
 
 - Explore รองรับ mobile primary navigation ด้วย bottom nav สำหรับ Explore, Chats, Create, Events, และ Profile.
 - Chat read mode ไม่ใช่ของตกแต่งแล้ว: top bar และ right-rail control toggle reading layout ได้จริง, แสดง reading-state notice, และทำให้ message area แคบลงเพื่ออ่านฉากยาว.
-- E2E smoke ตรวจ mobile Explore navigation และ Chat read mode บน desktop/mobile แล้ว.
-- Prompt Inspector มี guarded admin UI ที่ `/admin/prompt-inspector` พร้อม character selection, งบ section, diff, lore retrieval, warnings, และ prompt copy แบบ redacted.
-- Automated Evals มี guarded admin UI ที่ `/admin/evals` พร้อม suite summary, scenario accordion, per-check status, และ failure summary.
-- Route/Menu Audit และ Admin Health ใช้ Thai-first labels และทำให้สถานะ route/menu หลักชัดเจน: ready, guarded by admin key, หรือ waiting for real staging.
-- My Chats และ Chat sidebar มี three-dot menu flows จริงสำหรับ rename, pin/unpin, archive/restore, delete, selection mode, และ bulk actions พร้อม desktop/mobile e2e coverage.
-- Wallet แสดง token balance, model cost breakdown, seven-day trend, transactions, และ admin adjustment guards ด้วย backend data จาก QA seed.
-- Browser e2e smoke ล่าสุดผ่าน desktop/mobile สำหรับ core flows และ primary routes ทั้งหมด โดยไม่มี console errors หรือ horizontal overflow ที่เกี่ยวข้อง.
+- E2E smoke ตรวจการนำทาง Explore บนมือถือ และโหมดอ่านของ Chat บนจอเดสก์ท็อป/มือถือแล้ว.
+- Prompt Inspector มี UI เฉพาะผู้ดูแลที่ `/admin/prompt-inspector` พร้อมเลือกตัวละคร, งบแต่ละส่วน, ส่วนต่างพรอมป์, คลังความรู้ที่ดึงมาใช้, คำเตือน, และคัดลอกพรอมป์ที่ปิดข้อมูลลับแล้ว.
+- Automated Evals มี UI เฉพาะผู้ดูแลที่ `/admin/evals` พร้อมสรุปชุดทดสอบ, แผงพับแต่ละสถานการณ์, สถานะรายข้อ, และสรุปจุดไม่ผ่าน.
+- Route/Menu Audit และ Admin Health ใช้ label แบบ Thai-first และทำให้สถานะ route/menu หลักชัดเจน: พร้อมใช้, guard ด้วยคีย์ผู้ดูแล, หรือรอ staging จริง.
+- My Chats และ Chat sidebar มี flow เมนูสามจุดจริงสำหรับแก้ชื่อ, ปักหมุด/ถอนหมุด, จัดเก็บ/กู้คืน, ลบ, โหมดเลือก, และคำสั่งหลายรายการ พร้อม e2e coverage บนจอเดสก์ท็อป/มือถือ.
+- Wallet แสดงยอดโทเคน, ต้นทุนแยกตามโมเดล, แนวโน้ม 7 วัน, ธุรกรรม, และ guard สำหรับการปรับโทเคนโดยผู้ดูแลด้วยข้อมูลจาก QA seed.
+- Browser e2e smoke ล่าสุดผ่านจอเดสก์ท็อป/มือถือสำหรับ core flows และ primary routes ทั้งหมด โดยไม่มี console errors หรือการล้นแนวนอนที่เกี่ยวข้อง.
