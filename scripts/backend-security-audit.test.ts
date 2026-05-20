@@ -74,7 +74,7 @@ describe('backend security audit', () => {
             return { ok: true }
           })
       `),
-    ).toContain('admin route ยังไม่มี requireAdminApiKey guard ใน route handler block.')
+    ).toContain('route ผู้ดูแลยังไม่มี requireAdminApiKey guard ใน block ของ handler.')
   })
 
   test('allows admin routes with admin api key guards', () => {
@@ -97,7 +97,7 @@ describe('backend security audit', () => {
             return prisma.character.findFirst({ where: { id: params.id } })
           })
       `),
-    ).toContain('route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึง resource.')
+    ).toContain('route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึงข้อมูล.')
   })
 
   test('allows resource id routes with UUID guards', () => {

@@ -347,3 +347,4 @@ Last updated: 2026-05-20
 - Route/menu doc-check diagnostics Thai-first pass: ปรับข้อความ fail ของ `routeMenuAuditRows` จำนวนแถวน้อย, area/route ซ้ำ, และ `App.tsx` ไม่มี route ให้เป็นไทยนำ พร้อม regression test ใน `route-menu:audit:test`.
 - Frontend static audit diagnostics Thai-first pass: เปลี่ยนข้อความ fail สำหรับลิงก์ `#`, Router `#`, `not implemented`, และข้อความรอทำให้สื่อว่าเป็นค่าตัวอย่าง/ปุ่มตันชัดขึ้น พร้อม `frontend:static:audit:test`.
 - API route audit CLI wording Thai-first pass: เปลี่ยน summary จาก `routes` เป็น "รายการ" และเกลา failure headings ของ coverage map/source ให้เป็น "ตาราง coverage"/"ไฟล์ route" พร้อม `api:audit:test`.
+- Backend security audit diagnostics Thai-first pass: เกลา admin guard และ UUID guard failure copy จาก `admin route`/`resource` เป็นไทยนำ พร้อม `security:audit:test`.

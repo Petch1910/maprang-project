@@ -86,7 +86,7 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     findings.push({
       file,
       line: lineFor(content, match.index ?? 0),
-      message: 'admin route ยังไม่มี requireAdminApiKey guard ใน route handler block.',
+      message: 'route ผู้ดูแลยังไม่มี requireAdminApiKey guard ใน block ของ handler.',
     })
   }
 
@@ -95,7 +95,7 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     findings.push({
       file,
       line: lineFor(content, match.index ?? 0),
-      message: 'route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึง resource.',
+      message: 'route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึงข้อมูล.',
     })
   }
 

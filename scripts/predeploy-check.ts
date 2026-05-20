@@ -1138,7 +1138,7 @@ const checks: Check[] = [
           'apps/backend/index.ts',
           'scannedTargets',
           'adminRoutePattern',
-          'admin route ยังไม่มี requireAdminApiKey guard',
+          'route ผู้ดูแลยังไม่มี requireAdminApiKey guard',
           'uuidParamRoutePattern',
           'route ที่มี /:id ยังไม่มี rejectInvalidUuid guard',
           'rawRouteErrorResponsePattern',
