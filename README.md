@@ -185,6 +185,8 @@ bun run qa:repo
 bun run qa:local
 ```
 
+`qa:local` เริ่มจาก `qa:repo` เสมอ แล้วค่อยต่อ `smoke:doctor`, `smoke:local`, และ `api:smoke` เฉพาะส่วน runtime ที่ต้องมี backend/Postgres เปิดอยู่จริง เพื่อลดรายการเช็คซ้ำและกัน QA gate drift ระยะยาว.
+
 ใช้คำสั่งนี้เป็น local readiness gate ปกติ. มันตรวจ secrets, regression tests สำหรับ secret-pattern, memory/knowledge audits, deterministic prompt/context evals, API route coverage mapping, import-cycle architecture audit, deploy/predeploy wiring, backend tests, frontend build, backend root identity, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, และ avatar upload. Local API smoke จะข้าม external image provider สำหรับ creator draft checks เพื่อให้ routine QA deterministic; live avatar generation จะตรวจเฉพาะใน `api:smoke:live`, `smoke:image:live`, หรือ `production:check`.
 ขั้น local smoke ท้าย ๆ ต้องมี Docker Desktop/Postgres ที่รันอยู่ และ backend ต้องตอบที่ `http://127.0.0.1:3000`; ถ้า Docker หยุดหรือ backend ยังไม่ได้ start, `smoke:doctor` จะ fail ก่อน API smoke จะรัน.
 มันยัง audit project memory vault และ runtime knowledge packs เพื่อไม่ให้ long-running context เสีย required files หรือมี secret-shaped values หลุดเข้าไปเงียบ ๆ.

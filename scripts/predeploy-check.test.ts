@@ -35,9 +35,17 @@ describe('predeploy check wiring', () => {
     const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
     const productionSmoke = await readRepoFile('.github/workflows/production-smoke.yml')
 
+    const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
+    const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
+    const qaLocalCoverage = `${qaRepo} ${qaLocal}`
+
     expect(packageJson.scripts?.['predeploy:check:test']).toBe('bun test scripts/predeploy-check.test.ts')
-    expect(packageJson.scripts?.['qa:local']).toContain('bun run predeploy:check:test')
-    expect(packageJson.scripts?.['qa:local']).toContain('bun run deploy:doctor:self-test')
+    expect(qaLocal).toContain('bun run qa:repo')
+    expect(qaLocal).toContain('bun run smoke:doctor')
+    expect(qaLocal).toContain('bun run smoke:local')
+    expect(qaLocal).toContain('bun run api:smoke')
+    expect(qaLocalCoverage).toContain('bun run predeploy:check:test')
+    expect(qaLocalCoverage).toContain('bun run deploy:doctor:self-test')
     expect(ciWorkflow).toContain('bun run predeploy:check:test')
     expect(ciWorkflow).toContain('bun run deploy:doctor:self-test')
     expect(productionSmoke).toContain('bun run predeploy:check:test')

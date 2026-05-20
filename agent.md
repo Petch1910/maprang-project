@@ -153,6 +153,8 @@ bun run import-cycle:audit
 git diff --check
 ```
 
+`qa:repo` คือ deterministic repo-owned gate ที่ไม่ต้องมี runtime service; `qa:local` เรียก `qa:repo` ก่อน แล้วค่อยต่อ smoke runtime ที่ต้องมี backend/Postgres จริง.
+
 ก่อน production/staging:
 
 ```bash
