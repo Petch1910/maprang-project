@@ -70,7 +70,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'POST /creator/ai-draft': {
     owner: 'creator',
     coverage: ['smoke', 'live-smoke', 'backend-test'],
-    note: 'api-smoke verifies draft text; smoke:image:live verifies real image provider when billing/quota allows it',
+    note: 'api-smoke ตรวจเนื้อหาร่าง; smoke:image:live ตรวจผู้ให้บริการสร้างรูปจริงเมื่อวงเงินและโควตาพร้อม',
   },
   'GET /relationship/presets': {
     owner: 'relationship',

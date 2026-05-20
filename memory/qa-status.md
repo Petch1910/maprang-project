@@ -164,6 +164,7 @@ Results:
 - CI predeploy now runs `release:handoff:check`, `release:handoff:test`, and `secrets:patterns:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
 - API route audit now auto-discovers `apps/backend/index.ts` plus backend `*.routes.ts` files, covers `GET /`, and API smoke, local smoke, plus browser e2e smoke verify the root `maprang-backend` identity response; `api:audit:test` now locks discovery and root coverage.
+- API route audit Creator AI draft coverage note now passes Thai-first wording through `api:audit:test`, `api:audit`, and `predeploy:check`.
 - Security audit now scans `apps/backend/index.ts` plus backend source/prisma files.
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.
 - Security audit now fails if a backend `/:id` route block is missing `rejectInvalidUuid`.
