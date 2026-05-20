@@ -47,6 +47,7 @@ Results:
 - Secrets check: pass.
 - Memory audit: pass.
 - Knowledge audit: pass.
+- Memory/knowledge audit diagnostic localization: pass via `vault:audit:test`, `memory:audit`, and `knowledge:audit`.
 - Production deploy knowledge wiki: updated to reflect reply-budget gates and staging/deploy-status order.
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.

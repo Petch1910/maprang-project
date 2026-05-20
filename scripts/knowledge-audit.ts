@@ -52,14 +52,14 @@ async function walkKnowledgeFiles(dir: string, files: string[] = []) {
 
 function requireIncludes(content: string, values: string[], file: string, findings: string[]) {
   const missing = missingIncludes(content, values)
-  if (missing.length > 0) findings.push(`${file} is missing ${missing.join(', ')}`)
+  if (missing.length > 0) findings.push(`${file} ยังไม่มี ${missing.join(', ')}`)
 }
 
 export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResult> {
   const findings: string[] = []
 
   for (const file of requiredFiles) {
-    await assertFile(file).catch(() => findings.push(`missing required knowledge file: ${file}`))
+    await assertFile(file).catch(() => findings.push(`ยังไม่มี knowledge file ที่จำเป็น: ${file}`))
   }
 
   const readme = await readRepoFile('knowledge/README.md')
@@ -85,7 +85,7 @@ export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResul
 
     for (const forbidden of secretPatterns) {
       if (forbidden.pattern.test(content)) {
-        findings.push(`${relativePath}: contains ${forbidden.name}`)
+        findings.push(`${relativePath}: พบ ${forbidden.name}`)
       }
     }
 
@@ -93,18 +93,18 @@ export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResul
       for (const target of collectLocalMarkdownLinks(content)) {
         const resolved = resolve(dirname(file), target)
         if (!pathIsInside(knowledgeRoot, resolved)) {
-          findings.push(`${relativePath}: link escapes knowledge vault: ${target}`)
+          findings.push(`${relativePath}: link ออกนอก knowledge vault: ${target}`)
           continue
         }
-        await access(resolved).catch(() => findings.push(`${relativePath}: broken local link: ${target}`))
+        await access(resolved).catch(() => findings.push(`${relativePath}: local link เสีย: ${target}`))
       }
     }
   }
 
   const structured = loadStructuredKnowledge({ force: true }).status
   if (!structured.ok) {
-    for (const missing of structured.missing) findings.push(`structured knowledge missing: ${missing}`)
-    for (const error of structured.errors) findings.push(`structured knowledge invalid: ${error}`)
+    for (const missing of structured.missing) findings.push(`structured knowledge ยังไม่มี: ${missing}`)
+    for (const error of structured.errors) findings.push(`structured knowledge ไม่ถูกต้อง: ${error}`)
   }
 
   return {
@@ -121,12 +121,12 @@ export async function runKnowledgeAudit(
 ) {
   const result = await collectKnowledgeAuditResult()
   if (!result.ok) {
-    writeError('Knowledge audit failed:')
+    writeError('Knowledge audit ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ok - knowledge audit passed (${result.files} knowledge files, ${result.structuredPacks} structured packs)`)
+  writeLine(`ok - knowledge audit ผ่านแล้ว (${result.files} knowledge files, ${result.structuredPacks} structured packs)`)
   return 0
 }
 

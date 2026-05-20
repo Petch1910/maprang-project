@@ -49,7 +49,7 @@ async function walkMarkdown(dir: string, files: string[] = []) {
 function requireIncludes(content: string, values: string[], file: string) {
   const missing = missingIncludes(content, values)
   if (missing.length > 0) {
-    throw new Error(`${file} is missing ${missing.join(', ')}`)
+    throw new Error(`${file} ยังไม่มี ${missing.join(', ')}`)
   }
 }
 
@@ -57,7 +57,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
   const findings: string[] = []
 
   for (const file of requiredFiles) {
-    await assertFile(file).catch(() => findings.push(`missing required memory file: ${file}`))
+    await assertFile(file).catch(() => findings.push(`ยังไม่มี memory file ที่จำเป็น: ${file}`))
   }
 
   const readme = await readRepoFile('memory/README.md')
@@ -82,17 +82,17 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
     const content = await readFile(file, 'utf8')
     for (const forbidden of secretPatterns) {
       if (forbidden.pattern.test(content)) {
-        findings.push(`${relativePath}: contains ${forbidden.name}`)
+        findings.push(`${relativePath}: พบ ${forbidden.name}`)
       }
     }
 
     for (const target of collectLocalMarkdownLinks(content)) {
       const resolved = resolve(dirname(file), target)
       if (!pathIsInside(memoryRoot, resolved)) {
-        findings.push(`${relativePath}: link escapes memory vault: ${target}`)
+        findings.push(`${relativePath}: link ออกนอก memory vault: ${target}`)
         continue
       }
-      await access(resolved).catch(() => findings.push(`${relativePath}: broken local link: ${target}`))
+      await access(resolved).catch(() => findings.push(`${relativePath}: local link เสีย: ${target}`))
     }
   }
 
@@ -105,12 +105,12 @@ export async function runMemoryAudit(
 ) {
   const result = await collectMemoryAuditResult()
   if (!result.ok) {
-    writeError('Memory audit failed:')
+    writeError('Memory audit ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ok - memory audit passed (${result.files} markdown files)`)
+  writeLine(`ok - memory audit ผ่านแล้ว (${result.files} markdown files)`)
   return 0
 }
 

@@ -86,6 +86,7 @@ Verified:
 - Route/menu audit exists and is wired into QA.
 - Security audit, route audit, deploy env doctor self-test, and predeploy check pass.
 - Project memory, runtime knowledge, and deterministic prompt/context evals are part of the local QA gate.
+- Memory and knowledge vault audits now use Thai-first diagnostics for missing required files/snippets, secret-shaped content, local link escapes/breaks, structured knowledge errors, and pass/fail summaries.
 - Backend health/readiness now reports structured knowledge pack status.
 - Chat provider failures are typed as `providerFailure`, returned with zero usage/cost, surfaced in Chat UI, and read directly by live smoke scripts.
 - Roleplay reply depth defaults now favor longer Thai roleplay turns: `MODEL_MAX_OUTPUT_TOKENS=1600`, `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420`, stronger default system prompt guidance, and a larger continuation budget when the first reply is too short.
