@@ -27,15 +27,17 @@ describe('live chat smoke helpers', () => {
   })
 
   test('validates smoke token balance before spending provider credits', () => {
-    expect(() => assertSmokeUserHasTokenBalance(999, 1000)).toThrow('เติม token ให้ผู้ใช้ smoke')
+    expect(() => assertSmokeUserHasTokenBalance(999, 1000)).toThrow('เติมโทเคนให้ผู้ใช้ smoke')
     expect(assertSmokeUserHasTokenBalance(1000, 1000)).toBeUndefined()
   })
 
   test('reports provider failures before empty replies', () => {
     const issue = providerFailureIssue({ retryable: false })
     expect(issue).toContain('ไม่ทราบรหัส')
+    expect(issue).toContain('ตรวจแชทจริง')
     expect(issue).toContain('การเชื่อมต่อออกไป OpenRouter')
     expect(issue).toContain('log ระบบหลังบ้าน')
+    expect(issue).not.toContain('ตรวจ live chat')
     expect(issue).not.toContain('unknown')
     expect(issue).not.toContain('outbound network')
     expect(issue).not.toContain('backend logs')
@@ -60,7 +62,7 @@ describe('live chat smoke helpers', () => {
       'ไม่ได้สร้าง chat id',
     )
     expect(() => validateLiveChatSmokeResponse({ reply: 'hello', chatId: 'chat-1', usage: { totalTokens: 42 } }, 420)).toThrow(
-      'สั้นเกินไป',
+      'คำตอบแชทจริงสั้นเกินไป',
     )
   })
 
@@ -216,7 +218,7 @@ describe('live chat smoke helpers', () => {
     expect(exitCode).toBe(1)
     expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/me/usage'])
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('เติม token ให้ผู้ใช้ smoke')
+    expect(errors.join('\n')).toContain('เติมโทเคนให้ผู้ใช้ smoke')
     expect(errors.join('\n')).not.toContain('เติม token ให้ smoke user')
   })
 })
