@@ -42,6 +42,7 @@ Results:
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Frontend static audit diagnostic localization: pass via `frontend:static:audit:test`, `frontend:check`, and `predeploy:check`.
 - Frontend route audit and bundle budget diagnostic localization: pass via `frontend:route:audit:test`, `frontend:bundle:test`, and `frontend:check`.
+- Predeploy/API smoke/audit summary prefix localization: pass via `predeploy:check:test`, `api:smoke:test`, `frontend:bundle:test`, `api:audit:test`, `security:audit:test`, `frontend:static:audit:test`, `frontend:route:audit:test`, `import-cycle:audit:test`, `vault:audit:test`, `release:handoff:test`, `route-menu:audit:test`, `deploy:doctor:self-test`, `memory:audit`, `knowledge:audit`, `release:handoff:check`, `api:audit`, `security:audit`, `import-cycle:audit`, `route-menu:audit`, and `predeploy:check`.
 - Full local QA was rerun after the latest Thai UI copy guards and route/menu mixed-language guard; `qa:local` still passes across backend, frontend, local smoke, and API smoke.
 - Full local QA was rerun after the latest Thai-first frontend/admin copy and Creator Draft image-provider copy passes; `qa:local` still passes across backend, frontend, local smoke, API smoke, audits, evals, and predeploy.
 - Secrets check: pass.
@@ -148,6 +149,7 @@ Results:
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.
 - API smoke now covers `/chat/stream` SSE shape on an uncharged validation path.
 - API smoke validation-path provider-failure diagnostics now pass `api:smoke:test` and `predeploy:check`.
+- API smoke endpoint assertion diagnostics now pass Thai-first coverage via `api:smoke:test`, `predeploy:check`, `secrets:check`, and `git diff --check`; full `api:smoke` still waits for the local backend/Postgres runtime when not already running.
 - Roleplay depth budget bump to 1600/420: pass via backend chat/env/health tests, live chat smoke helper test, deploy doctor test, and API smoke helper test.
 - Runtime prompt depth alignment: pass via `context.service.test`, `chat.runtime.test`, `knowledge:audit`, and `predeploy:check`; predeploy now blocks stale shorter 3-6/4-sentence/7-12-sentence guidance from returning.
 - Production reply budget env guard: pass via `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`; deploy doctor now fails values below 1200 output tokens or 320 roleplay reply characters.

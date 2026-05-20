@@ -26,6 +26,7 @@ Verified:
 - Frontend static audit now guards a focused set of English UI label regressions for Thai-first pages, including Admin Health, Prompt Inspector, Automated Evals, Relationship Contract, Chat budget, Supabase/Auth labels, and route/menu surface names.
 - Frontend static audit diagnostics now report Thai-first failure messages for button accessibility, placeholder controls, raw error exposure, ApiError fallback, mixed UI copy, mojibake, and stale Vite starter files.
 - Frontend route audit and bundle budget CLI output now report Thai-first pass/fail guidance while keeping exact file, route, and chunk names for debugging.
+- Predeploy, API smoke, bundle budget, audit, eval, memory, knowledge, release handoff, route/menu, and deploy doctor self-test CLI summaries now use Thai-first pass/fail prefixes instead of `ok -` or `fail -`, with focused regression tests on the changed runners.
 - Predeploy now verifies the Relationship Contract Thai-first regression guard remains wired into the frontend static audit source and tests.
 - Frontend Thai polish now removes mixed English debug wording such as prompt-control, token budget, relationship state, scene state, system relationship, anchor, hook, fallback, disabled, and eval from user-facing admin/chat surfaces plus route/menu docs; static audit and predeploy guard those phrases from returning.
 - Frontend Redux fallback errors for failed character/chat loading are now Thai-first, and the static audit blocks the old `Could not load...` copy from returning.
@@ -183,6 +184,7 @@ Verified:
 - API smoke now reuses the shared live chat/image provider helpers so live chat provider failures are reported before empty-reply checks and image failure hints stay aligned across smoke scripts.
 - Live chat and live image smoke now validate backend root identity before health/provider checks, preventing provider credits from being spent against the wrong deployed target.
 - API smoke readiness/image helper logic now lives in `scripts/api-smoke-helpers.ts`, and the main smoke flow exports importable `runApiSmoke` plus `buildApiSmokeSummary` helpers so CI/dashboard code can import and summarize smoke output without executing network checks; `api:smoke:test` guards live-verification-only readiness, image provider hints, safe JSON parsing, summary counts, and runner import safety without hitting a backend.
+- API smoke endpoint assertion diagnostics now use Thai-first wording for health/readiness, wallet usage, persona, relationship presets, character/lore CRUD, chat/menu/world-state validation, admin checks, SSE parsing, and expected-error validation while preserving exact endpoint names and machine-readable codes.
 - Production checklist memory now includes deploy doctor/status review, live API smoke, and production-data safety guidance, and predeploy guards those handoff notes from drifting.
 - Production deploy knowledge wiki now documents reply-budget baselines/recommendations and the deploy-status-first staging gate order.
 
