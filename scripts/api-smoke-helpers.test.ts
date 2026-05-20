@@ -22,9 +22,11 @@ describe('api smoke helpers', () => {
   })
 
   test('builds image provider issues with actionable hints', () => {
-    expect(creatorImageIssue({ warnings: ['billing_hard_limit_reached'] })).toContain('billing limit')
-    expect(creatorImageIssue({ image: { note: '403 invalid api key' } })).toContain('backend-only image provider key ที่ถูกต้อง')
-    expect(creatorImageIssue({})).toBe('image provider ไม่ได้คืนรูปที่ generate แล้ว')
+    expect(creatorImageIssue({ warnings: ['billing_hard_limit_reached'] })).toContain('เพดานวงเงิน')
+    expect(creatorImageIssue({ image: { note: '403 invalid api key' } })).toContain(
+      'คีย์ฝั่งระบบหลังบ้านสำหรับสร้างรูปที่ถูกต้อง',
+    )
+    expect(creatorImageIssue({})).toBe('ผู้ให้บริการสร้างรูปไม่ได้คืนรูปที่สร้างเสร็จแล้ว')
   })
 
   test('parses JSON safely for API smoke response helpers', () => {

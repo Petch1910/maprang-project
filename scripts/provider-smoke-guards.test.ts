@@ -26,9 +26,9 @@ describe('provider smoke guard helpers', () => {
   })
 
   test('maps image provider failures to actionable fixes', () => {
-    expect(providerFailureHint('billing_hard_limit_reached')).toContain('billing limit')
-    expect(providerFailureHint('insufficient_quota')).toContain('เครดิต/quota')
-    expect(providerFailureHint('403 invalid api key')).toContain('backend-only image provider key ที่ถูกต้อง')
+    expect(providerFailureHint('billing_hard_limit_reached')).toContain('เพดานวงเงิน')
+    expect(providerFailureHint('insufficient_quota')).toContain('เครดิต/โควตา')
+    expect(providerFailureHint('403 invalid api key')).toContain('คีย์ฝั่งระบบหลังบ้านสำหรับสร้างรูปที่ถูกต้อง')
     expect(providerFailureHint('model unavailable')).toContain('IMAGE_GENERATION_MODEL')
     expect(providerFailureHint('temporary upstream error')).toBe('')
   })

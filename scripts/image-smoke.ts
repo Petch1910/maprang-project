@@ -55,16 +55,16 @@ export function shouldRunLiveImageSmoke(argv = process.argv, env = process.env) 
 export function providerFailureHint(message: string) {
   const normalized = message.toLowerCase()
   if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
-    return ' | วิธีแก้: เพิ่มหรือรีเซ็ต billing limit ของ image provider แล้วรัน `bun run smoke:image:live` ใหม่'
+    return ' | วิธีแก้: เพิ่มหรือรีเซ็ตเพดานวงเงินของผู้ให้บริการสร้างรูป แล้วรัน `bun run smoke:image:live` ใหม่'
   }
   if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
-    return ' | วิธีแก้: เติมเครดิต/quota ของ image provider แล้วรัน `bun run smoke:image:live` ใหม่'
+    return ' | วิธีแก้: เติมเครดิต/โควตาของผู้ให้บริการสร้างรูป แล้วรัน `bun run smoke:image:live` ใหม่'
   }
   if (normalized.includes('401') || normalized.includes('403') || normalized.includes('invalid api key')) {
-    return ' | วิธีแก้: เปลี่ยน IMAGE_GENERATION_API_KEY/OPENAI_API_KEY เป็น backend-only image provider key ที่ถูกต้อง'
+    return ' | วิธีแก้: เปลี่ยน IMAGE_GENERATION_API_KEY/OPENAI_API_KEY เป็นคีย์ฝั่งระบบหลังบ้านสำหรับสร้างรูปที่ถูกต้อง'
   }
   if (normalized.includes('model')) {
-    return ' | วิธีแก้: ตรวจ IMAGE_GENERATION_MODEL และสิทธิ์ของบัญชี provider ว่าใช้ image model นั้นได้'
+    return ' | วิธีแก้: ตรวจ IMAGE_GENERATION_MODEL และสิทธิ์บัญชีผู้ให้บริการว่าสร้างรูปด้วยโมเดลนั้นได้'
   }
   return ''
 }
@@ -79,7 +79,7 @@ export function buildSkippedImageSmokePayload(health: ImageSmokeHealthPayload, b
     imageStatus: health.model?.imageGeneration?.status ?? null,
     imageProductionReady: health.model?.imageGeneration?.productionReady ?? false,
     skipped:
-      'ข้าม live provider call แล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อ generate รูปจริงตอน staging/production QA',
+      'ข้ามการเรียกสร้างรูปจริงแล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อสร้างรูปจริงตอน staging/production QA',
   }
 }
 
@@ -87,15 +87,15 @@ export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   if (draft.image?.provider !== 'configured') {
     const warnings = draft.warnings?.filter(Boolean).join('; ')
     const issue = warnings || draft.image?.note || 'no warnings'
-    return `Image smoke กลับไปใช้ placeholder: ${issue}${providerFailureHint(issue)}`
+    return `Image smoke กลับไปใช้ภาพตัวอย่างระบบ: ${issue}${providerFailureHint(issue)}`
   }
 
   if (!draft.image.url) {
-    return 'Image smoke ใช้ provider ที่ตั้งค่าแล้ว แต่ไม่มี image URL'
+    return 'Image smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป'
   }
 
   if (draft.image.url.startsWith('data:image/svg+xml')) {
-    return 'Image smoke ได้ local placeholder SVG แทนรูปที่ generate จริง'
+    return 'Image smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ'
   }
 
   return null

@@ -45,7 +45,7 @@ describe('image smoke helpers', () => {
       imageStatus: 'needs_live_smoke',
       imageProductionReady: false,
       skipped:
-        'ข้าม live provider call แล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อ generate รูปจริงตอน staging/production QA',
+        'ข้ามการเรียกสร้างรูปจริงแล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อสร้างรูปจริงตอน staging/production QA',
     })
   })
 
@@ -54,16 +54,16 @@ describe('image smoke helpers', () => {
       liveImageDraftFailure({
         image: { provider: 'placeholder', note: 'billing_hard_limit_reached' },
       }),
-    ).toContain('billing limit')
+    ).toContain('เพดานวงเงิน')
 
     expect(liveImageDraftFailure({ image: { provider: 'configured' } })).toBe(
-      'Image smoke ใช้ provider ที่ตั้งค่าแล้ว แต่ไม่มี image URL',
+      'Image smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป',
     )
     expect(
       liveImageDraftFailure({
         image: { provider: 'configured', url: 'data:image/svg+xml;base64,abc' },
       }),
-    ).toBe('Image smoke ได้ local placeholder SVG แทนรูปที่ generate จริง')
+    ).toBe('Image smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ')
   })
 
   test('formats successful live-image payload and classifies generated URL kind', () => {
@@ -163,7 +163,7 @@ describe('image smoke helpers', () => {
 
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('billing limit')
+    expect(errors.join('\n')).toContain('เพดานวงเงิน')
   })
 
   test('validates backend root identity before image provider checks', async () => {
