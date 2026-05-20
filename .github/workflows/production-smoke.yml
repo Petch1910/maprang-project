@@ -8,17 +8,17 @@ on:
         required: false
         type: string
       run_chat:
-        description: รัน live AI chat smoke ด้วย คำสั่งนี้ใช้เครดิตผู้ให้บริการจริง
+        description: รันทดสอบแชทจริงกับ AI คำสั่งนี้ใช้เครดิตผู้ให้บริการจริง
         required: true
         default: false
         type: boolean
       run_image:
-        description: รัน live image generation smoke ด้วย คำสั่งนี้ใช้เครดิตสร้างรูปจริง
+        description: รันทดสอบสร้างรูปจริง คำสั่งนี้ใช้เครดิตสร้างรูปจริง
         required: true
         default: false
         type: boolean
       min_token_balance_for_chat:
-        description: ยอดโทเคนขั้นต่ำของ smoke user ก่อนรัน live chat smoke ที่ใช้เครดิตผู้ให้บริการจริง
+        description: ยอดโทเคนขั้นต่ำของผู้ใช้ smoke ก่อนรันทดสอบแชทจริงที่ใช้เครดิตผู้ให้บริการจริง
         required: true
         default: '1000'
         type: string
