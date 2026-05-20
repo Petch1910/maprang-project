@@ -40,7 +40,7 @@ const adminRoutePattern =
   /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/admin\b[^'"`]*\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
 const uuidParamRoutePattern =
   /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/[^'"`]*\/:id(?:\/[^'"`]*)?\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
-const rawRouteErrorResponsePattern = /return\s+\{\s*error:\s*(['"`])[a-z0-9_]+\1\s*\}/g
+const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 
 const patterns = [
   {

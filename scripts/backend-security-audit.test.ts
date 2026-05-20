@@ -107,15 +107,23 @@ describe('backend security audit', () => {
   })
 
   test('catches route error responses without Thai-first messages', () => {
-    expect(
-      messagesFor(`
-        export const reportRoutes = new Elysia()
-          .post('/reports', ({ set }) => {
-            set.status = 503
-            return { error: 'database_not_configured' }
-          })
-      `, 'report.routes.ts'),
-    ).toContain('route error response is missing a Thai-first message; use routeErrorResponse or include message.')
+    const literalMessages = messagesFor(`
+      export const reportRoutes = new Elysia()
+        .post('/reports', ({ set }) => {
+          set.status = 503
+          return { error: 'database_not_configured' }
+        })
+    `, 'report.routes.ts')
+    const dynamicMessages = messagesFor(`
+      export const reportRoutes = new Elysia()
+        .post('/reports', ({ set, result }) => {
+          set.status = 422
+          return { error: result.error }
+        })
+    `, 'report.routes.ts')
+
+    expect(literalMessages).toContain('route error response is missing a Thai-first message; use routeErrorResponse or include message.')
+    expect(dynamicMessages).toContain('route error response is missing a Thai-first message; use routeErrorResponse or include message.')
   })
 
   test('allows route error responses with explicit messages or route helper', () => {
