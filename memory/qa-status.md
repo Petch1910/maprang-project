@@ -354,3 +354,4 @@ Last updated: 2026-05-20
 - Memory/knowledge audit diagnostics Thai-first pass: เปลี่ยน pass/fail summary จาก `markdown files`, `knowledge files`, และ `structured packs` เป็น "ไฟล์ Markdown", "ไฟล์ความรู้", และ "ชุด structured" พร้อม vault audit regression.
 - Route/menu doc-check runner Thai-first pass: เปลี่ยน runner output จาก `document check`/`surfaces` เป็น "ตรวจเอกสาร route/menu"/"พื้นที่" พร้อม regression ใน `route-menu:audit:test`.
 - Frontend/static and backend/security runner output Thai-first pass: เปลี่ยน runner heading ของ static audit และ security audit เป็น "ตรวจ static หน้าบ้าน" กับ "ตรวจ security ระบบหลังบ้าน" พร้อม regression tests.
+- Eval/readiness runner output Thai-first pass: เปลี่ยน local eval output เป็น "ประเมิน/ตรวจ eval ในเครื่อง" และ readiness smoke failure เป็น "ตรวจ readiness ไม่ผ่าน" พร้อม focused regression tests.

@@ -157,7 +157,7 @@ describe('readiness smoke summary', () => {
 
     expect(exitCode).toBe(1)
     expect(JSON.parse(lines.join('\n')).failures).toEqual(['ฐานข้อมูลยังเชื่อมต่อไม่ได้'])
-    expect(errors).toEqual(['Readiness smoke ไม่ผ่าน: ฐานข้อมูลยังเชื่อมต่อไม่ได้'])
+    expect(errors).toEqual(['ตรวจ readiness ไม่ผ่าน: ฐานข้อมูลยังเชื่อมต่อไม่ได้'])
   })
 
   test('reads and validates backend root identity without reading readiness payload', async () => {

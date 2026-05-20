@@ -191,7 +191,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
     validateBackendRootIdentity(rootIdentity)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Readiness smoke ไม่ผ่าน: ${message}`)
+    writeError(`ตรวจ readiness ไม่ผ่าน: ${message}`)
     return 1
   }
 
@@ -200,7 +200,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
     result = await readinessReader(currentApiBaseUrl)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Readiness smoke ไม่ผ่าน: ${message}`)
+    writeError(`ตรวจ readiness ไม่ผ่าน: ${message}`)
     return 1
   }
 
@@ -216,7 +216,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
 
   if (!summary.ok) {
     const reason = summary.failures.length > 0 ? summary.failures.join('; ') : `สถานะ ${response.status}`
-    writeError(`Readiness smoke ไม่ผ่าน: ${reason}`)
+    writeError(`ตรวจ readiness ไม่ผ่าน: ${reason}`)
     return 1
   }
 

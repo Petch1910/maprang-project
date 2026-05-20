@@ -16,9 +16,9 @@ describe('local eval output formatting', () => {
     expect(output).toEqual({
       exitCode: 0,
       stdout: [
-        'eval - roleplay-depth: ประมาณ 1200 โทเคนของพรอมป์',
-        'eval - prompt-injection: ประมาณ 900 โทเคนของพรอมป์',
-        'ผ่าน - local eval ผ่าน (2 สถานการณ์)',
+        'ประเมิน - roleplay-depth: ประมาณ 1200 โทเคนของพรอมป์',
+        'ประเมิน - prompt-injection: ประมาณ 900 โทเคนของพรอมป์',
+        'ผ่าน - ตรวจ eval ในเครื่องผ่าน (2 สถานการณ์)',
       ],
       stderr: [],
     })
@@ -33,9 +33,9 @@ describe('local eval output formatting', () => {
     })
 
     expect(output.exitCode).toBe(1)
-    expect(output.stdout).toEqual(['eval - scenario-a: ประมาณ 777 โทเคนของพรอมป์'])
+    expect(output.stdout).toEqual(['ประเมิน - scenario-a: ประมาณ 777 โทเคนของพรอมป์'])
     expect(output.stderr).toEqual([
-      'Local eval ไม่ผ่าน:',
+      'ตรวจ eval ในเครื่องไม่ผ่าน:',
       '- scenario-a: ไม่พบข้อความที่ต้องมี "เป้าหมายของฉาก"',
     ])
   })
