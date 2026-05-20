@@ -130,7 +130,7 @@ async function loadSupabaseJwks() {
   if (!issuer) return []
 
   const response = await fetch(`${issuer}/.well-known/jwks.json`)
-  if (!response.ok) throw new Error(`Supabase JWKS fetch failed with status ${response.status}`)
+  if (!response.ok) throw new Error(`โหลด Supabase JWKS ไม่สำเร็จด้วย status ${response.status}`)
 
   const body = (await response.json()) as { keys?: JwksKey[] }
   jwksCache = {

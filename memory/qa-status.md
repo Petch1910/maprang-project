@@ -144,6 +144,7 @@ Last updated: 2026-05-20
 - Backend rate-limit response copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 141 pass.
 - Backend avatar storage failure copy now passes Thai-first coverage via `bun test apps\backend\src\storage.service.test.ts apps\backend\src\upload.routes.test.ts` and full `backend:check` with 141 pass.
 - Backend production auth 401 copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 141 pass.
+- Backend Supabase JWKS fetch failure wording is Thai-first, verified with `security.test.ts`, `backend:check`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Backend avatar upload validation copy now passes Thai-first coverage via `bun test apps\backend\src\storage.service.test.ts apps\backend\src\upload.routes.test.ts` and full `backend:check` with 141 pass.
 - Backend invalid UUID guard copy now passes Thai-first coverage via `bun test apps\backend\src\route-id-validation.test.ts apps\backend\src\chat.routes.security.test.ts` and full `backend:check` with 141 pass.
 - Backend chat route persistence/not-found error copy now passes Thai-first coverage via `bun test apps\backend\src\route-id-validation.test.ts apps\backend\src\chat.routes.security.test.ts` and full `backend:check` with 142 pass.

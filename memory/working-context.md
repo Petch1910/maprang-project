@@ -47,6 +47,7 @@ Verified:
 - Backend user usage/content-settings/persona routes now share centralized Thai-first `message` fields for persistence and user-not-found errors.
 - Backend route error fallback now returns a generic Thai retry message for unmapped codes instead of mislabeling non-ID failures as invalid IDs; explicit ID guards still use `invalid_id`.
 - Backend production auth failures now return Thai-first 401 messages for missing login and invalid/expired Supabase tokens.
+- Backend Supabase JWKS fetch failure logs now use Thai-first wording while preserving the HTTP status for debugging.
 - Frontend content rating labels shown in Explore/Character Lobby are now Thai-first, and the static audit blocks stale `Teen romance`, `Mature 18+`, and `Restricted 18+` labels from returning.
 - Chat selection accessibility labels in the sidebar and My Chats are now Thai-first, and the static audit blocks stale `Select chat` labels from returning.
 - Admin summary top-character rows now show Thai-first character status labels and Thai dashboard/lore wording instead of raw enum/mixed labels.
