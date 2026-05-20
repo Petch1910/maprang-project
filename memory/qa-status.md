@@ -20,7 +20,7 @@ Commands verified:
 - `git diff --check`
 
 Results:
-- Backend tests: 145 pass, 0 fail.
+- Backend tests: 146 pass, 0 fail.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
@@ -96,6 +96,7 @@ Results:
 - Backend character route persistence/access/not-found error copy now passes Thai-first coverage via `bun test apps\backend\src\character.validation.test.ts apps\backend\src\route-id-validation.test.ts` and full `backend:check` with 143 pass.
 - Backend lore route persistence/access/not-found error copy now passes Thai-first coverage via `bun test apps\backend\src\route-id-validation.test.ts` and full `backend:check` with 144 pass.
 - Backend report route access/persistence/admin-action error copy now passes Thai-first coverage via `bun test apps\backend\src\route-id-validation.test.ts apps\backend\src\report.service.test.ts` and full `backend:check` with 145 pass.
+- Backend admin route access/persistence/token-adjustment error copy now passes Thai-first coverage via `bun test apps\backend\src\admin.prompt-inspector.routes.test.ts apps\backend\src\admin.service.test.ts` and full `backend:check` with 146 pass.
 - Full `api:smoke` was not rerun in this delta because Docker Desktop/Postgres is not available in the local environment; `api:smoke:test` still passes and the changed smoke validation assertion now expects the Thai invalid-character reply.
 - Profile/tag helper and route/menu staging copy now pass Thai-first coverage via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, `route-menu:audit:test`, and `predeploy:check`; the static audit also blocks stale `backend`/`prompt`/`runtime`/`persona` helper wording from returning.
 - `frontend:static:audit:test` now also blocks stale mixed prompt/admin tooling copy such as `System prompt`, `redacted prompt`, `Runtime note`, `prompt snapshot`, `admin API`, and `frontend domain`.

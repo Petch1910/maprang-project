@@ -6,6 +6,10 @@ export type RouteSet = {
 
 export const routeErrorMessages: Record<string, string> = {
   admin_unauthorized: 'กรุณาใช้สิทธิ์ผู้ดูแลเพื่อใช้งานส่วนนี้',
+  admin_summary_unavailable: 'โหลดภาพรวมผู้ดูแลไม่สำเร็จ กรุณาตรวจสอบฐานข้อมูลแล้วลองใหม่',
+  amount_must_be_integer: 'จำนวนโทเคนต้องเป็นเลขจำนวนเต็ม',
+  amount_required: 'กรุณาระบุจำนวนโทเคนที่ต้องการปรับ',
+  amount_too_large: 'จำนวนโทเคนที่ปรับมากเกินไป',
   character_create_failed: 'สร้างตัวละครไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
   character_forbidden: 'คุณไม่มีสิทธิ์จัดการตัวละครนี้',
   character_id_required: 'กรุณาระบุตัวละครที่ต้องการรายงาน',
@@ -24,6 +28,8 @@ export const routeErrorMessages: Record<string, string> = {
   lore_create_failed: 'สร้างคลังความรู้ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
   lore_forbidden: 'คุณไม่มีสิทธิ์จัดการคลังความรู้ของตัวละครนี้',
   lore_not_found: 'ไม่พบคลังความรู้นี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+  insufficient_token_balance: 'ยอดโทเคนของผู้ใช้นี้ไม่พอสำหรับการปรับลด',
+  local_eval_unavailable: 'รันชุดทดสอบคุณภาพในเครื่องไม่สำเร็จ',
   message_id_required: 'กรุณาระบุข้อความที่ต้องการรายงาน',
   message_not_found: 'ไม่พบข้อความนี้ หรือคุณไม่มีสิทธิ์รายงาน',
   message_report_required: 'รายงานนี้ไม่ได้ผูกกับข้อความ',
@@ -32,6 +38,7 @@ export const routeErrorMessages: Record<string, string> = {
   report_not_found: 'ไม่พบรายงานนี้',
   character_report_required: 'รายงานนี้ไม่ได้ผูกกับตัวละคร',
   unauthorized: 'กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้',
+  user_not_found: 'ไม่พบผู้ใช้นี้',
 }
 
 export function routeErrorMessage(error: string) {

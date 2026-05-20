@@ -10,7 +10,7 @@ import {
   diffPromptSnapshots,
   type PromptInspectorRuntimeMemory,
 } from './prompt-inspector.service'
-import { rejectInvalidUuid } from './route-guards'
+import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
 import { requireAdminApiKey, resolveRequestUserId } from './security'
 import { loadUserPersona } from './user.service'
 
@@ -58,15 +58,15 @@ function chatRuntimeMemory(chat: {
 
 export const adminRoutes = new Elysia()
   .get('/admin/summary', async ({ request, set }) => {
-    if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+    if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
 
     const prisma = requireDatabase(set)
-    if (!prisma) return { error: 'database_not_configured' }
+    if (!prisma) return routeErrorResponse('database_not_configured')
 
     const summary = await loadAdminSummary()
     if (!summary) {
       set.status = 503
-      return { error: 'admin_summary_unavailable' }
+      return routeErrorResponse('admin_summary_unavailable')
     }
 
     return summary
@@ -74,10 +74,10 @@ export const adminRoutes = new Elysia()
   .patch(
     '/admin/users/:id/tokens',
     async ({ body, params, request, set }) => {
-      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+      if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
 
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_user_id')
       if (invalidId) return invalidId
 
@@ -89,12 +89,13 @@ export const adminRoutes = new Elysia()
       )
       if (!result) {
         set.status = 503
-        return { error: 'database_not_configured' }
+        return routeErrorResponse('database_not_configured')
       }
 
       if ('error' in result) {
-        set.status = result.error === 'user_not_found' ? 404 : 422
-        return { error: result.error }
+        const error = result.error ?? 'amount_required'
+        set.status = error === 'user_not_found' ? 404 : 422
+        return routeErrorResponse(error)
       }
 
       return result
@@ -112,10 +113,10 @@ export const adminRoutes = new Elysia()
   .get(
     '/admin/audit-logs',
     async ({ query, request, set }) => {
-      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+      if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
 
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
 
       return { logs: await listAdminAuditLogs(query.limit) }
     },
@@ -126,7 +127,7 @@ export const adminRoutes = new Elysia()
     },
   )
   .get('/admin/evals/local', async ({ request, set }) => {
-    if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+    if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
 
     try {
       return await runLocalEvalSuite()
@@ -134,17 +135,18 @@ export const adminRoutes = new Elysia()
       set.status = 500
       return {
         error: 'local_eval_unavailable',
-        message: error instanceof Error ? error.message : String(error),
+        message: routeErrorResponse('local_eval_unavailable').message,
+        detail: error instanceof Error ? error.message : String(error),
       }
     }
   })
   .post(
     '/admin/prompt-inspector',
     async ({ body, request, set }) => {
-      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+      if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
 
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
 
       const invalidCharacterId = rejectInvalidUuid(body.characterId, set, 'invalid_character_id')
       if (invalidCharacterId) return invalidCharacterId
@@ -157,7 +159,7 @@ export const adminRoutes = new Elysia()
       const character = await loadCharacter(body.characterId, viewerUserId)
       if (!character) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const runtimeWarnings: string[] = []
@@ -179,7 +181,7 @@ export const adminRoutes = new Elysia()
         })
 
         if (chat) runtimeMemory = chatRuntimeMemory(chat)
-        else runtimeWarnings.push('chatId was provided but no matching active chat was found for this character.')
+        else runtimeWarnings.push('ส่งรหัสแชทมาแล้ว แต่ไม่พบแชทที่ยังใช้งานอยู่และตรงกับตัวละครนี้')
       }
 
       const savedPersona =
