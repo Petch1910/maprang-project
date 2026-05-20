@@ -333,3 +333,4 @@ Last updated: 2026-05-20
 - Local eval service Thai-first pass: `eval:local`, `eval:local:test`, `predeploy:check:test`, full `backend:check` ผ่าน 152 tests / 482 expect calls, และ `predeploy:check` guard บล็อก English eval diagnostics เก่า.
 - Eval docs/config Thai-first pass: `evals/README.md` และ `evals/promptfoo.roleplay.yaml` ผ่าน `predeploy:check:test`, `predeploy:check`, `eval:local`, `secrets:check`, และ `git diff --check`.
 - Live chat smoke diagnostics Thai-first pass: `smoke:chat:test`, `provider:smoke:guards:test`, `predeploy:check`, `memory:audit`, `secrets:check`, และ `git diff --check` ผ่านหลังเปลี่ยนข้อความ CLI ผู้ดูแลจาก live-chat wording เก่าเป็น "ตรวจแชทจริง".
+- Image smoke diagnostics Thai-first pass: `smoke:image:test`, `provider:smoke:guards:test`, `predeploy:check`, `memory:audit`, `secrets:check`, และ `git diff --check` ผ่านหลังเปลี่ยนข้อความ CLI ผู้ดูแลจาก image-smoke wording เก่าเป็น "ตรวจสร้างรูปจริง".

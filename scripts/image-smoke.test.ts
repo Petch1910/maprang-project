@@ -45,7 +45,7 @@ describe('image smoke helpers', () => {
       imageStatus: 'needs_live_smoke',
       imageProductionReady: false,
       skipped:
-        'ข้ามการเรียกสร้างรูปจริงแล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อสร้างรูปจริงตอน staging/production QA',
+        'ข้ามการเรียกสร้างรูปจริงแล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อสร้างรูปจริงตอน QA สเตจจิงหรือโปรดักชัน',
     })
   })
 
@@ -57,16 +57,17 @@ describe('image smoke helpers', () => {
     ).toContain('เพดานวงเงิน')
 
     expect(liveImageDraftFailure({ image: { provider: 'configured' } })).toBe(
-      'ตรวจรูป smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป',
+      'ตรวจสร้างรูปจริงใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป',
     )
     expect(
       liveImageDraftFailure({
         image: { provider: 'configured', url: 'data:image/svg+xml;base64,abc' },
       }),
-    ).toBe('ตรวจรูป smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ')
+    ).toBe('ตรวจสร้างรูปจริงได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ')
     expect(liveImageDraftFailure({ image: { provider: 'placeholder' } })).toContain(
       'ไม่มีรายละเอียดจากผู้ให้บริการสร้างรูป',
     )
+    expect(liveImageDraftFailure({ image: { provider: 'placeholder' } })).not.toContain('ตรวจรูป smoke')
   })
 
   test('formats successful live-image payload and classifies generated URL kind', () => {
@@ -137,6 +138,8 @@ describe('image smoke helpers', () => {
     expect(lines).toEqual([])
     expect(errors.join('\n')).toContain('ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่าบนระบบหลังบ้าน')
     expect(errors.join('\n')).toContain('IMAGE_GENERATION_API_KEY')
+    expect(errors.join('\n')).toContain('ก่อนตรวจโปรดักชัน')
+    expect(errors.join('\n')).not.toContain('ก่อนตรวจ production')
   })
 
   test('runs live image smoke through an importable runner without provider calls', async () => {

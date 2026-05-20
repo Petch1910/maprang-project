@@ -79,7 +79,7 @@ export function buildSkippedImageSmokePayload(health: ImageSmokeHealthPayload, b
     imageStatus: health.model?.imageGeneration?.status ?? null,
     imageProductionReady: health.model?.imageGeneration?.productionReady ?? false,
     skipped:
-      'ข้ามการเรียกสร้างรูปจริงแล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อสร้างรูปจริงตอน staging/production QA',
+      'ข้ามการเรียกสร้างรูปจริงแล้ว ตั้ง SMOKE_IMAGE_LIVE=1 หรือรัน `bun run smoke:image:live` เพื่อสร้างรูปจริงตอน QA สเตจจิงหรือโปรดักชัน',
   }
 }
 
@@ -87,15 +87,15 @@ export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   if (draft.image?.provider !== 'configured') {
     const warnings = draft.warnings?.filter(Boolean).join('; ')
     const issue = warnings || draft.image?.note || 'ไม่มีรายละเอียดจากผู้ให้บริการสร้างรูป'
-    return `ตรวจรูป smoke กลับไปใช้ภาพตัวอย่างระบบ: ${issue}${providerFailureHint(issue)}`
+    return `ตรวจสร้างรูปจริงกลับไปใช้ภาพตัวอย่างระบบ: ${issue}${providerFailureHint(issue)}`
   }
 
   if (!draft.image.url) {
-    return 'ตรวจรูป smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป'
+    return 'ตรวจสร้างรูปจริงใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป'
   }
 
   if (draft.image.url.startsWith('data:image/svg+xml')) {
-    return 'ตรวจรูป smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ'
+    return 'ตรวจสร้างรูปจริงได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ'
   }
 
   return null
@@ -139,7 +139,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
     health = await (options.readHealth ?? (() => readJson<ImageSmokeHealthPayload>('/health')))()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`ตรวจรูป smoke ไม่ผ่าน: ${message}`)
+    writeError(`ตรวจสร้างรูปไม่ผ่าน: ${message}`)
     return 1
   }
 
@@ -147,7 +147,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
 
   if (!imageConfigured) {
     writeError(
-      'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่าบนระบบหลังบ้าน ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ก่อนตรวจ production',
+      'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่าบนระบบหลังบ้าน ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ก่อนตรวจโปรดักชัน',
     )
     return 1
   }
@@ -177,7 +177,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
         })))()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`ตรวจรูป smoke ไม่ผ่าน: ${message}`)
+    writeError(`ตรวจสร้างรูปจริงไม่ผ่าน: ${message}`)
     return 1
   }
 
