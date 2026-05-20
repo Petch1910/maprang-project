@@ -90,14 +90,14 @@ export function auditButtonsWithAst(content: string, file: string) {
           findings.push({
             file,
             line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
-            message: `button is missing an explicit type: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
+            message: `ปุ่มไม่มี type ชัดเจน: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
           })
         }
         if (typeAttrs.length > 1) {
           findings.push({
             file,
             line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
-            message: `button has duplicate type attributes: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
+            message: `ปุ่มมี type ซ้ำ: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
           })
         }
 
@@ -112,7 +112,7 @@ export function auditButtonsWithAst(content: string, file: string) {
             findings.push({
               file,
               line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
-              message: `icon-only button is missing aria-label or title: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
+              message: `ปุ่มไอคอนล้วนไม่มี aria-label หรือ title: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
             })
           }
         }
@@ -128,69 +128,69 @@ export function auditButtonsWithAst(content: string, file: string) {
 export const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
 
 export const suspiciousPatterns = [
-  { pattern: /href=(["'])#\1/g, message: 'link uses href="#" placeholder' },
-  { pattern: /to=(["'])#\1/g, message: 'router link uses to="#" placeholder' },
-  { pattern: /to=\{\s*(["'])#\1\s*\}/g, message: 'router link uses to={"#"} placeholder' },
-  { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'button/link has an empty onClick handler' },
-  { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'throws not implemented in frontend source' },
-  { pattern: /\bcoming soon\b/gi, message: 'contains coming soon placeholder copy' },
+  { pattern: /href=(["'])#\1/g, message: 'ลิงก์ใช้ href="#" เป็น placeholder' },
+  { pattern: /to=(["'])#\1/g, message: 'ลิงก์ Router ใช้ to="#" เป็น placeholder' },
+  { pattern: /to=\{\s*(["'])#\1\s*\}/g, message: 'ลิงก์ Router ใช้ to={"#"} เป็น placeholder' },
+  { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick ว่างเปล่า' },
+  { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'frontend source ยัง throw not implemented' },
+  { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบ placeholder' },
   {
     pattern: /setNote\(\s*error\s+instanceof\s+Error\s*\?\s*error\.message/g,
-    message: 'surfaces raw auth/provider error message to users',
+    message: 'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
   },
   {
     pattern: /state\.error\s*=\s*action\.error\.message/g,
-    message: 'surfaces raw Redux async error message to users',
+    message: 'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',
   },
   {
     pattern:
       /const\s+message\s*=\s*[\r\n\s]*payload\s*&&\s*typeof\s+payload\s*===\s*['"]object['"]\s*&&\s*['"]error['"]\s+in\s+payload/g,
-    message: 'ApiError should prefer payload.message before payload.error',
+    message: 'ApiError ต้องใช้ payload.message ก่อน payload.error',
   },
   {
     pattern: /const\s+payloadError\s*=\s*[\s\S]{0,240}?payload\.error/g,
-    message: 'ApiError should not surface payload.error as user-facing fallback',
+    message: 'ApiError ห้ามแสดง payload.error เป็น fallback ให้ผู้ใช้',
   },
   {
     pattern:
       /\b(?:Admin Health|Prompt Inspector|Automated Evals|Prompt diff|Route\/Menu Audit|Production blocker summary|Deploy checklist|Frontend backend URL|Frontend env warnings|Chat live smoke|Chat reply budget|Image provider configured|Image live smoke|Supabase Auth|Signed avatar storage|Production CORS|Cancel chat selection|Select chat|Explore \/ Home|Character Lobby|Relationship Contract|Chat Room|Chat Sidebar|Creator Studio|My Chats|Events Inbox|Profile \/ Persona|Staging Gate|Knowledge pack|Local readiness|Production gates|QA gate|runtime knowledge packs ready|needs check|staging\/future gate|Could not load chats|Could not load characters|failed with status|Teen romance|Mature 18|Restricted 18|prompt-control|prompt\/context|token budget|relationship state|scene state|Deterministic prompt\/context|image provider)\b/g,
-    message: 'contains English UI label that should be Thai-first',
+    message: 'พบ label ภาษาอังกฤษใน UI ที่ควรเป็น Thai-first',
   },
   {
     pattern: /(?:production\s+ควรตั้งค่า|Lobby\s+ดูน่ากด|แกน\s+prompt|backend\s+ช่วยร่าง)/g,
-    message: 'contains mixed Creator Studio wording that should be Thai-first',
+    message: 'พบข้อความ Creator Studio ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {
     pattern:
       /(?:backend\s+ยังไม่พร้อมเต็ม|ติดต่อ\s+backend\s+health|health\s+response\s+จาก\s+backend|backend\s+env|hosting\s+secret\s+manager|backend\s+host\s+secrets|waiting\s+for\s+backend\s+health\s+response|ยืนยัน\s+provider\s+จริง|final\s+gate|mobile\s+overflow|backend\/frontend\s+domain|warning\s+ฝั่ง\s+frontend|usage\.providerFailure|billing\/quota\s+limit|local\/dev\s+ยังไม่บังคับ|production\/staging)/g,
-    message: 'contains mixed Admin Health wording that should be Thai-first',
+    message: 'พบข้อความ Admin Health ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {
     pattern:
       /(?:System\s+prompt|รีเซ็ต\s+prompt|redacted\s+prompt|Redacted\s+final\s+prompt|Runtime\s+note|Persona\s+override|โน้ต\s+runtime|persona\s+ชั่วคราว|prompt\s+snapshot|diff\s+ที่\s+redact|เช็ค\s+backend|admin\s+API|snapshot\s+พรอมป์|diff\s+พรอมป์|(?<!\/)frontend\s+domain)/g,
-    message: 'contains mixed prompt/admin tooling wording that should be Thai-first',
+    message: 'พบข้อความ prompt/admin tooling ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {
     pattern: /(?:ระบบ relationship|anchor ตัวละคร|ยังไม่ได้รัน eval|รัน eval|hook:|ยัง fallback|fallback เป็นภาพ|เหตุผล disabled)/g,
-    message: 'contains mixed English UI wording that should be Thai-first',
+    message: 'พบข้อความ UI ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {
     pattern:
       /(?:backend\s+จำกัดตามบัญชี|เช็กการเชื่อมต่อ\s+backend|backend\s+จะจำกัดซ้ำตามบัญชี|prompt\s+ไม่ชัด)/g,
-    message: 'contains mixed profile/tag helper wording that should be Thai-first',
+    message: 'พบข้อความ profile/tag helper ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {
     pattern: /ยังไม่ใช่ปุ่มในแอปเครื่องนี้/g,
-    message: 'contains ambiguous staging checklist copy that sounds like a fake button',
+    message: 'พบข้อความ staging checklist ที่กำกวมเหมือนปุ่มปลอม',
   },
-  { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'contains Thai coming-soon placeholder copy' },
-  { pattern: /\uFFFD/g, message: 'contains replacement character, likely broken text encoding' },
-  { pattern: /[\u0080-\u009F]/g, message: 'contains C1 control character, likely mojibake' },
+  { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'พบข้อความไทยแนวเร็วๆนี้ที่เป็น placeholder' },
+  { pattern: /\uFFFD/g, message: 'พบ replacement character อาจเป็น encoding เสีย' },
+  { pattern: /[\u0080-\u009F]/g, message: 'พบ C1 control character อาจเป็น mojibake' },
   {
     pattern: /(?:\u0e40\u0e18[\u2022\u0084\u0081\u0099\u0088]|\u0e40\u0e19[\u20ac\u0089\u0088]|\u0e42\u0e40\u0e18)/g,
-    message: 'contains common Thai UTF-8 mojibake sequence',
+    message: 'พบลำดับตัวอักษรไทยที่มักเป็น UTF-8 mojibake',
   },
-  { pattern: /(?:\u0e23\u0083|\u0e23\u0082|\u0e23\u00a0\u0e22\u0e18|\u0e23\u00a0\u0e22\u0e19)/g, message: 'contains common UTF-8 mojibake sequence' },
+  { pattern: /(?:\u0e23\u0083|\u0e23\u0082|\u0e23\u00a0\u0e22\u0e18|\u0e23\u00a0\u0e22\u0e19)/g, message: 'พบลำดับตัวอักษรที่มักเป็น UTF-8 mojibake' },
 ]
 
 export async function auditStaleTemplateFiles(paths = staleTemplateFiles) {
@@ -202,7 +202,7 @@ export async function auditStaleTemplateFiles(paths = staleTemplateFiles) {
         findings.push({
           file: path,
           line: 1,
-          message: 'stale Vite starter template file should not be kept in production UI',
+          message: 'พบไฟล์ starter template ของ Vite ที่ไม่ควรอยู่ใน production UI',
         })
       } catch {
         // File is absent, which is what we want.
@@ -250,12 +250,12 @@ export async function runFrontendStaticAudit(
   const findings = await collectFrontendStaticFindings()
 
   if (findings.length > 0) {
-    writeError('Frontend static audit failed:')
+    writeError('Frontend static audit ไม่ผ่าน:')
     for (const finding of findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
     return 1
   }
 
-  writeLine('ok - frontend static audit passed')
+  writeLine('ok - frontend static audit ผ่านแล้ว')
   return 0
 }
 

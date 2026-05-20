@@ -23,6 +23,7 @@ Verified:
 - Route/menu staging row now describes staging as a checklist rather than a fake in-app button, and frontend static audit blocks the old ambiguous copy from returning.
 - Route/menu doc check now fails directly on stale mixed-language audit copy such as `รัน eval`, `prompt-control`, `token budget`, `accordion`, or ` disabled `, instead of relying only on predeploy.
 - Frontend static audit now guards a focused set of English UI label regressions for Thai-first pages, including Admin Health, Prompt Inspector, Automated Evals, Relationship Contract, Chat budget, Supabase/Auth labels, and route/menu surface names.
+- Frontend static audit diagnostics now report Thai-first failure messages for button accessibility, placeholder controls, raw error exposure, ApiError fallback, mixed UI copy, mojibake, and stale Vite starter files.
 - Predeploy now verifies the Relationship Contract Thai-first regression guard remains wired into the frontend static audit source and tests.
 - Frontend Thai polish now removes mixed English debug wording such as prompt-control, token budget, relationship state, scene state, system relationship, anchor, hook, fallback, disabled, and eval from user-facing admin/chat surfaces plus route/menu docs; static audit and predeploy guard those phrases from returning.
 - Frontend Redux fallback errors for failed character/chat loading are now Thai-first, and the static audit blocks the old `Could not load...` copy from returning.

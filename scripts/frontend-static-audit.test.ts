@@ -8,6 +8,13 @@ import {
   runFrontendStaticAudit,
 } from './frontend-static-audit'
 
+const englishUiFinding = 'พบ label ภาษาอังกฤษใน UI ที่ควรเป็น Thai-first'
+const creatorMixedFinding = 'พบข้อความ Creator Studio ปนอังกฤษที่ควรเป็น Thai-first'
+const adminHealthMixedFinding = 'พบข้อความ Admin Health ปนอังกฤษที่ควรเป็น Thai-first'
+const promptToolingMixedFinding = 'พบข้อความ prompt/admin tooling ปนอังกฤษที่ควรเป็น Thai-first'
+const mixedUiFinding = 'พบข้อความ UI ปนอังกฤษที่ควรเป็น Thai-first'
+const profileHelperMixedFinding = 'พบข้อความ profile/tag helper ปนอังกฤษที่ควรเป็น Thai-first'
+
 describe('frontend static audit', () => {
   test('reports buttons without explicit type and icon-only labels', () => {
     const findings = auditButtonsWithAst(
@@ -27,8 +34,8 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
-      expect.stringContaining('button is missing an explicit type'),
-      expect.stringContaining('icon-only button is missing aria-label or title'),
+      expect.stringContaining('ปุ่มไม่มี type ชัดเจน'),
+      expect.stringContaining('ปุ่มไอคอนล้วนไม่มี aria-label หรือ title'),
     ])
   })
 
@@ -54,14 +61,14 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
-      'link uses href="#" placeholder',
-      'router link uses to={"#"} placeholder',
-      'button/link has an empty onClick handler',
-      'throws not implemented in frontend source',
-      'surfaces raw auth/provider error message to users',
-      'surfaces raw Redux async error message to users',
-      'ApiError should prefer payload.message before payload.error',
-      'ApiError should not surface payload.error as user-facing fallback',
+      'ลิงก์ใช้ href="#" เป็น placeholder',
+      'ลิงก์ Router ใช้ to={"#"} เป็น placeholder',
+      'ปุ่มหรือลิงก์มี onClick ว่างเปล่า',
+      'frontend source ยัง throw not implemented',
+      'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
+      'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',
+      'ApiError ต้องใช้ payload.message ก่อน payload.error',
+      'ApiError ห้ามแสดง payload.error เป็น fallback ให้ผู้ใช้',
     ])
   })
 
@@ -77,10 +84,10 @@ describe('frontend static audit', () => {
 
     expect(findings.map((finding) => finding.message)).toEqual(
       expect.arrayContaining([
-        'contains Thai coming-soon placeholder copy',
-        'contains replacement character, likely broken text encoding',
-        'contains C1 control character, likely mojibake',
-        'contains common Thai UTF-8 mojibake sequence',
+        'พบข้อความไทยแนวเร็วๆนี้ที่เป็น placeholder',
+        'พบ replacement character อาจเป็น encoding เสีย',
+        'พบ C1 control character อาจเป็น mojibake',
+        'พบลำดับตัวอักษรไทยที่มักเป็น UTF-8 mojibake',
       ]),
     )
   })
@@ -109,26 +116,7 @@ describe('frontend static audit', () => {
       'EnglishUiFixture.tsx',
     )
 
-    expect(findings.map((finding) => finding.message)).toEqual([
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-    ])
+    expect(findings.map((finding) => finding.message)).toEqual(Array.from({ length: 18 }, () => englishUiFinding))
   })
 
   test('reports mixed English debug copy regressions for Thai-first surfaces', () => {
@@ -152,23 +140,9 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains English UI label that should be Thai-first',
-      'contains mixed Creator Studio wording that should be Thai-first',
-      'contains mixed Creator Studio wording that should be Thai-first',
-      'contains mixed Creator Studio wording that should be Thai-first',
-      'contains mixed Creator Studio wording that should be Thai-first',
-      'contains mixed English UI wording that should be Thai-first',
-      'contains mixed English UI wording that should be Thai-first',
-      'contains mixed English UI wording that should be Thai-first',
-      'contains mixed English UI wording that should be Thai-first',
-      'contains mixed English UI wording that should be Thai-first',
-      'contains mixed English UI wording that should be Thai-first',
-      'contains mixed English UI wording that should be Thai-first',
+      ...Array.from({ length: 6 }, () => englishUiFinding),
+      ...Array.from({ length: 4 }, () => creatorMixedFinding),
+      ...Array.from({ length: 7 }, () => mixedUiFinding),
     ])
   })
 
@@ -196,7 +170,7 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 16 }, () => 'contains mixed Admin Health wording that should be Thai-first'),
+      Array.from({ length: 16 }, () => adminHealthMixedFinding),
     )
   })
 
@@ -220,7 +194,7 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 15 }, () => 'contains mixed prompt/admin tooling wording that should be Thai-first'),
+      Array.from({ length: 15 }, () => promptToolingMixedFinding),
     )
   })
 
@@ -238,8 +212,8 @@ describe('frontend static audit', () => {
 
     expect(findings.map((finding) => finding.message)).toEqual(
       [
-        ...Array.from({ length: 4 }, () => 'contains mixed profile/tag helper wording that should be Thai-first'),
-        'contains ambiguous staging checklist copy that sounds like a fake button',
+        ...Array.from({ length: 4 }, () => profileHelperMixedFinding),
+        'พบข้อความ staging checklist ที่กำกวมเหมือนปุ่มปลอม',
       ],
     )
   })
@@ -256,9 +230,9 @@ describe('frontend static audit', () => {
     expect(findings.map((finding) => finding.line)).toEqual([3, 3, 3])
     expect(findings.map((finding) => finding.message)).toEqual(
       expect.arrayContaining([
-        expect.stringContaining('button is missing an explicit type'),
-        expect.stringContaining('icon-only button is missing aria-label or title'),
-        'button/link has an empty onClick handler',
+        expect.stringContaining('ปุ่มไม่มี type ชัดเจน'),
+        expect.stringContaining('ปุ่มไอคอนล้วนไม่มี aria-label หรือ title'),
+        'ปุ่มหรือลิงก์มี onClick ว่างเปล่า',
       ]),
     )
   })
@@ -271,7 +245,7 @@ describe('frontend static audit', () => {
 
     expect(findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('ok - frontend static audit passed')
+    expect(lines[0]).toBe('ok - frontend static audit ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })
