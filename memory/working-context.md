@@ -7,6 +7,7 @@ Last updated: 2026-05-20
 - `evals/golden-roleplay.json` ใช้คำอธิบาย สถานการณ์ lore และ runtime memory แบบ Thai-first แล้ว เพื่อให้ชุด deterministic prompt eval สอดคล้องกับ runtime prompt ที่แปลเป็นไทยก่อนหน้านี้.
 - สถานการณ์ prompt injection ยังตั้งใจคง `userMessage` ภาษาอังกฤษไว้ เพื่อทดสอบการโจมตีข้ามภาษาและยืนยันว่า prompt-control policy อยู่เหนือข้อความผู้ใช้ที่ไม่น่าเชื่อถือ.
 - Root README และ `evals/README.md` ใช้หัวข้อไทย-first สำหรับชั้นความรู้, ชั้นประเมินผล, ตัวตรวจพรอมป์, ชุดทดสอบหลัก, และคำสั่ง โดยยังคงคำอังกฤษสำคัญไว้ในวงเล็บเพื่อให้ค้นหาและ guard อัตโนมัติได้.
+- Root README หัวข้อเครื่องมืออ่านโค้ด, ความจำโปรเจกต์, การส่งต่องาน, สถานะ deploy, และ Docker build เป็น Thai-first แล้วเพื่อให้ entrypoint เอกสารสอดคล้องกับ UI/QA language direction.
 
 ## เป้าหมายปัจจุบัน
 

@@ -684,7 +684,7 @@ const checks: Check[] = [
       const memoryAudit = await readRepoFile('scripts/memory-audit.ts')
       requireIncludes(packageJson, ['"memory:audit"', 'bun scripts/memory-audit.ts', 'bun run memory:audit'], 'package.json')
       requireIncludes(packageJson, ['"vault:audit:test"', 'bun test scripts/markdown-audit-helpers.test.ts'], 'package.json')
-      requireIncludes(readme, ['memory/README.md', 'Project Memory'], 'README.md')
+      requireIncludes(readme, ['memory/README.md', 'ความจำโปรเจกต์ (Project Memory)'], 'README.md')
       requireIncludes(memoryReadme, ['ห้ามเก็บ secrets', 'ขั้นตอนอัปเดต', 'บริบทงานปัจจุบัน', 'ตัวกั้นก่อน deploy'], 'memory/README.md')
       requireIncludes(workingContext, ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน'], 'memory/working-context.md')
       requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')

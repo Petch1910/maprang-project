@@ -7,6 +7,7 @@ Last updated: 2026-05-20
 - Golden roleplay eval fixture Thai-first pass: `bun run eval:local`, `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังแปล `evals/golden-roleplay.json`.
 - Local eval formatting regression fixture now uses Thai-first failure text, verified with `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 - README/evals docs headings are Thai-first while preserving searchable English terms in parentheses; `predeploy:check:test` and `predeploy:check` now guard the Thai-first headings.
+- Root README handoff/tooling/deploy/Docker headings are Thai-first, verified with `predeploy:check:test`, `predeploy:check`, and a heading scan for English-only `##` sections.
 
 ## Gate local ล่าสุด
 
