@@ -136,6 +136,7 @@ Verified:
 - API smoke with admin auth now covers non-mutating wallet token route validation so the admin wallet route is exercised without changing balances.
 - API smoke now covers non-mutating report creation validation with SQL-like character ids before persistence.
 - API smoke now covers the uncharged `POST /chat` validation path before the live-provider-only chat smoke.
+- API smoke validation-path provider-failure errors now use Thai-first diagnostics for both normal chat and stream validation checks.
 - API smoke now covers non-mutating delete-chat validation so the delete route is exercised without removing real chats.
 - API smoke invalid-id checks now require Thai-first `message` fields as well as machine-readable error codes for chat delete, report creation, admin wallet, and admin report validation paths.
 - API route audit regression tests now cover route discovery, missing/stale/empty coverage entries, and the importable route audit runner, and run in local QA, CI, and Production Smoke.

@@ -136,6 +136,7 @@ Results:
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.
 - API smoke now covers `/chat/stream` SSE shape on an uncharged validation path.
+- API smoke validation-path provider-failure diagnostics now pass `api:smoke:test` and `predeploy:check`.
 - Roleplay depth budget bump to 1600/420: pass via backend chat/env/health tests, live chat smoke helper test, deploy doctor test, and API smoke helper test.
 - Runtime prompt depth alignment: pass via `context.service.test`, `chat.runtime.test`, `knowledge:audit`, and `predeploy:check`; predeploy now blocks stale shorter 3-6/4-sentence/7-12-sentence guidance from returning.
 - Production reply budget env guard: pass via `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`; deploy doctor now fails values below 1200 output tokens or 320 roleplay reply characters.

@@ -462,7 +462,9 @@ await check('POST /chat validation', async () => {
   if (!payload.reply?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('chat validation did not return Thai invalid character id')
   if (payload.chatId !== null && payload.chatId !== undefined) throw new Error('chat validation should not return a chatId')
   if ((payload.usage?.totalTokens ?? 0) !== 0) throw new Error('chat validation path should not use tokens')
-  if (payload.usage?.providerFailure) throw new Error(`chat validation path returned provider failure: ${payload.usage.providerFailure.code}`)
+  if (payload.usage?.providerFailure) {
+    throw new Error(`เส้นทางตรวจ validation ของแชทไม่ควรเรียกผู้ให้บริการ แต่พบ providerFailure: ${payload.usage.providerFailure.code}`)
+  }
   return 'ปฏิเสธรหัสตัวละครไม่ถูกต้องก่อนเรียกผู้ให้บริการ'
 })
 
@@ -515,7 +517,9 @@ await check('POST /chat/stream', async () => {
   if (!delta?.content?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('stream did not return Thai validation delta')
   if (!done) throw new Error('stream did not return done event')
   if ((done.usage?.totalTokens ?? 0) !== 0) throw new Error('stream validation path should not use tokens')
-  if (done.usage?.providerFailure) throw new Error(`stream validation path returned provider failure: ${done.usage.providerFailure.code}`)
+  if (done.usage?.providerFailure) {
+    throw new Error(`เส้นทางตรวจ validation ของสตรีมไม่ควรเรียกผู้ให้บริการ แต่พบ providerFailure: ${done.usage.providerFailure.code}`)
+  }
   return `${events.length} SSE events, validation path uncharged`
 })
 
