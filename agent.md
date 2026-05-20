@@ -4,13 +4,13 @@ Last updated: 2026-05-20
 
 ไฟล์นี้คือคู่มือสำหรับ AI agent หรือ developer ที่มาสานต่องาน Maprang AI ใน repo นี้ ให้เริ่มจากภาพรวมเดียวกันและไม่ทำงานหลุดทิศทาง
 
-## Mission
+## ภารกิจ (Mission)
 
 Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้าตาและ flow ต้องคุ้นมือกับผู้ใช้แนว Khuiai แต่เพิ่มระบบเชิงเกมและความจำที่ลึกกว่า ได้แก่ relationship contract, scene mode, world state, creator simulator, prompt inspector, automated evals, token economy, moderation และ production readiness
 
 เป้าหมายหลักตอนนี้คือทำให้ระบบเสถียรพอสำหรับ staging ก่อน production โดย local QA ต้องเขียวตลอด และ production blockers ต้องชัดเจนจนพลาดยาก
 
-## Current Status
+## สถานะปัจจุบัน (Current Status)
 
 อ่านสถานะล่าสุดจากไฟล์เหล่านี้ก่อนลงมือทุกครั้ง:
 
@@ -32,7 +32,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile
 - Production ยัง blocked เพราะต้องมี staging/backend/frontend domain จริง, CORS จริง, live chat smoke และ live image smoke
 
-## Product Direction
+## ทิศทางผลิตภัณฑ์ (Product Direction)
 
 ทำ UI/UX โดยยึดหลัก:
 
@@ -45,7 +45,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 - Creator Studio ต้องช่วยคนสร้าง: AI draft, image draft, tag conflict warning, relationship preset, preview simulator, auto-save/draft
 - Relationship และ Scene ต้องเป็นจุดขาย: เริ่มจาก sandbox, แจ้งเตือนก่อนเข้า scene, scene objective ชัด, outcome กลับมาอัปเดต timeline และ relationship state
 
-## Safety And Content Rules
+## กฎความปลอดภัยและเนื้อหา (Safety And Content Rules)
 
 ระบบนี้เป็น roleplay สำหรับผู้ใหญ่ได้ แต่ต้องออกแบบแบบ production-safe:
 
@@ -56,7 +56,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 - ห้าม hardcode หรือ commit secret จริง เช่น API key, service role key, database password, access token
 - ถ้าเจอ secret ในไฟล์ ให้หยุดแก้แบบระวังและย้ายเป็น placeholder/env ทันที
 
-## Architecture Map
+## แผนผังสถาปัตยกรรม (Architecture Map)
 
 Backend:
 
@@ -81,7 +81,7 @@ Knowledge and memory:
 - `knowledge/` เก็บ structured rules/wiki สำหรับ runtime context
 - `evals/` เก็บ deterministic prompt/context evals
 
-## Core Systems To Protect
+## ระบบหลักที่ต้องปกป้อง (Core Systems To Protect)
 
 Relationship Engine:
 
@@ -112,7 +112,7 @@ Security:
 - Admin action ต้องมี audit log
 - Rate limit ต้องแยก read navigation กับ expensive chat generation
 
-## Work Loop
+## วงจรทำงาน (Work Loop)
 
 ทุกครั้งที่เริ่มงาน:
 
@@ -132,7 +132,7 @@ Security:
 - ห้ามปล่อยปุ่ม/เมนูหลอกที่กดแล้วไม่มีผล
 - ห้ามทำ UI แยกธีมคนละทางกับหน้าที่มีอยู่
 
-## QA Commands
+## คำสั่ง QA (QA Commands)
 
 ใช้ตามระดับความเสี่ยง:
 
@@ -171,7 +171,7 @@ bun run smoke:chat
 bun run smoke:image:live
 ```
 
-## Production Blockers
+## ตัวกั้น production (Production Blockers)
 
 อย่า mark production ready จนกว่าสิ่งเหล่านี้ผ่านจริง:
 
@@ -185,7 +185,7 @@ bun run smoke:image:live
 - `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image smoke ผ่านจริง
 - Admin API smoke และ audit log ผ่าน
 
-## Definition Of Done
+## เงื่อนไขว่างานเสร็จ (Definition Of Done)
 
 งานหนึ่งก้อนถือว่าเสร็จเมื่อ:
 
@@ -196,7 +196,7 @@ bun run smoke:image:live
 - เอกสาร/memory/knowledge อัปเดตถ้างานเปลี่ยนสถานะระบบ
 - `git status --short` สะอาดหลัง commit ถ้าผู้ใช้ต้องการ push หรือเป็นงานจบก้อน
 
-## Next Agent Starting Point
+## จุดเริ่มต้นเอเจนต์ถัดไป (Next Agent Starting Point)
 
 ถ้าผู้ใช้บอกว่า "ทำต่อ" ให้เริ่มจาก:
 
