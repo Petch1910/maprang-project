@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { avatarExtension, avatarUrl, normalizeSupabaseSignedUrl, safeAvatarFilename, supabaseStorageAccess } from './storage.service'
+import {
+  avatarExtension,
+  avatarStorageMessages,
+  avatarUrl,
+  normalizeSupabaseSignedUrl,
+  safeAvatarFilename,
+  supabaseStorageAccess,
+} from './storage.service'
 
 describe('storage service', () => {
   test('normalizes supported avatar extensions', () => {
@@ -36,5 +43,13 @@ describe('storage service', () => {
     expect(normalizeSupabaseSignedUrl(supabaseUrl, '/object/sign/avatars/a.png?token=abc')).toBe(
       'https://example.supabase.co/storage/v1/object/sign/avatars/a.png?token=abc',
     )
+  })
+
+  test('keeps Supabase storage failure messages Thai-first', () => {
+    expect(avatarStorageMessages.notConfigured).toContain('ยังไม่ได้ตั้งค่า')
+    expect(avatarStorageMessages.uploadFailed(502)).toContain('อัปโหลดรูปตัวละคร')
+    expect(avatarStorageMessages.signedUrlFailed(500)).toContain('signed URL')
+    expect(avatarStorageMessages.signedUrlMissing).toContain('signed URL')
+    expect(avatarStorageMessages.unavailable).toContain('พื้นที่เก็บรูปตัวละคร')
   })
 })

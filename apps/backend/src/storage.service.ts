@@ -20,6 +20,14 @@ export const allowedAvatarTypes = new Map([
   ['image/gif', '.gif'],
 ])
 
+export const avatarStorageMessages = {
+  notConfigured: 'ยังไม่ได้ตั้งค่า Supabase Storage สำหรับรูปตัวละคร',
+  uploadFailed: (status: number) => `อัปโหลดรูปตัวละครไป Supabase ไม่สำเร็จ สถานะ ${status}`,
+  signedUrlFailed: (status: number) => `สร้างลิงก์รูปตัวละครแบบ signed URL ไม่สำเร็จ สถานะ ${status}`,
+  signedUrlMissing: 'Supabase ไม่ได้ส่ง signed URL ของรูปตัวละครกลับมา',
+  unavailable: 'พื้นที่เก็บรูปตัวละครยังไม่พร้อมใช้งาน กรุณาลองใหม่หรือติดต่อผู้ดูแลระบบ',
+}
+
 export function safeAvatarFilename(filename: string) {
   return /^[a-z0-9-]+\.(jpg|jpeg|png|webp|gif)$/i.test(filename) ? filename : null
 }
@@ -50,7 +58,7 @@ function supabaseStorageConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '')
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const bucket = process.env.SUPABASE_STORAGE_BUCKET
-  if (!supabaseUrl || !serviceRoleKey || !bucket) throw new Error('Supabase storage is not configured')
+  if (!supabaseUrl || !serviceRoleKey || !bucket) throw new Error(avatarStorageMessages.notConfigured)
   return { supabaseUrl, serviceRoleKey, bucket }
 }
 
@@ -81,7 +89,7 @@ async function uploadSupabaseAvatar({
     },
     body: bytes,
   })
-  if (!response.ok) throw new Error(`Supabase avatar upload failed with status ${response.status}`)
+  if (!response.ok) throw new Error(avatarStorageMessages.uploadFailed(response.status))
 
   return objectPath
 }
@@ -103,11 +111,11 @@ export async function resolveAvatarLocation(filename: string) {
     },
     body: JSON.stringify({ expiresIn: supabaseSignedUrlExpiresInSeconds }),
   })
-  if (!response.ok) throw new Error(`Supabase signed avatar URL failed with status ${response.status}`)
+  if (!response.ok) throw new Error(avatarStorageMessages.signedUrlFailed(response.status))
 
   const body = (await response.json()) as { signedURL?: string; signedUrl?: string }
   const signedPath = body.signedURL ?? body.signedUrl
-  if (!signedPath) throw new Error('Supabase signed avatar URL response is missing signedURL')
+  if (!signedPath) throw new Error(avatarStorageMessages.signedUrlMissing)
   return {
     type: 'redirect' as const,
     url: normalizeSupabaseSignedUrl(supabaseUrl, signedPath),

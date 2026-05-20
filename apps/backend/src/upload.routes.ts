@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { resolveAvatarLocation, safeAvatarFilename, uploadAvatarFile } from './storage.service'
+import { avatarStorageMessages, resolveAvatarLocation, safeAvatarFilename, uploadAvatarFile } from './storage.service'
 
 export const uploadRoutes = new Elysia()
   .post('/uploads/avatar', async ({ request, set }) => {
@@ -15,7 +15,7 @@ export const uploadRoutes = new Elysia()
     } catch (error) {
       console.error('Avatar upload failed:', error)
       set.status = 502
-      return { error: 'avatar_storage_unavailable' }
+      return { error: 'avatar_storage_unavailable', message: avatarStorageMessages.unavailable }
     }
     if (!uploaded.ok) {
       set.status = uploaded.status
@@ -48,6 +48,6 @@ export const uploadRoutes = new Elysia()
     } catch (error) {
       console.error('Avatar resolve failed:', error)
       set.status = 502
-      return { error: 'avatar_storage_unavailable' }
+      return { error: 'avatar_storage_unavailable', message: avatarStorageMessages.unavailable }
     }
   })
