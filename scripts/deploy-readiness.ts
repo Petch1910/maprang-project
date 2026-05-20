@@ -172,7 +172,7 @@ export function evaluateDeployReadiness(
     )
   }
   if (!health.checks.openRouterConfigured) {
-    addProductionBlocker('OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า', 'ตั้ง OPENROUTER_API_KEY ใน backend host secrets')
+    addProductionBlocker('OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า', 'ตั้ง OPENROUTER_API_KEY ใน secrets ของระบบหลังบ้าน')
   } else if (!(health.model?.chatProvider?.productionReady ?? health.model?.chatProvider?.liveVerified)) {
     addProductionBlocker(
       'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน',
@@ -182,7 +182,7 @@ export function evaluateDeployReadiness(
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
     addProductionBlocker(
       'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่า',
-      'ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ใน backend host secrets',
+      'ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ใน secrets ของระบบหลังบ้าน',
     )
   } else if (!(health.model?.imageGeneration?.productionReady ?? health.model?.imageGeneration?.liveVerified)) {
     addProductionBlocker(
@@ -191,10 +191,10 @@ export function evaluateDeployReadiness(
     )
   }
   for (const name of health.env?.missingRequired ?? []) {
-    addProductionBlocker(`${name} ยังไม่ได้ตั้งค่า`, `ตั้ง ${name} ใน backend host secrets หรือแก้ placeholder value`)
+    addProductionBlocker(`${name} ยังไม่ได้ตั้งค่า`, `ตั้ง ${name} ใน secrets ของระบบหลังบ้าน หรือแก้ค่าตัวอย่างที่ยังค้างอยู่`)
   }
   for (const issue of health.env?.invalid ?? []) {
-    addProductionBlocker(`production env ไม่ถูกต้อง: ${issue}`, 'แก้ค่า backend production environment ที่ /health รายงาน')
+    addProductionBlocker(`production env ไม่ถูกต้อง: ${issue}`, 'แก้ค่าตัวแปร production ของระบบหลังบ้านที่ /health รายงาน')
   }
 
   const productionReady = productionBlockers.length === 0

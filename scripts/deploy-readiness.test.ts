@@ -213,7 +213,7 @@ describe('deploy readiness evaluation', () => {
       ]),
     )
     expect(nextSteps).toContain(
-      'production env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production: แก้ค่า backend production environment ที่ /health รายงาน',
+      'production env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production: แก้ค่าตัวแปร production ของระบบหลังบ้านที่ /health รายงาน',
     )
   })
 
