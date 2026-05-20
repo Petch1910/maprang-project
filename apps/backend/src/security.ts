@@ -72,6 +72,17 @@ export class AuthError extends Error {
   }
 }
 
+export const rateLimitReplyMessage = 'ส่งคำขอถี่เกินไป กรุณารอสักครู่แล้วลองใหม่'
+
+export function buildRateLimitErrorResponse() {
+  return new Response(JSON.stringify({ error: 'rate_limited', message: rateLimitReplyMessage }), {
+    status: 429,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+  })
+}
+
 function bearerToken(request: Request) {
   return request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
 }

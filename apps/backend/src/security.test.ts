@@ -2,8 +2,10 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { chatRoutes } from './chat.routes'
 import {
   AuthError,
+  buildRateLimitErrorResponse,
   rateLimitBucket,
   rateLimitKey,
+  rateLimitReplyMessage,
   rateLimitRequestKey,
   requireAdminApiKey,
   resolveRequestUserId,
@@ -106,6 +108,17 @@ describe('security helpers', () => {
     expect(rateLimitBucket(chatRequest)).toBe('chat')
     expect(rateLimitRequestKey(readRequest)).toBe('user-1:read')
     expect(rateLimitRequestKey(chatRequest)).toBe('user-1:chat')
+  })
+
+  test('rate limit response is Thai-first and machine-readable', async () => {
+    const response = buildRateLimitErrorResponse()
+    const body = (await response.json()) as { error?: string; message?: string }
+
+    expect(response.status).toBe(429)
+    expect(response.headers.get('content-type')).toContain('application/json')
+    expect(body.error).toBe('rate_limited')
+    expect(body.message).toBe(rateLimitReplyMessage)
+    expect(body.message).toContain('ส่งคำขอถี่เกินไป')
   })
 
   test('request user resolution keeps local dev fallback when Supabase issuer is not configured', async () => {
