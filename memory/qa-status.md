@@ -305,3 +305,8 @@ Last updated: 2026-05-20
 - `/admin/health` shows prompt budget/history settings without console errors.
 - `/admin/health` deploy checklist shows a concrete next action on each blocker card.
 - Console errors/warnings: none relevant.
+
+## บันทึก QA ล่าสุด 2026-05-20
+
+- Runtime prompt heading Thai-first pass: `context.service.test.ts`, `prompt-inspector.service.test.ts`, `eval:local`, `eval:local:test`, `api:smoke:test`, `predeploy:check:test`, `backend:check`, `predeploy:check`, `secrets:check`, และ `git diff --check` ผ่านหลังแปลงหัวข้อ prompt/context runtime เป็นไทย-first.
+- `predeploy:check` ตอนนี้ guard หัวข้อ prompt runtime ภาษาไทยใน Context Service และ Prompt Inspector Service พร้อม forbid heading อังกฤษเก่าใน source runtime.

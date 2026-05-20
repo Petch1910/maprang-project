@@ -198,12 +198,33 @@ const checks: Check[] = [
     run: async () => {
       const contextService = await readRepoFile('apps/backend/src/context.service.ts')
       const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
+      const promptInspectorService = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
       const chatStyleGuide = await readRepoFile('knowledge/structured/chat-style-guide.json')
       const backendEnv = await readRepoFile('apps/backend/src/env.ts')
       const backendEnvTest = await readRepoFile('apps/backend/src/env.test.ts')
       requireIncludes(
         contextService,
-        ['write 4-6 short paragraphs', 'at least 5 complete sentences', '8-14 sentences'],
+        ['กฎคุมพรอมป์ของแพลตฟอร์ม', 'คลังความรู้ที่เกี่ยวข้อง', 'คำสั่งขณะรัน'],
+        'apps/backend/src/context.service.ts',
+      )
+      requireIncludes(
+        promptInspectorService,
+        ['กฎคุมพรอมป์ของแพลตฟอร์ม', 'คำสั่งขณะรัน', 'ความจำขณะรัน', 'ข้อความผู้ใช้'],
+        'apps/backend/src/prompt-inspector.service.ts',
+      )
+      forbidIncludes(
+        contextService,
+        ['Platform prompt-control policy', 'Relevant lorebook entries', 'Runtime instructions'],
+        'apps/backend/src/context.service.ts',
+      )
+      forbidIncludes(
+        promptInspectorService,
+        ['Platform prompt-control policy', 'Relevant lorebook entries', 'Runtime instructions', 'Runtime memory', 'User message'],
+        'apps/backend/src/prompt-inspector.service.ts',
+      )
+      requireIncludes(
+        contextService,
+        ['4-6 ย่อหน้าสั้น', 'อย่างน้อย 5 ประโยคสมบูรณ์', '8-14 ประโยค'],
         'apps/backend/src/context.service.ts',
       )
       requireIncludes(chatService, ['3-5 short paragraphs'], 'apps/backend/src/chat.service.ts')
@@ -214,7 +235,7 @@ const checks: Check[] = [
       )
       forbidIncludes(
         contextService,
-        ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences'],
+        ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences', 'write 4-6 short paragraphs', 'Reply naturally in Thai by default'],
         'apps/backend/src/context.service.ts',
       )
       forbidIncludes(chatService, ['2-4 short paragraphs'], 'apps/backend/src/chat.service.ts')

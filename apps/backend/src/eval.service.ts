@@ -84,7 +84,7 @@ function fixtureCharacter() {
 
 function runtimeMemoryBlock(memory?: Record<string, string>) {
   if (!memory) return ''
-  return ['Runtime memory:', ...Object.entries(memory).map(([key, value]) => `- ${key}: ${value}`)].join('\n')
+  return ['ความจำขณะรัน:', ...Object.entries(memory).map(([key, value]) => `- ${key}: ${value}`)].join('\n')
 }
 
 function assertSectionOrder(prompt: string, sections: string[]) {
@@ -109,7 +109,7 @@ function scenarioPrompt(scenario: EvalScenario) {
   return [
     buildContextPrompt(fixtureCharacter(), loreEntries),
     runtimeMemoryBlock(scenario.runtimeMemory),
-    `User message:\n${scenario.userMessage}`,
+    `ข้อความผู้ใช้:\n${scenario.userMessage}`,
   ]
     .filter(Boolean)
     .join('\n\n')

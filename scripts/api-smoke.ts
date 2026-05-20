@@ -787,9 +787,9 @@ if (adminHeaders) {
       }),
     })
     if (!payload.snapshot?.redacted) throw new Error('prompt inspector ไม่คืน redacted snapshot')
-    if (!payload.snapshot.prompt?.includes('Platform prompt-control policy')) throw new Error('ยังไม่มี prompt-control policy')
-    if (!payload.snapshot.sections?.some((section) => section.title === 'Runtime memory')) {
-      throw new Error('ยังไม่มี runtime memory section')
+    if (!payload.snapshot.prompt?.includes('กฎคุมพรอมป์ของแพลตฟอร์ม')) throw new Error('ยังไม่มีกฎคุมพรอมป์ของแพลตฟอร์ม')
+    if (!payload.snapshot.sections?.some((section) => section.title === 'ความจำขณะรัน')) {
+      throw new Error('ยังไม่มีส่วนความจำขณะรัน')
     }
     if (!payload.snapshot.totals?.estimatedTokens || !payload.snapshot.totals.sectionCount) {
       throw new Error('ยังไม่มี prompt totals')

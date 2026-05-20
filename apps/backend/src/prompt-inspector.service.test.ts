@@ -38,11 +38,11 @@ describe('prompt inspector service', () => {
     })
 
     expect(snapshot.redacted).toBe(true)
-    expect(snapshot.prompt).toContain('Platform prompt-control policy')
-    expect(snapshot.prompt).toContain('Relevant lorebook entries')
-    expect(snapshot.prompt).toContain('Runtime memory')
-    expect(snapshot.prompt).toContain('User persona')
-    expect(snapshot.prompt).toContain('User message')
+    expect(snapshot.prompt).toContain('กฎคุมพรอมป์ของแพลตฟอร์ม')
+    expect(snapshot.prompt).toContain('คลังความรู้ที่เกี่ยวข้อง')
+    expect(snapshot.prompt).toContain('ความจำขณะรัน')
+    expect(snapshot.prompt).toContain('ตัวตนผู้เล่น')
+    expect(snapshot.prompt).toContain('ข้อความผู้ใช้')
     expect(snapshot.prompt).toContain('[REDACTED_SECRET]')
     expect(snapshot.prompt).not.toContain(fakeOpenRouterKey)
     expect(snapshot.prompt).not.toContain(fakeDatabaseUrl)
@@ -80,8 +80,8 @@ describe('prompt inspector service', () => {
 
     expect(diff.currentEstimatedTokens).toBeGreaterThan(diff.previousEstimatedTokens)
     expect(diff.estimatedTokenDelta).toBeGreaterThan(0)
-    expect(diff.changedSections.some((section) => section.title.includes('Relevant lorebook entries'))).toBe(true)
-    expect(diff.changedSections.some((section) => section.title.includes('User message'))).toBe(true)
+    expect(diff.changedSections.some((section) => section.title.includes('คลังความรู้ที่เกี่ยวข้อง'))).toBe(true)
+    expect(diff.changedSections.some((section) => section.title.includes('ข้อความผู้ใช้'))).toBe(true)
   })
 
   test('keeps prompt inspector warnings Thai-first for large prompts', () => {

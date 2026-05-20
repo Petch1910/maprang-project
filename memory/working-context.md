@@ -285,3 +285,8 @@ Verified:
 4. รัน smoke ผู้ให้บริการจริงกับ staging ตามลำดับ โดยแนะนำ `api:smoke:live`.
 5. ตั้ง verification flags หลัง live smoke ผ่านจริงเท่านั้น.
 6. รัน `production:check` ซ้ำ.
+
+## บันทึกล่าสุด 2026-05-20
+
+- Runtime context, Prompt Inspector, local eval fixture, และ promptfoo roleplay template ใช้หัวข้อพรอมป์แบบ Thai-first แล้ว: `กฎคุมพรอมป์ของแพลตฟอร์ม`, `คลังความรู้ที่เกี่ยวข้อง`, `คำสั่งขณะรัน`, `ความจำขณะรัน`, และ `ข้อความผู้ใช้`.
+- `predeploy:check` เพิ่ม guard เพื่อบังคับหัวข้อพรอมป์ไทย-first ใน `context.service.ts` และ `prompt-inspector.service.ts` พร้อมกัน old English headings เช่น `Platform prompt-control policy`, `Runtime instructions`, `Runtime memory`, และ `User message` ไม่ให้กลับมาใน runtime source.
