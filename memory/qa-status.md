@@ -365,3 +365,4 @@ Last updated: 2026-05-20
 - E2E smoke runner diagnostics Thai-first pass: เกลา command labels และเปลี่ยน failure logging จาก raw Error object เป็นข้อความ "ตรวจเบราว์เซอร์ e2e ไม่ผ่าน" พร้อม regression test.
 - API smoke user/admin diagnostics Thai-first pass: เกลา error สำหรับ content rating, persona, relationship preview, prompt inspector, admin totals, reports และ audit logs ให้ไทยนำขึ้น พร้อม `api:smoke:test`.
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด API/e2e/local smoke diagnostics ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 152 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
+- Deploy env doctor diagnostics Thai-first pass: เกลา storage/CORS/OpenRouter wording จาก avatar/frontend/backend API origin เป็นรูปตัวละคร/origin ของหน้าบ้าน/ระบบหลังบ้าน พร้อม `deploy:doctor:test`.

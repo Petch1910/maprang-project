@@ -160,14 +160,14 @@ function auditBackendEnv(env: EnvMap) {
     }
   }
 
-  expectExact(env, 'STORAGE_PROVIDER', 'supabase', 'backend', 'production ต้องเก็บ avatar ผ่าน Supabase')
-  expectPresent(env, 'SUPABASE_STORAGE_BUCKET', 'backend', 'ต้องมี bucket avatar')
+  expectExact(env, 'STORAGE_PROVIDER', 'supabase', 'backend', 'โปรดักชันต้องเก็บรูปตัวละครผ่าน Supabase')
+  expectPresent(env, 'SUPABASE_STORAGE_BUCKET', 'backend', 'ต้องมี bucket รูปตัวละคร')
   if (hasRealValue(env.get('SUPABASE_STORAGE_BUCKET'))) {
     const bucket = env.get('SUPABASE_STORAGE_BUCKET')?.trim()
     if (bucket === 'avatars') pass('backend', 'SUPABASE_STORAGE_BUCKET', 'ใช้ bucket avatars แล้ว')
     else warn('backend', 'SUPABASE_STORAGE_BUCKET', 'ไม่ใช่ชื่อ avatars ต้องแน่ใจว่า host และ Supabase bucket ตรงกัน')
   }
-  expectExact(env, 'SUPABASE_STORAGE_ACCESS', 'signed', 'backend', 'production ควรใช้ private bucket + signed URL')
+  expectExact(env, 'SUPABASE_STORAGE_ACCESS', 'signed', 'backend', 'โปรดักชันควรใช้ private bucket + signed URL')
   auditPositiveInteger(env.get('SUPABASE_SIGNED_URL_EXPIRES_IN'), 'backend', 'SUPABASE_SIGNED_URL_EXPIRES_IN')
 
   const imageKey = env.get('IMAGE_GENERATION_API_KEY') ?? env.get('OPENAI_API_KEY')
@@ -223,7 +223,7 @@ function auditCrossEnv(backend: EnvMap, frontend: EnvMap) {
   const apiBaseOrigin = originOf(frontend.get('VITE_API_BASE_URL'))
   const corsOrigins = csv(backend.get('CORS_ORIGINS'))
   if (apiBaseOrigin && corsOrigins.includes(apiBaseOrigin)) {
-    warn('cross-check', 'CORS_ORIGINS', 'CORS ควรใส่ frontend origin ไม่ใช่ backend API origin ตรวจ domain อีกครั้ง')
+    warn('cross-check', 'CORS_ORIGINS', 'CORS ควรใส่ origin ของหน้าบ้าน ไม่ใช่ origin ของระบบหลังบ้าน ตรวจ domain อีกครั้ง')
   }
 }
 
@@ -365,7 +365,7 @@ function auditOpenRouterKey(value: string | undefined) {
   const key = value!.trim()
   if (!key.startsWith('sk-or-')) {
     if (key.startsWith('sk-proj-')) fail('backend', 'OPENROUTER_API_KEY', 'ค่านี้ดูเป็น OpenAI project key ไม่ใช่ OpenRouter key')
-    else fail('backend', 'OPENROUTER_API_KEY', 'ควรขึ้นต้นด้วย sk-or-')
+    else fail('backend', 'OPENROUTER_API_KEY', 'คีย์ OpenRouter ควรขึ้นต้นด้วย sk-or-')
     return
   }
   if (key.length < 24) {
@@ -394,7 +394,7 @@ function auditCorsOrigins(value: string | undefined) {
   if (!hasRealValue(value)) return
   const origins = csv(value)
   if (origins.length === 0) {
-    fail('backend', 'CORS_ORIGINS', 'ต้องมีอย่างน้อยหนึ่ง frontend origin')
+    fail('backend', 'CORS_ORIGINS', 'ต้องมีอย่างน้อยหนึ่ง origin ของหน้าบ้าน')
     return
   }
 
@@ -420,7 +420,7 @@ function auditCorsOrigins(value: string | undefined) {
     }
   }
 
-  if (!failed) pass('backend', 'CORS_ORIGINS', `ตั้งค่า frontend origin แล้ว ${origins.length} ค่า`)
+  if (!failed) pass('backend', 'CORS_ORIGINS', `ตั้งค่า origin ของหน้าบ้านแล้ว ${origins.length} ค่า`)
 }
 
 function auditSupabaseUrl(value: string | undefined, area: Area, check: string) {
