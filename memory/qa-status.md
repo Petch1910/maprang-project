@@ -314,3 +314,4 @@ Last updated: 2026-05-20
 - Relationship Engine hidden prompt Thai-first pass: focused `relationship.engine.test.ts`, `eval:local`, full `backend:check` ผ่าน 152 tests / 479 expect calls, และ `predeploy:check` guard บล็อก English relationship prompt labels เก่า.
 - Relationship timeline summary Thai-first pass: focused `chat.runtime.test.ts`, full `backend:check` ผ่าน 152 tests / 482 expect calls, และ `predeploy:check` guard บล็อก English timeline summary เก่า.
 - Local eval service Thai-first pass: `eval:local`, `eval:local:test`, `predeploy:check:test`, full `backend:check` ผ่าน 152 tests / 482 expect calls, และ `predeploy:check` guard บล็อก English eval diagnostics เก่า.
+- Eval docs/config Thai-first pass: `evals/README.md` และ `evals/promptfoo.roleplay.yaml` ผ่าน `predeploy:check:test`, `predeploy:check`, `eval:local`, `secrets:check`, และ `git diff --check`.

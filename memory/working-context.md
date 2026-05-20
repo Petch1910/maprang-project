@@ -294,3 +294,4 @@ Verified:
 - Relationship Engine hidden prompt guidance ตอนนี้ใช้ Thai-first สำหรับ prompt profile และ relationship state block แล้ว โดยยังคง machine values เช่น `status`, `tone`, `affinity`, และ hook codes ไว้เพื่อให้ระบบ parse/debug ได้เสถียร.
 - Relationship timeline summaries ที่ถูกบันทึกกลับเข้า runtime memory ตอนนี้เป็น Thai-first สำหรับ vulnerability, pressure, และ scene outcome summaries แล้ว.
 - Local eval fixture และ evaluator diagnostics ใน `eval.service.ts` เป็น Thai-first แล้ว ทั้งตัวละครทดสอบ, required/forbidden/lore checks, section order, และ token budget details.
+- `evals/README.md` และ metadata ของ `evals/promptfoo.roleplay.yaml` ใช้คำอธิบาย Thai-first แล้ว โดยยังคงชื่อเครื่องมือ `Promptfoo`, commands, และชื่อไฟล์เดิมเพื่อให้ค้นหา/รันได้เหมือนเดิม.

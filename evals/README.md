@@ -1,16 +1,15 @@
 # Maprang Evals
 
-This folder holds deterministic and provider-backed evaluation fixtures for Maprang AI.
+โฟลเดอร์นี้เก็บชุดทดสอบคุณภาพแบบ deterministic และชุดที่อาจต่อกับ provider สำหรับ Maprang AI โดยเน้นตรวจการประกอบพรอมป์ บริบทโรลเพลย์ และ regression ของระบบความสัมพันธ์/ฉาก.
 
-## Current Scope
+## ขอบเขตปัจจุบัน
 
-- `golden-roleplay.json`: local prompt assembly and roleplay guard scenarios.
-- `promptfoo.roleplay.yaml`: optional Promptfoo config using the `echo` provider, so it can run without spending model credits.
+- `golden-roleplay.json`: golden dataset สำหรับตรวจ local prompt assembly และ roleplay guard scenarios.
+- `promptfoo.roleplay.yaml`: config ของ Promptfoo แบบ optional โดยใช้ provider `echo` เพื่อรันได้โดยไม่เสียเครดิตโมเดล.
 
 ## Golden Dataset
 
-The golden dataset is intentionally small and deterministic. Add scenarios when a context bug is fixed, a relationship or
-scene rule changes, or a prompt-control regression needs a permanent guard.
+golden dataset ชุดนี้ตั้งใจให้เล็ก ชัด และ deterministic. เพิ่ม scenario ใหม่เมื่อแก้บัค context, เปลี่ยน relationship/scene rule, หรือเจอ prompt-control regression ที่ควรมี guard ถาวร.
 
 ## Commands
 
@@ -18,18 +17,18 @@ scene rule changes, or a prompt-control regression needs a permanent guard.
 bun run eval:local
 ```
 
-`eval:local` is deterministic and safe for CI. It validates the golden scenario corpus, prompt section order, knowledge pack inclusion, prompt-control policy, lore injection, and rough token budget.
-The same shared backend eval service is exposed to admins through `GET /admin/evals/local` and the `/admin/evals` UI.
+`eval:local` เป็น deterministic และปลอดภัยสำหรับ CI. คำสั่งนี้ตรวจ corpus ของ golden scenarios, ลำดับ section ของพรอมป์, การแนบ knowledge pack, prompt-control policy, lore injection, และงบโทเคนโดยประมาณ.
+backend eval service ตัวเดียวกันถูกเปิดให้ผู้ดูแลเรียกผ่าน `GET /admin/evals/local` และหน้า `/admin/evals`.
 
 ```bash
 bun run eval:promptfoo
 ```
 
-`eval:promptfoo` is optional. It uses `bunx promptfoo@latest` and may download Promptfoo if it is not cached locally. Keep this outside the strict local gate until the team decides to pin Promptfoo as a dev dependency.
+`eval:promptfoo` เป็น optional. คำสั่งนี้ใช้ `bunx promptfoo@latest` และอาจดาวน์โหลด Promptfoo ถ้ายังไม่มี cache ในเครื่อง จึงยังอยู่นอก strict local gate จนกว่าทีมจะตัดสินใจ pin Promptfoo เป็น dev dependency.
 
-## Rules
+## กฎ
 
-- No secrets in eval fixtures.
-- Never store real user chats, secrets, API keys, access tokens, service role keys, or private production URLs in eval fixtures.
-- Keep live-provider evals separate from deterministic evals.
-- Prefer small, high-signal scenarios that catch regressions in context assembly and roleplay behavior.
+- ห้ามใส่ secret ใน eval fixtures.
+- ห้ามเก็บแชทผู้ใช้จริง, API keys, access tokens, service role keys, หรือ private production URLs ใน eval fixtures.
+- แยก live-provider evals ออกจาก deterministic evals เสมอ.
+- เลือก scenario ที่เล็กแต่จับ regression ของ context assembly และ roleplay behavior ได้ชัด.

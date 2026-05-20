@@ -739,6 +739,7 @@ const checks: Check[] = [
       const evalReadme = await readRepoFile('evals/README.md')
       const evalService = await readRepoFile('apps/backend/src/eval.service.ts')
       const golden = await readRepoFile('evals/golden-roleplay.json')
+      const promptfooRoleplay = await readRepoFile('evals/promptfoo.roleplay.yaml')
       const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
       requireIncludes(
         packageJson,
@@ -747,7 +748,7 @@ const checks: Check[] = [
       )
       requireIncludes(readme, ['Evaluation Layer', 'bun run eval:local', 'evals/golden-roleplay.json'], 'README.md')
       requireIncludes(deploymentQa, ['bun run eval:local', 'deterministic prompt assembly'], 'DEPLOYMENT_QA.md')
-      requireIncludes(evalReadme, ['Golden Dataset', 'Promptfoo', 'No secrets'], 'evals/README.md')
+      requireIncludes(evalReadme, ['Golden Dataset', 'Promptfoo', 'ห้ามใส่ secret ใน eval fixtures'], 'evals/README.md')
       requireIncludes(
         evalService,
         ['ตัวละครทดสอบ Maprang', 'ไม่พบข้อความที่ต้องมี', 'โทเคนพรอมป์โดยประมาณ'],
@@ -757,6 +758,11 @@ const checks: Check[] = [
         evalService,
         ['A slow-burn roleplay character', 'missing required text', 'found in assembled prompt', 'estimated prompt tokens'],
         'apps/backend/src/eval.service.ts',
+      )
+      requireIncludes(
+        promptfooRoleplay,
+        ['ชุดตรวจพรอมป์ roleplay แบบ deterministic ของ Maprang', 'echo สำหรับตรวจการประกอบพรอมป์', 'มี prompt-control policy ในพรอมป์'],
+        'evals/promptfoo.roleplay.yaml',
       )
       requireIncludes(
         golden,
