@@ -169,7 +169,7 @@ describe('backend security audit', () => {
 
     expect(findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('ผ่าน - backend security audit ผ่านแล้ว')
+    expect(lines[0]).toBe('ผ่าน - ตรวจ security ระบบหลังบ้านผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

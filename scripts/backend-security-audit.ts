@@ -157,12 +157,12 @@ export async function runBackendSecurityAudit(
   const findings = await collectBackendSecurityFindings()
 
   if (findings.length > 0) {
-    writeError('Backend security audit ไม่ผ่าน:')
+    writeError('ตรวจ security ระบบหลังบ้านไม่ผ่าน:')
     for (const finding of findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
     return 1
   }
 
-  writeLine('ผ่าน - backend security audit ผ่านแล้ว')
+  writeLine('ผ่าน - ตรวจ security ระบบหลังบ้านผ่านแล้ว')
   return 0
 }
 

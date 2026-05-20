@@ -304,12 +304,12 @@ export async function runFrontendStaticAudit(
   const findings = await collectFrontendStaticFindings()
 
   if (findings.length > 0) {
-    writeError('Frontend static audit ไม่ผ่าน:')
+    writeError('ตรวจ static หน้าบ้านไม่ผ่าน:')
     for (const finding of findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
     return 1
   }
 
-  writeLine('ผ่าน - frontend static audit ผ่านแล้ว')
+  writeLine('ผ่าน - ตรวจ static หน้าบ้านผ่านแล้ว')
   return 0
 }
 
