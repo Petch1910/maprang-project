@@ -5,6 +5,7 @@ import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
 import { loreRoutes } from './lore.routes'
 import { reportRoutes } from './report.routes'
+import { rejectInvalidUuid, routeErrorMessage } from './route-guards'
 
 const prisma = getPrisma()
 const shouldRunDbTest = createDbTestGate(prisma, 'route id validation')
@@ -35,6 +36,18 @@ describe('route id validation', () => {
     } else {
       process.env.ADMIN_API_KEY = previousAdminKey
     }
+  })
+
+  test('route id guard returns Thai-first validation messages without database work', () => {
+    const set = { status: 200 }
+
+    expect(rejectInvalidUuid("' OR 1=1 --", set, 'invalid_character_id')).toEqual({
+      error: 'invalid_character_id',
+      message: 'รหัสตัวละครไม่ถูกต้อง',
+    })
+    expect(set.status).toBe(400)
+    expect(routeErrorMessage('invalid_parent_lore_id')).toBe('รหัสคลังความรู้หลักไม่ถูกต้อง')
+    expect(routeErrorMessage('unknown_error')).toBe('รหัสที่ส่งมาไม่ถูกต้อง')
   })
 
   test('rejects invalid character and lore ids before persistence errors', async () => {

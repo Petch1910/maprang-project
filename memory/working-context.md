@@ -11,7 +11,7 @@ Bring Maprang AI to a production-ready state before deploy. The local system sho
 Status: local QA ready
 
 Verified:
-- Backend tests pass: 140 pass, 0 fail.
+- Backend tests pass: 141 pass, 0 fail.
 - Frontend deploy check passes.
 - Local API smoke passes: 32 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
@@ -30,6 +30,7 @@ Verified:
 - Backend rate-limit responses now keep the machine-readable `rate_limited` code while returning a Thai-first user message.
 - Backend avatar storage failures now return Thai-first messages for Supabase configuration, upload, signed URL, and route-level storage-unavailable cases.
 - Backend avatar upload validation now returns Thai-first messages for missing files, unsupported file types, oversized files, and avatar-not-found responses.
+- Backend invalid UUID route guard now returns Thai-first messages for character, chat, lore, report, user, and parent-lore ids while keeping machine-readable error codes.
 - Backend production auth failures now return Thai-first 401 messages for missing login and invalid/expired Supabase tokens.
 - Frontend content rating labels shown in Explore/Character Lobby are now Thai-first, and the static audit blocks stale `Teen romance`, `Mature 18+`, and `Restricted 18+` labels from returning.
 - Chat selection accessibility labels in the sidebar and My Chats are now Thai-first, and the static audit blocks stale `Select chat` labels from returning.
