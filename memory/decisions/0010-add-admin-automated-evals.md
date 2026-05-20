@@ -1,24 +1,24 @@
-# 0010 - Add Admin Automated Evals
+# 0010 - เพิ่ม admin automated evals
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-## Status
+## สถานะ
 
 Accepted
 
-## Context
+## บริบท
 
-Prompt and context changes can silently break roleplay depth, prompt-control ordering, lore placement, or relationship/scene continuity. The project already has `bun run eval:local`, but relying only on terminal access makes quality regression harder to inspect during admin QA.
+การเปลี่ยน prompt และ context อาจทำให้ roleplay depth, prompt-control ordering, lore placement, หรือ relationship/scene continuity พังแบบเงียบๆ โปรเจกต์มี `bun run eval:local` แล้ว แต่ถ้าต้องพึ่ง terminal อย่างเดียว admin QA จะตรวจ regression ยาก
 
 ## Decision
 
-- Extract the deterministic golden roleplay eval logic into a backend service shared by CLI and API.
-- Expose `GET /admin/evals/local` behind `ADMIN_API_KEY`.
-- Add `/admin/evals` as a guarded admin UI showing suite status, scenario results, per-check pass/fail details, token budget, and failure summaries.
-- Include the route in route/menu audit, API smoke, and browser e2e smoke.
+- แยก deterministic golden roleplay eval logic เป็น backend service ที่ CLI และ API ใช้ร่วมกัน.
+- เปิด `GET /admin/evals/local` หลัง `ADMIN_API_KEY`.
+- เพิ่ม `/admin/evals` เป็น guarded admin UI ที่แสดง suite status, scenario results, per-check pass/fail details, token budget, และ failure summaries.
+- รวม route นี้ใน route/menu audit, API smoke, และ browser e2e smoke.
 
-## Consequences
+## ผลลัพธ์
 
-- Admins can verify prompt/context regression from the web without spending live model tokens.
-- CLI, API, and UI now use the same eval logic, reducing drift.
-- Future work can add saved eval history, prompt/provider comparisons, and live Promptfoo runs after staging is stable.
+- Admins ตรวจ prompt/context regression จากเว็บได้โดยไม่ใช้ live model tokens.
+- CLI, API, และ UI ใช้ eval logic ชุดเดียวกัน ลด drift.
+- อนาคตเพิ่ม saved eval history, prompt/provider comparisons, และ live Promptfoo runs ได้หลัง staging เสถียร.

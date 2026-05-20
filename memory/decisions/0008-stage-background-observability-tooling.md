@@ -1,34 +1,30 @@
-# 0008 - Stage Background and Observability Tooling
+# 0008 - เตรียม background และ observability tooling
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-## Status
+## สถานะ
 
 Accepted
 
-## Context
+## บริบท
 
-Several external tools can improve Maprang, but adding all of them directly to runtime would increase deploy risk before
-the core platform is production-ready. The project needs a staged adoption path that improves quality now and keeps heavier
-systems ready for the right moment.
+เครื่องมือภายนอกหลายตัวช่วยให้ Maprang ดีขึ้นได้ แต่การใส่ทุกอย่างเข้า runtime ทันทีจะเพิ่ม deploy risk ก่อนที่ core platform จะ production-ready โปรเจกต์จึงต้องมี staged adoption path ที่เพิ่มคุณภาพตอนนี้ และเตรียมระบบหนักไว้ใช้เมื่อถึงจังหวะเหมาะ
 
 ## Decision
 
-Adopt low-risk quality tooling now, and stage heavier runtime systems:
+รับ low-risk quality tooling ตอนนี้ และ stage runtime systems ที่หนักกว่าไว้ก่อน:
 
-- Use deterministic evals immediately for prompt/context regression checks.
-- Keep Promptfoo as optional live-eval scaffolding for model/provider comparisons.
-- Add Graphile Worker later for background jobs such as chat summaries, embedding refresh, image retries, cleanup, and
-  scheduled production smoke.
-- Add OpenTelemetry JS later for context-pipeline spans covering retrieve, assemble, generate, sanitize, and persist.
-- Add Sentry later for frontend/backend error capture once staging domains and release identifiers are stable.
-- Consider pgvector after the first production Postgres environment is stable.
-- Consider OpenFGA only when collaborative permissions, shared universes, or creator teams make role-based access too
-  complex for local policy checks.
-- Consider LiteLLM or One-API only when provider routing needs multi-key load balancing or failover beyond OpenRouter.
+- ใช้ deterministic evals ทันทีสำหรับ prompt/context regression checks.
+- เก็บ Promptfoo เป็น optional live-eval scaffolding สำหรับ model/provider comparisons.
+- เพิ่ม Graphile Worker ภายหลังสำหรับ background jobs เช่น chat summaries, embedding refresh, image retries, cleanup, และ scheduled production smoke.
+- เพิ่ม OpenTelemetry JS ภายหลังสำหรับ context-pipeline spans ที่ครอบ retrieve, assemble, generate, sanitize, และ persist.
+- เพิ่ม Sentry ภายหลังสำหรับ frontend/backend error capture เมื่อ staging domains และ release identifiers เสถียรแล้ว.
+- พิจารณา pgvector หลัง production Postgres environment แรกเสถียร.
+- พิจารณา OpenFGA เฉพาะเมื่อ collaborative permissions, shared universes, หรือ creator teams ทำให้ role-based access ซับซ้อนเกิน local policy checks.
+- พิจารณา LiteLLM หรือ One-API เฉพาะเมื่อ provider routing ต้องใช้ multi-key load balancing หรือ failover ที่เกิน OpenRouter.
 
-## Consequences
+## ผลลัพธ์
 
-- The repo gains quality gates without adding new runtime services.
-- Future architecture choices are documented before they are implemented.
-- Production deploy can focus on real env, Supabase, provider verification, UI QA, and API hardening first.
+- Repo ได้ quality gates โดยไม่เพิ่ม runtime services ใหม่.
+- Future architecture choices ถูกบันทึกก่อน implement.
+- Production deploy โฟกัส real env, Supabase, provider verification, UI QA, และ API hardening ก่อนได้.

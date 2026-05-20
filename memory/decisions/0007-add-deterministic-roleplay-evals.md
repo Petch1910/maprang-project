@@ -1,34 +1,30 @@
-# 0007 - Add Deterministic Roleplay Evals
+# 0007 - เพิ่ม deterministic roleplay evals
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-## Status
+## สถานะ
 
 Accepted
 
-## Context
+## บริบท
 
-Maprang's chat quality depends on assembled context, not only on the selected model. The project now has runtime knowledge
-packs, lore injection, prompt-control rules, relationship state, and scene state. A small prompt change can silently reduce
-roleplay depth, leak hidden instructions, or drop relationship continuity.
+คุณภาพแชทของ Maprang ขึ้นกับ context ที่ assemble แล้ว ไม่ได้ขึ้นกับโมเดลที่เลือกอย่างเดียว ตอนนี้โปรเจกต์มี runtime knowledge packs, lore injection, prompt-control rules, relationship state, และ scene state การเปลี่ยน prompt เล็กน้อยอาจทำให้ roleplay depth ลดลง, hidden instructions หลุด, หรือ relationship continuity หายไปแบบเงียบๆ
 
 ## Decision
 
-Add a deterministic local eval suite under `evals/` and run it through `bun run eval:local`. The suite checks prompt
-assembly without calling a live model:
+เพิ่ม deterministic local eval suite ไว้ใต้ `evals/` และรันผ่าน `bun run eval:local`. ชุดนี้ตรวจ prompt assembly โดยไม่เรียก live model:
 
-- prompt-control policy stays above untrusted text
-- runtime knowledge text remains present
-- lore entries are included in the expected section
-- relationship and scene continuity can be injected
-- secret-shaped values are not present
-- rough prompt token budget stays bounded
+- prompt-control policy อยู่เหนือ untrusted text
+- runtime knowledge text ยังอยู่ครบ
+- lore entries ถูกวางใน section ที่คาดไว้
+- relationship และ scene continuity inject ได้
+- ไม่มี secret-shaped values
+- rough prompt token budget ยังอยู่ในขอบเขต
 
-Keep optional Promptfoo scaffolding for later live-model comparisons, but do not make it part of the mandatory local gate
-until staging has stable provider keys and budgets.
+เก็บ Promptfoo scaffolding ไว้เป็น optional สำหรับ live-model comparisons ภายหลัง แต่ยังไม่ใส่เป็น mandatory local gate จนกว่า staging จะมี provider keys และ budgets ที่เสถียร
 
-## Consequences
+## ผลลัพธ์
 
-- `qa:local` and CI catch context regressions earlier.
-- The eval suite stays cheap and deterministic.
-- Live quality scoring remains a future staging step rather than a local developer blocker.
+- `qa:local` และ CI จับ context regressions ได้เร็วขึ้น.
+- Eval suite ยังถูกและ deterministic.
+- Live quality scoring ยังเป็น future staging step ไม่ใช่ local developer blocker.

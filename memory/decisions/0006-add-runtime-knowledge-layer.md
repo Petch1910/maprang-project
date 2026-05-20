@@ -1,26 +1,26 @@
-# 0006 - Add Runtime Knowledge Layer
+# 0006 - เพิ่ม runtime knowledge layer
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-Status: decided
+สถานะ: decided
 
-## Context
+## บริบท
 
-The project needs persistent product rules that are more structured than session memory and more directly usable by backend prompts and rule engines.
+โปรเจกต์ต้องมี product rules ที่ persist ได้ เป็นโครงสร้างมากกว่า session memory และ backend prompts/rule engines นำไปใช้ได้ตรงกว่า
 
 ## Decision
 
-Use a mixed architecture:
+ใช้สถาปัตยกรรมแบบผสม:
 
-- `memory/` stores project/session state, decisions, blockers, and QA status.
-- `knowledge/raw/` stores source notes and reference material without secrets.
-- `knowledge/wiki/` stores human-readable product knowledge.
-- `knowledge/structured/` stores schema-versioned JSON packs for runtime use.
+- `memory/` เก็บ project/session state, decisions, blockers, และ QA status.
+- `knowledge/raw/` เก็บ source notes และ reference material โดยไม่มี secrets.
+- `knowledge/wiki/` เก็บ product knowledge แบบมนุษย์อ่านได้.
+- `knowledge/structured/` เก็บ JSON packs แบบ schema-versioned สำหรับ runtime.
 
-The backend loads structured packs for chat style, creator drafting, relationship rules, scene rules, and content policy. Health/readiness exposes structured knowledge validity.
+Backend โหลด structured packs สำหรับ chat style, creator drafting, relationship rules, scene rules, และ content policy. Health/readiness แสดง structured knowledge validity.
 
-## Consequences
+## ผลลัพธ์
 
-- Product rules can compound across sessions without becoming loose chat history.
-- Runtime prompts can reuse consistent guidance without hard-coding every rule in TypeScript.
-- `bun run knowledge:audit` must pass before deploy.
+- Product rules สะสมข้าม session ได้โดยไม่กลายเป็น chat history หลวมๆ.
+- Runtime prompts ใช้ guidance ชุดเดียวกันได้ โดยไม่ต้อง hard-code ทุก rule ใน TypeScript.
+- `bun run knowledge:audit` ต้องผ่านก่อน deploy.
