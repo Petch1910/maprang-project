@@ -220,6 +220,11 @@ export const suspiciousPatterns = [
     message: 'พบข้อความ prompt/admin tooling ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {
+    pattern:
+      /(?:Lorebook|Lore\s+ที่ใช้|Lore\s+ที่ดึงมาใช้|lore\s+ที่ดึงมาใช้|ไม่มี\s+lore|กำลังโหลด\s+lore|เพิ่ม\s+lore|แก้\s+lore|บันทึก\s+lore|อัปเดต\s+lore|รายละเอียด\s+lore|Persona\s+ชั่วคราว|แนบ\s+persona|persona\s+ที่บันทึกไว้|visual\s+cue|persona\s+expression|placeholder=(["'])(?:keyword|aliases|priority)\b)/g,
+    message: 'พบข้อความคลังความรู้หรือตัวตนผู้เล่นปนอังกฤษที่ควรเป็น Thai-first',
+  },
+  {
     pattern: /(?:ระบบ relationship|anchor ตัวละคร|ยังไม่ได้รัน eval|รัน eval|hook:|ยัง fallback|fallback เป็นภาพ|เหตุผล disabled)/g,
     message: 'พบข้อความ UI ปนอังกฤษที่ควรเป็น Thai-first',
   },

@@ -542,7 +542,7 @@ function RightRail({
               <span className="rounded-lg bg-white/8 py-2" key={emoji}>{emoji}</span>
             ))}
           </div>
-          <p className="m-0 text-xs leading-5 text-white/45">ชุดอีโมจินี้ใช้เป็น visual cue ก่อนต่อระบบ persona expression จริง</p>
+          <p className="m-0 text-xs leading-5 text-white/45">ชุดอีโมจินี้ใช้เป็นสัญญาณภาพก่อนต่อระบบแสดงบุคลิกจริง</p>
         </>
       )
     }
@@ -585,7 +585,7 @@ function RightRail({
       <>
         <InfoLine label="โมเดลล่าสุด" value={usage?.modelName ?? 'ยังไม่มีรอบแชทล่าสุด'} />
         <InfoLine label="โทเคนรอบล่าสุด" value={usage ? usage.totalTokens.toLocaleString() : '0'} />
-        <InfoLine label="Lore ที่ดึงมาใช้" value={String(usage?.contextLoreCount ?? 0)} />
+        <InfoLine label="คลังความรู้ที่ดึงมาใช้" value={String(usage?.contextLoreCount ?? 0)} />
         <InfoLine
           label="งบพรอมป์"
           value={

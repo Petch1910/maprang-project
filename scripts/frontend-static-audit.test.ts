@@ -15,6 +15,7 @@ const adminHealthMixedFinding = 'พบข้อความ Admin Health ปน
 const promptToolingMixedFinding = 'พบข้อความ prompt/admin tooling ปนอังกฤษที่ควรเป็น Thai-first'
 const mixedUiFinding = 'พบข้อความ UI ปนอังกฤษที่ควรเป็น Thai-first'
 const profileHelperMixedFinding = 'พบข้อความ profile/tag helper ปนอังกฤษที่ควรเป็น Thai-first'
+const knowledgePersonaMixedFinding = 'พบข้อความคลังความรู้หรือตัวตนผู้เล่นปนอังกฤษที่ควรเป็น Thai-first'
 
 describe('frontend static audit', () => {
   test('reports buttons without explicit type and icon-only labels', () => {
@@ -238,6 +239,32 @@ describe('frontend static audit', () => {
 
     expect(findings.map((finding) => finding.message)).toEqual(
       Array.from({ length: 15 }, () => promptToolingMixedFinding),
+    )
+  })
+
+  test('reports mixed lorebook and persona wording regressions', () => {
+    const findings = auditSuspiciousPatterns(
+      [
+        '<p>Lorebook</p>',
+        '<StatCard label="Lore ที่ใช้" />',
+        '<p>Lore ที่ดึงมาใช้</p>',
+        '<p>ไม่มี lore ที่ถูกดึงมาใช้</p>',
+        '<p>กำลังโหลด lore...</p>',
+        '<button>เพิ่ม lore</button>',
+        '<button>แก้ lore</button>',
+        '<button>บันทึก lore</button>',
+        '<input placeholder="keyword เช่น บ้านเกิด" />',
+        '<input placeholder="aliases คั่นด้วย comma" />',
+        '<input placeholder="priority" />',
+        '<span>Persona ชั่วคราว</span>',
+        '<span>แนบ persona ที่บันทึกไว้</span>',
+        '<input placeholder="เว้นว่างเพื่อใช้ persona ที่บันทึกไว้" />',
+      ].join('\n'),
+      'KnowledgePersonaFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual(
+      Array.from({ length: 14 }, () => knowledgePersonaMixedFinding),
     )
   })
 

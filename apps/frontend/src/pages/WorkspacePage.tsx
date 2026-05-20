@@ -577,10 +577,10 @@ export function WorkspacePage() {
     try {
       const data = await createLoreEntry(character.id, input)
       setLoreEntries((prev) => [data.loreEntry, ...prev])
-      setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
+      setConnectionNote(`บันทึกคลังความรู้ "${data.loreEntry.keyword}" แล้ว`)
     } catch (error) {
       logUnexpectedWorkspaceError('สร้างคลังความรู้ไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
+      setConnectionNote(apiErrorMessage(error, 'อัปเดตคลังความรู้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
     }
@@ -591,10 +591,10 @@ export function WorkspacePage() {
     try {
       const data = await updateLoreEntry(loreId, input)
       setLoreEntries((prev) => prev.map((entry) => (entry.id === loreId ? data.loreEntry : entry)))
-      setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
+      setConnectionNote(`บันทึกคลังความรู้ "${data.loreEntry.keyword}" แล้ว`)
     } catch (error) {
       logUnexpectedWorkspaceError('แก้ไขคลังความรู้ไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
+      setConnectionNote(apiErrorMessage(error, 'อัปเดตคลังความรู้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
     }
@@ -605,10 +605,10 @@ export function WorkspacePage() {
     try {
       await deleteLoreEntry(loreId)
       setLoreEntries((prev) => prev.filter((entry) => entry.id !== loreId))
-      setConnectionNote('อัปเดต lore แล้ว')
+      setConnectionNote('อัปเดตคลังความรู้แล้ว')
     } catch (error) {
       logUnexpectedWorkspaceError('ลบคลังความรู้ไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
+      setConnectionNote(apiErrorMessage(error, 'อัปเดตคลังความรู้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
     }

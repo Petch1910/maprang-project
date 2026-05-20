@@ -79,10 +79,10 @@ export function LoreManager({
     setNote('')
     if (editingId) {
       await onUpdate(editingId, input)
-      setNote('อัปเดต lore แล้ว')
+      setNote('อัปเดตคลังความรู้แล้ว')
     } else {
       await onCreate(input)
-      setNote('เพิ่ม lore ใหม่แล้ว')
+      setNote('เพิ่มคลังความรู้ใหม่แล้ว')
     }
     reset()
   }
@@ -102,7 +102,7 @@ export function LoreManager({
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">Lorebook</p>
+          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">คลังความรู้</p>
           <h2 className="m-0 text-lg font-bold text-slate-900">ความรู้ของ {character.name}</h2>
         </div>
         <button type="button"
@@ -118,7 +118,7 @@ export function LoreManager({
         className="mb-3 flex min-h-10 w-full items-center justify-between rounded-xl border border-slate-900/10 bg-slate-50 px-3 text-left text-sm font-extrabold text-slate-900 transition hover:bg-white"
         onClick={() => setIsOpen((value) => !value)}
       >
-        <span>{editingId ? 'แก้ lore' : 'เพิ่ม lore'}</span>
+        <span>{editingId ? 'แก้คลังความรู้' : 'เพิ่มคลังความรู้'}</span>
         <span className="text-lg leading-none">{isOpen ? '-' : '+'}</span>
       </button>
 
@@ -128,26 +128,26 @@ export function LoreManager({
             className={inputClass}
             value={form.keyword}
             onChange={(event) => updateForm('keyword', event.target.value)}
-            placeholder="keyword เช่น บ้านเกิด, ความลับ, กฎของโลก"
+            placeholder="หัวข้อ เช่น บ้านเกิด, ความลับ, กฎของโลก"
           />
           <input
             className={inputClass}
             value={form.aliases}
             onChange={(event) => updateForm('aliases', event.target.value)}
-            placeholder="aliases คั่นด้วย comma"
+            placeholder="ชื่อเรียกอื่น คั่นด้วยคอมมา"
           />
           <textarea
             className={textareaClass}
             value={form.content}
             onChange={(event) => updateForm('content', event.target.value)}
-            placeholder="รายละเอียด lore ที่ AI ควรรู้"
+            placeholder="รายละเอียดคลังความรู้ที่ AI ควรรู้"
           />
           <input
             className={inputClass}
             inputMode="numeric"
             value={form.priority}
             onChange={(event) => updateForm('priority', event.target.value)}
-            placeholder="priority"
+            placeholder="ระดับความสำคัญ"
           />
           <div className="grid grid-cols-2 gap-2">
             <button type="button"
@@ -155,7 +155,7 @@ export function LoreManager({
               onClick={submit}
               disabled={isSaving || !form.keyword.trim() || !form.content.trim()}
             >
-              {isSaving ? 'กำลังบันทึก...' : editingId ? 'บันทึก lore' : 'เพิ่ม lore'}
+              {isSaving ? 'กำลังบันทึก...' : editingId ? 'บันทึกคลังความรู้' : 'เพิ่มคลังความรู้'}
             </button>
             <button type="button"
               className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-bold text-slate-700"
@@ -171,7 +171,7 @@ export function LoreManager({
       <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
         {sortedEntries.length === 0 && (
           <p className="m-0 rounded-lg border border-dashed border-slate-900/15 bg-white/60 p-3 text-sm leading-relaxed text-slate-500">
-            {isLoading ? 'กำลังโหลด lore...' : 'ยังไม่มี lore สำหรับตัวละครนี้'}
+            {isLoading ? 'กำลังโหลดคลังความรู้...' : 'ยังไม่มีคลังความรู้สำหรับตัวละครนี้'}
           </p>
         )}
 

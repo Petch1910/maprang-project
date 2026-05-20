@@ -27,7 +27,7 @@ const defaultMessage =
   'ช่วยตอบฉากนี้ให้มีรายละเอียดมากขึ้น คงบุคลิกเดิม ใช้บรรยากาศ ความรู้สึก และทิ้งจังหวะให้ผู้เล่นตอบต่อ'
 const defaultCompareMessage = 'สวัสดี วันนี้เธอเป็นยังไงบ้าง'
 const defaultRuntimeNote =
-  'ตรวจว่าหน่วยความจำ runtime สถานะความสัมพันธ์ สถานะฉาก และคลังความรู้ถูกวางในพรอมป์อย่างเหมาะสมก่อนยิงโมเดลจริง'
+  'ตรวจว่าหน่วยความจำระหว่างรัน สถานะความสัมพันธ์ สถานะฉาก และคลังความรู้ถูกวางในพรอมป์อย่างเหมาะสมก่อนยิงโมเดลจริง'
 
 function getStoredAdminKey() {
   if (typeof window === 'undefined') return ''
@@ -266,7 +266,7 @@ export function AdminPromptInspectorPage() {
             </p>
             <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">ตรวจพรอมป์ก่อนยิงโมเดล</h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              ตรวจภาพรวมพรอมป์ งบโทเคน lore ที่ดึงมาใช้ และส่วนต่างของบริบท เพื่อหาสาเหตุเวลาบอทตอบสั้นหรือหลุดบุคลิก
+              ตรวจภาพรวมพรอมป์ งบโทเคน คลังความรู้ที่ดึงมาใช้ และส่วนต่างของบริบท เพื่อหาสาเหตุเวลาบอทตอบสั้นหรือหลุดบุคลิก
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] xl:w-[560px]">
@@ -410,18 +410,18 @@ export function AdminPromptInspectorPage() {
               type="checkbox"
             />
             <span>
-              <span className="block text-sm font-black text-slate-950">แนบ persona ที่บันทึกไว้</span>
+              <span className="block text-sm font-black text-slate-950">แนบตัวตนผู้เล่นที่บันทึกไว้</span>
               <span className="block text-xs font-bold leading-5 text-slate-500">ใช้ค่าจากระบบหลังบ้าน ถ้าไม่ได้กรอกตัวตนชั่วคราวด้านล่าง</span>
             </span>
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-xs font-black text-slate-500">Persona ชั่วคราว</span>
+            <span className="mb-1 block text-xs font-black text-slate-500">ตัวตนชั่วคราว</span>
             <textarea
               className="min-h-24 w-full resize-y rounded-xl border border-slate-900/10 px-3 py-3 text-sm font-bold leading-6 text-slate-700 outline-none focus:border-amber-500"
               data-testid="prompt-inspector-user-persona"
               onChange={(event) => setUserPersona(event.target.value)}
-              placeholder="เว้นว่างเพื่อใช้ persona ที่บันทึกไว้"
+              placeholder="เว้นว่างเพื่อใช้ตัวตนผู้เล่นที่บันทึกไว้"
               value={userPersona}
             />
           </label>
@@ -444,7 +444,7 @@ export function AdminPromptInspectorPage() {
                 <StatCard label="ส่วนพรอมป์" value={result.snapshot.totals.sectionCount.toLocaleString()} tone="sky" />
                 <StatCard label="โทเคนโดยประมาณ" value={result.snapshot.totals.estimatedTokens.toLocaleString()} tone="amber" />
                 <StatCard label="ตัวอักษร" value={result.snapshot.totals.chars.toLocaleString()} />
-                <StatCard label="Lore ที่ใช้" value={result.snapshot.retrieval.loreCount.toLocaleString()} tone="emerald" />
+                <StatCard label="คลังความรู้ที่ใช้" value={result.snapshot.retrieval.loreCount.toLocaleString()} tone="emerald" />
               </section>
 
               {result.snapshot.warnings.length > 0 && (
@@ -504,9 +504,9 @@ export function AdminPromptInspectorPage() {
               </section>
 
               <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
-                <p className="m-0 text-sm font-black text-slate-950">Lore ที่ดึงมาใช้</p>
+                <p className="m-0 text-sm font-black text-slate-950">คลังความรู้ที่ดึงมาใช้</p>
                 {result.snapshot.retrieval.lore.length === 0 ? (
-                  <p className="m-0 mt-3 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-500">ไม่มี lore ที่ถูกดึงมาใช้ในรอบนี้</p>
+                  <p className="m-0 mt-3 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-500">ไม่มีคลังความรู้ที่ถูกดึงมาใช้ในรอบนี้</p>
                 ) : (
                   <div className="mt-3 grid gap-2">
                     {result.snapshot.retrieval.lore.map((entry) => (
