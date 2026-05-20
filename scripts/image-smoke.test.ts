@@ -211,6 +211,6 @@ describe('image smoke helpers', () => {
     expect(exitCode).toBe(1)
     expect(healthRead).toBe(false)
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('service name ไม่ถูกต้อง')
+    expect(errors.join('\n')).toContain('ชื่อ service ไม่ถูกต้อง')
   })
 })

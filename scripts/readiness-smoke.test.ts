@@ -135,7 +135,7 @@ describe('readiness smoke summary', () => {
     expect(exitCode).toBe(1)
     expect(readinessRead).toBe(false)
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('service name ไม่ถูกต้อง')
+    expect(errors.join('\n')).toContain('ชื่อ service ไม่ถูกต้อง')
   })
 
   test('returns a failure code without exiting when readiness is not ready', async () => {

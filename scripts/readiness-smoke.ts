@@ -142,7 +142,7 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
     response = await fetchImpl(`${apiBase}/ready`)
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
-    throw new Error(`ติดต่อ readiness endpoint ที่ ${apiBase}/ready ไม่ได้ (${reason})`)
+    throw new Error(`ติดต่อ endpoint ความพร้อมที่ ${apiBase}/ready ไม่ได้ (${reason})`)
   }
 
   const raw = await response.text()
@@ -150,7 +150,7 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
   try {
     payload = JSON.parse(raw) as ReadinessPayload
   } catch {
-    throw new Error(`/ready ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'empty response'}`)
+    throw new Error(`/ready ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'response ว่าง'}`)
   }
 
   return { response, payload }
@@ -162,7 +162,7 @@ export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: t
     response = await fetchImpl(`${apiBase}/`)
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error)
-    throw new Error(`ติดต่อ backend root identity ที่ ${apiBase}/ ไม่ได้ (${reason})`)
+    throw new Error(`ติดต่อ root identity ของระบบหลังบ้านที่ ${apiBase}/ ไม่ได้ (${reason})`)
   }
 
   const raw = await response.text()
@@ -170,7 +170,7 @@ export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: t
   try {
     payload = JSON.parse(raw) as RootIdentityPayload
   } catch {
-    throw new Error(`/ ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'empty response'}`)
+    throw new Error(`/ ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'response ว่าง'}`)
   }
 
   if (!response.ok) throw new Error(`/ ตอบ ${response.status}: ${raw.slice(0, 300) || response.statusText}`)
@@ -215,7 +215,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
   writeLine(formatReadinessSummary(summary))
 
   if (!summary.ok) {
-    const reason = summary.failures.length > 0 ? summary.failures.join('; ') : `status ${response.status}`
+    const reason = summary.failures.length > 0 ? summary.failures.join('; ') : `สถานะ ${response.status}`
     writeError(`Readiness smoke ไม่ผ่าน: ${reason}`)
     return 1
   }

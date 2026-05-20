@@ -47,10 +47,10 @@ describe('smoke helpers', () => {
 
   test('formats common fetch failures with Thai-first diagnostics', () => {
     expect(formatFetchErrorReason(new Error('Unable to connect. Is the computer able to access the url?'))).toBe(
-      'เชื่อมต่อไม่ได้ ตรวจว่า backend เปิดอยู่และพอร์ตถูกต้อง',
+      'เชื่อมต่อไม่ได้ ตรวจว่าระบบหลังบ้านเปิดอยู่และพอร์ตถูกต้อง',
     )
     expect(formatFetchErrorReason(new Error('operation timed out'))).toBe(
-      'หมดเวลารอการเชื่อมต่อ ตรวจ network หรือ backend',
+      'หมดเวลารอการเชื่อมต่อ ตรวจเครือข่ายหรือระบบหลังบ้าน',
     )
     expect(formatFetchErrorReason('custom upstream error')).toBe('custom upstream error')
   })
@@ -58,6 +58,6 @@ describe('smoke helpers', () => {
   test('validates backend root identity payloads', () => {
     expect(() => validateBackendRootIdentity({ ok: true, service: 'maprang-backend' })).not.toThrow()
     expect(() => validateBackendRootIdentity({ ok: false, service: 'maprang-backend' })).toThrow('ok=false')
-    expect(() => validateBackendRootIdentity({ ok: true, service: 'wrong' })).toThrow('service name ไม่ถูกต้อง')
+    expect(() => validateBackendRootIdentity({ ok: true, service: 'wrong' })).toThrow('ชื่อ service ไม่ถูกต้อง')
   })
 })

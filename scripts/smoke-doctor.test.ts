@@ -237,7 +237,7 @@ describe('smoke doctor report', () => {
     expect(healthRead).toBe(false)
     expect(lines).toEqual([])
     expect(warnings).toEqual([])
-    expect(errors.join('\n')).toContain('service name ไม่ถูกต้อง')
+    expect(errors.join('\n')).toContain('ชื่อ service ไม่ถูกต้อง')
     expect(errors.join('\n')).toContain('root ของระบบหลังบ้านที่ deploy แล้วไม่ใช่ proxy ของหน้าบ้าน/static')
     expect(errors.join('\n')).toContain('วิธีแก้ในเครื่อง:')
   })

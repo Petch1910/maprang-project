@@ -170,6 +170,7 @@ Last updated: 2026-05-20
 - `smoke:doctor:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, smoke doctor blocker output, and strict-gate output.
 - `smoke:ready:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, `/ready` summary output, and the importable readiness smoke runner.
 - Shared smoke helper diagnostics now pass Thai-first coverage via `smoke:helpers:test`, `smoke:local:test`, `deploy:status:test`, `smoke:image:test`, `smoke:chat:test`, `smoke:ready:test`, and `smoke:doctor:test`.
+- Shared smoke helper/readiness diagnostics now use Thai-first backend/network/status/empty-response wording, verified with `smoke:helpers:test`, `smoke:ready:test`, `smoke:local:test`, `smoke:image:test`, `smoke:chat:test`, `deploy:status:test`, and `smoke:doctor:test`.
 - Shared smoke helper fetch-reason localization now passes `smoke:helpers:test`, `smoke:doctor:test`, and `predeploy:check`.
 - `smoke:image:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, image smoke skip/fallback/live payload helpers, and the importable image smoke runner without provider calls.
 - Image smoke missing-detail fallback copy now passes `smoke:image:test` and no longer emits `no warnings`.
