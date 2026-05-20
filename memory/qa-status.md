@@ -91,6 +91,7 @@ Last updated: 2026-05-20
 - `frontend:api:test` now runs in `qa:local`, CI, and Production Smoke to guard frontend `ApiError` behavior: backend Thai `message` fields win, missing-message fallbacks stay Thai-first, and raw machine-readable `error` codes remain in `payload` instead of becoming user-facing copy.
 - `frontend:bundle:test` now runs in `qa:local`, CI, and Production Smoke to guard code-splitting, bundle budget regressions, and the importable bundle budget runner.
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, admin/system/relationship English UI label regressions, mixed English debug copy regressions, Thai text/mojibake regressions, and the importable static audit runner.
+- `frontend:static:audit:test` now also blocks frontend XSS/opener regressions: `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, and unsafe `target="_blank"` links.
 - `frontend:static:audit:test` now also blocks stale English Redux fallback errors such as `Could not load chats` and `Could not load characters`.
 - Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - Frontend API fallback error wording now passes Thai-first coverage via `frontend:static:audit:test` and full `frontend:check`.

@@ -125,6 +125,35 @@ export function auditButtonsWithAst(content: string, file: string) {
   return findings
 }
 
+export function auditLinksWithAst(content: string, file: string) {
+  const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const findings: Finding[] = []
+
+  function visit(node: ts.Node) {
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const tagName = node.tagName.getText(sourceFile)
+      if (tagName === 'a') {
+        const target = getJsxAttribute(node, sourceFile, 'target')
+        const rel = getJsxAttribute(node, sourceFile, 'rel')
+        const targetValue = target ? jsxAttributeValue(target) : ''
+        const relTokens = rel ? jsxAttributeValue(rel).toLowerCase().split(/\s+/).filter(Boolean) : []
+
+        if (targetValue === '_blank' && (!relTokens.includes('noopener') || !relTokens.includes('noreferrer'))) {
+          findings.push({
+            file,
+            line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
+            message: `ลิงก์ target="_blank" ต้องมี rel="noopener noreferrer": ${compact(node.getText(sourceFile)).slice(0, 140)}`,
+          })
+        }
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return findings
+}
+
 export const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
 
 export const suspiciousPatterns = [
@@ -134,6 +163,22 @@ export const suspiciousPatterns = [
   { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick ว่างเปล่า' },
   { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'frontend source ยัง throw not implemented' },
   { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบ placeholder' },
+  {
+    pattern: /dangerouslySetInnerHTML\s*=/g,
+    message: 'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
+  },
+  {
+    pattern: /\.innerHTML\s*=/g,
+    message: 'ห้ามเขียน innerHTML โดยตรงใน frontend source',
+  },
+  {
+    pattern: /\beval\s*\(/g,
+    message: 'ห้ามใช้ eval() ใน frontend source',
+  },
+  {
+    pattern: /\bnew\s+Function\s*\(/g,
+    message: 'ห้ามใช้ new Function() ใน frontend source',
+  },
   {
     pattern: /setNote\(\s*error\s+instanceof\s+Error\s*\?\s*error\.message/g,
     message: 'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
@@ -227,7 +272,7 @@ export function auditSuspiciousPatterns(content: string, file: string) {
 }
 
 export function auditFrontendSourceFile(content: string, file: string) {
-  return [...auditButtonsWithAst(content, file), ...auditSuspiciousPatterns(content, file)]
+  return [...auditButtonsWithAst(content, file), ...auditLinksWithAst(content, file), ...auditSuspiciousPatterns(content, file)]
 }
 
 export async function collectFrontendStaticFindings() {

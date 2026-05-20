@@ -982,7 +982,9 @@ const checks: Check[] = [
         await readRepoFile('scripts/frontend-static-audit.test.ts'),
         [
           'reports buttons without explicit type',
+          'reports unsafe new-tab links without opener protection',
           'reports placeholder links',
+          'reports risky frontend DOM and code execution patterns',
           'reports Thai placeholder and mojibake text regressions',
           'reports English UI label regressions for Thai-first surfaces',
           'reports mixed English debug copy regressions for Thai-first surfaces',
@@ -1005,6 +1007,8 @@ const checks: Check[] = [
           'ยัง fallback',
           'เหตุผล disabled',
           'runs the committed frontend static audit through an importable runner',
+          'dangerouslySetInnerHTML',
+          'target="_blank"',
         ],
         'scripts/frontend-static-audit.test.ts',
       )
@@ -1017,6 +1021,12 @@ const checks: Check[] = [
         await readRepoFile('scripts/frontend-static-audit.ts'),
         [
           'collectFrontendStaticFindings',
+          'auditLinksWithAst',
+          'dangerouslySetInnerHTML',
+          '\\.innerHTML\\s*=',
+          '\\beval\\s*\\(',
+          '\\bnew\\s+Function\\s*\\(',
+          `targetValue === '_blank'`,
           'setNote\\(\\s*error\\s+instanceof\\s+Error\\s*\\?\\s*error\\.message',
           'state\\.error\\s*=\\s*action\\.error\\.message',
           'image provider',

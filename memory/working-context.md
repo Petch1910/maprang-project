@@ -25,6 +25,7 @@ Verified:
 - Route/menu document check diagnostics now use Thai-first output for missing navigation, missing audit/preload rows, weak status labels, stale mixed-language copy, and pass/fail summaries.
 - Frontend static audit now guards a focused set of English UI label regressions for Thai-first pages, including Admin Health, Prompt Inspector, Automated Evals, Relationship Contract, Chat budget, Supabase/Auth labels, and route/menu surface names.
 - Frontend static audit diagnostics now report Thai-first failure messages for button accessibility, placeholder controls, raw error exposure, ApiError fallback, mixed UI copy, mojibake, and stale Vite starter files.
+- Frontend static audit now also guards XSS/opener regressions such as `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, and `target="_blank"` links without `rel="noopener noreferrer"`.
 - Frontend unexpected-error console labels across Workspace, Wallet, Admin Moderation, Prompt Inspector, Admin Evals, Character Lobby, and Relationship preset picker now use Thai-first diagnostics instead of `Load ... error` labels.
 - Frontend route audit and bundle budget CLI output now report Thai-first pass/fail guidance while keeping exact file, route, and chunk names for debugging.
 - Predeploy, API smoke, bundle budget, audit, eval, memory, knowledge, release handoff, route/menu, and deploy doctor self-test CLI summaries now use Thai-first pass/fail prefixes instead of `ok -` or `fail -`, with focused regression tests on the changed runners.

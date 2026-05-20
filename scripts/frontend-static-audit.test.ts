@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   auditButtonsWithAst,
   auditFrontendSourceFile,
+  auditLinksWithAst,
   auditSuspiciousPatterns,
   collectFrontendStaticFindings,
   lineFor,
@@ -39,6 +40,27 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports unsafe new-tab links without opener protection', () => {
+    const findings = auditLinksWithAst(
+      `
+        export function Fixture() {
+          return (
+            <>
+              <a href="https://example.com" target="_blank">External</a>
+              <a href="https://example.com" target="_blank" rel="noopener noreferrer">Safe</a>
+              <a href="https://example.com" target="_self">Same tab</a>
+            </>
+          )
+        }
+      `,
+      'LinkFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      expect.stringContaining('ลิงก์ target="_blank" ต้องมี rel="noopener noreferrer"'),
+    ])
+  })
+
   test('reports placeholder links, empty handlers, and not implemented errors', () => {
     const findings = auditSuspiciousPatterns(
       `
@@ -69,6 +91,25 @@ describe('frontend static audit', () => {
       'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',
       'ApiError ต้องใช้ payload.message ก่อน payload.error',
       'ApiError ห้ามแสดง payload.error เป็น fallback ให้ผู้ใช้',
+    ])
+  })
+
+  test('reports risky frontend DOM and code execution patterns', () => {
+    const findings = auditSuspiciousPatterns(
+      `
+        <section dangerouslySetInnerHTML={{ __html: html }} />
+        element.innerHTML = html
+        eval(userInput)
+        const fn = new Function(userInput)
+      `,
+      'RiskyFrontendFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
+      'ห้ามเขียน innerHTML โดยตรงใน frontend source',
+      'ห้ามใช้ eval() ใน frontend source',
+      'ห้ามใช้ new Function() ใน frontend source',
     ])
   })
 
