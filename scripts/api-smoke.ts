@@ -12,6 +12,16 @@ export type ApiSmokeResult = {
   detail: string
 }
 
+export function formatApiSmokeStatus(status: ApiSmokeStatus) {
+  const labels: Record<ApiSmokeStatus, string> = {
+    pass: 'ผ่าน',
+    warn: 'เตือน',
+    fail: 'ไม่ผ่าน',
+    skip: 'ข้าม',
+  }
+  return labels[status]
+}
+
 type ChatSummary = {
   id: string
   title?: string | null
@@ -848,7 +858,7 @@ if (adminHeaders) {
 }
 
 for (const result of results) {
-  writeLine(`${result.status.toUpperCase()} - ${result.name}: ${result.detail}`)
+  writeLine(`${formatApiSmokeStatus(result.status)} - ${result.name}: ${result.detail}`)
 }
 
 const summary = buildApiSmokeSummary(results, {

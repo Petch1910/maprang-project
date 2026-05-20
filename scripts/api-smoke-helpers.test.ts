@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
-import { buildApiSmokeSummary, runApiSmoke, type ApiSmokeResult } from './api-smoke'
+import { buildApiSmokeSummary, formatApiSmokeStatus, runApiSmoke, type ApiSmokeResult } from './api-smoke'
 
 const root = join(import.meta.dir, '..')
 
@@ -11,15 +11,24 @@ async function readRepoFile(path: string) {
 }
 
 describe('api smoke helpers', () => {
+  test('formats API smoke result statuses in Thai', () => {
+    expect(formatApiSmokeStatus('pass')).toBe('ผ่าน')
+    expect(formatApiSmokeStatus('warn')).toBe('เตือน')
+    expect(formatApiSmokeStatus('fail')).toBe('ไม่ผ่าน')
+    expect(formatApiSmokeStatus('skip')).toBe('ข้าม')
+  })
+
   test('keeps API smoke diagnostics Thai-first', async () => {
     const apiSmoke = await readRepoFile('scripts/api-smoke.ts')
 
     expect(apiSmoke).toContain('ยังไม่มี tokenBalance')
     expect(apiSmoke).toContain('chat validation ไม่ควรคืน chatId')
     expect(apiSmoke).toContain('ไม่ผ่านด้วยสถานะ')
+    expect(apiSmoke).toContain('formatApiSmokeStatus(result.status)')
     expect(apiSmoke).not.toContain('missing tokenBalance')
     expect(apiSmoke).not.toContain('chat validation should not return a chatId')
     expect(apiSmoke).not.toContain('failed with ${response.status}')
+    expect(apiSmoke).not.toContain('result.status.toUpperCase()')
   })
 
   test('allows live smoke to continue only for live verification readiness failures', () => {
