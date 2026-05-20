@@ -71,6 +71,18 @@ describe('route id validation', () => {
       error: 'lore_forbidden',
       message: 'คุณไม่มีสิทธิ์จัดการคลังความรู้ของตัวละครนี้',
     })
+    expect(routeErrorResponse('report_not_found')).toEqual({
+      error: 'report_not_found',
+      message: 'ไม่พบรายงานนี้',
+    })
+    expect(routeErrorResponse('message_not_found')).toEqual({
+      error: 'message_not_found',
+      message: 'ไม่พบข้อความนี้ หรือคุณไม่มีสิทธิ์รายงาน',
+    })
+    expect(routeErrorResponse('admin_unauthorized')).toEqual({
+      error: 'admin_unauthorized',
+      message: 'กรุณาใช้สิทธิ์ผู้ดูแลเพื่อใช้งานส่วนนี้',
+    })
     expect(routeErrorMessage('unknown_error')).toBe('รหัสที่ส่งมาไม่ถูกต้อง')
   })
 
@@ -80,6 +92,46 @@ describe('route id validation', () => {
 
     try {
       const response = await loreRoutes.handle(request('/characters/11111111-1111-4111-8111-111111111111/lore'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
+  })
+
+  test('returns Thai-first messages for report route access and persistence failures', async () => {
+    const unauthorizedResponse = await reportRoutes.handle(request('/admin/reports'))
+    const unauthorizedBody = (await unauthorizedResponse.json()) as { error: string; message: string }
+
+    expect(unauthorizedResponse.status).toBe(401)
+    expect(unauthorizedBody).toEqual({
+      error: 'admin_unauthorized',
+      message: 'กรุณาใช้สิทธิ์ผู้ดูแลเพื่อใช้งานส่วนนี้',
+    })
+
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await reportRoutes.handle(
+        request('/reports', {
+          method: 'POST',
+          body: {
+            targetType: 'CHARACTER',
+            characterId: '11111111-1111-4111-8111-111111111111',
+            reason: 'policy concern',
+          },
+        }),
+      )
       const body = (await response.json()) as { error: string; message: string }
 
       expect(response.status).toBe(503)
