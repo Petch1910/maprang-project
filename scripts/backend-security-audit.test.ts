@@ -46,11 +46,11 @@ describe('backend security audit', () => {
 
     expect(messages).toEqual(
       expect.arrayContaining([
-        'Prisma $queryRawUnsafe is forbidden; use Prisma query builders or tagged $queryRaw with parameters.',
-        'Prisma $executeRawUnsafe is forbidden; use Prisma query builders or tagged $executeRaw with parameters.',
-        'Prisma $queryRaw function-call form is forbidden; use tagged template parameterization.',
-        'Prisma $executeRaw function-call form is forbidden; use tagged template parameterization.',
-        'Prisma.raw is forbidden because it can bypass parameterization.',
+        'ห้ามใช้ Prisma $queryRawUnsafe; ให้ใช้ Prisma query builders หรือ tagged $queryRaw พร้อม parameters.',
+        'ห้ามใช้ Prisma $executeRawUnsafe; ให้ใช้ Prisma query builders หรือ tagged $executeRaw พร้อม parameters.',
+        'ห้ามใช้ Prisma $queryRaw แบบ function call; ให้ใช้ tagged template parameterization.',
+        'ห้ามใช้ Prisma $executeRaw แบบ function call; ให้ใช้ tagged template parameterization.',
+        'ห้ามใช้ Prisma.raw เพราะอาจข้าม parameterization.',
       ]),
     )
   })
@@ -74,7 +74,7 @@ describe('backend security audit', () => {
             return { ok: true }
           })
       `),
-    ).toContain('admin route is missing requireAdminApiKey guard in the route handler block.')
+    ).toContain('admin route ยังไม่มี requireAdminApiKey guard ใน route handler block.')
   })
 
   test('allows admin routes with admin api key guards', () => {
@@ -97,7 +97,7 @@ describe('backend security audit', () => {
             return prisma.character.findFirst({ where: { id: params.id } })
           })
       `),
-    ).toContain('route with /:id is missing rejectInvalidUuid guard before resource access.')
+    ).toContain('route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึง resource.')
   })
 
   test('allows resource id routes with UUID guards', () => {
@@ -129,8 +129,8 @@ describe('backend security audit', () => {
         })
     `, 'report.routes.ts')
 
-    expect(literalMessages).toContain('route error response is missing a Thai-first message; use routeErrorResponse or include message.')
-    expect(dynamicMessages).toContain('route error response is missing a Thai-first message; use routeErrorResponse or include message.')
+    expect(literalMessages).toContain('route error response ยังไม่มี message แบบ Thai-first; ใช้ routeErrorResponse หรือใส่ message.')
+    expect(dynamicMessages).toContain('route error response ยังไม่มี message แบบ Thai-first; ใช้ routeErrorResponse หรือใส่ message.')
   })
 
   test('allows route error responses with explicit messages or route helper', () => {
@@ -169,7 +169,7 @@ describe('backend security audit', () => {
 
     expect(findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('ok - backend security audit passed')
+    expect(lines[0]).toBe('ok - backend security audit ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

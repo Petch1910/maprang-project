@@ -196,12 +196,12 @@ export async function runImportCycleAudit(
   const result = await collectImportCycleAuditResult()
 
   if (!result.ok) {
-    writeError('Import cycle audit failed:')
+    writeError('Import cycle audit ไม่ผ่าน:')
     for (const cycle of result.cycles) writeError(`- ${cycle.join(' -> ')}`)
     return 1
   }
 
-  writeLine(`ok - import cycle audit passed (${result.fileCount} files, ${result.edgeCount} edges)`)
+  writeLine(`ok - import cycle audit ผ่านแล้ว (${result.fileCount} files, ${result.edgeCount} edges)`)
   return 0
 }
 

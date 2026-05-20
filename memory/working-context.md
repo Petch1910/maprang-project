@@ -134,6 +134,7 @@ Verified:
 - Security audit now also checks that backend `/:id` route blocks contain `rejectInvalidUuid` before resource access.
 - Security audit now also blocks backend route files from returning raw error objects, including literal or dynamic `{ error: ... }` responses, without a Thai-first `message` or `routeErrorResponse` helper.
 - Security audit now verifies every literal `routeErrorResponse('code')` call is backed by an explicit `routeErrorMessages` entry, preventing new codes from falling back to a generic invalid-id message.
+- Backend security audit and import-cycle audit CLI output now use Thai-first pass/fail guidance while preserving exact helper, route, file, and graph names for debugging.
 - Security audit regression tests now cover unsafe raw SQL helpers, tagged raw SQL allowance, missing admin guards, missing UUID guards, and the importable backend security audit runner, and run in local QA, CI, and Production Smoke.
 - Manual Production Smoke now runs predeploy and release handoff guards before validating deployed smoke secrets or spending provider credits.
 - Manual Production Smoke also runs secrets, secret pattern tests, memory, knowledge, eval, security, API route, and route/menu audits before deployed smoke validation.

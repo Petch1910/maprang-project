@@ -59,7 +59,7 @@ describe('import cycle audit', () => {
     expect(result.fileCount).toBeGreaterThan(0)
     expect(result.cycles).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toContain('ok - import cycle audit passed')
+    expect(lines[0]).toContain('ok - import cycle audit ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

@@ -48,23 +48,23 @@ const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_
 const patterns = [
   {
     pattern: /\.\$queryRawUnsafe\s*\(/g,
-    message: 'Prisma $queryRawUnsafe is forbidden; use Prisma query builders or tagged $queryRaw with parameters.',
+    message: 'ห้ามใช้ Prisma $queryRawUnsafe; ให้ใช้ Prisma query builders หรือ tagged $queryRaw พร้อม parameters.',
   },
   {
     pattern: /\.\$executeRawUnsafe\s*\(/g,
-    message: 'Prisma $executeRawUnsafe is forbidden; use Prisma query builders or tagged $executeRaw with parameters.',
+    message: 'ห้ามใช้ Prisma $executeRawUnsafe; ให้ใช้ Prisma query builders หรือ tagged $executeRaw พร้อม parameters.',
   },
   {
     pattern: /\bPrisma\.raw\s*\(/g,
-    message: 'Prisma.raw is forbidden because it can bypass parameterization.',
+    message: 'ห้ามใช้ Prisma.raw เพราะอาจข้าม parameterization.',
   },
   {
     pattern: /\.\$queryRaw(?:<[^>]+>)?\s*\(/g,
-    message: 'Prisma $queryRaw function-call form is forbidden; use tagged template parameterization.',
+    message: 'ห้ามใช้ Prisma $queryRaw แบบ function call; ให้ใช้ tagged template parameterization.',
   },
   {
     pattern: /\.\$executeRaw(?:<[^>]+>)?\s*\(/g,
-    message: 'Prisma $executeRaw function-call form is forbidden; use tagged template parameterization.',
+    message: 'ห้ามใช้ Prisma $executeRaw แบบ function call; ให้ใช้ tagged template parameterization.',
   },
 ]
 
@@ -86,7 +86,7 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     findings.push({
       file,
       line: lineFor(content, match.index ?? 0),
-      message: 'admin route is missing requireAdminApiKey guard in the route handler block.',
+      message: 'admin route ยังไม่มี requireAdminApiKey guard ใน route handler block.',
     })
   }
 
@@ -95,7 +95,7 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     findings.push({
       file,
       line: lineFor(content, match.index ?? 0),
-      message: 'route with /:id is missing rejectInvalidUuid guard before resource access.',
+      message: 'route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึง resource.',
     })
   }
 
@@ -104,7 +104,7 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
       findings.push({
         file,
         line: lineFor(content, match.index ?? 0),
-        message: 'route error response is missing a Thai-first message; use routeErrorResponse or include message.',
+        message: 'route error response ยังไม่มี message แบบ Thai-first; ใช้ routeErrorResponse หรือใส่ message.',
       })
     }
   }
@@ -141,7 +141,7 @@ export async function collectBackendSecurityFindings() {
         findings.push({
           file: relativeFile,
           line: lineFor(content, call.index),
-          message: `routeErrorResponse code "${call.code}" is missing from routeErrorMessages.`,
+          message: `routeErrorResponse code "${call.code}" ยังไม่มีใน routeErrorMessages.`,
         })
       }
     }
@@ -157,12 +157,12 @@ export async function runBackendSecurityAudit(
   const findings = await collectBackendSecurityFindings()
 
   if (findings.length > 0) {
-    writeError('Backend security audit failed:')
+    writeError('Backend security audit ไม่ผ่าน:')
     for (const finding of findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
     return 1
   }
 
-  writeLine('ok - backend security audit passed')
+  writeLine('ok - backend security audit ผ่านแล้ว')
   return 0
 }
 
