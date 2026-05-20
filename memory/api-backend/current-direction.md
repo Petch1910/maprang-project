@@ -1,10 +1,10 @@
-# ทิศทาง API และ backend
+# ทิศทาง API และระบบหลังบ้าน
 
 อัปเดตล่าสุด: 2026-05-20
 
 ## แนวทางหลัก
 
-Backend ควรให้ความสำคัญกับ explicit guards, typed validation, auditability, และ deterministic local smoke มากกว่าการเดาว่าทุกอย่างพร้อม
+ระบบหลังบ้านควรให้ความสำคัญกับ guard ที่ชัดเจน, validation แบบมีชนิดข้อมูล, การตรวจสอบย้อนหลังได้, และ local smoke ที่ผลซ้ำได้ มากกว่าการเดาว่าทุกอย่างพร้อม
 
 ## จุดแข็งปัจจุบัน
 
@@ -12,19 +12,19 @@ Backend ควรให้ความสำคัญกับ explicit guards, 
 - Context สำหรับคุมพรอมป์ครอบข้อความตัวละครที่ไม่น่าเชื่อถือ.
 - Admin actions มี audit log coverage.
 - Token wallet debit ค่า chat usage โดยไม่ให้ overdraft.
-- Local smoke ข้ามการใช้เครดิตผู้ให้บริการจริง แต่ยังตรวจ endpoint shape.
+- Smoke ในเครื่องข้ามการใช้เครดิตผู้ให้บริการจริง แต่ยังตรวจรูปร่าง endpoint.
 - เส้นทางผู้ให้บริการจริงถูกแยกเป็น gate ของตัวเอง.
-- Structured knowledge packs ป้อน chat/creator prompt guidance และแสดงผ่าน health/readiness.
-- Deterministic prompt/context evals คุมความลึกของ roleplay, ลำดับกฎคุมพรอมป์, lore injection, และ relationship/scene continuity.
-- Admin Prompt Inspector แสดง prompt snapshots แบบ redacted, token estimates ราย section, lore ที่ดึงมา, และ previous/current prompt diffs โดยไม่ใช้ live model tokens.
-- Admin Automated Evals เปิด deterministic golden roleplay suite ผ่าน API/UI ที่มี guard ทำให้ prompt regressions เห็นได้โดยไม่ต้องใช้ terminal.
-- Chat World State Controller เก็บ owner-scoped scene constants ใน chat memory, inject เข้า runtime prompts, และแสดงผ่าน chat UI รวมถึง Prompt Inspector runtime memory.
-- Usage and cost intelligence คำนวณจาก usage ledger เดิม เพื่อแสดง total cost, model breakdown, daily trend, และ remaining-request estimates ผ่าน `/me/usage`.
+- ชุดความรู้แบบ structured ป้อนแนวทางพรอมป์สำหรับแชท/ครีเอเตอร์ และแสดงผ่าน health/readiness.
+- ชุด eval พรอมป์/บริบทแบบผลซ้ำได้คุมความลึกของ roleplay, ลำดับกฎคุมพรอมป์, การป้องกัน lore injection, และความต่อเนื่องของ relationship/scene.
+- Admin Prompt Inspector แสดงภาพรวมพรอมป์ที่ปิดข้อมูลลับแล้ว, ประมาณโทเคนราย section, คลังความรู้ที่ดึงมา, และส่วนต่างของพรอมป์ก่อนหน้า/ปัจจุบัน โดยไม่ใช้ live model tokens.
+- Admin Automated Evals เปิดชุดทดสอบ roleplay มาตรฐานแบบผลซ้ำได้ผ่าน API/UI ที่มี guard ทำให้ prompt regressions เห็นได้โดยไม่ต้องใช้ terminal.
+- Chat World State Controller เก็บค่าคงที่ของฉากแบบ owner-scoped ในความจำแชท, inject เข้า runtime prompts, และแสดงผ่าน chat UI รวมถึง Prompt Inspector runtime memory.
+- Usage and cost intelligence คำนวณจาก usage ledger เดิม เพื่อแสดงต้นทุนรวม, การใช้แยกตามโมเดล, แนวโน้มรายวัน, และจำนวนคำขอโดยประมาณที่ยังพอใช้ได้ผ่าน `/me/usage`.
 - Prompt budgeting ตัด chat history เก่าสุดก่อนเรียก provider, บันทึก budget metadata, และแสดง budget configuration ผ่าน health/readiness surfaces.
-- Chat provider failures ถูกจัดประเภทเป็น safe retry/admin states, คืน zero token usage, และแสดงเป็น `providerFailure` metadata ใน normal/streamed chat responses.
-- Runtime env validation, deploy env doctor, smoke doctor, deploy readiness, และ deploy status แสดง roleplay reply budget risk ร่วมกัน ค่าใต้ 1200 output tokens หรือ 320 roleplay reply characters จะ block production; ค่า baseline ที่ยังต่ำกว่า 1600/420 จะแสดง CLI/UI recommendations เพื่อคำตอบ roleplay ที่แน่นขึ้น.
+- Chat provider failures ถูกจัดประเภทเป็นสถานะ retry/admin ที่ปลอดภัย, คืน zero token usage, และแสดงเป็น `providerFailure` metadata ใน normal/streamed chat responses.
+- Runtime env validation, deploy env doctor, smoke doctor, deploy readiness, และ deploy status แสดงความเสี่ยงของ roleplay reply budget ร่วมกัน ค่าใต้ 1200 output tokens หรือ 320 roleplay reply characters จะ block production; ค่า baseline ที่ยังต่ำกว่า 1600/420 จะแสดงคำแนะนำใน CLI/UI เพื่อคำตอบ roleplay ที่แน่นขึ้น.
 - Deploy readiness ใช้ logic ร่วมกันระหว่าง smoke doctor และ deploy status ทำให้ staging/production blockers กับ next steps ตรงกันทั้ง CLI, CI, และ Admin Health handoff.
-- Local API smoke ครอบ non-mutating validation paths สำหรับ admin reports, admin wallet, report creation, chat deletion, chat streaming shape, prompt inspector, และ automated evals โดยไม่ใช้ live provider credits.
+- Local API smoke ครอบ validation paths ที่ไม่แก้ข้อมูลจริงสำหรับ admin reports, admin wallet, report creation, chat deletion, chat streaming shape, prompt inspector, และ automated evals โดยไม่ใช้ live provider credits.
 
 ## API สำคัญก่อน production
 
@@ -43,10 +43,10 @@ Backend ควรให้ความสำคัญกับ explicit guards, 
 - `/admin/evals/local`
 - deploy/smoke scripts ที่อ่าน `/health` และ `/ready`
 
-## Provider policy
+## นโยบายผู้ให้บริการ
 
-- Chat provider readiness ต้องมีคำตอบจริง, `chatId`, token usage, และรายการ wallet.
-- Image provider readiness ต้องได้ generated image แบบ `configured` ไม่ใช่ placeholder fallback.
+- ความพร้อมของผู้ให้บริการแชทต้องมีคำตอบจริง, `chatId`, token usage, และรายการ wallet.
+- ความพร้อมของผู้ให้บริการสร้างรูปต้องได้รูปที่สร้างจริงแบบ `configured` ไม่ใช่ placeholder fallback.
 - Production `/ready` ต้องยังไม่ผ่านจนกว่า environment เป้าหมายจะตั้งทั้ง chat และ image live verification flags.
 - ห้ามตั้ง live verification flags จาก local deterministic smoke.
 - รักษา `knowledge/structured/*.json` ให้ deterministic, schema-versioned, และตรวจด้วย `bun run knowledge:audit`.
