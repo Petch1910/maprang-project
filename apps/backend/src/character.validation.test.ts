@@ -97,6 +97,28 @@ describe('character quality relationship validation', () => {
 })
 
 describe('relationship route endpoints', () => {
+  test('returns Thai-first messages when character persistence is unavailable', async () => {
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await characterRoutes.handle(new Request('http://localhost/creator/draft'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
+  })
+
   test('filters relationship presets by surface', async () => {
     const allResponse = await characterRoutes.handle(new Request('http://localhost/relationship/presets'))
     const allBody = (await allResponse.json()) as {

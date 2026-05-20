@@ -55,6 +55,14 @@ describe('route id validation', () => {
       error: 'chat_not_found',
       message: 'ไม่พบแชทนี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
     })
+    expect(routeErrorResponse('character_not_found')).toEqual({
+      error: 'character_not_found',
+      message: 'ไม่พบตัวละครนี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+    })
+    expect(routeErrorResponse('character_forbidden')).toEqual({
+      error: 'character_forbidden',
+      message: 'คุณไม่มีสิทธิ์จัดการตัวละครนี้',
+    })
     expect(routeErrorMessage('unknown_error')).toBe('รหัสที่ส่งมาไม่ถูกต้อง')
   })
 

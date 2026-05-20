@@ -23,7 +23,7 @@ import {
   simulateRelationshipPreview,
   validateRelationshipTags,
 } from './relationship.engine'
-import { rejectInvalidUuid } from './route-guards'
+import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
 import { canAccessOwnerResource, isAdminRequest, resolveRequestUserId } from './security'
 import { effectiveMaxRatingForUser } from './user.service'
 
@@ -94,24 +94,24 @@ function hasRequestIdentity(request: Request) {
 export const characterRoutes = new Elysia()
   .get('/creator/draft', async ({ request, set }) => {
     const prisma = requireDatabase(set)
-    if (!prisma) return { error: 'database_not_configured' }
+    if (!prisma) return routeErrorResponse('database_not_configured')
 
     const actorId = await resolveRequestUserId(request)
     if (!actorId) {
       set.status = 401
-      return { error: 'unauthorized' }
+      return routeErrorResponse('unauthorized')
     }
     const payload = await getCreatorDraft(actorId)
     return { draft: payload ?? null }
   })
   .put('/creator/draft', async ({ body, request, set }) => {
     const prisma = requireDatabase(set)
-    if (!prisma) return { error: 'database_not_configured' }
+    if (!prisma) return routeErrorResponse('database_not_configured')
 
     const actorId = await resolveRequestUserId(request)
     if (!actorId) {
       set.status = 401
-      return { error: 'unauthorized' }
+      return routeErrorResponse('unauthorized')
     }
     await saveCreatorDraft(actorId, body.payload)
     return { ok: true }
@@ -216,10 +216,10 @@ export const characterRoutes = new Elysia()
     '/characters',
     async ({ body, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
 
       const character = await createCharacter(normalizeCharacterBody(body) as CharacterInput, await resolveRequestUserId(request))
-      if (!character) return { error: 'character_create_failed' }
+      if (!character) return routeErrorResponse('character_create_failed')
 
       set.status = 201
       return { character: publicCharacter(character, { includePrivateFields: true }) }
@@ -238,7 +238,7 @@ export const characterRoutes = new Elysia()
 
       if (!character) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
@@ -247,7 +247,7 @@ export const characterRoutes = new Elysia()
 
       if (!isPublicCharacter && !includePrivateFields) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       return { character: publicCharacter(character, { viewerUserId: actorId ?? defaultUserId, includePrivateFields }) }
@@ -262,19 +262,19 @@ export const characterRoutes = new Elysia()
     '/characters/:id',
     async ({ body, params, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
       if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       if (!canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId: await resolveRequestUserId(request, defaultUserId) })) {
         set.status = 403
-        return { error: 'character_forbidden' }
+        return routeErrorResponse('character_forbidden')
       }
 
       const character = await updateCharacter(params.id, normalizeCharacterBody(body))
@@ -291,19 +291,19 @@ export const characterRoutes = new Elysia()
     '/characters/:id',
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
       if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       if (!canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId: await resolveRequestUserId(request, defaultUserId) })) {
         set.status = 403
-        return { error: 'character_forbidden' }
+        return routeErrorResponse('character_forbidden')
       }
 
       await softDeleteCharacter(params.id)
@@ -319,14 +319,14 @@ export const characterRoutes = new Elysia()
     '/characters/:id/duplicate',
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
       if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
@@ -336,13 +336,13 @@ export const characterRoutes = new Elysia()
 
       if (!canDuplicateSource) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const character = await duplicateCharacter(params.id, actorId ?? defaultUserId)
       if (!character) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       set.status = 201
@@ -358,24 +358,24 @@ export const characterRoutes = new Elysia()
     '/characters/:id/reset-prompt',
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
       if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
       if (!canAccessOwnerResource({ request, ownerId: existing.creatorId, actorId: await resolveRequestUserId(request, defaultUserId) })) {
         set.status = 403
-        return { error: 'character_forbidden' }
+        return routeErrorResponse('character_forbidden')
       }
 
       const character = await resetCharacterPrompt(params.id)
       if (!character) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       return { character: publicCharacter(character, { includePrivateFields: true }) }
@@ -390,14 +390,14 @@ export const characterRoutes = new Elysia()
     '/characters/:id/favorite',
     async ({ body, params, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
       if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
@@ -407,13 +407,13 @@ export const characterRoutes = new Elysia()
 
       if (!canFavorite) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const character = await setFavorite(params.id, body.favorite, actorId ?? defaultUserId)
       if (!character) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       return { character: publicCharacter(character, { viewerUserId: actorId ?? defaultUserId }) }
@@ -431,14 +431,14 @@ export const characterRoutes = new Elysia()
     '/characters/:id/view',
     async ({ params, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
       if (invalidId) return invalidId
 
       const existing = await loadCharacter(params.id)
       if (!existing) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const actorId = hasRequestIdentity(request) ? await resolveRequestUserId(request, defaultUserId) : null
@@ -448,13 +448,13 @@ export const characterRoutes = new Elysia()
 
       if (!canView) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       const character = await trackCharacterView(params.id)
       if (!character) {
         set.status = 404
-        return { error: 'character_not_found' }
+        return routeErrorResponse('character_not_found')
       }
 
       return { character: publicCharacter(character, { viewerUserId: actorId ?? defaultUserId, includePrivateFields }) }

@@ -5,6 +5,9 @@ export type RouteSet = {
 }
 
 export const routeErrorMessages: Record<string, string> = {
+  character_create_failed: 'สร้างตัวละครไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+  character_forbidden: 'คุณไม่มีสิทธิ์จัดการตัวละครนี้',
+  character_not_found: 'ไม่พบตัวละครนี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
   chat_not_found: 'ไม่พบแชทนี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
   database_not_configured: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
   invalid_character_id: 'รหัสตัวละครไม่ถูกต้อง',
@@ -14,6 +17,7 @@ export const routeErrorMessages: Record<string, string> = {
   invalid_report_id: 'รหัสรายงานไม่ถูกต้อง',
   invalid_user_id: 'รหัสผู้ใช้ไม่ถูกต้อง',
   invalid_id: 'รหัสที่ส่งมาไม่ถูกต้อง',
+  unauthorized: 'กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้',
 }
 
 export function routeErrorMessage(error: string) {
