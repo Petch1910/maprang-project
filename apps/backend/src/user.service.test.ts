@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
+import { userRoutes } from './user.routes'
 import {
   effectiveMaxRatingForUser,
   loadContentSettings,
@@ -42,6 +43,28 @@ describe('user content settings', () => {
   afterAll(async () => {
     if (!(await shouldRunDbTest({ silent: true }))) return
     await prisma?.user.deleteMany({ where: { id: { in: contentUserIds } } })
+  })
+
+  test('returns Thai-first messages when user persistence is unavailable', async () => {
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await userRoutes.handle(new Request('http://localhost/me/persona'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
   })
 
   test('defaults users to teen romance and clamps requested adult ratings', async () => {
