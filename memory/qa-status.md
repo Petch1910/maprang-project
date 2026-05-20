@@ -367,3 +367,4 @@ Last updated: 2026-05-20
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด API/e2e/local smoke diagnostics ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 152 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - Deploy env doctor diagnostics Thai-first pass: เกลา storage/CORS/OpenRouter wording จาก avatar/frontend/backend API origin เป็นรูปตัวละคร/origin ของหน้าบ้าน/ระบบหลังบ้าน พร้อม `deploy:doctor:test`.
 - Readiness avatar-storage blocker Thai-first pass: เปลี่ยน production/readiness blocker จาก `avatar storage` เป็น "พื้นที่เก็บรูปตัวละคร" พร้อม deploy readiness และ backend health tests.
+- Supabase signed-storage wording Thai-first pass: เกลา workflow, release handoff, setup script, predeploy guard, และ deploy docs ให้ใช้ "พื้นที่เก็บรูปตัวละคร" แทน `avatar storage` ในข้อความที่ผู้ดูแลเห็น.

@@ -41,8 +41,8 @@ bun run release:handoff:check -- --filled
 
 - โหมด auth:
 - Supabase project ref:
-- ผู้ให้บริการ avatar storage:
-- รูปแบบการเข้าถึง avatar storage:
+- ผู้ให้บริการพื้นที่เก็บรูปตัวละคร:
+- รูปแบบการเข้าถึงรูปตัวละคร:
 - อายุ signed URL:
 - CORS origins:
 

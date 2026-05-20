@@ -56,5 +56,5 @@ guard ใน repo:
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว
 - Desktop/mobile e2e smoke ผ่านแล้ว
-- Supabase signed avatar storage implement แล้ว และถูกตรวจโดย production gate
+- Supabase signed URL สำหรับพื้นที่เก็บรูปตัวละคร implement แล้ว และถูกตรวจโดย production gate
 - Relationship contract presets แยกจาก creator presets แล้ว และมี API smoke ครอบไว้

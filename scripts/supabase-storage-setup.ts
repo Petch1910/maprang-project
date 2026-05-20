@@ -70,7 +70,7 @@ export function resolveSupabaseStorageConfig(
 
   if (!supabaseUrl) throw new Error('SUPABASE_URL ยังไม่ได้ตั้งค่า')
   if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY ยังไม่ได้ตั้งค่า')
-  if (storageAccess !== 'signed') throw new Error('SUPABASE_STORAGE_ACCESS ต้องเป็น signed สำหรับ production avatar storage')
+  if (storageAccess !== 'signed') throw new Error('SUPABASE_STORAGE_ACCESS ต้องเป็น signed สำหรับพื้นที่เก็บรูปตัวละครใน production')
   if (!Number.isFinite(expiresIn) || expiresIn < 60) throw new Error('SUPABASE_SIGNED_URL_EXPIRES_IN ต้องไม่น้อยกว่า 60 วินาที')
 
   return {

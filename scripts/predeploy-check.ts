@@ -734,7 +734,7 @@ const checks: Check[] = [
         throw new Error('package.json production:check ต้องพิมพ์ deploy status ก่อน strict production gates')
       }
       if (!productionCheck.includes('supabase:storage:check')) {
-        throw new Error('package.json production:check ต้องตรวจ Supabase signed avatar storage')
+        throw new Error('package.json production:check ต้องตรวจ Supabase signed URL สำหรับรูปตัวละคร')
       }
       if (!productionCheck.includes('--require-admin')) {
         throw new Error('package.json production:check ต้องบังคับ admin smoke checks')
@@ -1462,7 +1462,7 @@ const checks: Check[] = [
           'ยอดโทเคนขั้นต่ำของผู้ใช้ smoke ก่อนรันทดสอบแชทจริงที่ใช้เครดิตผู้ให้บริการจริง',
           'ตรวจ config ก่อนรัน smoke',
           'พิมพ์สถานะ deploy readiness',
-          'ตรวจ Supabase signed avatar storage',
+          'ตรวจ Supabase signed URL สำหรับรูปตัวละคร',
           'ตรวจ admin APIs',
           'SMOKE_API_BASE_URL',
           'SMOKE_ADMIN_API_KEY',
@@ -1546,6 +1546,7 @@ const checks: Check[] = [
           'Validate smoke configuration',
           'Print deploy readiness status',
           'Verify Supabase signed avatar storage',
+          'ตรวจ Supabase signed avatar storage',
           'Verify admin APIs',
         ],
         '.github/workflows/production-smoke.yml',

@@ -101,7 +101,7 @@ jobs:
             exit 1
           fi
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "ตั้ง repository secrets SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY เพื่อให้ production smoke ตรวจ private avatars bucket"
+            echo "ตั้ง repository secrets SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY เพื่อให้ production smoke ตรวจ bucket รูปตัวละครแบบ private"
             exit 1
           fi
           if [ -z "$SUPABASE_STORAGE_BUCKET" ]; then
@@ -109,7 +109,7 @@ jobs:
             exit 1
           fi
           if [ "$SUPABASE_STORAGE_ACCESS" != "signed" ]; then
-            echo "ตั้ง repository secret SUPABASE_STORAGE_ACCESS=signed สำหรับ production smoke"
+            echo "ตั้ง repository secret SUPABASE_STORAGE_ACCESS=signed สำหรับตรวจรูปตัวละครใน production smoke"
             exit 1
           fi
           if [ -z "$SUPABASE_SIGNED_URL_EXPIRES_IN" ]; then
@@ -119,7 +119,7 @@ jobs:
       - name: พิมพ์สถานะ deploy readiness
         run: bun run deploy:status
       - run: bun scripts/smoke-doctor.ts --strict-production
-      - name: ตรวจ Supabase signed avatar storage
+      - name: ตรวจ Supabase signed URL สำหรับรูปตัวละคร
         run: bun run supabase:storage:check
       - run: bun run smoke:ready
       - run: bun run smoke:local

@@ -236,7 +236,7 @@ bun run smoke:live
 bun run production:check
 ```
 
-คำสั่งนี้จะรัน production health gate แบบเข้ม, Supabase signed-avatar storage smoke, และ live API smoke รวมถึงการตรวจแชทจริงกับการสร้างรูปจริง ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็นภาพตัวอย่างเพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะล้ม.
+คำสั่งนี้จะรัน production health gate แบบเข้ม, smoke ของพื้นที่เก็บรูปตัวละครแบบ Supabase signed URL, และ live API smoke รวมถึงการตรวจแชทจริงกับการสร้างรูปจริง ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็นภาพตัวอย่างเพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะล้ม.
 script จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้สรุป blocker และ next steps แสดงก่อน gate เข้ม fail.
 
 ถ้าต้องการตรวจพื้นที่ที่ repo ดูแลทั้งหมดก่อนด่านสุดท้ายของโดเมนและผู้ให้บริการจริง ให้รัน:
