@@ -27,7 +27,7 @@ Results:
 - Bundle budget: pass.
 - Frontend Redux circular dependency cleanup: pass via `frontend:check` and SocratiCode graph check; store/slice cycles dropped from six frontend chains to zero.
 - Backend circular dependency cleanup: pass via focused backend tests and SocratiCode graph check; project graph now reports no circular dependencies.
-- Import-cycle audit: pass via `import-cycle:audit`, `import-cycle:audit:test`, and `predeploy:check`; the repo-owned audit currently checks 121 app/QA source files and 268 relative import edges, including TypeScript import-equals `require()` and CommonJS `require()` calls, and predeploy now guards that coverage plus its docs.
+- Import-cycle audit: pass via `import-cycle:audit`, `import-cycle:audit:test`, and `predeploy:check`; the repo-owned audit currently checks 122 app/QA source files and 272 relative import edges, including TypeScript import-equals `require()` and CommonJS `require()` calls, and predeploy now guards that coverage plus its docs.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Browser e2e smoke now checks the Thai-first Automated Evals heading `ทดสอบคุณภาพพรอมป์และบริบท` instead of the old mixed `prompt/context` wording, and the latest desktop/mobile run passes 4/4 again.
@@ -73,6 +73,7 @@ Results:
 - `frontend:static:audit:test` now also blocks stale English chat-selection accessibility labels such as `Select chat`.
 - Admin summary Thai status labels now pass full `frontend:check`.
 - Chat role panel Thai publication/visibility labels now pass full `frontend:check`.
+- Centralized character publication/visibility labels now pass full `frontend:check`, `import-cycle:audit`, and `import-cycle:audit:test`.
 - `frontend:static:audit:test` now also blocks stale mixed Creator Studio copy such as `image provider`, `production ควรตั้งค่า`, `Lobby ดูน่ากด`, `แกน prompt`, and `backend ช่วยร่าง`.
 - `frontend:static:audit:test` now also blocks stale mixed Admin Health operational copy such as `backend ยังไม่พร้อมเต็ม`, `health response จาก backend`, `provider จริง`, `final gate`, and `mobile overflow`.
 - Creator Draft image-provider copy now passes focused backend coverage with Thai-first missing-provider, configured-failure, and billing-limit messages.

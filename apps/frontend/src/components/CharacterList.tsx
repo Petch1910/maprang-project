@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Character, CharacterListFilters } from '../lib/api'
+import { characterStatusLabel, characterStatusOptions, characterVisibilityLabel } from '../lib/characterLabels'
 
 type CharacterListProps = {
   characters: Character[]
@@ -11,15 +12,6 @@ type CharacterListProps = {
 
 const inputClass =
   'min-h-9 rounded-lg border border-slate-900/15 bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-blue-500/60 focus:ring-4 focus:ring-blue-500/15'
-
-const statusLabels: Record<string, string> = {
-  DRAFT: 'ดราฟต์',
-  REVIEW: 'รอตรวจ',
-  PUBLISHED: 'เผยแพร่แล้ว',
-  REJECTED: 'ถูกปฏิเสธ',
-  ARCHIVED: 'เก็บแล้ว',
-  PUBLIC: 'สาธารณะ',
-}
 
 export function CharacterList({
   characters,
@@ -88,11 +80,11 @@ export function CharacterList({
             onChange={(event) => setStatus(event.target.value as CharacterListFilters['status'])}
           >
             <option value="">ทุกสถานะ</option>
-            <option value="DRAFT">ดราฟต์</option>
-            <option value="REVIEW">รอตรวจ</option>
-            <option value="PUBLISHED">เผยแพร่แล้ว</option>
-            <option value="REJECTED">ถูกปฏิเสธ</option>
-            <option value="ARCHIVED">เก็บแล้ว</option>
+            {characterStatusOptions.map((option) => (
+              <option key={option} value={option}>
+                {characterStatusLabel(option)}
+              </option>
+            ))}
           </select>
         </div>
         <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
@@ -141,7 +133,7 @@ export function CharacterList({
               <div className="flex items-center gap-2">
                 <strong className="truncate text-sm text-slate-900">{character.name}</strong>
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                  {statusLabels[character.status ?? character.visibility ?? 'PUBLIC'] ?? character.status ?? character.visibility}
+                  {character.status ? characterStatusLabel(character.status) : characterVisibilityLabel(character.visibility, 'สาธารณะ')}
                 </span>
                 <button
                   className={`ml-auto grid size-7 place-items-center rounded-full border text-xs font-extrabold ${

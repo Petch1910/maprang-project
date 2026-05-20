@@ -1,16 +1,9 @@
 import type { AdminSummary as AdminSummaryData } from '../lib/api'
+import { characterStatusLabel } from '../lib/characterLabels'
 
 type AdminSummaryProps = {
   summary: AdminSummaryData | null
   onRefresh: () => Promise<void>
-}
-
-const characterStatusLabels: Record<string, string> = {
-  DRAFT: 'ดราฟต์',
-  REVIEW: 'รอตรวจ',
-  PUBLISHED: 'เผยแพร่แล้ว',
-  REJECTED: 'ถูกปฏิเสธ',
-  ARCHIVED: 'เก็บแล้ว',
 }
 
 function Metric({ label, value }: { label: string; value: string | number }) {
@@ -68,7 +61,7 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
                   <span className="truncate text-slate-500">
                     {character.chatCount} แชท · {character.viewCount} เข้าชม · {character.favoriteCount} ถูกใจ
                   </span>
-                  <span className="font-bold text-slate-400">{characterStatusLabels[character.status ?? ''] ?? character.status ?? 'ไม่ทราบ'}</span>
+                  <span className="font-bold text-slate-400">{characterStatusLabel(character.status)}</span>
                 </div>
               ))}
             </div>

@@ -30,6 +30,7 @@ Verified:
 - Chat selection accessibility labels in the sidebar and My Chats are now Thai-first, and the static audit blocks stale `Select chat` labels from returning.
 - Admin summary top-character rows now show Thai-first character status labels and Thai dashboard/lore wording instead of raw enum/mixed labels.
 - Chat role panel now shows Thai-first character publication and visibility labels instead of raw `DRAFT`/`PRIVATE` enum values.
+- Character publication and visibility labels are now centralized in `characterLabels.ts` so Admin Summary, Chat role panel, Character List, and Character Manager share the same Thai display names.
 - Creator Studio and chat/admin status copy now avoid mixed English operational wording such as `image provider`, `production`, `backend`, `Lobby`, and raw `prompt` in user-facing Thai copy, with frontend static/predeploy guards for those stale phrases.
 - Admin Health copy now maps visible operational wording to Thai-first terms for backend/frontend/provider/environment/checklist/final-gate guidance while preserving exact env names and commands.
 - Backend Creator Draft image status and warning messages now return Thai-first user-facing copy for missing/configured/failed image provider paths while preserving actionable smoke/env guidance.

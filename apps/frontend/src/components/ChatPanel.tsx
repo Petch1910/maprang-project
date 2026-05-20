@@ -21,25 +21,12 @@ import {
 import heroImage from '../assets/hero.png'
 import type { Character, ChatMessage, ChatResponse, ChatRuntimeState, WorldStateInput } from '../lib/api'
 import { displayCharacterDetail, displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
+import { characterStatusLabel, characterVisibilityLabel } from '../lib/characterLabels'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { Composer } from './Composer'
 import { MessageBubble } from './MessageBubble'
 
 type ChatUsage = NonNullable<ChatResponse['usage']>
-
-const characterStatusLabels: Record<NonNullable<Character['status']>, string> = {
-  DRAFT: 'ดราฟต์',
-  REVIEW: 'รอตรวจ',
-  PUBLISHED: 'เผยแพร่แล้ว',
-  REJECTED: 'ถูกปฏิเสธ',
-  ARCHIVED: 'เก็บแล้ว',
-}
-
-const characterVisibilityLabels: Record<NonNullable<Character['visibility']>, string> = {
-  PUBLIC: 'สาธารณะ',
-  UNLISTED: 'ซ่อนจากหน้าสำรวจ',
-  PRIVATE: 'ส่วนตัว',
-}
 
 type ChatPanelProps = {
   character: Character
@@ -87,14 +74,6 @@ function providerFailureLabel(failure?: ChatUsage['providerFailure']) {
     unknown: 'ผิดพลาดไม่ทราบสาเหตุ',
   }
   return `${labels[failure.code]}${failure.retryable ? ' · ลองใหม่ได้' : ' · ต้องให้ผู้ดูแลแก้'}`
-}
-
-function characterStatusLabel(status?: Character['status']) {
-  return status ? characterStatusLabels[status] : characterStatusLabels.DRAFT
-}
-
-function characterVisibilityLabel(visibility?: Character['visibility']) {
-  return visibility ? characterVisibilityLabels[visibility] : characterVisibilityLabels.PRIVATE
 }
 
 function compactSceneLabel(runtimeState: ChatRuntimeState | null) {
@@ -432,8 +411,8 @@ function RightRail({
       return (
         <>
           <p className="m-0 text-sm leading-6 text-white/70">{displayCharacterDetail(character)}</p>
-          <InfoLine label="สถานะเผยแพร่" value={characterStatusLabel(character.status)} />
-          <InfoLine label="การมองเห็น" value={characterVisibilityLabel(character.visibility)} />
+          <InfoLine label="สถานะเผยแพร่" value={characterStatusLabel(character.status, 'ดราฟต์')} />
+          <InfoLine label="การมองเห็น" value={characterVisibilityLabel(character.visibility, 'ส่วนตัว')} />
         </>
       )
     }

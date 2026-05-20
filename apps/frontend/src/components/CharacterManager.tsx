@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { uploadAvatar, type Character, type CharacterInput } from '../lib/api'
+import { characterStatusLabel, characterStatusOptions, characterVisibilityLabel, characterVisibilityOptions } from '../lib/characterLabels'
 import { analyzeTags } from '../lib/tagAnalysis'
 import { CreatorReadinessPanel } from './CreatorReadinessPanel'
 import { RelationshipPreviewPanel } from './RelationshipPreviewPanel'
@@ -13,23 +14,6 @@ type CharacterManagerProps = {
   onDuplicate: () => Promise<void>
   onResetPrompt: () => Promise<void>
   onSave: (input: CharacterInput) => Promise<void>
-}
-
-const visibilityOptions: Array<CharacterInput['visibility']> = ['PUBLIC', 'UNLISTED', 'PRIVATE']
-const statusOptions: Array<CharacterInput['status']> = ['DRAFT', 'REVIEW', 'PUBLISHED', 'REJECTED', 'ARCHIVED']
-
-const visibilityLabels: Record<NonNullable<CharacterInput['visibility']>, string> = {
-  PUBLIC: 'สาธารณะ',
-  UNLISTED: 'ไม่แสดงในหน้าค้นหา',
-  PRIVATE: 'ส่วนตัว',
-}
-
-const statusLabels: Record<NonNullable<CharacterInput['status']>, string> = {
-  DRAFT: 'ดราฟต์',
-  REVIEW: 'รอตรวจ',
-  PUBLISHED: 'เผยแพร่แล้ว',
-  REJECTED: 'ถูกปฏิเสธ',
-  ARCHIVED: 'เก็บแล้ว',
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -258,9 +242,9 @@ export function CharacterManager({
               value={visibility}
               onChange={(event) => setVisibility(event.target.value as CharacterInput['visibility'])}
             >
-              {visibilityOptions.map((option) => (
+              {characterVisibilityOptions.map((option) => (
                 <option key={option} value={option}>
-                  {visibilityLabels[option]}
+                  {characterVisibilityLabel(option)}
                 </option>
               ))}
             </select>
@@ -272,9 +256,9 @@ export function CharacterManager({
               value={status}
               onChange={(event) => setStatus(event.target.value as CharacterInput['status'])}
             >
-              {statusOptions.map((option) => (
+              {characterStatusOptions.map((option) => (
                 <option key={option} value={option}>
-                  {statusLabels[option]}
+                  {characterStatusLabel(option)}
                 </option>
               ))}
             </select>
