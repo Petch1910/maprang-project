@@ -138,9 +138,9 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   const myChatsDeleteChatId = isMobile ? seededMyChatsDeleteMobileChatId : seededMyChatsDeleteDesktopChatId
   const myChatsBulkArchiveChatId = isMobile ? seededMyChatsBulkArchiveMobileChatId : seededMyChatsBulkArchiveDesktopChatId
   const myChatsBulkDeleteChatId = isMobile ? seededMyChatsBulkDeleteMobileChatId : seededMyChatsBulkDeleteDesktopChatId
-  await expectBackendRootIdentity(request, 'browser smoke')
+  await expectBackendRootIdentity(request, 'ตรวจเบราว์เซอร์')
   const health = await request.get(`${backendUrl}/health`)
-  expect(health.ok(), 'backend /health should be reachable before browser smoke').toBeTruthy()
+  expect(health.ok(), 'ระบบหลังบ้าน /health ต้องเรียกได้ก่อนตรวจเบราว์เซอร์').toBeTruthy()
 
   await page.goto('/')
   await expect(page.locator('body')).toContainText('Maprang')
@@ -174,7 +174,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
 
   const uniqueName = `QA Smoke ${Date.now()}`
   await page.getByTestId('creator-name').fill(uniqueName)
-  await page.getByTestId('creator-tagline').fill('ตัวละครทดสอบ e2e smoke ก่อน deploy')
+  await page.getByTestId('creator-tagline').fill('ตัวละครทดสอบ e2e ก่อนดีพลอย')
   await page.getByTestId('creator-image-style').selectOption('anime')
 
   await page.waitForTimeout(2000) // Wait for debounce auto-save to DB
@@ -183,7 +183,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.getByTestId('creator-name')).toBeVisible()
 
   await expect(page.getByTestId('creator-name')).toHaveValue(uniqueName)
-  await expect(page.getByTestId('creator-tagline')).toHaveValue('ตัวละครทดสอบ e2e smoke ก่อน deploy')
+  await expect(page.getByTestId('creator-tagline')).toHaveValue('ตัวละครทดสอบ e2e ก่อนดีพลอย')
   await expect(page.getByTestId('creator-image-style')).toHaveValue('anime')
 
   await page.getByTestId('creator-avatar-url').fill('/src/assets/hero.png')
@@ -213,11 +213,11 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
         },
       },
     )
-    expect(createdCharacters.ok(), 'browser smoke should find the temporary character it just created').toBeTruthy()
+    expect(createdCharacters.ok(), 'การตรวจเบราว์เซอร์ต้องหาตัวละครชั่วคราวที่เพิ่งสร้างได้').toBeTruthy()
     const body = (await createdCharacters.json()) as { characters?: Array<{ id: string; name: string }> }
     createdCharacterId = body.characters?.find((item) => item.name === uniqueName)?.id
   }
-  expect(createdCharacterId, 'browser smoke should capture the temporary character id for cleanup').toBeTruthy()
+  expect(createdCharacterId, 'การตรวจเบราว์เซอร์ต้องเก็บรหัสตัวละครชั่วคราวเพื่อ cleanup').toBeTruthy()
   if (createdCharacterId) {
     const cleanup = await request.delete(`${backendUrl}/characters/${createdCharacterId}`, {
       headers: {
@@ -225,7 +225,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
         ...(adminKey ? { 'x-admin-key': adminKey } : {}),
       },
     })
-    expect([200, 404], 'browser smoke should clean up its temporary character').toContain(cleanup.status())
+    expect([200, 404], 'การตรวจเบราว์เซอร์ต้อง cleanup ตัวละครชั่วคราว').toContain(cleanup.status())
   }
 
   await page.goto('/chats')
@@ -556,21 +556,21 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
 })
 
 test('all primary routes render without console errors or horizontal overflow', async ({ page, request }) => {
-  await expectBackendRootIdentity(request, 'route audit smoke')
+  await expectBackendRootIdentity(request, 'ตรวจ route audit')
   const health = await request.get(`${backendUrl}/health`)
-  expect(health.ok(), 'backend /health should be reachable before route audit smoke').toBeTruthy()
+  expect(health.ok(), 'ระบบหลังบ้าน /health ต้องเรียกได้ก่อนตรวจ route audit').toBeTruthy()
 
   const browserErrors = collectBrowserErrors(page)
 
   for (const target of routeSmokeTargets) {
     await page.goto(target.path)
     if ('testId' in target && target.testId) {
-      await expect(page.getByTestId(target.testId), `${target.path} should expose ${target.testId}`).toBeVisible()
+      await expect(page.getByTestId(target.testId), `${target.path} ต้องแสดง ${target.testId}`).toBeVisible()
     } else {
-      await expect(page.locator('body'), `${target.path} should render expected text`).toContainText(target.text)
+      await expect(page.locator('body'), `${target.path} ต้องแสดงข้อความที่คาดไว้`).toContainText(target.text)
     }
     await expectNoHorizontalOverflow(page)
   }
 
-  expect(browserErrors, 'routes should not emit browser console/page errors').toEqual([])
+  expect(browserErrors, 'route ไม่ควรมี browser console/page error').toEqual([])
 })

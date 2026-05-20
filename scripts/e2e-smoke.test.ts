@@ -10,15 +10,15 @@ describe('e2e smoke command plan', () => {
   test('runs seed, Playwright, then seed restore in order', () => {
     expect(e2eSmokeSteps()).toEqual([
       {
-        label: 'QA seed: reset ก่อน browser smoke',
+        label: 'QA seed: reset ก่อนตรวจเบราว์เซอร์',
         command: ['bun', 'run', 'qa:seed'],
       },
       {
-        label: 'Playwright smoke: routes desktop และ mobile',
+        label: 'Playwright smoke: ตรวจ routes บนเดสก์ท็อปและมือถือ',
         command: ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'],
       },
       {
-        label: 'QA seed: คืน demo data หลัง browser smoke',
+        label: 'QA seed: คืน demo data หลังตรวจเบราว์เซอร์',
         command: ['bun', 'run', 'qa:seed'],
         alwaysRun: true,
       },
@@ -38,13 +38,13 @@ describe('e2e smoke command plan', () => {
 
     expect(exitCode).toBe(1)
     expect(calls).toEqual([
-      'QA seed: reset ก่อน browser smoke',
-      'Playwright smoke: routes desktop และ mobile',
-      'QA seed: คืน demo data หลัง browser smoke',
+      'QA seed: reset ก่อนตรวจเบราว์เซอร์',
+      'Playwright smoke: ตรวจ routes บนเดสก์ท็อปและมือถือ',
+      'QA seed: คืน demo data หลังตรวจเบราว์เซอร์',
     ])
   })
 
-  test('stops before browser smoke when initial seed fails', async () => {
+  test('stops before browser route check when initial seed fails', async () => {
     const calls: string[] = []
 
     await expect(
@@ -55,8 +55,8 @@ describe('e2e smoke command plan', () => {
         },
         quietLogger,
       ),
-    ).rejects.toThrow('QA seed: reset ก่อน browser smoke ไม่ผ่านด้วย exit code 1')
+    ).rejects.toThrow('QA seed: reset ก่อนตรวจเบราว์เซอร์ ไม่ผ่านด้วย exit code 1')
 
-    expect(calls).toEqual(['QA seed: reset ก่อน browser smoke'])
+    expect(calls).toEqual(['QA seed: reset ก่อนตรวจเบราว์เซอร์'])
   })
 })
