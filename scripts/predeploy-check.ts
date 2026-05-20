@@ -304,7 +304,7 @@ const checks: Check[] = [
           'IMAGE_GENERATION_API_KEY',
           'imageGenerationConfigured=true',
           'CORS_ORIGINS=https://<frontend-domain>',
-          'Do not include localhost, `http://` origins, wildcard origins, or the backend URL',
+          'ห้ามใส่ localhost, origin แบบ `http://`, wildcard origins, หรือ backend URL',
           'VITE_API_BASE_URL=https://<backend-domain>',
         ],
         'DEPLOY_RENDER.md',
@@ -1180,7 +1180,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('DEPLOY_RENDER.md'),
-        ['CORS_ORIGINS=https://<frontend-domain>', 'Do not include localhost, `http://` origins, wildcard origins, or the backend URL'],
+        ['CORS_ORIGINS=https://<frontend-domain>', 'ห้ามใส่ localhost, origin แบบ `http://`, wildcard origins, หรือ backend URL'],
         'DEPLOY_RENDER.md',
       )
       requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin'], 'STAGING_RUNBOOK.md')
