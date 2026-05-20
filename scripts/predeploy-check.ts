@@ -1389,12 +1389,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         promptInspector,
-        ['redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map'],
+        ['redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map', 'sk-ant-', 'hf_', 'sk_live_', 'github_pat_', 'AIza', 'xox'],
         'apps/backend/src/prompt-inspector.service.ts',
       )
       requireIncludes(
         promptInspectorTest,
-        ['fakeDatabaseUrl', 'retrieval.lore', 'not.toContain(fakeDatabaseUrl)'],
+        ['fakeDatabaseUrl', 'fakeAnthropicKey', 'fakeHuggingFaceToken', 'fakeStripeKey', 'fakeGitHubToken', 'fakeGoogleKey', 'fakeSlackToken', 'fakePrivateKey', 'retrieval.lore', 'not.toContain(fakeDatabaseUrl)'],
         'apps/backend/src/prompt-inspector.service.test.ts',
       )
     },
