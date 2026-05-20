@@ -214,7 +214,7 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 bun run qa:live
 ```
 
-`qa:live` และ `api:smoke:live` เรียกผู้ให้บริการจริง จึงอาจ fail ได้แม้ key มีอยู่แล้ว ถ้า billing, quota, สิทธิ์โมเดล, rate limit ของผู้ให้บริการ, หรือ network ออกนอกระบบยังไม่พร้อม กรณี chat จะรายงานเป็น `usage.providerFailure` เพื่อชี้ failure class ที่ถูกต้อง ให้ถือว่าเป็น staging blocker ก่อน production. `api:smoke:live` ตรวจ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ก่อน live chat call และครอบคลุม live chat หนึ่งครั้งพร้อม live image-generation หนึ่งครั้ง ดังนั้นใช้ `smoke:chat` หรือ `smoke:image:live` เฉพาะตอนต้อง retry provider path เดี่ยว อย่ารัน live smoke หลายคำสั่งพร้อมกันบนบัญชีที่ quota จำกัด ให้ใช้ `api:smoke:live` เป็น ordered pass ครั้งเดียว หลัง live chat verification สำเร็จครั้งแรกให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`; หลัง live image verification สำเร็จครั้งแรกให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`; แล้ว rerun production gate สุดท้าย.
+`qa:live` และ `api:smoke:live` เรียกผู้ให้บริการจริง จึงอาจ fail ได้แม้ key มีอยู่แล้ว ถ้า billing, quota, สิทธิ์โมเดล, ข้อจำกัดอัตราการเรียกของผู้ให้บริการ, หรือการเชื่อมต่อออกนอกระบบยังไม่พร้อม กรณี chat จะรายงานเป็น `usage.providerFailure` เพื่อชี้ failure class ที่ถูกต้อง ให้ถือว่าเป็น staging blocker ก่อน production. `api:smoke:live` ตรวจ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ก่อน live chat call และครอบคลุม live chat หนึ่งครั้งพร้อม live image-generation หนึ่งครั้ง ดังนั้นใช้ `smoke:chat` หรือ `smoke:image:live` เฉพาะตอนต้อง retry provider path เดี่ยว อย่ารัน live smoke หลายคำสั่งพร้อมกันบนบัญชีที่ quota จำกัด ให้ใช้ `api:smoke:live` เป็น ordered pass ครั้งเดียว หลัง live chat verification สำเร็จครั้งแรกให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`; หลัง live image verification สำเร็จครั้งแรกให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`; แล้ว rerun production gate สุดท้าย.
 
 สำหรับ backend ที่ deploy แล้ว ให้ใช้ smoke-only live gate พร้อม `SMOKE_API_BASE_URL` และ smoke auth variables เมื่อต้องการ retry provider connectivity โดยไม่รัน persistence tests กับ production data:
 
@@ -283,7 +283,7 @@ bun run smoke:local
 bun run smoke:chat
 ```
 
-`smoke:chat` ตรวจเฉพาะเส้นทาง backend-to-OpenRouter จริง และอาจล้มเมื่อ network ออกไป provider, API credits, หรือ provider key ยังไม่พร้อม. มันตรวจ backend root identity และ token balance ของ smoke user ก่อนเรียก AI provider โดยค่าเริ่มต้นคือ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=1000`. GitHub Actions ยังรัน deploy checks, seeded local smoke test, และ Docker image builds เมื่อ push ไป `main` หรือเปิด pull request.
+`smoke:chat` ตรวจเฉพาะเส้นทางระบบหลังบ้านไป OpenRouter จริง และอาจล้มเมื่อการเชื่อมต่อออกไปผู้ให้บริการ, เครดิต API, หรือคีย์ผู้ให้บริการยังไม่พร้อม. มันตรวจ backend root identity และ token balance ของ smoke user ก่อนเรียก AI provider โดยค่าเริ่มต้นคือ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=1000`. GitHub Actions ยังรัน deploy checks, seeded local smoke test, และ Docker image builds เมื่อ push ไป `main` หรือเปิด pull request.
 
 ```bash
 bun run smoke:image:live

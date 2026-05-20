@@ -198,7 +198,7 @@ SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-ke
 GitHub workflow `Production Smoke` ต้องมี repository secrets `SUPABASE_URL` และ `SUPABASE_SERVICE_ROLE_KEY` ด้วย เพื่อให้ตรวจ bucket `avatars` แบบ private ได้จริงแทนการเชื่อ backend health flags อย่างเดียว.
 Workflow นี้ยังต้องมี `SMOKE_ADMIN_API_KEY` เพื่อให้ smoke run ตรวจ admin summary, moderation reports, และ audit logs แทนการข้าม admin-only APIs เงียบ ๆ.
 
-`smoke:chat` และ provider gate รวมอย่าง `api:smoke:live` จะเช็ก wallet ของผู้ใช้ smoke ก่อนเรียก OpenRouter ให้คงยอดผู้ใช้ smoke ไว้สูงกว่า `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` หรือปรับ threshold ถ้า prompt ทดสอบหนักกว่าเดิม ถ้า backend คืน `usage.providerFailure` แปลว่า route ติดต่อได้แล้ว แต่ live provider path ยังถูกบล็อกอยู่ ให้ตรวจเครดิต/โควตา OpenRouter, สิทธิ์โมเดล, ความถูกต้องของ key, outbound networking, และ backend logs ก่อน deploy.
+`smoke:chat` และ provider gate รวมอย่าง `api:smoke:live` จะเช็ก wallet ของผู้ใช้ smoke ก่อนเรียก OpenRouter ให้คงยอดผู้ใช้ smoke ไว้สูงกว่า `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` หรือปรับ threshold ถ้า prompt ทดสอบหนักกว่าเดิม ถ้า backend คืน `usage.providerFailure` แปลว่า route ติดต่อได้แล้ว แต่ live provider path ยังถูกบล็อกอยู่ ให้ตรวจเครดิต/โควตา OpenRouter, สิทธิ์โมเดล, ความถูกต้องของ key, การเชื่อมต่อออกไป OpenRouter, และ log ระบบหลังบ้านก่อน deploy.
 
 `smoke:image` ตรวจ image provider configuration โดยค่าเริ่มต้นจะไม่ใช้ image credits. ถ้าต้องการสร้าง avatar จริง 1 รูปบน staging/production ให้รัน `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1 bun run smoke:image`; คำสั่งนี้จะเรียก `/creator/ai-draft` และล้มถ้า Creator Studio fallback ไปใช้ placeholder image.
 

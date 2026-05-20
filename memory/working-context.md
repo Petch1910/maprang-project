@@ -74,6 +74,7 @@ Verified:
 - Production setup docs now use Thai-first deployment-order, production check, staging verify, GitHub Production Smoke, smoke auth, production data safety, and readiness-note guidance while preserving exact env names, workflow inputs, and commands.
 - Production setup Supabase storage and final-gate guidance now avoids stale English phrases such as `Development only`, `hard final gate`, and `gate fail` while preserving exact env names and blocker semantics.
 - README, Deployment QA, Production Setup, and deploy blockers now use Thai-first live provider handoff wording for smoke wallet checks, `usage.providerFailure`, image billing/quota, and DB example-value rejection while preserving exact env names and commands.
+- README, Deployment QA, and Production Setup live provider troubleshooting now describe outbound/network/log failures with Thai-first wording such as `การเชื่อมต่อออกไป OpenRouter` and `log ระบบหลังบ้าน`.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
 - Smoke doctor and deploy status root/health failure hints now avoid mixed `วิธีแก้ local`, `วิธีแก้ deploy`, `backend root`, `deployed backend`, and `frontend/static proxy` wording while keeping `SMOKE_API_BASE_URL` and identity payload guidance exact.
 - Deploy status runtime error prefixes now use Thai-first `ตรวจสถานะ deploy ไม่ผ่าน` wording while keeping JSON payload keys stable.
