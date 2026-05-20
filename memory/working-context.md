@@ -210,6 +210,7 @@ Verified:
 - Backend DB check planning is covered by `backend:check:db:test`, ensuring DB availability is checked before backend tests run with `REQUIRE_DB_TESTS=true`, and the DB check command plan has an importable runner for CI/dashboard reuse.
 - Supabase signed-storage setup now exports testable helpers and an importable setup runner for env loading, config validation, bucket privacy checks, smoke object upload/sign/cleanup flow, signed URL normalization, and object path encoding; `supabase:storage:test` covers them with fake operations without hitting Supabase.
 - Supabase signed-storage setup failures now use Thai-first guidance for missing env, signed-access requirements, bucket privacy, signed URL, upload, fetch, and cleanup errors.
+- Supabase signed-storage setup runtime errors now avoid stale `status`, `smoke avatar`, `project`, `setup`, and `update` wording while preserving exact bucket and signed URL terms.
 - Local smoke now exports testable helpers and an importable smoke runner for smoke character selection, avatar upload validation, cleanup, and QA summary formatting; `smoke:local:test` covers them without hitting the backend.
 - Browser e2e smoke now exports a testable command plan, and `e2e:smoke:test` guards seed reset, Playwright execution, and seed restore ordering without launching the browser.
 - E2E smoke command labels and failure text now use Thai-first wording while preserving the QA seed and Playwright identifiers.

@@ -183,6 +183,7 @@ Last updated: 2026-05-20
 - `backend:check:db:test` now runs in `qa:local`, CI, and Production Smoke to guard DB-required backend check command planning and the importable DB check runner.
 - `supabase:storage:test` now runs in `qa:local`, CI, and Production Smoke to guard signed-storage setup helpers plus the importable setup runner without calling Supabase.
 - Supabase signed-storage setup failure guidance now passes Thai-first coverage via `supabase:storage:test`.
+- Supabase signed-storage setup runtime errors now pass Thai-first wording coverage for public bucket check mode and storage operation status failures via `supabase:storage:test`.
 - `smoke:local:test` now runs in `qa:local`, CI, and Production Smoke to guard local smoke helper behavior and the importable local smoke runner without calling the backend.
 - `e2e:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard browser smoke seed reset/restore command ordering without launching Playwright.
 - E2E smoke command-label localization now passes `e2e:smoke:test` and `predeploy:check`.

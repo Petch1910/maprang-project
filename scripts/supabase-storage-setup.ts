@@ -127,7 +127,7 @@ async function parseError(response: Response) {
 async function getBucket(config: SupabaseStorageConfig) {
   const response = await storageRequest(config, `/bucket/${encodeURIComponent(config.bucket)}`)
   if (response.status === 404) return { exists: false as const, public: null }
-  if (!response.ok) throw new Error(`อ่าน bucket ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`อ่าน bucket ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
   const payload = (await response.json()) as { public?: boolean; id?: string; name?: string }
   return { exists: true as const, public: payload.public === true }
 }
@@ -145,7 +145,7 @@ async function createBucket(config: SupabaseStorageConfig) {
     }),
   })
   if (!response.ok && response.status !== 409) {
-    throw new Error(`สร้าง bucket ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
+    throw new Error(`สร้าง bucket ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
   }
 }
 
@@ -159,7 +159,7 @@ async function updateBucketPrivate(config: SupabaseStorageConfig) {
       allowed_mime_types: allowedMimeTypes,
     }),
   })
-  if (!response.ok) throw new Error(`ปรับ bucket ให้เป็น private ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`ปรับ bucket ให้เป็น private ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
 }
 
 async function uploadSmokeImage(config: SupabaseStorageConfig, objectPath: string) {
@@ -173,7 +173,7 @@ async function uploadSmokeImage(config: SupabaseStorageConfig, objectPath: strin
     },
     body: bytes,
   })
-  if (!response.ok) throw new Error(`อัปโหลด smoke avatar ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`อัปโหลดรูป smoke ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
 }
 
 async function createSignedUrl(config: SupabaseStorageConfig, objectPath: string) {
@@ -182,7 +182,7 @@ async function createSignedUrl(config: SupabaseStorageConfig, objectPath: string
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ expiresIn: config.expiresIn }),
   })
-  if (!response.ok) throw new Error(`สร้าง signed URL ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`สร้าง signed URL ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
   const payload = (await response.json()) as { signedURL?: string; signedUrl?: string }
   const signedPath = payload.signedURL ?? payload.signedUrl
   if (!signedPath) throw new Error('ผลลัพธ์ signed URL ไม่มี signedURL')
@@ -191,7 +191,7 @@ async function createSignedUrl(config: SupabaseStorageConfig, objectPath: string
 
 async function verifySignedUrl(signedUrl: string) {
   const response = await fetch(signedUrl)
-  if (!response.ok) throw new Error(`เรียก signed URL ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`เรียก signed URL ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
 }
 
 async function deleteObject(config: SupabaseStorageConfig, objectPath: string) {
@@ -200,7 +200,7 @@ async function deleteObject(config: SupabaseStorageConfig, objectPath: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prefixes: [objectPath] }),
   })
-  if (!response.ok) throw new Error(`ลบ smoke avatar ไม่สำเร็จด้วย status ${response.status}: ${await parseError(response)}`)
+  if (!response.ok) throw new Error(`ลบรูป smoke ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
 }
 
 export const liveSupabaseStorageOperations: SupabaseStorageOperations = {
@@ -233,7 +233,7 @@ export async function runSupabaseStorageSetup(
 
     const bucketState = await operations.getBucket(config)
     if (!bucketState.exists) {
-      if (config.checkOnly) throw new Error(`ไม่พบ Supabase bucket "${config.bucket}" ให้รัน bun run supabase:storage:setup หลัง project พร้อมใช้งาน`)
+      if (config.checkOnly) throw new Error(`ไม่พบ Supabase bucket "${config.bucket}" ให้รัน bun run supabase:storage:setup หลังโปรเจกต์พร้อมใช้งาน`)
       await operations.createBucket(config)
       writeLine(`createdBucket: ${config.bucket}`)
     } else {
@@ -241,16 +241,16 @@ export async function runSupabaseStorageSetup(
     }
 
     const currentBucket = await operations.getBucket(config)
-    if (!currentBucket.exists) throw new Error(`อ่าน Supabase bucket "${config.bucket}" หลัง setup ไม่สำเร็จ`)
+    if (!currentBucket.exists) throw new Error(`อ่าน Supabase bucket "${config.bucket}" หลังตั้งค่าไม่สำเร็จ`)
 
     if (currentBucket.public === true) {
-      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public; production ต้องใช้ private bucket พร้อม signed URL`)
+      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public; ก่อน production ต้องใช้ private bucket พร้อม signed URL`)
       await operations.updateBucketPrivate(config)
       writeLine(`updatedBucketPrivate: ${config.bucket}`)
     }
 
     const verifiedBucket = await operations.getBucket(config)
-    if (verifiedBucket.public === true) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public หลัง update`)
+    if (verifiedBucket.public === true) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public หลังปรับค่า`)
 
     const objectPath = `avatars/smoke-${now()}.png`
     await operations.uploadSmokeImage(config, objectPath)
