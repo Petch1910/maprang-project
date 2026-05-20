@@ -6,6 +6,7 @@ Last updated: 2026-05-20
 
 - Documentation command audit pass: `bun run docs:commands`, `bun run docs:commands:test`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `git diff --check` ผ่านหลังเพิ่ม gate ตรวจ `bun run ...` ในเอกสารหลัก 189 references.
 - `qa:repo`, CI, และ Production Smoke ตอนนี้รัน `docs:commands` กับ `docs:commands:test` เพื่อกัน command drift ระหว่าง root package, backend package, frontend package, และเอกสาร deploy/handoff.
+- Predeploy command-doc integration pass: `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run docs:commands:test` ผ่านหลังให้ `predeploy:check` เรียก `collectDocsCommandAuditResult` โดยตรง.
 - Golden roleplay eval fixture Thai-first pass: `bun run eval:local`, `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังแปล `evals/golden-roleplay.json`.
 - Local eval formatting regression fixture now uses Thai-first failure text, verified with `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 - README/evals docs headings are Thai-first while preserving searchable English terms in parentheses; `predeploy:check:test` and `predeploy:check` now guard the Thai-first headings.

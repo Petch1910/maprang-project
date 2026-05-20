@@ -1,5 +1,6 @@
 import { access, readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
+import { collectDocsCommandAuditResult } from './docs-command-audit'
 
 const root = join(import.meta.dir, '..')
 
@@ -182,6 +183,15 @@ const checks: Check[] = [
     run: async () => {
       for (const file of markdownHeadingFiles) {
         assertThaiFirstMarkdownHeadings(await readRepoFile(file), file)
+      }
+    },
+  },
+  {
+    name: 'คำสั่งในเอกสารต้องตรงกับ package scripts',
+    run: async () => {
+      const result = await collectDocsCommandAuditResult()
+      if (result.findings.length > 0) {
+        throw new Error(result.findings.join('; '))
       }
     },
   },

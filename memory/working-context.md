@@ -6,6 +6,7 @@ Last updated: 2026-05-20
 
 - เพิ่ม `docs:commands` และ `docs:commands:test` เพื่อตรวจว่าเอกสารหลักอ้าง `bun run ...` ตรงกับ package context จริง ทั้ง root docs, app READMEs, release/deploy handoff, route/menu audit, และ staging/production runbooks.
 - `qa:repo`, CI predeploy/secrets layer, และ Production Smoke ถูกผูกให้รัน command-doc audit แล้ว เพื่อกัน README หรือ deploy docs แนะนำ script ที่ไม่มีอยู่จริงในตำแหน่งที่ผู้ใช้รัน.
+- `predeploy:check` เรียก command-doc audit โดยตรงแล้ว ดังนั้น `production:check` จะจับเอกสารที่อ้าง script ผิด context ได้แม้ไม่ได้รัน `qa:repo` ก่อน.
 - README ของ backend/frontend package เปลี่ยนคำสั่ง app-local check เป็น `bun run deploy:check` และแยกบอกชัดว่าถ้ารันจาก repo root ให้ใช้ `bun run backend:check` / `bun run frontend:check`.
 - `evals/golden-roleplay.json` ใช้คำอธิบาย สถานการณ์ lore และ runtime memory แบบ Thai-first แล้ว เพื่อให้ชุด deterministic prompt eval สอดคล้องกับ runtime prompt ที่แปลเป็นไทยก่อนหน้านี้.
 - สถานการณ์ prompt injection ยังตั้งใจคง `userMessage` ภาษาอังกฤษไว้ เพื่อทดสอบการโจมตีข้ามภาษาและยืนยันว่า prompt-control policy อยู่เหนือข้อความผู้ใช้ที่ไม่น่าเชื่อถือ.
