@@ -208,15 +208,26 @@ describe('frontend static audit', () => {
         '<p>production smoke กับ backend/frontend domain จริง</p>',
         '<p>ไม่มี warning ฝั่ง frontend</p>',
         '<p>ถ้าได้ usage.providerFailure ต้องเช็คคีย์</p>',
+        '<p>ถ้าได้ providerFailure ต้องเช็คคีย์</p>',
         '<p>ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงิน</p>',
         '<p>local/dev ยังไม่บังคับ</p>',
         '<p>รันกับ production/staging ให้ผ่าน</p>',
+        '<p>รันกับ staging/production ให้ผ่าน</p>',
+        '<h1>ตรวจความพร้อมก่อน staging / production</h1>',
+        '<p>ยืนยัน live chat smoke แล้ว</p>',
+        '<p>ยืนยัน live image smoke แล้ว</p>',
+        '<p>เช็คด้วย browser smoke</p>',
+        '<p>สรุป blocker production</p>',
+        '<p>พร้อมสำหรับ production smoke</p>',
+        '<p>รัน production gate ซ้ำ</p>',
+        '<p>ก่อน production ต้องเช็ค</p>',
+        '<p>build production แล้ว</p>',
       ].join('\n'),
       'AdminHealthFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 16 }, () => adminHealthMixedFinding),
+      Array.from({ length: 28 }, () => adminHealthMixedFinding),
     )
   })
 

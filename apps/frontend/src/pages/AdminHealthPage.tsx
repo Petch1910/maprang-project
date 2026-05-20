@@ -81,7 +81,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       label: 'ฐานข้อมูลเชื่อมต่อ',
       ok: Boolean(checks?.databaseConfigured && checks.databaseConnected),
       detail: checks?.databaseConnected ? 'ระบบหลังบ้านต่อฐานข้อมูลได้แล้ว' : 'ตั้ง DATABASE_URL แล้วรัน migration และ smoke กับ DB จริง',
-      action: checks?.databaseConnected ? 'เช็คซ้ำด้วย bun run smoke:local ก่อนส่ง staging' : 'ตั้ง DATABASE_URL, รัน bunx prisma migrate deploy แล้วรัน bun run smoke:local',
+      action: checks?.databaseConnected ? 'เช็คซ้ำด้วย bun run smoke:local ก่อนส่งสเตจจิง' : 'ตั้ง DATABASE_URL, รัน bunx prisma migrate deploy แล้วรัน bun run smoke:local',
       scope: 'local',
     },
     {
@@ -114,20 +114,20 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: checks?.openRouterConfigured
         ? 'ตั้งคีย์แล้ว แต่ยังต้องให้ smoke:chat หรือ api:smoke:live ผ่านเพื่อยืนยันโควตา รุ่นโมเดล และเครือข่ายจริง'
         : 'ตั้ง OPENROUTER_API_KEY ก่อนทดสอบแชทจริง',
-      action: checks?.openRouterConfigured ? 'รัน bun run smoke:chat กับ staging เพื่อยืนยันผู้ให้บริการจริง' : 'ตั้ง OPENROUTER_API_KEY ที่ขึ้นต้น sk-or- ใน secret ของโฮสต์หลังบ้าน',
+      action: checks?.openRouterConfigured ? 'รัน bun run smoke:chat กับสเตจจิงเพื่อยืนยันผู้ให้บริการจริง' : 'ตั้ง OPENROUTER_API_KEY ที่ขึ้นต้น sk-or- ใน secret ของโฮสต์หลังบ้าน',
       scope: 'local',
     },
     {
       label: 'ทดสอบแชทจริง',
       ok: chatProductionReady,
       detail: chatProductionReady
-        ? 'ยืนยัน live chat smoke แล้ว'
+        ? 'ยืนยันการทดสอบแชทจริงแล้ว'
         : checks?.openRouterConfigured || chatProvider?.configured
-          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าได้รหัส providerFailure ต้องเช็คโควตา OpenRouter, สิทธิ์โมเดล, คีย์ และเครือข่าย`
-          : 'ยังไม่มี OPENROUTER_API_KEY จึงยังทดสอบ live chat ไม่ได้',
+          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับสเตจจิงหรือโปรดักชันให้ผ่าน ถ้าได้รหัสผู้ให้บริการล้มเหลว ต้องเช็คโควตา OpenRouter, สิทธิ์โมเดล, คีย์ และเครือข่าย`
+          : 'ยังไม่มี OPENROUTER_API_KEY จึงยังทดสอบแชทจริงไม่ได้',
       action: chatProductionReady
         ? 'คง CHAT_PROVIDER_LIVE_VERIFIED=1 ไว้เฉพาะสภาพแวดล้อมที่ smoke ผ่านจริง'
-        : `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} กับ staging ถ้าผ่านแล้วค่อยตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`,
+        : `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} กับสเตจจิง ถ้าผ่านแล้วค่อยตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`,
       scope: 'production',
     },
     {
@@ -137,12 +137,12 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         ? `ใช้ ${model.name}, คำตอบสูงสุด ${model.maxOutputTokens ?? 'ค่าเริ่มต้น'} โทเคน, บทบาทสมมุติขั้นต่ำ ${model.minRoleplayReplyChars ?? 'ค่าเริ่มต้น'} ตัวอักษร, ความสุ่ม ${model.temperature ?? 'ค่าเริ่มต้น'}, ลองซ้ำแชท ${providerRetry?.chatAttempts ?? 'ค่าเริ่มต้น'} ครั้ง`
         : 'รอคำตอบสถานะจากระบบหลังบ้าน',
       action: !model
-        ? 'รอ health ของระบบหลังบ้าน แล้วเช็คค่า MODEL_MAX_OUTPUT_TOKENS และ MODEL_MIN_ROLEPLAY_REPLY_CHARS'
+        ? 'รอสถานะระบบหลังบ้าน แล้วเช็คค่า MODEL_MAX_OUTPUT_TOKENS และ MODEL_MIN_ROLEPLAY_REPLY_CHARS'
         : !replyBudgetMeetsBaseline
-          ? 'ตั้งอย่างน้อย MODEL_MAX_OUTPUT_TOKENS=1200 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=320 ก่อน staging'
+          ? 'ตั้งอย่างน้อย MODEL_MAX_OUTPUT_TOKENS=1200 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=320 ก่อนส่งสเตจจิง'
           : replyBudgetMeetsRecommended
-            ? 'ค่าความยาวตอบกลับอยู่ระดับแนะนำสำหรับ roleplay แล้ว'
-            : 'ผ่าน baseline แล้ว แต่แนะนำปรับเป็น MODEL_MAX_OUTPUT_TOKENS=1600 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=420 เพื่อให้บอทตอบมีเนื้อขึ้น',
+            ? 'ค่าความยาวตอบกลับอยู่ระดับแนะนำสำหรับบทบาทสมมุติแล้ว'
+            : 'ผ่านเกณฑ์ขั้นต่ำแล้ว แต่แนะนำปรับเป็น MODEL_MAX_OUTPUT_TOKENS=1600 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=420 เพื่อให้บอทตอบมีเนื้อขึ้น',
       scope: 'local',
     },
     {
@@ -163,10 +163,10 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       ok: imageProductionReady,
       detail:
         imageProductionReady
-          ? 'ยืนยัน live image smoke แล้ว'
+          ? 'ยืนยันการทดสอบสร้างรูปจริงแล้ว'
           : isProductionMode
-            ? `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`
-            : `สภาพแวดล้อมเครื่องยังไม่บังคับ แต่ก่อน production ต้องรัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} ให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน`,
+            ? `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หรือ bun run api:smoke:live กับสเตจจิงหรือโปรดักชันให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`
+            : `สภาพแวดล้อมเครื่องยังไม่บังคับ แต่ก่อนโปรดักชันต้องรัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} ให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน`,
       action: imageProductionReady
         ? 'คง IMAGE_GENERATION_LIVE_VERIFIED=1 ไว้เฉพาะสภาพแวดล้อมที่ smoke ผ่านจริง'
         : `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หลังเพิ่มวงเงินหรือโควตา แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`,
@@ -178,7 +178,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'ระบบหลังบ้านและหน้าบ้านมีค่าการยืนยันตัวตน Supabase แล้ว' : 'ต้องมี SUPABASE_URL/JWT issuer และ VITE_SUPABASE_*',
       action:
         checks?.supabaseAuthConfigured && hasFrontendSupabase
-          ? 'ทดสอบล็อกอิน/เซสชันกับโดเมน staging อีกครั้ง'
+          ? 'ทดสอบล็อกอิน/เซสชันกับโดเมนสเตจจิงอีกครั้ง'
           : 'ตั้ง SUPABASE_URL, SUPABASE_JWT_ISSUER, VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ให้ครบ',
       scope: 'local',
     },
@@ -191,7 +191,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
           : 'ก่อนใช้งานจริงควรใช้ Supabase bucket private + signed URL',
       action:
         security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed'
-          ? 'รัน bun run supabase:storage:check กับ staging/prod ก่อนเปิดใช้'
+          ? 'รัน bun run supabase:storage:check กับสเตจจิงหรือโปรดักชันก่อนเปิดใช้'
           : 'รัน bun run supabase:storage:setup แล้วตั้ง SUPABASE_STORAGE_ACCESS=signed',
       scope: 'production',
     },
@@ -201,18 +201,18 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail:
         security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))
           ? security.corsOrigins.join(', ')
-          : 'staging/production ต้องเปลี่ยน CORS_ORIGINS เป็นโดเมนจริง',
+          : 'สเตจจิง/โปรดักชันต้องเปลี่ยน CORS_ORIGINS เป็นโดเมนจริง',
       action:
         security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))
           ? 'คง CORS ให้เหลือเฉพาะโดเมนหน้าบ้านจริง'
-          : 'ตั้ง CORS_ORIGINS=https://<frontend-domain> และเอา localhost ออกจาก production',
+          : 'ตั้ง CORS_ORIGINS=https://<frontend-domain> และเอา localhost ออกจากโปรดักชัน',
       scope: 'production',
     },
     {
       label: 'URL หลังบ้านของหน้าเว็บ',
       ok: hasBackendUrl,
-      detail: hasBackendUrl ? API_BASE_URL : 'ตั้ง VITE_API_BASE_URL เป็น URL ระบบหลังบ้าน staging/production จริง',
-      action: hasBackendUrl ? 'เช็คด้วย browser smoke ว่าหน้าบ้านเรียกโดเมนระบบหลังบ้านจริง' : 'ตั้ง VITE_API_BASE_URL=https://<backend-domain> ใน env ของโฮสต์หน้าบ้าน',
+      detail: hasBackendUrl ? API_BASE_URL : 'ตั้ง VITE_API_BASE_URL เป็น URL ระบบหลังบ้านสเตจจิง/โปรดักชันจริง',
+      action: hasBackendUrl ? 'เช็คด้วย smoke ผ่านเบราว์เซอร์ว่าหน้าบ้านเรียกโดเมนระบบหลังบ้านจริง' : 'ตั้ง VITE_API_BASE_URL=https://<backend-domain> ใน env ของโฮสต์หน้าบ้าน',
       scope: 'frontend',
     },
     {
@@ -221,8 +221,8 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: frontendWarnings.length === 0 ? 'ไม่มีคำเตือนฝั่งหน้าบ้าน' : frontendWarnings.join(' / '),
       action:
         frontendWarnings.length === 0
-          ? 'ล็อก env หน้าบ้านชุดนี้ไว้ก่อน build production'
-          : 'แก้ VITE_API_BASE_URL, VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ตาม warning',
+          ? 'ล็อก env หน้าบ้านชุดนี้ไว้ก่อน build โปรดักชัน'
+          : 'แก้ VITE_API_BASE_URL, VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ตามคำเตือน',
       scope: 'frontend',
     },
   ]
@@ -254,7 +254,7 @@ export function AdminHealthPage() {
       setNote(data.ok ? 'โหลดสถานะระบบแล้ว' : 'ระบบหลังบ้านยังไม่พร้อมเต็ม ต้องดูเช็กลิสต์ด้านล่าง')
     } catch {
       setHealthStatus(null)
-      setNote('ติดต่อ health ของระบบหลังบ้านไม่ได้ ตรวจว่าระบบหลังบ้านเปิดอยู่และ VITE_API_BASE_URL ถูกต้อง')
+      setNote('ติดต่อสถานะระบบหลังบ้านไม่ได้ ตรวจว่าระบบหลังบ้านเปิดอยู่และ VITE_API_BASE_URL ถูกต้อง')
     } finally {
       setIsLoading(false)
     }
@@ -290,7 +290,7 @@ export function AdminHealthPage() {
               ตรวจระบบผู้ดูแล
             </p>
             <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">
-              ตรวจความพร้อมก่อน staging / production
+              ตรวจความพร้อมก่อนสเตจจิง/โปรดักชัน
             </h1>
             <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               หน้านี้รวมสถานะระบบหลังบ้าน ค่าแวดล้อม Supabase พื้นที่เก็บรูปแบบ signed URL ผู้ให้บริการสร้างรูป และการตรวจเส้นทาง/เมนู
@@ -349,7 +349,7 @@ export function AdminHealthPage() {
           <p className="m-0 text-xs font-black tracking-widest uppercase">ด่าน QA</p>
           <p className="m-0 mt-2 text-2xl font-black">qa:full</p>
           <p className="m-0 mt-1 text-sm font-bold leading-6">
-            ใช้เช็คระบบหลังบ้าน หน้าบ้าน smoke เส้นทาง console error และจอล้นบนมือถือก่อนส่ง staging
+            ใช้เช็คระบบหลังบ้าน หน้าบ้าน smoke เส้นทาง console error และจอล้นบนมือถือก่อนส่งสเตจจิง
           </p>
         </article>
       </section>
@@ -361,11 +361,11 @@ export function AdminHealthPage() {
       >
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <p className="m-0 text-sm font-black">สรุป blocker production</p>
+            <p className="m-0 text-sm font-black">สรุปด่านค้างก่อนโปรดักชัน</p>
             <p className="m-0 mt-1 text-sm font-bold leading-6">
               {productionReady
-                ? 'พร้อมสำหรับด่านสุดท้ายแล้ว ให้รัน production smoke กับโดเมนระบบหลังบ้าน/หน้าบ้านจริงอีกครั้ง'
-                : `ยังค้าง ${productionBlockers.length} ข้อก่อน deploy จริง แก้ตามรายการนี้ก่อนค่อยรัน production gate ซ้ำ`}
+                ? 'พร้อมสำหรับด่านสุดท้ายแล้ว ให้รัน smoke โปรดักชันกับโดเมนระบบหลังบ้าน/หน้าบ้านจริงอีกครั้ง'
+                : `ยังค้าง ${productionBlockers.length} ข้อก่อน deploy จริง แก้ตามรายการนี้ก่อนค่อยรันด่านโปรดักชันซ้ำ`}
             </p>
           </div>
           <code className="inline-flex min-h-9 items-center rounded-xl bg-white/75 px-3 text-xs font-black text-slate-800 shadow-sm">
@@ -469,7 +469,7 @@ export function AdminHealthPage() {
           <div>
             <p className="m-0 text-sm font-black text-slate-950">ตรวจเส้นทาง/เมนู</p>
             <p className="m-0 mt-1 text-xs font-bold text-slate-400">
-              ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็นด่าน staging หรือฟีเจอร์เผื่ออนาคต
+              ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็นด่านสเตจจิงหรือฟีเจอร์เผื่ออนาคต
             </p>
           </div>
           <span className="inline-flex min-h-9 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700">
@@ -511,11 +511,11 @@ export function AdminHealthPage() {
       </section>
 
       <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-        <p className="m-0 font-black">ด่าน staging ก่อนโปรดักชัน</p>
+        <p className="m-0 font-black">ด่านสเตจจิงก่อนโปรดักชัน</p>
         <p className="m-0 mt-1">
-          ใช้ Supabase project จริงสำหรับ staging, bucket avatars แบบ private + signed URL, ระบบหลังบ้านบน Render/Railway,
-          โดเมนหน้าบ้านทดลอง, CORS โดเมนจริง แล้วรัน `bun run qa:full` และ `bun run production:check` กับ staging URL
-          ก่อนปล่อย production
+          ใช้ Supabase project จริงสำหรับสเตจจิง, bucket avatars แบบ private + signed URL, ระบบหลังบ้านบน Render/Railway,
+          โดเมนหน้าบ้านทดลอง, CORS โดเมนจริง แล้วรัน `bun run qa:full` และ `bun run production:check` กับ URL สเตจจิง
+          ก่อนปล่อยโปรดักชัน
         </p>
       </section>
     </div>

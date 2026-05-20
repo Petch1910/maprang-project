@@ -211,7 +211,7 @@ export const suspiciousPatterns = [
   },
   {
     pattern:
-      /(?:backend\s+ยังไม่พร้อมเต็ม|ติดต่อ\s+backend\s+health|health\s+response\s+จาก\s+backend|backend\s+env|hosting\s+secret\s+manager|backend\s+host\s+secrets|waiting\s+for\s+backend\s+health\s+response|ยืนยัน\s+provider\s+จริง|final\s+gate|mobile\s+overflow|backend\/frontend\s+domain|warning\s+ฝั่ง\s+frontend|usage\.providerFailure|billing\/quota\s+limit|local\/dev\s+ยังไม่บังคับ|production\/staging)/g,
+      /(?:backend\s+ยังไม่พร้อมเต็ม|ติดต่อ\s+backend\s+health|health\s+response\s+จาก\s+backend|backend\s+env|hosting\s+secret\s+manager|backend\s+host\s+secrets|waiting\s+for\s+backend\s+health\s+response|ยืนยัน\s+provider\s+จริง|final\s+gate|mobile\s+overflow|backend\/frontend\s+domain|warning\s+ฝั่ง\s+frontend|usage\.providerFailure|รหัส\s+providerFailure|ถ้าได้\s+providerFailure|billing\/quota\s+limit|local\/dev\s+ยังไม่บังคับ|production\/staging|staging\/production|staging\s*\/\s*production|ยืนยัน\s+live\s+chat|ทดสอบ\s+live\s+chat|ยังทดสอบ\s+live\s+chat|ยืนยัน\s+live\s+image|ทดสอบ\s+live\s+image|browser\s+smoke|blocker\s+production|production\s+smoke|production\s+gate|ก่อน\s+production|build\s+production)/g,
     message: 'พบข้อความ Admin Health ปนอังกฤษที่ควรเป็น Thai-first',
   },
   {
