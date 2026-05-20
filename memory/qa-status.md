@@ -150,6 +150,7 @@ Last updated: 2026-05-20
 - Shared smoke helper diagnostics now pass Thai-first coverage via `smoke:helpers:test`, `smoke:local:test`, `deploy:status:test`, `smoke:image:test`, `smoke:chat:test`, `smoke:ready:test`, and `smoke:doctor:test`.
 - Shared smoke helper fetch-reason localization now passes `smoke:helpers:test`, `smoke:doctor:test`, and `predeploy:check`.
 - `smoke:image:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, image smoke skip/fallback/live payload helpers, and the importable image smoke runner without provider calls.
+- Image smoke missing-detail fallback copy now passes `smoke:image:test` and no longer emits `no warnings`.
 - `smoke:chat:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, live chat smoke validation, success payload helpers, and the importable live chat smoke runner without provider calls.
 - `deploy:status:test` now runs in `qa:local`, CI, and Production Smoke to guard backend root identity preflight, deploy status JSON/text output, and the importable deploy status runner.
 - `deploy:status:test` now also verifies helper-only payload/text output does not invent a root identity when no root preflight result was supplied.

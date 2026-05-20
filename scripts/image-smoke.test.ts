@@ -64,6 +64,9 @@ describe('image smoke helpers', () => {
         image: { provider: 'configured', url: 'data:image/svg+xml;base64,abc' },
       }),
     ).toBe('ตรวจรูป smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ')
+    expect(liveImageDraftFailure({ image: { provider: 'placeholder' } })).toContain(
+      'ไม่มีรายละเอียดจากผู้ให้บริการสร้างรูป',
+    )
   })
 
   test('formats successful live-image payload and classifies generated URL kind', () => {

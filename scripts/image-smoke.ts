@@ -86,7 +86,7 @@ export function buildSkippedImageSmokePayload(health: ImageSmokeHealthPayload, b
 export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   if (draft.image?.provider !== 'configured') {
     const warnings = draft.warnings?.filter(Boolean).join('; ')
-    const issue = warnings || draft.image?.note || 'no warnings'
+    const issue = warnings || draft.image?.note || 'ไม่มีรายละเอียดจากผู้ให้บริการสร้างรูป'
     return `ตรวจรูป smoke กลับไปใช้ภาพตัวอย่างระบบ: ${issue}${providerFailureHint(issue)}`
   }
 
