@@ -16,9 +16,9 @@ describe('local eval output formatting', () => {
     expect(output).toEqual({
       exitCode: 0,
       stdout: [
-        'eval - roleplay-depth: 1200 estimated prompt tokens',
-        'eval - prompt-injection: 900 estimated prompt tokens',
-        'ok - local eval passed (2 scenarios)',
+        'eval - roleplay-depth: ประมาณ 1200 โทเคนของพรอมป์',
+        'eval - prompt-injection: ประมาณ 900 โทเคนของพรอมป์',
+        'ok - local eval ผ่าน (2 สถานการณ์)',
       ],
       stderr: [],
     })
@@ -33,9 +33,9 @@ describe('local eval output formatting', () => {
     })
 
     expect(output.exitCode).toBe(1)
-    expect(output.stdout).toEqual(['eval - scenario-a: 777 estimated prompt tokens'])
+    expect(output.stdout).toEqual(['eval - scenario-a: ประมาณ 777 โทเคนของพรอมป์'])
     expect(output.stderr).toEqual([
-      'Local eval failed:',
+      'Local eval ไม่ผ่าน:',
       '- scenario-a: missing required text "Scene Objective"',
     ])
   })

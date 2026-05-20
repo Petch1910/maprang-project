@@ -128,6 +128,7 @@ Verified:
 - Browser e2e smoke now exports a testable command plan, and `e2e:smoke:test` guards seed reset, Playwright execution, and seed restore ordering without launching the browser.
 - Secret scanning now exports path-rule helpers, and `secrets:check:test` guards tracked `.env` rejection plus source/docs/config scan selection.
 - Local eval CLI now exports output formatting helpers, and `eval:local:test` guards pass/fail summary output without rerunning the deterministic prompt suite.
+- Local eval CLI pass/fail summaries and prompt token estimates now use Thai-first output while preserving scenario ids for debugging.
 - Smoke doctor now exports a report builder, and `smoke:doctor:test` guards staging blocker next steps, strict staging failure, and backend health failure output without calling a live backend.
 - Image smoke now exports fallback/live payload helpers and an importable smoke runner, and `smoke:image:test` guards skipped live-image output plus placeholder/no-URL/SVG failure handling without spending provider credits.
 - Live chat smoke now exports validation/payload helpers and an importable smoke runner, and `smoke:chat:test` guards provider-failure precedence, token threshold checks, wallet debit matching, and success payload formatting without spending provider credits.
