@@ -65,6 +65,7 @@ Verified:
 - Frontend Redux fallback errors for failed character/chat loading are now Thai-first, and the static audit blocks the old `Could not load...` copy from returning.
 - Frontend auth and Redux load failures no longer surface raw provider/browser English error messages directly; they now map to Thai-first user-facing notes, and frontend static/predeploy guards block the old raw-error patterns from returning.
 - Frontend AuthPanel and chat workspace auth refresh now catch Supabase/session failures, log only safe summaries through `logUnexpectedError`, and show Thai retry notes instead of leaving unhandled promise rejections.
+- Predeploy now checks AuthPanel and workspace auth failure wiring so the safe Supabase/session fallback behavior stays repo-owned.
 - Frontend API fallback errors now use Thai-first `ApiError` messages when a backend response has no JSON error string, and the static audit blocks stale `failed with status` wording from returning.
 - Frontend `ApiError` now prefers backend `message` fields before machine-readable `error` codes, falls back to Thai-first retry copy when `message` is missing, and keeps raw backend codes in `payload` only; `frontend:api:test` plus the static audit block raw `payload.error` display regressions.
 - Backend chat validation/access/token/rating/empty-provider fallback replies now use centralized Thai-first copy, and short-reply continuation skips those operational replies instead of trying to extend them as roleplay.

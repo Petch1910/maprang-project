@@ -1028,6 +1028,8 @@ const checks: Check[] = [
       const abuseChecklist = await readRepoFile('ABUSE_QA_CHECKLIST.md')
       const packageJson = await readRepoFile('package.json')
       const securityAudit = await readRepoFile('scripts/backend-security-audit.ts')
+      const authPanel = await readRepoFile('apps/frontend/src/components/AuthPanel.tsx')
+      const workspacePage = await readRepoFile('apps/frontend/src/pages/WorkspacePage.tsx')
       const backendRedaction = await readRepoFile('apps/backend/src/redaction.ts')
       const creatorDraft = await readRepoFile('apps/backend/src/creator-draft.service.ts')
       const creatorDraftTest = await readRepoFile('apps/backend/src/creator-draft.service.test.ts')
@@ -1301,6 +1303,16 @@ const checks: Check[] = [
           'if (import.meta.main) process.exit(await runFrontendStaticAudit())',
         ],
         'scripts/frontend-static-audit.ts',
+      )
+      requireIncludes(
+        authPanel,
+        ['authFailureMessage', 'logUnexpectedError', 'เชื่อมต่อระบบบัญชีไม่สำเร็จ:', '.catch((error)', 'disabled={isBusy}'],
+        'apps/frontend/src/components/AuthPanel.tsx',
+      )
+      requireIncludes(
+        workspacePage,
+        ['refreshWorkspaceAuth', 'โหลดสถานะบัญชีไม่สำเร็จ:', 'โหลดสถานะบัญชีไม่สำเร็จ แต่ยังใช้โหมดในเครื่องต่อได้'],
+        'apps/frontend/src/pages/WorkspacePage.tsx',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-route-audit.ts'),

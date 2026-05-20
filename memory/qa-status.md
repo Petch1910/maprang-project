@@ -129,6 +129,7 @@ Last updated: 2026-05-20
 - `frontend:static:audit:test` now also blocks stale English Redux fallback errors such as `Could not load chats` and `Could not load characters`.
 - Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - Frontend auth promise hardening now passes `frontend:check` and `frontend:static:audit:test`; AuthPanel/session refresh/sign-out/dev-user flows no longer leave Supabase failures as unhandled promise rejections.
+- Predeploy now guards AuthPanel and workspace auth failure wiring so Supabase/session promise handling cannot drift back to uncaught UI failures silently.
 - Frontend API fallback error wording now passes Thai-first coverage via `frontend:static:audit:test` and full `frontend:check`.
 - Frontend `ApiError` backend-message precedence now passes `frontend:api:test`, `frontend:static:audit:test`, and full `frontend:check`; the static audit blocks the old payload.error-first constructor and `payloadError` fallback patterns.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.
