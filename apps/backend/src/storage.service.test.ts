@@ -46,6 +46,10 @@ describe('storage service', () => {
   })
 
   test('keeps Supabase storage failure messages Thai-first', () => {
+    expect(avatarStorageMessages.fileRequired).toContain('แนบไฟล์รูปตัวละคร')
+    expect(avatarStorageMessages.typeNotSupported).toContain('JPG')
+    expect(avatarStorageMessages.tooLarge(2 * 1024 * 1024)).toContain('2 MB')
+    expect(avatarStorageMessages.notFound).toContain('ไม่พบรูปตัวละคร')
     expect(avatarStorageMessages.notConfigured).toContain('ยังไม่ได้ตั้งค่า')
     expect(avatarStorageMessages.uploadFailed(502)).toContain('อัปโหลดรูปตัวละคร')
     expect(avatarStorageMessages.signedUrlFailed(500)).toContain('signed URL')

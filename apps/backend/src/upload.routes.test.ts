@@ -74,9 +74,29 @@ describe('upload routes', () => {
         body: form,
       }),
     )
-    const body = (await response.json()) as { error: string }
+    const body = (await response.json()) as { error: string; message?: string }
 
     expect(response.status).toBe(415)
     expect(body.error).toBe('avatar_type_not_supported')
+    expect(body.message).toContain('รองรับเฉพาะรูป')
+  })
+
+  test('returns Thai-first messages for missing and unknown avatar files', async () => {
+    const missingUpload = await uploadRoutes.handle(
+      new Request('http://localhost/uploads/avatar', {
+        method: 'POST',
+        body: new FormData(),
+      }),
+    )
+    const missingUploadBody = (await missingUpload.json()) as { error: string; message?: string }
+    expect(missingUpload.status).toBe(400)
+    expect(missingUploadBody.error).toBe('avatar_file_required')
+    expect(missingUploadBody.message).toContain('แนบไฟล์รูปตัวละคร')
+
+    const missingAvatar = await uploadRoutes.handle(new Request('http://localhost/uploads/avatars/not-safe.svg'))
+    const missingAvatarBody = (await missingAvatar.json()) as { error: string; message?: string }
+    expect(missingAvatar.status).toBe(404)
+    expect(missingAvatarBody.error).toBe('avatar_not_found')
+    expect(missingAvatarBody.message).toContain('ไม่พบรูปตัวละคร')
   })
 })

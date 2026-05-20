@@ -7,7 +7,7 @@ export const uploadRoutes = new Elysia()
     const file = form.get('file')
     if (!(file instanceof File)) {
       set.status = 400
-      return { error: 'avatar_file_required' }
+      return { error: 'avatar_file_required', message: avatarStorageMessages.fileRequired }
     }
     let uploaded: Awaited<ReturnType<typeof uploadAvatarFile>>
     try {
@@ -19,7 +19,7 @@ export const uploadRoutes = new Elysia()
     }
     if (!uploaded.ok) {
       set.status = uploaded.status
-      return { error: uploaded.error, maxBytes: 'maxBytes' in uploaded ? uploaded.maxBytes : undefined }
+      return { error: uploaded.error, message: uploaded.message, maxBytes: 'maxBytes' in uploaded ? uploaded.maxBytes : undefined }
     }
 
     return uploaded
@@ -28,7 +28,7 @@ export const uploadRoutes = new Elysia()
     const filename = safeAvatarFilename(params.filename)
     if (!filename) {
       set.status = 404
-      return { error: 'avatar_not_found' }
+      return { error: 'avatar_not_found', message: avatarStorageMessages.notFound }
     }
 
     try {
@@ -41,7 +41,7 @@ export const uploadRoutes = new Elysia()
       const file = Bun.file(location.path)
       if (!file.size) {
         set.status = 404
-        return { error: 'avatar_not_found' }
+        return { error: 'avatar_not_found', message: avatarStorageMessages.notFound }
       }
 
       return file

@@ -21,6 +21,10 @@ export const allowedAvatarTypes = new Map([
 ])
 
 export const avatarStorageMessages = {
+  fileRequired: 'กรุณาแนบไฟล์รูปตัวละครก่อนอัปโหลด',
+  typeNotSupported: 'รองรับเฉพาะรูป JPG, PNG, WebP หรือ GIF เท่านั้น',
+  tooLarge: (maxBytes: number) => `รูปตัวละครใหญ่เกินไป ขนาดสูงสุดคือ ${Math.round(maxBytes / 1024 / 1024)} MB`,
+  notFound: 'ไม่พบรูปตัวละครนี้',
   notConfigured: 'ยังไม่ได้ตั้งค่า Supabase Storage สำหรับรูปตัวละคร',
   uploadFailed: (status: number) => `อัปโหลดรูปตัวละครไป Supabase ไม่สำเร็จ สถานะ ${status}`,
   signedUrlFailed: (status: number) => `สร้างลิงก์รูปตัวละครแบบ signed URL ไม่สำเร็จ สถานะ ${status}`,
@@ -124,11 +128,24 @@ export async function resolveAvatarLocation(filename: string) {
 
 export async function uploadAvatarFile({ file, origin }: { file: File; origin: string }) {
   if (file.size > maxAvatarBytes) {
-    return { ok: false as const, status: 413, error: 'avatar_too_large', maxBytes: maxAvatarBytes }
+    return {
+      ok: false as const,
+      status: 413,
+      error: 'avatar_too_large',
+      message: avatarStorageMessages.tooLarge(maxAvatarBytes),
+      maxBytes: maxAvatarBytes,
+    }
   }
 
   const extension = avatarExtension(file)
-  if (!extension) return { ok: false as const, status: 415, error: 'avatar_type_not_supported' }
+  if (!extension) {
+    return {
+      ok: false as const,
+      status: 415,
+      error: 'avatar_type_not_supported',
+      message: avatarStorageMessages.typeNotSupported,
+    }
+  }
 
   const filename = `${crypto.randomUUID()}${extension}`
   const bytes = new Uint8Array(await file.arrayBuffer())
@@ -159,11 +176,24 @@ export async function uploadAvatarBytes({
   origin: string
 }) {
   if (bytes.byteLength > maxAvatarBytes) {
-    return { ok: false as const, status: 413, error: 'avatar_too_large', maxBytes: maxAvatarBytes }
+    return {
+      ok: false as const,
+      status: 413,
+      error: 'avatar_too_large',
+      message: avatarStorageMessages.tooLarge(maxAvatarBytes),
+      maxBytes: maxAvatarBytes,
+    }
   }
 
   const extension = avatarExtensionFromContentType(contentType)
-  if (!extension) return { ok: false as const, status: 415, error: 'avatar_type_not_supported' }
+  if (!extension) {
+    return {
+      ok: false as const,
+      status: 415,
+      error: 'avatar_type_not_supported',
+      message: avatarStorageMessages.typeNotSupported,
+    }
+  }
 
   const filename = `${crypto.randomUUID()}${extension}`
   if (storageProvider === 'supabase') {
