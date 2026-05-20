@@ -68,7 +68,7 @@ describe('committed secret scan path rules', () => {
 
     expect(findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('No obvious committed secrets found.')
+    expect(lines[0]).toBe('ไม่พบ secret ที่ชัดเจนในไฟล์ที่ commit')
     expect(errors).toEqual([])
   })
 })

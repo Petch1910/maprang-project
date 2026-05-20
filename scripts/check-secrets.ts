@@ -65,7 +65,7 @@ async function gitTrackedFiles() {
   const stderr = await new Response(proc.stderr).text()
   const exitCode = await proc.exited
   if (exitCode !== 0) {
-    throw new Error(`git ls-files failed: ${stderr.trim() || `exit code ${exitCode}`}`)
+    throw new Error(`git ls-files ไม่สำเร็จ: ${stderr.trim() || `exit code ${exitCode}`}`)
   }
   return stdout.split(/\r?\n/).filter(Boolean)
 }
@@ -82,7 +82,7 @@ export async function collectSecretFindings(): Promise<SecretFinding[]> {
   }
   for (const file of await gitTrackedFiles()) {
     if (isUnsafeTrackedEnvPath(file)) {
-      findings.push({ file, name: 'Tracked env file' })
+      findings.push({ file, name: 'tracked env file ที่ไม่ควร commit' })
     }
   }
   return findings
@@ -94,14 +94,14 @@ export async function runSecretsCheck(
 ) {
   const findings = await collectSecretFindings()
   if (findings.length > 0) {
-    writeError('Potential committed secrets found:')
+    writeError('พบค่าที่อาจเป็น secret ในไฟล์ที่ commit:')
     for (const finding of findings) {
       writeError(`- ${finding.file}: ${finding.name}`)
     }
     return 1
   }
 
-  writeLine('No obvious committed secrets found.')
+  writeLine('ไม่พบ secret ที่ชัดเจนในไฟล์ที่ commit')
   return 0
 }
 

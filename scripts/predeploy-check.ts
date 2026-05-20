@@ -351,12 +351,12 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')
       requireIncludes(
         script,
-        ['checkReleaseHandoffContent', 'collectReleaseHandoffCheckResult', 'runReleaseHandoffCheck', '--filled', 'forbiddenPatterns', 'Release handoff check failed'],
+        ['checkReleaseHandoffContent', 'collectReleaseHandoffCheckResult', 'runReleaseHandoffCheck', '--filled', 'forbiddenPatterns', 'Release handoff check ไม่ผ่าน'],
         'scripts/release-handoff-check.ts',
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'secret-shaped values', 'contains GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'secret-shaped values', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(

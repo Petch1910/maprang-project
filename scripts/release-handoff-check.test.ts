@@ -78,7 +78,7 @@ describe('release handoff check', () => {
 
     expect(checkReleaseHandoffContent(template)).toEqual([])
     expect(checkReleaseHandoffContent(template, { requireFilled: true })).toEqual(
-      expect.arrayContaining(['line 4 is still blank: - Release date:', 'line 5 is still blank: - Git commit:']),
+      expect.arrayContaining(['บรรทัด 4 ยังว่างอยู่: - Release date:', 'บรรทัด 5 ยังว่างอยู่: - Git commit:']),
     )
   })
 
@@ -90,7 +90,7 @@ describe('release handoff check', () => {
       .replace('project-ref-only', `${fakeOpenRouterKey}\n- Debug token: ${fakeGithubToken}`)
 
     expect(checkReleaseHandoffContent(unsafe)).toEqual(
-      expect.arrayContaining(['missing section: Release Decision', 'contains OpenRouter key', 'contains GitHub token']),
+      expect.arrayContaining(['ยังไม่มี section: Release Decision', 'พบ OpenRouter key', 'พบ GitHub token']),
     )
   })
 
@@ -103,7 +103,7 @@ describe('release handoff check', () => {
     expect(result.ok).toBe(true)
     expect(result.requireFilled).toBe(false)
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('ok - release handoff is safe to commit')
+    expect(lines[0]).toBe('ok - release handoff ปลอดภัยต่อการ commit')
     expect(errors).toEqual([])
   })
 })

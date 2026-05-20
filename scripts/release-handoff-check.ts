@@ -33,11 +33,11 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
   const findings: string[] = []
 
   for (const section of requiredSections) {
-    if (!content.includes(section)) findings.push(`missing section: ${section}`)
+    if (!content.includes(section)) findings.push(`ยังไม่มี section: ${section}`)
   }
 
   for (const forbidden of forbiddenPatterns) {
-    if (forbidden.pattern.test(content)) findings.push(`contains ${forbidden.name}`)
+    if (forbidden.pattern.test(content)) findings.push(`พบ ${forbidden.name}`)
   }
 
   if (options.requireFilled) {
@@ -45,7 +45,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
       .split(/\r?\n/)
       .map((line, index) => ({ line: line.trim(), index: index + 1 }))
       .filter(({ line }) => line.startsWith('- ') && /:\s*$/.test(line))
-    for (const field of blankFields) findings.push(`line ${field.index} is still blank: ${field.line}`)
+    for (const field of blankFields) findings.push(`บรรทัด ${field.index} ยังว่างอยู่: ${field.line}`)
   }
 
   return findings
@@ -63,12 +63,12 @@ export async function runReleaseHandoffCheck(
 ) {
   const result = await collectReleaseHandoffCheckResult(argv.includes('--filled'))
   if (!result.ok) {
-    writeError('Release handoff check failed:')
+    writeError('Release handoff check ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ok - release handoff is ${result.requireFilled ? 'filled and ' : ''}safe to commit`)
+  writeLine(`ok - release handoff ${result.requireFilled ? 'กรอกครบและ' : ''}ปลอดภัยต่อการ commit`)
   return 0
 }
 
