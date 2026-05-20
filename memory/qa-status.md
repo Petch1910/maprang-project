@@ -362,3 +362,4 @@ Last updated: 2026-05-20
 - API smoke admin eval diagnostics Thai-first pass: เปลี่ยน error ของ `/admin/evals/local` จาก `local eval ไม่ผ่าน` และ `local eval scenarios` เป็น "ตรวจ eval ในเครื่องไม่ผ่าน" และ "สถานการณ์ eval ในเครื่อง" พร้อม regression guard.
 - README/Deployment QA handoff Thai-first pass: เกลา wording เรื่อง knowledge/eval/prompt inspector/local QA/staging checks ให้ไทยนำขึ้น โดยคงชื่อ command, env, route, และ provider terms ที่ต้อง search/debug ไว้.
 - Local smoke diagnostics Thai-first pass: เปลี่ยนข้อความอัปโหลดรูปตัวละคร, ระบบหลังบ้าน, ตัวละคร seed และตัวอย่างความสัมพันธ์ให้ไทยนำขึ้น พร้อม `smoke:local:test`.
+- E2E smoke runner diagnostics Thai-first pass: เกลา command labels และเปลี่ยน failure logging จาก raw Error object เป็นข้อความ "ตรวจเบราว์เซอร์ e2e ไม่ผ่าน" พร้อม regression test.

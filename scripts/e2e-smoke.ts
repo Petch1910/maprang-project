@@ -10,15 +10,15 @@ export type E2eSmokeLogger = Pick<typeof console, 'log' | 'error'>
 export function e2eSmokeSteps(): E2eSmokeStep[] {
   return [
     {
-      label: 'QA seed: reset ก่อนตรวจเบราว์เซอร์',
+      label: 'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
       command: ['bun', 'run', 'qa:seed'],
     },
     {
-      label: 'Playwright smoke: ตรวจ routes บนเดสก์ท็อปและมือถือ',
+      label: 'ตรวจเบราว์เซอร์ Playwright: ตรวจ routes บนเดสก์ท็อปและมือถือ',
       command: ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'],
     },
     {
-      label: 'QA seed: คืน demo data หลังตรวจเบราว์เซอร์',
+      label: 'คืนข้อมูล QA: คืน demo data หลังตรวจเบราว์เซอร์',
       command: ['bun', 'run', 'qa:seed'],
       alwaysRun: true,
     },
@@ -41,6 +41,10 @@ async function runStep(step: E2eSmokeStep, runner: E2eSmokeRunner, logger: E2eSm
   }
 }
 
+export function formatE2eSmokeError(error: unknown) {
+  return `ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`
+}
+
 export async function runE2eSmoke(
   runner: E2eSmokeRunner = spawnStep,
   logger: E2eSmokeLogger = console,
@@ -57,13 +61,13 @@ export async function runE2eSmoke(
     await runStep(browserSmoke, runner, logger)
   } catch (error) {
     exitCode = 1
-    logger.error(error)
+    logger.error(formatE2eSmokeError(error))
   } finally {
     try {
       await runStep(restore, runner, logger)
     } catch (error) {
       exitCode = 1
-      logger.error(error)
+      logger.error(formatE2eSmokeError(error))
     }
   }
 
