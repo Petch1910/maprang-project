@@ -1526,7 +1526,7 @@ export function streamChat(input: SendChatInput) {
         })
       } catch (error) {
         const providerFailure = classifyChatProviderError(error)
-        console.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error)
+        console.error('สตรีมแชทไม่สำเร็จ:', providerFailure)
         send({
           type: 'error',
           message: providerFailure.userMessage,

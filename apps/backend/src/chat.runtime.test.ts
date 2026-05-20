@@ -300,4 +300,11 @@ describe('chat provider retry guard', () => {
     expect(quotaFailure.code).toBe('quota_exhausted')
     expect(quotaFailure.retryable).toBe(false)
   })
+
+  test('does not log raw stream provider errors after classification', () => {
+    const source = readFileSync(new URL('./chat.service.ts', import.meta.url), 'utf8')
+
+    expect(source).toContain("console.error('สตรีมแชทไม่สำเร็จ:', providerFailure)")
+    expect(source).not.toContain("console.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error)")
+  })
 })

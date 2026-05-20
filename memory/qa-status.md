@@ -372,3 +372,4 @@ Last updated: 2026-05-20
 - Stream chat validation guard pass: เพิ่ม backend unit test ให้ `streamChat` คืน validation delta/done โดยไม่คิด token และไม่ใส่ providerFailure เมื่อ ID ผิดรูปแบบก่อนแตะ provider.
 - API smoke stream diagnostics Thai-first pass: เกลา `/chat` และ `/chat/stream` validation output จาก `stream validation path`/`SSE events` เป็นข้อความไทยนำ พร้อม `api:smoke:test`.
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด signed-storage handoff, release handoff guard, stream validation guard, และ stream smoke diagnostics ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, deploy/predeploy guards, backend tests 153 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
+- Stream provider logging hardening pass: stream catch log เฉพาะ `providerFailure` ที่ classify แล้ว ไม่ log raw provider error object พร้อม backend regression test.
