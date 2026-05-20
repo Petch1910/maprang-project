@@ -177,6 +177,7 @@ describe('Supabase storage setup helpers', () => {
 
     expect(exitCode).toBe(1)
     expect(lines).toEqual(['bucket: avatars'])
-    expect(errors.join('\n')).toContain('ก่อน production ต้องใช้ private bucket พร้อม signed URL')
+    expect(errors.join('\n')).toContain('ก่อนโปรดักชันต้องใช้ private bucket พร้อม signed URL')
+    expect(errors.join('\n')).not.toContain('ก่อน production ต้องใช้ private bucket พร้อม signed URL')
   })
 })

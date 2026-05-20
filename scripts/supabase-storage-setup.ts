@@ -244,7 +244,7 @@ export async function runSupabaseStorageSetup(
     if (!currentBucket.exists) throw new Error(`อ่าน Supabase bucket "${config.bucket}" หลังตั้งค่าไม่สำเร็จ`)
 
     if (currentBucket.public === true) {
-      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public; ก่อน production ต้องใช้ private bucket พร้อม signed URL`)
+      if (config.checkOnly) throw new Error(`Supabase bucket "${config.bucket}" ยังเป็น public; ก่อนโปรดักชันต้องใช้ private bucket พร้อม signed URL`)
       await operations.updateBucketPrivate(config)
       writeLine(`updatedBucketPrivate: ${config.bucket}`)
     }
