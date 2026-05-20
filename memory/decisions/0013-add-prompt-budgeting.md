@@ -1,24 +1,24 @@
-# 0013 - Add Prompt Budgeting
+# 0013 - เพิ่ม prompt budgeting
 
-Date: 2026-05-14
+วันที่: 2026-05-14
 
-## Context
+## บริบท
 
-Long roleplay sessions can silently grow prompt size through saved history, runtime memory, lore, persona, and scene state. Without a budget, costs and latency can rise before the team notices, and providers can fail once context exceeds model limits.
+roleplay sessions ที่ยาวขึ้นทำให้ prompt size โตแบบเงียบๆ จาก saved history, runtime memory, lore, persona, และ scene state ถ้าไม่มี budget ค่าใช้จ่ายและ latency จะเพิ่มก่อนทีมรู้ตัว และ provider อาจ fail เมื่อ context เกิน model limits
 
 ## Decision
 
-Add Prompt Budgeting v1 to chat assembly:
+เพิ่ม Prompt Budgeting v1 ใน chat assembly:
 
-- Keep configurable `PROMPT_BUDGET_TOKENS` and `PROMPT_HISTORY_MAX_MESSAGES`.
-- Estimate prompt size before provider calls.
-- Drop oldest chat history messages first until the assembled prompt fits the budget.
-- Return prompt budget metadata in chat usage and persist it in message/transaction metadata.
-- Expose the budget config through health and the chat right-rail model panel.
+- เก็บ `PROMPT_BUDGET_TOKENS` และ `PROMPT_HISTORY_MAX_MESSAGES` ให้ configurable.
+- Estimate prompt size ก่อน provider calls.
+- ตัด chat history messages ที่เก่าที่สุดก่อน จน assembled prompt อยู่ใน budget.
+- คืน prompt budget metadata ใน chat usage และ persist ลง message/transaction metadata.
+- แสดง budget config ผ่าน health และ chat right-rail model panel.
 
-## Consequences
+## ผลลัพธ์
 
-- No migration is required.
-- Recent conversation, system policy, character context, persona, world state, relationship state, and scene state stay prioritized.
-- If fixed context alone exceeds the budget, the metadata marks `overBudget` so Prompt Inspector and QA can guide further trimming.
-- Production can tune budget values per model without code changes.
+- ไม่ต้องมี migration.
+- Recent conversation, system policy, character context, persona, world state, relationship state, และ scene state ยังถูกจัด priority สูงกว่า.
+- ถ้า fixed context อย่างเดียวเกิน budget แล้ว metadata จะ mark `overBudget` เพื่อให้ Prompt Inspector และ QA ช่วยชี้ว่าควร trim อะไรต่อ.
+- Production ปรับ budget values ราย model ได้โดยไม่ต้องแก้โค้ด.

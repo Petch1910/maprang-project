@@ -1,26 +1,26 @@
-# 0014 - Add Chat Provider Failure Classification
+# 0014 - เพิ่ม chat provider failure classification
 
-Date: 2026-05-14
+วันที่: 2026-05-14
 
 ## Decision
 
-Chat provider failures should be classified into typed, user-safe states before they reach the UI.
+Chat provider failures ต้องถูก classify เป็น typed, user-safe states ก่อนถึง UI.
 
-## Context
+## บริบท
 
-Maprang now depends on live LLM providers for both normal chat and streamed chat. Failures from providers can be caused by rate limits, exhausted quota, bad credentials, timeouts, or temporary outages. Raw provider errors are too noisy for users, may expose implementation details, and should not result in token charges.
+Maprang พึ่ง live LLM providers สำหรับทั้ง normal chat และ streamed chat แล้ว provider failures อาจเกิดจาก rate limits, exhausted quota, bad credentials, timeouts, หรือ temporary outages. Raw provider errors รกเกินไปสำหรับผู้ใช้, อาจเปิด implementation details, และไม่ควรทำให้เกิด token charges.
 
-## Implementation Direction
+## ทิศทาง implementation
 
-- Classify chat provider errors as `rate_limited`, `quota_exhausted`, `invalid_credentials`, `timeout`, `provider_unavailable`, or `unknown`.
-- Return Thai user-facing messages that explain whether the user can retry or whether an admin needs to fix configuration.
-- Keep failed provider attempts at zero token usage and zero cost.
-- Send `providerFailure` metadata in normal and streamed chat responses so the UI and QA can observe the failure mode.
-- Let roleplay continuation failures degrade gracefully by keeping the primary provider reply instead of failing the whole turn.
-- Make live chat smoke fail on `usage.providerFailure` directly so staging diagnostics point to the actual provider failure class.
+- Classify chat provider errors เป็น `rate_limited`, `quota_exhausted`, `invalid_credentials`, `timeout`, `provider_unavailable`, หรือ `unknown`.
+- คืน Thai user-facing messages ที่บอกว่าผู้ใช้ retry เองได้หรือ admin ต้องแก้ configuration.
+- ให้ failed provider attempts มี zero token usage และ zero cost.
+- ส่ง `providerFailure` metadata ใน normal/streamed chat responses เพื่อให้ UI และ QA เห็น failure mode.
+- ให้ roleplay continuation failures degrade gracefully โดยเก็บ primary provider reply ไว้ แทนการ fail ทั้งเทิร์น.
+- ให้ live chat smoke fail บน `usage.providerFailure` โดยตรง เพื่อให้ staging diagnostics ชี้ไปที่ provider failure class จริง.
 
-## Consequences
+## ผลลัพธ์
 
-- Chat UX is less brittle when OpenRouter or the selected model has a temporary issue.
-- Local QA can verify provider failure handling without spending live model tokens.
-- Future model-router/fallback work can reuse the same typed failure contract.
+- Chat UX เปราะน้อยลงเมื่อ OpenRouter หรือโมเดลที่เลือกมีปัญหาชั่วคราว.
+- Local QA ตรวจ provider failure handling ได้โดยไม่ใช้ live model tokens.
+- งาน model-router/fallback ในอนาคต reuse typed failure contract ชุดเดียวกันได้.
