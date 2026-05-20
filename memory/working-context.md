@@ -64,6 +64,7 @@ Verified:
 - Deploy readiness next-step fixes now avoid mixed `backend host secrets`, `placeholder value`, and `backend production environment` wording while preserving exact env names.
 - Staging/production docs now describe live chat/image provider blockers with Thai-first billing, quota, providerFailure, and placeholder guidance while preserving exact commands and verification flags.
 - Production setup docs now use Thai-first admin-key, backend/frontend env, OpenRouter, roleplay budget, retry, and Supabase signed-storage setup guidance while preserving exact env names and commands.
+- Production setup docs now use Thai-first deployment-order, production check, staging verify, GitHub Production Smoke, smoke auth, production data safety, and readiness-note guidance while preserving exact env names, workflow inputs, and commands.
 - README, Deployment QA, Production Setup, and deploy blockers now use Thai-first live provider handoff wording for smoke wallet checks, `usage.providerFailure`, image billing/quota, and DB example-value rejection while preserving exact env names and commands.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
 - Deploy readiness health rows now use Thai-first ready/default/unknown labels such as `พร้อม`, `ยังไม่พร้อม`, `ไม่ทราบ`, and `ค่าเริ่มต้น` while preserving exact row keys for CLI/dashboard parsing.

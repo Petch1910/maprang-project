@@ -1172,7 +1172,7 @@ const checks: Check[] = [
       )
       requireIncludes(readme, ['local/non-https CORS', 'backend root identity'], 'README.md')
       requireIncludes(deploymentQa, ['local/non-https CORS', 'backend root identity'], 'DEPLOYMENT_QA.md')
-      requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS is local or non-https', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
+      requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS เป็น local หรือไม่ใช่ HTTPS', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
       forbidIncludes(
         await readRepoFile('ROUTE_MENU_AUDIT.md'),
         ['รัน eval', 'prompt-control', 'token budget', 'accordion', ' disabled '],

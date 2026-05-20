@@ -99,6 +99,7 @@ Last updated: 2026-05-20
 - Deploy readiness next-step fix wording now passes `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
 - Staging/production live provider documentation wording now passes `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`.
 - Production setup env/storage Thai-first wording now passes `predeploy:check:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
+- Production setup deploy-order/workflow Thai-first wording now passes `predeploy:check:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Live provider handoff docs now keep smoke wallet, providerFailure, image billing/quota, and DB example-value rejection guidance Thai-first while preserving exact env names and commands.
 - Deploy env doctor image-key wording now passes through `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Runtime env and deploy env doctor database placeholder wording now passes `bun test apps\backend\src\env.test.ts`, `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
