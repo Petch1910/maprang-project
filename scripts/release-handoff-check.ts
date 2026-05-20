@@ -23,6 +23,8 @@ const forbiddenPatterns = [
   { name: 'raw access token', pattern: /\b(access|refresh|service)[_-]?token\s*:\s*\S{16,}/i },
 ]
 
+const forbiddenCopySnippets = ['ผู้ให้บริการ avatar storage', 'รูปแบบการเข้าถึง avatar storage']
+
 export type ReleaseHandoffCheckResult = {
   ok: boolean
   requireFilled: boolean
@@ -38,6 +40,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
 
   for (const forbidden of forbiddenPatterns) {
     if (forbidden.pattern.test(content)) findings.push(`พบ ${forbidden.name}`)
+  }
+
+  for (const snippet of forbiddenCopySnippets) {
+    if (content.includes(snippet)) findings.push(`พบข้อความส่งมอบที่ยังใช้คำเก่า: ${snippet}`)
   }
 
   if (options.requireFilled) {

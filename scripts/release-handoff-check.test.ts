@@ -94,6 +94,19 @@ describe('release handoff check', () => {
     )
   })
 
+  test('reports stale avatar-storage handoff labels', () => {
+    const stale = filledHandoff
+      .replace('ผู้ให้บริการพื้นที่เก็บรูปตัวละคร', 'ผู้ให้บริการ avatar storage')
+      .replace('รูปแบบการเข้าถึงรูปตัวละคร', 'รูปแบบการเข้าถึง avatar storage')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'พบข้อความส่งมอบที่ยังใช้คำเก่า: ผู้ให้บริการ avatar storage',
+        'พบข้อความส่งมอบที่ยังใช้คำเก่า: รูปแบบการเข้าถึง avatar storage',
+      ]),
+    )
+  })
+
   test('runs the committed handoff template through an importable runner', async () => {
     const result = await collectReleaseHandoffCheckResult()
     const lines: string[] = []

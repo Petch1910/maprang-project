@@ -503,13 +503,14 @@ const checks: Check[] = [
           'runReleaseHandoffCheck',
           '--filled',
           'forbiddenPatterns',
+          'forbiddenCopySnippets',
           'ตรวจเอกสารส่งมอบ release ไม่ผ่าน',
         ],
         'scripts/release-handoff-check.ts',
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'secret-shaped values', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(
