@@ -50,7 +50,7 @@ Results:
 - Memory audit: pass.
 - Knowledge audit: pass.
 - Memory/knowledge audit diagnostic localization: pass via `vault:audit:test`, `memory:audit`, and `knowledge:audit`.
-- Production deploy knowledge wiki: updated to reflect reply-budget gates and staging/deploy-status order.
+- Production deploy knowledge wiki: updated to reflect reply-budget gates, staging/deploy-status order, and Thai-first gate wording for backend/frontend URLs, CORS, storage, and live provider smoke.
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.
 - Deploy status: pass, reports 2 staging blockers and 4 production blockers in local mode.

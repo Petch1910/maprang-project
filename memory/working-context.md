@@ -200,6 +200,7 @@ Verified:
 - API smoke result rows now format statuses as Thai labels (`ผ่าน`, `เตือน`, `ไม่ผ่าน`, `ข้าม`) instead of `PASS/WARN/FAIL/SKIP`, with `api:smoke:test` guarding the mapping.
 - Production checklist memory now includes deploy doctor/status review, live API smoke, and production-data safety guidance, and predeploy guards those handoff notes from drifting.
 - Production deploy knowledge wiki now documents reply-budget baselines/recommendations and the deploy-status-first staging gate order.
+- Production deploy knowledge wiki now uses Thai-first deploy gate wording for real backend/frontend URLs, production CORS, signed avatar storage, live chat/image provider smoke, and staging verification while preserving exact command/env names.
 
 ## Current Production Status
 
