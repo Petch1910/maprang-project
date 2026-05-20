@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-20
 
-## Repo-owned QA update 2026-05-20
+## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-20
 
 - Golden roleplay eval fixture Thai-first pass: `bun run eval:local`, `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังแปล `evals/golden-roleplay.json`.
 - Local eval formatting regression fixture now uses Thai-first failure text, verified with `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
@@ -11,8 +11,9 @@ Last updated: 2026-05-20
 - Agent handoff headings in `AGENTS.md` and `agent.md` are Thai-first, with `predeploy:check:test`, `predeploy:check`, and an English-only heading scan passing.
 - Production/deploy docs headings are Thai-first across deployment QA, production setup, release handoff, security checklist, production memory, and knowledge wiki; verified with release handoff tests/checks, predeploy tests/checks, memory audit, and knowledge audit.
 - Backend/frontend app README titles and env headings are Thai-first, verified with an English-only heading scan plus `memory:audit` and `predeploy:check`.
+- Memory vault and decision-record headings are Thai-first; `memory:audit` and `predeploy:check` pass, with only technical acronyms such as `API`/`URL` intentionally left as headings.
 
-## Gate local ล่าสุด
+## เกต local ล่าสุด (Gate local)
 
 สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
@@ -283,7 +284,7 @@ Last updated: 2026-05-20
 - Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.
 - Relationship preset API smoke now verifies 24 full presets, 19 player contract presets, and 24 Creator Studio presets.
 
-## Gate production
+## เกต production (Gate production)
 
 สถานะ: ตั้งใจให้ยัง fail จนกว่า environment จริงจะพร้อม
 
@@ -297,7 +298,7 @@ Last updated: 2026-05-20
 - Local backend URL.
 - Local, missing, or non-https staging CORS.
 
-## QA ผ่าน browser
+## การทดสอบผ่าน browser (Browser QA)
 
 สถานะ: ผ่านสำหรับ Admin Health, Admin Evals, และ Chat UI interaction
 

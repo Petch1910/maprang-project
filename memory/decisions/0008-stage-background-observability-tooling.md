@@ -10,7 +10,7 @@ Accepted
 
 เครื่องมือภายนอกหลายตัวช่วยให้ Maprang ดีขึ้นได้ แต่การใส่ทุกอย่างเข้า runtime ทันทีจะเพิ่ม deploy risk ก่อนที่ core platform จะ production-ready โปรเจกต์จึงต้องมี staged adoption path ที่เพิ่มคุณภาพตอนนี้ และเตรียมระบบหนักไว้ใช้เมื่อถึงจังหวะเหมาะ
 
-## Decision
+## การตัดสินใจ (Decision)
 
 รับ low-risk quality tooling ตอนนี้ และ stage runtime systems ที่หนักกว่าไว้ก่อน:
 

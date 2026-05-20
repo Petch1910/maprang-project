@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-20
 
-## Repo-owned update 2026-05-20
+## อัปเดตงานใน repo (Repo-owned update) 2026-05-20
 
 - `evals/golden-roleplay.json` ใช้คำอธิบาย สถานการณ์ lore และ runtime memory แบบ Thai-first แล้ว เพื่อให้ชุด deterministic prompt eval สอดคล้องกับ runtime prompt ที่แปลเป็นไทยก่อนหน้านี้.
 - สถานการณ์ prompt injection ยังตั้งใจคง `userMessage` ภาษาอังกฤษไว้ เพื่อทดสอบการโจมตีข้ามภาษาและยืนยันว่า prompt-control policy อยู่เหนือข้อความผู้ใช้ที่ไม่น่าเชื่อถือ.

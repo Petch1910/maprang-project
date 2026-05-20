@@ -10,7 +10,7 @@ Accepted
 
 คุณภาพ roleplay ของ Maprang ขึ้นกับ prompt assembly, lore retrieval, persona injection, runtime memory, และ relationship state เมื่อ bot reply สั้นเกินไปหรือหลุด character การเดาว่าเป็นปัญหาจาก model provider อย่างเดียวทั้งช้าและเปลือง
 
-## Decision
+## การตัดสินใจ (Decision)
 
 เพิ่ม prompt inspector endpoint และ UI สำหรับ admin เท่านั้น:
 

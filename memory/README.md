@@ -35,7 +35,7 @@
 ใช้รูปแบบนี้สำหรับโน้ตใหม่:
 
 ```md
-## YYYY-MM-DD - Short Title
+## วันที่ YYYY-MM-DD - ชื่อสั้น (Short Title)
 
 Status: decided | done | blocked | needs verification
 

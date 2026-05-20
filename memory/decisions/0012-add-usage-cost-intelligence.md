@@ -6,7 +6,7 @@
 
 Maprang ต้องมองเห็น token economy ก่อน staging และ production รายการ wallet transactions แบบดิบอย่างเดียวไม่พอสำหรับการตัดสินใจ production เพราะไม่บอกว่าโมเดลไหนแพงที่สุด, usage เคลื่อนตามเวลาอย่างไร, หรือ token balance ปัจจุบันน่าจะรองรับ chat turns ได้อีกกี่รอบ
 
-## Decision
+## การตัดสินใจ (Decision)
 
 ขยาย `/me/usage` endpoint เดิม แทนการเพิ่ม table หรือ route ใหม่ โดย derive cost intelligence จาก `Usage` และ `TokenTransaction` ledgers เดิม:
 

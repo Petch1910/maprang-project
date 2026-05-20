@@ -8,7 +8,7 @@
 
 โปรเจกต์ต้องมี product rules ที่ persist ได้ เป็นโครงสร้างมากกว่า session memory และ backend prompts/rule engines นำไปใช้ได้ตรงกว่า
 
-## Decision
+## การตัดสินใจ (Decision)
 
 ใช้สถาปัตยกรรมแบบผสม:
 

@@ -4,7 +4,7 @@
 
 สถานะ: done
 
-## Decision
+## การตัดสินใจ (Decision)
 
 เพิ่ม `memory:audit` และรันอยู่ใน `qa:local`.
 

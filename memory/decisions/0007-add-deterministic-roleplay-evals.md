@@ -10,7 +10,7 @@ Accepted
 
 คุณภาพแชทของ Maprang ขึ้นกับ context ที่ assemble แล้ว ไม่ได้ขึ้นกับโมเดลที่เลือกอย่างเดียว ตอนนี้โปรเจกต์มี runtime knowledge packs, lore injection, กฎคุมพรอมป์, relationship state, และ scene state การเปลี่ยน prompt เล็กน้อยอาจทำให้ roleplay depth ลดลง, hidden instructions หลุด, หรือ relationship continuity หายไปแบบเงียบๆ
 
-## Decision
+## การตัดสินใจ (Decision)
 
 เพิ่ม deterministic local eval suite ไว้ใต้ `evals/` และรันผ่าน `bun run eval:local`. ชุดนี้ตรวจ prompt assembly โดยไม่เรียก live model:
 

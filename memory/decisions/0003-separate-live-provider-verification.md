@@ -4,7 +4,7 @@
 
 สถานะ: done
 
-## Decision
+## การตัดสินใจ (Decision)
 
 ติดตาม live readiness ของ chat provider แยกจาก live readiness ของ image provider.
 

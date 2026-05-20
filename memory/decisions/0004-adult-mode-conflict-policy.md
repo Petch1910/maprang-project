@@ -4,7 +4,7 @@
 
 สถานะ: decided
 
-## Decision
+## การตัดสินใจ (Decision)
 
 ใน adult mode ความขัดแย้งของ relationship/tag สามารถเป็น creator warnings แทน hard publish blocks ได้ ตราบใดที่เนื้อหาถูกวางกรอบว่าเป็น fictional simulation และ user-facing safety model ยังชัดเจน
 

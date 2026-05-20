@@ -4,7 +4,7 @@
 
 สถานะ: done
 
-## Decision
+## การตัดสินใจ (Decision)
 
 ใช้ SocratiCode เป็นเครื่องมือ MCP สำหรับพัฒนาในเครื่อง ไม่ใช่ runtime dependency ของ Maprang
 

@@ -4,7 +4,7 @@
 
 สถานะ: done
 
-## Decision
+## การตัดสินใจ (Decision)
 
 เพิ่ม project memory vault แบบเบาไว้ใต้ `memory/`.
 

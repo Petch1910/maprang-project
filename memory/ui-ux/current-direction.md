@@ -28,11 +28,11 @@ Maprang ควรรู้สึกคุ้นมือสำหรับผู
 - Prompt Inspector: เครื่องมือเฉพาะผู้ดูแลสำหรับดูภาพรวม/ส่วนต่างของพรอมป์ที่ปิดข้อมูลลับแล้ว เพื่อ debug ความลึกของคำตอบ, การดึงคลังความรู้, และบริบทที่เลื่อนเพี้ยน.
 - Automated Evals: ชุดทดสอบคุณภาพแบบผลซ้ำได้สำหรับผู้ดูแล เพื่อจับ regression ของพรอมป์/บริบทก่อน staging.
 
-## UX concern ปัจจุบัน
+## ข้อกังวล UX ปัจจุบัน (UX concern)
 
 ผู้ใช้ย้ำหลายครั้งว่า UI ต้องรู้สึกสมบูรณ์และเป็นธรรมชาติ เมนูที่มองเห็นทุกจุดต้องกดได้จริง, มี guard ชัดเจน, หรือยังไม่ควรแสดง
 
-## Frontend pass ล่าสุด
+## รอบปรับหน้าบ้านล่าสุด (Frontend pass)
 
 - Explore รองรับ mobile primary navigation ด้วย bottom nav สำหรับ Explore, Chats, Create, Events, และ Profile.
 - Chat read mode ไม่ใช่ของตกแต่งแล้ว: top bar และ right-rail control toggle reading layout ได้จริง, แสดง reading-state notice, และทำให้ message area แคบลงเพื่ออ่านฉากยาว.

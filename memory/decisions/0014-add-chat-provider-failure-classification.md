@@ -2,7 +2,7 @@
 
 วันที่: 2026-05-14
 
-## Decision
+## การตัดสินใจ (Decision)
 
 Chat provider failures ต้องถูก classify เป็น typed, user-safe states ก่อนถึง UI.
 

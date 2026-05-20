@@ -6,7 +6,7 @@
 
 roleplay sessions ที่ยาวขึ้นทำให้ prompt size โตแบบเงียบๆ จาก saved history, runtime memory, lore, persona, และ scene state ถ้าไม่มี budget ค่าใช้จ่ายและ latency จะเพิ่มก่อนทีมรู้ตัว และ provider อาจ fail เมื่อ context เกิน model limits
 
-## Decision
+## การตัดสินใจ (Decision)
 
 เพิ่ม Prompt Budgeting v1 ใน chat assembly:
 

@@ -10,7 +10,7 @@ Accepted
 
 แชท roleplay ยาวๆ ต้องการมากกว่า raw message history, lore, relationship state, และ scene state เพราะโมเดลอาจ drift เรื่องเวลาปัจจุบัน, สถานที่, อากาศ, หรืออารมณ์ของฉากหลังผ่านไปหลายเทิร์น โดยเฉพาะเมื่อผู้ใช้กลับมาเล่น saved chat หรือเข้า/ออก Scene Mode
 
-## Decision
+## การตัดสินใจ (Decision)
 
 - เก็บ `worldState` ไว้ใน `Chat.memory` JSON เดิม แทนการเพิ่ม table ใหม่สำหรับ v1.
 - เปิด owner-scoped `GET /chats/:id/world-state` และ `PATCH /chats/:id/world-state`.
