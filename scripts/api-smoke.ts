@@ -209,7 +209,7 @@ await check('GET /me/content-settings', async () => {
   const payload = await readJson<{ contentSettings?: { maxRating?: string } }>('/me/content-settings', {
     headers: authHeaders,
   })
-  if (!payload.contentSettings?.maxRating) throw new Error('ยังไม่มี content settings')
+  if (!payload.contentSettings?.maxRating) throw new Error('ยังไม่มีค่าจัดระดับเนื้อหา')
   return payload.contentSettings.maxRating
 })
 
@@ -217,7 +217,7 @@ await check('GET/PATCH /me/persona', async () => {
   const current = await readJson<{ persona?: { persona?: string; updatedAt?: string | null; maxChars?: number } }>('/me/persona', {
     headers: authHeaders,
   })
-  if (typeof current.persona?.persona !== 'string') throw new Error('ยังไม่มี persona payload')
+  if (typeof current.persona?.persona !== 'string') throw new Error('ยังไม่มีข้อมูลตัวตนผู้เล่น')
 
   const marker = `API smoke persona ${Date.now()}`
   const saved = await readJson<{ persona?: { persona?: string; updatedAt?: string | null; maxChars?: number } }>('/me/persona', {
@@ -261,7 +261,7 @@ await check('POST /relationship/preview', async () => {
       messages: ['hello', 'thank you for telling me'],
     }),
   })
-  if (!payload.preview?.turns?.length) throw new Error('relationship preview ไม่คืน turn')
+  if (!payload.preview?.turns?.length) throw new Error('ตัวอย่างความสัมพันธ์ไม่คืน turn')
   return `${payload.preview.turns.length} turns`
 })
 
@@ -273,8 +273,8 @@ await check('POST /relationship/validate', async () => {
       tags: ['thai', 'roleplay', 'slow-burn', 'relationship-ready', 'scene-ready'],
     }),
   })
-  if (!payload.seed?.route) throw new Error('ยังไม่มี relationship seed route')
-  if (!Array.isArray(payload.issues)) throw new Error('ยังไม่มีรายการ relationship validation issues')
+  if (!payload.seed?.route) throw new Error('ยังไม่มีเส้นทาง relationship seed')
+  if (!Array.isArray(payload.issues)) throw new Error('ยังไม่มีรายการผลตรวจ relationship validation')
   return `route=${payload.seed.route}, issues=${payload.issues.length}`
 })
 
@@ -695,7 +695,7 @@ await check('PATCH /me/content-settings', async () => {
   const current = await readJson<{ contentSettings?: { isAdult?: boolean; maxRating?: string } }>('/me/content-settings', {
     headers: authHeaders,
   })
-  if (!current.contentSettings?.maxRating) throw new Error('ยังไม่มี content settings ปัจจุบัน')
+  if (!current.contentSettings?.maxRating) throw new Error('ยังไม่มีค่าจัดระดับเนื้อหาปัจจุบัน')
 
   const payload = await readJson<{ contentSettings?: { isAdult?: boolean; maxRating?: string } }>('/me/content-settings', {
     method: 'PATCH',
@@ -753,7 +753,7 @@ if (adminHeaders) {
     const payload = await readJson<{ totals?: { users?: number; characters?: number } }>('/admin/summary', {
       headers: adminHeaders,
     })
-    if (typeof payload.totals?.users !== 'number') throw new Error('ยังไม่มี admin totals')
+    if (typeof payload.totals?.users !== 'number') throw new Error('ยังไม่มียอดรวมฝั่งผู้ดูแล')
     return `users=${payload.totals.users}, characters=${payload.totals.characters ?? 0}`
   })
 
@@ -786,15 +786,15 @@ if (adminHeaders) {
         runtimeNote: 'Smoke runtime note: verify context inspector without calling the live model.',
       }),
     })
-    if (!payload.snapshot?.redacted) throw new Error('prompt inspector ไม่คืน redacted snapshot')
+    if (!payload.snapshot?.redacted) throw new Error('ตัวตรวจพรอมป์ไม่คืน snapshot ที่ปิดข้อมูลลับ')
     if (!payload.snapshot.prompt?.includes('กฎคุมพรอมป์ของแพลตฟอร์ม')) throw new Error('ยังไม่มีกฎคุมพรอมป์ของแพลตฟอร์ม')
     if (!payload.snapshot.sections?.some((section) => section.title === 'ความจำขณะรัน')) {
       throw new Error('ยังไม่มีส่วนความจำขณะรัน')
     }
     if (!payload.snapshot.totals?.estimatedTokens || !payload.snapshot.totals.sectionCount) {
-      throw new Error('ยังไม่มี prompt totals')
+      throw new Error('ยังไม่มียอดรวมพรอมป์')
     }
-    if (!payload.diff || !Array.isArray(payload.diff.changedSections)) throw new Error('ยังไม่มี prompt diff')
+    if (!payload.diff || !Array.isArray(payload.diff.changedSections)) throw new Error('ยังไม่มีผลเทียบพรอมป์')
     return `sections=${payload.snapshot.totals.sectionCount}, estimatedTokens=${payload.snapshot.totals.estimatedTokens}`
   })
 
@@ -818,7 +818,7 @@ if (adminHeaders) {
 
   await check('GET /admin/reports', async () => {
     const payload = await readJson<{ reports?: unknown[] }>('/admin/reports?limit=5', { headers: adminHeaders })
-    if (!payload.reports) throw new Error('ยังไม่มี reports array')
+    if (!payload.reports) throw new Error('ยังไม่มีรายการรายงาน')
     return `รายงาน ${payload.reports.length} รายการ`
   })
 
@@ -842,7 +842,7 @@ if (adminHeaders) {
 
   await check('GET /admin/audit-logs', async () => {
     const payload = await readJson<{ logs?: unknown[] }>('/admin/audit-logs?limit=5', { headers: adminHeaders })
-    if (!payload.logs) throw new Error('ยังไม่มี audit logs array')
+    if (!payload.logs) throw new Error('ยังไม่มีรายการ audit log')
     return `บันทึก audit ${payload.logs.length} รายการ`
   })
 } else {
