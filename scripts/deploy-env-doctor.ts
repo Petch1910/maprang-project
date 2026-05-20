@@ -153,9 +153,9 @@ function auditBackendEnv(env: EnvMap) {
 
   const imageKey = env.get('IMAGE_GENERATION_API_KEY') ?? env.get('OPENAI_API_KEY')
   if (!hasRealValue(imageKey)) {
-    fail('backend', 'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY', 'ต้องมี image provider key ถ้าจะเปิด AI สร้างรูปจริง')
+    fail('backend', 'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY', 'ต้องมีคีย์ผู้ให้บริการสร้างรูป ถ้าจะเปิด AI สร้างรูปจริง')
   } else {
-    pass('backend', 'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY', 'ตั้งค่า image provider key แล้ว')
+    pass('backend', 'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY', 'ตั้งค่าคีย์ผู้ให้บริการสร้างรูปแล้ว')
     auditImageKey(imageKey)
   }
 
@@ -359,10 +359,10 @@ function auditOpenRouterKey(value: string | undefined) {
 function auditImageKey(value: string | undefined) {
   if (!hasRealValue(value)) return
   const key = value!.trim()
-  if (key.startsWith('sk-or-')) fail('backend', 'IMAGE_GENERATION_API_KEY', 'ค่านี้ดูเป็น OpenRouter key ไม่ใช่ image provider/OpenAI key')
-  else if (key.startsWith('sk-') && key.length >= 20) pass('backend', 'IMAGE_GENERATION_API_KEY', 'รูปแบบ image provider key ดูถูกต้อง')
-  else if (key.startsWith('sk-')) fail('backend', 'IMAGE_GENERATION_API_KEY', 'image provider key ดูสั้นผิดปกติ ตรวจว่าคัดลอกมาครบ')
-  else warn('backend', 'IMAGE_GENERATION_API_KEY', 'รูปแบบ key ไม่คุ้นตา ตรวจ provider/model access อีกครั้ง')
+  if (key.startsWith('sk-or-')) fail('backend', 'IMAGE_GENERATION_API_KEY', 'ค่านี้ดูเป็น OpenRouter key ไม่ใช่คีย์สร้างรูปหรือ OpenAI key')
+  else if (key.startsWith('sk-') && key.length >= 20) pass('backend', 'IMAGE_GENERATION_API_KEY', 'รูปแบบคีย์ผู้ให้บริการสร้างรูปดูถูกต้อง')
+  else if (key.startsWith('sk-')) fail('backend', 'IMAGE_GENERATION_API_KEY', 'คีย์ผู้ให้บริการสร้างรูปดูสั้นผิดปกติ ตรวจว่าคัดลอกมาครบ')
+  else warn('backend', 'IMAGE_GENERATION_API_KEY', 'รูปแบบคีย์ไม่คุ้นตา ตรวจสิทธิ์ผู้ให้บริการ/โมเดลอีกครั้ง')
 }
 
 function auditAdminKey(value: string | undefined) {

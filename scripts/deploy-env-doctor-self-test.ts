@@ -157,7 +157,7 @@ try {
   if (shortKey.exitCode === 0) {
     throw new Error('short key env should fail deploy doctor')
   }
-  const expectedShortKeyMessages = ['OpenRouter key ดูสั้นผิดปกติ', 'image provider key ดูสั้นผิดปกติ']
+  const expectedShortKeyMessages = ['OpenRouter key ดูสั้นผิดปกติ', 'คีย์ผู้ให้บริการสร้างรูปดูสั้นผิดปกติ']
   for (const message of expectedShortKeyMessages) {
     if (!shortKey.output.includes(message)) {
       throw new Error(`short key output is missing expected message: ${message}\n${shortKey.output}`)

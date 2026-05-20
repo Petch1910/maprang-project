@@ -52,6 +52,7 @@ Verified:
 - Backend relationship tag validation messages now return Thai-first creator warnings for adult-mode conflicts, no-romance/romance conflicts, progression-speed conflicts, safety-tone conflicts, and too-many-engine-tag guidance.
 - Backend character quality review notes now return Thai-first creator guidance for missing name/tagline/description/biography/scenario/system prompt/compact prompt/greeting/tags.
 - Backend runtime env validation, health readiness failures, security posture details, deploy readiness blockers, deploy status output, and smoke doctor blocker output now use Thai-first copy while preserving exact env names, commands, and provider names.
+- Deploy env doctor image-key diagnostics now use Thai-first wording for missing, valid, short, misrouted OpenRouter, and unknown provider key shapes while preserving exact env names.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
 - Smoke doctor now warns about missing image-generation configuration with Thai-first Creator Studio placeholder guidance.
 - Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.
