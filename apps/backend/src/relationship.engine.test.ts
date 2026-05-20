@@ -3,6 +3,7 @@ import {
   RELATIONSHIP_PRESETS,
   applyRelationshipDelta,
   analyzeRelationshipTags,
+  buildRelationshipPrompt,
   buildRelationshipSeedFromTags,
   listRelationshipPresets,
   simulateRelationshipPreview,
@@ -88,6 +89,18 @@ describe('relationship tag validation', () => {
 })
 
 describe('relationship seed', () => {
+  test('builds Thai-first hidden relationship prompt guidance', () => {
+    const state = buildRelationshipSeedFromTags(['lover', 'golden', 'slow-burn'])
+    const prompt = buildRelationshipPrompt(state)
+
+    expect(prompt).toContain('สถานะ Relationship Engine')
+    expect(prompt).toContain('ตัวปรับพรอมป์')
+    expect(prompt).toContain('ใช้เป็นทิศทางพฤติกรรมแบบซ่อนอยู่')
+    expect(prompt).not.toContain('Relationship engine state')
+    expect(prompt).not.toContain('Status is')
+    expect(prompt).not.toContain('Behavior:')
+  })
+
   test('normalizes the expanded Thai relationship ladder', () => {
     const profile = analyzeRelationshipTags([
       'ศัตรู',

@@ -695,22 +695,22 @@ function promptProfileForState(state: {
   normalized: RelationshipStats
 }) {
   const lines = [
-    `Status is ${state.status}; tier is ${state.tier}; tone should read as ${state.tone}.`,
-    state.tone === 'warm' ? 'Behavior: softer wording, more willingness to share, gentle curiosity.' : '',
-    state.tone === 'guarded' ? 'Behavior: cautious, short trust tests, avoids immediate vulnerability.' : '',
-    state.tone === 'hostile' ? 'Behavior: tense, defensive, may challenge the user without breaking character.' : '',
-    state.tone === 'fearful' ? 'Behavior: careful compliance, visible unease, does not become instantly affectionate.' : '',
-    state.flags.includes('high_difficulty') ? 'Progression: affection and trust should rise slowly; make earned moments feel meaningful.' : '',
-    state.flags.includes('unfinished_business') ? 'Narrative: unresolved history may surface through subtext, hesitation, or pointed questions.' : '',
-    state.flags.includes('banter_tension') ? 'Narrative: use teasing friction and push-pull banter without turning every line into hostility.' : '',
-    state.flags.includes('friendship_tension') ? 'Narrative: preserve the comfort of friendship while hinting at feelings that are not fully spoken yet.' : '',
-    state.flags.includes('tentative_romance') ? 'Progression: keep the bond exploratory; avoid acting like commitment is already settled.' : '',
-    state.flags.includes('almost_relationship') ? 'Progression: show expectation and chemistry, but leave room for uncertainty and negotiation.' : '',
-    state.flags.includes('toxic_bond') ? 'Safety: portray toxicity as tension and conflict, not as healthy romance; let trust repair require explicit behavior.' : '',
-    state.flags.includes('stable_commitment') ? 'Narrative: reference shared history, routine care, and long-term stakes.' : '',
-    state.flags.includes('soulmate') ? 'Narrative: the bond can feel fated or deeply aligned, but still respond to the user turn naturally.' : '',
-    state.constraints.includes('no_romance') ? 'Constraint: block romance/intimacy escalation and redirect to safe relationship dynamics.' : '',
-    state.events.length > 0 ? `Active hooks: ${state.events.map((event) => event.code).join(', ')}.` : '',
+    `สถานะคือ ${state.status}; tier คือ ${state.tier}; โทนควรอ่านเป็น ${state.tone}.`,
+    state.tone === 'warm' ? 'พฤติกรรม: ใช้ถ้อยคำนุ่มขึ้น พร้อมแบ่งปันมากขึ้น และมีความอยากรู้อย่างอ่อนโยน' : '',
+    state.tone === 'guarded' ? 'พฤติกรรม: ระวังตัว ทดสอบความไว้ใจสั้น ๆ และเลี่ยงการเปราะบางทันที' : '',
+    state.tone === 'hostile' ? 'พฤติกรรม: ตึง ป้องกันตัว อาจท้าทายผู้ใช้โดยไม่หลุดคาแรกเตอร์' : '',
+    state.tone === 'fearful' ? 'พฤติกรรม: ยอมตามอย่างระวัง มีความไม่สบายใจให้เห็น และไม่กลายเป็นอบอุ่นทันที' : '',
+    state.flags.includes('high_difficulty') ? 'จังหวะพัฒนา: ความรักและความไว้ใจควรเพิ่มช้า ทำให้ช่วงที่ได้มารู้สึกมีความหมาย' : '',
+    state.flags.includes('unfinished_business') ? 'การเล่าเรื่อง: ประวัติที่ยังค้างคาอาจโผล่ผ่าน subtext ความลังเล หรือคำถามที่มีน้ำหนัก' : '',
+    state.flags.includes('banter_tension') ? 'การเล่าเรื่อง: ใช้แรงเสียดทานเชิงหยอกและ push-pull banter โดยไม่ทำให้ทุกบรรทัดกลายเป็นศัตรู' : '',
+    state.flags.includes('friendship_tension') ? 'การเล่าเรื่อง: รักษาความสบายใจของความเป็นเพื่อน พร้อมบอกใบ้ความรู้สึกที่ยังไม่พูดเต็มปาก' : '',
+    state.flags.includes('tentative_romance') ? 'จังหวะพัฒนา: ให้ความสัมพันธ์ยังเป็นการลองสำรวจ หลีกเลี่ยงการทำเหมือนตกลงผูกมัดแล้ว' : '',
+    state.flags.includes('almost_relationship') ? 'จังหวะพัฒนา: แสดงความคาดหวังและ chemistry แต่เหลือพื้นที่ให้ความไม่แน่ใจและการตกลงกัน' : '',
+    state.flags.includes('toxic_bond') ? 'ความปลอดภัย: ถ่ายทอด toxicity เป็นแรงตึงและความขัดแย้ง ไม่ใช่โรแมนซ์สุขภาพดี และให้การซ่อม trust ต้องอาศัยพฤติกรรมชัดเจน' : '',
+    state.flags.includes('stable_commitment') ? 'การเล่าเรื่อง: อ้างอิงประวัติร่วม การดูแลที่เป็นกิจวัตร และเดิมพันระยะยาว' : '',
+    state.flags.includes('soulmate') ? 'การเล่าเรื่อง: ความผูกพันอาจรู้สึกเหมือนถูกกำหนดหรือเข้ากันลึก แต่ยังต้องตอบสนองต่อเทิร์นผู้ใช้อย่างเป็นธรรมชาติ' : '',
+    state.constraints.includes('no_romance') ? 'ข้อจำกัด: บล็อกการยกระดับสู่โรแมนซ์/ความใกล้ชิด และเบนไปสู่ dynamic ความสัมพันธ์ที่ปลอดภัย' : '',
+    state.events.length > 0 ? `hook ที่พร้อมทำงาน: ${state.events.map((event) => event.code).join(', ')}.` : '',
   ].filter(Boolean)
 
   return lines.join(' ')
@@ -1025,23 +1025,23 @@ export function applyRelationshipDelta(
 export function buildRelationshipPrompt(state: RelationshipState) {
   const stats = state.normalized
   const tagProfile = [
-    state.tagProfile.engine.length > 0 ? `engine tags=${state.tagProfile.engine.join(', ')}` : '',
-    state.tagProfile.safety.length > 0 ? `safety tags=${state.tagProfile.safety.join(', ')}` : '',
-    state.tagProfile.discovery.length > 0 ? `discovery tags=${state.tagProfile.discovery.join(', ')}` : '',
+    state.tagProfile.engine.length > 0 ? `แท็ก engine=${state.tagProfile.engine.join(', ')}` : '',
+    state.tagProfile.safety.length > 0 ? `แท็ก safety=${state.tagProfile.safety.join(', ')}` : '',
+    state.tagProfile.discovery.length > 0 ? `แท็ก discovery=${state.tagProfile.discovery.join(', ')}` : '',
   ]
     .filter(Boolean)
     .join('; ')
 
   return [
-    'Relationship engine state:',
-    `- route=${state.route}, arc=${state.arcStage}, status=${state.status}, tier=${state.tier}, tone=${state.tone}`,
-    `- normalized stats: affinity=${stats.affinity}, trust=${stats.trust}, intimacy=${stats.intimacy}, dominance=${stats.dominance}, fear=${stats.fear}, respect=${stats.respect}`,
-    tagProfile ? `- tag profile: ${tagProfile}` : '',
-    state.flags.length > 0 ? `- behavior flags: ${state.flags.join(', ')}` : '',
-    state.constraints.length > 0 ? `- constraints: ${state.constraints.join(', ')}` : '',
-    state.events.length > 0 ? `- active relationship hooks: ${state.events.map((event) => event.code).join(', ')}` : '',
-    `- prompt adapter: ${state.promptProfile}`,
-    '- Use this as hidden behavioral direction. Do not expose raw numbers or engine labels unless the user asks for debug details.',
+    'สถานะ Relationship Engine:',
+    `- เส้นทาง=${state.route}, arc=${state.arcStage}, status=${state.status}, tier=${state.tier}, tone=${state.tone}`,
+    `- ค่าสรุป normalized: affinity=${stats.affinity}, trust=${stats.trust}, intimacy=${stats.intimacy}, dominance=${stats.dominance}, fear=${stats.fear}, respect=${stats.respect}`,
+    tagProfile ? `- โปรไฟล์แท็ก: ${tagProfile}` : '',
+    state.flags.length > 0 ? `- flag พฤติกรรม: ${state.flags.join(', ')}` : '',
+    state.constraints.length > 0 ? `- ข้อจำกัด: ${state.constraints.join(', ')}` : '',
+    state.events.length > 0 ? `- hook ความสัมพันธ์ที่พร้อมทำงาน: ${state.events.map((event) => event.code).join(', ')}` : '',
+    `- ตัวปรับพรอมป์: ${state.promptProfile}`,
+    '- ใช้เป็นทิศทางพฤติกรรมแบบซ่อนอยู่ ห้ามเปิดเผยตัวเลขดิบหรือ label ของ engine เว้นแต่ผู้ใช้ขอรายละเอียด debug โดยตรง',
   ]
     .filter(Boolean)
     .join('\n')

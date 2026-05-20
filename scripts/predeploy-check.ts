@@ -201,6 +201,7 @@ const checks: Check[] = [
       const config = await readRepoFile('apps/backend/src/config.ts')
       const creatorDraftService = await readRepoFile('apps/backend/src/creator-draft.service.ts')
       const promptInspectorService = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
+      const relationshipEngine = await readRepoFile('apps/backend/src/relationship.engine.ts')
       const sceneRuntime = await readRepoFile('apps/backend/src/scene.runtime.ts')
       const chatStyleGuide = await readRepoFile('knowledge/structured/chat-style-guide.json')
       const backendEnv = await readRepoFile('apps/backend/src/env.ts')
@@ -243,6 +244,11 @@ const checks: Check[] = [
         'apps/backend/src/scene.runtime.ts',
       )
       requireIncludes(
+        relationshipEngine,
+        ['สถานะ Relationship Engine', 'ตัวปรับพรอมป์', 'ใช้เป็นทิศทางพฤติกรรมแบบซ่อนอยู่'],
+        'apps/backend/src/relationship.engine.ts',
+      )
+      requireIncludes(
         chatStyleGuide,
         ['4-6 ย่อหน้าสั้น', 'อย่างน้อย 5 ประโยคสมบูรณ์', '8-14 ประโยค'],
         'knowledge/structured/chat-style-guide.json',
@@ -271,6 +277,11 @@ const checks: Check[] = [
         sceneRuntime,
         ['Scene engine state', 'Pending scene notifications', 'Sandbox mode: continue', 'Let the character open up carefully', 'Run a focused relationship scene'],
         'apps/backend/src/scene.runtime.ts',
+      )
+      forbidIncludes(
+        relationshipEngine,
+        ['Relationship engine state', 'Status is', 'Behavior:', 'Progression:', 'Narrative:', 'Safety:', 'Constraint:', 'Active hooks'],
+        'apps/backend/src/relationship.engine.ts',
       )
       forbidIncludes(
         chatStyleGuide,
