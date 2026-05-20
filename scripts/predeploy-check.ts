@@ -1268,6 +1268,7 @@ const checks: Check[] = [
           'Backend URL ที่ต้องการทดสอบ ถ้าเว้นว่างจะใช้ repository secret SMOKE_API_BASE_URL',
           'รัน live AI chat smoke ด้วย คำสั่งนี้ใช้เครดิตผู้ให้บริการจริง',
           'รัน live image generation smoke ด้วย คำสั่งนี้ใช้เครดิตสร้างรูปจริง',
+          'ยอดโทเคนขั้นต่ำของ smoke user ก่อนรัน live chat smoke ที่ใช้เครดิตผู้ให้บริการจริง',
           'SMOKE_API_BASE_URL',
           'SMOKE_ADMIN_API_KEY',
           'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT',
@@ -1343,6 +1344,7 @@ const checks: Check[] = [
           'Backend URL to test',
           'This uses provider credits',
           'This uses image provider credits',
+          'Minimum smoke-user token balance',
         ],
         '.github/workflows/production-smoke.yml',
       )
