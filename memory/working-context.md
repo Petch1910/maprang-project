@@ -299,6 +299,7 @@ Verified:
 
 ## บันทึกล่าสุด 2026-05-20
 
+- Signed-storage handoff wording, release handoff stale-label guard, stream chat validation guard, และ API smoke stream diagnostics ถูกปิดแล้ว; `qa:repo` ล่าสุดผ่านเต็มด้วย backend tests 153 pass และ frontend build/bundle ผ่าน.
 - Runtime context, Prompt Inspector, local eval fixture, และ promptfoo roleplay template ใช้หัวข้อพรอมป์แบบ Thai-first แล้ว: `กฎคุมพรอมป์ของแพลตฟอร์ม`, `คลังความรู้ที่เกี่ยวข้อง`, `คำสั่งขณะรัน`, `ความจำขณะรัน`, และ `ข้อความผู้ใช้`.
 - `predeploy:check` เพิ่ม guard เพื่อบังคับหัวข้อพรอมป์ไทย-first ใน `context.service.ts` และ `prompt-inspector.service.ts` พร้อมกัน old English headings เช่น `Platform prompt-control policy`, `Runtime instructions`, `Runtime memory`, และ `User message` ไม่ให้กลับมาใน runtime source.
 - Backend runtime prompt copy สำหรับ default assistant, continuation instruction, Creator Draft, Scene Engine, และ local eval fixture ถูกปรับเป็น Thai-first แล้ว โดยยังคง schema keys, env names, และ command names เป็นอังกฤษเท่าที่จำเป็นต่อระบบ.
