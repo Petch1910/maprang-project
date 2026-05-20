@@ -36,6 +36,7 @@ Last updated: 2026-05-20
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Prompt Inspector/Lore Manager Thai-first copy polish: pass via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, and `predeploy:check:test`; the static audit now blocks stale `Lorebook`, `lore ที่ดึงมาใช้`, `Persona ชั่วคราว`, `keyword`, `aliases`, `priority`, `visual cue`, and `persona expression` wording from returning.
 - Creator Studio tag placeholder Thai-first polish: pass via `frontend:static:audit:test`, focused relationship-engine test, `frontend:check`, `backend:check`, `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`; the static audit now blocks `roleplay, thai` in visible creator helper copy and backend relationship tags normalize the Thai defaults.
+- Sidebar brand tagline Thai-first polish: pass via `frontend:static:audit:test`, `frontend:check`, `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`; the static audit now blocks old `AI roleplay ภาษาไทย` wording.
 - Predeploy guard for the Lore/Persona Thai-first static audit wiring: pass via `predeploy:check`.
 - Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Browser e2e smoke now checks the Thai-first Automated Evals heading `ทดสอบคุณภาพพรอมป์และบริบท` instead of the old mixed `prompt/context` wording, and the latest desktop/mobile run passes 4/4 again.

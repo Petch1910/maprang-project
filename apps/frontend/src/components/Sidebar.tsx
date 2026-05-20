@@ -449,7 +449,7 @@ function SidebarContent({
         </span>
         <span className="min-w-0">
           <span className="block truncate text-lg font-black tracking-wide">MAPRANG</span>
-          <span className="block truncate text-[11px] font-bold text-white/38">AI roleplay ภาษาไทย</span>
+          <span className="block truncate text-[11px] font-bold text-white/38">บทบาทสมมุติภาษาไทย</span>
         </span>
       </Link>
 

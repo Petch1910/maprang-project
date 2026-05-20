@@ -180,13 +180,14 @@ describe('frontend static audit', () => {
         '<p>มีแกน prompt สำหรับคุมโทนตัวละคร</p>',
         '<p>ให้ backend ช่วยร่างตัวละคร</p>',
         '<input placeholder="roleplay, thai" />',
+        '<span>AI roleplay ภาษาไทย</span>',
       ].join('\n'),
       'MixedEnglishUiFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
       ...Array.from({ length: 6 }, () => englishUiFinding),
-      ...Array.from({ length: 5 }, () => creatorMixedFinding),
+      ...Array.from({ length: 6 }, () => creatorMixedFinding),
       ...Array.from({ length: 7 }, () => mixedUiFinding),
     ])
   })
