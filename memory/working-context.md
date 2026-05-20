@@ -21,6 +21,7 @@ Verified:
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
 - Frontend Thai localization pass now covers admin utility pages, prompt/usage labels, route/menu audit table headings, chat prompt budget, System Status model budget labels, and Character Lobby/Profile/Create helper copy.
 - Frontend Thai localization pass now also covers Prompt Inspector persona wording, Lore Manager placeholders/actions, Chat role-panel lore usage labels, Workspace lore save/error notes, and Route/Menu prompt-inspector coverage text; the static audit blocks stale `Lorebook`, `lore ที่ดึงมาใช้`, `Persona ชั่วคราว`, `keyword`, `aliases`, `priority`, `visual cue`, and `persona expression` strings from returning.
+- Predeploy now verifies the frontend static audit keeps the Lore/Persona Thai-first regression test and source patterns wired.
 - Route/menu audit runtime data and `ROUTE_MENU_AUDIT.md` now use Thai-first surface names and control descriptions while keeping the Route/Menu Audit marker for automated docs checks.
 - Route/menu staging row now describes staging as a checklist rather than a fake in-app button, and frontend static audit blocks the old ambiguous copy from returning.
 - Route/menu doc check now fails directly on stale mixed-language audit copy such as `รัน eval`, `prompt-control`, `token budget`, `accordion`, or ` disabled `, instead of relying only on predeploy.

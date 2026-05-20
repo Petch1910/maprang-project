@@ -259,12 +259,13 @@ describe('frontend static audit', () => {
         '<span>Persona ชั่วคราว</span>',
         '<span>แนบ persona ที่บันทึกไว้</span>',
         '<input placeholder="เว้นว่างเพื่อใช้ persona ที่บันทึกไว้" />',
+        '<p>ชุดนี้ใช้เป็น visual cue ก่อนต่อ persona expression จริง</p>',
       ].join('\n'),
       'KnowledgePersonaFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 14 }, () => knowledgePersonaMixedFinding),
+      Array.from({ length: 16 }, () => knowledgePersonaMixedFinding),
     )
   })
 
