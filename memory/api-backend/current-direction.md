@@ -45,9 +45,9 @@ Backend ควรให้ความสำคัญกับ explicit guards, 
 
 ## Provider policy
 
-- Chat provider readiness ต้องมีคำตอบจริง, `chatId`, token usage, และ wallet transaction.
+- Chat provider readiness ต้องมีคำตอบจริง, `chatId`, token usage, และรายการ wallet.
 - Image provider readiness ต้องได้ generated image แบบ `configured` ไม่ใช่ placeholder fallback.
-- Production `/ready` ต้อง fail จนกว่า target environment จะตั้งทั้ง chat และ image live verification flags.
+- Production `/ready` ต้องยังไม่ผ่านจนกว่า environment เป้าหมายจะตั้งทั้ง chat และ image live verification flags.
 - ห้ามตั้ง live verification flags จาก local deterministic smoke.
 - รักษา `knowledge/structured/*.json` ให้ deterministic, schema-versioned, และตรวจด้วย `bun run knowledge:audit`.
 - รักษา `evals/golden-roleplay.json` ให้ deterministic และตรวจด้วย `bun run eval:local` ก่อนเปลี่ยน context assembly.

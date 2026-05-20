@@ -283,7 +283,7 @@ bun run smoke:local
 bun run smoke:chat
 ```
 
-`smoke:chat` ตรวจเฉพาะเส้นทางระบบหลังบ้านไป OpenRouter จริง และอาจล้มเมื่อการเชื่อมต่อออกไปผู้ให้บริการ, เครดิต API, หรือคีย์ผู้ให้บริการยังไม่พร้อม. มันตรวจ backend root identity และ token balance ของ smoke user ก่อนเรียก AI provider โดยค่าเริ่มต้นคือ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=1000`. GitHub Actions ยังรัน deploy checks, seeded local smoke test, และ Docker image builds เมื่อ push ไป `main` หรือเปิด pull request.
+`smoke:chat` ตรวจเฉพาะเส้นทางระบบหลังบ้านไป OpenRouter จริง และอาจล้มเมื่อการเชื่อมต่อออกไปผู้ให้บริการ, เครดิต API, หรือคีย์ผู้ให้บริการยังไม่พร้อม. มันตรวจ root identity ของระบบหลังบ้านและยอด token ของผู้ใช้ smoke ก่อนเรียกผู้ให้บริการ AI โดยค่าเริ่มต้นคือ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=1000`. GitHub Actions ยังรัน deploy checks, seeded local smoke test, และ Docker image builds เมื่อ push ไป `main` หรือเปิด pull request.
 
 ```bash
 bun run smoke:image:live

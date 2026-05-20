@@ -118,6 +118,7 @@ Last updated: 2026-05-20
 - Production setup storage/final-gate wording now avoids stale `Development only`, `hard final gate`, and `gate fail` phrases and will be checked by `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check` in this docs scope.
 - Live provider handoff docs now keep smoke wallet, providerFailure, image billing/quota, and DB example-value rejection guidance Thai-first while preserving exact env names and commands.
 - Live provider troubleshooting docs now describe outbound connection and backend-log guidance with Thai-first wording across README, Deployment QA, and Production Setup.
+- README, deploy blockers, and API/backend handoff live smoke wording now avoid stale `backend root identity`, `smoke user`, `target environment`, and raw `wallet transaction` phrasing.
 - Deploy env doctor image-key wording now passes through `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Runtime env and deploy env doctor database placeholder wording now passes `bun test apps\backend\src\env.test.ts`, `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.

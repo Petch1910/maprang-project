@@ -34,7 +34,7 @@ guard ใน repo:
 
 สิ่งที่ต้องทำ:
 - รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging.
-- ยืนยันว่ามีคำตอบจริงจากโมเดล, `chatId`, token usage, และ wallet transaction ชนิด `CHAT_USAGE` ที่ตรงกัน
+- ยืนยันว่ามีคำตอบจริงจากโมเดล, `chatId`, token usage, และรายการ wallet ชนิด `CHAT_USAGE` ที่ตรงกัน
 - ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` เฉพาะ environment นั้นหลัง smoke ผ่านจริงเท่านั้น
 
 ### การยืนยัน live image provider
