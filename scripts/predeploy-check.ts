@@ -737,6 +737,7 @@ const checks: Check[] = [
       const readme = await readRepoFile('README.md')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const evalReadme = await readRepoFile('evals/README.md')
+      const evalService = await readRepoFile('apps/backend/src/eval.service.ts')
       const golden = await readRepoFile('evals/golden-roleplay.json')
       const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
       requireIncludes(
@@ -747,6 +748,16 @@ const checks: Check[] = [
       requireIncludes(readme, ['Evaluation Layer', 'bun run eval:local', 'evals/golden-roleplay.json'], 'README.md')
       requireIncludes(deploymentQa, ['bun run eval:local', 'deterministic prompt assembly'], 'DEPLOYMENT_QA.md')
       requireIncludes(evalReadme, ['Golden Dataset', 'Promptfoo', 'No secrets'], 'evals/README.md')
+      requireIncludes(
+        evalService,
+        ['ตัวละครทดสอบ Maprang', 'ไม่พบข้อความที่ต้องมี', 'โทเคนพรอมป์โดยประมาณ'],
+        'apps/backend/src/eval.service.ts',
+      )
+      forbidIncludes(
+        evalService,
+        ['A slow-burn roleplay character', 'missing required text', 'found in assembled prompt', 'estimated prompt tokens'],
+        'apps/backend/src/eval.service.ts',
+      )
       requireIncludes(
         golden,
         ['roleplay-depth-and-knowledge', 'prompt-injection-defense', 'relationship-scene-continuity'],
