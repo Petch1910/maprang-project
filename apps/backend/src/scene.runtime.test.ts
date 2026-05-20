@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { buildRelationshipSeedFromTags, applyRelationshipDelta } from './relationship.engine'
-import { outcomeRelationshipDelta, updateEmotionalMomentum, updateSceneState } from './scene.runtime'
+import { buildScenePrompt, outcomeRelationshipDelta, updateEmotionalMomentum, updateSceneState } from './scene.runtime'
 
 describe('scene runtime', () => {
   test('creates a pending scene notification from relationship hooks', () => {
@@ -39,6 +39,23 @@ describe('scene runtime', () => {
     expect(scene.mode).toBe('scene')
     expect(scene.activeScene?.code).toBe('soft_confession_available')
     expect(scene.eventCooldowns.soft_confession_available).toBe(10)
+  })
+
+  test('builds Thai-first scene prompt context', () => {
+    const relationship = buildRelationshipSeedFromTags(['lover', 'golden', 'romance'])
+    const scene = updateSceneState({
+      previousSceneState: null,
+      relationship,
+      userMessage: 'hello',
+      turnCount: 1,
+    })
+    const prompt = buildScenePrompt(scene)
+
+    expect(prompt).toContain('สถานะ Scene Engine')
+    expect(prompt).toContain('โหมดฉาก')
+    expect(prompt).toContain('มีแจ้งเตือนฉากที่รอให้ผู้ใช้เลือก')
+    expect(prompt).not.toContain('Scene engine state')
+    expect(prompt).not.toContain('Pending scene notifications')
   })
 
   test('records accepted scene outcome and consumes one-shot event', () => {

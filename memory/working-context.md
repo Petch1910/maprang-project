@@ -152,7 +152,7 @@ Verified:
 - Backend structured knowledge validation errors now use Thai-first messages for schemaVersion, required fields, item counts, and sandbox mode while keeping exact JSON field paths for debugging.
 - Chat provider failures are typed as `providerFailure`, returned with zero usage/cost, surfaced in Chat UI, and read directly by live smoke scripts.
 - Roleplay reply depth defaults now favor longer Thai roleplay turns: `MODEL_MAX_OUTPUT_TOKENS=1600`, `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420`, stronger default system prompt guidance, and a larger continuation budget when the first reply is too short.
-- Runtime prompt assembly and the structured chat style guide now match the same longer roleplay target: 4-6 short paragraphs, at least 5 complete sentences, and usually 8-14 sentences unless the player asks for brevity.
+- Runtime prompt assembly และ structured chat style guide ตอนนี้ใช้เป้าหมายคำตอบโรลเพลย์ยาวขึ้นแบบเดียวกัน: 4-6 ย่อหน้าสั้น, อย่างน้อย 5 ประโยคสมบูรณ์, และโดยมากราว 8-14 ประโยค เว้นแต่ผู้เล่นขอให้สั้น.
 - Deploy env doctor now fails production/staging envs with roleplay reply budget below the production baseline `MODEL_MAX_OUTPUT_TOKENS=1200` or `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320`.
 - Runtime production env validation now applies the same reply-budget baseline, so `/health`, `deploy:status`, and `production:check` surface thin-reply model settings even if `deploy:doctor` was not run first.
 - Deploy readiness regression coverage now proves `/health` invalid env entries for thin roleplay reply budgets become staging and production blockers with concrete next-step output.
@@ -290,3 +290,4 @@ Verified:
 
 - Runtime context, Prompt Inspector, local eval fixture, และ promptfoo roleplay template ใช้หัวข้อพรอมป์แบบ Thai-first แล้ว: `กฎคุมพรอมป์ของแพลตฟอร์ม`, `คลังความรู้ที่เกี่ยวข้อง`, `คำสั่งขณะรัน`, `ความจำขณะรัน`, และ `ข้อความผู้ใช้`.
 - `predeploy:check` เพิ่ม guard เพื่อบังคับหัวข้อพรอมป์ไทย-first ใน `context.service.ts` และ `prompt-inspector.service.ts` พร้อมกัน old English headings เช่น `Platform prompt-control policy`, `Runtime instructions`, `Runtime memory`, และ `User message` ไม่ให้กลับมาใน runtime source.
+- Backend runtime prompt copy สำหรับ default assistant, continuation instruction, Creator Draft, Scene Engine, และ local eval fixture ถูกปรับเป็น Thai-first แล้ว โดยยังคง schema keys, env names, และ command names เป็นอังกฤษเท่าที่จำเป็นต่อระบบ.

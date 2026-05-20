@@ -309,19 +309,19 @@ function normalizeDraft(value: Partial<CreatorDraftFields>, fallback: CreatorDra
 function draftPrompt(input: CreatorDraftInput) {
   const current = input.current ?? {}
   return [
-    'Create a Thai roleplay character draft for Maprang AI.',
+    'สร้างดราฟต์ตัวละครโรลเพลย์ภาษาไทยสำหรับ Maprang AI',
     buildCreatorKnowledgePrompt(),
-    'Return JSON only. Do not include markdown.',
-    'Required keys: name, tagline, description, biography, scenario, systemPrompt, compactPrompt, characterAnchor, constraints, greeting, tags.',
-    'Every value must be a plain string. tags must be one comma-separated string, not an array.',
-    'The character must feel usable immediately in a Khuiai-like creator flow, but deeper through relationship/scene systems.',
-    'Keep all prose in Thai except optional romanized name after a pipe.',
-    'Do not write sexual explicit content. You may support mature/adult roleplay setup only as tags/relationship tone when the user asks.',
-    `Brief: ${clip(input.brief || '', 700) || 'สร้างตัวละครออริจินัลสำหรับโรลเพลย์ไทย'}`,
-    `Image prompt/cue: ${clip(input.imagePrompt || '', 700) || 'no image cue yet'}`,
-    `Current name: ${current.name || ''}`,
-    `Current tagline: ${current.tagline || ''}`,
-    `Current tags: ${current.tags || ''}`,
+    'ตอบเป็น JSON เท่านั้น ห้ามใส่ markdown',
+    'key ที่ต้องมี: name, tagline, description, biography, scenario, systemPrompt, compactPrompt, characterAnchor, constraints, greeting, tags',
+    'ทุก value ต้องเป็น plain string ส่วน tags ต้องเป็น string คั่นด้วย comma ไม่ใช่ array',
+    'ตัวละครต้องเอาไปใช้ได้ทันทีใน flow สร้างตัวละครแบบ Khuiai แต่มีความลึกผ่านระบบ relationship/scene ของ Maprang',
+    'เนื้อหาหลักทั้งหมดให้เขียนเป็นภาษาไทย ยกเว้นชื่อ romanized หลังเครื่องหมาย pipe ถ้าจำเป็น',
+    'ห้ามเขียนเนื้อหา sexual explicit โดยตรง รองรับ mature/adult roleplay setup ได้เฉพาะในระดับ tag หรือโทนความสัมพันธ์เมื่อผู้ใช้ขอ',
+    `โจทย์สั้น: ${clip(input.brief || '', 700) || 'สร้างตัวละครออริจินัลสำหรับโรลเพลย์ไทย'}`,
+    `คำใบ้รูป/ภาพจำ: ${clip(input.imagePrompt || '', 700) || 'ยังไม่มีคำใบ้รูป'}`,
+    `ชื่อปัจจุบัน: ${current.name || ''}`,
+    `คำโปรยปัจจุบัน: ${current.tagline || ''}`,
+    `แท็กปัจจุบัน: ${current.tags || ''}`,
   ].filter(Boolean).join('\n')
 }
 
@@ -431,7 +431,7 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
           {
             role: 'system',
             content:
-              'You are a senior Thai character designer for an AI roleplay platform. Produce concise, playable, emotionally coherent character drafts.',
+              'คุณคือผู้ออกแบบตัวละครภาษาไทยระดับ senior สำหรับแพลตฟอร์ม AI roleplay ให้สร้างดราฟต์ที่กระชับ เล่นได้จริง และอารมณ์ของตัวละครคงเส้นคงวา',
           },
           { role: 'user', content: draftPrompt(safeInput) },
         ],

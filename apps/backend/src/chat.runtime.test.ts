@@ -226,9 +226,9 @@ describe('roleplay reply quality guard', () => {
   test('builds continuation instruction that avoids repeating the previous answer', () => {
     const instruction = buildRoleplayContinuationInstruction('เธอหลบตา', 420)
 
-    expect(instruction).toContain('Do not repeat')
-    expect(instruction).toContain('3-5 short paragraphs')
-    expect(instruction).toContain('Thai')
+    expect(instruction).toContain('ห้ามเขียนซ้ำ')
+    expect(instruction).toContain('3-5 ย่อหน้าสั้น')
+    expect(instruction).toContain('ภาษาไทย')
   })
 })
 

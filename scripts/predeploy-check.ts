@@ -198,7 +198,10 @@ const checks: Check[] = [
     run: async () => {
       const contextService = await readRepoFile('apps/backend/src/context.service.ts')
       const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
+      const config = await readRepoFile('apps/backend/src/config.ts')
+      const creatorDraftService = await readRepoFile('apps/backend/src/creator-draft.service.ts')
       const promptInspectorService = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
+      const sceneRuntime = await readRepoFile('apps/backend/src/scene.runtime.ts')
       const chatStyleGuide = await readRepoFile('knowledge/structured/chat-style-guide.json')
       const backendEnv = await readRepoFile('apps/backend/src/env.ts')
       const backendEnvTest = await readRepoFile('apps/backend/src/env.test.ts')
@@ -227,18 +230,48 @@ const checks: Check[] = [
         ['4-6 ย่อหน้าสั้น', 'อย่างน้อย 5 ประโยคสมบูรณ์', '8-14 ประโยค'],
         'apps/backend/src/context.service.ts',
       )
-      requireIncludes(chatService, ['3-5 short paragraphs'], 'apps/backend/src/chat.service.ts')
+      requireIncludes(config, ['คุณคือ Maprang', '4-6 ย่อหน้าสั้น', 'อย่างน้อย 5 ประโยคสมบูรณ์'], 'apps/backend/src/config.ts')
+      requireIncludes(chatService, ['3-5 ย่อหน้าสั้น', 'ห้ามเขียนซ้ำข้อความก่อนหน้า'], 'apps/backend/src/chat.service.ts')
+      requireIncludes(
+        creatorDraftService,
+        ['สร้างดราฟต์ตัวละครโรลเพลย์ภาษาไทยสำหรับ Maprang AI', 'ตอบเป็น JSON เท่านั้น', 'คุณคือผู้ออกแบบตัวละครภาษาไทยระดับ senior'],
+        'apps/backend/src/creator-draft.service.ts',
+      )
+      requireIncludes(
+        sceneRuntime,
+        ['สถานะ Scene Engine', 'โหมดฉาก', 'มีแจ้งเตือนฉากที่รอให้ผู้ใช้เลือก'],
+        'apps/backend/src/scene.runtime.ts',
+      )
       requireIncludes(
         chatStyleGuide,
         ['4-6 ย่อหน้าสั้น', 'อย่างน้อย 5 ประโยคสมบูรณ์', '8-14 ประโยค'],
         'knowledge/structured/chat-style-guide.json',
       )
       forbidIncludes(
+        config,
+        ['You are Maprang', 'For roleplay, write naturally in scene', 'Do not invent facts you are unsure about'],
+        'apps/backend/src/config.ts',
+      )
+      forbidIncludes(
         contextService,
         ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences', 'write 4-6 short paragraphs', 'Reply naturally in Thai by default'],
         'apps/backend/src/context.service.ts',
       )
-      forbidIncludes(chatService, ['2-4 short paragraphs'], 'apps/backend/src/chat.service.ts')
+      forbidIncludes(
+        chatService,
+        ['2-4 short paragraphs', '3-5 short paragraphs', 'The previous assistant turn was too short', 'Do not repeat the previous text'],
+        'apps/backend/src/chat.service.ts',
+      )
+      forbidIncludes(
+        creatorDraftService,
+        ['Create a Thai roleplay character draft', 'Return JSON only', 'senior Thai character designer'],
+        'apps/backend/src/creator-draft.service.ts',
+      )
+      forbidIncludes(
+        sceneRuntime,
+        ['Scene engine state', 'Pending scene notifications', 'Let the character open up carefully', 'Run a focused relationship scene'],
+        'apps/backend/src/scene.runtime.ts',
+      )
       forbidIncludes(
         chatStyleGuide,
         ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences', 'write 4-6 short paragraphs', 'Reply naturally in Thai by default'],

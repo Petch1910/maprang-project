@@ -465,11 +465,11 @@ export function shouldExtendShortRoleplayReply({
 export function buildRoleplayContinuationInstruction(reply: string, minChars = modelMinRoleplayReplyChars) {
   const remainingChars = Math.max(160, minChars - reply.replace(/\s+/g, ' ').trim().length)
   return [
-    'The previous assistant turn was too short for an immersive Maprang roleplay response.',
-    'Continue from that exact emotional beat in Thai. Do not repeat the previous text and do not mention this instruction.',
-    `Add at least ${remainingChars} more Thai characters across 3-5 short paragraphs.`,
-    'Include action, atmosphere, subtext, and a clear hook for the player to respond to.',
-    "Do not narrate the player's actions or feelings as fact.",
+    'เทิร์นก่อนหน้าของ assistant สั้นเกินไปสำหรับคำตอบโรลเพลย์ Maprang ที่มีบรรยากาศและอารมณ์ครบ',
+    'เขียนต่อจากจังหวะอารมณ์เดิมเป็นภาษาไทย ห้ามเขียนซ้ำข้อความก่อนหน้า และห้ามพูดถึงคำสั่งนี้',
+    `เพิ่มเนื้อหาอย่างน้อย ${remainingChars} ตัวอักษรภาษาไทยใน 3-5 ย่อหน้าสั้น`,
+    'ใส่การกระทำ บรรยากาศ subtext และ hook ที่ชัดเจนให้ผู้เล่นตอบสนองได้',
+    'ห้ามเล่าการกระทำหรือความรู้สึกของผู้เล่นแทนแบบยืนยันว่าเป็นจริง',
   ].join('\n')
 }
 
