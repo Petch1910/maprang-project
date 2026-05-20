@@ -1,4 +1,4 @@
-# Maprang Backend
+# ระบบหลังบ้าน Maprang (Maprang Backend)
 
 Bun + Elysia backend สำหรับ Maprang AI.
 
@@ -19,7 +19,7 @@ bun run start
 bun run backend:check
 ```
 
-## Env
+## ค่า env (Env)
 
 เริ่มจาก `.env.example` หรือ `.env.production.example`.
 

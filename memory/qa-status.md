@@ -10,6 +10,7 @@ Last updated: 2026-05-20
 - Root README handoff/tooling/deploy/Docker headings are Thai-first, verified with `predeploy:check:test`, `predeploy:check`, and a heading scan for English-only `##` sections.
 - Agent handoff headings in `AGENTS.md` and `agent.md` are Thai-first, with `predeploy:check:test`, `predeploy:check`, and an English-only heading scan passing.
 - Production/deploy docs headings are Thai-first across deployment QA, production setup, release handoff, security checklist, production memory, and knowledge wiki; verified with release handoff tests/checks, predeploy tests/checks, memory audit, and knowledge audit.
+- Backend/frontend app README titles and env headings are Thai-first, verified with an English-only heading scan plus `memory:audit` and `predeploy:check`.
 
 ## Gate local ล่าสุด
 

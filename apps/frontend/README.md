@@ -1,4 +1,4 @@
-# Maprang Frontend
+# หน้าบ้าน Maprang (Maprang Frontend)
 
 React + Vite frontend สำหรับ Maprang AI.
 
@@ -17,7 +17,7 @@ bun run build
 bun run frontend:check
 ```
 
-## Env
+## ค่า env (Env)
 
 เริ่มจาก `.env.example` หรือ `.env.production.example`.
 
