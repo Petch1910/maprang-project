@@ -61,6 +61,7 @@ Results:
 - API smoke and E2E now cover chat world state save/read persistence.
 - API smoke and Wallet UI now cover total cost, cost by model, seven-day usage trend, and remaining-request estimates.
 - API smoke with `--require-admin` now passes 32 checks plus 1 local live-chat skip, including backend root identity, uncharged chat validation, non-mutating chat delete/report creation, admin wallet, and admin report PATCH/action validation.
+- API smoke invalid-id validation now requires Thai-first `message` fields in addition to `error` codes for chat/report/admin validation paths, guarded by `api:smoke:test` import safety and predeploy.
 - `api:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard route discovery, coverage-map regressions, and the importable route audit runner.
 - `import-cycle:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard relative import extraction, extension/index resolution, cycle detection, and the importable architecture audit runner.
 - `api:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard API smoke readiness/image helper regressions, summary counts, and API smoke runner import safety without calling a backend.

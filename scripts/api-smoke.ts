@@ -651,9 +651,7 @@ await check('DELETE /chats/:id validation', async () => {
     method: 'DELETE',
     headers: authHeaders,
   })
-  if (payload.status !== 400 || payload.payload.error !== 'invalid_chat_id') {
-    throw new Error(`expected invalid_chat_id 400, got ${payload.status} ${payload.payload.error ?? 'unknown'}`)
-  }
+  assertExpectedErrorPayload(payload, 400, 'invalid_chat_id', 'รหัสแชทไม่ถูกต้อง')
   return 'invalid chat id rejected before delete'
 })
 
@@ -675,9 +673,7 @@ await check('POST /reports validation', async () => {
       reason: 'non-mutating report validation smoke',
     }),
   })
-  if (payload.status !== 400 || payload.payload.error !== 'invalid_character_id') {
-    throw new Error(`expected invalid_character_id 400, got ${payload.status} ${payload.payload.error ?? 'unknown'}`)
-  }
+  assertExpectedErrorPayload(payload, 400, 'invalid_character_id', 'รหัสตัวละครไม่ถูกต้อง')
   return 'SQL-like report character id rejected before persistence'
 })
 
@@ -753,9 +749,7 @@ if (adminHeaders) {
       headers: { 'Content-Type': 'application/json', ...adminHeaders },
       body: JSON.stringify({ amount: 1, reason: 'non-mutating smoke validation' }),
     })
-    if (payload.status !== 400 || payload.payload.error !== 'invalid_user_id') {
-      throw new Error(`expected invalid_user_id 400, got ${payload.status} ${payload.payload.error ?? 'unknown'}`)
-    }
+    assertExpectedErrorPayload(payload, 400, 'invalid_user_id', 'รหัสผู้ใช้ไม่ถูกต้อง')
     return 'invalid admin wallet user id rejected before mutation'
   })
 
@@ -820,18 +814,14 @@ if (adminHeaders) {
       headers: { 'Content-Type': 'application/json', ...adminHeaders },
       body: JSON.stringify({ status: 'REVIEWED' }),
     })
-    if (patch.status !== 400 || patch.payload.error !== 'invalid_report_id') {
-      throw new Error(`PATCH invalid id expected invalid_report_id 400, got ${patch.status} ${patch.payload.error ?? 'unknown'}`)
-    }
+    assertExpectedErrorPayload(patch, 400, 'invalid_report_id', 'รหัสรายงานไม่ถูกต้อง', 'PATCH invalid id')
 
     const action = await readExpectedError('/admin/reports/not-a-uuid/actions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...adminHeaders },
       body: JSON.stringify({ action: 'ARCHIVE_MESSAGE' }),
     })
-    if (action.status !== 400 || action.payload.error !== 'invalid_report_id') {
-      throw new Error(`POST action invalid id expected invalid_report_id 400, got ${action.status} ${action.payload.error ?? 'unknown'}`)
-    }
+    assertExpectedErrorPayload(action, 400, 'invalid_report_id', 'รหัสรายงานไม่ถูกต้อง', 'POST action invalid id')
 
     return 'invalid admin report ids rejected before mutation'
   })
@@ -937,7 +927,22 @@ async function readExpectedError(path: string, init: RequestInit) {
 
   return {
     status: response.status,
-    payload: parsed as { error?: string },
+    payload: parsed as { error?: string; message?: string },
+  }
+}
+
+function assertExpectedErrorPayload(
+  result: { status: number; payload: { error?: string; message?: string } },
+  expectedStatus: number,
+  expectedError: string,
+  expectedMessage: string,
+  label = 'expected error',
+) {
+  if (result.status !== expectedStatus || result.payload.error !== expectedError) {
+    throw new Error(`${label} expected ${expectedError} ${expectedStatus}, got ${result.status} ${result.payload.error ?? 'unknown'}`)
+  }
+  if (!result.payload.message?.includes(expectedMessage)) {
+    throw new Error(`${label} expected Thai message "${expectedMessage}", got ${result.payload.message ?? 'missing'}`)
   }
 }
 

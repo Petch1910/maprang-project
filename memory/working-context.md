@@ -124,6 +124,7 @@ Verified:
 - API smoke now covers non-mutating report creation validation with SQL-like character ids before persistence.
 - API smoke now covers the uncharged `POST /chat` validation path before the live-provider-only chat smoke.
 - API smoke now covers non-mutating delete-chat validation so the delete route is exercised without removing real chats.
+- API smoke invalid-id checks now require Thai-first `message` fields as well as machine-readable error codes for chat delete, report creation, admin wallet, and admin report validation paths.
 - API route audit regression tests now cover route discovery, missing/stale/empty coverage entries, and the importable route audit runner, and run in local QA, CI, and Production Smoke.
 - Frontend bundle budget regression tests now cover main/chat chunk detection, split-route missing failures, oversized chunk reporting, human-readable KB formatting, and the importable bundle budget runner.
 - Frontend static audit regression tests now cover button type/accessible-name rules plus placeholder links, empty handlers, not-implemented errors, line-number reporting, and the importable static audit runner.
