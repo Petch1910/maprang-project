@@ -100,6 +100,32 @@ describe('route menu doc check', () => {
     )
   })
 
+  test('reports route/menu structure problems in Thai-first diagnostics', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | open | renders | none | helpful |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = []
+      `,
+      rows: [row(), row()],
+      minRows: 3,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'routeMenuAuditRows มีจำนวนแถวน้อยเกินไป (2 แถว)',
+        'routeMenuAuditRows มี area/route ซ้ำ',
+        'App.tsx ยังไม่มี <Route path="..."> ให้ตรวจ',
+      ]),
+    )
+  })
+
   test('reports stale mixed-language copy in route menu documentation', () => {
     const findings = auditRouteMenuDocumentation({
       markdown: `

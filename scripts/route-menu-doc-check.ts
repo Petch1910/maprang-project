@@ -178,16 +178,16 @@ export function auditRouteMenuDocumentation({
   const findings: string[] = []
 
   if (rows.length < minRows) {
-    findings.push(`routeMenuAuditRows looks too small (${rows.length} rows)`)
+    findings.push(`routeMenuAuditRows มีจำนวนแถวน้อยเกินไป (${rows.length} แถว)`)
   }
 
   const auditKeys = rows.map((row) => `${row.area}::${row.route}`)
   if (!uniqueKeys(auditKeys)) {
-    findings.push('routeMenuAuditRows contains duplicate area/route entries')
+    findings.push('routeMenuAuditRows มี area/route ซ้ำ')
   }
 
   if (declaredRoutes.length === 0) {
-    findings.push('App.tsx has no declared <Route path="..."> entries')
+    findings.push('App.tsx ยังไม่มี <Route path="..."> ให้ตรวจ')
   }
 
   if (navigationPaths.length === 0) {
