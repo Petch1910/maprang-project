@@ -89,6 +89,7 @@ Results:
 - Deploy readiness provider blocker wording now passes `bun test apps\backend\src\health.service.test.ts`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
 - Deploy readiness next-step fix wording now passes `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
 - Staging/production live provider documentation wording now passes `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`.
+- Live provider handoff docs now keep smoke wallet, providerFailure, image billing/quota, and DB example-value rejection guidance Thai-first while preserving exact env names and commands.
 - Deploy env doctor image-key wording now passes through `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Runtime env and deploy env doctor database placeholder wording now passes `bun test apps\backend\src\env.test.ts`, `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.

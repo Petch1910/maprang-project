@@ -51,7 +51,7 @@ Required for production Creator Studio image generation:
 - `IMAGE_GENERATION_OUTPUT_COMPRESSION`
 - `IMAGE_GENERATION_LIVE_VERIFIED=1` only after live image smoke passes
 
-`DATABASE_URL` must be a real production Postgres URL with `sslmode=require`. Do not leave the example `USER:PASSWORD@HOST/DATABASE` values in place; `env:check` rejects placeholder credentials, localhost databases, and URLs without `sslmode=require` in production.
+`DATABASE_URL` ต้องเป็น production Postgres URL จริงพร้อม `sslmode=require` ห้ามทิ้งค่าตัวอย่าง `USER:PASSWORD@HOST/DATABASE` ไว้ เพราะ `env:check` จะปฏิเสธค่า credential ตัวอย่าง, database แบบ localhost, และ URL production ที่ไม่มี `sslmode=require`.
 
 `OPENROUTER_API_KEY` powers creator text drafting and chat responses. It must be an OpenRouter key that starts with `sk-or-`, not an OpenAI `sk-proj-` key. Having a valid-looking key is not enough for production readiness: run `bun run smoke:chat` or `bun run api:smoke:live` against staging first, then set `CHAT_PROVIDER_LIVE_VERIFIED=1` only after the backend returns a real model reply with usage accounting. Real creator avatar generation is a separate image-provider path; if `IMAGE_GENERATION_API_KEY` is not configured, Creator Studio will still draft Thai character content but will label the avatar as a temporary system placeholder.
 
@@ -59,9 +59,9 @@ Required for production Creator Studio image generation:
 
 `CHAT_PROVIDER_RETRY_*` and `CREATOR_DRAFT_RETRY_*` make provider failures less brittle during traffic spikes or truncated JSON responses. The defaults retry chat twice and creator drafting three times with a short delay, while still failing fast for credential, billing, and policy errors.
 
-For production, configure a real OpenAI image key before opening Creator Studio to users. The backend calls the OpenAI Images endpoint and uploads generated avatars through the same avatar storage pipeline.
-Having an image key is not enough for production readiness because the provider billing/quota can still fail. Run `bun run smoke:image:live` or `bun run api:smoke:live` against staging/production first. `api:smoke:live` may warn that `/ready` is waiting for chat/image live verification; that is expected on the first verification run before the flags are set. Set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after the live image call passes, then rerun the final production gate.
-If the live image smoke reports `billing_hard_limit_reached`, `billing hard limit`, or `insufficient_quota`, the fix is on the image-provider account: เพิ่มหรือรีเซ็ตวงเงิน/โควตา แล้ว rerun live smoke เดิม. Keep `IMAGE_GENERATION_LIVE_VERIFIED=0` until that rerun returns a configured generated image instead of a placeholder.
+สำหรับ production ให้ตั้งค่า OpenAI image key จริงก่อนเปิด Creator Studio ให้ผู้ใช้ทั่วไป backend จะเรียก OpenAI Images endpoint แล้วอัปโหลด avatar ที่สร้างผ่าน pipeline เก็บรูปชุดเดียวกับระบบ avatar.
+การมี image key อย่างเดียวไม่พอสำหรับ production readiness เพราะ billing หรือ quota ของผู้ให้บริการยัง fail ได้ ให้รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging หรือ production ก่อน `api:smoke:live` อาจเตือนว่า `/ready` ยังรอ chat/image live verification ซึ่งเป็นเรื่องปกติของรอบตรวจแรกก่อนตั้ง flag ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image call ผ่านเท่านั้น แล้ว rerun production gate สุดท้าย.
+ถ้า live image smoke รายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` จุดแก้อยู่ที่บัญชีผู้ให้บริการสร้างรูป: เพิ่มหรือรีเซ็ตวงเงิน/โควตา แล้ว rerun live smoke เดิม ให้คง `IMAGE_GENERATION_LIVE_VERIFIED=0` จนกว่ารอบ rerun จะคืนรูปที่สร้างจริงแบบ configured แทน placeholder.
 
 After adding backend env values, validate them:
 
@@ -198,7 +198,7 @@ This prints the deploy status summary first, then catches local URLs, local/non-
 The GitHub `Production Smoke` workflow also requires repository secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` so it can verify the private `avatars` bucket instead of only trusting backend health flags.
 It also requires `SMOKE_ADMIN_API_KEY` so the smoke run verifies admin summary, moderation reports, and audit logs instead of silently skipping admin-only APIs.
 
-`smoke:chat` and the combined `api:smoke:live` provider gate check the smoke user's wallet before calling OpenRouter. Keep the smoke user topped up above `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT`, default `1000`, or override the threshold for heavier test prompts. If the backend returns `usage.providerFailure`, the route is reachable but the live provider path is still blocked; check OpenRouter credits/quota, model access, key validity, outbound networking, and backend logs before deploy.
+`smoke:chat` และ provider gate รวมอย่าง `api:smoke:live` จะเช็ก wallet ของผู้ใช้ smoke ก่อนเรียก OpenRouter ให้คงยอดผู้ใช้ smoke ไว้สูงกว่า `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` หรือปรับ threshold ถ้า prompt ทดสอบหนักกว่าเดิม ถ้า backend คืน `usage.providerFailure` แปลว่า route ติดต่อได้แล้ว แต่ live provider path ยังถูกบล็อกอยู่ ให้ตรวจเครดิต/โควตา OpenRouter, สิทธิ์โมเดล, ความถูกต้องของ key, outbound networking, และ backend logs ก่อน deploy.
 
 `smoke:image` checks the image provider configuration without spending image credits by default. To generate one real staging/production avatar, run `bun run smoke:image:live` or `SMOKE_IMAGE_LIVE=1 bun run smoke:image`; this calls `/creator/ai-draft` and fails if Creator Studio falls back to the placeholder image.
 

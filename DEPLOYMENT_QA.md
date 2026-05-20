@@ -181,33 +181,33 @@ bun run smoke:ready
 bun run smoke:local
 ```
 
-To verify the live AI provider path, run this only when the backend is allowed to reach OpenRouter:
+ตรวจเส้นทางผู้ให้บริการแชทจริงเมื่อ backend ออกไปหา OpenRouter ได้แล้วเท่านั้น:
 
 ```bash
 bun run smoke:chat
 ```
 
-`smoke:chat` and `api:smoke:live` check `/me/usage` before they call the AI provider. The smoke user must have at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`, so the test fails before spending provider credits when the smoke account is not topped up. `smoke:chat` is a targeted retry/debug command; use `production:check` for the final go/no-go gate.
+`smoke:chat` และ `api:smoke:live` จะเช็ก `/me/usage` ก่อนเรียกผู้ให้บริการ AI จริง ผู้ใช้ smoke ต้องมี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` เพื่อให้การทดสอบหยุดก่อนใช้เครดิตผู้ให้บริการถ้าบัญชียังเติมไม่พอ `smoke:chat` เหมาะสำหรับ retry/debug เฉพาะทาง ส่วน gate สุดท้ายให้ใช้ `production:check`
 
-If `smoke:chat` reports `usage.providerFailure`, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. ตรวจ network ออกไปที่ `https://openrouter.ai`, `OPENROUTER_API_KEY`, เครดิต/โควตา, สิทธิ์โมเดลที่เลือก, และ backend logs.
-Do not set `CHAT_PROVIDER_LIVE_VERIFIED=1` until a live chat smoke returns a real model reply, `chatId`, token usage, and a matching `CHAT_USAGE` wallet transaction.
+ถ้า `smoke:chat` รายงาน `usage.providerFailure` แปลว่าแอป ฐานข้อมูล และเส้นทางแชทติดต่อได้แล้ว แต่ backend ยังเรียกผู้ให้บริการภายนอกไม่สำเร็จ ให้ตรวจ network ออกไปที่ `https://openrouter.ai`, `OPENROUTER_API_KEY`, เครดิตกับโควตา, สิทธิ์โมเดลที่เลือก, และ backend logs.
+อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่า live chat smoke จะได้คำตอบจริงจากโมเดล, `chatId`, token usage, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน.
 
-To verify that the image generation provider is configured without spending image credits:
+ตรวจว่าตั้งค่าผู้ให้บริการสร้างรูปไว้แล้วโดยยังไม่ใช้เครดิตสร้างรูป:
 
 ```bash
 bun run smoke:image
 ```
 
-To generate one real staging/production avatar through the configured image provider, opt in explicitly:
+ถ้าต้องการสร้าง avatar จริงหนึ่งรูปบน staging/production ผ่านผู้ให้บริการที่ตั้งค่าไว้ ให้ opt in ชัดเจน:
 
 ```bash
 bun run smoke:image:live
 ```
 
-`smoke:image` only checks `/health` by default. With `bun run smoke:image:live` or `SMOKE_IMAGE_LIVE=1`, it calls `/creator/ai-draft`, expects `image.provider="configured"`, and fails if Creator Studio falls back to the local placeholder image. โหมด live นี้อาจใช้ทั้งเครดิตข้อความและเครดิตสร้างรูป.
-If the live run reports `billing_hard_limit_reached`, `billing hard limit`, or `insufficient_quota`, do not set `IMAGE_GENERATION_LIVE_VERIFIED=1` yet. เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป, rerun `bun run smoke:image:live`, and only mark live verification after the generated image path returns `image.provider="configured"`.
+ค่าเริ่มต้นของ `smoke:image` จะตรวจแค่ `/health` ถ้าใช้ `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1` ระบบจะเรียก `/creator/ai-draft`, คาดหวัง `image.provider="configured"`, และ fail ถ้า Creator Studio ถอยกลับไปใช้ภาพ placeholder ในเครื่อง โหมด live นี้อาจใช้ทั้งเครดิตข้อความและเครดิตสร้างรูป.
+ถ้า live run รายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` อย่าเพิ่งตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ให้เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป, rerun `bun run smoke:image:live`, และ mark live verification เฉพาะหลังเส้นทางสร้างรูปจริงคืนค่า `image.provider="configured"`.
 
-For a deployed backend, point the smoke tests at the backend URL. Prefer a Supabase user token:
+สำหรับ backend ที่ deploy แล้ว ให้ชี้ smoke tests ไปที่ backend URL จริง และควรใช้ Supabase user token:
 
 ```bash
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local

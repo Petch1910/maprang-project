@@ -47,8 +47,8 @@ Current issue:
 
 Required:
 - เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป.
-- Rerun `bun run smoke:image:live` or `bun run api:smoke:live`.
-- Set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after generated image provider returns `configured`.
+- รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` อีกครั้ง.
+- ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` เฉพาะหลังผู้ให้บริการสร้างรูปคืนค่า `configured`.
 
 ## Not Blockers
 
