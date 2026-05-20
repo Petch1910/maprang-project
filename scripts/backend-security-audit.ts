@@ -41,6 +41,9 @@ const adminRoutePattern =
 const uuidParamRoutePattern =
   /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/[^'"`]*\/:id(?:\/[^'"`]*)?\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
+const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
+const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
+const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
 
 const patterns = [
   {
@@ -109,14 +112,39 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
   return findings
 }
 
+export function collectKnownRouteErrorMessages(routeGuardsContent: string) {
+  const block = routeGuardsContent.match(routeErrorMessagesBlockPattern)?.[1] ?? ''
+  return new Set([...block.matchAll(routeErrorMessageKeyPattern)].map((match) => match[1] ?? '').filter(Boolean))
+}
+
+export function collectRouteErrorResponseCodes(content: string) {
+  return [...content.matchAll(routeErrorResponseCallPattern)].map((match) => ({
+    code: match[2] ?? '',
+    index: match.index ?? 0,
+  })).filter((item) => item.code)
+}
+
 export async function collectBackendSecurityFindings() {
   const files = (await Promise.all(scannedTargets.map((target) => collectSourceFiles(join(root, target))))).flat()
   const findings: BackendSecurityFinding[] = []
+  const routeGuardsPath = join(root, 'apps/backend/src/route-guards.ts')
+  const routeGuardsContent = await readFile(routeGuardsPath, 'utf8')
+  const knownRouteErrors = collectKnownRouteErrorMessages(routeGuardsContent)
 
   for (const file of files) {
     const content = await readFile(file, 'utf8')
     const relativeFile = relative(root, file).replaceAll('\\', '/')
     findings.push(...collectBackendSecurityFindingsFromSource(relativeFile, content))
+    if (!relativeFile.endsWith('route-guards.ts')) {
+      for (const call of collectRouteErrorResponseCodes(content)) {
+        if (knownRouteErrors.has(call.code)) continue
+        findings.push({
+          file: relativeFile,
+          line: lineFor(content, call.index),
+          message: `routeErrorResponse code "${call.code}" is missing from routeErrorMessages.`,
+        })
+      }
+    }
   }
 
   return findings

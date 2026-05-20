@@ -157,6 +157,7 @@ Results:
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.
 - Security audit now fails if a backend `/:id` route block is missing `rejectInvalidUuid`.
 - Security audit now fails if a backend route returns raw literal or dynamic `{ error: ... }` objects without a Thai-first `message` or `routeErrorResponse` helper.
+- Security audit now fails if a literal `routeErrorResponse('code')` call is missing an explicit `routeErrorMessages` entry.
 - `security:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard the backend security audit rules and importable runner.
 - Production Smoke workflow now runs predeploy and release handoff guards before deployed smoke validation.
 - Production Smoke workflow now runs secrets, secret-pattern tests, memory, knowledge, eval, security, API, and route/menu audits before deployed smoke validation.

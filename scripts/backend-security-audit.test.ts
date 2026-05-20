@@ -2,7 +2,14 @@ import { describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { collectBackendSecurityFindings, collectBackendSecurityFindingsFromSource, collectSourceFiles, runBackendSecurityAudit } from './backend-security-audit'
+import {
+  collectBackendSecurityFindings,
+  collectBackendSecurityFindingsFromSource,
+  collectKnownRouteErrorMessages,
+  collectRouteErrorResponseCodes,
+  collectSourceFiles,
+  runBackendSecurityAudit,
+} from './backend-security-audit'
 
 function messagesFor(content: string, file = 'fixture.ts') {
   return collectBackendSecurityFindingsFromSource(file, content).map((finding) => finding.message)
@@ -136,6 +143,22 @@ describe('backend security audit', () => {
           })
       `, 'upload.routes.ts'),
     ).toEqual([])
+  })
+
+  test('extracts route error message keys and helper calls for explicit-copy checks', () => {
+    const known = collectKnownRouteErrorMessages(`
+      export const routeErrorMessages: Record<string, string> = {
+        database_not_configured: 'ฐานข้อมูลยังไม่พร้อม',
+        chat_not_found: 'ไม่พบแชท',
+      }
+    `)
+    const calls = collectRouteErrorResponseCodes(`
+      return routeErrorResponse('database_not_configured')
+      return routeErrorResponse("missing_new_code")
+    `)
+
+    expect([...known].sort()).toEqual(['chat_not_found', 'database_not_configured'])
+    expect(calls.map((call) => call.code)).toEqual(['database_not_configured', 'missing_new_code'])
   })
 
   test('runs the committed backend security audit through an importable runner', async () => {
