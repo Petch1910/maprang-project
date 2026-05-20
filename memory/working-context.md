@@ -11,9 +11,10 @@ Last updated: 2026-05-20
 สถานะ: static/unit/build QA พร้อมแล้ว; final local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
 Verified:
+- Latest full `qa:repo` after Creator tag defaults and Sidebar tagline polish passes; backend tests now pass 150 tests with 468 expects, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
 - Latest full `qa:local` attempt reached final runtime smoke and then failed because Docker Desktop/Postgres plus backend `http://127.0.0.1:3000` were not running in this desktop session.
 - Latest direct `deploy:status` also fails at backend root preflight for the same reason: `http://127.0.0.1:3000` is not running.
-- Backend tests pass: 149 pass, 0 fail, 465 expects.
+- Backend tests pass: 150 pass, 0 fail, 468 expects.
 - Frontend deploy check passes.
 - Local API smoke passes: 32 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
