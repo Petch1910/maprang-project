@@ -3,6 +3,7 @@ import {
   assertSmokeUserHasTokenBalance,
   buildLiveChatSmokePayload,
   findMatchingChatDebit,
+  providerFailureIssue,
   runLiveChatSmoke,
   selectLiveChatSmokeCharacter,
   validateLiveChatSmokeResponse,
@@ -31,6 +32,14 @@ describe('live chat smoke helpers', () => {
   })
 
   test('reports provider failures before empty replies', () => {
+    const issue = providerFailureIssue({ retryable: false })
+    expect(issue).toContain('ไม่ทราบรหัส')
+    expect(issue).toContain('การเชื่อมต่อออกไป OpenRouter')
+    expect(issue).toContain('log ระบบหลังบ้าน')
+    expect(issue).not.toContain('unknown')
+    expect(issue).not.toContain('outbound network')
+    expect(issue).not.toContain('backend logs')
+
     expect(() =>
       validateLiveChatSmokeResponse(
         {

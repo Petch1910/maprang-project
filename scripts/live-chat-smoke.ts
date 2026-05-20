@@ -60,8 +60,9 @@ export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN
 
 export function providerFailureIssue(failure: ProviderFailure) {
   const userMessage = failure.userMessage ? ` ข้อความจากผู้ให้บริการ: ${failure.userMessage}` : ''
-  const retry = failure.retryable ? ' ลองใหม่ได้หลัง cooldown' : ' ต้องแก้ config/quota/admin ก่อน'
-  return `ตรวจ live chat ติดต่อระบบหลังบ้านได้แล้ว แต่ผู้ให้บริการ AI คืน ${failure.code ?? 'unknown'}.${retry}${userMessage} ตรวจ outbound network ไป OpenRouter, OPENROUTER_API_KEY, เครดิต/quota ของ provider, rate limits, model access, และ backend logs ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`
+  const retry = failure.retryable ? ' ลองใหม่ได้หลังช่วงพัก' : ' ต้องแก้การตั้งค่า, โควตา หรือสิทธิ์ผู้ดูแลก่อน'
+  const code = failure.code ?? 'ไม่ทราบรหัส'
+  return `ตรวจ live chat ติดต่อระบบหลังบ้านได้แล้ว แต่ผู้ให้บริการ AI คืน ${code}.${retry}${userMessage} ตรวจการเชื่อมต่อออกไป OpenRouter, OPENROUTER_API_KEY, เครดิต/โควตาของผู้ให้บริการ, ข้อจำกัดอัตราการเรียก, สิทธิ์เข้าถึงโมเดล, และ log ระบบหลังบ้านก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`
 }
 
 export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[]) {
