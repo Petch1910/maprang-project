@@ -32,6 +32,7 @@ Verified:
 - `qa:local` now reuses `qa:repo` and only appends runtime smoke (`smoke:doctor`, `smoke:local`, `api:smoke`), reducing duplicated QA script wiring while preserving local readiness coverage.
 - CI secrets/predeploy jobs now install root dependencies before running repo-owned gates, and predeploy guards that both root install steps remain wired.
 - GitHub Production Smoke input descriptions and validation messages for missing smoke/storage secrets are now Thai-first while preserving exact env names for debugging.
+- GitHub Actions visible step names for CI and Production Smoke are Thai-first, with predeploy guarding the key workflow labels.
 - Provider smoke guard regression tests now align with the current Thai-first retry wording for rate-limit provider failures.
 - Frontend unexpected-error console labels across Workspace, Wallet, Admin Moderation, Prompt Inspector, Admin Evals, Character Lobby, and Relationship preset picker now use Thai-first diagnostics instead of `Load ... error` labels.
 - Frontend route audit and bundle budget CLI output now report Thai-first pass/fail guidance while keeping exact file, route, and chunk names for debugging.

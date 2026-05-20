@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - name: Install root dependencies
+      - name: ติดตั้ง dependencies ระดับ repo
         run: bun install --frozen-lockfile
       - run: bun run secrets:check
       - run: bun run secrets:check:test
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - name: Install root dependencies
+      - name: ติดตั้ง dependencies ระดับ repo
         run: bun install --frozen-lockfile
       - run: bun run predeploy:check
       - run: bun run predeploy:check:test
@@ -146,7 +146,7 @@ jobs:
       - run: cd apps/backend && bunx prisma generate
       - run: cd apps/backend && bunx prisma migrate deploy
       - run: cd apps/backend && bun prisma/seed.ts
-      - name: Run seeded local smoke tests
+      - name: รัน local smoke จาก seed
         run: |
           cd apps/backend
           bun run start &

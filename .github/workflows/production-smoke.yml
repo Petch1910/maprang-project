@@ -80,7 +80,7 @@ jobs:
       - run: bun run deploy:status:test
       - run: bun run deploy:doctor:test
       - run: bun run deploy:doctor:self-test
-      - name: Validate smoke configuration
+      - name: ตรวจ config ก่อนรัน smoke
         run: |
           if [ -z "$SMOKE_API_BASE_URL" ]; then
             echo "ตั้ง workflow input api_base_url หรือ repository secret SMOKE_API_BASE_URL ก่อนรัน smoke"
@@ -116,15 +116,15 @@ jobs:
             echo "ตั้ง repository secret SUPABASE_SIGNED_URL_EXPIRES_IN โดยปกติใช้ 3600"
             exit 1
           fi
-      - name: Print deploy readiness status
+      - name: พิมพ์สถานะ deploy readiness
         run: bun run deploy:status
       - run: bun scripts/smoke-doctor.ts --strict-production
-      - name: Verify Supabase signed avatar storage
+      - name: ตรวจ Supabase signed avatar storage
         run: bun run supabase:storage:check
       - run: bun run smoke:ready
       - run: bun run smoke:local
       - run: bun run smoke:image
-      - name: Verify admin APIs
+      - name: ตรวจ admin APIs
         run: bun scripts/api-smoke.ts --require-admin
       - if: ${{ inputs.run_chat && inputs.run_image }}
         run: bun scripts/api-smoke.ts --live --require-live-image --require-admin

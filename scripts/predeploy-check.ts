@@ -1269,6 +1269,10 @@ const checks: Check[] = [
           'รัน live AI chat smoke ด้วย คำสั่งนี้ใช้เครดิตผู้ให้บริการจริง',
           'รัน live image generation smoke ด้วย คำสั่งนี้ใช้เครดิตสร้างรูปจริง',
           'ยอดโทเคนขั้นต่ำของ smoke user ก่อนรัน live chat smoke ที่ใช้เครดิตผู้ให้บริการจริง',
+          'ตรวจ config ก่อนรัน smoke',
+          'พิมพ์สถานะ deploy readiness',
+          'ตรวจ Supabase signed avatar storage',
+          'ตรวจ admin APIs',
           'SMOKE_API_BASE_URL',
           'SMOKE_ADMIN_API_KEY',
           'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT',
@@ -1345,6 +1349,10 @@ const checks: Check[] = [
           'This uses provider credits',
           'This uses image provider credits',
           'Minimum smoke-user token balance',
+          'Validate smoke configuration',
+          'Print deploy readiness status',
+          'Verify Supabase signed avatar storage',
+          'Verify admin APIs',
         ],
         '.github/workflows/production-smoke.yml',
       )
@@ -1393,10 +1401,12 @@ const checks: Check[] = [
         ],
         '.github/workflows/ci.yml',
       )
-      const ciRootInstallCount = ciWorkflow.match(/name: Install root dependencies[\s\S]*?run: bun install --frozen-lockfile/g)?.length ?? 0
+      const ciRootInstallCount = ciWorkflow.match(/name: ติดตั้ง dependencies ระดับ repo[\s\S]*?run: bun install --frozen-lockfile/g)?.length ?? 0
       if (ciRootInstallCount < 2) {
         throw new Error('CI ต้องติดตั้ง root dependencies ก่อนรัน secrets และ predeploy repo-owned gates')
       }
+      requireIncludes(ciWorkflow, ['รัน local smoke จาก seed'], '.github/workflows/ci.yml')
+      forbidIncludes(ciWorkflow, ['Install root dependencies', 'Run seeded local smoke tests'], '.github/workflows/ci.yml')
     },
   },
 ]
