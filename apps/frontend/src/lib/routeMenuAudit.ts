@@ -137,7 +137,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     route: 'โดเมนสเตจจิงจริง',
     control: 'Supabase จริง, ระบบหลังบ้านบน Render/Railway, โดเมนหน้าบ้าน, CORS จริง, e2e smoke',
     result: 'ต้องดีพลอยสเตจจิงก่อนขึ้นใช้งานจริง และรัน migration/smoke กับ DB staging จริง',
-    disabledReason: 'ยังไม่ใช่ปุ่มในแอปเครื่องนี้ เพราะต้องใช้บัญชีและโดเมนจริง',
+    disabledReason: 'ด่านนี้เป็น checklist สำหรับ staging จึงไม่แสดงเป็นเมนูให้กดในเว็บ ต้องใช้บัญชีและโดเมนจริงก่อนตรวจ',
     emptyState: 'ใช้ STAGING_RUNBOOK.md และ checklist ใน /admin/health เป็นตัวบอกงานที่ค้าง',
     status: 'needs-staging',
   },

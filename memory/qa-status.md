@@ -36,6 +36,7 @@ Results:
 - Full `qa:local` was rerun after wiring `predeploy:check:test`; the new predeploy regression test passed inside the full local gate.
 - Predeploy now explicitly requires `qa:local` and CI to keep `deploy:doctor:self-test` wired, matching the deployed smoke workflow.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
+- Route/menu staging checklist copy now passes `frontend:static:audit:test`, `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`; the static audit blocks the old ambiguous `ยังไม่ใช่ปุ่มในแอปเครื่องนี้` wording from returning.
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Full local QA was rerun after the latest Thai UI copy guards and route/menu mixed-language guard; `qa:local` still passes across backend, frontend, local smoke, and API smoke.
 - Full local QA was rerun after the latest Thai-first frontend/admin copy and Creator Draft image-provider copy passes; `qa:local` still passes across backend, frontend, local smoke, API smoke, audits, evals, and predeploy.

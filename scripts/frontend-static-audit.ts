@@ -179,6 +179,10 @@ export const suspiciousPatterns = [
       /(?:backend\s+จำกัดตามบัญชี|เช็กการเชื่อมต่อ\s+backend|backend\s+จะจำกัดซ้ำตามบัญชี|prompt\s+ไม่ชัด)/g,
     message: 'contains mixed profile/tag helper wording that should be Thai-first',
   },
+  {
+    pattern: /ยังไม่ใช่ปุ่มในแอปเครื่องนี้/g,
+    message: 'contains ambiguous staging checklist copy that sounds like a fake button',
+  },
   { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'contains Thai coming-soon placeholder copy' },
   { pattern: /\uFFFD/g, message: 'contains replacement character, likely broken text encoding' },
   { pattern: /[\u0080-\u009F]/g, message: 'contains C1 control character, likely mojibake' },

@@ -227,12 +227,16 @@ describe('frontend static audit', () => {
         '<p>บันทึกโหมดคอนเทนต์ไม่ได้ กรุณาเช็กการเชื่อมต่อ backend</p>',
         '<p>โดย backend จะจำกัดซ้ำตามบัญชี</p>',
         '<p>พฤติกรรมบอทอาจแกว่งถ้า prompt ไม่ชัด</p>',
+        '<p>ยังไม่ใช่ปุ่มในแอปเครื่องนี้ เพราะต้องใช้บัญชีและโดเมนจริง</p>',
       ].join('\n'),
       'ProfileTagFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 4 }, () => 'contains mixed profile/tag helper wording that should be Thai-first'),
+      [
+        ...Array.from({ length: 4 }, () => 'contains mixed profile/tag helper wording that should be Thai-first'),
+        'contains ambiguous staging checklist copy that sounds like a fake button',
+      ],
     )
   })
 
