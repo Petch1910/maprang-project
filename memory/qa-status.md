@@ -55,6 +55,7 @@ Last updated: 2026-05-20
 - Full local QA was rerun after the latest Thai-first frontend/admin copy and Creator Draft image-provider copy passes; `qa:local` still passes across backend, frontend, local smoke, API smoke, audits, evals, and predeploy.
 - Secrets check: pass.
 - Secret scan and release handoff diagnostic localization: pass via `secrets:check:test`, `release:handoff:test`, `secrets:check`, and `release:handoff:check`.
+- Security checklist Thai-first headings and CIA/AAA wording: pass via `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`.
 - Release handoff template Thai-first sections: pass via `release:handoff:test`, `release:handoff:check`, and `predeploy:check:test`.
 - Memory audit: pass.
 - Production memory handoff wording for blockers, next steps, and live provider verification is Thai-first.

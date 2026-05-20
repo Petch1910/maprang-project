@@ -1,8 +1,8 @@
-# Security Checklist
+# เช็กลิสต์ความปลอดภัย (Security Checklist)
 
 ใช้คู่กับ `bun run security:audit`, `bun run backend:check`, `bun run qa:full` และหน้า `/admin/health` ก่อน staging/production
 
-## SQL Injection
+## การฉีดคำสั่งฐานข้อมูล (SQL Injection)
 
 - Backend ใช้ Prisma query builder เป็นหลัก เช่น `findMany`, `findFirst`, `updateMany`, `deleteMany`, `upsert`
 - จุด raw SQL ที่ตั้งใจใช้มีเฉพาะ token debit แบบ row lock ใน `chat.service.ts` และต้องใช้ Prisma tagged template parameterization เท่านั้น
@@ -14,7 +14,7 @@
 - Guard อัตโนมัติ: `bun run security:audit`
 - QA ที่เกี่ยวข้อง: `backend-security-audit.test.ts`, `chat.routes.security.test.ts`, `route-id-validation.test.ts`, `wallet.persistence.test.ts`
 
-## Broken Access Control
+## สิทธิ์เข้าถึงข้ามบัญชี (Broken Access Control)
 
 - Production auth ต้องใช้ Supabase JWT; local `x-user-id` ใช้ได้เฉพาะ dev หรือ admin smoke เท่านั้น
 - Owner resource checks ใช้ `userId`, `creatorId` และ admin guard ก่อนอ่าน/แก้ไข/ลบ resource
@@ -25,13 +25,13 @@
 - Static guard: `bun run security:audit` fails if any backend `/admin` route block is missing `requireAdminApiKey`.
 - Guard อัตโนมัติ: `backend-security-audit.test.ts`, `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
 
-## Frontend XSS / Link Safety
+## Frontend XSS / Link Safety / ความปลอดภัยของลิงก์
 
 - ห้ามใช้ `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, หรือ `window.open()` ใน frontend source จนกว่าจะมี sanitizer และ security review ชัดเจน
 - ลิงก์ที่เปิดแท็บใหม่ด้วย `target="_blank"` ต้องมี `rel="noopener noreferrer"` เพื่อกัน opener/tabnabbing
 - Static guard: `bun run frontend:static:audit:test` และ `bun run predeploy:check` ต้องจับ regression ชุดนี้ก่อน staging
 
-## Prompt Control
+## การคุมพรอมป์ (Prompt Control)
 
 - System prompt ต้องใส่ `Platform prompt-control policy` ก่อน character prompt/lore/memory/persona/history
 - Character prompt, lore, memory, persona, history และ user message ต้องถูกระบุเป็น untrusted narrative/input data
@@ -42,18 +42,18 @@
 - Prompt Inspector ต้อง redact ทั้ง final prompt, section content, และ retrieved lore preview/keyword/alias ก่อนส่งกลับ UI
 - Guard อัตโนมัติ: `context.service.test.ts`, `prompt-inspector.service.test.ts`
 
-## CIA / AAA Coverage
+## ความครอบคลุม CIA / AAA
 
-- Confidentiality: Supabase JWT, admin API key, hidden private prompt fields, signed avatar URLs in production, and prompt-control policy.
-- Secret hygiene: `secrets:check` scans committed source/docs for OpenRouter, OpenAI, Anthropic, Hugging Face, Stripe live keys, platform tokens, JWT-like secrets, and fails if any tracked `.env`/`.env.*` file is present; untracked local env files stay usable for development.
+- Confidentiality / การรักษาความลับ: Supabase JWT, คีย์ผู้ดูแล, private prompt fields ที่ซ่อนอยู่, signed avatar URLs ใน production, และนโยบายคุมพรอมป์.
+- Secret hygiene / สุขอนามัยของ secret: `secrets:check` สแกน source/docs ที่ commit แล้วเพื่อหา OpenRouter, OpenAI, Anthropic, Hugging Face, Stripe live keys, platform tokens, JWT-like secrets, และ fail ถ้ามีไฟล์ `.env`/`.env.*` ที่ถูก track; env local ที่ไม่ถูก track ยังใช้พัฒนาได้ตามปกติ.
 - `.gitignore` ignores real `.env.*` files but explicitly allows `.env.example` and `.env.production.example` templates.
-- Integrity: Prisma query builder, raw SQL audit, route id validation, owner/admin guards, migrations, and relationship/tag validation.
-- Availability: database readiness, OpenRouter readiness, rate-limit buckets, token guard, smoke tests, and invalid-id 400/404 handling instead of 500.
-- Authentication: Supabase JWT in production; local `x-user-id` only for dev/admin smoke.
-- Authorization: owner/admin checks for chat, character, lore, report, wallet, and admin actions.
-- Accounting/Auditing: usage ledger, token transactions, reports, and admin audit logs.
+- Integrity / ความถูกต้องของข้อมูล: Prisma query builder, raw SQL audit, route id validation, owner/admin guards, migrations, และ relationship/tag validation.
+- Availability / ความพร้อมใช้งาน: database readiness, OpenRouter readiness, rate-limit buckets, token guard, smoke tests, และ invalid-id 400/404 handling แทน 500.
+- Authentication / การยืนยันตัวตน: Supabase JWT ใน production; local `x-user-id` ใช้เฉพาะ dev/admin smoke.
+- Authorization / การอนุญาตสิทธิ์: owner/admin checks สำหรับ chat, character, lore, report, wallet, และ admin actions.
+- Accounting/Auditing / การบันทึกบัญชีและ audit: usage ledger, token transactions, reports, และ admin audit logs.
 
-## Production Must-Pass
+## สิ่งที่ต้องผ่านก่อน production (Production Must-Pass)
 
 - `bun run qa:full`
 - `SMOKE_API_BASE_URL=https://<backend-staging-domain> bun run smoke:doctor`
