@@ -65,6 +65,7 @@ Verified:
 - Staging/production docs now describe live chat/image provider blockers with Thai-first billing, quota, providerFailure, and placeholder guidance while preserving exact commands and verification flags.
 - README, Deployment QA, Production Setup, and deploy blockers now use Thai-first live provider handoff wording for smoke wallet checks, `usage.providerFailure`, image billing/quota, and DB example-value rejection while preserving exact env names and commands.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
+- Deploy readiness health rows now use Thai-first ready/default/unknown labels such as `พร้อม`, `ยังไม่พร้อม`, `ไม่ทราบ`, and `ค่าเริ่มต้น` while preserving exact row keys for CLI/dashboard parsing.
 - Smoke doctor now warns about missing image-generation configuration with Thai-first Creator Studio placeholder guidance.
 - Smoke doctor roleplay reply-budget recommendation warnings now use Thai-first wording while preserving exact budget values and env names.
 - Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.
@@ -185,6 +186,7 @@ Verified:
 - Live chat and live image smoke now validate backend root identity before health/provider checks, preventing provider credits from being spent against the wrong deployed target.
 - API smoke readiness/image helper logic now lives in `scripts/api-smoke-helpers.ts`, and the main smoke flow exports importable `runApiSmoke` plus `buildApiSmokeSummary` helpers so CI/dashboard code can import and summarize smoke output without executing network checks; `api:smoke:test` guards live-verification-only readiness, image provider hints, safe JSON parsing, summary counts, and runner import safety without hitting a backend.
 - API smoke endpoint assertion diagnostics now use Thai-first wording for health/readiness, wallet usage, persona, relationship presets, character/lore CRUD, chat/menu/world-state validation, admin checks, SSE parsing, and expected-error validation while preserving exact endpoint names and machine-readable codes.
+- API smoke result rows now format statuses as Thai labels (`ผ่าน`, `เตือน`, `ไม่ผ่าน`, `ข้าม`) instead of `PASS/WARN/FAIL/SKIP`, with `api:smoke:test` guarding the mapping.
 - Production checklist memory now includes deploy doctor/status review, live API smoke, and production-data safety guidance, and predeploy guards those handoff notes from drifting.
 - Production deploy knowledge wiki now documents reply-budget baselines/recommendations and the deploy-status-first staging gate order.
 

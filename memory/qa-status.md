@@ -99,6 +99,7 @@ Results:
 - Deploy env doctor image-key wording now passes through `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Runtime env and deploy env doctor database placeholder wording now passes `bun test apps\backend\src\env.test.ts`, `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.
+- Deploy readiness health-row labels now pass Thai-first coverage via `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
 - Smoke doctor missing image-generation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor roleplay reply-budget recommendation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor success output and deploy env doctor self-test localization now pass `smoke:doctor:test`, `deploy:doctor:self-test`, and `deploy:doctor:test`.
@@ -150,6 +151,7 @@ Results:
 - API smoke now covers `/chat/stream` SSE shape on an uncharged validation path.
 - API smoke validation-path provider-failure diagnostics now pass `api:smoke:test` and `predeploy:check`.
 - API smoke endpoint assertion diagnostics now pass Thai-first coverage via `api:smoke:test`, `predeploy:check`, `secrets:check`, and `git diff --check`; full `api:smoke` still waits for the local backend/Postgres runtime when not already running.
+- API smoke result status labels now pass Thai-first coverage via `api:smoke:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Roleplay depth budget bump to 1600/420: pass via backend chat/env/health tests, live chat smoke helper test, deploy doctor test, and API smoke helper test.
 - Runtime prompt depth alignment: pass via `context.service.test`, `chat.runtime.test`, `knowledge:audit`, and `predeploy:check`; predeploy now blocks stale shorter 3-6/4-sentence/7-12-sentence guidance from returning.
 - Production reply budget env guard: pass via `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`; deploy doctor now fails values below 1200 output tokens or 320 roleplay reply characters.
