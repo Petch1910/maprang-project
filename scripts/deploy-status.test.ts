@@ -92,6 +92,8 @@ describe('deploy status formatting', () => {
     expect(text).toContain('backend URL ยังเป็น local')
     expect(text).toContain('CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https')
     expect(text).toContain('ขั้นตอนถัดไป:')
+    expect(text).toContain('วิธีแก้สเตจจิง:')
+    expect(text).not.toContain('วิธีแก้ staging:')
   })
 
   test('reports health failures without hiding deploy readiness', () => {
@@ -187,6 +189,7 @@ describe('deploy status formatting', () => {
     expect(errors.join('\n')).toContain('ชื่อ service ไม่ถูกต้อง')
     expect(errors.join('\n')).toContain('ไม่ใช่ proxy ของหน้าบ้าน/static')
     expect(errors.join('\n')).toContain('วิธีแก้ในเครื่อง:')
+    expect(errors.join('\n')).toContain('วิธีแก้สเตจจิง:')
   })
 
   test('returns a failure code without exiting when health cannot be read', async () => {
@@ -209,6 +212,7 @@ describe('deploy status formatting', () => {
     expect(errors.join('\n')).toContain('ตรวจสถานะ deploy ไม่ผ่าน: backend unavailable')
     expect(errors.join('\n')).not.toContain('Deploy status ไม่ผ่าน')
     expect(errors.join('\n')).toContain('วิธีแก้ในเครื่อง:')
+    expect(errors.join('\n')).toContain('วิธีแก้สเตจจิง:')
     expect(errors.join('\n')).toContain('URL ระบบหลังบ้านที่ deploy แล้ว')
     expect(errors.join('\n')).not.toContain('วิธีแก้ local:')
   })

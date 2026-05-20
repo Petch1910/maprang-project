@@ -58,6 +58,8 @@ describe('smoke doctor report', () => {
     expect(report.stdout).toContain('ขั้นตอนถัดไป:')
     expect(report.stdout.join('\n')).toContain('backend URL ยังเป็น local')
     expect(report.stdout.join('\n')).toContain('รัน `bun run staging:verify`')
+    expect(report.stdout.join('\n')).toContain('วิธีแก้สเตจจิง:')
+    expect(report.stdout.join('\n')).not.toContain('วิธีแก้ staging:')
     expect(report.stdout.at(-1)).toBe('Smoke doctor ผ่านแล้ว')
   })
 
@@ -71,9 +73,7 @@ describe('smoke doctor report', () => {
     expect(report.exitCode).toBe(1)
     expect(report.stdout).toContain('stagingReady: false')
     expect(report.stdout.some((line) => line.startsWith('productionReady:'))).toBe(false)
-    expect(report.stderr).toContain(
-      'Staging gate ไม่ผ่าน: แก้ staging blockers ด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว',
-    )
+    expect(report.stderr).toContain('ด่านสเตจจิงไม่ผ่าน: แก้ตัวกั้นสเตจจิงด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
   })
 
   test('reports backend health failures with Thai-first local and deploy fixes', () => {

@@ -176,7 +176,7 @@ export function evaluateDeployReadiness(
   } else if (!(health.model?.chatProvider?.productionReady ?? health.model?.chatProvider?.liveVerified)) {
     addProductionBlocker(
       'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน',
-      `รัน \`${health.model?.chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'}\` หรือ \`bun run api:smoke:live\` กับ staging/production แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน`,
+      `รัน \`${health.model?.chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'}\` หรือ \`bun run api:smoke:live\` กับสเตจจิงหรือโปรดักชัน แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน`,
     )
   }
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
@@ -187,7 +187,7 @@ export function evaluateDeployReadiness(
   } else if (!(health.model?.imageGeneration?.productionReady ?? health.model?.imageGeneration?.liveVerified)) {
     addProductionBlocker(
       'live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน',
-      `รัน \`${health.model?.imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'}\` หรือ \`bun run api:smoke:live\` กับ staging/production แล้วตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1 หลังผ่าน`,
+      `รัน \`${health.model?.imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'}\` หรือ \`bun run api:smoke:live\` กับสเตจจิงหรือโปรดักชัน แล้วตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1 หลังผ่าน`,
     )
   }
   for (const name of health.env?.missingRequired ?? []) {
@@ -232,9 +232,9 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
     steps.push('รัน `bun run staging:verify` พร้อม SMOKE_API_BASE_URL และ SMOKE_ADMIN_API_KEY')
   } else if (!readiness.productionReady) {
     for (const fix of readiness.productionFixes) steps.push(fix)
-    steps.push('รัน `bun run production:check` ใหม่กับระบบหลังบ้าน staging/production')
+    steps.push('รัน `bun run production:check` ใหม่กับระบบหลังบ้านสเตจจิงหรือโปรดักชัน')
   } else {
-    steps.push('รัน `bun run production:check` รอบสุดท้ายกับ domain ระบบหลังบ้านและหน้าบ้าน production')
+    steps.push('รัน `bun run production:check` รอบสุดท้ายกับโดเมนระบบหลังบ้านและหน้าบ้านโปรดักชัน')
     steps.push('กรอก `RELEASE_HANDOFF.md` ด้วย URL ที่ deploy แล้ว, สถานะ migration, storage/auth/CORS, ผล live smoke, ข้อจำกัดที่ยังรู้, และบันทึก go/no-go')
   }
 

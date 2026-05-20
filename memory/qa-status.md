@@ -17,6 +17,7 @@ Last updated: 2026-05-20
 - `predeploy:check` now guards Thai-first Markdown headings across the main docs, app READMEs, memory vault, and knowledge wiki, while allowing technical `API`/`URL` headings and numeric decision ids.
 - Browser e2e smoke spec and abuse QA checklist now expect the Thai prompt-control heading `กฎคุมพรอมป์ของแพลตฟอร์ม`; predeploy guards the old English heading from returning to the e2e spec.
 - Admin Health visible readiness copy now avoids stale mixed English staging/production/provider smoke wording, and the frontend static audit guards those phrases from returning.
+- Deploy readiness/status/smoke doctor CLI gate guidance now uses Thai-first staging/production labels while preserving automation keys such as `stagingReady` and `productionReady`.
 
 ## เกต local ล่าสุด (Gate local)
 

@@ -111,7 +111,7 @@ export function formatDeployStatusText(
       : 'stagingBlockers: ไม่พบ',
   )
   if (readiness.stagingFixes.length > 0) {
-    lines.push('วิธีแก้ staging:')
+    lines.push('วิธีแก้สเตจจิง:')
     for (const fix of readiness.stagingFixes) lines.push(`- ${fix}`)
   }
 
@@ -124,7 +124,7 @@ export function formatDeployStatusText(
       : 'productionBlockers: ไม่พบ',
   )
   if (readiness.productionFixes.length > 0) {
-    lines.push('วิธีแก้ production:')
+    lines.push('วิธีแก้โปรดักชัน:')
     for (const fix of readiness.productionFixes) lines.push(`- ${fix}`)
   }
 
@@ -160,7 +160,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
     } else {
       writeError(`ตรวจสถานะ deploy ไม่ผ่าน: ${message}`)
       writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
-      writeError('วิธีแก้ staging: ตั้ง SMOKE_API_BASE_URL เป็น URL ระบบหลังบ้านที่ deploy แล้ว ไม่ใช่ proxy ของหน้าบ้าน/static')
+      writeError('วิธีแก้สเตจจิง: ตั้ง SMOKE_API_BASE_URL เป็น URL ระบบหลังบ้านที่ deploy แล้ว ไม่ใช่ proxy ของหน้าบ้าน/static')
     }
     return 1
   }
@@ -174,7 +174,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
     } else {
       writeError(`ตรวจสถานะ deploy ไม่ผ่าน: ${message}`)
       writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้านและฐานข้อมูล แล้วรัน `bun run deploy:status` ใหม่')
-      writeError('วิธีแก้ staging: ตั้ง SMOKE_API_BASE_URL เป็น URL ระบบหลังบ้านที่ deploy แล้ว')
+      writeError('วิธีแก้สเตจจิง: ตั้ง SMOKE_API_BASE_URL เป็น URL ระบบหลังบ้านที่ deploy แล้ว')
     }
     return 1
   }

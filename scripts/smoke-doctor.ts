@@ -105,11 +105,11 @@ export function buildSmokeDoctorReport(
   stdout.push(`stagingBlockerCount: ${stagingBlockers.length}`)
   if (stagingBlockers.length > 0) {
     stdout.push(`stagingBlockers: ${stagingBlockers.join('; ')}`)
-    stdout.push('วิธีแก้ staging:')
+    stdout.push('วิธีแก้สเตจจิง:')
     for (const fix of stagingFixes) stdout.push(`- ${fix}`)
-    stdout.push('stagingGate: รัน `bun run staging:verify` กับ deployed staging backend ก่อนยืนยัน production.')
+    stdout.push('ด่านสเตจจิง: รัน `bun run staging:verify` กับระบบหลังบ้านสเตจจิงที่ deploy แล้วก่อนยืนยันโปรดักชัน')
     if (options.strictStagingGate) {
-      stderr.push('Staging gate ไม่ผ่าน: แก้ staging blockers ด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
+      stderr.push('ด่านสเตจจิงไม่ผ่าน: แก้ตัวกั้นสเตจจิงด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
@@ -121,11 +121,11 @@ export function buildSmokeDoctorReport(
 
   if (productionBlockers.length > 0) {
     stdout.push(`productionBlockers: ${productionBlockers.join('; ')}`)
-    stdout.push('วิธีแก้ production:')
+    stdout.push('วิธีแก้โปรดักชัน:')
     for (const fix of productionFixes) stdout.push(`- ${fix}`)
-    stdout.push('productionGate: รัน `bun run production:check` กับ staging/production backend ก่อน deploy.')
+    stdout.push('ด่านโปรดักชัน: รัน `bun run production:check` กับระบบหลังบ้านสเตจจิงหรือโปรดักชันก่อน deploy')
     if (options.strictProductionGate) {
-      stderr.push('Production gate ไม่ผ่าน: แก้ production blockers ด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
+      stderr.push('ด่านโปรดักชันไม่ผ่าน: แก้ตัวกั้นโปรดักชันด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
