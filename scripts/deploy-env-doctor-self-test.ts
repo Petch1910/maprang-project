@@ -170,7 +170,7 @@ try {
     }
   }
 
-  writeLine('ok - deploy env doctor self-test ผ่านแล้ว')
+  writeLine('ผ่าน - deploy env doctor self-test ผ่านแล้ว')
 } finally {
   await rm(tempDir, { recursive: true, force: true })
 }

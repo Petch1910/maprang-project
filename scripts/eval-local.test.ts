@@ -18,7 +18,7 @@ describe('local eval output formatting', () => {
       stdout: [
         'eval - roleplay-depth: ประมาณ 1200 โทเคนของพรอมป์',
         'eval - prompt-injection: ประมาณ 900 โทเคนของพรอมป์',
-        'ok - local eval ผ่าน (2 สถานการณ์)',
+        'ผ่าน - local eval ผ่าน (2 สถานการณ์)',
       ],
       stderr: [],
     })

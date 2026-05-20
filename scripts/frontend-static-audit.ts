@@ -255,7 +255,7 @@ export async function runFrontendStaticAudit(
     return 1
   }
 
-  writeLine('ok - frontend static audit ผ่านแล้ว')
+  writeLine('ผ่าน - frontend static audit ผ่านแล้ว')
   return 0
 }
 

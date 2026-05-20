@@ -68,7 +68,7 @@ export async function runReleaseHandoffCheck(
     return 1
   }
 
-  writeLine(`ok - release handoff ${result.requireFilled ? 'กรอกครบและ' : ''}ปลอดภัยต่อการ commit`)
+  writeLine(`ผ่าน - release handoff ${result.requireFilled ? 'กรอกครบและ' : ''}ปลอดภัยต่อการ commit`)
   return 0
 }
 

@@ -381,7 +381,7 @@ export async function runApiRouteAudit(
     return 1
   }
 
-  writeLine('ok - backend API route audit ผ่านแล้ว')
+  writeLine('ผ่าน - backend API route audit ผ่านแล้ว')
   return 0
 }
 

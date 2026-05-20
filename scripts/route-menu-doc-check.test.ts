@@ -137,7 +137,7 @@ describe('route menu doc check', () => {
     expect(result.auditedSurfaces).toBeGreaterThan(0)
     expect(result.findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toContain('ok - route/menu document check ผ่านแล้ว')
+    expect(lines[0]).toContain('ผ่าน - route/menu document check ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

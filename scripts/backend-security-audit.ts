@@ -162,7 +162,7 @@ export async function runBackendSecurityAudit(
     return 1
   }
 
-  writeLine('ok - backend security audit ผ่านแล้ว')
+  writeLine('ผ่าน - backend security audit ผ่านแล้ว')
   return 0
 }
 

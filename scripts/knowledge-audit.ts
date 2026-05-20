@@ -126,7 +126,7 @@ export async function runKnowledgeAudit(
     return 1
   }
 
-  writeLine(`ok - knowledge audit ผ่านแล้ว (${result.files} knowledge files, ${result.structuredPacks} structured packs)`)
+  writeLine(`ผ่าน - knowledge audit ผ่านแล้ว (${result.files} knowledge files, ${result.structuredPacks} structured packs)`)
   return 0
 }
 

@@ -261,7 +261,7 @@ export async function runRouteMenuDocCheck(
     return 1
   }
 
-  writeLine(`ok - route/menu document check ผ่านแล้ว (${result.auditedSurfaces} surfaces)`)
+  writeLine(`ผ่าน - route/menu document check ผ่านแล้ว (${result.auditedSurfaces} surfaces)`)
   return 0
 }
 

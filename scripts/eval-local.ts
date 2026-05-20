@@ -10,7 +10,7 @@ export function formatLocalEvalRun(run: Pick<LocalEvalRun, 'passed' | 'scenarioC
     return { exitCode: 1, stdout, stderr }
   }
 
-  stdout.push(`ok - local eval ผ่าน (${run.scenarioCount} สถานการณ์)`)
+  stdout.push(`ผ่าน - local eval ผ่าน (${run.scenarioCount} สถานการณ์)`)
   return { exitCode: 0, stdout, stderr }
 }
 

@@ -245,7 +245,7 @@ describe('frontend static audit', () => {
 
     expect(findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('ok - frontend static audit ผ่านแล้ว')
+    expect(lines[0]).toBe('ผ่าน - frontend static audit ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

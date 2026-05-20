@@ -201,7 +201,7 @@ export async function runImportCycleAudit(
     return 1
   }
 
-  writeLine(`ok - import cycle audit ผ่านแล้ว (${result.fileCount} files, ${result.edgeCount} edges)`)
+  writeLine(`ผ่าน - import cycle audit ผ่านแล้ว (${result.fileCount} files, ${result.edgeCount} edges)`)
   return 0
 }
 

@@ -186,7 +186,7 @@ export async function runFrontendRouteAudit(
     return 1
   }
 
-  writeLine(`ok - frontend route audit ผ่านแล้ว (${result.declaredRoutes.length} routes)`)
+  writeLine(`ผ่าน - frontend route audit ผ่านแล้ว (${result.declaredRoutes.length} routes)`)
   return 0
 }
 

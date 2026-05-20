@@ -67,7 +67,7 @@ describe('frontend route audit', () => {
     expect(result.declaredRoutes.length).toBeGreaterThan(0)
     expect(result.findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toContain('ok - frontend route audit ผ่านแล้ว')
+    expect(lines[0]).toContain('ผ่าน - frontend route audit ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

@@ -110,7 +110,7 @@ export async function runMemoryAudit(
     return 1
   }
 
-  writeLine(`ok - memory audit ผ่านแล้ว (${result.files} markdown files)`)
+  writeLine(`ผ่าน - memory audit ผ่านแล้ว (${result.files} markdown files)`)
   return 0
 }
 
