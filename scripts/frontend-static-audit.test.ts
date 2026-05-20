@@ -89,6 +89,7 @@ describe('frontend static audit', () => {
         '<span>staging/future gate</span>',
         '<p>Could not load chats</p>',
         '<p>Could not load characters</p>',
+        '<p>/chat failed with status 500</p>',
         '<p>Teen romance</p>',
         '<p>Mature 18+</p>',
         '<p>Restricted 18+</p>',
@@ -99,6 +100,7 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
+      'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',
       'contains English UI label that should be Thai-first',

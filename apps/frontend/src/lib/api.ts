@@ -14,7 +14,7 @@ export class ApiError extends Error {
     const message =
       payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
         ? payload.error
-        : `${path} failed with status ${status}`
+        : `${path} ไม่สำเร็จ (status ${status})`
     super(message)
     this.name = 'ApiError'
     this.path = path
