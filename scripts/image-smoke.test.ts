@@ -113,6 +113,29 @@ describe('image smoke helpers', () => {
     expect(errors).toEqual([])
   })
 
+  test('reports missing configured provider with Thai-first deploy guidance', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runImageSmoke({
+      argv: ['bun', 'image-smoke.ts'],
+      env: {},
+      apiBaseUrl: 'https://api.maprang.example',
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
+      readHealth: async () => ({
+        ok: true,
+        checks: { imageGenerationConfigured: false },
+        model: { imageGeneration: { configured: false } },
+      }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่าบนระบบหลังบ้าน')
+    expect(errors.join('\n')).toContain('IMAGE_GENERATION_API_KEY')
+  })
+
   test('runs live image smoke through an importable runner without provider calls', async () => {
     const lines: string[] = []
     const errors: string[] = []

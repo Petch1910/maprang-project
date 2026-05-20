@@ -146,7 +146,9 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
   const imageConfigured = imageGenerationIsConfigured(health)
 
   if (!imageConfigured) {
-    writeError('image generation provider ยังไม่ได้ตั้งค่าบน backend ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ก่อน production')
+    writeError(
+      'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่าบนระบบหลังบ้าน ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ก่อนตรวจ production',
+    )
     return 1
   }
 
