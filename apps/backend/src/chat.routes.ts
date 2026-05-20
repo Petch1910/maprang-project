@@ -73,7 +73,7 @@ export const chatRoutes = new Elysia()
 
         console.error('Chat error:', error)
         return {
-          reply: 'The AI service is temporarily unavailable. Please try again.',
+          reply: 'บริการ AI ขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง',
           chatId: responseChatId(body.chatId),
         }
       }

@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import {
   applyPromptBudget,
   buildRoleplayContinuationInstruction,
@@ -13,6 +14,13 @@ import { contentRatingFromTags, ratingAllowed } from './content-rating'
 import { buildWorldStatePrompt, coerceWorldState, mergeWorldState } from './world-state.service'
 
 describe('chat runtime state', () => {
+  test('keeps route-level chat fallback reply Thai-first', () => {
+    const routeSource = readFileSync(new URL('./chat.routes.ts', import.meta.url), 'utf8')
+
+    expect(routeSource).toContain('บริการ AI ขัดข้องชั่วคราว')
+    expect(routeSource).not.toContain('The AI service is temporarily unavailable')
+  })
+
   test('drops oldest history messages to stay within prompt budget', () => {
     const history = Array.from({ length: 6 }, (_, index) => ({
       role: index % 2 === 0 ? ('user' as const) : ('assistant' as const),

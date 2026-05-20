@@ -34,6 +34,7 @@ Verified:
 - Frontend API fallback errors now use Thai-first `ApiError` messages when a backend response has no JSON error string, and the static audit blocks stale `failed with status` wording from returning.
 - Frontend `ApiError` now prefers backend `message` fields before machine-readable `error` codes, falls back to Thai-first retry copy when `message` is missing, and keeps raw backend codes in `payload` only; `frontend:api:test` plus the static audit block raw `payload.error` display regressions.
 - Backend chat validation/access/token/rating/empty-provider fallback replies now use centralized Thai-first copy, and short-reply continuation skips those operational replies instead of trying to extend them as roleplay.
+- Backend `/chat` route-level fallback reply now uses Thai-first temporary-service-failure copy instead of the old English AI-service message, with focused runtime regression coverage.
 - Backend rate-limit responses now keep the machine-readable `rate_limited` code while returning a Thai-first user message.
 - Backend avatar storage failures now return Thai-first messages for Supabase configuration, upload, signed URL, and route-level storage-unavailable cases.
 - Backend avatar upload validation now returns Thai-first messages for missing files, unsupported file types, oversized files, and avatar-not-found responses.

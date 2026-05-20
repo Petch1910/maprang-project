@@ -128,6 +128,7 @@ Last updated: 2026-05-20
 - Backend DB-required check guidance now passes Thai-first coverage via `bun run backend:check:db:test`.
 - Backend DB test gate guidance now passes Thai-first coverage via `bun test apps\backend\src\db.test-gate.test.ts` and full `backend:check` with 141 pass.
 - Backend chat validation/access/token/rating/empty-provider fallback copy now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts apps\backend\src\character.persistence.test.ts` and full `backend:check` with 141 pass.
+- Backend chat route-level fallback reply now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts`.
 - Backend rate-limit response copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 141 pass.
 - Backend avatar storage failure copy now passes Thai-first coverage via `bun test apps\backend\src\storage.service.test.ts apps\backend\src\upload.routes.test.ts` and full `backend:check` with 141 pass.
 - Backend production auth 401 copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 141 pass.
