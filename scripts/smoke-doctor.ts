@@ -63,7 +63,7 @@ export function buildSmokeDoctorReport(
   const failures = healthFailures(health)
 
   if (failures.length > 0) {
-    stderr.push(`Smoke doctor ไม่ผ่าน: ${failures.join('; ')}`)
+    stderr.push(`ตรวจ smoke doctor ไม่ผ่าน: ${failures.join('; ')}`)
     stderr.push('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่มระบบหลังบ้าน')
     stderr.push('วิธีแก้ตอน deploy: ตรวจ DATABASE_URL, migrations, และเครือข่ายของ service ระบบหลังบ้าน')
     return { exitCode: 1, stdout, stderr, warnings }
@@ -145,7 +145,7 @@ export function buildSmokeDoctorReport(
     stdout.push(`${index + 1}. ${step}`)
   }
 
-  stdout.push('Smoke doctor ผ่านแล้ว')
+  stdout.push('ผ่าน - ตรวจ smoke doctor ผ่านแล้ว')
   return { exitCode: 0, stdout, stderr, warnings }
 }
 
@@ -165,7 +165,7 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
   try {
     validateBackendRootIdentity(await rootIdentityReader())
   } catch (error) {
-    writeError(`Smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
+    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
     writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
     writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า root ของระบบหลังบ้านที่ deploy แล้วไม่ใช่ proxy ของหน้าบ้าน/static')
     return 1
@@ -175,7 +175,7 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
   try {
     health = await healthReader()
   } catch (error) {
-    writeError(`Smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
+    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
     writeError('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่มระบบหลังบ้าน')
     writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่าระบบหลังบ้านที่ deploy แล้วเข้าถึงได้')
     return 1

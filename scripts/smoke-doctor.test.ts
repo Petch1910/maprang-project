@@ -60,7 +60,7 @@ describe('smoke doctor report', () => {
     expect(report.stdout.join('\n')).toContain('รัน `bun run staging:verify`')
     expect(report.stdout.join('\n')).toContain('วิธีแก้สเตจจิง:')
     expect(report.stdout.join('\n')).not.toContain('วิธีแก้ staging:')
-    expect(report.stdout.at(-1)).toBe('Smoke doctor ผ่านแล้ว')
+    expect(report.stdout.at(-1)).toBe('ผ่าน - ตรวจ smoke doctor ผ่านแล้ว')
   })
 
   test('strict staging gate fails before production output when staging blockers remain', () => {
@@ -260,7 +260,7 @@ describe('smoke doctor report', () => {
 
     expect(exitCode).toBe(0)
     expect(lines).toContain('productionReady: true')
-    expect(lines.at(-1)).toBe('Smoke doctor ผ่านแล้ว')
+    expect(lines.at(-1)).toBe('ผ่าน - ตรวจ smoke doctor ผ่านแล้ว')
     expect(warnings).toEqual([])
     expect(errors).toEqual([])
   })
