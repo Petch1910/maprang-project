@@ -107,6 +107,7 @@ Results:
 - Knowledge wiki Thai-first core pages now pass `knowledge:audit`, `vault:audit:test`, and `predeploy:check`.
 - Raw knowledge inbox and decision index Thai-first entry points now pass `memory:audit`, `knowledge:audit`, and `secrets:check`.
 - Deploy status and smoke doctor text-output localization now passes `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
+- Decision records 0001-0005 Thai-first localization now passes `memory:audit`, `secrets:check`, and `predeploy:check`.
 - Smoke doctor missing image-generation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor roleplay reply-budget recommendation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor success output and deploy env doctor self-test localization now pass `smoke:doctor:test`, `deploy:doctor:self-test`, and `deploy:doctor:test`.

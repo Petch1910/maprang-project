@@ -1,17 +1,17 @@
-# 0004 - Adult-Mode Conflict Policy
+# 0004 - Adult-mode conflict policy
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-Status: decided
+สถานะ: decided
 
 ## Decision
 
-In adult mode, relationship/tag conflicts can become creator warnings instead of hard publish blocks, as long as the content is framed as fictional simulation and the user-facing safety model remains explicit.
+ใน adult mode ความขัดแย้งของ relationship/tag สามารถเป็น creator warnings แทน hard publish blocks ได้ ตราบใดที่เนื้อหาถูกวางกรอบว่าเป็น fictional simulation และ user-facing safety model ยังชัดเจน
 
-## Rationale
+## เหตุผล
 
-The target audience is adults who expect intense roleplay. The creator experience should not feel arbitrarily blocked, but the platform still needs visible warnings, age/content settings, reporting, moderation, and deployment-safe policy language.
+กลุ่มเป้าหมายคือผู้ใหญ่ที่คาดหวัง roleplay เข้มข้น creator experience จึงไม่ควรรู้สึกว่าถูก block แบบไร้เหตุผล แต่แพลตฟอร์มยังต้องมี visible warnings, age/content settings, reporting, moderation, และ deployment-safe policy language.
 
-## Boundary
+## ขอบเขต
 
-This decision does not remove platform safety, report, audit, or content-setting requirements.
+decision นี้ไม่ได้ตัดข้อกำหนดด้าน platform safety, report, audit, หรือ content-setting ออก.

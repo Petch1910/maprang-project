@@ -1,24 +1,24 @@
-# 0002 - Add Markdown Memory Vault
+# 0002 - เพิ่ม Markdown memory vault
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-Status: done
+สถานะ: done
 
 ## Decision
 
-Add a lightweight project memory vault under `memory/`.
+เพิ่ม project memory vault แบบเบาไว้ใต้ `memory/`.
 
-## Rationale
+## เหตุผล
 
-The work spans many sessions and includes product decisions, deployment blockers, provider verification, UI direction, backend contracts, and QA gates. Keeping those notes in Markdown reduces repeated rediscovery and makes future sessions easier to continue.
+งานนี้ลากยาวหลาย session และมี product decisions, deployment blockers, provider verification, UI direction, backend contracts, และ QA gates จำนวนมาก การเก็บโน้ตเป็น Markdown ลดการค้นซ้ำ และทำให้ session ถัดไปสานต่อง่ายขึ้น
 
-## Rules
+## กฎ
 
-- No secrets.
-- No real credentials.
-- Keep notes dated and specific.
-- Update after major QA, deploy, API, schema, UI, or provider changes.
+- ห้ามใส่ secrets.
+- ห้ามใส่ real credentials.
+- เขียนโน้ตให้มีวันที่และเฉพาะเจาะจง.
+- อัปเดตหลังมี major QA, deploy, API, schema, UI, หรือ provider changes.
 
-## Next
+## ถัดไป
 
-Use the memory vault as the first stop when resuming long-running work.
+ใช้ memory vault เป็นจุดเริ่มต้นแรกเมื่อกลับมาสานต่องานระยะยาว.

@@ -1,24 +1,24 @@
-# 0005 - Audit Memory in Local QA
+# 0005 - ตรวจ memory ใน local QA
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-Status: done
+สถานะ: done
 
 ## Decision
 
-Add `memory:audit` and run it inside `qa:local`.
+เพิ่ม `memory:audit` และรันอยู่ใน `qa:local`.
 
-## Rationale
+## เหตุผล
 
-The memory vault is now part of the development workflow. It should be checked like any other project artifact so required context files, local links, and secret-safety rules do not silently drift.
+memory vault เป็นส่วนหนึ่งของ workflow การพัฒนาแล้ว จึงควรถูกตรวจเหมือน artifact อื่นในโปรเจกต์ เพื่อไม่ให้ required context files, local links, และ secret-safety rules drift โดยไม่รู้ตัว
 
-## Implementation
+## สิ่งที่ทำแล้ว
 
-- Added `scripts/memory-audit.ts`.
-- Added `bun run memory:audit`.
-- Added `memory:audit` to `qa:local`.
-- Added memory checks to `predeploy:check`.
+- เพิ่ม `scripts/memory-audit.ts`.
+- เพิ่ม `bun run memory:audit`.
+- เพิ่ม `memory:audit` เข้า `qa:local`.
+- เพิ่ม memory checks เข้า `predeploy:check`.
 
-## Next
+## ถัดไป
 
-Keep memory concise and update it after major QA, deploy, API, schema, UI, or provider changes.
+รักษา memory ให้กระชับ และอัปเดตหลัง major QA, deploy, API, schema, UI, หรือ provider changes.

@@ -1,23 +1,23 @@
-# 0001 - Use SocratiCode as Local Codebase Intelligence
+# 0001 - ใช้ SocratiCode เป็น local codebase intelligence
 
-Date: 2026-05-13
+วันที่: 2026-05-13
 
-Status: done
+สถานะ: done
 
 ## Decision
 
-Use SocratiCode as a local MCP development tool, not as a Maprang runtime dependency.
+ใช้ SocratiCode เป็นเครื่องมือ MCP สำหรับพัฒนาในเครื่อง ไม่ใช่ runtime dependency ของ Maprang
 
-## Rationale
+## เหตุผล
 
-Maprang now has enough backend, frontend, QA, deploy, and provider wiring that codebase intelligence can save time when tracing route-to-service-to-database flows and assessing impact before edits.
+ตอนนี้ Maprang มี backend, frontend, QA, deploy, และ provider wiring มากพอที่ codebase intelligence จะช่วยลดเวลาไล่ route-to-service-to-database flows และประเมินผลกระทบก่อนแก้โค้ด
 
-## Implementation
+## สิ่งที่ทำแล้ว
 
-- Added a SocratiCode MCP server to the local Codex config.
-- Added `.socraticodeignore` to avoid indexing dependencies, build output, local runtime files, binaries, and env secrets.
-- Documented the workflow in the project README.
+- เพิ่ม SocratiCode MCP server ใน local Codex config.
+- เพิ่ม `.socraticodeignore` เพื่อไม่ index dependencies, build output, local runtime files, binaries, และ env secrets.
+- บันทึก workflow ไว้ใน README ของโปรเจกต์.
 
-## Risk
+## ความเสี่ยง
 
-SocratiCode is AGPL licensed on npm, so it should remain a local development tool unless licensing is reviewed separately.
+SocratiCode บน npm เป็น AGPL licensed จึงควรใช้เป็น local development tool เท่านั้น จนกว่าจะ review licensing แยกต่างหาก.
