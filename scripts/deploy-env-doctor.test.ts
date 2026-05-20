@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
-import { formatDeployDoctorStatus, hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile, runDeployEnvDoctor } from './deploy-env-doctor'
+import { formatDeployDoctorArea, formatDeployDoctorStatus, hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile, runDeployEnvDoctor } from './deploy-env-doctor'
 import { runDeployEnvDoctorSelfTest } from './deploy-env-doctor-self-test'
 
 const tempDir = join(import.meta.dir, '..', '.tmp', 'deploy-env-doctor-unit')
@@ -11,6 +11,12 @@ describe('deploy env doctor helpers', () => {
     expect(formatDeployDoctorStatus('pass')).toBe('ผ่าน')
     expect(formatDeployDoctorStatus('warn')).toBe('เตือน')
     expect(formatDeployDoctorStatus('fail')).toBe('ไม่ผ่าน')
+  })
+
+  test('formats deploy doctor areas in Thai', () => {
+    expect(formatDeployDoctorArea('backend')).toBe('ระบบหลังบ้าน')
+    expect(formatDeployDoctorArea('frontend')).toBe('หน้าบ้าน')
+    expect(formatDeployDoctorArea('cross-check')).toBe('ตรวจเทียบสองฝั่ง')
   })
 
   test('parses flags and key value arguments without running the doctor', () => {
@@ -118,8 +124,14 @@ describe('deploy env doctor helpers', () => {
       expect(result.ok).toBe(true)
       expect(result.fail).toBe(0)
       expect(result.findings.some((finding) => finding.area === 'cross-check' && finding.check === 'Supabase URL match' && finding.status === 'pass')).toBe(true)
-      expect(lines[0]).toBe('Deploy env doctor')
+      expect(lines[0]).toBe('ตรวจ env ก่อน deploy')
+      expect(lines.join('\n')).toContain('ไฟล์ env ระบบหลังบ้าน:')
+      expect(lines.join('\n')).toContain('ไฟล์ env หน้าบ้าน:')
+      expect(lines.join('\n')).toContain('ผ่าน - ระบบหลังบ้าน')
       expect(lines.join('\n')).toContain('ผ่าน -')
+      expect(lines.join('\n')).not.toContain('Deploy env doctor')
+      expect(lines.join('\n')).not.toContain('backendEnv:')
+      expect(lines.join('\n')).not.toContain('frontendEnv:')
       expect(lines.join('\n')).not.toContain('PASS -')
       expect(lines.join('\n')).not.toContain(anonKey)
       expect(lines.join('\n')).not.toContain(serviceRoleKey)

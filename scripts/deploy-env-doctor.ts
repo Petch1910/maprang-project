@@ -36,6 +36,15 @@ export function formatDeployDoctorStatus(status: Status) {
   return labels[status]
 }
 
+export function formatDeployDoctorArea(area: Area) {
+  const labels: Record<Area, string> = {
+    backend: 'ระบบหลังบ้าน',
+    frontend: 'หน้าบ้าน',
+    'cross-check': 'ตรวจเทียบสองฝั่ง',
+  }
+  return labels[area]
+}
+
 export async function runDeployEnvDoctor(argv = process.argv.slice(2), writeLine: (line: string) => void = (line) => console.log(line)): Promise<DeployEnvDoctorResult> {
 const args = parseArgs(argv)
 const backendEnvPath = resolveFromRoot(args.get('backend-env') ?? 'apps/backend/.env')
@@ -49,14 +58,14 @@ let frontendEnv: EnvMap
 try {
   backendEnv = await readEnvFile(backendEnvPath)
 } catch (error) {
-  fail('backend', 'backend env file', `อ่านไฟล์ backend env ไม่ได้: ${errorMessage(error)}`)
+  fail('backend', 'ไฟล์ env ระบบหลังบ้าน', `อ่านไฟล์ env ระบบหลังบ้านไม่ได้: ${errorMessage(error)}`)
   backendEnv = new Map()
 }
 
 try {
   frontendEnv = await readEnvFile(frontendEnvPath)
 } catch (error) {
-  fail('frontend', 'frontend env file', `อ่านไฟล์ frontend env ไม่ได้: ${errorMessage(error)}`)
+  fail('frontend', 'ไฟล์ env หน้าบ้าน', `อ่านไฟล์ env หน้าบ้านไม่ได้: ${errorMessage(error)}`)
   frontendEnv = new Map()
 }
 
@@ -64,13 +73,14 @@ auditBackendEnv(backendEnv)
 auditFrontendEnv(frontendEnv)
 auditCrossEnv(backendEnv, frontendEnv)
 
-writeLine(`Deploy env doctor`)
-writeLine(`backendEnv: ${displayPath(backendEnvPath)}`)
-writeLine(`frontendEnv: ${displayPath(frontendEnvPath)}`)
+writeLine(`ตรวจ env ก่อน deploy`)
+writeLine(`ไฟล์ env ระบบหลังบ้าน: ${displayPath(backendEnvPath)}`)
+writeLine(`ไฟล์ env หน้าบ้าน: ${displayPath(frontendEnvPath)}`)
 
 for (const finding of findings) {
   const label = formatDeployDoctorStatus(finding.status)
-  writeLine(`${label} - ${finding.area} ${finding.check}: ${finding.detail}`)
+  const areaLabel = formatDeployDoctorArea(finding.area)
+  writeLine(`${label} - ${areaLabel} ${finding.check}: ${finding.detail}`)
 }
 
 const failCount = findings.filter((finding) => finding.status === 'fail').length
