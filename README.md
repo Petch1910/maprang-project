@@ -1,38 +1,38 @@
 # Maprang Project
 
-AI character chat platform with relationship state, scene events, creator tools, usage tracking, wallet ledger, and production-ready auth/storage hooks.
+แพลตฟอร์ม AI character chat ที่มี relationship state, scene events, creator tools, usage tracking, wallet ledger, และ production-ready auth/storage hooks.
 
-## Local Setup
+## ตั้งค่า local
 
-1. Start Postgres:
+1. เปิด Postgres:
 
 ```bash
 docker compose up -d postgres
 ```
 
-2. Backend env:
+2. ตั้งค่า Backend env:
 
 ```bash
 cp apps/backend/.env.example apps/backend/.env
 ```
 
-Fill `OPENROUTER_API_KEY`. Supabase values are optional for local dev. Avatar uploads use local disk by default and switch to Supabase Storage when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET` are set.
-Keep real `.env` and `.env.*` files untracked. The repo allows only env templates such as `.env.example` and `.env.production.example`, and `secrets:check` fails if a real env file becomes tracked.
+ใส่ `OPENROUTER_API_KEY`. ค่า Supabase เป็น optional สำหรับ local dev. Avatar uploads จะใช้ local disk เป็นค่าเริ่มต้น และจะเปลี่ยนไปใช้ Supabase Storage เมื่อมี `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, และ `SUPABASE_STORAGE_BUCKET`.
+อย่า track ไฟล์ `.env` และ `.env.*` จริงใน git. Repo อนุญาตเฉพาะ env templates เช่น `.env.example` และ `.env.production.example`; `secrets:check` จะ fail ถ้ามี tracked `.env` จริง.
 
-Creator Studio can draft Thai character content through OpenRouter. Real AI avatar generation is optional and needs `IMAGE_GENERATION_API_KEY`; without it the app uses a clearly labeled temporary placeholder image while still filling the character fields.
+Creator Studio ร่างเนื้อหาตัวละครภาษาไทยผ่าน OpenRouter ได้. การสร้าง AI avatar จริงเป็น optional และต้องมี `IMAGE_GENERATION_API_KEY`; ถ้าไม่มี key ระบบจะใช้ placeholder image ชั่วคราวที่ระบุชัด แต่ยังเติม character fields ให้ได้.
 
-3. Frontend env:
+3. ตั้งค่า Frontend env:
 
 ```bash
 cp apps/frontend/.env.example apps/frontend/.env
 ```
 
-Leave blank or omit this file for local dev auth mode.
-Set `VITE_API_BASE_URL` when the backend is not running at `http://localhost:3000`.
+ปล่อยว่างหรือละไฟล์นี้ได้สำหรับ local dev auth mode.
+ตั้ง `VITE_API_BASE_URL` เมื่อ backend ไม่ได้รันที่ `http://localhost:3000`.
 
-For local development with real Supabase credentials, keep `STORAGE_PROVIDER=local` in `apps/backend/.env`. This lets auth use Supabase while avatar tests and local uploads stay on disk. Use `STORAGE_PROVIDER=supabase` only in production or when intentionally testing Supabase Storage. To create or verify the private signed `avatars` bucket, run `bun run supabase:storage:setup`; use `bun run supabase:storage:check` for a read-only verification.
+สำหรับ local development ที่ใช้ Supabase credentials จริง ให้คง `STORAGE_PROVIDER=local` ใน `apps/backend/.env`. วิธีนี้ทำให้ auth ใช้ Supabase ได้ แต่ avatar tests และ local uploads ยังอยู่บน disk. ใช้ `STORAGE_PROVIDER=supabase` เฉพาะ production หรือเมื่อตั้งใจทดสอบ Supabase Storage. ถ้าต้องการสร้างหรือตรวจ bucket `avatars` แบบ private signed ให้รัน `bun run supabase:storage:setup`; ใช้ `bun run supabase:storage:check` สำหรับ read-only verification.
 
-4. Install and migrate:
+4. ติดตั้งและ migrate:
 
 ```bash
 cd apps/backend
@@ -41,7 +41,7 @@ bunx prisma generate
 bunx prisma migrate deploy
 ```
 
-5. Run apps:
+5. รัน apps:
 
 ```bash
 cd apps/backend
@@ -59,75 +59,67 @@ Backend readiness: `http://127.0.0.1:3000/ready`
 
 ## Local Codebase Intelligence
 
-This workspace is prepared for SocratiCode as a local MCP codebase intelligence tool. It is configured in
-`C:\Users\Phet\.codex\config.toml` and uses the project `.socraticodeignore` to skip dependencies, build output, local
-runtime files, binary assets, and env secrets.
+Workspace นี้เตรียมไว้ให้ใช้ SocratiCode เป็น local MCP codebase intelligence tool. การตั้งค่าอยู่ที่
+`C:\Users\Phet\.codex\config.toml` และใช้ `.socraticodeignore` ของโปรเจกต์เพื่อข้าม dependencies, build output, local
+runtime files, binary assets, และ env secrets.
 
-After restarting Codex, ask the assistant to index this codebase. Keep SocratiCode as a local development tool only; do
-not add it as a Maprang runtime dependency unless licensing is reviewed separately.
+หลัง restart Codex ให้สั่ง assistant index codebase นี้. ใช้ SocratiCode เป็น local development tool เท่านั้น; อย่าเพิ่มเป็น Maprang runtime dependency จนกว่าจะ review licensing แยกต่างหาก.
 
 ## Project Memory
 
-Long-running project context lives in [`memory/README.md`](./memory/README.md). Start there when resuming work across
-sessions. The memory vault tracks current blockers, QA status, deploy readiness, UI/API direction, and decision logs.
-It must never contain secrets or real credentials.
+บริบทโปรเจกต์ระยะยาวอยู่ที่ [`memory/README.md`](./memory/README.md). ให้เริ่มตรงนั้นเมื่อต้อง resume งานข้าม session. Memory vault เก็บ current blockers, QA status, deploy readiness, UI/API direction, และ decision logs.
+ห้ามใส่ secrets หรือ credentials จริงลงใน memory.
 
 ## Agent Handoff
 
-Future agents and developers should start with [`AGENTS.md`](./AGENTS.md), which points to the canonical
-[`agent.md`](./agent.md) operating guide. The guide summarizes the mission, product direction, QA gates, production
-blockers, and the relationship/scene/prompt systems that must stay stable.
+agents และ developers ที่มาสานต่อควรเริ่มจาก [`AGENTS.md`](./AGENTS.md), ซึ่งชี้ไปที่ operating guide หลัก
+[`agent.md`](./agent.md). คู่มือนี้สรุป mission, product direction, QA gates, production blockers, และ relationship/scene/prompt systems ที่ต้องรักษาให้เสถียร.
 
 ```bash
 bun run memory:audit
 ```
 
-`memory:audit` checks required memory files, local Markdown links, provider verification notes, and common secret-shaped
-values. It also runs inside `qa:local`.
+`memory:audit` ตรวจ required memory files, local Markdown links, provider verification notes, และ common secret-shaped values. คำสั่งนี้รันอยู่ใน `qa:local` ด้วย.
 
 ## Deploy Status
 
-Use this before staging handoff when you want the current blockers and next actions in one place:
+ใช้คำสั่งนี้ก่อน staging handoff เมื่อต้องการดู current blockers และ next actions ในที่เดียว:
 
 ```bash
 bun run deploy:status
 ```
 
-Use JSON mode for CI logs or dashboards:
+ใช้ JSON mode สำหรับ CI logs หรือ dashboards:
 
 ```bash
 bun scripts/deploy-status.ts --json
 ```
 
-JSON output includes top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, and `productionBlockerCount` fields for automation, plus detailed `readiness` and ordered `nextSteps`.
+JSON output มี field top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` สำหรับ automation พร้อมรายละเอียด `readiness` และ `nextSteps` ตามลำดับ.
 
 ## Knowledge Layer
 
-Runtime product knowledge lives in [`knowledge/README.md`](./knowledge/README.md). This is separate from session memory:
-`memory/` explains what happened in the project, while `knowledge/` stores product rules and structured packs the backend
-can load for chat style, creator drafts, relationship rules, scene rules, and content policy.
+Runtime product knowledge อยู่ที่ [`knowledge/README.md`](./knowledge/README.md). ส่วนนี้แยกจาก session memory:
+`memory/` อธิบายสิ่งที่เกิดขึ้นในโปรเจกต์ ส่วน `knowledge/` เก็บ product rules และ structured packs ที่ backend โหลดไปใช้กับ chat style, creator drafts, relationship rules, scene rules, และ content policy.
 
 ```bash
 bun run knowledge:audit
 ```
 
-`knowledge:audit` validates the structured JSON packs, local wiki links, and secret-shaped values. The backend exposes the
-structured knowledge status in `/health` and `/ready`, and `qa:local` runs the audit before smoke tests.
+`knowledge:audit` ตรวจ structured JSON packs, local wiki links, และ secret-shaped values. Backend แสดง structured knowledge status ใน `/health` และ `/ready`; `qa:local` จะรัน audit นี้ก่อน smoke tests.
 
 ## Evaluation Layer
 
-Prompt and context regression checks live in [`evals/README.md`](./evals/README.md). The deterministic local eval reads
-[`evals/golden-roleplay.json`](./evals/golden-roleplay.json), assembles Maprang chat context through the backend context
-service, and verifies section order, prompt-control text, relationship/scene continuity, lore injection, token budget, and
-secret-shaped exclusions without calling a live model.
+Prompt และ context regression checks อยู่ที่ [`evals/README.md`](./evals/README.md). deterministic local eval อ่าน
+[`evals/golden-roleplay.json`](./evals/golden-roleplay.json), ประกอบ Maprang chat context ผ่าน backend context
+service, แล้วตรวจ section order, prompt-control text, relationship/scene continuity, lore injection, token budget, และ secret-shaped exclusions โดยไม่เรียก live model.
 
 ```bash
 bun run eval:local
 ```
 
-`eval:local` runs inside `qa:local` and CI. Admins can also run the same deterministic suite from `/admin/evals` or
-`GET /admin/evals/local` without spending live model tokens. Optional Promptfoo scaffolding is available for future live
-model quality comparisons:
+`eval:local` รันใน `qa:local` และ CI. Admins รัน deterministic suite ชุดเดียวกันจาก `/admin/evals` หรือ
+`GET /admin/evals/local` ได้โดยไม่ใช้ live model tokens. มี optional Promptfoo scaffolding สำหรับ future live model quality comparisons:
 
 ```bash
 bun run eval:promptfoo
