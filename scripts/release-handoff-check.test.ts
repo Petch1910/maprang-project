@@ -103,7 +103,7 @@ describe('release handoff check', () => {
     expect(result.ok).toBe(true)
     expect(result.requireFilled).toBe(false)
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('ผ่าน - release handoff ปลอดภัยต่อการ commit')
+    expect(lines[0]).toBe('ผ่าน - ตรวจเอกสารส่งมอบ release ปลอดภัยต่อการ commit')
     expect(errors).toEqual([])
   })
 })

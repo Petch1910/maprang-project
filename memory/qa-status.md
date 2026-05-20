@@ -357,3 +357,4 @@ Last updated: 2026-05-20
 - Eval/readiness runner output Thai-first pass: เปลี่ยน local eval output เป็น "ประเมิน/ตรวจ eval ในเครื่อง" และ readiness smoke failure เป็น "ตรวจ readiness ไม่ผ่าน" พร้อม focused regression tests.
 - Smoke doctor runner output Thai-first pass: เปลี่ยน smoke doctor success/failure output เป็น "ผ่าน - ตรวจ smoke doctor ผ่านแล้ว" และ "ตรวจ smoke doctor ไม่ผ่าน" พร้อม regression tests.
 - Deploy status/smoke doctor env text Thai-first pass: เปลี่ยน text output ของ env/readiness failure จาก `missingRequired`/`invalidEnv` เป็น `env จำเป็นที่ขาด`/`env ไม่ถูกต้อง` โดยคง JSON keys เดิมสำหรับ automation.
+- Release handoff runner output Thai-first pass: เปลี่ยนผลตรวจ release handoff เป็น "ตรวจเอกสารส่งมอบ release" พร้อม regression test.

@@ -63,12 +63,12 @@ export async function runReleaseHandoffCheck(
 ) {
   const result = await collectReleaseHandoffCheckResult(argv.includes('--filled'))
   if (!result.ok) {
-    writeError('ตรวจ release handoff ไม่ผ่าน:')
+    writeError('ตรวจเอกสารส่งมอบ release ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ผ่าน - release handoff ${result.requireFilled ? 'กรอกครบและ' : ''}ปลอดภัยต่อการ commit`)
+  writeLine(`ผ่าน - ตรวจเอกสารส่งมอบ release ${result.requireFilled ? 'กรอกครบและ' : ''}ปลอดภัยต่อการ commit`)
   return 0
 }
 

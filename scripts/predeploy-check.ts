@@ -497,7 +497,14 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')
       requireIncludes(
         script,
-        ['checkReleaseHandoffContent', 'collectReleaseHandoffCheckResult', 'runReleaseHandoffCheck', '--filled', 'forbiddenPatterns', 'ตรวจ release handoff ไม่ผ่าน'],
+        [
+          'checkReleaseHandoffContent',
+          'collectReleaseHandoffCheckResult',
+          'runReleaseHandoffCheck',
+          '--filled',
+          'forbiddenPatterns',
+          'ตรวจเอกสารส่งมอบ release ไม่ผ่าน',
+        ],
         'scripts/release-handoff-check.ts',
       )
       requireIncludes(
