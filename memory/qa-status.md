@@ -229,6 +229,7 @@ Last updated: 2026-05-20
 - API route audit Creator AI draft coverage note now passes Thai-first wording through `api:audit:test`, `api:audit`, and `predeploy:check`.
 - API route audit CLI localization now passes `api:audit:test` and `api:audit`.
 - API route audit coverage notes now pass Thai-first regression coverage via `api:audit:test` and `api:audit`, including root identity, chat provider, Prompt Inspector, and eval notes.
+- API route audit heading/failure/pass summaries now pass Thai-first regression coverage via `api:audit:test` and `api:audit`.
 - Security audit now scans `apps/backend/index.ts` plus backend source/prisma files.
 - Security audit now fails if a backend `/admin` route block is missing `requireAdminApiKey`.
 - Security audit now fails if a backend `/:id` route block is missing `rejectInvalidUuid`.

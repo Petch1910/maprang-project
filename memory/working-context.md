@@ -236,6 +236,7 @@ Verified:
 - Production deploy knowledge wiki now documents reply-budget baselines/recommendations and the deploy-status-first staging gate order.
 - Production deploy knowledge wiki now uses Thai-first deploy gate wording for real backend/frontend URLs, production CORS, signed avatar storage, live chat/image provider smoke, and staging verification while preserving exact command/env names.
 - API route coverage notes now use Thai-first descriptions for root identity, health/ready checks, wallet/profile, relationship, chat, storage, moderation, Prompt Inspector, and eval routes while preserving exact command names and route identifiers.
+- API route audit CLI heading, failure headings, and pass summary now use Thai-first output while keeping route keys and owner names stable for debugging.
 
 ## สถานะ production ปัจจุบัน
 

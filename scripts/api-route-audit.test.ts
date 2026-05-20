@@ -109,8 +109,10 @@ describe('api route audit', () => {
 
     expect(routes.length).toBeGreaterThan(0)
     expect(exitCode).toBe(0)
-    expect(lines[0]).toContain('API route audit: พบ')
-    expect(lines.at(-1)).toBe('ผ่าน - backend API route audit ผ่านแล้ว')
+    expect(lines[0]).toContain('ตรวจ API route: พบ')
+    expect(lines.at(-1)).toBe('ผ่าน - ตรวจ backend API route ผ่านแล้ว')
+    expect(lines.join('\n')).not.toContain('API route audit:')
+    expect(lines.join('\n')).not.toContain('backend API route audit')
     expect(errors).toEqual([])
   })
 })
