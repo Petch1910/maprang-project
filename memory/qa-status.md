@@ -145,6 +145,7 @@ Last updated: 2026-05-20
 - Backend chat validation/access/token/rating/empty-provider fallback copy now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts apps\backend\src\character.persistence.test.ts` and full `backend:check` with 141 pass.
 - Backend chat route-level fallback reply now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts`.
 - Backend runtime console error labels for chat, chat streaming, avatar upload, and avatar resolving now use Thai-first wording, verified with `backend:check`, `predeploy:check`, `secrets:check`, and `git diff --check`.
+- Backend chat continuation and avatar upload/resolve runtime diagnostics now avoid stale English labels, verified with `backend:check`.
 - Backend rate-limit response copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 141 pass.
 - Backend avatar storage failure copy now passes Thai-first coverage via `bun test apps\backend\src\storage.service.test.ts apps\backend\src\upload.routes.test.ts` and full `backend:check` with 141 pass.
 - Backend production auth 401 copy now passes Thai-first coverage via `bun test apps\backend\src\security.test.ts` and full `backend:check` with 141 pass.

@@ -1276,7 +1276,7 @@ export async function sendChat(input: SendChatInput) {
     reply,
     userMessage: input.message,
   }).catch((error): { reply: string; usage: CompletionUsage; extended: false } => {
-    console.warn('Roleplay continuation failed:', classifyChatProviderError(error))
+    console.warn('ต่อคำตอบเล่นบทไม่สำเร็จ:', classifyChatProviderError(error))
     return { reply, usage: fallbackUsage(), extended: false }
   })
   if (extension.extended) {
@@ -1475,7 +1475,7 @@ export function streamChat(input: SendChatInput) {
           reply: trimmedReply,
           userMessage: input.message,
         }).catch((error): { reply: string; usage: CompletionUsage; extended: false } => {
-          console.warn('Roleplay stream continuation failed:', classifyChatProviderError(error))
+          console.warn('ต่อสตรีมคำตอบเล่นบทไม่สำเร็จ:', classifyChatProviderError(error))
           return { reply: trimmedReply, usage: fallbackUsage(), extended: false }
         })
         if (extension.extended) {

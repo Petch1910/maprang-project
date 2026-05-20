@@ -37,6 +37,7 @@ Verified:
 - Backend chat validation/access/token/rating/empty-provider fallback replies now use centralized Thai-first copy, and short-reply continuation skips those operational replies instead of trying to extend them as roleplay.
 - Backend `/chat` route-level fallback reply now uses Thai-first temporary-service-failure copy instead of the old English AI-service message, with focused runtime regression coverage.
 - Backend runtime console error labels for chat, chat streaming, avatar upload, and avatar resolving now use Thai-first wording.
+- Backend runtime console warning/error labels now avoid stale `Roleplay continuation failed` and `avatar` wording in chat continuation and upload routes.
 - Backend rate-limit responses now keep the machine-readable `rate_limited` code while returning a Thai-first user message.
 - Backend avatar storage failures now return Thai-first messages for Supabase configuration, upload, signed URL, and route-level storage-unavailable cases.
 - Backend avatar upload validation now returns Thai-first messages for missing files, unsupported file types, oversized files, and avatar-not-found responses.

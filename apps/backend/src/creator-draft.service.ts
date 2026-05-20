@@ -399,7 +399,7 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
     const bytes = new Uint8Array(await imageResponse.arrayBuffer())
     const uploaded = await uploadAvatarBytes({ bytes, contentType, origin })
     if (uploaded.ok) return uploaded.url
-    throw new Error('อัปโหลดรูป avatar ไม่สำเร็จหลังได้คำตอบจากผู้ให้บริการสร้างรูป')
+    throw new Error('อัปโหลดรูปตัวละครไม่สำเร็จหลังได้คำตอบจากผู้ให้บริการสร้างรูป')
   }
   if (image?.url) return image.url
   throw new Error('คำตอบจากผู้ให้บริการสร้างรูปไม่มีข้อมูลรูปภาพ')
