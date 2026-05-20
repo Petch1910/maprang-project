@@ -90,6 +90,28 @@ describe('chat routes security', () => {
     await cleanup()
   })
 
+  test('returns Thai-first messages when chat persistence is unavailable', async () => {
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await chatRoutes.handle(routeRequest('/chats'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
+  })
+
   test('rejects invalid chat ids before they reach persistence', async () => {
     if (!(await shouldRunDbTest())) return
 
@@ -109,9 +131,10 @@ describe('chat routes security', () => {
 
     for (const request of cases) {
       const response = await chatRoutes.handle(request)
-      const body = (await response.json()) as { error: string }
+      const body = (await response.json()) as { error: string; message: string }
       expect(response.status).toBe(400)
       expect(body.error).toBe('invalid_chat_id')
+      expect(body.message).toBe('รหัสแชทไม่ถูกต้อง')
     }
   })
 

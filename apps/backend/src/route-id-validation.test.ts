@@ -5,7 +5,7 @@ import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
 import { loreRoutes } from './lore.routes'
 import { reportRoutes } from './report.routes'
-import { rejectInvalidUuid, routeErrorMessage } from './route-guards'
+import { rejectInvalidUuid, routeErrorMessage, routeErrorResponse } from './route-guards'
 
 const prisma = getPrisma()
 const shouldRunDbTest = createDbTestGate(prisma, 'route id validation')
@@ -47,6 +47,14 @@ describe('route id validation', () => {
     })
     expect(set.status).toBe(400)
     expect(routeErrorMessage('invalid_parent_lore_id')).toBe('รหัสคลังความรู้หลักไม่ถูกต้อง')
+    expect(routeErrorResponse('database_not_configured')).toEqual({
+      error: 'database_not_configured',
+      message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+    })
+    expect(routeErrorResponse('chat_not_found')).toEqual({
+      error: 'chat_not_found',
+      message: 'ไม่พบแชทนี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+    })
     expect(routeErrorMessage('unknown_error')).toBe('รหัสที่ส่งมาไม่ถูกต้อง')
   })
 
