@@ -10,6 +10,7 @@ type Check = {
 
 const requiredFiles = [
   'AGENTS.md',
+  'ABUSE_QA_CHECKLIST.md',
   'agent.md',
   'DEPLOY_RENDER.md',
   'DEPLOYMENT_QA.md',
@@ -834,6 +835,7 @@ const checks: Check[] = [
     name: 'security checklist และ audit script พร้อมใช้งาน',
     run: async () => {
       const checklist = await readRepoFile('SECURITY_CHECKLIST.md')
+      const abuseChecklist = await readRepoFile('ABUSE_QA_CHECKLIST.md')
       const packageJson = await readRepoFile('package.json')
       const securityAudit = await readRepoFile('scripts/backend-security-audit.ts')
       const promptInspector = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
@@ -851,8 +853,23 @@ const checks: Check[] = [
           'requireAdminApiKey',
           'retrieved lore preview',
           'Production Must-Pass',
+          'ABUSE_QA_CHECKLIST.md',
         ],
         'SECURITY_CHECKLIST.md',
+      )
+      requireIncludes(
+        abuseChecklist,
+        [
+          'SQL-like input',
+          'Broken access',
+          'Auth spoofing',
+          'Prompt control',
+          'Frontend XSS',
+          'Admin audit',
+          'Token/rate limit',
+          'Storage/avatar',
+        ],
+        'ABUSE_QA_CHECKLIST.md',
       )
       requireIncludes(
         packageJson,
