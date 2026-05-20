@@ -57,6 +57,7 @@ Verified:
 - Admin Health live chat/image guidance now avoids raw `usage.providerFailure`, `billing/quota limit`, `local/dev`, and reversed `production/staging` wording in visible helper copy, with frontend static audit coverage.
 - Backend Creator Draft image status and warning messages now return Thai-first user-facing copy for missing/configured/failed image provider paths while preserving actionable smoke/env guidance.
 - Backend Creator Draft provider failure fallbacks now use Thai-first `ไม่ทราบสาเหตุ` for non-Error failures instead of leaking `unknown error`, with focused service coverage.
+- Creator Draft non-Error provider failure test now casts the fetch mock through `unknown` so current TypeScript/Bun fetch types pass `backend:check`.
 - Backend relationship tag validation messages now return Thai-first creator warnings for adult-mode conflicts, no-romance/romance conflicts, progression-speed conflicts, safety-tone conflicts, and too-many-engine-tag guidance.
 - Backend character quality review notes now return Thai-first creator guidance for missing name/tagline/description/biography/scenario/system prompt/compact prompt/greeting/tags.
 - Backend runtime env validation, health readiness failures, security posture details, deploy readiness blockers, deploy status output, and smoke doctor blocker output now use Thai-first copy while preserving exact env names, commands, and provider names.
@@ -95,6 +96,7 @@ Verified:
 - Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.
 - Live image/API smoke helper messages now avoid mixed English fix copy for missing image providers, billing, quota, invalid image keys, placeholder fallback, missing image URLs, and local SVG placeholders while preserving exact env names and commands.
 - Local smoke helper failures for backend health, avatar upload shape/access, missing seed character, and relationship preview now use Thai-first CLI output, with `smoke:local:test` guarding the messages.
+- Backend Prisma seed and QA seed CLI errors/status lines now use Thai-first output for missing `DATABASE_URL`, seed start, success, and failure messages.
 - Backend DB-required check CLI now uses Thai-first failure/local/deploy guidance, with regression coverage in `backend:check:db:test`.
 - Backend DB test gate skip/forced-failure guidance now uses Thai-first output for optional persistence suites, with focused regression coverage in `db.test-gate.test.ts`.
 - Prompt tooling UI copy now uses Thai-first labels for system prompt reset, redacted prompt snapshots, runtime/persona inputs, section budget, and route/menu audit descriptions.

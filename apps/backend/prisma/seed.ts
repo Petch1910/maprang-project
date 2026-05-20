@@ -3,7 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 
 if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is required to seed the database')
+  throw new Error('ต้องตั้ง DATABASE_URL ก่อน seed ฐานข้อมูล')
 }
 
 const prisma = new PrismaClient({
@@ -37,7 +37,7 @@ const maprangProfile = {
 }
 
 async function main() {
-  console.log('Start seeding...')
+  console.log('เริ่ม seed ข้อมูลพื้นฐาน...')
 
   const user = await prisma.user.upsert({
     where: { email: 'phet@maprang.io' },
@@ -139,15 +139,15 @@ async function main() {
     },
   })
 
-  console.log('User ready:', user.email)
-  console.log('Character ready:', character.name)
-  console.log('Seeding completed successfully!')
+  console.log('ผู้ใช้พร้อมแล้ว:', user.email)
+  console.log('ตัวละครพร้อมแล้ว:', character.name)
+  console.log('seed ข้อมูลพื้นฐานสำเร็จ')
 }
 
 try {
   await main()
 } catch (error) {
-  console.error('Seed failed:')
+  console.error('seed ข้อมูลพื้นฐานไม่สำเร็จ:')
   console.error(error)
   process.exit(1)
 } finally {

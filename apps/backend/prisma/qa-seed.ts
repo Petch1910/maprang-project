@@ -3,7 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 
 if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is required to seed QA data')
+  throw new Error('ต้องตั้ง DATABASE_URL ก่อน seed ข้อมูล QA')
 }
 
 const prisma = new PrismaClient({
@@ -699,7 +699,7 @@ async function upsertReportAndAudit() {
 }
 
 async function main() {
-  console.log('QA seed: preparing users, characters, chat, wallet, reports...')
+  console.log('QA seed: กำลังเตรียมผู้ใช้ ตัวละคร แชท กระเป๋าโทเคน และรายงาน...')
   await cleanupPreviousBrowserSmokeArtifacts()
   await upsertUsers()
   await upsertCharacters()
@@ -715,13 +715,13 @@ async function main() {
     prisma.tokenTransaction.count({ where: { metadata: { path: ['source'], equals: 'qa-seed' } } }),
   ])
 
-  console.log(`QA seed ready: ${characterCount} QA characters, ${chatCount} QA chats, ${reportCount} reports, ${transactionCount} transactions.`)
+  console.log(`QA seed พร้อมแล้ว: ตัวละคร QA ${characterCount} รายการ, แชท QA ${chatCount} ห้อง, รายงาน ${reportCount} รายการ, ธุรกรรม ${transactionCount} รายการ`)
 }
 
 try {
   await main()
 } catch (error) {
-  console.error('QA seed failed:')
+  console.error('QA seed ไม่สำเร็จ:')
   console.error(error)
   process.exit(1)
 } finally {

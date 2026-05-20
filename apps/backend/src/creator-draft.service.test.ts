@@ -456,7 +456,7 @@ describe('creator AI draft', () => {
     process.env.IMAGE_GENERATION_API_KEY = 'image-key'
     globalThis.fetch = (async () => {
       throw 'raw provider failure'
-    }) as typeof fetch
+    }) as unknown as typeof fetch
 
     try {
       const result = await generateCreatorDraft(

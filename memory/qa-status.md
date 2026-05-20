@@ -101,6 +101,7 @@ Last updated: 2026-05-20
 - `frontend:static:audit:test` now also blocks stale Admin Health provider guidance such as raw `usage.providerFailure`, `billing/quota limit`, `local/dev ยังไม่บังคับ`, and reversed `production/staging` wording.
 - Creator Draft image-provider copy now passes focused backend coverage with Thai-first missing-provider, configured-failure, and billing-limit messages.
 - Creator Draft non-Error provider fallback copy now passes focused backend coverage and no longer exposes `unknown error`.
+- Creator Draft non-Error provider failure test now passes TypeScript fetch typing through `unknown`, restoring `backend:check` compatibility with current Bun fetch types.
 - Backend relationship validation copy now passes Thai-first coverage via `bun test apps\backend\src\relationship.engine.test.ts`, focused character validation tests, and full `backend:check` with 132 pass.
 - Backend character quality notes now pass Thai-first coverage via `bun test apps\backend\src\character.validation.test.ts` and full `backend:check` with 133 pass.
 - Backend runtime env/readiness copy now passes Thai-first coverage via `bun test apps\backend\src\env.test.ts apps\backend\src\health.service.test.ts scripts\deploy-readiness.test.ts scripts\deploy-status.test.ts scripts\smoke-doctor.test.ts scripts\api-smoke-helpers.test.ts`, `backend:check`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
@@ -132,6 +133,7 @@ Last updated: 2026-05-20
 - Live provider smoke guidance now passes Thai-first coverage via `bun run smoke:image:test`, `bun run smoke:chat:test`, `bun run provider:smoke:guards:test`, `bun run api:smoke:test`, and `predeploy:check`.
 - Live image/API smoke helper copy now passes Thai-first coverage for missing provider config, provider billing, quota, invalid image keys, placeholder fallback, missing image URL, and local SVG fallback through `api:smoke:test`, `smoke:image:test`, `provider:smoke:guards:test`, and `predeploy:check`.
 - Local smoke failure guidance now passes Thai-first coverage via `bun run smoke:local:test`.
+- Backend Prisma seed and QA seed CLI output now uses Thai-first missing-`DATABASE_URL`, progress, success, and failure messages; this code-only polish is verified with `backend:check`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Backend DB-required check guidance now passes Thai-first coverage via `bun run backend:check:db:test`.
 - Backend DB test gate guidance now passes Thai-first coverage via `bun test apps\backend\src\db.test-gate.test.ts` and full `backend:check` with 141 pass.
 - Backend chat validation/access/token/rating/empty-provider fallback copy now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts apps\backend\src\character.persistence.test.ts` and full `backend:check` with 141 pass.
