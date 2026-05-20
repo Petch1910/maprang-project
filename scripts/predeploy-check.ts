@@ -1028,6 +1028,9 @@ const checks: Check[] = [
       const abuseChecklist = await readRepoFile('ABUSE_QA_CHECKLIST.md')
       const packageJson = await readRepoFile('package.json')
       const securityAudit = await readRepoFile('scripts/backend-security-audit.ts')
+      const backendRedaction = await readRepoFile('apps/backend/src/redaction.ts')
+      const creatorDraft = await readRepoFile('apps/backend/src/creator-draft.service.ts')
+      const creatorDraftTest = await readRepoFile('apps/backend/src/creator-draft.service.test.ts')
       const promptInspector = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
       const promptInspectorTest = await readRepoFile('apps/backend/src/prompt-inspector.service.test.ts')
       requireIncludes(
@@ -1389,8 +1392,28 @@ const checks: Check[] = [
       )
       requireIncludes(
         promptInspector,
-        ['redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map', 'sk-ant-', 'hf_', 'sk_live_', 'github_pat_', 'AIza', 'xox'],
+        ['redactSensitiveText', 'redactLoreForInspector', 'retrievalRedactionCount', 'redactedLore.map'],
         'apps/backend/src/prompt-inspector.service.ts',
+      )
+      requireIncludes(
+        backendRedaction,
+        ['redactSensitiveText', 'sk-ant-', 'hf_', 'sk_live_', 'github_pat_', 'AIza', 'xox', 'PRIVATE KEY', 'postgres'],
+        'apps/backend/src/redaction.ts',
+      )
+      requireIncludes(
+        creatorDraft,
+        ['redactSensitiveText', 'safeFailureDetail', 'friendlyImageFailureReason', 'ผู้ให้บริการสร้างรูปตอบกลับ'],
+        'apps/backend/src/creator-draft.service.ts',
+      )
+      requireIncludes(
+        creatorDraftTest,
+        [
+          'redacts secret-shaped text model failures before returning creator warnings',
+          'redacts secret-shaped image provider failures before returning notes',
+          'not.toContain(leakedProviderKey)',
+          'not.toContain(leakedImageKey)',
+        ],
+        'apps/backend/src/creator-draft.service.test.ts',
       )
       requireIncludes(
         promptInspectorTest,

@@ -231,6 +231,40 @@ describe('creator AI draft', () => {
     expect(result.warnings).toEqual([])
   })
 
+  test('redacts secret-shaped text model failures before returning creator warnings', async () => {
+    const previousKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    const leakedProviderKey = ['sk', 'proj', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+    const leakedDatabaseUrl = ['postgresql://maprang:', 'runtime-secret', '@db.example.com:5432/maprang?sslmode=require'].join('')
+
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    delete process.env.IMAGE_GENERATION_API_KEY
+    delete process.env.OPENAI_API_KEY
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'ตัวละครทดสอบ error redaction',
+        },
+        async () => {
+          throw new Error(`provider rejected key ${leakedProviderKey} DATABASE_URL=${leakedDatabaseUrl}`)
+        },
+      )
+
+      const warningText = result.warnings.join('\n')
+      expect(result.source).toBe('fallback')
+      expect(warningText).toContain('[REDACTED_SECRET]')
+      expect(warningText).not.toContain(leakedProviderKey)
+      expect(warningText).not.toContain(leakedDatabaseUrl)
+      expect(warningText).not.toContain('runtime-secret')
+    } finally {
+      restoreOpenRouterKey(previousKey)
+      restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+      restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+    }
+  })
+
   test('uses GPT Image request shape when image provider is configured', async () => {
     const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
     const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
@@ -387,6 +421,57 @@ describe('creator AI draft', () => {
       restoreOpenRouterKey(previousOpenRouterKey)
       if (previousImageKey === undefined) delete process.env.IMAGE_GENERATION_API_KEY
       else process.env.IMAGE_GENERATION_API_KEY = previousImageKey
+      globalThis.fetch = previousFetch
+    }
+  })
+
+  test('redacts secret-shaped image provider failures before returning notes', async () => {
+    const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    const previousFetch = globalThis.fetch
+    const leakedImageKey = ['sk', 'proj', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    process.env.IMAGE_GENERATION_API_KEY = 'image-key'
+    delete process.env.OPENAI_API_KEY
+    globalThis.fetch = (async (_url, _init) =>
+      new Response(JSON.stringify({ error: { message: `bad image key ${leakedImageKey}` } }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })) as typeof fetch
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'ตัวละครทดสอบ image provider redaction',
+          imagePrompt: 'cinematic portrait',
+        },
+        completionWith(
+          JSON.stringify({
+            name: 'เรย์ | RAY',
+            tagline: 'คนที่จำอดีตได้ชัดเกินไป',
+            description: 'ตัวละครทดสอบ image provider redaction',
+            biography: 'เรย์เก็บเรื่องเก่าไว้ในภาพถ่าย',
+            scenario: 'คุณพบเขาในห้องล้างรูป',
+            systemPrompt: 'คุณคือเรย์ ตอบเป็นภาษาไทยและไม่เขียนแทนผู้เล่น',
+            compactPrompt: 'เรย์: memory slow-burn',
+            characterAnchor: 'ช่างสังเกตและระวังคำพูด',
+            constraints: 'อย่าเขียนแทนผู้เล่น',
+            greeting: 'รูปใบนี้... เธอจำได้ไหม',
+            tags: 'roleplay, thai, slow-burn',
+          }),
+        ),
+      )
+
+      const returnedText = `${result.image.note}\n${result.warnings.join('\n')}`
+      expect(result.image.provider).toBe('placeholder')
+      expect(returnedText).toContain('[REDACTED_SECRET]')
+      expect(returnedText).not.toContain(leakedImageKey)
+    } finally {
+      restoreOpenRouterKey(previousOpenRouterKey)
+      restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+      restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
       globalThis.fetch = previousFetch
     }
   })

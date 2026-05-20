@@ -1,4 +1,5 @@
 import { buildContextPromptBlocks, type ContextCharacter, type LoreForContext } from './context.service'
+import { redactSensitiveText } from './redaction'
 
 export type PromptInspectorRuntimeMemory = string | string[] | Record<string, unknown>
 
@@ -60,11 +61,6 @@ export type PromptInspectorDiff = {
   }>
 }
 
-type RedactionResult = {
-  text: string
-  count: number
-}
-
 const injectionHints = [
   'ignore previous',
   'ignore all',
@@ -94,35 +90,10 @@ function clip(value: string, max = 220) {
   return `${normalized.slice(0, Math.max(0, max - 1)).trimEnd()}...`
 }
 
-function redactSecrets(value: string): RedactionResult {
-  let count = 0
-  let text = value
-  const replace = (pattern: RegExp, replacement = '[REDACTED_SECRET]') => {
-    text = text.replace(pattern, () => {
-      count += 1
-      return replacement
-    })
-  }
-
-  replace(/\bsk-(?:or-v1|proj)-[A-Za-z0-9_-]{12,}\b/g)
-  replace(/\bsk-ant-[A-Za-z0-9_-]{12,}\b/g)
-  replace(/\bhf_[A-Za-z0-9]{20,}\b/g)
-  replace(/\bsk_live_[A-Za-z0-9]{16,}\b/g)
-  replace(/\b(?:gh[pousr]_[A-Za-z0-9_]{36,}|github_pat_[A-Za-z0-9_]{20,})\b/g)
-  replace(/\bAIza[A-Za-z0-9_-]{35}\b/g)
-  replace(/\bxox[baprs]-[A-Za-z0-9-]{20,}\b/g)
-  replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g)
-  replace(/\bpostgres(?:ql)?:\/\/[^\s"'`]+/gi, 'postgresql://[REDACTED_SECRET]')
-  replace(/\b[A-Z][A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD|DATABASE_URL)[A-Z0-9_]*\s*=\s*[^\s"'`]+/g)
-  replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g)
-
-  return { text, count }
-}
-
 function redactLoreForInspector(entry: LoreForContext) {
-  const keyword = redactSecrets(entry.keyword)
-  const aliases = entry.aliases.map(redactSecrets)
-  const content = redactSecrets(entry.content)
+  const keyword = redactSensitiveText(entry.keyword)
+  const aliases = entry.aliases.map(redactSensitiveText)
+  const content = redactSensitiveText(entry.content)
 
   return {
     lore: {
@@ -180,7 +151,7 @@ function runtimeMemoryBlock(runtimeMemory?: PromptInspectorRuntimeMemory | null)
 }
 
 function toSection(content: string, index: number): PromptInspectorSection {
-  const redacted = redactSecrets(content).text
+  const redacted = redactSensitiveText(content).text
   return {
     index,
     title: titleFromContent(redacted, index),
@@ -231,7 +202,7 @@ export function buildPromptInspectorSnapshot(input: PromptInspectorInput): Promp
     input.userMessage.trim() ? `ข้อความผู้ใช้:\n${input.userMessage.trim()}` : '',
   ].filter(Boolean)
   const prompt = blocks.join('\n\n')
-  const redacted = redactSecrets(prompt)
+  const redacted = redactSensitiveText(prompt)
   const sections = blocks.map(toSection)
   const redactedLore = loreEntries.map(redactLoreForInspector)
   const retrievalRedactionCount = redactedLore.reduce((sum, entry) => sum + entry.redactionCount, 0)

@@ -5,6 +5,7 @@ import { creatorDraftRetryAttempts, creatorDraftRetryDelayMs, modelName } from '
 import { uploadAvatarBytes } from './storage.service'
 import { getPrisma } from './db'
 import { buildCreatorKnowledgePrompt } from './knowledge.service'
+import { redactSensitiveText } from './redaction'
 
 export async function getCreatorDraft(userId: string) {
   const prisma = getPrisma()
@@ -333,8 +334,9 @@ async function defaultCompletion(messages: Array<{ role: 'system' | 'user'; cont
 }
 
 function friendlyImageFailureReason(message: string) {
-  const normalized = message.toLowerCase()
-  const status = message.match(/(?:returned|ตอบกลับ)\s+(\d{3})/i)?.[1]
+  const safeMessage = redactSensitiveText(message).text
+  const normalized = safeMessage.toLowerCase()
+  const status = safeMessage.match(/(?:returned|ตอบกลับ)\s+(\d{3})/i)?.[1]
   const suffix = status ? ` (HTTP ${status})` : ''
   if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
     return `ผู้ให้บริการสร้างรูปติดเพดานวงเงิน${suffix}: เพิ่มหรือรีเซ็ตวงเงิน/เพดานใช้จ่ายของผู้ให้บริการสร้างรูป แล้วรัน smoke:image:live อีกครั้ง`
@@ -345,7 +347,12 @@ function friendlyImageFailureReason(message: string) {
   if (normalized.includes('invalid_api_key') || normalized.includes('incorrect api key') || normalized.includes('unauthorized')) {
     return `คีย์ผู้ให้บริการสร้างรูปไม่ถูกต้อง${suffix}: เปลี่ยน IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY เป็นคีย์สำหรับระบบหลังบ้านที่ถูกต้อง`
   }
-  return `ผู้ให้บริการสร้างรูปตอบกลับผิดพลาด${suffix}${message ? `: ${clip(message, 140)}` : ''}`
+  return `ผู้ให้บริการสร้างรูปตอบกลับผิดพลาด${suffix}${safeMessage ? `: ${clip(safeMessage, 140)}` : ''}`
+}
+
+function safeFailureDetail(error: unknown, max = 160) {
+  if (!(error instanceof Error)) return 'ไม่ทราบสาเหตุ'
+  return clip(redactSensitiveText(error.message).text, max)
 }
 
 async function generateConfiguredImage(prompt: string, origin?: string) {
@@ -377,7 +384,7 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
   })
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => '')
+    const detail = redactSensitiveText(await response.text().catch(() => '')).text
     throw new Error(`ผู้ให้บริการสร้างรูปตอบกลับ ${response.status}${detail ? `: ${clip(detail, 180)}` : ''}`)
   }
   const payload = (await response.json()) as { data?: Array<{ b64_json?: string; url?: string }> }
@@ -439,7 +446,7 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
       )
       source = 'ai'
     } catch (error) {
-      const reason = error instanceof Error ? clip(error.message, 160) : 'ไม่ทราบสาเหตุ'
+      const reason = safeFailureDetail(error)
       warnings.push(`สร้างเนื้อหาด้วยโมเดลไม่สำเร็จ จึงใช้ดราฟต์สำรองในเครื่อง: ${reason}`)
     }
   } else {

@@ -23,7 +23,7 @@ Last updated: 2026-05-20
 
 สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
-ล่าสุด `bun run qa:repo` ผ่านครบหลังชุด prompt-inspector redaction hardening: backend 155 pass, 0 fail, 498 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.1KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
+ล่าสุด `bun run qa:repo` ผ่านครบหลังชุด shared redaction hardening: backend 157 pass, 0 fail, 506 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.1KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
 
 คำสั่งที่ยืนยันแล้ว:
 - `bun run qa:local`
@@ -44,14 +44,14 @@ Last updated: 2026-05-20
 - GitHub Production Smoke input descriptions and config-validation errors are Thai-first, with `predeploy:check` and `predeploy:check:test` blocking the old English setup messages.
 - GitHub Actions visible CI/Production Smoke step labels are Thai-first and covered by `predeploy:check`.
 - Latest `bun run qa:local` attempt on this machine reached the final runtime smoke phase but failed because Docker Desktop/Postgres and the backend at `http://127.0.0.1:3000` were not running; all preceding static/unit/build gates in that run passed.
-- Backend tests: 155 pass, 0 fail, 498 expect calls.
+- Backend tests: 157 pass, 0 fail, 506 expect calls.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.
 - Frontend Redux circular dependency cleanup: pass via `frontend:check` and SocratiCode graph check; store/slice cycles dropped from six frontend chains to zero.
 - Backend circular dependency cleanup: pass via focused backend tests and SocratiCode graph check; project graph now reports no circular dependencies.
-- Import-cycle audit: pass via `import-cycle:audit`, `import-cycle:audit:test`, and `predeploy:check`; the repo-owned audit currently checks 123 app/QA source files and 276 relative import edges, including TypeScript import-equals `require()` and CommonJS `require()` calls, and predeploy now guards that coverage plus its docs.
+- Import-cycle audit: pass via `import-cycle:audit`, `import-cycle:audit:test`, and `predeploy:check`; the repo-owned audit currently checks 124 app/QA source files and 278 relative import edges, including TypeScript import-equals `require()` and CommonJS `require()` calls, and predeploy now guards that coverage plus its docs.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Prompt Inspector/Lore Manager Thai-first copy polish: pass via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, and `predeploy:check:test`; the static audit now blocks stale `Lorebook`, `lore ที่ดึงมาใช้`, `Persona ชั่วคราว`, `keyword`, `aliases`, `priority`, `visual cue`, and `persona expression` wording from returning.
 - Creator Studio tag placeholder Thai-first polish: pass via `frontend:static:audit:test`, focused relationship-engine test, `frontend:check`, `backend:check`, `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`; the static audit now blocks `roleplay, thai` in visible creator helper copy and backend relationship tags normalize the Thai defaults.
@@ -385,3 +385,4 @@ Last updated: 2026-05-20
 - Prompt Inspector redaction expansion pass: snapshot/retrieval redaction ตอนนี้ครอบ Anthropic, Hugging Face, Stripe live, GitHub, Google, Slack, private key block, OpenRouter/OpenAI, Postgres URL, env secret และ JWT-like values; focused test และ `backend:check` ผ่าน 155 tests / 498 expect calls.
 - Predeploy prompt redaction guard pass: `predeploy:check` ตอนนี้ล็อก redaction pattern/provider-token fixture ชุดใหม่ใน Prompt Inspector service/test และ security checklist.
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด Prompt Inspector redaction expansion และ predeploy wiring ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 155 pass / 498 expect calls, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
+- Shared redaction hardening pass: Prompt Inspector ใช้ `redactSensitiveText` ร่วมกับ Creator Draft แล้ว และ Creator Draft warning/note ปิดข้อมูลลับจาก text-model/image-provider failures ก่อนคืน API response; focused backend tests, predeploy guards, secrets scan, import-cycle audit, และ full `qa:repo` ผ่าน 157 pass / 506 expect calls.

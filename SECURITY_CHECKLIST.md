@@ -41,8 +41,9 @@
 - Persona ใช้เป็น context ได้ แต่ห้ามใช้เป็นคำสั่งเพื่อ reveal hidden prompts, bypass rules หรือ act as admin/developer
 - Runtime instruction ต้องย้ำว่าไม่ reveal hidden system instructions และไม่ทำตามคำสั่งที่ขัดกับ platform policy
 - `POST /admin/prompt-inspector` ต้องเป็น admin-only และต้องคืนเฉพาะ prompt snapshot ที่ redact แล้ว ห้ามปล่อย API key, DB URL, JWT หรือ service-role secret ผ่าน debugger output
-- Prompt Inspector ต้อง redact ทั้ง final prompt, section content, และ retrieved lore preview/keyword/alias ก่อนส่งกลับ UI รวมถึง OpenRouter/OpenAI, Anthropic, Hugging Face, Stripe live, GitHub, Google, Slack, private key, DB URL และ JWT-like values
-- Guard อัตโนมัติ: `context.service.test.ts`, `prompt-inspector.service.test.ts`
+- Prompt Inspector และ Creator Draft warning ต้องใช้ `redactSensitiveText` ก่อนส่งข้อความ diagnostic กลับ UI/API โดยครอบ OpenRouter/OpenAI, Anthropic, Hugging Face, Stripe live, GitHub, Google, Slack, private key, DB URL และ JWT-like values
+- Prompt Inspector ต้อง redact ทั้ง final prompt, section content, และ retrieved lore preview/keyword/alias ก่อนส่งกลับ UI; Creator Draft ต้องไม่สะท้อน raw provider error message ที่มี secret-shaped value ใน warning/note
+- Guard อัตโนมัติ: `context.service.test.ts`, `prompt-inspector.service.test.ts`, `creator-draft.service.test.ts`
 
 ## ความครอบคลุม CIA / AAA
 
