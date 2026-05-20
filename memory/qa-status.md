@@ -15,6 +15,7 @@ Last updated: 2026-05-20
 - Render deploy guide, staging runbook, and abuse QA sign-off headings are Thai-first; heading scan, `predeploy:check`, and `memory:audit` pass.
 - Main document H1 titles are Thai-first while preserving searchable English names in parentheses; H1 scan, `predeploy:check`, `memory:audit`, and `knowledge:audit` pass.
 - `predeploy:check` now guards Thai-first Markdown headings across the main docs, app READMEs, memory vault, and knowledge wiki, while allowing technical `API`/`URL` headings and numeric decision ids.
+- Browser e2e smoke spec and abuse QA checklist now expect the Thai prompt-control heading `กฎคุมพรอมป์ของแพลตฟอร์ม`; predeploy guards the old English heading from returning to the e2e spec.
 
 ## เกต local ล่าสุด (Gate local)
 

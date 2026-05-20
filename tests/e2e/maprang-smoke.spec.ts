@@ -536,7 +536,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     await page.getByTestId('prompt-inspector-message').fill('ช่วยตรวจว่าพรอมป์ยังคุมบุคลิกและตอบยาวพอไหม')
     await expect(page.getByTestId('prompt-inspector-submit')).toBeEnabled()
     await page.getByTestId('prompt-inspector-submit').click()
-    await expect(page.getByTestId('prompt-inspector-output')).toContainText('Platform prompt-control policy')
+    await expect(page.getByTestId('prompt-inspector-output')).toContainText('กฎคุมพรอมป์ของแพลตฟอร์ม')
     await expect(page.getByTestId('prompt-inspector-diff')).toBeVisible()
   } else {
     await expect(page.getByTestId('prompt-inspector-admin-key-input')).toBeVisible()
