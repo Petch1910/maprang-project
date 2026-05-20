@@ -107,7 +107,7 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
       findings.push({
         file,
         line: sourcePosition(sourceFile, node),
-        message: `${context} points to ${path}, but App.tsx has no matching Route`,
+        message: `${context} ชี้ไปที่ ${path} แต่ App.tsx ไม่มี Route ที่ตรงกัน`,
       })
     }
   }
@@ -119,7 +119,7 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
         const name = attribute.name.getText(sourceFile)
         if (name !== 'to' && name !== 'href') continue
         const value = attributeStringValue(attribute, sourceFile)
-        if (value) checkPath(value, attribute, `${name} attribute`)
+        if (value) checkPath(value, attribute, `attribute ${name}`)
       }
     }
 
@@ -130,7 +130,7 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
       node.arguments[0] &&
       ts.isStringLiteral(node.arguments[0])
     ) {
-      checkPath(node.arguments[0].text, node.arguments[0], 'navigate call')
+      checkPath(node.arguments[0].text, node.arguments[0], 'คำสั่ง navigate')
     }
 
     ts.forEachChild(node, visit)
@@ -148,7 +148,7 @@ export async function collectFrontendRouteAuditResult(): Promise<FrontendRouteAu
       ok: false,
       declaredRoutes,
       findings: [],
-      failure: 'Frontend route audit failed: no <Route path="..."> entries found in App.tsx',
+      failure: 'Frontend route audit ไม่ผ่าน: ไม่พบ <Route path="..."> ใน App.tsx',
     }
   }
 
@@ -181,12 +181,12 @@ export async function runFrontendRouteAudit(
       return 1
     }
 
-    writeError('Frontend route audit failed:')
+    writeError('Frontend route audit ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
     return 1
   }
 
-  writeLine(`ok - frontend route audit passed (${result.declaredRoutes.length} declared routes)`)
+  writeLine(`ok - frontend route audit ผ่านแล้ว (${result.declaredRoutes.length} routes)`)
   return 0
 }
 

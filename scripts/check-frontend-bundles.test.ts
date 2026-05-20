@@ -25,9 +25,9 @@ describe('frontend bundle budget check', () => {
     )
 
     expect(result.failures).toEqual([
-      'main index bundle is 120.0KB, expected <= 100KB',
-      'ChatRoomPage chunk was not found; chat/workspace code may have been pulled into the main bundle',
-      'oversized frontend chunk(s): Everything-huge.js 160.0KB',
+      'main index bundle มีขนาด 120.0KB, ต้องไม่เกิน 100KB',
+      'ไม่พบ ChatRoomPage chunk; โค้ด chat/workspace อาจถูกรวมเข้า main bundle',
+      'พบ frontend chunk ที่ใหญ่เกินกำหนด: Everything-huge.js 160.0KB',
     ])
   })
 
@@ -50,7 +50,7 @@ describe('frontend bundle budget check', () => {
 
     expect(exitCode).toBe(0)
     expect(lines[0]).toBe('Frontend bundle budget:')
-    expect(lines.at(-1)).toBe('ok - frontend bundle budget passed')
+    expect(lines.at(-1)).toBe('ok - frontend bundle budget ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

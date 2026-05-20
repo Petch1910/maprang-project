@@ -40,6 +40,7 @@ Results:
 - Route/menu staging checklist copy now passes `frontend:static:audit:test`, `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`; the static audit blocks the old ambiguous `ยังไม่ใช่ปุ่มในแอปเครื่องนี้` wording from returning.
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Frontend static audit diagnostic localization: pass via `frontend:static:audit:test`, `frontend:check`, and `predeploy:check`.
+- Frontend route audit and bundle budget diagnostic localization: pass via `frontend:route:audit:test`, `frontend:bundle:test`, and `frontend:check`.
 - Full local QA was rerun after the latest Thai UI copy guards and route/menu mixed-language guard; `qa:local` still passes across backend, frontend, local smoke, and API smoke.
 - Full local QA was rerun after the latest Thai-first frontend/admin copy and Creator Draft image-provider copy passes; `qa:local` still passes across backend, frontend, local smoke, API smoke, audits, evals, and predeploy.
 - Secrets check: pass.

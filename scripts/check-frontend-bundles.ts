@@ -36,20 +36,20 @@ export function evaluateFrontendBundleBudgets(sizes: BundleSize[], budget: Bundl
   const failures: string[] = []
 
   if (!mainIndex) {
-    failures.push('main index bundle was not found in apps/frontend/dist/assets')
+    failures.push('ไม่พบ main index bundle ใน apps/frontend/dist/assets')
   } else if (kb(mainIndex.bytes) > budget.mainIndexKb) {
-    failures.push(`main index bundle is ${formatKb(mainIndex.bytes)}, expected <= ${budget.mainIndexKb}KB`)
+    failures.push(`main index bundle มีขนาด ${formatKb(mainIndex.bytes)}, ต้องไม่เกิน ${budget.mainIndexKb}KB`)
   }
 
   if (!chatRoom) {
-    failures.push('ChatRoomPage chunk was not found; chat/workspace code may have been pulled into the main bundle')
+    failures.push('ไม่พบ ChatRoomPage chunk; โค้ด chat/workspace อาจถูกรวมเข้า main bundle')
   } else if (kb(chatRoom.bytes) > budget.chatRoomKb) {
-    failures.push(`ChatRoomPage chunk is ${formatKb(chatRoom.bytes)}, expected <= ${budget.chatRoomKb}KB`)
+    failures.push(`ChatRoomPage chunk มีขนาด ${formatKb(chatRoom.bytes)}, ต้องไม่เกิน ${budget.chatRoomKb}KB`)
   }
 
   if (oversized.length > 0) {
     failures.push(
-      `oversized frontend chunk(s): ${oversized.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`,
+      `พบ frontend chunk ที่ใหญ่เกินกำหนด: ${oversized.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`,
     )
   }
 
@@ -84,16 +84,16 @@ export async function runFrontendBundleCheck(
   const result = evaluateFrontendBundleBudgets(sizes)
 
   writeLine('Frontend bundle budget:')
-  writeLine(`- main index: ${result.mainIndex ? formatKb(result.mainIndex.bytes) : 'missing'} / ${budgets.mainIndexKb}KB`)
-  writeLine(`- chat route: ${result.chatRoom ? formatKb(result.chatRoom.bytes) : 'missing'} / ${budgets.chatRoomKb}KB`)
-  writeLine(`- largest chunks: ${result.largest.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`)
+  writeLine(`- main index: ${result.mainIndex ? formatKb(result.mainIndex.bytes) : 'ไม่พบ'} / ${budgets.mainIndexKb}KB`)
+  writeLine(`- chat route: ${result.chatRoom ? formatKb(result.chatRoom.bytes) : 'ไม่พบ'} / ${budgets.chatRoomKb}KB`)
+  writeLine(`- chunk ใหญ่สุด: ${result.largest.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`)
 
   if (result.failures.length > 0) {
     for (const failure of result.failures) writeError(`fail - ${failure}`)
     return 1
   }
 
-  writeLine('ok - frontend bundle budget passed')
+  writeLine('ok - frontend bundle budget ผ่านแล้ว')
   return 0
 }
 
