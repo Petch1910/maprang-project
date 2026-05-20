@@ -369,3 +369,4 @@ Last updated: 2026-05-20
 - Readiness avatar-storage blocker Thai-first pass: เปลี่ยน production/readiness blocker จาก `avatar storage` เป็น "พื้นที่เก็บรูปตัวละคร" พร้อม deploy readiness และ backend health tests.
 - Supabase signed-storage wording Thai-first pass: เกลา workflow, release handoff, setup script, predeploy guard, และ deploy docs ให้ใช้ "พื้นที่เก็บรูปตัวละคร" แทน `avatar storage` ในข้อความที่ผู้ดูแลเห็น.
 - Release handoff stale storage-label guard pass: ตัวตรวจเอกสารส่งมอบ release ตอนนี้ fail ถ้า field รูปตัวละครถอยกลับไปใช้ `avatar storage` label เก่า พร้อม regression test.
+- Stream chat validation guard pass: เพิ่ม backend unit test ให้ `streamChat` คืน validation delta/done โดยไม่คิด token และไม่ใส่ providerFailure เมื่อ ID ผิดรูปแบบก่อนแตะ provider.

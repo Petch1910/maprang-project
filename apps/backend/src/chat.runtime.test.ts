@@ -8,10 +8,29 @@ import {
   isTransientChatProviderError,
   sendChat,
   shouldExtendShortRoleplayReply,
+  streamChat,
   updateRuntimeState,
 } from './chat.service'
 import { contentRatingFromTags, ratingAllowed } from './content-rating'
 import { buildWorldStatePrompt, coerceWorldState, mergeWorldState } from './world-state.service'
+
+async function readStreamEvents(stream: ReadableStream<Uint8Array>) {
+  const reader = stream.getReader()
+  const decoder = new TextDecoder()
+  let raw = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    raw += decoder.decode(value, { stream: true })
+  }
+  raw += decoder.decode()
+
+  return raw
+    .split('\n\n')
+    .filter(Boolean)
+    .map((event) => JSON.parse(event.replace(/^data:\s*/, '')))
+}
 
 describe('chat runtime state', () => {
   test('keeps route-level chat fallback reply Thai-first', () => {
@@ -173,6 +192,25 @@ describe('chat id validation guard', () => {
 
     expect(result.reply).toBe(chatReplyMessages.invalidUserId)
     expect(result.chatId).toBeNull()
+  })
+
+  test('streams validation errors without provider usage or raw failure metadata', async () => {
+    const events = await readStreamEvents(
+      streamChat({
+        message: 'hello',
+        characterId: "' OR 1=1 --",
+        chatId: "' OR 1=1 --",
+        userId: 'not-a-user-id',
+      }),
+    )
+    const delta = events.find((event) => event.type === 'delta')
+    const done = events.find((event) => event.type === 'done')
+
+    expect(delta?.content).toBe(chatReplyMessages.invalidUserId)
+    expect(done?.chatId).toBeNull()
+    expect(done?.usage.totalTokens).toBe(0)
+    expect(done?.usage.cost).toBe(0)
+    expect(done?.usage.providerFailure).toBeUndefined()
   })
 })
 
