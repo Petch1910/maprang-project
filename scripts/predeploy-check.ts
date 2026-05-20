@@ -591,7 +591,7 @@ const checks: Check[] = [
       requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
       requireIncludes(
         productionChecklist,
-        ['bun run deploy:doctor', 'bun run deploy:status', 'bun run api:smoke:live', 'Do not point `qa:local`'],
+        ['bun run deploy:doctor', 'bun run deploy:status', 'bun run api:smoke:live', 'อย่าชี้ `qa:local`'],
         'memory/production/checklist.md',
       )
       requireIncludes(

@@ -101,6 +101,7 @@ Results:
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.
 - Deploy readiness health-row labels now pass Thai-first coverage via `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
 - Deploy blocker handoff memory now reads Thai-first while keeping exact env names, commands, and verification flags for staging/production follow-up.
+- Memory inbox and production checklist Thai-first handoff wording now passes `memory:audit` and `predeploy:check`; the predeploy guard checks the Thai `qa:local` production-data warning.
 - Smoke doctor missing image-generation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor roleplay reply-budget recommendation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor success output and deploy env doctor self-test localization now pass `smoke:doctor:test`, `deploy:doctor:self-test`, and `deploy:doctor:test`.
