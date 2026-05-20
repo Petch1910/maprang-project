@@ -2,11 +2,11 @@
 
 Last updated: 2026-05-20
 
-## Latest Local Gate
+## Gate local ล่าสุด
 
-Status: static/unit/build gates passing; full local smoke needs Docker/Postgres and backend running
+สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
-Commands verified:
+คำสั่งที่ยืนยันแล้ว:
 - `bun run qa:local`
 - `bun run e2e:smoke`
 - `bunx prisma migrate deploy`
@@ -19,7 +19,7 @@ Commands verified:
 - `bun run smoke:doctor`
 - `git diff --check`
 
-Results:
+ผลลัพธ์:
 - Latest `bun run qa:local` attempt on this machine reached the final runtime smoke phase but failed because Docker Desktop/Postgres and the backend at `http://127.0.0.1:3000` were not running; all preceding static/unit/build gates in that run passed.
 - Backend tests: 147 pass, 0 fail.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
@@ -215,25 +215,25 @@ Results:
 - Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.
 - Relationship preset API smoke now verifies 24 full presets, 19 player contract presets, and 24 Creator Studio presets.
 
-## Production Gate
+## Gate production
 
-Status: intentionally failing until real environment is ready
+สถานะ: ตั้งใจให้ยัง fail จนกว่า environment จริงจะพร้อม
 
-Known `production:check` blockers:
+ตัวกั้น `production:check` ที่รู้แล้ว:
 - Local backend URL.
 - Local, missing, or non-https production CORS.
 - Chat provider live smoke not marked verified.
 - Image provider live smoke not marked verified.
 
-Known `staging:verify` blockers in local mode:
+ตัวกั้น `staging:verify` ที่รู้แล้วใน local mode:
 - Local backend URL.
 - Local, missing, or non-https staging CORS.
 
-## Browser QA
+## QA ผ่าน browser
 
-Status: passing for Admin Health, Admin Evals, and Chat UI interaction
+สถานะ: ผ่านสำหรับ Admin Health, Admin Evals, และ Chat UI interaction
 
-Checked:
+ตรวจแล้ว:
 - `/admin/health` renders.
 - `/admin/prompt-inspector` renders and can call the admin prompt snapshot flow when an admin key is available.
 - `/admin/evals` renders and can run the deterministic local eval flow when an admin key is available.

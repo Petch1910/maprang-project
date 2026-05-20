@@ -2,13 +2,13 @@
 
 Last updated: 2026-05-20
 
-## Current Goal
+## เป้าหมายปัจจุบัน
 
-Bring Maprang AI to a production-ready state before deploy. The local system should stay stable while production-only blockers are made explicit and impossible to miss.
+ทำให้ Maprang AI พร้อมสำหรับ production ก่อน deploy โดยระบบ local ต้องเสถียร และ production-only blockers ต้องชัดจนพลาดยาก.
 
-## Current Local Status
+## สถานะ local ปัจจุบัน
 
-Status: static/unit/build QA ready; final local smoke needs Docker/Postgres and backend running
+สถานะ: static/unit/build QA พร้อมแล้ว; final local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
 Verified:
 - Latest full `qa:local` attempt reached final runtime smoke and then failed because Docker Desktop/Postgres plus backend `http://127.0.0.1:3000` were not running in this desktop session.
