@@ -30,7 +30,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 - Backend tests ล่าสุดผ่าน 149 tests
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile
-- Production ยัง blocked เพราะต้องมี staging/backend/frontend domain จริง, CORS จริง, live chat smoke และ live image smoke
+- โปรดักชันยังถูกกั้น เพราะต้องมีโดเมนสเตจจิง/ระบบหลังบ้าน/หน้าบ้านจริง, CORS จริง, การทดสอบแชทจริง และการทดสอบสร้างรูปจริง
 
 ## ทิศทางผลิตภัณฑ์ (Product Direction)
 
@@ -54,7 +54,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 - เนื้อหา roleplay ต้องถูกอธิบายว่าเป็นเรื่องสมมุติหรือการจำลอง
 - UGC ต้องมี report, moderation และ audit log
 - ห้าม hardcode หรือ commit secret จริง เช่น API key, service role key, database password, access token
-- ถ้าเจอ secret ในไฟล์ ให้หยุดแก้แบบระวังและย้ายเป็น placeholder/env ทันที
+- ถ้าเจอ secret ในไฟล์ ให้หยุดแก้แบบระวังและย้ายเป็นค่าตัวอย่างหรือ env ทันที
 
 ## แผนผังสถาปัตยกรรม (Architecture Map)
 
@@ -66,7 +66,7 @@ Backend:
 - Auth: Supabase JWT ใน production, local fallback เฉพาะ dev/test
 - Storage: Supabase Storage signed URL สำหรับ production avatar
 - AI chat: OpenRouter-compatible provider
-- Image generation: configured image provider หรือ fallback placeholder เฉพาะ local/dev
+- Image generation: ผู้ให้บริการรูปภาพที่ตั้งค่าไว้ หรือภาพตัวอย่างสำรองเฉพาะ local/dev
 
 Frontend:
 
@@ -181,8 +181,8 @@ bun run smoke:image:live
 - `CORS_ORIGINS` เป็น frontend HTTPS domain จริง ไม่รวม localhost, `http://`, wildcard, หรือ backend URL ใน staging/production
 - Supabase project จริงพร้อม bucket `avatars` แบบ private + signed URL
 - `SUPABASE_STORAGE_ACCESS=signed`
-- `CHAT_PROVIDER_LIVE_VERIFIED=1` หลัง live chat smoke ผ่านจริง
-- `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image smoke ผ่านจริง
+- `CHAT_PROVIDER_LIVE_VERIFIED=1` หลังการทดสอบแชทจริงผ่าน
+- `IMAGE_GENERATION_LIVE_VERIFIED=1` หลังการทดสอบสร้างรูปจริงผ่าน
 - Admin API smoke และ audit log ผ่าน
 
 ## เงื่อนไขว่างานเสร็จ (Definition Of Done)
