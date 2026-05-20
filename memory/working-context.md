@@ -12,7 +12,7 @@ Last updated: 2026-05-20
 
 Verified:
 - Latest full `qa:local` attempt reached final runtime smoke and then failed because Docker Desktop/Postgres plus backend `http://127.0.0.1:3000` were not running in this desktop session.
-- Backend tests pass: 147 pass, 0 fail.
+- Backend tests pass: 149 pass, 0 fail, 465 expects.
 - Frontend deploy check passes.
 - Local API smoke passes: 32 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.

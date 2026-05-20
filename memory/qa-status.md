@@ -23,14 +23,14 @@ Last updated: 2026-05-20
 - `qa:local` now chains through `qa:repo` first, then runs only the runtime smoke layer (`smoke:doctor`, `smoke:local`, `api:smoke`) so deterministic QA coverage stays centralized and harder to drift.
 - CI secrets/predeploy jobs install root dependencies before repo-owned gates; `predeploy:check` and `predeploy:check:test` now guard the install wiring.
 - Latest `bun run qa:local` attempt on this machine reached the final runtime smoke phase but failed because Docker Desktop/Postgres and the backend at `http://127.0.0.1:3000` were not running; all preceding static/unit/build gates in that run passed.
-- Backend tests: 147 pass, 0 fail.
+- Backend tests: 149 pass, 0 fail, 465 expect calls.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.
 - Frontend Redux circular dependency cleanup: pass via `frontend:check` and SocratiCode graph check; store/slice cycles dropped from six frontend chains to zero.
 - Backend circular dependency cleanup: pass via focused backend tests and SocratiCode graph check; project graph now reports no circular dependencies.
-- Import-cycle audit: pass via `import-cycle:audit`, `import-cycle:audit:test`, and `predeploy:check`; the repo-owned audit currently checks 122 app/QA source files and 272 relative import edges, including TypeScript import-equals `require()` and CommonJS `require()` calls, and predeploy now guards that coverage plus its docs.
+- Import-cycle audit: pass via `import-cycle:audit`, `import-cycle:audit:test`, and `predeploy:check`; the repo-owned audit currently checks 122 app/QA source files and 273 relative import edges, including TypeScript import-equals `require()` and CommonJS `require()` calls, and predeploy now guards that coverage plus its docs.
 - Frontend Thai localization pass: pass via frontend static audit and frontend deploy check.
 - Admin browser smoke Thai labels: pass via `frontend:static:audit:test`, `frontend:check`, `e2e:smoke:test`, and `predeploy:check`.
 - Browser e2e smoke now checks the Thai-first Automated Evals heading `ทดสอบคุณภาพพรอมป์และบริบท` instead of the old mixed `prompt/context` wording, and the latest desktop/mobile run passes 4/4 again.
@@ -173,8 +173,8 @@ Last updated: 2026-05-20
 - Backend lore route persistence/access/not-found error copy now passes Thai-first coverage via `bun test apps\backend\src\route-id-validation.test.ts` and full `backend:check` with 144 pass.
 - Backend report route access/persistence/admin-action error copy now passes Thai-first coverage via `bun test apps\backend\src\route-id-validation.test.ts apps\backend\src\report.service.test.ts` and full `backend:check` with 145 pass.
 - Backend admin route access/persistence/token-adjustment error copy now passes Thai-first coverage via `bun test apps\backend\src\admin.prompt-inspector.routes.test.ts apps\backend\src\admin.service.test.ts` and full `backend:check` with 146 pass.
-- Backend user route persistence error copy now passes Thai-first coverage via `bun test apps\backend\src\user.service.test.ts` and full `backend:check` with 147 pass.
-- Backend route error fallback copy now passes focused route-id coverage and full `backend:check` with 147 pass, 460 expect calls.
+- Backend user route persistence error copy now passes Thai-first coverage via `bun test apps\backend\src\user.service.test.ts` and full `backend:check` with 149 pass.
+- Backend route error fallback copy now passes focused route-id coverage and full `backend:check` with 149 pass, 465 expect calls.
 - Full `api:smoke` was not rerun in this delta because Docker Desktop/Postgres is not available in the local environment; `api:smoke:test` still passes and the changed smoke validation assertion now expects the Thai invalid-character reply.
 - Profile/tag helper and route/menu staging copy now pass Thai-first coverage via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, `route-menu:audit:test`, and `predeploy:check`; the static audit also blocks stale `backend`/`prompt`/`runtime`/`persona` helper wording from returning.
 - `frontend:static:audit:test` now also blocks stale mixed prompt/admin tooling copy such as `System prompt`, `redacted prompt`, `Runtime note`, `prompt snapshot`, `admin API`, and `frontend domain`.

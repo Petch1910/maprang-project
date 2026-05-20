@@ -52,7 +52,7 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- backend test suite ฝั่ง local ผ่านแล้ว: 147 pass, 0 fail.
+- backend test suite ฝั่ง local ผ่านแล้ว: 149 pass, 0 fail, 465 expect calls.
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว
 - Desktop/mobile e2e smoke ผ่านแล้ว

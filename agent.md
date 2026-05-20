@@ -1,6 +1,6 @@
 # Maprang AI Agent Guide
 
-Last updated: 2026-05-19
+Last updated: 2026-05-20
 
 ไฟล์นี้คือคู่มือสำหรับ AI agent หรือ developer ที่มาสานต่องาน Maprang AI ใน repo นี้ ให้เริ่มจากภาพรวมเดียวกันและไม่ทำงานหลุดทิศทาง
 
@@ -27,7 +27,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 สถานะล่าสุดที่ต้องจำ:
 
 - Local QA พร้อมใช้งาน
-- Backend tests ล่าสุดผ่าน 147 tests
+- Backend tests ล่าสุดผ่าน 149 tests
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile
 - Production ยัง blocked เพราะต้องมี staging/backend/frontend domain จริง, CORS จริง, live chat smoke และ live image smoke
