@@ -95,20 +95,20 @@ async function readRepoFile(path: string) {
 function requireIncludes(content: string, values: string[], file: string) {
   const missing = values.filter((value) => !content.includes(value))
   if (missing.length > 0) {
-    throw new Error(`${file} is missing ${missing.join(', ')}`)
+    throw new Error(`${file} ยังไม่มีข้อความที่ต้องมี: ${missing.join(', ')}`)
   }
 }
 
 function forbidIncludes(content: string, values: string[], file: string) {
   const present = values.filter((value) => content.includes(value))
   if (present.length > 0) {
-    throw new Error(`${file} contains stale text ${present.join(', ')}`)
+    throw new Error(`${file} ยังมีข้อความเก่าที่ต้องเอาออก: ${present.join(', ')}`)
   }
 }
 
 const checks: Check[] = [
   {
-    name: 'required deploy files exist',
+    name: 'ไฟล์ deploy ที่จำเป็นต้องมีครบ',
     run: async () => {
       await Promise.all(requiredFiles.map(assertFile))
       const gitignore = await readRepoFile('.gitignore')
@@ -116,7 +116,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'agent handoff guide is available',
+    name: 'คู่มือส่งต่องาน agent พร้อมใช้งาน',
     run: async () => {
       const agentEntry = await readRepoFile('AGENTS.md')
       const agentGuide = await readRepoFile('agent.md')
@@ -161,7 +161,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'backend production env example covers critical settings',
+    name: 'ตัวอย่าง env production ฝั่ง backend ครอบคลุมค่าจำเป็น',
     run: async () => {
       const content = await readRepoFile('apps/backend/.env.production.example')
       requireIncludes(
@@ -193,7 +193,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'roleplay depth prompt guidance matches production defaults',
+    name: 'แนวทาง prompt ความยาว roleplay ตรงกับค่า production',
     run: async () => {
       const contextService = await readRepoFile('apps/backend/src/context.service.ts')
       const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
@@ -235,7 +235,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'frontend production env example covers critical settings',
+    name: 'ตัวอย่าง env production ฝั่ง frontend ครอบคลุมค่าจำเป็น',
     run: async () => {
       const content = await readRepoFile('apps/frontend/.env.production.example')
       requireIncludes(
@@ -246,7 +246,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'dockerfiles expose expected services',
+    name: 'Dockerfile เปิด service ที่คาดไว้ครบ',
     run: async () => {
       const backend = await readRepoFile('apps/backend/Dockerfile')
       const frontend = await readRepoFile('apps/frontend/Dockerfile')
@@ -255,7 +255,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'required migrations are present',
+    name: 'migration ที่จำเป็นต้องมีครบ',
     run: async () => {
       const migrations = await readdir(join(root, 'apps/backend/prisma/migrations'))
       const required = [
@@ -268,11 +268,11 @@ const checks: Check[] = [
         '20260513103000_add_lore_parent_index',
       ]
       const missing = required.filter((name) => !migrations.includes(name))
-      if (missing.length > 0) throw new Error(`missing migration(s): ${missing.join(', ')}`)
+      if (missing.length > 0) throw new Error(`ยังไม่มี migration: ${missing.join(', ')}`)
     },
   },
   {
-    name: 'production docs mention migration, smoke tests, and signed storage',
+    name: 'เอกสาร production ระบุ migration, smoke test และ signed storage',
     run: async () => {
       const setup = await readRepoFile('PRODUCTION_SETUP.md')
       const render = await readRepoFile('DEPLOY_RENDER.md')
@@ -312,7 +312,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'release handoff template is available',
+    name: 'แม่แบบ release handoff พร้อมใช้งาน',
     run: async () => {
       const handoff = await readRepoFile('RELEASE_HANDOFF.md')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
@@ -374,7 +374,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'QA scripts cover seed and Playwright e2e smoke',
+    name: 'สคริปต์ QA ครอบคลุม seed และ Playwright e2e smoke',
     run: async () => {
       const content = await readRepoFile('package.json')
       const frontendPackage = await readRepoFile('apps/frontend/package.json')
@@ -459,94 +459,94 @@ const checks: Check[] = [
       const stagingVerify = packageJson.scripts?.['staging:verify'] ?? ''
       const productionCheck = packageJson.scripts?.['production:check'] ?? ''
       if (smokeLive.includes('smoke:chat')) {
-        throw new Error('package.json smoke:live should use api:smoke:live once instead of calling smoke:chat separately')
+        throw new Error('package.json smoke:live ควรเรียก api:smoke:live เพียงครั้งเดียวแทนการเรียก smoke:chat แยก')
       }
       if (qaLive.includes('smoke:chat') || qaLive.includes('smoke:image')) {
-        throw new Error('package.json qa:live should not duplicate provider calls outside api:smoke:live')
+        throw new Error('package.json qa:live ไม่ควรยิง provider ซ้ำจากคำสั่งนอก api:smoke:live')
       }
       if (!qaLocal.includes('secrets:patterns:test')) {
-        throw new Error('package.json qa:local must run secrets:patterns:test so shared secret pattern regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน secrets:patterns:test เพื่อจับ regression ของ secret pattern กลาง')
       }
       if (!qaLocal.includes('secrets:check:test')) {
-        throw new Error('package.json qa:local must run secrets:check:test so committed secret scan path regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน secrets:check:test เพื่อจับ regression ของเส้นทางสแกน secret ที่ commit แล้ว')
       }
       if (!qaLocal.includes('vault:audit:test')) {
-        throw new Error('package.json qa:local must run vault:audit:test so memory/knowledge audit helper regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน vault:audit:test เพื่อจับ regression ของตัวช่วย audit memory/knowledge')
       }
       if (!qaLocal.includes('eval:local:test')) {
-        throw new Error('package.json qa:local must run eval:local:test so local eval output regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน eval:local:test เพื่อจับ regression ของผลลัพธ์ local eval')
       }
       if (!qaLocal.includes('security:audit:test')) {
-        throw new Error('package.json qa:local must run security:audit:test so backend security audit regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน security:audit:test เพื่อจับ regression ของ backend security audit')
       }
       if (!qaLocal.includes('import-cycle:audit') || !qaLocal.includes('import-cycle:audit:test')) {
-        throw new Error('package.json qa:local must run import-cycle audit and its regression test so architecture cycles are caught')
+        throw new Error('package.json qa:local ต้องรัน import-cycle audit และ regression test เพื่อจับวงจร import ในสถาปัตยกรรม')
       }
       if (!qaLocal.includes('api:audit:test')) {
-        throw new Error('package.json qa:local must run api:audit:test so route audit regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน api:audit:test เพื่อจับ regression ของ route audit')
       }
       if (!qaLocal.includes('api:smoke:test')) {
-        throw new Error('package.json qa:local must run api:smoke:test so API smoke helper regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน api:smoke:test เพื่อจับ regression ของตัวช่วย API smoke')
       }
       if (!qaLocal.includes('frontend:api:test')) {
-        throw new Error('package.json qa:local must run frontend:api:test so frontend API error regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน frontend:api:test เพื่อจับ regression ของ error API ฝั่ง frontend')
       }
       if (!qaLocal.includes('frontend:bundle:test')) {
-        throw new Error('package.json qa:local must run frontend:bundle:test so bundle budget regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน frontend:bundle:test เพื่อจับ regression ของ bundle budget')
       }
       if (!qaLocal.includes('frontend:static:audit:test')) {
-        throw new Error('package.json qa:local must run frontend:static:audit:test so frontend static audit regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน frontend:static:audit:test เพื่อจับ regression ของ frontend static audit')
       }
       if (!qaLocal.includes('frontend:route:audit:test')) {
-        throw new Error('package.json qa:local must run frontend:route:audit:test so frontend route audit regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน frontend:route:audit:test เพื่อจับ regression ของ frontend route audit')
       }
       if (!qaLocal.includes('route-menu:audit:test')) {
-        throw new Error('package.json qa:local must run route-menu:audit:test so route/menu doc regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน route-menu:audit:test เพื่อจับ regression ของเอกสาร route/menu')
       }
       if (!qaLocal.includes('smoke:helpers:test')) {
-        throw new Error('package.json qa:local must run smoke:helpers:test so smoke auth/url regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน smoke:helpers:test เพื่อจับ regression ของ auth/url ใน smoke')
       }
       if (!qaLocal.includes('provider:smoke:guards:test')) {
-        throw new Error('package.json qa:local must run provider:smoke:guards:test so provider smoke guard regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน provider:smoke:guards:test เพื่อจับ regression ของ provider smoke guard')
       }
       if (!qaLocal.includes('smoke:doctor:test')) {
-        throw new Error('package.json qa:local must run smoke:doctor:test so smoke doctor blocker output regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน smoke:doctor:test เพื่อจับ regression ของผลลัพธ์ blocker ใน smoke doctor')
       }
       if (!qaLocal.includes('smoke:ready:test')) {
-        throw new Error('package.json qa:local must run smoke:ready:test so readiness smoke output regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน smoke:ready:test เพื่อจับ regression ของผลลัพธ์ readiness smoke')
       }
       if (!qaLocal.includes('smoke:image:test')) {
-        throw new Error('package.json qa:local must run smoke:image:test so image smoke fallback regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน smoke:image:test เพื่อจับ regression ของ image smoke fallback')
       }
       if (!qaLocal.includes('smoke:chat:test')) {
-        throw new Error('package.json qa:local must run smoke:chat:test so live chat smoke validation regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน smoke:chat:test เพื่อจับ regression ของการตรวจ live chat smoke')
       }
       if (!qaLocal.includes('smoke:local:test')) {
-        throw new Error('package.json qa:local must run smoke:local:test so local smoke helper regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน smoke:local:test เพื่อจับ regression ของตัวช่วย local smoke')
       }
       if (!qaLocal.includes('e2e:smoke:test')) {
-        throw new Error('package.json qa:local must run e2e:smoke:test so browser smoke command regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน e2e:smoke:test เพื่อจับ regression ของคำสั่ง browser smoke')
       }
       if (!qaLocal.includes('backend:check:db:test')) {
-        throw new Error('package.json qa:local must run backend:check:db:test so DB-required backend check planning is caught')
+        throw new Error('package.json qa:local ต้องรัน backend:check:db:test เพื่อจับ regression ของแผนเช็ค backend ที่ต้องใช้ DB')
       }
       if (!qaLocal.includes('supabase:storage:test')) {
-        throw new Error('package.json qa:local must run supabase:storage:test so signed storage helper regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน supabase:storage:test เพื่อจับ regression ของตัวช่วย signed storage')
       }
       if (!qaLocal.includes('deploy:status:test')) {
-        throw new Error('package.json qa:local must run deploy:status:test so deploy status output regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน deploy:status:test เพื่อจับ regression ของผลลัพธ์ deploy status')
       }
       if (!qaLocal.includes('deploy:doctor:test')) {
-        throw new Error('package.json qa:local must run deploy:doctor:test so deploy env helper regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน deploy:doctor:test เพื่อจับ regression ของตัวช่วย deploy env')
       }
       if (!qaLocal.includes('deploy:doctor:self-test')) {
-        throw new Error('package.json qa:local must run deploy:doctor:self-test so deploy env CLI self-test stays covered')
+        throw new Error('package.json qa:local ต้องรัน deploy:doctor:self-test เพื่อให้ self-test ของ deploy env CLI ยังถูกครอบไว้')
       }
       if (!qaLocal.includes('predeploy:check:test')) {
-        throw new Error('package.json qa:local must run predeploy:check:test so predeploy guard wiring regressions are caught')
+        throw new Error('package.json qa:local ต้องรัน predeploy:check:test เพื่อจับ regression ของการผูก predeploy guard')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
-        throw new Error('package.json staging:check must cover qa:full, Supabase storage, and admin API smoke')
+        throw new Error('package.json staging:check ต้องครอบ qa:full, Supabase storage และ admin API smoke')
       }
       if (
         !stagingVerify.includes('bun scripts/smoke-doctor.ts --strict-staging') ||
@@ -555,16 +555,16 @@ const checks: Check[] = [
         !stagingVerify.includes('smoke:ready') ||
         !stagingVerify.includes('--require-admin')
       ) {
-        throw new Error('package.json staging:verify must print deploy status, require strict staging smoke doctor, Supabase storage, readiness, and admin API smoke')
+        throw new Error('package.json staging:verify ต้องพิมพ์ deploy status และบังคับ strict staging smoke doctor, Supabase storage, readiness และ admin API smoke')
       }
       if (!productionCheck.includes('bun run deploy:status')) {
-        throw new Error('package.json production:check must print deploy status before strict production gates')
+        throw new Error('package.json production:check ต้องพิมพ์ deploy status ก่อน strict production gates')
       }
       if (!productionCheck.includes('supabase:storage:check')) {
-        throw new Error('package.json production:check must verify Supabase signed avatar storage')
+        throw new Error('package.json production:check ต้องตรวจ Supabase signed avatar storage')
       }
       if (!productionCheck.includes('--require-admin')) {
-        throw new Error('package.json production:check must require admin smoke checks')
+        throw new Error('package.json production:check ต้องบังคับ admin smoke checks')
       }
       requireIncludes(
         frontendPackage,
@@ -574,7 +574,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'project memory vault is available',
+    name: 'คลังความจำของโปรเจกต์พร้อมใช้งาน',
     run: async () => {
       const packageJson = await readRepoFile('package.json')
       const readme = await readRepoFile('README.md')
@@ -607,7 +607,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'project knowledge layer is available',
+    name: 'ชั้นความรู้ของโปรเจกต์พร้อมใช้งาน',
     run: async () => {
       const packageJson = await readRepoFile('package.json')
       const readme = await readRepoFile('README.md')
@@ -632,7 +632,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'project eval foundation is available',
+    name: 'ฐานทดสอบคุณภาพของโปรเจกต์พร้อมใช้งาน',
     run: async () => {
       const packageJson = await readRepoFile('package.json')
       const readme = await readRepoFile('README.md')
@@ -657,7 +657,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'deployment QA covers relationship contracts',
+    name: 'QA สำหรับ deploy ครอบคลุม relationship contract',
     run: async () => {
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const routeMenuAudit = await readRepoFile('apps/frontend/src/lib/routeMenuAudit.ts')
@@ -677,7 +677,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'local smoke cannot hide live image verification',
+    name: 'local smoke ต้องไม่ซ่อนการยืนยัน live image',
     run: async () => {
       const packageJsonContent = await readRepoFile('package.json')
       const packageJson = JSON.parse(packageJsonContent) as { scripts?: Record<string, string> }
@@ -689,21 +689,21 @@ const checks: Check[] = [
         'scripts/api-smoke.ts',
       )
       if (apiSmoke.includes('skipImageProvider: true')) {
-        throw new Error('scripts/api-smoke.ts must only skip the image provider through skipImageProvider: !live')
+        throw new Error('scripts/api-smoke.ts ต้องข้าม image provider ได้เฉพาะผ่าน skipImageProvider: !live')
       }
       if (!packageJson.scripts?.['api:smoke:live']?.includes('--live --require-live-image')) {
-        throw new Error('package.json api:smoke:live must require a real live image provider check')
+        throw new Error('package.json api:smoke:live ต้องบังคับตรวจ live image provider จริง')
       }
       if (!packageJson.scripts?.['production:check']?.includes('bun scripts/smoke-doctor.ts --strict-production')) {
-        throw new Error('package.json production:check must run smoke-doctor in strict production mode')
+        throw new Error('package.json production:check ต้องรัน smoke-doctor ใน strict production mode')
       }
       if (!packageJson.scripts?.['staging:verify']?.includes('bun scripts/smoke-doctor.ts --strict-staging')) {
-        throw new Error('package.json staging:verify must run smoke-doctor in strict staging mode')
+        throw new Error('package.json staging:verify ต้องรัน smoke-doctor ใน strict staging mode')
       }
     },
   },
   {
-    name: 'deploy status shares readiness logic',
+    name: 'deploy status ใช้ readiness logic ร่วมกัน',
     run: async () => {
       const packageJson = await readRepoFile('package.json')
       const smokeDoctor = await readRepoFile('scripts/smoke-doctor.ts')
@@ -831,7 +831,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'security checklist and audit script are available',
+    name: 'security checklist และ audit script พร้อมใช้งาน',
     run: async () => {
       const checklist = await readRepoFile('SECURITY_CHECKLIST.md')
       const packageJson = await readRepoFile('package.json')
@@ -1142,7 +1142,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'route/menu audit and staging runbook are available',
+    name: 'route/menu audit และ staging runbook พร้อมใช้งาน',
     run: async () => {
       const audit = await readRepoFile('ROUTE_MENU_AUDIT.md')
       const staging = await readRepoFile('STAGING_RUNBOOK.md')
@@ -1198,7 +1198,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'production smoke workflow is available',
+    name: 'workflow production smoke พร้อมใช้งาน',
     run: async () => {
       const workflow = await readRepoFile('.github/workflows/production-smoke.yml')
       const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
@@ -1324,7 +1324,7 @@ for (const check of checks) {
 }
 
 for (const result of results) {
-  console.log(`${result.ok ? 'ok' : 'fail'} - ${result.name}${result.error ? `: ${result.error}` : ''}`)
+  console.log(`${result.ok ? 'ผ่าน' : 'ไม่ผ่าน'} - ${result.name}${result.error ? `: ${result.error}` : ''}`)
 }
 
 if (results.some((result) => !result.ok)) process.exit(1)

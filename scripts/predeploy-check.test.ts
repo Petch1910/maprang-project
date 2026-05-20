@@ -9,6 +9,17 @@ async function readRepoFile(path: string) {
 }
 
 describe('predeploy check wiring', () => {
+  test('keeps predeploy diagnostics Thai-first', async () => {
+    const predeploy = await readRepoFile('scripts/predeploy-check.ts')
+
+    expect(predeploy).toContain('ไฟล์ deploy ที่จำเป็นต้องมีครบ')
+    expect(predeploy).toContain('ยังไม่มีข้อความที่ต้องมี')
+    expect(predeploy).toContain("result.ok ? 'ผ่าน' : 'ไม่ผ่าน'")
+    expect(predeploy).not.toContain("result.ok ? 'ok' : 'fail'")
+    expect(predeploy).not.toContain('is missing ${missing.join')
+    expect(predeploy).not.toContain('contains stale text')
+  })
+
   test('locks Thai-first e2e labels for admin eval smoke', async () => {
     const predeploy = await readRepoFile('scripts/predeploy-check.ts')
     const e2eSmoke = await readRepoFile('tests/e2e/maprang-smoke.spec.ts')
