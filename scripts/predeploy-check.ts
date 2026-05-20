@@ -840,7 +840,18 @@ const checks: Check[] = [
       const promptInspectorTest = await readRepoFile('apps/backend/src/prompt-inspector.service.test.ts')
       requireIncludes(
         checklist,
-        ['SQL Injection', 'Broken Access Control', 'Prompt Control', 'bun run security:audit', 'requireAdminApiKey', 'retrieved lore preview', 'Production Must-Pass'],
+        [
+          'SQL Injection',
+          'Broken Access Control',
+          'Frontend XSS / Link Safety',
+          'dangerouslySetInnerHTML',
+          'rel="noopener noreferrer"',
+          'Prompt Control',
+          'bun run security:audit',
+          'requireAdminApiKey',
+          'retrieved lore preview',
+          'Production Must-Pass',
+        ],
         'SECURITY_CHECKLIST.md',
       )
       requireIncludes(
