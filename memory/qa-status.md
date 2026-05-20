@@ -54,6 +54,8 @@ Last updated: 2026-05-20
 - Memory/knowledge audit diagnostic localization: pass via `vault:audit:test`, `memory:audit`, and `knowledge:audit`.
 - Root README entrypoint Thai-first wording now passes `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Root README production/current verification Thai-first wording now passes `predeploy:check:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
+- Root README eval/prompt-inspector/local-readiness/live-smoke/staging-verify wording now uses Thai-first handoff copy and will be checked by `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check` in this docs scope.
+- Predeploy README wording guard now tracks the Thai-first secret-pattern and staging verify deploy-status snippets, with `predeploy:check:test` included in this scope's verification.
 - Deployment QA remaining handoff sections now use Thai-first eval/smoke/workflow/env/storage/mobile/manual guidance and will be guarded by `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check` in this doc-only scope.
 - Backend/frontend app README replacement now passes `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Production deploy knowledge wiki: updated to reflect reply-budget gates, staging/deploy-status order, and Thai-first gate wording for backend/frontend URLs, CORS, storage, and live provider smoke.
