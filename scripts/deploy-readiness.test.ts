@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  buildHealthRows,
   buildNextDeploySteps,
   evaluateDeployReadiness,
   healthFailures,
@@ -98,6 +99,31 @@ function cloneHealth(overrides: Partial<HealthPayload> = {}): HealthPayload {
 }
 
 describe('deploy readiness evaluation', () => {
+  test('formats health rows with Thai-first readiness labels', () => {
+    const rows = new Map(buildHealthRows(baseHealth, 'https://api.example.com'))
+
+    expect(rows.get('backend')).toBe('พร้อม')
+    expect(rows.get('structuredKnowledge')).toBe('5 ไฟล์พร้อม')
+    expect(rows.get('securityPosture')).toBe('ไม่ได้รายงาน')
+
+    const brokenRows = new Map(
+      buildHealthRows(
+        cloneHealth({
+          ok: false,
+          knowledge: { structured: { ok: false, fileCount: 0, missing: [], errors: [] } },
+          model: { name: undefined as unknown as string, chatProvider: { status: undefined }, imageGeneration: { model: undefined, status: undefined } },
+          security: { authMode: undefined, avatarStorage: undefined, avatarStorageAccess: undefined, signedUrlExpiresIn: undefined },
+        }),
+        'http://127.0.0.1:3000',
+      ),
+    )
+
+    expect(brokenRows.get('backend')).toBe('ยังไม่พร้อม')
+    expect(brokenRows.get('model')).toBe('ยังไม่ได้ตั้งค่า')
+    expect(brokenRows.get('chatStatus')).toBe('ไม่ทราบ')
+    expect(brokenRows.get('structuredKnowledge')).toBe('ยังไม่พร้อม')
+  })
+
   test('passes a production-ready health payload', () => {
     const readiness = evaluateDeployReadiness(baseHealth, { isLocalSmokeTarget: false })
 

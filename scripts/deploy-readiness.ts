@@ -94,36 +94,36 @@ export function isUnsafeCorsOrigin(origin: string) {
 
 export function buildHealthRows(health: HealthPayload, apiBaseUrl: string) {
   return [
-    ['backend', health.ok ? 'ok' : 'not ready'],
+    ['backend', health.ok ? 'พร้อม' : 'ยังไม่พร้อม'],
     ['apiBaseUrl', apiBaseUrl],
     ['databaseConfigured', String(health.checks.databaseConfigured)],
     ['databaseConnected', String(health.checks.databaseConnected)],
     ['openRouterConfigured', String(health.checks.openRouterConfigured)],
     ['imageGenerationConfigured', String(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured ?? false)],
-    ['authMode', health.security?.authMode ?? 'unknown'],
-    ['avatarStorage', health.security?.avatarStorage ?? 'unknown'],
-    ['avatarStorageAccess', health.security?.avatarStorageAccess ?? 'unknown'],
-    ['signedUrlExpiresIn', String(health.security?.signedUrlExpiresIn ?? 'n/a')],
-    ['model', health.model?.name ?? 'not configured'],
-    ['modelTemperature', String(health.model?.temperature ?? 'default')],
-    ['modelMaxOutputTokens', String(health.model?.maxOutputTokens ?? 'default')],
-    ['modelMinRoleplayReplyChars', String(health.model?.minRoleplayReplyChars ?? 'default')],
-    ['chatProviderRetryAttempts', String(health.model?.providerRetry?.chatAttempts ?? 'default')],
-    ['creatorDraftRetryAttempts', String(health.model?.providerRetry?.creatorDraftAttempts ?? 'default')],
-    ['chatStatus', health.model?.chatProvider?.status ?? 'unknown'],
+    ['authMode', health.security?.authMode ?? 'ไม่ทราบ'],
+    ['avatarStorage', health.security?.avatarStorage ?? 'ไม่ทราบ'],
+    ['avatarStorageAccess', health.security?.avatarStorageAccess ?? 'ไม่ทราบ'],
+    ['signedUrlExpiresIn', String(health.security?.signedUrlExpiresIn ?? 'ไม่มี')],
+    ['model', health.model?.name ?? 'ยังไม่ได้ตั้งค่า'],
+    ['modelTemperature', String(health.model?.temperature ?? 'ค่าเริ่มต้น')],
+    ['modelMaxOutputTokens', String(health.model?.maxOutputTokens ?? 'ค่าเริ่มต้น')],
+    ['modelMinRoleplayReplyChars', String(health.model?.minRoleplayReplyChars ?? 'ค่าเริ่มต้น')],
+    ['chatProviderRetryAttempts', String(health.model?.providerRetry?.chatAttempts ?? 'ค่าเริ่มต้น')],
+    ['creatorDraftRetryAttempts', String(health.model?.providerRetry?.creatorDraftAttempts ?? 'ค่าเริ่มต้น')],
+    ['chatStatus', health.model?.chatProvider?.status ?? 'ไม่ทราบ'],
     ['chatLiveVerified', String(health.model?.chatProvider?.liveVerified ?? false)],
     ['chatProductionReady', String(health.model?.chatProvider?.productionReady ?? false)],
-    ['imageModel', health.model?.imageGeneration?.model ?? 'not configured'],
-    ['imageStatus', health.model?.imageGeneration?.status ?? 'unknown'],
+    ['imageModel', health.model?.imageGeneration?.model ?? 'ยังไม่ได้ตั้งค่า'],
+    ['imageStatus', health.model?.imageGeneration?.status ?? 'ไม่ทราบ'],
     ['imageLiveVerified', String(health.model?.imageGeneration?.liveVerified ?? false)],
     ['imageProductionReady', String(health.model?.imageGeneration?.productionReady ?? false)],
     [
       'securityPosture',
       health.securityPosture
-        ? `${Object.values(health.securityPosture).filter((item) => item.ok).length}/${Object.values(health.securityPosture).length} ready`
-        : 'not reported',
+        ? `${Object.values(health.securityPosture).filter((item) => item.ok).length}/${Object.values(health.securityPosture).length} พร้อม`
+        : 'ไม่ได้รายงาน',
     ],
-    ['structuredKnowledge', health.knowledge?.structured?.ok ? `${health.knowledge.structured.fileCount ?? 0} files ready` : 'not ready'],
+    ['structuredKnowledge', health.knowledge?.structured?.ok ? `${health.knowledge.structured.fileCount ?? 0} ไฟล์พร้อม` : 'ยังไม่พร้อม'],
   ] satisfies Array<[string, string]>
 }
 
