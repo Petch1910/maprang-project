@@ -20,12 +20,12 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /': {
     owner: 'platform',
     coverage: ['smoke', 'e2e'],
-    note: 'api-smoke และ browser preflight ตรวจ root identity ของระบบหลังบ้านก่อนเช็คบริการที่ deploy',
+    note: 'api-smoke และ preflight ฝั่งเบราว์เซอร์ตรวจ root identity ของระบบหลังบ้านก่อนเช็คบริการที่ deploy',
   },
   'GET /health': {
     owner: 'platform',
     coverage: ['smoke', 'e2e'],
-    note: 'smoke:doctor, smoke:ready, api-smoke และ browser preflight ตรวจสุขภาพบริการ',
+    note: 'smoke:doctor, smoke:ready, api-smoke และ preflight ฝั่งเบราว์เซอร์ตรวจสุขภาพบริการ',
   },
   'GET /ready': {
     owner: 'platform',
@@ -40,12 +40,12 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /me/content-settings': {
     owner: 'user/profile',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke, browser smoke และ user service tests ตรวจการจำค่าเรตเนื้อหา',
+    note: 'api-smoke, การตรวจเบราว์เซอร์ และ user service tests ตรวจการจำค่าเรตเนื้อหา',
   },
   'PATCH /me/content-settings': {
     owner: 'user/profile',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke เก็บค่าปัจจุบันไว้ และ browser smoke ตรวจการสลับโหมด teen/adult',
+    note: 'api-smoke เก็บค่าปัจจุบันไว้ และการตรวจเบราว์เซอร์ตรวจการสลับโหมด teen/adult',
   },
   'GET /me/persona': {
     owner: 'user/profile',
@@ -65,7 +65,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'PUT /creator/draft': {
     owner: 'creator',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke ตรวจบันทึก/ล้าง draft และ browser smoke ตรวจ autosave หลัง reload',
+    note: 'api-smoke ตรวจบันทึก/ล้าง draft และการตรวจเบราว์เซอร์ตรวจ autosave หลัง reload',
   },
   'POST /creator/ai-draft': {
     owner: 'creator',
@@ -90,17 +90,17 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /characters': {
     owner: 'characters',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke, Explore/Lobby browser smoke และ persistence tests ตรวจการมองเห็นตัวละคร',
+    note: 'api-smoke, การตรวจเบราว์เซอร์หน้า Explore/Lobby และ persistence tests ตรวจการมองเห็นตัวละคร',
   },
   'POST /characters': {
     owner: 'characters',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke และ Creator Studio browser smoke สร้างแล้วล้างตัวละครทดสอบ',
+    note: 'api-smoke และการตรวจเบราว์เซอร์หน้า Creator Studio สร้างแล้วล้างตัวละครทดสอบ',
   },
   'GET /characters/:id': {
     owner: 'characters',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke และ Character Lobby browser smoke ตรวจสิทธิ์ public/owner',
+    note: 'api-smoke และการตรวจเบราว์เซอร์หน้า Character Lobby ตรวจสิทธิ์ public/owner',
   },
   'PATCH /characters/:id': {
     owner: 'characters',
@@ -155,7 +155,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /chats': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke, My Chats browser smoke และ persistence tests ตรวจรายการแชท active/archived',
+    note: 'api-smoke, การตรวจเบราว์เซอร์หน้า My Chats และ persistence tests ตรวจรายการแชท active/archived',
   },
   'POST /chat': {
     owner: 'chat',
@@ -170,37 +170,37 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /chats/:id/messages': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke และ Chat Room browser smoke โหลดข้อความแชทจาก seed',
+    note: 'api-smoke และการตรวจเบราว์เซอร์หน้า Chat Room โหลดข้อความแชทจาก seed',
   },
   'GET /chats/:id/world-state': {
     owner: 'chat/context',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke, Chat Room browser smoke และ route security tests ตรวจการอ่าน world state',
+    note: 'api-smoke, การตรวจเบราว์เซอร์หน้า Chat Room และ route security tests ตรวจการอ่าน world state',
   },
   'PATCH /chats/:id/world-state': {
     owner: 'chat/context',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke, Chat Room browser smoke และ persistence tests ตรวจการอัปเดต world state ตามเจ้าของ',
+    note: 'api-smoke, การตรวจเบราว์เซอร์หน้า Chat Room และ persistence tests ตรวจการอัปเดต world state ตามเจ้าของ',
   },
   'PATCH /chats/:id': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke และ browser smoke ตรวจเปลี่ยนชื่อแชทใน sidebar กับ My Chats',
+    note: 'api-smoke และการตรวจเบราว์เซอร์ตรวจเปลี่ยนชื่อแชทใน sidebar กับ My Chats',
   },
   'PATCH /chats/:id/archive': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke และ browser smoke ตรวจเก็บแชททั้งรายการเดียวและหลายรายการ',
+    note: 'api-smoke และการตรวจเบราว์เซอร์ตรวจเก็บแชททั้งรายการเดียวและหลายรายการ',
   },
   'PATCH /chats/:id/restore': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke และ browser smoke ตรวจคืนค่าแชททั้งรายการเดียวและหลายรายการ',
+    note: 'api-smoke และการตรวจเบราว์เซอร์ตรวจคืนค่าแชททั้งรายการเดียวและหลายรายการ',
   },
   'DELETE /chats/:id': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke ตรวจ invalid-id แบบไม่ลบข้อมูล; browser smoke ตรวจ confirm delete กับ bulk delete; tests ตรวจ owner guard',
+    note: 'api-smoke ตรวจ invalid-id แบบไม่ลบข้อมูล; การตรวจเบราว์เซอร์ตรวจ confirm delete กับ bulk delete; tests ตรวจ owner guard',
   },
   'POST /uploads/avatar': {
     owner: 'storage',
@@ -215,7 +215,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'POST /reports': {
     owner: 'moderation',
     coverage: ['smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke ตรวจ invalid-id แบบไม่สร้างข้อมูล; browser smoke เปิด report dialog; persistence tests ตรวจสร้างรายงานกับ access guard',
+    note: 'api-smoke ตรวจ invalid-id แบบไม่สร้างข้อมูล; การตรวจเบราว์เซอร์เปิด report dialog; persistence tests ตรวจสร้างรายงานกับ access guard',
   },
   'GET /admin/reports': {
     owner: 'moderation',
@@ -235,7 +235,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /admin/summary': {
     owner: 'admin',
     coverage: ['admin-smoke', 'e2e'],
-    note: 'api-smoke --require-admin และ Admin Health/Moderation smoke ตรวจ admin guard',
+    note: 'api-smoke --require-admin และการตรวจหน้า Admin Health/Moderation ตรวจ admin guard',
   },
   'POST /admin/prompt-inspector': {
     owner: 'admin/context',
@@ -245,7 +245,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'GET /admin/evals/local': {
     owner: 'admin/evals',
     coverage: ['admin-smoke', 'e2e', 'backend-test'],
-    note: 'api-smoke และหน้า Admin Evals ตรวจ eval แบบ deterministic ของ prompt/context หลัง admin auth',
+    note: 'api-smoke และหน้า Admin Evals ตรวจ eval แบบผลซ้ำได้ของพรอมป์/บริบทหลัง admin auth',
   },
   'PATCH /admin/users/:id/tokens': {
     owner: 'wallet/admin',

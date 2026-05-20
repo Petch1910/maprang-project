@@ -92,13 +92,19 @@ describe('api route audit', () => {
     for (const staleSnippet of [
       'backend root identity endpoint is checked by',
       'deployed service sanity check',
+      'browser smoke',
       'provider call; runtime tests cover relationship/scene state',
       'redacted prompt snapshots/diff; backend tests cover',
       'prompt/context regression checks behind admin auth',
+      'prompt/context หลัง admin auth',
       'without spending provider tokens',
     ]) {
       expect(notes).not.toContain(staleSnippet)
     }
+
+    expect(notes).toContain('preflight ฝั่งเบราว์เซอร์')
+    expect(notes).toContain('การตรวจเบราว์เซอร์หน้า Chat Room')
+    expect(notes).toContain('พรอมป์/บริบทหลัง admin auth')
   })
 
   test('runs the committed API route audit through an importable runner', async () => {
