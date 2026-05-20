@@ -69,6 +69,7 @@ Verified:
 - Deploy blocker handoff memory now uses Thai-first headings, status, current-issue, required-action, and not-blocker wording while preserving exact env names, commands, and provider flags.
 - Memory inbox and production checklist now use Thai-first handoff wording while preserving exact smoke/deploy commands, env names, and production-data safety warnings.
 - Memory and knowledge README entry points now use Thai-first safety, update, layer, and runtime usage wording, with vault audits and predeploy guarding the Thai snippets.
+- Project map, UI/UX direction, and API/backend direction handoff docs now use Thai-first guidance while preserving route names, commands, and technical identifiers.
 - Smoke doctor now warns about missing image-generation configuration with Thai-first Creator Studio placeholder guidance.
 - Smoke doctor roleplay reply-budget recommendation warnings now use Thai-first wording while preserving exact budget values and env names.
 - Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.

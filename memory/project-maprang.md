@@ -1,12 +1,12 @@
-# Project Map: Maprang AI
+# แผนที่โปรเจกต์: Maprang AI
 
-Last updated: 2026-05-13
+อัปเดตล่าสุด: 2026-05-20
 
-## Product Shape
+## รูปทรงผลิตภัณฑ์
 
-Maprang AI is a Thai AI character roleplay platform inspired by familiar character-chat UX, with deeper game-like relationship and scene systems.
+Maprang AI คือแพลตฟอร์ม roleplay ตัวละครภาษาไทยที่ยึด UX แบบ character chat ที่ผู้ใช้คุ้นมือ แต่เพิ่มระบบความสัมพันธ์และฉากแบบ game layer ให้ลึกกว่าแอปแชททั่วไป
 
-Primary surfaces:
+พื้นผิวหลัก:
 - Explore/Home
 - Character Lobby
 - Chat Room
@@ -18,27 +18,27 @@ Primary surfaces:
 - Admin Moderation
 - Admin Health
 
-## Backend Areas
+## พื้นที่ backend
 
-- Character CRUD and quality validation
+- Character CRUD และ quality validation
 - Relationship presets, validation, preview, runtime state
-- Scene runtime and pending event handling
+- Scene runtime และ pending event handling
 - Chat generation, streaming, token usage, wallet debit
-- Creator AI draft and optional image generation
-- Supabase auth and avatar storage
-- User content settings and persona
-- Moderation reports and admin audit logs
+- Creator AI draft และ optional image generation
+- Supabase auth และ avatar storage
+- User content settings และ persona
+- Moderation reports และ admin audit logs
 - Health/readiness/deploy checks
 
-## Frontend Areas
+## พื้นที่ frontend
 
-- Dark-first app shell with Thai navigation
-- Redux state for scalable chat and future group/universe chat
-- Chat room with relationship top bar, scene mode, pending events, message tools
-- Creator Studio with AI draft, image flow, tag warnings, simulator, draft autosave
-- Admin Health page with deployment gate status
+- app shell แบบ dark-first พร้อม navigation ภาษาไทย
+- Redux state สำหรับ chat ที่สเกลไป group/universe chat ในอนาคต
+- Chat room ที่มี relationship top bar, scene mode, pending events, message tools
+- Creator Studio ที่มี AI draft, image flow, tag warnings, simulator, draft autosave
+- Admin Health page ที่แสดง deployment gate status
 
-## Tooling
+## เครื่องมือ
 
 - Bun
 - Vite/React
@@ -46,7 +46,7 @@ Primary surfaces:
 - Prisma/Postgres
 - Supabase Auth/Storage
 - Playwright e2e smoke
-- SocratiCode MCP as local codebase intelligence
-- Markdown memory vault in `memory/`
-- Runtime knowledge layer in `knowledge/` for chat, creator, relationship, scene, and content-policy packs
-- Deterministic roleplay evals in `evals/`, with optional Promptfoo live-eval scaffolding
+- SocratiCode MCP เป็น local codebase intelligence
+- Markdown memory vault ใน `memory/`
+- Runtime knowledge layer ใน `knowledge/` สำหรับ chat, creator, relationship, scene, และ content-policy packs
+- Deterministic roleplay evals ใน `evals/` พร้อม Promptfoo live-eval scaffolding แบบ optional
