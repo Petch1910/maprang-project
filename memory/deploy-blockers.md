@@ -1,60 +1,60 @@
-# Deploy Blockers
+# ตัวกั้นก่อน deploy
 
-Last updated: 2026-05-20
+อัปเดตล่าสุด: 2026-05-20
 
-## Active Blockers
+## ตัวกั้นที่ยังเปิดอยู่
 
-### Backend and frontend URLs
+### URL ของระบบหลังบ้านและหน้าบ้าน
 
-Status: blocked until staging/production hosting exists
+สถานะ: ยังติดอยู่จนกว่าจะมี hosting สำหรับ staging/production จริง
 
-Current issue:
-- Smoke environment still points at local backend/frontend URLs.
-- Latest local smoke doctor reports 2 staging blockers: backend URL is local, and CORS is empty, local, or non-https, with Thai-first next-step guidance in the CLI.
-- `bun run deploy:status` now prints the same blockers plus ordered next steps without failing the local handoff.
+ปัญหาปัจจุบัน:
+- smoke environment ยังชี้ไปที่ URL local ของ backend/frontend.
+- smoke doctor รอบ local ล่าสุดรายงานตัวกั้น staging 2 ข้อ: backend URL ยังเป็น local และ `CORS_ORIGINS` ว่าง, เป็น local, หรือไม่ใช่ HTTPS พร้อมคำแนะนำขั้นถัดไปแบบ Thai-first ใน CLI.
+- `bun run deploy:status` แสดงตัวกั้นชุดเดียวกันพร้อมลำดับขั้นถัดไป โดยไม่ทำให้ handoff local ล้มเหลว
 
-Required:
-- Set deployed backend URL for `SMOKE_API_BASE_URL`.
-- Set deployed backend URL for frontend `VITE_API_BASE_URL`.
-- Set real HTTPS frontend domain in backend `CORS_ORIGINS`.
-- Run `bun run staging:verify` with `SMOKE_API_BASE_URL` and `SMOKE_ADMIN_API_KEY` after staging domains exist.
+สิ่งที่ต้องทำ:
+- ตั้ง URL backend ที่ deploy แล้วให้ `SMOKE_API_BASE_URL`.
+- ตั้ง URL backend ที่ deploy แล้วให้ frontend `VITE_API_BASE_URL`.
+- ตั้ง domain frontend จริงแบบ HTTPS ใน backend `CORS_ORIGINS`.
+- หลังมี staging domains แล้ว ให้รัน `bun run staging:verify` พร้อม `SMOKE_API_BASE_URL` และ `SMOKE_ADMIN_API_KEY`.
 
-Repo guard:
-- `DEPLOY_RENDER.md` now documents HTTPS-only Render backend/frontend placeholders and forbids localhost, `http://`, wildcard origins, or the backend URL in `CORS_ORIGINS`; `bun run predeploy:check` enforces this wording.
+guard ใน repo:
+- `DEPLOY_RENDER.md` ระบุ placeholder ของ Render backend/frontend แบบ HTTPS-only และห้ามใช้ localhost, `http://`, wildcard origins, หรือ backend URL ใน `CORS_ORIGINS`; `bun run predeploy:check` คุม wording ชุดนี้ไว้แล้ว
 
-### Chat provider live verification
+### การยืนยัน live chat provider
 
-Status: needs verification
+สถานะ: ยังต้องยืนยันกับ staging
 
-Current issue:
-- One live chat smoke returned a real model reply with token usage and wallet debit.
-- A later live chat smoke reached the provider failure path.
-- Provider failures are now classified as `usage.providerFailure`, but the live provider path still needs a clean staging smoke before production.
-- Latest local smoke doctor still reports `chatStatus=needs_live_smoke` and `chatLiveVerified=false`.
+ปัญหาปัจจุบัน:
+- live chat smoke เคยได้คำตอบจริงจากโมเดล พร้อม token usage และ wallet debit แล้วหนึ่งรอบ
+- live chat smoke รอบถัดมาวิ่งเข้าทาง provider failure
+- provider failure ถูกจัดประเภทเป็น `usage.providerFailure` แล้ว แต่เส้นทาง live provider ยังต้องผ่าน staging smoke แบบสะอาดก่อน production
+- smoke doctor รอบ local ล่าสุดยังรายงาน `chatStatus=needs_live_smoke` และ `chatLiveVerified=false`
 
-Required:
-- Run `bun run smoke:chat` or `bun run api:smoke:live` against staging.
-- Verify a real model reply, `chatId`, token usage, and matching `CHAT_USAGE` wallet transaction.
-- Then set `CHAT_PROVIDER_LIVE_VERIFIED=1` only in that target environment.
+สิ่งที่ต้องทำ:
+- รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging.
+- ยืนยันว่ามีคำตอบจริงจากโมเดล, `chatId`, token usage, และ wallet transaction ชนิด `CHAT_USAGE` ที่ตรงกัน
+- ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` เฉพาะ environment นั้นหลัง smoke ผ่านจริงเท่านั้น
 
-### Image provider live verification
+### การยืนยัน live image provider
 
-Status: blocked by provider account
+สถานะ: ติดบัญชี/โควตาของ provider
 
-Current issue:
-- `bun run smoke:image:live` falls back to placeholder because the image provider reports a billing hard limit.
-- Latest local smoke doctor still reports `imageStatus=needs_live_smoke` and `imageLiveVerified=false`.
+ปัญหาปัจจุบัน:
+- `bun run smoke:image:live` fallback เป็น placeholder เพราะผู้ให้บริการสร้างรูปรายงาน billing hard limit
+- smoke doctor รอบ local ล่าสุดยังรายงาน `imageStatus=needs_live_smoke` และ `imageLiveVerified=false`
 
-Required:
+สิ่งที่ต้องทำ:
 - เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป.
 - รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` อีกครั้ง.
 - ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` เฉพาะหลังผู้ให้บริการสร้างรูปคืนค่า `configured`.
 
-## Not Blockers
+## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- Local backend test suite currently passes: 147 pass, 0 fail.
-- Local API smoke currently passes.
-- Frontend build and bundle budget currently pass.
-- Desktop/mobile e2e smoke currently passes.
-- Supabase signed avatar storage is implemented and checked by the production gate.
-- Relationship contract presets are split from creator presets and covered by API smoke.
+- backend test suite ฝั่ง local ผ่านแล้ว: 147 pass, 0 fail.
+- Local API smoke ผ่านแล้ว
+- Frontend build และ bundle budget ผ่านแล้ว
+- Desktop/mobile e2e smoke ผ่านแล้ว
+- Supabase signed avatar storage implement แล้ว และถูกตรวจโดย production gate
+- Relationship contract presets แยกจาก creator presets แล้ว และมี API smoke ครอบไว้
