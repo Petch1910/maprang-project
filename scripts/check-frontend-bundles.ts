@@ -36,20 +36,20 @@ export function evaluateFrontendBundleBudgets(sizes: BundleSize[], budget: Bundl
   const failures: string[] = []
 
   if (!mainIndex) {
-    failures.push('ไม่พบ main index bundle ใน apps/frontend/dist/assets')
+    failures.push('ไม่พบ bundle หลักใน apps/frontend/dist/assets')
   } else if (kb(mainIndex.bytes) > budget.mainIndexKb) {
-    failures.push(`main index bundle มีขนาด ${formatKb(mainIndex.bytes)}, ต้องไม่เกิน ${budget.mainIndexKb}KB`)
+    failures.push(`bundle หลักมีขนาด ${formatKb(mainIndex.bytes)}, ต้องไม่เกิน ${budget.mainIndexKb}KB`)
   }
 
   if (!chatRoom) {
-    failures.push('ไม่พบ ChatRoomPage chunk; โค้ด chat/workspace อาจถูกรวมเข้า main bundle')
+    failures.push('ไม่พบ chunk หน้า ChatRoomPage; โค้ด chat/workspace อาจถูกรวมเข้า bundle หลัก')
   } else if (kb(chatRoom.bytes) > budget.chatRoomKb) {
-    failures.push(`ChatRoomPage chunk มีขนาด ${formatKb(chatRoom.bytes)}, ต้องไม่เกิน ${budget.chatRoomKb}KB`)
+    failures.push(`chunk หน้า ChatRoomPage มีขนาด ${formatKb(chatRoom.bytes)}, ต้องไม่เกิน ${budget.chatRoomKb}KB`)
   }
 
   if (oversized.length > 0) {
     failures.push(
-      `พบ frontend chunk ที่ใหญ่เกินกำหนด: ${oversized.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`,
+      `พบ chunk ฝั่งหน้าบ้านที่ใหญ่เกินกำหนด: ${oversized.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`,
     )
   }
 

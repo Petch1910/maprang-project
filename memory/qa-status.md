@@ -348,3 +348,4 @@ Last updated: 2026-05-20
 - Frontend static audit diagnostics Thai-first pass: เปลี่ยนข้อความ fail สำหรับลิงก์ `#`, Router `#`, `not implemented`, และข้อความรอทำให้สื่อว่าเป็นค่าตัวอย่าง/ปุ่มตันชัดขึ้น พร้อม `frontend:static:audit:test`.
 - API route audit CLI wording Thai-first pass: เปลี่ยน summary จาก `routes` เป็น "รายการ" และเกลา failure headings ของ coverage map/source ให้เป็น "ตาราง coverage"/"ไฟล์ route" พร้อม `api:audit:test`.
 - Backend security audit diagnostics Thai-first pass: เกลา admin guard และ UUID guard failure copy จาก `admin route`/`resource` เป็นไทยนำ พร้อม `security:audit:test`.
+- Import/bundle QA diagnostics Thai-first pass: เปลี่ยน import-cycle summary จาก `files/edges` เป็น "ไฟล์/เส้น import" และ bundle-budget failure copy เป็น "bundle หลัก/chunk ฝั่งหน้าบ้าน" พร้อม regression tests.
