@@ -128,32 +128,31 @@ bun run eval:promptfoo
 ## Prompt Inspector
 
 Admin-only prompt debugging is available through `/admin/prompt-inspector` and `POST /admin/prompt-inspector`. It
-assembles the same base context blocks used by chat, adds optional persona/runtime memory/user message context, returns only
-redacted prompt text, estimates token usage by section, and can diff the current message against a previous message. Use it
-when a character reply becomes too short, loses lore, or drifts from relationship/scene continuity.
+ประกอบ base context blocks ชุดเดียวกับที่ chat ใช้, เพิ่ม optional persona/runtime memory/user message context, คืนเฉพาะ
+redacted prompt text, ประมาณ token usage ตาม section, และ diff ข้อความปัจจุบันกับข้อความก่อนหน้าได้. ใช้หน้านี้เมื่อ character reply สั้นเกินไป, lore หาย, หรือ relationship/scene continuity drift.
 
-Local API smoke covers this endpoint and `/admin/evals/local` when `ADMIN_API_KEY` or `SMOKE_ADMIN_API_KEY` is available.
+Local API smoke ครอบ endpoint นี้และ `/admin/evals/local` เมื่อมี `ADMIN_API_KEY` หรือ `SMOKE_ADMIN_API_KEY`.
 
-## Production Checklist
+## เช็กลิสต์ production
 
-- Follow `PRODUCTION_SETUP.md` for the full production env and Supabase setup.
-- Use `DEPLOY_RENDER.md` for the recommended first hosting path.
-- Fill `RELEASE_HANDOFF.md` after `bun run production:check` passes and before sending real users to the release. Run `bun run release:handoff:check -- --filled` after filling it.
-- Set backend env from `apps/backend/.env.production.example`.
-- Set frontend env from `apps/frontend/.env.production.example`.
-- Keep `MODEL_MAX_OUTPUT_TOKENS=1600` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420` for richer roleplay replies; short character turns get one backend continuation pass unless the player asks for brevity.
-- Keep the default provider retry env values unless staging shows repeated transient 5xx/timeout errors.
-- Run live chat smoke before production and set `CHAT_PROVIDER_LIVE_VERIFIED=1` only after the backend returns a real model reply with token usage.
+- ทำตาม `PRODUCTION_SETUP.md` สำหรับ production env และ Supabase setup แบบครบ.
+- ใช้ `DEPLOY_RENDER.md` เป็น recommended first hosting path.
+- กรอก `RELEASE_HANDOFF.md` หลัง `bun run production:check` ผ่าน และก่อนเปิดให้ผู้ใช้จริงเข้า release. หลังกรอกแล้วให้รัน `bun run release:handoff:check -- --filled`.
+- ตั้ง backend env จาก `apps/backend/.env.production.example`.
+- ตั้ง frontend env จาก `apps/frontend/.env.production.example`.
+- คง `MODEL_MAX_OUTPUT_TOKENS=1600` และ `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420` เพื่อให้ roleplay replies มีเนื้อขึ้น; character turns ที่สั้นจะได้ backend continuation pass หนึ่งครั้ง ยกเว้นผู้เล่นขอให้ตอบสั้น.
+- คงค่า default provider retry env values เว้นแต่ staging แสดง transient 5xx/timeout errors ซ้ำ ๆ.
+- รัน live chat smoke ก่อน production และตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` เฉพาะหลัง backend คืน real model reply พร้อม token usage.
 - ตั้ง `IMAGE_GENERATION_API_KEY` ถ้า Creator Studio ต้องสร้าง avatar จริงแทน placeholder ก่อน production ให้รัน live image smoke และตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` เฉพาะหลังบัญชีผู้ให้บริการผ่าน billing และ quota แล้ว.
-- Set `VITE_API_BASE_URL` to the deployed backend URL.
-- Set `NODE_ENV=production`.
-- Set `CORS_ORIGINS` to deployed frontend origins only.
-- Set a long random `ADMIN_API_KEY`.
-- Set `SUPABASE_URL` or `SUPABASE_JWT_ISSUER` for JWT verification.
-- Set backend `SUPABASE_ANON_KEY` so HS256/shared-secret Supabase access tokens can be verified through the Auth server when needed.
-- Set `STORAGE_PROVIDER=supabase`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET=avatars`, and `SUPABASE_STORAGE_ACCESS=signed`.
-- Create the Supabase Storage bucket before multi-instance deploy.
-- Run the verification commands below before deploying.
+- ตั้ง `VITE_API_BASE_URL` เป็น deployed backend URL.
+- ตั้ง `NODE_ENV=production`.
+- ตั้ง `CORS_ORIGINS` เป็น deployed frontend origins เท่านั้น.
+- ตั้ง `ADMIN_API_KEY` เป็นค่าสุ่มยาว.
+- ตั้ง `SUPABASE_URL` หรือ `SUPABASE_JWT_ISSUER` สำหรับ JWT verification.
+- ตั้ง backend `SUPABASE_ANON_KEY` เพื่อให้ HS256/shared-secret Supabase access tokens verify ผ่าน Auth server ได้เมื่อจำเป็น.
+- ตั้ง `STORAGE_PROVIDER=supabase`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET=avatars`, และ `SUPABASE_STORAGE_ACCESS=signed`.
+- สร้าง Supabase Storage bucket ก่อน multi-instance deploy.
+- รันคำสั่ง verification ด้านล่างก่อน deploy.
 
 ## Docker Build
 
@@ -165,51 +164,51 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
   --build-arg VITE_SUPABASE_ANON_PUBLIC=<supabase-anon-key> .
 ```
 
-Frontend `VITE_*` values are compiled into the static bundle at build time. The Supabase anon key is intended to be public, but service role keys must stay backend-only.
+ค่า Frontend `VITE_*` จะถูก compile เข้า static bundle ตอน build. Supabase anon key ตั้งใจให้ public ได้ แต่ service role keys ต้องอยู่ backend-only.
 
-Run database migrations before starting the production backend:
+รัน database migrations ก่อน start production backend:
 
 ```bash
 cd apps/backend
 bunx prisma migrate deploy
 ```
 
-## Current Verification
+## การตรวจปัจจุบัน
 
 ```bash
 bun run qa:local
 ```
 
-Use this as the normal local readiness gate. It checks secrets, secret-pattern regression tests, memory and knowledge audits, deterministic prompt/context evals, API route coverage mapping, import-cycle architecture audit, deploy/predeploy wiring, backend tests, frontend build, backend root identity, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke skips the external image provider for creator draft checks so routine QA is deterministic; live avatar generation is verified only by `api:smoke:live`, `smoke:image:live`, or `production:check`.
-The final local smoke steps expect Docker Desktop/Postgres to be running and the backend to answer at `http://127.0.0.1:3000`; if Docker is stopped or the backend is not started, `smoke:doctor` fails before the API smoke can run.
-It also audits the project memory vault and runtime knowledge packs so long-running context cannot silently lose required files or pick up secret-shaped values.
-The secrets gate ignores untracked local env files for normal development, but it rejects tracked `.env` or `.env.*` files before commit/CI.
+ใช้คำสั่งนี้เป็น normal local readiness gate. มันตรวจ secrets, secret-pattern regression tests, memory/knowledge audits, deterministic prompt/context evals, API route coverage mapping, import-cycle architecture audit, deploy/predeploy wiring, backend tests, frontend build, backend root identity, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, และ avatar upload. Local API smoke จะข้าม external image provider สำหรับ creator draft checks เพื่อให้ routine QA deterministic; live avatar generation จะตรวจเฉพาะใน `api:smoke:live`, `smoke:image:live`, หรือ `production:check`.
+final local smoke steps ต้องมี Docker Desktop/Postgres ที่รันอยู่ และ backend ต้องตอบที่ `http://127.0.0.1:3000`; ถ้า Docker หยุดหรือ backend ยังไม่ได้ start, `smoke:doctor` จะ fail ก่อน API smoke จะรัน.
+มันยัง audit project memory vault และ runtime knowledge packs เพื่อไม่ให้ long-running context เสีย required files หรือมี secret-shaped values หลุดเข้าไปเงียบ ๆ.
+secrets gate จะ ignore untracked local env files สำหรับ normal development แต่จะ reject tracked `.env` หรือ `.env.*` files ก่อน commit/CI.
 
-To check only backend API route coverage:
+ถ้าต้องการตรวจเฉพาะ backend API route coverage:
 
 ```bash
 bun run api:audit
 ```
 
-This verifies that every route declared in `apps/backend/src/*.routes.ts` is accounted for by smoke, browser e2e, backend tests, live-provider smoke, admin smoke, or a manual production gate.
+คำสั่งนี้ยืนยันว่า route ทุกตัวใน `apps/backend/src/*.routes.ts` ถูกนับใน smoke, browser e2e, backend tests, live-provider smoke, admin smoke, หรือ manual production gate แล้ว.
 
-To check import cycles across app and QA source:
+ถ้าต้องการตรวจ import cycles ใน app และ QA source:
 
 ```bash
 bun run import-cycle:audit
 ```
 
-This verifies backend, frontend, scripts, seed data, Playwright config, and e2e smoke files stay free of circular relative imports.
+คำสั่งนี้ยืนยันว่า backend, frontend, scripts, seed data, Playwright config, และ e2e smoke files ไม่มี circular relative imports.
 
-To check production env files before deploy without printing secret values:
+ถ้าต้องการตรวจ production env files ก่อน deploy โดยไม่พิมพ์ secret values:
 
 ```bash
 bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/frontend/.env
 ```
 
-Use `--allow-unverified-image` only for early staging before `smoke:image:live` passes.
+ใช้ `--allow-unverified-image` เฉพาะ early staging ก่อน `smoke:image:live` ผ่าน.
 
-Run the full local or staging provider gate only when the backend can reach OpenRouter:
+รัน full local หรือ staging provider gate เฉพาะเมื่อ backend ติดต่อ OpenRouter ได้:
 
 ```bash
 bun run qa:live
@@ -217,7 +216,7 @@ bun run qa:live
 
 `qa:live` และ `api:smoke:live` เรียกผู้ให้บริการจริง จึงอาจ fail ได้แม้ key มีอยู่แล้ว ถ้า billing, quota, สิทธิ์โมเดล, provider rate limit, หรือ outbound networking ยังไม่พร้อม กรณี chat จะรายงานเป็น `usage.providerFailure` เพื่อชี้ failure class ที่ถูกต้อง ให้ถือว่าเป็น staging blocker ก่อน production. `api:smoke:live` ตรวจ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ก่อน live chat call และครอบคลุม live chat หนึ่งครั้งพร้อม live image-generation หนึ่งครั้ง ดังนั้นใช้ `smoke:chat` หรือ `smoke:image:live` เฉพาะตอนต้อง retry provider path เดี่ยว อย่ารัน live smoke หลายคำสั่งพร้อมกันบนบัญชีที่ quota จำกัด ให้ใช้ `api:smoke:live` เป็น ordered pass ครั้งเดียว หลัง live chat verification สำเร็จครั้งแรกให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`; หลัง live image verification สำเร็จครั้งแรกให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`; แล้ว rerun production gate สุดท้าย.
 
-For an already deployed backend, use the smoke-only live gate with `SMOKE_API_BASE_URL` and smoke auth variables when you only want to retry provider connectivity without running persistence tests against production data:
+สำหรับ backend ที่ deploy แล้ว ให้ใช้ smoke-only live gate พร้อม `SMOKE_API_BASE_URL` และ smoke auth variables เมื่อต้องการ retry provider connectivity โดยไม่รัน persistence tests กับ production data:
 
 ```bash
 bun run smoke:live
@@ -230,17 +229,17 @@ bun run production:check
 ```
 
 คำสั่งนี้จะรัน strict production health gate, Supabase signed-avatar storage smoke, และ live API smoke รวมถึง real chat กับ real image-generation checks ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็น placeholder เพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะ fail.
-The script prints `bun run deploy:status` first, so the blocker summary and next steps appear before the strict gate fails.
+script จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้ blocker summary และ next steps แสดงก่อน strict gate fail.
 
-When you want to verify all repo-owned surfaces before the final live provider/domain gate, run:
+ถ้าต้องการตรวจ repo-owned surfaces ทั้งหมดก่อน final live provider/domain gate ให้รัน:
 
 ```bash
 bun run staging:check
 ```
 
-This runs the full local QA suite, desktop/mobile Playwright smoke, real Supabase signed-storage verification, and admin-required API smoke. It does not mark production ready by itself; `production:check` remains the final gate after real domains, CORS, and live image/chat provider paths are available.
+คำสั่งนี้รัน full local QA suite, desktop/mobile Playwright smoke, real Supabase signed-storage verification, และ admin-required API smoke. มันไม่ได้ mark production ready ด้วยตัวเอง; `production:check` ยังเป็น final gate หลัง real domains, CORS, และ live image/chat provider paths พร้อมแล้ว.
 
-After staging backend/frontend domains exist, run the deployed staging gate:
+หลังมี staging backend/frontend domains แล้ว ให้รัน deployed staging gate:
 
 ```bash
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
@@ -254,7 +253,7 @@ Or run each check separately:
 bun run backend:check
 ```
 
-Use this stricter backend gate when Postgres is running and you want persistence tests to be mandatory:
+ใช้ stricter backend gate นี้เมื่อ Postgres รันอยู่และต้องการบังคับ persistence tests:
 
 ```bash
 bun run backend:check:db

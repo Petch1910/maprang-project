@@ -342,7 +342,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         readme,
-        ['RELEASE_HANDOFF.md', 'bun run production:check', 'before sending real users', 'secret-pattern regression tests', 'tracked `.env`'],
+        ['RELEASE_HANDOFF.md', 'bun run production:check', 'ก่อนเปิดให้ผู้ใช้จริง', 'secret-pattern regression tests', 'tracked `.env`'],
         'README.md',
       )
       requireIncludes(deploymentQa, ['bun run secrets:patterns:test', 'secrets/secret-pattern/memory', 'Real `.env`'], 'DEPLOYMENT_QA.md')
@@ -826,7 +826,7 @@ const checks: Check[] = [
         'scripts/deploy-readiness.test.ts',
       )
       requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json'], 'DEPLOYMENT_QA.md')
-      requireIncludes(readme, ['bun run deploy:status', '`staging:verify` prints', 'stagingBlockerCount', 'blocker summary and next steps'], 'README.md')
+      requireIncludes(readme, ['bun run deploy:status', '`staging:verify` prints', 'stagingBlockerCount', 'blocker summary และ next steps'], 'README.md')
       requireIncludes(stagingRunbook, ['bun run deploy:status', 'bun run staging:verify', 'bun run production:check'], 'STAGING_RUNBOOK.md')
     },
   },
