@@ -133,6 +133,7 @@ Last updated: 2026-05-20
 - Raw knowledge inbox and decision index Thai-first entry points now pass `memory:audit`, `knowledge:audit`, and `secrets:check`.
 - Deploy status and smoke doctor text-output localization now passes `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
 - Decision records 0001-0005 Thai-first localization now passes `memory:audit`, `secrets:check`, and `predeploy:check`.
+- Decision record 0003 live provider verification wording now avoids stale `gate fail`, `networking`, and `target environment` phrasing.
 - Decision records 0006-0010 Thai-first localization now passes `memory:audit`, `secrets:check`, and `predeploy:check`.
 - Decision records 0011-0014 Thai-first localization now passes `memory:audit`, `secrets:check`, and `predeploy:check`.
 - Live chat/image smoke failure-output localization now passes `smoke:chat:test`, `smoke:image:test`, `provider:smoke:guards:test`, and `predeploy:check`.
