@@ -10,6 +10,8 @@ Last updated: 2026-05-20
 - Root README หัวข้อเครื่องมืออ่านโค้ด, ความจำโปรเจกต์, การส่งต่องาน, สถานะ deploy, และ Docker build เป็น Thai-first แล้วเพื่อให้ entrypoint เอกสารสอดคล้องกับ UI/QA language direction.
 - `AGENTS.md` และ `agent.md` ใช้หัวข้อ Thai-first สำหรับขอบเขต การสานต่องาน QA gates product direction safety/core systems production blockers และ definition of done แล้ว โดยยังคงคำอังกฤษในวงเล็บเพื่อค้นหาได้.
 - Deployment QA, Production Setup, Release Handoff, Security Checklist, production checklist memory, และ knowledge wiki ใช้ heading Thai-first สำหรับ production env, storage, mobile/manual QA, release notes, env setup, QA gates, security, commands, runtime knowledge, gates, และ compile flow แล้ว.
+- QA runner polish ล่าสุดทำให้ eval/readiness/smoke doctor/deploy status/release handoff/API smoke/local smoke/e2e smoke diagnostics เป็น Thai-first มากขึ้น โดยยังคง command/env/route/provider keys ที่ต้องใช้ debug ไว้.
+- Full deterministic `bun run qa:repo` ผ่านหลังชุด polish ล่าสุด ครอบคลุม backend tests 152 pass, frontend build/bundle, audits, evals, smoke helper tests และ predeploy guards; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 
 ## เป้าหมายปัจจุบัน
 
