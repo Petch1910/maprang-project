@@ -38,6 +38,7 @@ Results:
 - Predeploy now explicitly requires `qa:local` and CI to keep `deploy:doctor:self-test` wired, matching the deployed smoke workflow.
 - Route/menu Thai localization: pass via `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`.
 - Route/menu staging checklist copy now passes `frontend:static:audit:test`, `route-menu:audit`, `route-menu:audit:test`, and `frontend:check`; the static audit blocks the old ambiguous `ยังไม่ใช่ปุ่มในแอปเครื่องนี้` wording from returning.
+- Route/menu document check localization now passes `route-menu:audit:test` and `route-menu:audit`.
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Frontend static audit diagnostic localization: pass via `frontend:static:audit:test`, `frontend:check`, and `predeploy:check`.
 - Frontend route audit and bundle budget diagnostic localization: pass via `frontend:route:audit:test`, `frontend:bundle:test`, and `frontend:check`.

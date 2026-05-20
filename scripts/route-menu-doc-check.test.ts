@@ -91,11 +91,11 @@ describe('route menu doc check', () => {
 
     expect(findings).toEqual(
       expect.arrayContaining([
-        'navigation path /ghost has no matching App.tsx Route',
-        'navigation path /ghost is missing from routeMenuAuditRows',
-        'navigation path /ghost is missing from routePreloads',
-        'routeMenuAuditRows "Home" has an empty control',
-        'routeMenuAuditStatusLabel("ready") is missing a user-facing label',
+        'navigation path /ghost ไม่มี Route ที่ตรงกันใน App.tsx',
+        'navigation path /ghost ยังไม่มีใน routeMenuAuditRows',
+        'navigation path /ghost ยังไม่มีใน routePreloads',
+        'routeMenuAuditRows "Home" มี control ว่าง',
+        'routeMenuAuditStatusLabel("ready") ยังไม่มี label ที่ผู้ใช้อ่านรู้เรื่อง',
       ]),
     )
   })
@@ -120,10 +120,10 @@ describe('route menu doc check', () => {
 
     expect(findings).toEqual(
       expect.arrayContaining([
-        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy "รัน eval"',
-        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy "prompt-control"',
-        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy "token budget"',
-        'ROUTE_MENU_AUDIT.md contains stale mixed-language copy " disabled "',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "รัน eval"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "prompt-control"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "token budget"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย " disabled "',
       ]),
     )
   })
@@ -137,7 +137,7 @@ describe('route menu doc check', () => {
     expect(result.auditedSurfaces).toBeGreaterThan(0)
     expect(result.findings).toEqual([])
     expect(exitCode).toBe(0)
-    expect(lines[0]).toContain('ok - route/menu document check passed')
+    expect(lines[0]).toContain('ok - route/menu document check ผ่านแล้ว')
     expect(errors).toEqual([])
   })
 })

@@ -176,41 +176,41 @@ export function auditRouteMenuDocumentation({
   }
 
   if (navigationPaths.length === 0) {
-    findings.push('App.tsx has no static NavLink/nav item paths to audit')
+    findings.push('App.tsx ไม่มี static NavLink/nav item paths ให้ตรวจ')
   }
 
   const auditedRouteTokens = rows.flatMap((row) => expectedRouteTokens(row.route)).filter((token) => token.startsWith('/'))
   for (const path of navigationPaths) {
     if (!isCoveredByRoute(path, declaredRoutes)) {
-      findings.push(`navigation path ${path} has no matching App.tsx Route`)
+      findings.push(`navigation path ${path} ไม่มี Route ที่ตรงกันใน App.tsx`)
     }
     if (!isCoveredByRoute(path, auditedRouteTokens)) {
-      findings.push(`navigation path ${path} is missing from routeMenuAuditRows`)
+      findings.push(`navigation path ${path} ยังไม่มีใน routeMenuAuditRows`)
     }
     if (!preloadPaths.includes(path)) {
-      findings.push(`navigation path ${path} is missing from routePreloads`)
+      findings.push(`navigation path ${path} ยังไม่มีใน routePreloads`)
     }
   }
 
   for (const row of rows) {
     const documented = findDocumentedRow(documentedRows, row.area)
     if (!documented) {
-      findings.push(`ROUTE_MENU_AUDIT.md is missing area "${row.area}"`)
+      findings.push(`ROUTE_MENU_AUDIT.md ยังไม่มีพื้นที่ "${row.area}"`)
       continue
     }
 
     for (const token of expectedRouteTokens(row.route)) {
       if (!documented.route.includes(token)) {
-        findings.push(`ROUTE_MENU_AUDIT.md row "${row.area}" is missing route token "${token}"`)
+        findings.push(`ROUTE_MENU_AUDIT.md แถว "${row.area}" ยังไม่มี route token "${token}"`)
       }
       if (token.startsWith('/') && !isCoveredByRoute(token, declaredRoutes)) {
-        findings.push(`routeMenuAuditRows "${row.area}" references ${token}, but App.tsx has no matching Route`)
+        findings.push(`routeMenuAuditRows "${row.area}" อ้างถึง ${token} แต่ App.tsx ไม่มี Route ที่ตรงกัน`)
       }
     }
 
     for (const field of ['control', 'result', 'disabledReason', 'emptyState'] as const) {
       if (!row[field].trim()) {
-        findings.push(`routeMenuAuditRows "${row.area}" has an empty ${field}`)
+        findings.push(`routeMenuAuditRows "${row.area}" มี ${field} ว่าง`)
       }
     }
   }
@@ -219,19 +219,19 @@ export function auditRouteMenuDocumentation({
   for (const status of statusValues) {
     const label = statusLabel(status)
     if (!label || label === status) {
-      findings.push(`routeMenuAuditStatusLabel("${status}") is missing a user-facing label`)
+      findings.push(`routeMenuAuditStatusLabel("${status}") ยังไม่มี label ที่ผู้ใช้อ่านรู้เรื่อง`)
     }
   }
 
   for (const snippet of requiredSnippets) {
     if (!markdown.includes(snippet)) {
-      findings.push(`ROUTE_MENU_AUDIT.md is missing "${snippet}"`)
+      findings.push(`ROUTE_MENU_AUDIT.md ยังไม่มี "${snippet}"`)
     }
   }
 
   for (const snippet of forbiddenSnippets) {
     if (markdown.includes(snippet)) {
-      findings.push(`ROUTE_MENU_AUDIT.md contains stale mixed-language copy "${snippet}"`)
+      findings.push(`ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "${snippet}"`)
     }
   }
 
@@ -256,12 +256,12 @@ export async function runRouteMenuDocCheck(
   const result = await collectRouteMenuDocCheckResult()
 
   if (result.findings.length > 0) {
-    writeError('Route/menu document check failed:')
+    writeError('Route/menu document check ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ok - route/menu document check passed (${result.auditedSurfaces} audited surfaces)`)
+  writeLine(`ok - route/menu document check ผ่านแล้ว (${result.auditedSurfaces} surfaces)`)
   return 0
 }
 

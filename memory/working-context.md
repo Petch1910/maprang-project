@@ -22,6 +22,7 @@ Verified:
 - Route/menu audit runtime data and `ROUTE_MENU_AUDIT.md` now use Thai-first surface names and control descriptions while keeping the Route/Menu Audit marker for automated docs checks.
 - Route/menu staging row now describes staging as a checklist rather than a fake in-app button, and frontend static audit blocks the old ambiguous copy from returning.
 - Route/menu doc check now fails directly on stale mixed-language audit copy such as `รัน eval`, `prompt-control`, `token budget`, `accordion`, or ` disabled `, instead of relying only on predeploy.
+- Route/menu document check diagnostics now use Thai-first output for missing navigation, missing audit/preload rows, weak status labels, stale mixed-language copy, and pass/fail summaries.
 - Frontend static audit now guards a focused set of English UI label regressions for Thai-first pages, including Admin Health, Prompt Inspector, Automated Evals, Relationship Contract, Chat budget, Supabase/Auth labels, and route/menu surface names.
 - Frontend static audit diagnostics now report Thai-first failure messages for button accessibility, placeholder controls, raw error exposure, ApiError fallback, mixed UI copy, mojibake, and stale Vite starter files.
 - Frontend route audit and bundle budget CLI output now report Thai-first pass/fail guidance while keeping exact file, route, and chunk names for debugging.
