@@ -57,7 +57,7 @@ describe('smoke doctor report', () => {
     expect(report.stdout).toContain('stagingReady: false')
     expect(report.stdout.join('\n')).toContain('backend URL ยังเป็น local')
     expect(report.stdout.join('\n')).toContain('รัน `bun run staging:verify`')
-    expect(report.stdout.at(-1)).toBe('Smoke doctor passed.')
+    expect(report.stdout.at(-1)).toBe('Smoke doctor ผ่านแล้ว')
   })
 
   test('strict staging gate fails before production output when staging blockers remain', () => {
@@ -253,7 +253,7 @@ describe('smoke doctor report', () => {
 
     expect(exitCode).toBe(0)
     expect(lines).toContain('productionReady: true')
-    expect(lines.at(-1)).toBe('Smoke doctor passed.')
+    expect(lines.at(-1)).toBe('Smoke doctor ผ่านแล้ว')
     expect(warnings).toEqual([])
     expect(errors).toEqual([])
   })

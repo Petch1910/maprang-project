@@ -100,6 +100,7 @@ Results:
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.
 - Smoke doctor missing image-generation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor roleplay reply-budget recommendation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
+- Smoke doctor success output and deploy env doctor self-test localization now pass `smoke:doctor:test`, `deploy:doctor:self-test`, and `deploy:doctor:test`.
 - Live provider smoke guidance now passes Thai-first coverage via `bun run smoke:image:test`, `bun run smoke:chat:test`, `bun run provider:smoke:guards:test`, `bun run api:smoke:test`, and `predeploy:check`.
 - Live image/API smoke helper copy now passes Thai-first coverage for missing provider config, provider billing, quota, invalid image keys, placeholder fallback, missing image URL, and local SVG fallback through `api:smoke:test`, `smoke:image:test`, `provider:smoke:guards:test`, and `predeploy:check`.
 - Local smoke failure guidance now passes Thai-first coverage via `bun run smoke:local:test`.

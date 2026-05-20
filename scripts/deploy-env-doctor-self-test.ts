@@ -131,12 +131,12 @@ try {
 
   const valid = await runDoctor(validBackend, validFrontend)
   if (valid.exitCode !== 0) {
-    throw new Error(`valid env should pass deploy doctor:\n${valid.output}`)
+    throw new Error(`valid env ควรผ่าน deploy doctor:\n${valid.output}`)
   }
 
   const invalid = await runDoctor(invalidBackend, invalidFrontend)
   if (invalid.exitCode === 0) {
-    throw new Error('invalid env should fail deploy doctor')
+    throw new Error('invalid env ควรทำให้ deploy doctor ไม่ผ่าน')
   }
 
   const expectedMessages = [
@@ -149,28 +149,28 @@ try {
   ]
   for (const message of expectedMessages) {
     if (!invalid.output.includes(message)) {
-      throw new Error(`invalid env output is missing expected message: ${message}\n${invalid.output}`)
+      throw new Error(`ผลลัพธ์ invalid env ยังไม่มีข้อความที่คาดไว้: ${message}\n${invalid.output}`)
     }
   }
 
   const shortKey = await runDoctor(shortKeyBackend, validFrontend)
   if (shortKey.exitCode === 0) {
-    throw new Error('short key env should fail deploy doctor')
+    throw new Error('short key env ควรทำให้ deploy doctor ไม่ผ่าน')
   }
   const expectedShortKeyMessages = ['OpenRouter key ดูสั้นผิดปกติ', 'คีย์ผู้ให้บริการสร้างรูปดูสั้นผิดปกติ']
   for (const message of expectedShortKeyMessages) {
     if (!shortKey.output.includes(message)) {
-      throw new Error(`short key output is missing expected message: ${message}\n${shortKey.output}`)
+      throw new Error(`ผลลัพธ์ short key ยังไม่มีข้อความที่คาดไว้: ${message}\n${shortKey.output}`)
     }
   }
 
   for (const secret of [anonKey, serviceRoleKey, 'very-secret-password']) {
     if (valid.output.includes(secret) || invalid.output.includes(secret) || shortKey.output.includes(secret)) {
-      throw new Error('deploy doctor output leaked a secret value')
+      throw new Error('deploy doctor output เผลอแสดง secret value')
     }
   }
 
-  writeLine('ok - deploy env doctor self-test passed')
+  writeLine('ok - deploy env doctor self-test ผ่านแล้ว')
 } finally {
   await rm(tempDir, { recursive: true, force: true })
 }

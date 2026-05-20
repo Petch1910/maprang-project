@@ -145,7 +145,7 @@ export function buildSmokeDoctorReport(
     stdout.push(`${index + 1}. ${step}`)
   }
 
-  stdout.push('Smoke doctor passed.')
+  stdout.push('Smoke doctor ผ่านแล้ว')
   return { exitCode: 0, stdout, stderr, warnings }
 }
 
