@@ -87,7 +87,7 @@ export function buildSmokeDoctorReport(
         minRoleplayReplyChars < recommendedMinRoleplayReplyChars)
     ) {
       warnings.push(
-        `Warning: roleplay reply budget is below the recommended ${recommendedRoleplayMaxOutputTokens}/${recommendedMinRoleplayReplyChars}. Current MODEL_MAX_OUTPUT_TOKENS=${maxOutputTokens}, MODEL_MIN_ROLEPLAY_REPLY_CHARS=${minRoleplayReplyChars}.`,
+        `คำเตือน: งบคำตอบ roleplay ต่ำกว่าค่าแนะนำ ${recommendedRoleplayMaxOutputTokens}/${recommendedMinRoleplayReplyChars} ตอนนี้ MODEL_MAX_OUTPUT_TOKENS=${maxOutputTokens}, MODEL_MIN_ROLEPLAY_REPLY_CHARS=${minRoleplayReplyChars}`,
       )
     }
   }

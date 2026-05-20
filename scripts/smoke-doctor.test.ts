@@ -162,7 +162,7 @@ describe('smoke doctor report', () => {
 
     expect(report.exitCode).toBe(0)
     expect(report.warnings).toContain(
-      'Warning: roleplay reply budget is below the recommended 1600/420. Current MODEL_MAX_OUTPUT_TOKENS=1200, MODEL_MIN_ROLEPLAY_REPLY_CHARS=320.',
+      'คำเตือน: งบคำตอบ roleplay ต่ำกว่าค่าแนะนำ 1600/420 ตอนนี้ MODEL_MAX_OUTPUT_TOKENS=1200, MODEL_MIN_ROLEPLAY_REPLY_CHARS=320',
     )
   })
 
@@ -204,7 +204,7 @@ describe('smoke doctor report', () => {
     expect(report.stdout.join('\n')).toContain(
       'production env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
     )
-    expect(report.warnings.join('\n')).not.toContain('roleplay reply budget is below the recommended 1600/420')
+    expect(report.warnings.join('\n')).not.toContain('งบคำตอบ roleplay ต่ำกว่าค่าแนะนำ 1600/420')
   })
 
   test('validates backend root identity before health checks', async () => {
