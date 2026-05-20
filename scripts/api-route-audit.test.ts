@@ -84,6 +84,23 @@ describe('api route audit', () => {
     expect(routeCoverage['GET /'].coverage).toEqual(expect.arrayContaining(['smoke', 'e2e']))
   })
 
+  test('keeps committed coverage notes Thai-first', () => {
+    const notes = Object.values(routeCoverage)
+      .map((entry) => entry.note)
+      .join('\n')
+
+    for (const staleSnippet of [
+      'backend root identity endpoint is checked by',
+      'deployed service sanity check',
+      'provider call; runtime tests cover relationship/scene state',
+      'redacted prompt snapshots/diff; backend tests cover',
+      'prompt/context regression checks behind admin auth',
+      'without spending provider tokens',
+    ]) {
+      expect(notes).not.toContain(staleSnippet)
+    }
+  })
+
   test('runs the committed API route audit through an importable runner', async () => {
     const routes = await discoverRoutes()
     const lines: string[] = []
