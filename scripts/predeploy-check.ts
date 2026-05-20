@@ -370,8 +370,16 @@ const checks: Check[] = [
         ['tracked real env files', 'runs the committed secret scan through an importable runner'],
         'scripts/check-secrets.test.ts',
       )
-      requireIncludes(secretPatterns, ['GitHub token', 'Google API key', 'Slack token', 'Private key block'], 'scripts/secret-patterns.ts')
-      requireIncludes(secretPatternsTest, ['repo scan allows placeholder docs', 'handoff and memory scans inherit repo secret coverage'], 'scripts/secret-patterns.test.ts')
+      requireIncludes(
+        secretPatterns,
+        ['Anthropic key', 'Hugging Face token', 'Stripe live secret key', 'GitHub token', 'Google API key', 'Slack token', 'Private key block'],
+        'scripts/secret-patterns.ts',
+      )
+      requireIncludes(
+        secretPatternsTest,
+        ['Anthropic key', 'Hugging Face token', 'Stripe live secret key', 'repo scan allows placeholder docs', 'handoff and memory scans inherit repo secret coverage'],
+        'scripts/secret-patterns.test.ts',
+      )
     },
   },
   {

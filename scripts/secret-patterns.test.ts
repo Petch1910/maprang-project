@@ -10,13 +10,19 @@ describe('secret pattern sets', () => {
   test('repo scan catches committed provider and platform token shapes', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', 'a'.repeat(32)].join('-')
     const fakeOpenAiProjectKey = ['sk', 'proj', 'b'.repeat(32)].join('-')
+    const fakeAnthropicKey = ['sk', 'ant', 'c'.repeat(32)].join('-')
+    const fakeHuggingFaceToken = `hf_${'d'.repeat(32)}`
+    const fakeStripeLiveSecret = `sk_live_${'e'.repeat(32)}`
     const fakeGithubToken = `ghp_${'c'.repeat(36)}`
-    const fakeGoogleApiKey = `AIza${'d'.repeat(35)}`
+    const fakeGoogleApiKey = `AIza${'f'.repeat(35)}`
     const fakeSlackToken = `xoxb-${'1'.repeat(20)}`
     const fakePrivateKeyBlock = ['-----BEGIN ', 'FAKE PRIVATE KEY', '-----'].join('')
     const content = [
       fakeOpenRouterKey,
       fakeOpenAiProjectKey,
+      fakeAnthropicKey,
+      fakeHuggingFaceToken,
+      fakeStripeLiveSecret,
       fakeGithubToken,
       fakeGoogleApiKey,
       fakeSlackToken,
@@ -27,6 +33,9 @@ describe('secret pattern sets', () => {
       expect.arrayContaining([
         'OpenRouter key',
         'OpenAI project key',
+        'Anthropic key',
+        'Hugging Face token',
+        'Stripe live secret key',
         'GitHub token',
         'Google API key',
         'Slack token',

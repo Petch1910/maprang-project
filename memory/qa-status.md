@@ -93,6 +93,7 @@ Last updated: 2026-05-20
 - `frontend:static:audit:test` now runs in `qa:local`, CI, and Production Smoke to guard button accessibility, placeholder-copy regressions, admin/system/relationship English UI label regressions, mixed English debug copy regressions, Thai text/mojibake regressions, and the importable static audit runner.
 - `frontend:static:audit:test` now also blocks frontend XSS/opener regressions: `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, `window.open()`, and unsafe `target="_blank"` links.
 - `ABUSE_QA_CHECKLIST.md` is now a required predeploy file and is guarded by `predeploy:check` for SQL-like input, broken access, auth spoofing, prompt control, frontend XSS, admin audit, token/rate limit, and storage/avatar coverage.
+- `secrets:patterns:test` now covers Anthropic key, Hugging Face token, and Stripe live secret key shapes alongside OpenRouter/OpenAI/provider/platform tokens.
 - `frontend:static:audit:test` now also blocks stale English Redux fallback errors such as `Could not load chats` and `Could not load characters`.
 - Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - Frontend API fallback error wording now passes Thai-first coverage via `frontend:static:audit:test` and full `frontend:check`.
