@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "scene-rules",
-  "updatedAt": "2026-05-13",
+  "updatedAt": "2026-05-20",
   "sceneMode": {
     "defaultMode": "sandbox",
-    "entryRule": "Enter scene mode only after a pending event is available and the user accepts it.",
-    "exitRule": "Return to sandbox after the objective resolves, expires, or the user exits.",
-    "uiExpectation": "Dim or frame the chat subtly, show the scene objective, and avoid rerendering the entire chat."
+    "entryRule": "เข้า scene mode เฉพาะเมื่อมี pending event พร้อมแล้ว และผู้ใช้ยอมรับว่าจะเข้าสู่ฉากนั้น",
+    "exitRule": "กลับสู่ sandbox เมื่อ objective สำเร็จ หมดเวลา หรือผู้ใช้ออกจากฉาก",
+    "uiExpectation": "หรี่หรือใส่กรอบบรรยากาศให้แชทอย่างสุภาพ แสดง objective ของฉาก และหลีกเลี่ยงการ rerender หน้าต่างแชททั้งหน้า"
   },
   "eventTypes": [
     "soft_confession_available",
@@ -17,9 +17,9 @@
     "constraint_guard"
   ],
   "runtimeRules": [
-    "Scene objectives should be clear and focused.",
-    "Scene outcomes should update relationship state and timeline.",
-    "Declined or held events should not punish the user.",
-    "Sandbox conversation should continue naturally after a scene ends."
+    "objective ของฉากต้องชัดและโฟกัส",
+    "outcome ของฉากต้องอัปเดต relationship state และ timeline",
+    "event ที่ผู้ใช้ปฏิเสธหรือเก็บไว้ก่อนต้องไม่ลงโทษผู้ใช้",
+    "sandbox conversation ต้องไหลต่ออย่างเป็นธรรมชาติหลังฉากจบ"
   ]
 }

@@ -209,7 +209,7 @@ const checks: Check[] = [
       requireIncludes(chatService, ['3-5 short paragraphs'], 'apps/backend/src/chat.service.ts')
       requireIncludes(
         chatStyleGuide,
-        ['write 4-6 short paragraphs', 'at least 5 complete sentences', '8-14 sentences'],
+        ['4-6 ย่อหน้าสั้น', 'อย่างน้อย 5 ประโยคสมบูรณ์', '8-14 ประโยค'],
         'knowledge/structured/chat-style-guide.json',
       )
       forbidIncludes(
@@ -220,7 +220,7 @@ const checks: Check[] = [
       forbidIncludes(chatService, ['2-4 short paragraphs'], 'apps/backend/src/chat.service.ts')
       forbidIncludes(
         chatStyleGuide,
-        ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences'],
+        ['write 3-6 short paragraphs', 'at least 4 complete sentences', '7-12 sentences', 'write 4-6 short paragraphs', 'Reply naturally in Thai by default'],
         'knowledge/structured/chat-style-guide.json',
       )
       requireIncludes(
@@ -647,7 +647,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         knowledgeAudit,
-        ['collectKnowledgeAuditResult', 'runKnowledgeAudit', 'KnowledgeAuditResult', 'if (import.meta.main) process.exit(await runKnowledgeAudit())'],
+        ['collectKnowledgeAuditResult', 'runKnowledgeAudit', 'KnowledgeAuditResult', 'forbiddenStructuredEnglishSnippets', 'Roleplay content is fictional simulation.', 'if (import.meta.main) process.exit(await runKnowledgeAudit())'],
         'scripts/knowledge-audit.ts',
       )
     },

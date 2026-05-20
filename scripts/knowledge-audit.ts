@@ -22,6 +22,14 @@ const requiredFiles = [
   'knowledge/structured/content-policy.json',
 ]
 
+const forbiddenStructuredEnglishSnippets = [
+  'Roleplay content is fictional simulation.',
+  'Create Thai roleplay characters that feel usable immediately.',
+  'Reply naturally in Thai by default.',
+  'Start neutral with low trust and room for discovery.',
+  'Enter scene mode only after a pending event is available and the user accepts it.',
+]
+
 export type KnowledgeAuditResult = {
   ok: boolean
   files: number
@@ -81,6 +89,7 @@ export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResul
   const files = await walkKnowledgeFiles(knowledgeRoot)
   for (const file of files) {
     const relativePath = relative(root, file)
+    const normalizedRelativePath = relativePath.replaceAll('\\', '/')
     const content = await readFile(file, 'utf8')
 
     for (const forbidden of secretPatterns) {
@@ -97,6 +106,14 @@ export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResul
           continue
         }
         await access(resolved).catch(() => findings.push(`${relativePath}: local link เสีย: ${target}`))
+      }
+    }
+
+    if (normalizedRelativePath.startsWith('knowledge/structured/')) {
+      for (const snippet of forbiddenStructuredEnglishSnippets) {
+        if (content.includes(snippet)) {
+          findings.push(`${relativePath}: structured knowledge ยังมีข้อความอังกฤษเก่า: ${snippet}`)
+        }
       }
     }
   }

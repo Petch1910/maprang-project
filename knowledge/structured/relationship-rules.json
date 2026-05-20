@@ -1,83 +1,83 @@
 {
   "schemaVersion": 1,
   "id": "relationship-rules",
-  "updatedAt": "2026-05-19",
+  "updatedAt": "2026-05-20",
   "presetSeeds": [
     {
       "id": "stranger",
-      "label": "Stranger",
-      "intent": "Start neutral with low trust and room for discovery."
+      "label": "คนแปลกหน้า",
+      "intent": "เริ่มแบบเป็นกลาง ความไว้ใจต่ำ และยังมีพื้นที่ให้ค่อย ๆ ค้นพบกัน"
     },
     {
       "id": "enemy",
       "label": "ศัตรู",
-      "intent": "Start hostile with low trust and visible opposition."
+      "intent": "เริ่มด้วยความเป็นปฏิปักษ์ ความไว้ใจต่ำ และมีแรงต้านที่เห็นชัด"
     },
     {
       "id": "disliked",
       "label": "ไม่ถูกกัน",
-      "intent": "Start with friction and bias, but less severe than enemy."
+      "intent": "เริ่มด้วยอคติและแรงเสียดทาน แต่ไม่รุนแรงเท่าสถานะศัตรู"
     },
     {
       "id": "rival",
       "label": "คู่ปรับ",
-      "intent": "Start competitive with some respect and emotional pressure."
+      "intent": "เริ่มแบบแข่งขันกัน มีความเคารพบางส่วน และมีแรงกดดันทางอารมณ์"
     },
     {
       "id": "bickering-rival",
       "label": "คู่กัด",
-      "intent": "Start with banter, teasing friction, and push-pull chemistry."
+      "intent": "เริ่มด้วยการหยอกล้อ ปะทะกันเล็กน้อย และเคมีแบบผลัก-ดึง"
     },
     {
       "id": "acquaintance",
       "label": "คนรู้จัก",
-      "intent": "Start familiar but not close, with low emotional assumption."
+      "intent": "เริ่มแบบพอคุ้นหน้าแต่ยังไม่สนิท และยังไม่สมมุติความผูกพันลึกเกินไป"
     },
     {
       "id": "warm-close-friend",
-      "label": "Warm close friend",
-      "intent": "Start with trust and comfort while preserving slow-burn progression."
+      "label": "เพื่อนสนิทอบอุ่น",
+      "intent": "เริ่มด้วยความไว้ใจและความสบายใจ แต่ยังรักษาการพัฒนาแบบ slow-burn"
     },
     {
       "id": "ride-or-die",
       "label": "เพื่อนตาย",
-      "intent": "Start with deep trust, loyalty, and shared history."
+      "intent": "เริ่มด้วยความไว้ใจลึก ความภักดี และอดีตร่วมกัน"
     },
     {
       "id": "hidden-enemy-crush",
-      "label": "Hidden enemy crush",
-      "intent": "Start tense, guarded, and emotionally charged."
+      "label": "ศัตรูที่แอบหวั่นไหว",
+      "intent": "เริ่มตึง ระวังตัว และมีแรงดึงดูดทางอารมณ์ที่ยังไม่ยอมรับตรง ๆ"
     },
     {
       "id": "friend-crush",
       "label": "เพื่อนสนิทคิดไม่ซื่อ",
-      "intent": "Preserve friendship comfort while hiding romantic tension."
+      "intent": "รักษาความสบายใจแบบเพื่อนสนิท แต่ซ่อนความตึงโรแมนติกไว้ข้างใต้"
     },
     {
       "id": "dating-trial",
       "label": "ลองคุย",
-      "intent": "Start exploratory and uncommitted, testing chemistry."
+      "intent": "เริ่มแบบสำรวจความเข้ากัน ยังไม่ผูกมัด และทดสอบเคมีไปทีละนิด"
     },
     {
       "id": "talking-stage",
       "label": "คนคุย",
-      "intent": "Start with stronger mutual expectation than casual dating."
+      "intent": "เริ่มด้วยความคาดหวังร่วมกันมากกว่าการลองคุยแบบหลวม ๆ"
     },
     {
       "id": "toxic-partner",
       "label": "แฟน Toxic",
-      "intent": "Start romantically attached but low-trust and volatile; portray as conflict, not healthy romance."
+      "intent": "เริ่มแบบมีพันธะโรแมนติกแต่ไว้ใจต่ำและผันผวน ให้เล่าเป็น conflict ไม่ใช่ความสัมพันธ์สุขภาพดี"
     },
     {
       "id": "soulmate",
       "label": "คู่แท้",
-      "intent": "Start with deep alignment and high trust while keeping user turns meaningful."
+      "intent": "เริ่มด้วยความเข้ากันลึกและความไว้ใจสูง แต่ยังต้องให้เทิร์นของผู้เล่นมีความหมาย"
     }
   ],
   "runtimeRules": [
-    "Relationship seeds set the starting tone but user behavior should still matter more over time.",
-    "Do not force romance when no-romance constraints are active.",
-    "Major relationship events should be optional and surfaced as pending events before entering scene mode.",
-    "Cooldowns should prevent repeating confession, break, or fear-lock events too often."
+    "relationship seed กำหนดโทนเริ่มต้นเท่านั้น พฤติกรรมของผู้ใช้ต้องมีน้ำหนักมากกว่าเมื่อเวลาผ่านไป",
+    "ห้ามบังคับ romance เมื่อมีข้อจำกัด no-romance ทำงานอยู่",
+    "event ความสัมพันธ์สำคัญต้องเป็นตัวเลือก และควรถูกแสดงเป็น pending event ก่อนเข้า scene mode",
+    "cooldown ต้องกันไม่ให้ event สารภาพรัก แตกหัก หรือ fear-lock เกิดซ้ำถี่เกินไป"
   ]
 }
