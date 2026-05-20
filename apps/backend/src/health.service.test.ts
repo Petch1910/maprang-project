@@ -185,8 +185,8 @@ describe('readiness gate', () => {
       expect.arrayContaining([
         'Supabase Auth ยังไม่ได้ตั้งค่า',
         'ADMIN_API_KEY ยังไม่ได้ตั้งค่า',
-        'production avatar storage ต้องใช้ Supabase',
-        'production avatar storage access ต้องใช้ signed URL',
+        'production พื้นที่เก็บรูปตัวละครต้องใช้ Supabase',
+        'production พื้นที่เก็บรูปตัวละครต้องใช้ signed URL',
         'production auth mode ต้องใช้ Supabase JWT',
         'production admin guard ต้องใช้ API key',
       ]),

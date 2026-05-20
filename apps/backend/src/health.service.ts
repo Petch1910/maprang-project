@@ -221,8 +221,8 @@ export function readinessFailures(health: HealthStatus) {
     if (!health.model.imageGeneration.liveVerified) {
       failures.push('live smoke ของระบบสร้างรูปยังไม่ผ่านการยืนยัน')
     }
-    if (health.security.avatarStorage !== 'supabase') failures.push('production avatar storage ต้องใช้ Supabase')
-    if (health.security.avatarStorageAccess !== 'signed') failures.push('production avatar storage access ต้องใช้ signed URL')
+    if (health.security.avatarStorage !== 'supabase') failures.push('production พื้นที่เก็บรูปตัวละครต้องใช้ Supabase')
+    if (health.security.avatarStorageAccess !== 'signed') failures.push('production พื้นที่เก็บรูปตัวละครต้องใช้ signed URL')
     if (health.security.authMode !== 'supabase-jwt') failures.push('production auth mode ต้องใช้ Supabase JWT')
     if (health.security.adminGuard !== 'api-key') failures.push('production admin guard ต้องใช้ API key')
   }

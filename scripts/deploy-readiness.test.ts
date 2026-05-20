@@ -208,7 +208,7 @@ describe('deploy readiness evaluation', () => {
     expect(readiness.stagingBlockers).toEqual(
       expect.arrayContaining([
         'auth mode ยังไม่ใช่ Supabase JWT',
-        'avatar storage ยังไม่ใช่ Supabase signed URL',
+        'พื้นที่เก็บรูปตัวละครยังไม่ใช่ Supabase signed URL',
         'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https',
         'คลังความรู้ structured ยังไม่ผ่าน',
         'OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า',

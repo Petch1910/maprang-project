@@ -155,7 +155,7 @@ export function evaluateDeployReadiness(
   }
   if (health.security?.avatarStorage !== 'supabase' || health.security?.avatarStorageAccess !== 'signed') {
     addProductionBlocker(
-      'avatar storage ยังไม่ใช่ Supabase signed URL',
+      'พื้นที่เก็บรูปตัวละครยังไม่ใช่ Supabase signed URL',
       'รัน `bun run supabase:storage:setup` แล้วตั้ง STORAGE_PROVIDER=supabase และ SUPABASE_STORAGE_ACCESS=signed บน backend',
     )
   }
