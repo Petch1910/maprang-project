@@ -642,7 +642,7 @@ const checks: Check[] = [
       requireIncludes(wikiIndex, ['โมเดลผลิตภัณฑ์ Maprang', 'Relationship Engine', 'Creator Studio', 'Production Deploy'], 'knowledge/wiki/INDEX.md')
       requireIncludes(
         backendKnowledge,
-        ['buildChatKnowledgePrompt', 'buildCreatorKnowledgePrompt', 'structuredKnowledgeHealth'],
+        ['buildChatKnowledgePrompt', 'buildCreatorKnowledgePrompt', 'structuredKnowledgeHealth', 'ชุดความรู้ structured ของ Maprang', 'รูปทรงคำตอบ', 'ชุดความรู้ครีเอเตอร์ของ Maprang'],
         'apps/backend/src/knowledge.service.ts',
       )
       requireIncludes(

@@ -206,16 +206,16 @@ export function buildChatKnowledgePrompt() {
   const ageMode = stringArray(policy.ageMode)
 
   return [
-    'Maprang structured knowledge pack:',
-    bulletBlock('Chat style principles:', stringArray(runtimePrompt.principles)),
-    bulletBlock('Reply shape:', stringArray(runtimePrompt.replyShape)),
-    bulletBlock('Platform avoid rules:', stringArray(runtimePrompt.avoid)),
-    bulletBlock('Relationship runtime rules:', relationshipRules, 4),
-    bulletBlock('Scene runtime rules:', sceneRules, 4),
-    typeof sceneMode.defaultMode === 'string' ? `Default mode: ${sceneMode.defaultMode}` : '',
-    typeof sceneMode.entryRule === 'string' ? `Scene entry rule: ${sceneMode.entryRule}` : '',
-    typeof policy.fictionNotice === 'string' ? `Fiction notice: ${policy.fictionNotice}` : '',
-    bulletBlock('Age/content mode rules:', ageMode, 4),
+    'ชุดความรู้ structured ของ Maprang:',
+    bulletBlock('หลักการสไตล์แชท:', stringArray(runtimePrompt.principles)),
+    bulletBlock('รูปทรงคำตอบ:', stringArray(runtimePrompt.replyShape)),
+    bulletBlock('ข้อห้ามของแพลตฟอร์ม:', stringArray(runtimePrompt.avoid)),
+    bulletBlock('กฎ runtime ของความสัมพันธ์:', relationshipRules, 4),
+    bulletBlock('กฎ runtime ของฉาก:', sceneRules, 4),
+    typeof sceneMode.defaultMode === 'string' ? `โหมดเริ่มต้น: ${sceneMode.defaultMode}` : '',
+    typeof sceneMode.entryRule === 'string' ? `กฎเข้า scene: ${sceneMode.entryRule}` : '',
+    typeof policy.fictionNotice === 'string' ? `คำเตือนเรื่องสมมุติ: ${policy.fictionNotice}` : '',
+    bulletBlock('กฎโหมดอายุ/เนื้อหา:', ageMode, 4),
   ]
     .filter(Boolean)
     .join('\n')
@@ -229,11 +229,11 @@ export function buildCreatorKnowledgePrompt() {
   const policy = childRecord(knowledge.contentPolicy, 'runtimePolicy')
 
   return [
-    'Maprang creator knowledge pack:',
-    bulletBlock('Creator drafting principles:', stringArray(draftPrompt.principles)),
-    bulletBlock('Required character qualities:', stringArray(draftPrompt.requiredQualities)),
-    bulletBlock('Creator draft avoid rules:', stringArray(draftPrompt.avoid)),
-    typeof policy.fictionNotice === 'string' ? `Fiction notice: ${policy.fictionNotice}` : '',
+    'ชุดความรู้ครีเอเตอร์ของ Maprang:',
+    bulletBlock('หลักการร่างตัวละครสำหรับครีเอเตอร์:', stringArray(draftPrompt.principles)),
+    bulletBlock('คุณภาพตัวละครที่ต้องมี:', stringArray(draftPrompt.requiredQualities)),
+    bulletBlock('ข้อห้ามของดราฟต์ครีเอเตอร์:', stringArray(draftPrompt.avoid)),
+    typeof policy.fictionNotice === 'string' ? `คำเตือนเรื่องสมมุติ: ${policy.fictionNotice}` : '',
   ]
     .filter(Boolean)
     .join('\n')

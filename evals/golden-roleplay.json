@@ -19,10 +19,10 @@
       "expects": {
         "required": [
           "Platform prompt-control policy",
-          "Maprang structured knowledge pack",
+          "ชุดความรู้ structured ของ Maprang",
           "Relevant lorebook entries",
-          "Reply naturally in Thai by default",
-          "Do not answer roleplay with a single short line"
+          "ตอบเป็นภาษาไทยอย่างเป็นธรรมชาติเป็นค่าเริ่มต้น",
+          "ห้ามตอบโรลเพลย์ที่กำลังอินอยู่ด้วยบรรทัดสั้น ๆ เพียงบรรทัดเดียว"
         ],
         "forbidden": ["sk-or-v1-", "sk-proj-", "service_role", "DATABASE_URL="],
         "sectionOrder": ["Platform prompt-control policy", "Relevant lorebook entries", "Runtime instructions"],
@@ -66,10 +66,10 @@
       ],
       "expects": {
         "required": [
-          "Relationship runtime rules",
-          "Scene runtime rules",
-          "Default mode: sandbox",
-          "Scene entry rule",
+          "กฎ runtime ของความสัมพันธ์",
+          "กฎ runtime ของฉาก",
+          "โหมดเริ่มต้น: sandbox",
+          "กฎเข้า scene",
           "Runtime memory"
         ],
         "forbidden": ["sk-or-v1-", "sk-proj-", "service_role"],

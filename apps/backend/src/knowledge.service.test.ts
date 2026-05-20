@@ -13,17 +13,17 @@ describe('structured knowledge service', () => {
   test('builds compact chat runtime prompt', () => {
     const prompt = buildChatKnowledgePrompt()
 
-    expect(prompt).toContain('Maprang structured knowledge pack')
-    expect(prompt).toContain('Reply shape')
-    expect(prompt).toContain('Default mode: sandbox')
-    expect(prompt).toContain('Fiction notice')
+    expect(prompt).toContain('ชุดความรู้ structured ของ Maprang')
+    expect(prompt).toContain('รูปทรงคำตอบ')
+    expect(prompt).toContain('โหมดเริ่มต้น: sandbox')
+    expect(prompt).toContain('คำเตือนเรื่องสมมุติ')
   })
 
   test('builds creator drafting prompt', () => {
     const prompt = buildCreatorKnowledgePrompt()
 
-    expect(prompt).toContain('Maprang creator knowledge pack')
-    expect(prompt).toContain('Creator drafting principles')
-    expect(prompt).toContain('Required character qualities')
+    expect(prompt).toContain('ชุดความรู้ครีเอเตอร์ของ Maprang')
+    expect(prompt).toContain('หลักการร่างตัวละครสำหรับครีเอเตอร์')
+    expect(prompt).toContain('คุณภาพตัวละครที่ต้องมี')
   })
 })
