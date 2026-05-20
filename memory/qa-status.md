@@ -351,3 +351,4 @@ Last updated: 2026-05-20
 - Import/bundle QA diagnostics Thai-first pass: เปลี่ยน import-cycle summary จาก `files/edges` เป็น "ไฟล์/เส้น import" และ bundle-budget failure copy เป็น "bundle หลัก/chunk ฝั่งหน้าบ้าน" พร้อม regression tests.
 - Full deterministic repo gate pass: `qa:repo` ผ่านหลังชุด QA diagnostics ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, deploy/predeploy guards, backend tests 152 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - Frontend route audit diagnostics Thai-first pass: เปลี่ยน path finding จาก `attribute to` เป็น "ค่า to" และ summary จาก `routes` เป็น "รายการ" พร้อม `frontend:route:audit:test`.
+- Memory/knowledge audit diagnostics Thai-first pass: เปลี่ยน pass/fail summary จาก `markdown files`, `knowledge files`, และ `structured packs` เป็น "ไฟล์ Markdown", "ไฟล์ความรู้", และ "ชุด structured" พร้อม vault audit regression.

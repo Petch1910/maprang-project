@@ -105,12 +105,12 @@ export async function runMemoryAudit(
 ) {
   const result = await collectMemoryAuditResult()
   if (!result.ok) {
-    writeError('Memory audit ไม่ผ่าน:')
+    writeError('ตรวจ memory ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ผ่าน - memory audit ผ่านแล้ว (${result.files} markdown files)`)
+  writeLine(`ผ่าน - memory audit ผ่านแล้ว (${result.files} ไฟล์ Markdown)`)
   return 0
 }
 

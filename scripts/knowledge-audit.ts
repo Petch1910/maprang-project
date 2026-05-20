@@ -138,12 +138,12 @@ export async function runKnowledgeAudit(
 ) {
   const result = await collectKnowledgeAuditResult()
   if (!result.ok) {
-    writeError('Knowledge audit ไม่ผ่าน:')
+    writeError('ตรวจ knowledge ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ผ่าน - knowledge audit ผ่านแล้ว (${result.files} knowledge files, ${result.structuredPacks} structured packs)`)
+  writeLine(`ผ่าน - knowledge audit ผ่านแล้ว (${result.files} ไฟล์ความรู้, ${result.structuredPacks} ชุด structured)`)
   return 0
 }
 
