@@ -17,6 +17,9 @@ export const routeErrorMessages: Record<string, string> = {
   invalid_report_id: 'รหัสรายงานไม่ถูกต้อง',
   invalid_user_id: 'รหัสผู้ใช้ไม่ถูกต้อง',
   invalid_id: 'รหัสที่ส่งมาไม่ถูกต้อง',
+  lore_create_failed: 'สร้างคลังความรู้ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+  lore_forbidden: 'คุณไม่มีสิทธิ์จัดการคลังความรู้ของตัวละครนี้',
+  lore_not_found: 'ไม่พบคลังความรู้นี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
   unauthorized: 'กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้',
 }
 

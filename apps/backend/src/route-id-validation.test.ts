@@ -63,7 +63,37 @@ describe('route id validation', () => {
       error: 'character_forbidden',
       message: 'คุณไม่มีสิทธิ์จัดการตัวละครนี้',
     })
+    expect(routeErrorResponse('lore_not_found')).toEqual({
+      error: 'lore_not_found',
+      message: 'ไม่พบคลังความรู้นี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+    })
+    expect(routeErrorResponse('lore_forbidden')).toEqual({
+      error: 'lore_forbidden',
+      message: 'คุณไม่มีสิทธิ์จัดการคลังความรู้ของตัวละครนี้',
+    })
     expect(routeErrorMessage('unknown_error')).toBe('รหัสที่ส่งมาไม่ถูกต้อง')
+  })
+
+  test('returns Thai-first messages when lore persistence is unavailable', async () => {
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await loreRoutes.handle(request('/characters/11111111-1111-4111-8111-111111111111/lore'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
   })
 
   test('rejects invalid character and lore ids before persistence errors', async () => {
