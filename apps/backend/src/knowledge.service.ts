@@ -67,11 +67,11 @@ function childRecord(source: JsonRecord, key: string) {
 
 function validateBase(file: string, value: JsonRecord) {
   const errors: string[] = []
-  if (value.schemaVersion !== 1) errors.push('schemaVersion must be 1')
-  if (typeof value.id !== 'string' || value.id.length === 0) errors.push('id is required')
-  if (typeof value.updatedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.updatedAt)) errors.push('updatedAt must be YYYY-MM-DD')
+  if (value.schemaVersion !== 1) errors.push('schemaVersion ต้องเป็น 1')
+  if (typeof value.id !== 'string' || value.id.length === 0) errors.push('ต้องมี id')
+  if (typeof value.updatedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value.updatedAt)) errors.push('updatedAt ต้องเป็นรูปแบบ YYYY-MM-DD')
   if (!file.startsWith(`${String(value.id)}.`)) {
-    errors.push(`file name must start with id "${String(value.id)}"`)
+    errors.push(`ชื่อไฟล์ต้องขึ้นต้นด้วย id "${String(value.id)}"`)
   }
   return errors
 }
@@ -81,35 +81,35 @@ function validateStructuredFile(file: string, value: JsonRecord) {
 
   if (file === 'chat-style-guide.json') {
     const prompt = childRecord(value, 'runtimePrompt')
-    if (stringArray(prompt.principles).length < 3) errors.push('runtimePrompt.principles needs at least 3 items')
-    if (stringArray(prompt.replyShape).length < 2) errors.push('runtimePrompt.replyShape needs at least 2 items')
-    if (stringArray(prompt.avoid).length < 2) errors.push('runtimePrompt.avoid needs at least 2 items')
+    if (stringArray(prompt.principles).length < 3) errors.push('runtimePrompt.principles ต้องมีอย่างน้อย 3 รายการ')
+    if (stringArray(prompt.replyShape).length < 2) errors.push('runtimePrompt.replyShape ต้องมีอย่างน้อย 2 รายการ')
+    if (stringArray(prompt.avoid).length < 2) errors.push('runtimePrompt.avoid ต้องมีอย่างน้อย 2 รายการ')
   }
 
   if (file === 'creator-guides.json') {
     const prompt = childRecord(value, 'draftPrompt')
-    if (stringArray(prompt.principles).length < 3) errors.push('draftPrompt.principles needs at least 3 items')
-    if (stringArray(prompt.requiredQualities).length < 3) errors.push('draftPrompt.requiredQualities needs at least 3 items')
-    if (stringArray(prompt.avoid).length < 2) errors.push('draftPrompt.avoid needs at least 2 items')
+    if (stringArray(prompt.principles).length < 3) errors.push('draftPrompt.principles ต้องมีอย่างน้อย 3 รายการ')
+    if (stringArray(prompt.requiredQualities).length < 3) errors.push('draftPrompt.requiredQualities ต้องมีอย่างน้อย 3 รายการ')
+    if (stringArray(prompt.avoid).length < 2) errors.push('draftPrompt.avoid ต้องมีอย่างน้อย 2 รายการ')
   }
 
   if (file === 'relationship-rules.json') {
-    if (!Array.isArray(value.presetSeeds) || value.presetSeeds.length < 3) errors.push('presetSeeds needs at least 3 items')
-    if (stringArray(value.runtimeRules).length < 3) errors.push('runtimeRules needs at least 3 items')
+    if (!Array.isArray(value.presetSeeds) || value.presetSeeds.length < 3) errors.push('presetSeeds ต้องมีอย่างน้อย 3 รายการ')
+    if (stringArray(value.runtimeRules).length < 3) errors.push('runtimeRules ต้องมีอย่างน้อย 3 รายการ')
   }
 
   if (file === 'scene-rules.json') {
     const sceneMode = childRecord(value, 'sceneMode')
-    if (sceneMode.defaultMode !== 'sandbox') errors.push('sceneMode.defaultMode must be sandbox')
-    if (stringArray(value.eventTypes).length < 3) errors.push('eventTypes needs at least 3 items')
-    if (stringArray(value.runtimeRules).length < 3) errors.push('runtimeRules needs at least 3 items')
+    if (sceneMode.defaultMode !== 'sandbox') errors.push('sceneMode.defaultMode ต้องเป็น sandbox')
+    if (stringArray(value.eventTypes).length < 3) errors.push('eventTypes ต้องมีอย่างน้อย 3 รายการ')
+    if (stringArray(value.runtimeRules).length < 3) errors.push('runtimeRules ต้องมีอย่างน้อย 3 รายการ')
   }
 
   if (file === 'content-policy.json') {
     const policy = childRecord(value, 'runtimePolicy')
-    if (typeof policy.fictionNotice !== 'string' || policy.fictionNotice.length === 0) errors.push('runtimePolicy.fictionNotice is required')
-    if (stringArray(policy.ageMode).length < 2) errors.push('runtimePolicy.ageMode needs at least 2 items')
-    if (stringArray(policy.promptControl).length < 2) errors.push('runtimePolicy.promptControl needs at least 2 items')
+    if (typeof policy.fictionNotice !== 'string' || policy.fictionNotice.length === 0) errors.push('ต้องมี runtimePolicy.fictionNotice')
+    if (stringArray(policy.ageMode).length < 2) errors.push('runtimePolicy.ageMode ต้องมีอย่างน้อย 2 รายการ')
+    if (stringArray(policy.promptControl).length < 2) errors.push('runtimePolicy.promptControl ต้องมีอย่างน้อย 2 รายการ')
   }
 
   return errors

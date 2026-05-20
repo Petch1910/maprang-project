@@ -52,6 +52,7 @@ Last updated: 2026-05-20
 - Production memory handoff wording for blockers, next steps, and live provider verification is Thai-first.
 - Knowledge audit: pass.
 - Memory/knowledge audit diagnostic localization: pass via `vault:audit:test`, `memory:audit`, and `knowledge:audit`.
+- Backend structured knowledge validation errors now use Thai-first messages while keeping JSON field paths visible, verified with `knowledge.service.test.ts`, `backend:check`, `knowledge:audit`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Root README entrypoint Thai-first wording now passes `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Root README production/current verification Thai-first wording now passes `predeploy:check:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Root README eval/prompt-inspector/local-readiness/live-smoke/staging-verify wording now uses Thai-first handoff copy and will be checked by `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check` in this docs scope.
