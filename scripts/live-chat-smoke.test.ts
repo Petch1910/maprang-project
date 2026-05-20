@@ -27,7 +27,7 @@ describe('live chat smoke helpers', () => {
   })
 
   test('validates smoke token balance before spending provider credits', () => {
-    expect(() => assertSmokeUserHasTokenBalance(999, 1000)).toThrow('เติม token ให้ smoke user')
+    expect(() => assertSmokeUserHasTokenBalance(999, 1000)).toThrow('เติม token ให้ผู้ใช้ smoke')
     expect(assertSmokeUserHasTokenBalance(1000, 1000)).toBeUndefined()
   })
 
@@ -104,7 +104,7 @@ describe('live chat smoke helpers', () => {
       balanceAfter: 1112,
       replyChars: 440,
       minRoleplayReplyChars: 420,
-      nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน target environment นี้ แล้วรัน production:check ใหม่',
+      nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน environment เป้าหมายนี้ แล้วรัน production:check ใหม่',
       replyPreview: 'ก'.repeat(120),
     })
   })
@@ -216,6 +216,7 @@ describe('live chat smoke helpers', () => {
     expect(exitCode).toBe(1)
     expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/me/usage'])
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('เติม token ให้ smoke user')
+    expect(errors.join('\n')).toContain('เติม token ให้ผู้ใช้ smoke')
+    expect(errors.join('\n')).not.toContain('เติม token ให้ smoke user')
   })
 })

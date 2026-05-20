@@ -77,7 +77,7 @@ export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[
 export function assertSmokeUserHasTokenBalance(tokenBalance: number, minSmokeTokenBalance: number) {
   if (tokenBalance < minSmokeTokenBalance) {
     throw new Error(
-      `smoke user มี ${tokenBalance} token ซึ่งต่ำกว่า SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance} เติม token ให้ smoke user ก่อนรัน live chat smoke`,
+      `ผู้ใช้ smoke มี ${tokenBalance} token ซึ่งต่ำกว่า SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=${minSmokeTokenBalance} เติม token ให้ผู้ใช้ smoke ก่อนรัน live chat smoke`,
     )
   }
 }
@@ -88,13 +88,13 @@ export function validateLiveChatSmokeResponse(chat: LiveChatSmokeResponse, minRo
   }
 
   if (!chat.reply) {
-    throw new Error('ตรวจ live chat ไม่ได้คืน AI reply: reply ว่าง')
+    throw new Error('ตรวจ live chat ไม่ได้คืนคำตอบ AI: reply ว่าง')
   }
 
   if (!chat.chatId) throw new Error('ตรวจ live chat ไม่ได้สร้าง chat id')
   if (!chat.usage?.totalTokens) throw new Error('ตรวจ live chat ไม่ได้คืน token usage')
   if (chat.reply.length < minRoleplayReplyChars) {
-    throw new Error(`คำตอบ live chat สั้นเกินไปสำหรับ roleplay QA ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร Reply: ${chat.reply}`)
+    throw new Error(`คำตอบ live chat สั้นเกินไปสำหรับ roleplay QA ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร ตัวอย่างคำตอบ: ${chat.reply}`)
   }
 
   return {
@@ -140,7 +140,7 @@ export function buildLiveChatSmokePayload({
     balanceAfter: chatDebit.balanceAfter,
     replyChars: reply.length,
     minRoleplayReplyChars,
-    nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน target environment นี้ แล้วรัน production:check ใหม่',
+    nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน environment เป้าหมายนี้ แล้วรัน production:check ใหม่',
     replyPreview: reply.slice(0, 120),
   }
 }
@@ -162,11 +162,11 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     const minRoleplayReplyChars = Math.max(420, health.model?.minRoleplayReplyChars ?? 420)
 
     if (!health.ok || !health.checks.databaseConnected) {
-      throw new Error('backend health check ไม่ผ่าน')
+      throw new Error('health check ของระบบหลังบ้านไม่ผ่าน')
     }
 
     if (!health.checks.openRouterConfigured) {
-      throw new Error('ยังไม่ได้ตั้งค่า OpenRouter บน backend')
+      throw new Error('ยังไม่ได้ตั้งค่า OpenRouter บนระบบหลังบ้าน')
     }
 
     const characters = await jsonReader<{
@@ -176,7 +176,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     })
 
     const smokeCharacter = selectLiveChatSmokeCharacter(characters.characters ?? [])
-    if (!smokeCharacter) throw new Error('ไม่พบ seeded smoke character')
+    if (!smokeCharacter) throw new Error('ไม่พบตัวละคร seed สำหรับ smoke')
 
     const walletBefore = await jsonReader<{
       user: { tokenBalance: number }
@@ -214,7 +214,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     const chatDebit = findMatchingChatDebit(walletAfter.wallet?.transactions, chatResult.totalTokens)
 
     if (!chatDebit) {
-      throw new Error('ตรวจ live chat คืน token usage แล้ว แต่ไม่พบ CHAT_USAGE wallet transaction ที่ตรงกัน')
+      throw new Error('ตรวจ live chat คืน token usage แล้ว แต่ไม่พบรายการ wallet แบบ CHAT_USAGE ที่ตรงกัน')
     }
 
     writeLine(
