@@ -360,3 +360,4 @@ Last updated: 2026-05-20
 - Release handoff runner output Thai-first pass: เปลี่ยนผลตรวจ release handoff เป็น "ตรวจเอกสารส่งมอบ release" พร้อม regression test.
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด Thai-first QA runner polish ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 152 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - API smoke admin eval diagnostics Thai-first pass: เปลี่ยน error ของ `/admin/evals/local` จาก `local eval ไม่ผ่าน` และ `local eval scenarios` เป็น "ตรวจ eval ในเครื่องไม่ผ่าน" และ "สถานการณ์ eval ในเครื่อง" พร้อม regression guard.
+- README/Deployment QA handoff Thai-first pass: เกลา wording เรื่อง knowledge/eval/prompt inspector/local QA/staging checks ให้ไทยนำขึ้น โดยคงชื่อ command, env, route, และ provider terms ที่ต้อง search/debug ไว้.

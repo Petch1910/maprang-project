@@ -100,26 +100,26 @@ JSON output มี field top-level `stagingReady`, `stagingBlockerCount`, `produ
 ## ชั้นความรู้ (Knowledge Layer)
 
 Runtime product knowledge อยู่ที่ [`knowledge/README.md`](./knowledge/README.md). ส่วนนี้แยกจาก session memory:
-`memory/` อธิบายสิ่งที่เกิดขึ้นในโปรเจกต์ ส่วน `knowledge/` เก็บ product rules และ structured packs ที่ backend โหลดไปใช้กับ chat style, creator drafts, relationship rules, scene rules, และ content policy.
+`memory/` อธิบายสิ่งที่เกิดขึ้นในโปรเจกต์ ส่วน `knowledge/` เก็บกฎผลิตภัณฑ์และชุด structured ที่ backend โหลดไปใช้กับสไตล์แชท, creator drafts, relationship rules, scene rules, และ content policy.
 
 ```bash
 bun run knowledge:audit
 ```
 
-`knowledge:audit` ตรวจ structured JSON packs, local wiki links, และ secret-shaped values. Backend แสดง structured knowledge status ใน `/health` และ `/ready`; `qa:local` จะรัน audit นี้ก่อน smoke tests.
+`knowledge:audit` ตรวจชุด JSON structured, ลิงก์ wiki ใน repo, และค่าที่มีรูปทรงเหมือน secret. Backend แสดงสถานะ structured knowledge ใน `/health` และ `/ready`; `qa:local` จะรัน audit นี้ก่อน smoke tests.
 
 ## ชั้นประเมินผล (Evaluation Layer)
 
-ชุดตรวจ regression ของพรอมป์และบริบทอยู่ที่ [`evals/README.md`](./evals/README.md). deterministic local eval อ่าน
+ชุดตรวจ regression ของพรอมป์และบริบทอยู่ที่ [`evals/README.md`](./evals/README.md). local eval แบบ deterministic อ่าน
 [`evals/golden-roleplay.json`](./evals/golden-roleplay.json), ประกอบ Maprang chat context ผ่าน backend context
-service, แล้วตรวจลำดับ section, ข้อความคุมพรอมป์, relationship/scene continuity, lore injection, งบ token, และ secret-shaped exclusions โดยไม่เรียก live model.
+service, แล้วตรวจลำดับ section, ข้อความคุมพรอมป์, relationship/scene continuity, lore injection, งบ token, และการกัน secret-shaped values โดยไม่เรียก live model.
 
 ```bash
 bun run eval:local
 ```
 
 `eval:local` รันใน `qa:local` และ CI. Admins รัน deterministic suite ชุดเดียวกันจาก `/admin/evals` หรือ
-`GET /admin/evals/local` ได้โดยไม่ใช้ live model tokens. มี Promptfoo scaffold แบบเลือกใช้เองสำหรับเทียบคุณภาพ live model ในอนาคต:
+`GET /admin/evals/local` ได้โดยไม่ใช้ token ของ live model. มี Promptfoo scaffold แบบเลือกใช้เองสำหรับเทียบคุณภาพ live model ในอนาคต:
 
 ```bash
 bun run eval:promptfoo
@@ -128,8 +128,8 @@ bun run eval:promptfoo
 ## ตัวตรวจพรอมป์ (Prompt Inspector)
 
 หน้าตรวจพรอมป์สำหรับ admin เปิดใช้ผ่าน `/admin/prompt-inspector` และ `POST /admin/prompt-inspector`. มัน
-ประกอบ base context blocks ชุดเดียวกับที่ chat ใช้, เพิ่ม persona/runtime memory/user message context แบบเลือกใช้ได้, คืนเฉพาะ
-พรอมป์ที่ปิดข้อมูลลับแล้ว, ประมาณโทเคนที่ใช้ตาม section, และ diff ข้อความปัจจุบันกับข้อความก่อนหน้าได้. ใช้หน้านี้เมื่อ character reply สั้นเกินไป, lore หาย, หรือ relationship/scene continuity drift.
+ประกอบบล็อกบริบทพื้นฐานชุดเดียวกับที่ chat ใช้, เพิ่ม persona/runtime memory/user message context แบบเลือกใช้ได้, คืนเฉพาะ
+พรอมป์ที่ปิดข้อมูลลับแล้ว, ประมาณโทเคนที่ใช้ตาม section, และเทียบ diff ระหว่างข้อความปัจจุบันกับข้อความก่อนหน้าได้. ใช้หน้านี้เมื่อ character reply สั้นเกินไป, lore หาย, หรือ relationship/scene continuity drift.
 
 Local API smoke ครอบ endpoint นี้และ `/admin/evals/local` เมื่อมี `ADMIN_API_KEY` หรือ `SMOKE_ADMIN_API_KEY`.
 
@@ -222,7 +222,7 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 bun run qa:live
 ```
 
-`qa:live` และ `api:smoke:live` เรียกผู้ให้บริการจริง จึงอาจ fail ได้แม้ key มีอยู่แล้ว ถ้า billing, quota, สิทธิ์โมเดล, ข้อจำกัดอัตราการเรียกของผู้ให้บริการ, หรือการเชื่อมต่อออกนอกระบบยังไม่พร้อม กรณี chat จะรายงานเป็น `usage.providerFailure` เพื่อชี้ failure class ที่ถูกต้อง ให้ถือว่าเป็น staging blocker ก่อน production. `api:smoke:live` ตรวจ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ก่อนเรียกแชทจริง และครอบคลุมแชทจริงหนึ่งครั้งพร้อมสร้างรูปจริงหนึ่งครั้ง ดังนั้นใช้ `smoke:chat` หรือ `smoke:image:live` เฉพาะตอนต้อง retry provider path เดี่ยว อย่ารัน live smoke หลายคำสั่งพร้อมกันบนบัญชีที่ quota จำกัด ให้ใช้ `api:smoke:live` เป็น ordered pass ครั้งเดียว หลังยืนยันแชทจริงสำเร็จครั้งแรกให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`; หลังยืนยันรูปจริงสำเร็จครั้งแรกให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`; แล้ว rerun production gate สุดท้าย.
+`qa:live` และ `api:smoke:live` เรียกผู้ให้บริการจริง จึงอาจ fail ได้แม้ key มีอยู่แล้ว ถ้า billing, quota, สิทธิ์โมเดล, ข้อจำกัดอัตราการเรียกของผู้ให้บริการ, หรือการเชื่อมต่อออกนอกระบบยังไม่พร้อม กรณี chat จะรายงานเป็น `usage.providerFailure` เพื่อชี้ failure class ที่ถูกต้อง ให้ถือว่าเป็น staging blocker ก่อน production. `api:smoke:live` ตรวจ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ก่อนเรียกแชทจริง และครอบคลุมแชทจริงหนึ่งครั้งพร้อมสร้างรูปจริงหนึ่งครั้ง ดังนั้นใช้ `smoke:chat` หรือ `smoke:image:live` เฉพาะตอนต้อง retry เส้นทางผู้ให้บริการที่ fail เพียงจุดเดียว อย่ารัน live smoke หลายคำสั่งพร้อมกันบนบัญชีที่ quota จำกัด ให้ใช้ `api:smoke:live` เป็นรอบตรวจตามลำดับครั้งเดียว หลังยืนยันแชทจริงสำเร็จครั้งแรกให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`; หลังยืนยันรูปจริงสำเร็จครั้งแรกให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`; แล้ว rerun production gate สุดท้าย.
 
 สำหรับ backend ที่ deploy แล้ว ให้ใช้ smoke-only live gate พร้อม `SMOKE_API_BASE_URL` และ smoke auth variables เมื่อต้องการ retry provider connectivity โดยไม่รัน persistence tests กับ production data:
 
@@ -239,13 +239,13 @@ bun run production:check
 คำสั่งนี้จะรัน production health gate แบบเข้ม, Supabase signed-avatar storage smoke, และ live API smoke รวมถึงการตรวจแชทจริงกับการสร้างรูปจริง ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็นภาพตัวอย่างเพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะล้ม.
 script จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้สรุป blocker และ next steps แสดงก่อน gate เข้ม fail.
 
-ถ้าต้องการตรวจ repo-owned surfaces ทั้งหมดก่อน final live provider/domain gate ให้รัน:
+ถ้าต้องการตรวจพื้นที่ที่ repo ดูแลทั้งหมดก่อนด่านสุดท้ายของโดเมนและผู้ให้บริการจริง ให้รัน:
 
 ```bash
 bun run staging:check
 ```
 
-คำสั่งนี้รัน full local QA suite, Playwright smoke บนเดสก์ท็อป/มือถือ, real Supabase signed-storage verification, และ admin-required API smoke. มันไม่ได้ประกาศว่า production พร้อมด้วยตัวเอง; `production:check` ยังเป็น gate สุดท้ายหลัง real domains, CORS, และ live image/chat provider paths พร้อมแล้ว.
+คำสั่งนี้รันชุด QA local ครบ, Playwright smoke บนเดสก์ท็อป/มือถือ, ตรวจ Supabase signed-storage จริง, และ API smoke ที่บังคับ admin. มันไม่ได้ประกาศว่า production พร้อมด้วยตัวเอง; `production:check` ยังเป็น gate สุดท้ายหลังโดเมนจริง, CORS, และเส้นทาง live image/chat provider พร้อมแล้ว.
 
 หลังมี staging backend/frontend domains แล้ว ให้รัน deployed staging gate:
 
