@@ -2,7 +2,7 @@
 
 เส้นทางนี้เหมาะเป็นเส้นทาง production แรก เพราะ Render โฮสต์ backend แบบ Docker service, frontend static site, และ managed Postgres ได้ในที่เดียว.
 
-## 1. สร้าง Postgres
+## ขั้นที่ 1 สร้าง Postgres
 
 สร้าง Render Postgres database แล้วคัดลอก external connection string.
 
@@ -19,7 +19,7 @@ bun run frontend:check
 
 ถ้าเครื่อง local ไม่มี Docker/Postgres ให้รัน `backend:check` กับ staging database ก่อนขึ้น production.
 
-## 2. Deploy Backend
+## ขั้นที่ 2 Deploy backend (Deploy Backend)
 
 สร้าง Render Web Service ใหม่จาก repo นี้.
 
@@ -73,7 +73,7 @@ bunx prisma migrate deploy
 
 migration set ปัจจุบันมี moderation reports และ admin audit logs แล้ว ห้ามข้ามขั้นตอนนี้.
 
-## 3. Deploy Frontend
+## ขั้นที่ 3 Deploy frontend (Deploy Frontend)
 
 สร้าง Render Static Site จาก repo นี้.
 
@@ -93,7 +93,7 @@ VITE_SUPABASE_ANON_KEY=<supabase-anon-key>
 
 หลังรู้ frontend URL แล้ว ให้อัปเดต backend `CORS_ORIGINS` ให้ตรงกับ HTTPS origin นั้นแบบ exact match.
 
-## 4. Supabase Storage
+## ขั้นที่ 4 ตั้งค่า Supabase Storage
 
 สร้าง bucket:
 
@@ -102,7 +102,7 @@ VITE_SUPABASE_ANON_KEY=<supabase-anon-key>
 
 Backend จะคืน stable URLs ใต้ `/uploads/avatars/<filename>` แล้ว redirect ไปยัง signed Supabase URLs.
 
-## 5. Smoke Test Production
+## ขั้นที่ 5 ทดสอบ production smoke (Smoke Test Production)
 
 ใช้ Supabase access token จริง หรือ UUID user id ที่รู้แน่นอน:
 

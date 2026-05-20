@@ -12,6 +12,7 @@ Last updated: 2026-05-20
 - Production/deploy docs headings are Thai-first across deployment QA, production setup, release handoff, security checklist, production memory, and knowledge wiki; verified with release handoff tests/checks, predeploy tests/checks, memory audit, and knowledge audit.
 - Backend/frontend app README titles and env headings are Thai-first, verified with an English-only heading scan plus `memory:audit` and `predeploy:check`.
 - Memory vault and decision-record headings are Thai-first; `memory:audit` and `predeploy:check` pass, with only technical acronyms such as `API`/`URL` intentionally left as headings.
+- Render deploy guide, staging runbook, and abuse QA sign-off headings are Thai-first; heading scan, `predeploy:check`, and `memory:audit` pass.
 
 ## เกต local ล่าสุด (Gate local)
 

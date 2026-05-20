@@ -25,7 +25,7 @@
 | Token/rate limit | ส่ง chat ถี่ ๆ, กดส่งซ้ำระหว่าง streaming, และทดสอบบัญชี token ต่ำ | ต้องไม่ยิงซ้ำโดยไม่ตั้งใจ, ไม่หัก token เมื่อ provider fail, และ rate-limit message ต้องปลอดภัย |
 | Storage/avatar | อัปโหลดไฟล์ผิดชนิด, ไฟล์ใหญ่เกิน, และ avatar path แปลก | ต้องปฏิเสธด้วยข้อความไทย ปลอดภัย และ signed URL ไม่เปิด bucket private |
 
-## Sign-off
+## ลงชื่อยืนยัน (Sign-off)
 
 | รายการ | ผู้ตรวจ | วันที่ | หมายเหตุ |
 | --- | --- | --- | --- |
