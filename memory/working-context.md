@@ -101,6 +101,7 @@ Verified:
 - Local smoke helper failures for backend health, avatar upload shape/access, missing seed character, and relationship preview now use Thai-first CLI output, with `smoke:local:test` guarding the messages.
 - Backend Prisma seed and QA seed CLI errors/status lines now use Thai-first output for missing `DATABASE_URL`, seed start, success, and failure messages.
 - Backend DB-required check CLI now uses Thai-first failure/local/deploy guidance, with regression coverage in `backend:check:db:test`.
+- Backend DB-required check CLI now avoids mixed `Database check`, `วิธีแก้ local`, `วิธีแก้ deploy`, `network access`, and `backend service` wording; `backend:check:db:test` guards the Thai-first text.
 - Backend DB test gate skip/forced-failure guidance now uses Thai-first output for optional persistence suites, with focused regression coverage in `db.test-gate.test.ts`.
 - Prompt tooling UI copy now uses Thai-first labels for system prompt reset, redacted prompt snapshots, runtime/persona inputs, section budget, and route/menu audit descriptions.
 - Profile content settings, tag conflict helper warnings, Prompt Inspector helper labels, and route/menu staging rows now avoid mixed `backend`, `prompt`, `runtime`, `persona`, and staging/deploy wording in user-facing Thai copy; frontend static audit and predeploy guard those stale phrases.

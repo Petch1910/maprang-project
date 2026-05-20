@@ -19,18 +19,18 @@ function summarizeDatabaseError(error: unknown) {
 const prisma = getPrisma()
 
 if (!prisma) {
-  console.error('Database check ไม่ผ่าน: DATABASE_URL ยังไม่ได้ตั้งค่า')
+  console.error('ตรวจฐานข้อมูลไม่ผ่าน: DATABASE_URL ยังไม่ได้ตั้งค่า')
   process.exit(1)
 }
 
 try {
   await prisma.$queryRaw`SELECT 1`
-  console.log('Database check ผ่าน')
+  console.log('ตรวจฐานข้อมูลผ่าน')
   await prisma.$disconnect()
 } catch (error) {
-  console.error(`Database check ไม่ผ่าน: ${summarizeDatabaseError(error)}`)
-  console.error('วิธีแก้ local: เปิด Docker Desktop, รัน `docker compose up -d postgres`, แล้วรัน migrations')
-  console.error('วิธีแก้ deploy: ตรวจ DATABASE_URL, migrations, และ network access จาก backend service')
+  console.error(`ตรวจฐานข้อมูลไม่ผ่าน: ${summarizeDatabaseError(error)}`)
+  console.error('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, แล้วรัน migrations')
+  console.error('วิธีแก้ตอน deploy: ตรวจ DATABASE_URL, migrations, และสิทธิ์เชื่อมต่อเครือข่ายจาก service ระบบหลังบ้าน')
   await prisma.$disconnect().catch(() => undefined)
   process.exit(1)
 }

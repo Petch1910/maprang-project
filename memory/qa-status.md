@@ -138,6 +138,7 @@ Last updated: 2026-05-20
 - Local smoke failure guidance now passes Thai-first coverage via `bun run smoke:local:test`.
 - Backend Prisma seed and QA seed CLI output now uses Thai-first missing-`DATABASE_URL`, progress, success, and failure messages; this code-only polish is verified with `backend:check`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Backend DB-required check guidance now passes Thai-first coverage via `bun run backend:check:db:test`.
+- Backend DB-required check wording now blocks stale mixed `Database check`, `วิธีแก้ local`, `วิธีแก้ deploy`, `network access`, and `backend service` text via `backend:check:db:test`.
 - Backend DB test gate guidance now passes Thai-first coverage via `bun test apps\backend\src\db.test-gate.test.ts` and full `backend:check` with 141 pass.
 - Backend chat validation/access/token/rating/empty-provider fallback copy now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts apps\backend\src\character.persistence.test.ts` and full `backend:check` with 141 pass.
 - Backend chat route-level fallback reply now passes Thai-first coverage via `bun test apps\backend\src\chat.runtime.test.ts`.
