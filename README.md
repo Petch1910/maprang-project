@@ -97,7 +97,7 @@ bun scripts/deploy-status.ts --json
 
 JSON output มี field top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` สำหรับ automation พร้อมรายละเอียด `readiness` และ `nextSteps` ตามลำดับ.
 
-## Knowledge Layer
+## ชั้นความรู้ (Knowledge Layer)
 
 Runtime product knowledge อยู่ที่ [`knowledge/README.md`](./knowledge/README.md). ส่วนนี้แยกจาก session memory:
 `memory/` อธิบายสิ่งที่เกิดขึ้นในโปรเจกต์ ส่วน `knowledge/` เก็บ product rules และ structured packs ที่ backend โหลดไปใช้กับ chat style, creator drafts, relationship rules, scene rules, และ content policy.
@@ -108,7 +108,7 @@ bun run knowledge:audit
 
 `knowledge:audit` ตรวจ structured JSON packs, local wiki links, และ secret-shaped values. Backend แสดง structured knowledge status ใน `/health` และ `/ready`; `qa:local` จะรัน audit นี้ก่อน smoke tests.
 
-## Evaluation Layer
+## ชั้นประเมินผล (Evaluation Layer)
 
 ชุดตรวจ regression ของพรอมป์และบริบทอยู่ที่ [`evals/README.md`](./evals/README.md). deterministic local eval อ่าน
 [`evals/golden-roleplay.json`](./evals/golden-roleplay.json), ประกอบ Maprang chat context ผ่าน backend context
@@ -125,7 +125,7 @@ bun run eval:local
 bun run eval:promptfoo
 ```
 
-## Prompt Inspector
+## ตัวตรวจพรอมป์ (Prompt Inspector)
 
 หน้าตรวจพรอมป์สำหรับ admin เปิดใช้ผ่าน `/admin/prompt-inspector` และ `POST /admin/prompt-inspector`. มัน
 ประกอบ base context blocks ชุดเดียวกับที่ chat ใช้, เพิ่ม persona/runtime memory/user message context แบบเลือกใช้ได้, คืนเฉพาะ

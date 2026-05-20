@@ -7,11 +7,11 @@
 - `golden-roleplay.json`: golden dataset สำหรับตรวจ local prompt assembly และ roleplay guard scenarios.
 - `promptfoo.roleplay.yaml`: config ของ Promptfoo แบบ optional โดยใช้ provider `echo` เพื่อรันได้โดยไม่เสียเครดิตโมเดล.
 
-## Golden Dataset
+## ชุดทดสอบหลัก (Golden Dataset)
 
 golden dataset ชุดนี้ตั้งใจให้เล็ก ชัด และ deterministic. เพิ่ม scenario ใหม่เมื่อแก้บัค context, เปลี่ยน relationship/scene rule, หรือเจอ prompt-control regression ที่ควรมี guard ถาวร.
 
-## Commands
+## คำสั่ง (Commands)
 
 ```bash
 bun run eval:local

@@ -715,7 +715,7 @@ const checks: Check[] = [
       const backendKnowledge = await readRepoFile('apps/backend/src/knowledge.service.ts')
       const knowledgeAudit = await readRepoFile('scripts/knowledge-audit.ts')
       requireIncludes(packageJson, ['"knowledge:audit"', 'bun scripts/knowledge-audit.ts', 'bun run knowledge:audit'], 'package.json')
-      requireIncludes(readme, ['Knowledge Layer', 'knowledge/README.md', 'bun run knowledge:audit'], 'README.md')
+      requireIncludes(readme, ['ชั้นความรู้ (Knowledge Layer)', 'knowledge/README.md', 'bun run knowledge:audit'], 'README.md')
       requireIncludes(knowledgeReadme, ['การใช้งาน runtime', 'ชุดข้อมูล structured', 'ห้ามเก็บ secrets'], 'knowledge/README.md')
       requireIncludes(wikiIndex, ['โมเดลผลิตภัณฑ์ Maprang', 'Relationship Engine', 'Creator Studio', 'Production Deploy'], 'knowledge/wiki/INDEX.md')
       requireIncludes(
@@ -746,9 +746,9 @@ const checks: Check[] = [
         ['"eval:local"', 'bun scripts/eval-local.ts', '"eval:local:test"', 'bun test scripts/eval-local.test.ts', '"eval:promptfoo"'],
         'package.json',
       )
-      requireIncludes(readme, ['Evaluation Layer', 'bun run eval:local', 'evals/golden-roleplay.json'], 'README.md')
+      requireIncludes(readme, ['ชั้นประเมินผล (Evaluation Layer)', 'bun run eval:local', 'evals/golden-roleplay.json'], 'README.md')
       requireIncludes(deploymentQa, ['bun run eval:local', 'deterministic prompt assembly'], 'DEPLOYMENT_QA.md')
-      requireIncludes(evalReadme, ['Golden Dataset', 'Promptfoo', 'ห้ามใส่ secret ใน eval fixtures'], 'evals/README.md')
+      requireIncludes(evalReadme, ['ชุดทดสอบหลัก (Golden Dataset)', 'คำสั่ง (Commands)', 'Promptfoo', 'ห้ามใส่ secret ใน eval fixtures'], 'evals/README.md')
       requireIncludes(
         evalService,
         ['ตัวละครทดสอบ Maprang', 'ไม่พบข้อความที่ต้องมี', 'โทเคนพรอมป์โดยประมาณ'],
