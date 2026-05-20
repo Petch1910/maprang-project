@@ -83,37 +83,37 @@ jobs:
       - name: Validate smoke configuration
         run: |
           if [ -z "$SMOKE_API_BASE_URL" ]; then
-            echo "Set workflow input api_base_url or repository secret SMOKE_API_BASE_URL."
+            echo "ตั้ง workflow input api_base_url หรือ repository secret SMOKE_API_BASE_URL ก่อนรัน smoke"
             exit 1
           fi
           case "$SMOKE_API_BASE_URL" in
             https://localhost*|https://127.0.0.1*|http://*)
-              echo "SMOKE_API_BASE_URL must be a deployed https backend URL, not localhost or http."
+              echo "SMOKE_API_BASE_URL ต้องเป็น backend URL ที่ deploy แล้วแบบ https ไม่ใช่ localhost หรือ http"
               exit 1
               ;;
           esac
           if [ -z "$SMOKE_ACCESS_TOKEN" ] && [ -z "$SMOKE_USER_ID" ]; then
-            echo "Set repository secret SMOKE_ACCESS_TOKEN or SMOKE_USER_ID for user-flow smoke requests."
+            echo "ตั้ง repository secret SMOKE_ACCESS_TOKEN หรือ SMOKE_USER_ID สำหรับ smoke ฝั่งผู้ใช้"
             exit 1
           fi
           if [ -z "$SMOKE_ADMIN_API_KEY" ]; then
-            echo "Set repository secret SMOKE_ADMIN_API_KEY so production smoke can verify admin reports and audit logs."
+            echo "ตั้ง repository secret SMOKE_ADMIN_API_KEY เพื่อให้ production smoke ตรวจรายงานและ audit log ฝั่งผู้ดูแล"
             exit 1
           fi
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "Set repository secrets SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY so production smoke can verify the private avatars bucket."
+            echo "ตั้ง repository secrets SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY เพื่อให้ production smoke ตรวจ private avatars bucket"
             exit 1
           fi
           if [ -z "$SUPABASE_STORAGE_BUCKET" ]; then
-            echo "Set repository secret SUPABASE_STORAGE_BUCKET, normally avatars."
+            echo "ตั้ง repository secret SUPABASE_STORAGE_BUCKET โดยปกติใช้ avatars"
             exit 1
           fi
           if [ "$SUPABASE_STORAGE_ACCESS" != "signed" ]; then
-            echo "Set repository secret SUPABASE_STORAGE_ACCESS=signed for production smoke."
+            echo "ตั้ง repository secret SUPABASE_STORAGE_ACCESS=signed สำหรับ production smoke"
             exit 1
           fi
           if [ -z "$SUPABASE_SIGNED_URL_EXPIRES_IN" ]; then
-            echo "Set repository secret SUPABASE_SIGNED_URL_EXPIRES_IN, normally 3600."
+            echo "ตั้ง repository secret SUPABASE_SIGNED_URL_EXPIRES_IN โดยปกติใช้ 3600"
             exit 1
           fi
       - name: Print deploy readiness status

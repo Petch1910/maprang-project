@@ -50,5 +50,7 @@ describe('predeploy check wiring', () => {
     expect(ciWorkflow).toContain('bun run predeploy:check:test')
     expect(ciWorkflow).toContain('bun run deploy:doctor:self-test')
     expect(productionSmoke).toContain('bun run predeploy:check:test')
+    expect(productionSmoke).toContain('ตั้ง workflow input api_base_url หรือ repository secret SMOKE_API_BASE_URL ก่อนรัน smoke')
+    expect(productionSmoke).not.toContain('Set workflow input api_base_url')
   })
 })

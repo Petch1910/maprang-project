@@ -22,6 +22,7 @@ Last updated: 2026-05-20
 ผลลัพธ์:
 - `qa:local` now chains through `qa:repo` first, then runs only the runtime smoke layer (`smoke:doctor`, `smoke:local`, `api:smoke`) so deterministic QA coverage stays centralized and harder to drift.
 - CI secrets/predeploy jobs install root dependencies before repo-owned gates; `predeploy:check` and `predeploy:check:test` now guard the install wiring.
+- GitHub Production Smoke config-validation errors are Thai-first, with `predeploy:check` and `predeploy:check:test` blocking the old English setup messages.
 - Latest `bun run qa:local` attempt on this machine reached the final runtime smoke phase but failed because Docker Desktop/Postgres and the backend at `http://127.0.0.1:3000` were not running; all preceding static/unit/build gates in that run passed.
 - Backend tests: 149 pass, 0 fail, 465 expect calls.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.

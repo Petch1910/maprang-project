@@ -1270,6 +1270,9 @@ const checks: Check[] = [
           'SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT',
           'SUPABASE_URL',
           'SUPABASE_SERVICE_ROLE_KEY',
+          'ตั้ง workflow input api_base_url หรือ repository secret SMOKE_API_BASE_URL ก่อนรัน smoke',
+          'SMOKE_API_BASE_URL ต้องเป็น backend URL ที่ deploy แล้วแบบ https',
+          'ตั้ง repository secret SMOKE_ADMIN_API_KEY เพื่อให้ production smoke ตรวจรายงานและ audit log ฝั่งผู้ดูแล',
           '--require-admin',
           'bun install --frozen-lockfile',
           'bun run predeploy:check',
@@ -1320,6 +1323,20 @@ const checks: Check[] = [
           'bun run smoke:ready',
           'bun run smoke:local',
           'bun run smoke:image',
+        ],
+        '.github/workflows/production-smoke.yml',
+      )
+      forbidIncludes(
+        workflow,
+        [
+          'Set workflow input api_base_url',
+          'must be a deployed https backend URL',
+          'Set repository secret SMOKE_ACCESS_TOKEN',
+          'Set repository secret SMOKE_ADMIN_API_KEY',
+          'Set repository secrets SUPABASE_URL',
+          'Set repository secret SUPABASE_STORAGE_BUCKET',
+          'Set repository secret SUPABASE_STORAGE_ACCESS',
+          'Set repository secret SUPABASE_SIGNED_URL_EXPIRES_IN',
         ],
         '.github/workflows/production-smoke.yml',
       )
