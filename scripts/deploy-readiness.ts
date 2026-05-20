@@ -144,7 +144,7 @@ export function evaluateDeployReadiness(
   if (options.isLocalSmokeTarget) {
     addProductionBlocker(
       'backend URL ยังเป็น local',
-      'ตั้ง SMOKE_API_BASE_URL และ frontend VITE_API_BASE_URL เป็น deployed backend URL',
+      'ตั้ง SMOKE_API_BASE_URL และ VITE_API_BASE_URL ฝั่งหน้าบ้านเป็น URL ระบบหลังบ้านที่ deploy แล้ว',
     )
   }
   if (health.security?.authMode !== 'supabase-jwt') {
@@ -162,7 +162,7 @@ export function evaluateDeployReadiness(
   if (!health.security?.corsOrigins?.length || health.security.corsOrigins.some(isUnsafeCorsOrigin)) {
     addProductionBlocker(
       'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https',
-      'ตั้ง CORS_ORIGINS เป็น frontend domain จริงแบบ https เท่านั้น',
+      'ตั้ง CORS_ORIGINS เป็น domain หน้าบ้านจริงแบบ https เท่านั้น',
     )
   }
   if (!health.knowledge?.structured?.ok) {
@@ -232,9 +232,9 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
     steps.push('รัน `bun run staging:verify` พร้อม SMOKE_API_BASE_URL และ SMOKE_ADMIN_API_KEY')
   } else if (!readiness.productionReady) {
     for (const fix of readiness.productionFixes) steps.push(fix)
-    steps.push('รัน `bun run production:check` ใหม่กับ staging/production backend')
+    steps.push('รัน `bun run production:check` ใหม่กับระบบหลังบ้าน staging/production')
   } else {
-    steps.push('รัน `bun run production:check` รอบสุดท้ายกับ production backend และ frontend domains')
+    steps.push('รัน `bun run production:check` รอบสุดท้ายกับ domain ระบบหลังบ้านและหน้าบ้าน production')
     steps.push('กรอก `RELEASE_HANDOFF.md` ด้วย deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, และ go/no-go notes')
   }
 

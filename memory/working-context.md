@@ -145,6 +145,7 @@ Verified:
 - Deploy readiness logic is shared by `smoke:doctor` and `deploy:status`, and covered by `deploy:readiness:test`, so current staging/production blockers and next steps can be printed without duplicating blocker rules.
 - `smoke:doctor` now validates backend root identity before `/health`, and its importable runner can be tested without calling a live backend.
 - Deploy readiness blocks CORS that is empty, local, or non-https; staging and production must use the real HTTPS frontend domain.
+- Deploy readiness next-step text now describes backend/frontend URLs and production domains Thai-first while preserving exact env names and commands.
 - Render deploy documentation now uses HTTPS-only frontend/backend placeholders and predeploy verifies the Render CORS warning cannot drift back to localhost/http/wildcard examples.
 - Render deploy documentation now uses Thai-first setup, migration, Supabase storage, and smoke-test guidance while predeploy still guards `/ready`, signed storage, image provider, and HTTPS-only CORS wording.
 - Render deploy guide now uses Thai-first backend/frontend env labels and CORS update wording while preserving exact Render field names and command/env snippets.

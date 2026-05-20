@@ -75,6 +75,7 @@ Last updated: 2026-05-20
 - Smoke doctor now prints ordered deploy next steps from the shared readiness evaluator.
 - Deploy status JSON now exposes top-level staging/production ready flags and blocker counts for automation.
 - Deploy readiness self-test: pass.
+- Deploy readiness next-step wording for backend/frontend URLs and production domains is Thai-first, verified with `deploy:readiness:test`.
 - Frontend UI smoke now covers mobile Explore bottom nav and Chat read mode.
 - API smoke now covers admin-only prompt inspector snapshots, prompt diffs, and deterministic local evals.
 - Prompt Inspector service tests now cover secret redaction in retrieved lore previews and aliases.

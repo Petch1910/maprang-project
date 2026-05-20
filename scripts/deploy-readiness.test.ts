@@ -132,7 +132,7 @@ describe('deploy readiness evaluation', () => {
     expect(readiness.stagingBlockers).toEqual([])
     expect(readiness.productionBlockers).toEqual([])
     expect(buildNextDeploySteps(readiness)).toContain(
-      'รัน `bun run production:check` รอบสุดท้ายกับ production backend และ frontend domains',
+      'รัน `bun run production:check` รอบสุดท้ายกับ domain ระบบหลังบ้านและหน้าบ้าน production',
     )
     expect(buildNextDeploySteps(readiness)).toContain(
       'กรอก `RELEASE_HANDOFF.md` ด้วย deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, และ go/no-go notes',
@@ -167,7 +167,7 @@ describe('deploy readiness evaluation', () => {
     expect(readiness.productionBlockers).toContain('live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน')
     expect(readiness.productionBlockers).toContain('live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน')
     expect(nextSteps).toContain(
-      'backend URL ยังเป็น local: ตั้ง SMOKE_API_BASE_URL และ frontend VITE_API_BASE_URL เป็น deployed backend URL',
+      'backend URL ยังเป็น local: ตั้ง SMOKE_API_BASE_URL และ VITE_API_BASE_URL ฝั่งหน้าบ้านเป็น URL ระบบหลังบ้านที่ deploy แล้ว',
     )
     expect(nextSteps).not.toContain(
       'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน: รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging/production แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน',
