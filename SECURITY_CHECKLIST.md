@@ -23,6 +23,7 @@
 - Report/message guards ต้องบล็อก report private character หรือ message ที่ไม่ได้อยู่ใน chat ของผู้รายงาน
 - Admin actions ต้องมี `ADMIN_API_KEY` และมี audit log เมื่อเปลี่ยน report/status/token หรือซ่อน content
 - Static guard: `bun run security:audit` fails if any backend `/admin` route block is missing `requireAdminApiKey`.
+- Backend route ต้องไม่ `throw error` หรือ log raw error object กลับไปตรงๆ; ให้คืน `routeErrorResponse`/ข้อความที่ควบคุมได้และใช้ safe summary ใน log
 - Guard อัตโนมัติ: `backend-security-audit.test.ts`, `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
 
 ## ความปลอดภัย frontend XSS และลิงก์ (Frontend XSS / Link Safety)

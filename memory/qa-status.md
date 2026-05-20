@@ -381,3 +381,4 @@ Last updated: 2026-05-20
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด log hardening ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 155 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - Predeploy frontend log guard pass: `predeploy:check` ตอนนี้ล็อก `logUnexpectedError` และ raw frontend console error pattern ไว้ใน static audit/security checklist.
 - Backend route raw-throw guard pass: `/chat/stream` route คืน `routeErrorResponse('unknown_error')` พร้อม safe log เมื่อเกิด synchronous failure และ backend security audit จะ fail ถ้า `.routes.ts` กลับไป `throw error` ดิบ.
+- Predeploy route raw-throw guard pass: `predeploy:check` ตอนนี้ล็อก `rawRouteErrorThrowPattern` และ regression test `catches route raw error throws` ไว้ใน security audit wiring.
