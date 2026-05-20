@@ -121,6 +121,7 @@ Last updated: 2026-05-20
 - Memory inbox and production checklist Thai-first handoff wording now passes `memory:audit` and `predeploy:check`; the predeploy guard checks the Thai `qa:local` production-data warning.
 - Memory/knowledge README Thai-first entry points now pass `vault:audit:test`, `memory:audit`, `knowledge:audit`, and `predeploy:check`.
 - Project map, UI/UX direction, and API/backend direction Thai-first handoff docs now pass `memory:audit`, `predeploy:check`, `secrets:check`, and `git diff --check`.
+- API/backend, UI/UX, and deterministic eval decision note wording now avoids stale mixed prompt-control/token-budget copy and will be checked with `memory:audit`, `secrets:check`, and `git diff --check` in this memory-only scope.
 - Knowledge wiki Thai-first core pages now pass `knowledge:audit`, `vault:audit:test`, and `predeploy:check`.
 - Raw knowledge inbox and decision index Thai-first entry points now pass `memory:audit`, `knowledge:audit`, and `secrets:check`.
 - Deploy status and smoke doctor text-output localization now passes `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.

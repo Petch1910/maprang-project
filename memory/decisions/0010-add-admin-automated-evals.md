@@ -8,13 +8,13 @@ Accepted
 
 ## บริบท
 
-การเปลี่ยน prompt และ context อาจทำให้ roleplay depth, prompt-control ordering, lore placement, หรือ relationship/scene continuity พังแบบเงียบๆ โปรเจกต์มี `bun run eval:local` แล้ว แต่ถ้าต้องพึ่ง terminal อย่างเดียว admin QA จะตรวจ regression ยาก
+การเปลี่ยน prompt และ context อาจทำให้ roleplay depth, ลำดับกฎคุมพรอมป์, lore placement, หรือ relationship/scene continuity พังแบบเงียบๆ โปรเจกต์มี `bun run eval:local` แล้ว แต่ถ้าต้องพึ่ง terminal อย่างเดียว admin QA จะตรวจ regression ยาก
 
 ## Decision
 
 - แยก deterministic golden roleplay eval logic เป็น backend service ที่ CLI และ API ใช้ร่วมกัน.
 - เปิด `GET /admin/evals/local` หลัง `ADMIN_API_KEY`.
-- เพิ่ม `/admin/evals` เป็น guarded admin UI ที่แสดง suite status, scenario results, per-check pass/fail details, token budget, และ failure summaries.
+- เพิ่ม `/admin/evals` เป็น guarded admin UI ที่แสดง suite status, scenario results, per-check pass/fail details, งบ token, และ failure summaries.
 - รวม route นี้ใน route/menu audit, API smoke, และ browser e2e smoke.
 
 ## ผลลัพธ์

@@ -84,6 +84,7 @@ Verified:
 - Predeploy route/menu staging guard now tracks the Thai-first `Supabase สำหรับ Staging` heading.
 - Backend and frontend app-level READMEs now describe Maprang-specific responsibilities, commands, env boundaries, and deployment references instead of stale Bun/Vite starter template text.
 - Project map, UI/UX direction, and API/backend direction handoff docs now use Thai-first guidance while preserving route names, commands, and technical identifiers.
+- API/backend, UI/UX, and deterministic eval decision notes now use Thai-first wording for prompt-control, token-budget, inspector, and eval concepts while preserving exact routes and command names.
 - Knowledge wiki core pages now use Thai-first product, creator, relationship, and production deploy guidance while preserving structured knowledge paths and gate command names.
 - Raw knowledge inbox and decision index now use Thai-first entry-point wording while preserving decision links and safety boundaries.
 - Deploy status and smoke doctor text output now use Thai-first headers, no-blocker labels, fix sections, gate guidance, and next-step labels while keeping JSON/readiness keys stable.

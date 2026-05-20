@@ -9,14 +9,14 @@ Backend ควรให้ความสำคัญกับ explicit guards, 
 ## จุดแข็งปัจจุบัน
 
 - Route ID validation กัน ID ที่หน้าตาเหมือน injection ก่อนเข้า persistence.
-- Prompt-control context ครอบ untrusted character text.
+- Context สำหรับคุมพรอมป์ครอบข้อความตัวละครที่ไม่น่าเชื่อถือ.
 - Admin actions มี audit log coverage.
 - Token wallet debit ค่า chat usage โดยไม่ให้ overdraft.
 - Local smoke ข้ามการใช้เครดิตผู้ให้บริการจริง แต่ยังตรวจ endpoint shape.
 - เส้นทางผู้ให้บริการจริงถูกแยกเป็น gate ของตัวเอง.
 - Structured knowledge packs ป้อน chat/creator prompt guidance และแสดงผ่าน health/readiness.
-- Deterministic prompt/context evals คุม roleplay depth, prompt-control ordering, lore injection, และ relationship/scene continuity.
-- Admin Prompt Inspector แสดง redacted prompt snapshots, section token estimates, retrieved lore, และ previous/current prompt diffs โดยไม่ใช้ live model tokens.
+- Deterministic prompt/context evals คุมความลึกของ roleplay, ลำดับกฎคุมพรอมป์, lore injection, และ relationship/scene continuity.
+- Admin Prompt Inspector แสดง prompt snapshots แบบ redacted, token estimates ราย section, lore ที่ดึงมา, และ previous/current prompt diffs โดยไม่ใช้ live model tokens.
 - Admin Automated Evals เปิด deterministic golden roleplay suite ผ่าน API/UI ที่มี guard ทำให้ prompt regressions เห็นได้โดยไม่ต้องใช้ terminal.
 - Chat World State Controller เก็บ owner-scoped scene constants ใน chat memory, inject เข้า runtime prompts, และแสดงผ่าน chat UI รวมถึง Prompt Inspector runtime memory.
 - Usage and cost intelligence คำนวณจาก usage ledger เดิม เพื่อแสดง total cost, model breakdown, daily trend, และ remaining-request estimates ผ่าน `/me/usage`.
