@@ -11,10 +11,15 @@ export class ApiError extends Error {
   payload: unknown
 
   constructor(path: string, status: number, payload: unknown) {
-    const message =
+    const payloadMessage =
+      payload && typeof payload === 'object' && 'message' in payload && typeof payload.message === 'string'
+        ? payload.message
+        : null
+    const payloadError =
       payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
         ? payload.error
         : `${path} ไม่สำเร็จ (status ${status})`
+    const message = payloadMessage ?? payloadError
     super(message)
     this.name = 'ApiError'
     this.path = path

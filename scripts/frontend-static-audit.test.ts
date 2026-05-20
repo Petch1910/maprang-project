@@ -41,6 +41,10 @@ describe('frontend static audit', () => {
         throw new Error('not implemented')
         setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
         state.error = action.error.message
+        const message =
+          payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
+            ? payload.error
+            : 'fallback'
       `,
       'Fixture.tsx',
     )
@@ -52,6 +56,7 @@ describe('frontend static audit', () => {
       'throws not implemented in frontend source',
       'surfaces raw auth/provider error message to users',
       'surfaces raw Redux async error message to users',
+      'ApiError should prefer payload.message before payload.error',
     ])
   })
 

@@ -69,6 +69,7 @@ Results:
 - `frontend:static:audit:test` now also blocks stale English Redux fallback errors such as `Could not load chats` and `Could not load characters`.
 - Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - Frontend API fallback error wording now passes Thai-first coverage via `frontend:static:audit:test` and full `frontend:check`.
+- Frontend `ApiError` backend-message precedence now passes `frontend:static:audit:test` and full `frontend:check`; the static audit blocks the old payload.error-first constructor pattern.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.
 - `frontend:static:audit:test` now also blocks stale English chat-selection accessibility labels such as `Select chat`.
 - Admin summary Thai status labels now pass full `frontend:check`.
