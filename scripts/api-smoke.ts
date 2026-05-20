@@ -808,8 +808,8 @@ if (adminHeaders) {
     }>('/admin/evals/local', {
       headers: adminHeaders,
     })
-    if (!payload.passed) throw new Error(`local eval ไม่ผ่าน; failCount=${payload.failCount ?? 'ไม่ทราบ'}`)
-    if (!payload.scenarioCount || !payload.results?.length) throw new Error('ยังไม่มี local eval scenarios')
+    if (!payload.passed) throw new Error(`ตรวจ eval ในเครื่องไม่ผ่าน; failCount=${payload.failCount ?? 'ไม่ทราบ'}`)
+    if (!payload.scenarioCount || !payload.results?.length) throw new Error('ยังไม่มีสถานการณ์ eval ในเครื่อง')
     if (!payload.results.some((result) => result.id === 'prompt-injection-defense' && result.passed)) {
       throw new Error('ยังไม่มีผลทดสอบ prompt injection eval')
     }
