@@ -330,7 +330,7 @@ function auditDatabaseUrl(value: string | undefined) {
     const password = decodeURIComponent(url.password).toLowerCase()
     const databaseName = decodeURIComponent(url.pathname.replace(/^\//, '')).toLowerCase()
     if (['user', 'username'].includes(username) || ['password', 'pass'].includes(password) || ['database', 'db'].includes(databaseName)) {
-      fail('backend', 'DATABASE_URL', 'ยังมี placeholder credentials หรือ database name')
+      fail('backend', 'DATABASE_URL', 'ยังมีค่าตัวอย่างของ credential หรือชื่อฐานข้อมูล')
     }
     if (url.searchParams.get('sslmode') !== 'require') fail('backend', 'DATABASE_URL', 'ต้องมี sslmode=require')
     if (!findings.some((finding) => finding.area === 'backend' && finding.check === 'DATABASE_URL' && finding.status === 'fail')) {

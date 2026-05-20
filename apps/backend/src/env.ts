@@ -136,7 +136,7 @@ function invalidProductionValues() {
       const password = decodeURIComponent(databaseUrl.password).toLowerCase()
       const databaseName = databaseUrl.pathname.replace(/^\//, '').toLowerCase()
       if (['user', 'username'].includes(user) || ['password', 'pass'].includes(password) || ['database', 'db'].includes(databaseName)) {
-        invalid.push('DATABASE_URL ยังมี placeholder ของ user/password/database')
+        invalid.push('DATABASE_URL ยังมีค่าตัวอย่างของ user/password/database')
       }
       if (databaseUrl.searchParams.get('sslmode') !== 'require') {
         invalid.push('DATABASE_URL ต้องมี sslmode=require ใน production')
