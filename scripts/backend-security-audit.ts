@@ -66,6 +66,10 @@ const patterns = [
     pattern: /\.\$executeRaw(?:<[^>]+>)?\s*\(/g,
     message: 'ห้ามใช้ Prisma $executeRaw แบบ function call; ให้ใช้ tagged template parameterization.',
   },
+  {
+    pattern: /console\.(?:error|warn)\([^)\n]*providerFailure[^)\n]*,\s*error\b/g,
+    message: 'ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.',
+  },
 ]
 
 export function collectBackendSecurityFindingsFromSource(file: string, content: string): BackendSecurityFinding[] {

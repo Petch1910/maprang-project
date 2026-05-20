@@ -66,6 +66,22 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches raw provider error logging after classification', () => {
+    expect(
+      messagesFor(`
+        const providerFailure = classifyChatProviderError(error)
+        console.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error)
+      `),
+    ).toContain('ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.')
+
+    expect(
+      messagesFor(`
+        const providerFailure = classifyChatProviderError(error)
+        console.error('สตรีมแชทไม่สำเร็จ:', providerFailure)
+      `),
+    ).toEqual([])
+  })
+
   test('catches admin routes without admin api key guards', () => {
     expect(
       messagesFor(`
