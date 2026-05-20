@@ -11,7 +11,7 @@ Last updated: 2026-05-20
 - `AGENTS.md` และ `agent.md` ใช้หัวข้อ Thai-first สำหรับขอบเขต การสานต่องาน QA gates product direction safety/core systems production blockers และ definition of done แล้ว โดยยังคงคำอังกฤษในวงเล็บเพื่อค้นหาได้.
 - Deployment QA, Production Setup, Release Handoff, Security Checklist, production checklist memory, และ knowledge wiki ใช้ heading Thai-first สำหรับ production env, storage, mobile/manual QA, release notes, env setup, QA gates, security, commands, runtime knowledge, gates, และ compile flow แล้ว.
 - QA runner polish ล่าสุดทำให้ eval/readiness/smoke doctor/deploy status/release handoff/API smoke/local smoke/e2e smoke diagnostics เป็น Thai-first มากขึ้น โดยยังคง command/env/route/provider keys ที่ต้องใช้ debug ไว้.
-- Full deterministic `bun run qa:repo` ผ่านหลังชุด polish ล่าสุด ครอบคลุม backend tests 152 pass, frontend build/bundle, audits, evals, smoke helper tests และ predeploy guards; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
+- Full deterministic `bun run qa:repo` ผ่านหลังชุด prompt-inspector redaction hardening ล่าสุด ครอบคลุม backend tests 155 pass / 498 expect calls, frontend build/bundle, audits, evals, smoke helper tests และ predeploy guards; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 
 ## เป้าหมายปัจจุบัน
 
@@ -22,10 +22,10 @@ Last updated: 2026-05-20
 สถานะ: static/unit/build QA พร้อมแล้ว; final local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
 Verified:
-- Latest full `qa:repo` after log hardening passes; backend tests now pass 155 tests with 491 expects, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
+- Latest full `qa:repo` after prompt-inspector redaction hardening passes; backend tests now pass 155 tests with 498 expects, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
 - Latest full `qa:local` attempt reached final runtime smoke and then failed because Docker Desktop/Postgres plus backend `http://127.0.0.1:3000` were not running in this desktop session.
 - Latest direct `deploy:status` also fails at backend root preflight for the same reason: `http://127.0.0.1:3000` is not running.
-- Backend tests pass: 155 pass, 0 fail, 491 expects.
+- Backend tests pass: 155 pass, 0 fail, 498 expects.
 - Frontend deploy check passes.
 - Local API smoke passes: 32 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
