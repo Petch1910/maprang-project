@@ -185,7 +185,8 @@ describe('deploy status formatting', () => {
     expect(healthRead).toBe(false)
     expect(lines).toEqual([])
     expect(errors.join('\n')).toContain('service name ไม่ถูกต้อง')
-    expect(errors.join('\n')).toContain('ไม่ใช่ frontend/static proxy')
+    expect(errors.join('\n')).toContain('ไม่ใช่ proxy ของหน้าบ้าน/static')
+    expect(errors.join('\n')).toContain('วิธีแก้ในเครื่อง:')
   })
 
   test('returns a failure code without exiting when health cannot be read', async () => {
@@ -206,6 +207,8 @@ describe('deploy status formatting', () => {
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
     expect(errors.join('\n')).toContain('Deploy status ไม่ผ่าน: backend unavailable')
-    expect(errors.join('\n')).toContain('วิธีแก้ local:')
+    expect(errors.join('\n')).toContain('วิธีแก้ในเครื่อง:')
+    expect(errors.join('\n')).toContain('URL ระบบหลังบ้านที่ deploy แล้ว')
+    expect(errors.join('\n')).not.toContain('วิธีแก้ local:')
   })
 })

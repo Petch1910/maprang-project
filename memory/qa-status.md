@@ -117,6 +117,7 @@ Last updated: 2026-05-20
 - Deploy env doctor image-key wording now passes through `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Runtime env and deploy env doctor database placeholder wording now passes `bun test apps\backend\src\env.test.ts`, `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.
+- Smoke doctor and deploy status root/health failure hints now pass Thai-first coverage for `วิธีแก้ในเครื่อง`, `วิธีแก้ตอน deploy`, and URL ระบบหลังบ้าน wording via `smoke:doctor:test` and `deploy:status:test`.
 - Deploy readiness health-row labels now pass Thai-first coverage via `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
 - Deploy blocker handoff memory now reads Thai-first while keeping exact env names, commands, and verification flags for staging/production follow-up.
 - Memory inbox and production checklist Thai-first handoff wording now passes `memory:audit` and `predeploy:check`; the predeploy guard checks the Thai `qa:local` production-data warning.

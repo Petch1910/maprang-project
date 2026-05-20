@@ -64,8 +64,8 @@ export function buildSmokeDoctorReport(
 
   if (failures.length > 0) {
     stderr.push(`Smoke doctor ไม่ผ่าน: ${failures.join('; ')}`)
-    stderr.push('วิธีแก้ local: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่ม backend')
-    stderr.push('วิธีแก้ deploy: ตรวจ DATABASE_URL, migrations, และ network ของ backend service')
+    stderr.push('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่มระบบหลังบ้าน')
+    stderr.push('วิธีแก้ตอน deploy: ตรวจ DATABASE_URL, migrations, และเครือข่ายของ service ระบบหลังบ้าน')
     return { exitCode: 1, stdout, stderr, warnings }
   }
 
@@ -109,7 +109,7 @@ export function buildSmokeDoctorReport(
     for (const fix of stagingFixes) stdout.push(`- ${fix}`)
     stdout.push('stagingGate: รัน `bun run staging:verify` กับ deployed staging backend ก่อนยืนยัน production.')
     if (options.strictStagingGate) {
-      stderr.push('Staging gate ไม่ผ่าน: แก้ staging blockers ด้านบน แล้วรันใหม่ด้วย deployed backend URL')
+      stderr.push('Staging gate ไม่ผ่าน: แก้ staging blockers ด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
@@ -125,7 +125,7 @@ export function buildSmokeDoctorReport(
     for (const fix of productionFixes) stdout.push(`- ${fix}`)
     stdout.push('productionGate: รัน `bun run production:check` กับ staging/production backend ก่อน deploy.')
     if (options.strictProductionGate) {
-      stderr.push('Production gate ไม่ผ่าน: แก้ production blockers ด้านบน แล้วรันใหม่ด้วย deployed backend URL')
+      stderr.push('Production gate ไม่ผ่าน: แก้ production blockers ด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
       return { exitCode: 1, stdout, stderr, warnings }
     }
   } else {
@@ -166,8 +166,8 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
     validateBackendRootIdentity(await rootIdentityReader())
   } catch (error) {
     writeError(`Smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
-    writeError('วิธีแก้ local: เริ่ม backend แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
-    writeError('วิธีแก้ deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า backend root ที่ deploy ไม่ใช่ frontend/static proxy')
+    writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
+    writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า root ของระบบหลังบ้านที่ deploy แล้วไม่ใช่ proxy ของหน้าบ้าน/static')
     return 1
   }
 
@@ -176,8 +176,8 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
     health = await healthReader()
   } catch (error) {
     writeError(`Smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
-    writeError('วิธีแก้ local: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่ม backend')
-    writeError('วิธีแก้ deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า deployed backend เข้าถึงได้')
+    writeError('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่มระบบหลังบ้าน')
+    writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่าระบบหลังบ้านที่ deploy แล้วเข้าถึงได้')
     return 1
   }
 
