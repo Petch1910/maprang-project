@@ -103,7 +103,9 @@ export const chatRoutes = new Elysia()
           }
         }
 
-        throw error
+        console.error('เริ่มสตรีมแชทไม่สำเร็จ:', safeRouteErrorSummary(error))
+        set.status = 500
+        return routeErrorResponse('unknown_error')
       }
     },
     {

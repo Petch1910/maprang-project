@@ -213,6 +213,36 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches route raw error throws', () => {
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat/stream', async () => {
+            try {
+              return streamChat()
+            } catch (error) {
+              throw error
+            }
+          })
+      `, 'chat.routes.ts'),
+    ).toContain('route throw raw error object ตรงๆ ไม่ได้; คืน routeErrorResponse หรือ response ที่ควบคุมข้อความได้.')
+
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat/stream', async ({ set }) => {
+            try {
+              return streamChat()
+            } catch (error) {
+              console.error('เริ่มสตรีมแชทไม่สำเร็จ:', safeRouteErrorSummary(error))
+              set.status = 500
+              return routeErrorResponse('unknown_error')
+            }
+          })
+      `, 'chat.routes.ts'),
+    ).toEqual([])
+  })
+
   test('extracts route error message keys and helper calls for explicit-copy checks', () => {
     const known = collectKnownRouteErrorMessages(`
       export const routeErrorMessages: Record<string, string> = {

@@ -380,3 +380,4 @@ Last updated: 2026-05-20
 - Frontend console log hardening pass: เพิ่ม `logUnexpectedError` ให้ browser console log เฉพาะ summary ที่ปลอดภัย และ frontend static audit จะ fail ถ้า source กลับไป `console.error(..., error)` ดิบ.
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด log hardening ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 155 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - Predeploy frontend log guard pass: `predeploy:check` ตอนนี้ล็อก `logUnexpectedError` และ raw frontend console error pattern ไว้ใน static audit/security checklist.
+- Backend route raw-throw guard pass: `/chat/stream` route คืน `routeErrorResponse('unknown_error')` พร้อม safe log เมื่อเกิด synchronous failure และ backend security audit จะ fail ถ้า `.routes.ts` กลับไป `throw error` ดิบ.
