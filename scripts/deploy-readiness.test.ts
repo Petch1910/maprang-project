@@ -135,8 +135,10 @@ describe('deploy readiness evaluation', () => {
       'รัน `bun run production:check` รอบสุดท้ายกับ domain ระบบหลังบ้านและหน้าบ้าน production',
     )
     expect(buildNextDeploySteps(readiness)).toContain(
-      'กรอก `RELEASE_HANDOFF.md` ด้วย deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, และ go/no-go notes',
+      'กรอก `RELEASE_HANDOFF.md` ด้วย URL ที่ deploy แล้ว, สถานะ migration, storage/auth/CORS, ผล live smoke, ข้อจำกัดที่ยังรู้, และบันทึก go/no-go',
     )
+    expect(buildNextDeploySteps(readiness).join('\n')).not.toContain('deployed URLs')
+    expect(buildNextDeploySteps(readiness).join('\n')).not.toContain('known limitations')
   })
 
   test('separates staging blockers from live provider verification blockers', () => {

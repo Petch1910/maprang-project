@@ -111,6 +111,7 @@ Last updated: 2026-05-20
 - Backend runtime env/readiness copy now passes Thai-first coverage via `bun test apps\backend\src\env.test.ts apps\backend\src\health.service.test.ts scripts\deploy-readiness.test.ts scripts\deploy-status.test.ts scripts\smoke-doctor.test.ts scripts\api-smoke-helpers.test.ts`, `backend:check`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
 - Deploy readiness provider blocker wording now passes `bun test apps\backend\src\health.service.test.ts`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
 - Deploy readiness next-step fix wording now passes `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
+- Deploy readiness and Production Setup release-handoff wording now passes `deploy:readiness:test`, `predeploy:check`, `memory:audit`, and `secrets:check`.
 - Staging/production live provider documentation wording now passes `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`.
 - Production setup env/storage Thai-first wording now passes `predeploy:check:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Production setup deploy-order/workflow Thai-first wording now passes `predeploy:check:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.

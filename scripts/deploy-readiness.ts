@@ -235,7 +235,7 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
     steps.push('รัน `bun run production:check` ใหม่กับระบบหลังบ้าน staging/production')
   } else {
     steps.push('รัน `bun run production:check` รอบสุดท้ายกับ domain ระบบหลังบ้านและหน้าบ้าน production')
-    steps.push('กรอก `RELEASE_HANDOFF.md` ด้วย deployed URLs, migration status, storage/auth/CORS, live smoke results, known limitations, และ go/no-go notes')
+    steps.push('กรอก `RELEASE_HANDOFF.md` ด้วย URL ที่ deploy แล้ว, สถานะ migration, storage/auth/CORS, ผล live smoke, ข้อจำกัดที่ยังรู้, และบันทึก go/no-go')
   }
 
   return steps

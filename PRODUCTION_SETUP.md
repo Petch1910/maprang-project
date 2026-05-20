@@ -208,7 +208,7 @@ Workflow นี้ยังต้องมี `SMOKE_ADMIN_API_KEY` เพื่
 
 ห้ามชี้ `backend:check`, `qa:local`, หรือ `qa:live` ไปที่ production data เว้นแต่ตั้งใจให้ automated persistence tests สร้างและ archive test records ที่นั่นจริง ๆ ให้ใช้ gates เหล่านี้กับ local หรือ staging databases.
 
-10. ทำ manual QA จาก `DEPLOYMENT_QA.md` ให้ครบ แล้วกรอก `RELEASE_HANDOFF.md` ด้วย deployed frontend/backend URLs, migration result, storage/auth/CORS posture, live smoke results, known limitations, และ go/no-go decision. รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
+10. ทำ manual QA จาก `DEPLOYMENT_QA.md` ให้ครบ แล้วกรอก `RELEASE_HANDOFF.md` ด้วย URL หน้าบ้าน/ระบบหลังบ้านที่ deploy แล้ว, ผล migration, สถานะ storage/auth/CORS, ผล live smoke, ข้อจำกัดที่ยังรู้, และบันทึก go/no-go. รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 
 หลังแต่ละ deploy สามารถรัน manual GitHub Actions workflow `Production Smoke` ได้ด้วย.
 ตั้ง repository secrets `SMOKE_API_BASE_URL`, `SMOKE_ADMIN_API_KEY`, และเลือกอย่างใดอย่างหนึ่งระหว่าง `SMOKE_ACCESS_TOKEN` หรือ `SMOKE_USER_ID`.

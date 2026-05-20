@@ -83,6 +83,7 @@ Verified:
 - Memory and knowledge README entry points now use Thai-first safety, update, layer, and runtime usage wording, with vault audits and predeploy guarding the Thai snippets.
 - Root README entrypoint now uses Thai-first local setup, SocratiCode, memory, agent handoff, deploy status, knowledge layer, and eval layer wording while preserving exact commands, env names, and URLs.
 - Root README production checklist and current verification sections now use Thai-first release handoff, env, smoke, local readiness, route/import/deploy checks, and staging gate guidance while preserving exact commands/env names.
+- Deploy readiness and Production Setup release-handoff steps now avoid stale `deployed URLs`, `known limitations`, and related English handoff wording while preserving `RELEASE_HANDOFF.md` and go/no-go semantics.
 - Root README evaluation, Prompt Inspector, local readiness, live smoke, production check, and staging verify guidance now avoids stale mixed-English handoff wording while preserving exact commands, routes, env names, and workflow semantics.
 - Predeploy now checks the Thai-first README snippets for secret-pattern regression coverage and staging verify deploy-status guidance instead of the older English wording.
 - Deployment QA handoff now uses Thai-first eval, smoke, GitHub Production Smoke, required production env, Supabase storage, mobile QA, and manual QA guidance while preserving exact commands, env names, route names, and workflow inputs.
