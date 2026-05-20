@@ -80,6 +80,7 @@ Results:
 - Centralized character publication/visibility labels now pass full `frontend:check`, `import-cycle:audit`, and `import-cycle:audit:test`.
 - `frontend:static:audit:test` now also blocks stale mixed Creator Studio copy such as `image provider`, `production ควรตั้งค่า`, `Lobby ดูน่ากด`, `แกน prompt`, and `backend ช่วยร่าง`.
 - `frontend:static:audit:test` now also blocks stale mixed Admin Health operational copy such as `backend ยังไม่พร้อมเต็ม`, `health response จาก backend`, `provider จริง`, `final gate`, and `mobile overflow`.
+- `frontend:static:audit:test` now also blocks stale Admin Health provider guidance such as raw `usage.providerFailure`, `billing/quota limit`, `local/dev ยังไม่บังคับ`, and reversed `production/staging` wording.
 - Creator Draft image-provider copy now passes focused backend coverage with Thai-first missing-provider, configured-failure, and billing-limit messages.
 - Backend relationship validation copy now passes Thai-first coverage via `bun test apps\backend\src\relationship.engine.test.ts`, focused character validation tests, and full `backend:check` with 132 pass.
 - Backend character quality notes now pass Thai-first coverage via `bun test apps\backend\src\character.validation.test.ts` and full `backend:check` with 133 pass.

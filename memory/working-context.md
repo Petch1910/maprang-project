@@ -48,6 +48,7 @@ Verified:
 - Character publication and visibility labels are now centralized in `characterLabels.ts` so Admin Summary, Chat role panel, Character List, and Character Manager share the same Thai display names.
 - Creator Studio and chat/admin status copy now avoid mixed English operational wording such as `image provider`, `production`, `backend`, `Lobby`, and raw `prompt` in user-facing Thai copy, with frontend static/predeploy guards for those stale phrases.
 - Admin Health copy now maps visible operational wording to Thai-first terms for backend/frontend/provider/environment/checklist/final-gate guidance while preserving exact env names and commands.
+- Admin Health live chat/image guidance now avoids raw `usage.providerFailure`, `billing/quota limit`, `local/dev`, and reversed `production/staging` wording in visible helper copy, with frontend static audit coverage.
 - Backend Creator Draft image status and warning messages now return Thai-first user-facing copy for missing/configured/failed image provider paths while preserving actionable smoke/env guidance.
 - Backend relationship tag validation messages now return Thai-first creator warnings for adult-mode conflicts, no-romance/romance conflicts, progression-speed conflicts, safety-tone conflicts, and too-many-engine-tag guidance.
 - Backend character quality review notes now return Thai-first creator guidance for missing name/tagline/description/biography/scenario/system prompt/compact prompt/greeting/tags.

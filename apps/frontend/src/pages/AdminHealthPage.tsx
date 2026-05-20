@@ -123,7 +123,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: chatProductionReady
         ? 'ยืนยัน live chat smoke แล้ว'
         : checks?.openRouterConfigured || chatProvider?.configured
-          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าได้ usage.providerFailure ต้องเช็ค OpenRouter quota, สิทธิ์โมเดล, คีย์ และเครือข่าย`
+          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าได้รหัส providerFailure ต้องเช็คโควตา OpenRouter, สิทธิ์โมเดล, คีย์ และเครือข่าย`
           : 'ยังไม่มี OPENROUTER_API_KEY จึงยังทดสอบ live chat ไม่ได้',
       action: chatProductionReady
         ? 'คง CHAT_PROVIDER_LIVE_VERIFIED=1 ไว้เฉพาะสภาพแวดล้อมที่ smoke ผ่านจริง'
@@ -165,11 +165,11 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
         imageProductionReady
           ? 'ยืนยัน live image smoke แล้ว'
           : isProductionMode
-            ? `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หรือ bun run api:smoke:live กับ production/staging ให้ผ่าน ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงินผู้ให้บริการก่อน แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`
-            : `local/dev ยังไม่บังคับ แต่ก่อน production ต้องรัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} ให้ผ่าน ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงินผู้ให้บริการก่อน`,
+            ? `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หรือ bun run api:smoke:live กับ staging/production ให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`
+            : `สภาพแวดล้อมเครื่องยังไม่บังคับ แต่ก่อน production ต้องรัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} ให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน`,
       action: imageProductionReady
         ? 'คง IMAGE_GENERATION_LIVE_VERIFIED=1 ไว้เฉพาะสภาพแวดล้อมที่ smoke ผ่านจริง'
-        : `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หลังเพิ่ม billing/quota แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`,
+        : `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หลังเพิ่มวงเงินหรือโควตา แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`,
       scope: 'production',
     },
     {

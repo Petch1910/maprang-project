@@ -187,12 +187,16 @@ describe('frontend static audit', () => {
         '<p>เช็ค console error และ mobile overflow</p>',
         '<p>production smoke กับ backend/frontend domain จริง</p>',
         '<p>ไม่มี warning ฝั่ง frontend</p>',
+        '<p>ถ้าได้ usage.providerFailure ต้องเช็คคีย์</p>',
+        '<p>ถ้าเจอ billing/quota limit ต้องเพิ่มวงเงิน</p>',
+        '<p>local/dev ยังไม่บังคับ</p>',
+        '<p>รันกับ production/staging ให้ผ่าน</p>',
       ].join('\n'),
       'AdminHealthFixture.tsx',
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 12 }, () => 'contains mixed Admin Health wording that should be Thai-first'),
+      Array.from({ length: 16 }, () => 'contains mixed Admin Health wording that should be Thai-first'),
     )
   })
 
