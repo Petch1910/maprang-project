@@ -105,6 +105,7 @@ Results:
 - Memory/knowledge README Thai-first entry points now pass `vault:audit:test`, `memory:audit`, `knowledge:audit`, and `predeploy:check`.
 - Project map, UI/UX direction, and API/backend direction Thai-first handoff docs now pass `memory:audit`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Knowledge wiki Thai-first core pages now pass `knowledge:audit`, `vault:audit:test`, and `predeploy:check`.
+- Raw knowledge inbox and decision index Thai-first entry points now pass `memory:audit`, `knowledge:audit`, and `secrets:check`.
 - Smoke doctor missing image-generation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor roleplay reply-budget recommendation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor success output and deploy env doctor self-test localization now pass `smoke:doctor:test`, `deploy:doctor:self-test`, and `deploy:doctor:test`.

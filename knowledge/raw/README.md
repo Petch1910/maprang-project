@@ -1,12 +1,12 @@
-# Raw Knowledge Inbox
+# กล่องวัตถุดิบความรู้
 
-Drop source material here before it is compiled into the wiki or structured packs.
+วาง source material ไว้ที่นี่ก่อนนำไปสรุปเป็น wiki หรือ structured packs.
 
-Allowed examples:
-- TOR summaries without secrets.
+ตัวอย่างที่ใส่ได้:
+- สรุป TOR ที่ไม่มี secret.
 - UX reference notes.
-- Provider documentation summaries.
+- สรุป provider documentation.
 - Game design notes.
-- Moderation and policy notes.
+- Moderation และ policy notes.
 
-Do not place real credentials, database URLs with passwords, API keys, service role keys, or private user data here.
+ห้ามใส่ real credentials, database URLs ที่มี password, API keys, service role keys, หรือ private user data ในไฟล์นี้.
