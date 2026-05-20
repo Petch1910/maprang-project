@@ -1,37 +1,37 @@
 # Production Deploy
 
-Production readiness requires real infrastructure and live provider verification.
+production readiness ต้องมี infrastructure จริงและ live provider verification จริง ไม่ใช่แค่ตั้งค่า env ครบ
 
-## Gate Philosophy
+## ปรัชญาของ gate
 
-Configured env values are not enough. Provider keys can still fail because of quota, rate limits, billing, model access, or network restrictions.
+ค่าที่ถูกใส่ใน env ยังไม่พอ เพราะ provider keys อาจยัง fail จาก quota, rate limits, billing, model access, หรือ network restrictions ได้
 
-## Current Required Gates
+## Gates ที่ต้องผ่าน
 
 - Real backend URL.
 - Real frontend URL.
 - Production CORS.
 - Supabase JWT auth.
 - Private signed `avatars` bucket.
-- Production roleplay reply budget at least `MODEL_MAX_OUTPUT_TOKENS=1200` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320`.
-- Recommended roleplay reply budget near `MODEL_MAX_OUTPUT_TOKENS=1600` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420`.
+- Production roleplay reply budget อย่างน้อย `MODEL_MAX_OUTPUT_TOKENS=1200` และ `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320`.
+- Recommended roleplay reply budget ใกล้ `MODEL_MAX_OUTPUT_TOKENS=1600` และ `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420`.
 - Live chat provider smoke.
 - Live image provider smoke.
-- `deploy:status` output reviewed for blocker counts and next steps.
-- `staging:verify` passing against the deployed staging backend.
-- `production:check` passing.
+- ตรวจ `deploy:status` output ว่า blocker counts และ next steps ชัดเจน.
+- `staging:verify` ผ่านกับ deployed staging backend.
+- `production:check` ผ่าน.
 
-## Gate Order
+## ลำดับ gate
 
-1. Run local `qa:local`.
-2. Review env files with `deploy:doctor`.
-3. Review shared readiness output with `deploy:status`.
-4. Run `staging:verify` against the real staging backend URL.
-5. Run live provider smoke only after staging infra, CORS, auth, storage, and wallet are ready.
-6. Set live verification flags only in the target environment after live smoke succeeds.
-7. Run `production:check` and fill `RELEASE_HANDOFF.md`.
+1. รัน local `qa:local`.
+2. ตรวจ env files ด้วย `deploy:doctor`.
+3. ตรวจ shared readiness output ด้วย `deploy:status`.
+4. รัน `staging:verify` กับ real staging backend URL.
+5. รัน live provider smoke หลัง staging infra, CORS, auth, storage, และ wallet พร้อมแล้วเท่านั้น.
+6. ตั้ง live verification flags เฉพาะ target environment หลัง live smoke ผ่านจริง.
+7. รัน `production:check` และกรอก `RELEASE_HANDOFF.md`.
 
-Related memory:
+memory ที่เกี่ยวข้อง:
 
 - `memory/deploy-blockers.md`
 - `memory/production/checklist.md`

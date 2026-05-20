@@ -618,7 +618,7 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"knowledge:audit"', 'bun scripts/knowledge-audit.ts', 'bun run knowledge:audit'], 'package.json')
       requireIncludes(readme, ['Knowledge Layer', 'knowledge/README.md', 'bun run knowledge:audit'], 'README.md')
       requireIncludes(knowledgeReadme, ['การใช้งาน runtime', 'ชุดข้อมูล structured', 'ห้ามเก็บ secrets'], 'knowledge/README.md')
-      requireIncludes(wikiIndex, ['Maprang Product', 'Relationship Engine', 'Creator Studio', 'Production Deploy'], 'knowledge/wiki/INDEX.md')
+      requireIncludes(wikiIndex, ['โมเดลผลิตภัณฑ์ Maprang', 'Relationship Engine', 'Creator Studio', 'Production Deploy'], 'knowledge/wiki/INDEX.md')
       requireIncludes(
         backendKnowledge,
         ['buildChatKnowledgePrompt', 'buildCreatorKnowledgePrompt', 'structuredKnowledgeHealth'],

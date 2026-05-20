@@ -1,20 +1,20 @@
-# Product Model
+# โมเดลผลิตภัณฑ์
 
-Maprang is a Thai AI character roleplay platform with familiar character-chat UX and deeper game-like systems.
+Maprang คือแพลตฟอร์ม roleplay ตัวละคร AI ภาษาไทยที่มี UX แบบ character chat ที่ผู้ใช้คุ้นมือ พร้อมระบบความสัมพันธ์และฉากเชิงเกมที่ลึกกว่าเดิม
 
-## Product Pillars
+## เสาหลักของผลิตภัณฑ์
 
-- Fast character discovery.
-- Natural chat first, relationship systems second.
-- Relationship seed before chat.
-- Sandbox mode by default.
-- Scene mode only when an event is ready and the user chooses to enter.
-- Creator tools that help produce usable characters quickly.
-- Production readiness through explicit health gates.
+- ค้นพบตัวละครได้เร็ว.
+- แชทธรรมชาติมาก่อน ระบบความสัมพันธ์ตามมาเป็นชั้น feedback.
+- เลือก relationship seed ก่อนเข้าแชท.
+- เริ่มจาก sandbox mode เป็นค่าเริ่มต้น.
+- scene mode เปิดเฉพาะเมื่อ event พร้อมและผู้ใช้เลือกเข้าสู่ฉาก.
+- เครื่องมือ creator ต้องช่วยสร้างตัวละครที่ใช้งานได้เร็ว.
+- Production readiness ต้องผ่าน health gates ที่ตรวจได้ชัดเจน.
 
-## Runtime Knowledge
+## Runtime knowledge
 
-The product-level runtime guidance lives in:
+guidance ระดับผลิตภัณฑ์สำหรับ runtime อยู่ใน:
 
 - `knowledge/structured/chat-style-guide.json`
 - `knowledge/structured/creator-guides.json`

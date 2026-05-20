@@ -1,17 +1,17 @@
 # Creator Studio
 
-Creator Studio should feel familiar to users who already know Khuiai-like creation flows, while adding Maprang's deeper relationship and scene systems.
+Creator Studio ควรรู้สึกคุ้นมือกับผู้ใช้ที่รู้จัก creation flow แนว Khuiai อยู่แล้ว แต่เพิ่มระบบ relationship และ scene ของ Maprang ให้ลึกกว่า
 
-## UX Rules
+## กฎ UX
 
-- Keep the form understandable on mobile.
-- Make personality, scenario, greeting, and boundaries clear.
-- Let AI draft image and text together.
-- Use warnings for risky or conflicting tags.
-- In adult mode, conflicts can be warnings instead of hard blocks.
-- Let creators preview before publishing.
+- ฟอร์มต้องเข้าใจง่ายบนมือถือ.
+- บุคลิก, scenario, greeting, และ boundaries ต้องชัด.
+- ให้ AI draft รูปและเนื้อหาด้วยกัน.
+- ใช้ warnings สำหรับ tags ที่เสี่ยงหรือขัดกัน.
+- ใน adult mode ความขัดแย้งของ tag เป็น warning ได้ ไม่จำเป็นต้อง hard block เสมอ.
+- ให้ creators preview ก่อน publish.
 
-Structured guidance lives in:
+structured guidance อยู่ใน:
 
 - `knowledge/structured/creator-guides.json`
 - `knowledge/structured/content-policy.json`

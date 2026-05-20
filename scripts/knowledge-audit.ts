@@ -73,7 +73,7 @@ export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResul
   const wikiIndex = await readRepoFile('knowledge/wiki/INDEX.md')
   requireIncludes(
     wikiIndex,
-    ['Maprang Product', 'Relationship Engine', 'Creator Studio', 'Production Deploy'],
+    ['โมเดลผลิตภัณฑ์ Maprang', 'Relationship Engine', 'Creator Studio', 'Production Deploy'],
     'knowledge/wiki/INDEX.md',
     findings,
   )
