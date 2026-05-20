@@ -215,6 +215,7 @@ Last updated: 2026-05-20
 - Production Smoke workflow now runs deploy readiness/status and deploy env doctor regression/self-tests before deployed smoke validation.
 - `staging:verify` and `production:check` now print `deploy:status` before strict smoke gates so failed deployed checks show blockers and next steps directly.
 - Predeploy now verifies README/STAGING_RUNBOOK documentation stays aligned with deploy-status-first CLI gates.
+- Deployment QA automated-checks Thai-first wording now passes `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Relationship engine focused test passes for the expanded Thai ladder and preset surface split: 12 pass, 0 fail.
 - Current delta gate passes: `backend:check`, `frontend:check`, and `knowledge:audit`.
 - Full local QA was rerun after starting Docker/Postgres and local backend; persistence tests ran against the local DB instead of skipping.

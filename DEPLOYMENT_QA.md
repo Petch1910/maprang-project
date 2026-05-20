@@ -1,107 +1,105 @@
-# Deployment QA Checklist
+# เช็กลิสต์ Deployment QA
 
-Use this checklist before handing the app to testers or deploying a new environment.
+ใช้เช็กลิสต์นี้ก่อนส่งแอปให้ tester หรือ deploy environment ใหม่.
 
-## Automated Checks
+## ตรวจอัตโนมัติ
 
-Run the full local gate when Postgres, backend, and frontend are available:
+รัน full local gate เมื่อ Postgres, backend, และ frontend พร้อม:
 
 ```bash
 bun run qa:local
 ```
 
-This gate does not call the live AI provider. It verifies committed secrets, committed-secret scan path regressions, API route coverage mapping, import-cycle architecture regressions, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend API error-message regressions, frontend bundle/static/route and route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, live chat smoke validation regressions, local smoke helper regressions, browser e2e smoke command-plan regressions, predeploy guard wiring regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke also passes `skipImageProvider=true` for creator draft checks, so it verifies the endpoint shape without spending image credits; live image generation stays in `api:smoke:live`, `smoke:image:live`, and `production:check`.
-Real `.env` and `.env.*` files must stay untracked. `secrets:check` ignores local untracked env files for developer convenience but fails if one is ever committed or tracked.
+Gate นี้ไม่เรียก live AI provider. มันตรวจ committed secrets, committed-secret scan path regressions, API route coverage mapping, import-cycle architecture regressions, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend API error-message regressions, frontend bundle/static/route และ route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, live chat smoke validation regressions, local smoke helper regressions, browser e2e smoke command-plan regressions, predeploy guard wiring regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, และ avatar upload. Local API smoke ยังส่ง `skipImageProvider=true` สำหรับ creator draft checks จึงตรวจ endpoint shape ได้โดยไม่ใช้ image credits; live image generation อยู่ใน `api:smoke:live`, `smoke:image:live`, และ `production:check`.
+Real `.env` และ `.env.*` files ต้องไม่ถูก track. `secrets:check` จะ ignore local untracked env files เพื่อความสะดวกของ developer แต่จะ fail ถ้าไฟล์นั้นถูก commit หรือ tracked.
 
-To inspect backend API coverage without running the full suite:
+ถ้าต้องการตรวจ backend API coverage โดยไม่รัน full suite:
 
 ```bash
 bun run api:audit
 ```
 
-`api:audit` reads backend route files and fails if a route exists without a documented automated/manual coverage path. It is intentionally separate from `api:smoke`: the audit answers “is every endpoint accounted for?” while the smoke answers “do the high-value runtime paths work right now?”
+`api:audit` อ่าน backend route files และจะ fail ถ้ามี route ที่ยังไม่มี documented automated/manual coverage path. มันตั้งใจแยกจาก `api:smoke`: audit ตอบคำถามว่า “ทุก endpoint ถูกนับใน coverage แล้วหรือยัง?” ส่วน smoke ตอบว่า “runtime paths สำคัญยังทำงานตอนนี้ไหม?”
 
-To inspect app, QA script, seed, and e2e source imports for circular dependencies:
+ถ้าต้องการตรวจ imports ของ app, QA script, seed, และ e2e source ว่ามี circular dependencies หรือไม่:
 
 ```bash
 bun run import-cycle:audit
 ```
 
-`import-cycle:audit` scans relative TypeScript imports, re-exports, dynamic imports, TypeScript import-equals `require()`, and CommonJS `require()` calls across backend, frontend, scripts, seed data, Playwright config, and e2e smoke files. It is included in `qa:local`, CI, and Production Smoke so architecture cycles cannot return silently.
+`import-cycle:audit` scan relative TypeScript imports, re-exports, dynamic imports, TypeScript import-equals `require()`, และ CommonJS `require()` calls ใน backend, frontend, scripts, seed data, Playwright config, และ e2e smoke files. คำสั่งนี้อยู่ใน `qa:local`, CI, และ Production Smoke เพื่อกัน architecture cycles กลับมาแบบเงียบ ๆ.
 
-To inspect production env files before deploying, without printing secret values:
+ถ้าต้องการตรวจ production env files ก่อน deploy โดยไม่พิมพ์ secret values:
 
 ```bash
 bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/frontend/.env
 ```
 
-For early staging only, add `--allow-unverified-image` until the live image smoke passes and `IMAGE_GENERATION_LIVE_VERIFIED=1` is set.
+สำหรับ early staging เท่านั้น ให้เพิ่ม `--allow-unverified-image` จนกว่า live image smoke จะผ่านและตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`.
 
-To summarize the current backend deploy readiness and next steps without failing on expected staging/provider blockers:
+ถ้าต้องการสรุป backend deploy readiness และ next steps ปัจจุบันโดยไม่ fail กับ staging/provider blockers ที่คาดไว้:
 
 ```bash
 bun run deploy:status
 ```
 
-For CI logs or dashboards that need structured output:
+สำหรับ CI logs หรือ dashboards ที่ต้องการ structured output:
 
 ```bash
 bun scripts/deploy-status.ts --json
 ```
 
-The JSON response exposes top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, and `productionBlockerCount` fields so automation does not need to parse nested readiness details.
+JSON response มี fields top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` เพื่อให้ automation ไม่ต้อง parse nested readiness details.
 
-The underlying readiness rules have a deterministic self-test:
+readiness rules ด้านล่างมี deterministic self-test:
 
 ```bash
 bun run deploy:readiness:test
 ```
 
-To seed repeatable browser QA data and run the Playwright end-to-end smoke over desktop and mobile viewports:
+ถ้าต้องการ seed browser QA data ที่ทำซ้ำได้ และรัน Playwright end-to-end smoke บน desktop/mobile viewports:
 
 ```bash
 bun run qa:seed
 bun run e2e:smoke
 ```
 
-`e2e:smoke` opens the home page, Character Lobby, Creator Studio, My Chats, Events, Profile, Wallet, Moderation,
-`/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, and a seeded chat on both desktop and mobile viewports. It also
-verifies the Character Lobby relationship contract, the chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow when an admin key is
-available, route rendering, browser console errors, and horizontal overflow. It avoids sending a live chat message so it
-does not spend provider credits during UI smoke testing.
+`e2e:smoke` เปิด home page, Character Lobby, Creator Studio, My Chats, Events, Profile, Wallet, Moderation,
+`/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, และ seeded chat ทั้ง desktop/mobile viewports. มันยังตรวจ Character Lobby relationship contract, chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow เมื่อมี admin key,
+route rendering, browser console errors, และ horizontal overflow. มันไม่ส่ง live chat message จึงไม่ใช้ provider credits ตอน UI smoke testing.
 
-For the full local predeploy gate plus browser smoke:
+สำหรับ full local predeploy gate พร้อม browser smoke:
 
 ```bash
 bun run qa:full
 ```
 
-For a pre-production dry run that covers all repo-owned checks plus real Supabase signed storage and admin-only APIs, run:
+สำหรับ pre-production dry run ที่ครอบ repo-owned checks ทั้งหมด พร้อม real Supabase signed storage และ admin-only APIs:
 
 ```bash
 bun run staging:check
 ```
 
-`staging:check` is useful before the final domain/provider gate. It runs `qa:full`, verifies the real `avatars` bucket through signed URLs, and reruns API smoke with admin checks required. The API smoke creates a private draft character and lore entry, checks edit/view/favorite/duplicate/reset/delete, then cleans up. It can still pass while live chat/image provider checks are left for `production:check`.
+`staging:check` มีประโยชน์ก่อน final domain/provider gate. มันรัน `qa:full`, ตรวจ bucket `avatars` จริงผ่าน signed URLs, และรัน API smoke ซ้ำโดยบังคับ admin checks. API smoke จะสร้าง private draft character และ lore entry, ตรวจ edit/view/favorite/duplicate/reset/delete, แล้ว cleanup. คำสั่งนี้ยังผ่านได้แม้ live chat/image provider checks จะถูกทิ้งไว้ให้ `production:check`.
 
-After staging domains exist, run the strict deployed staging gate:
+หลังมี staging domains แล้ว ให้รัน strict deployed staging gate:
 
 ```bash
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
-`staging:verify` prints `bun run deploy:status` first, and deploy status checks backend root identity before health. It then runs `smoke-doctor --strict-staging`, Supabase signed-storage check, `/ready`, and admin-required API smoke against the deployed backend. It fails on localhost URLs, local/non-https CORS, missing signed storage, broken readiness, or missing admin smoke auth, but it does not require `CHAT_PROVIDER_LIVE_VERIFIED=1` or `IMAGE_GENERATION_LIVE_VERIFIED=1` yet.
+`staging:verify` พิมพ์ `bun run deploy:status` ก่อน และ deploy status จะตรวจ backend root identity ก่อน health. จากนั้นรัน `smoke-doctor --strict-staging`, Supabase signed-storage check, `/ready`, และ admin-required API smoke กับ deployed backend. คำสั่งนี้ fail เมื่อเจอ localhost URLs, local/non-https CORS, signed storage ที่ขาด, readiness พัง, หรือ admin smoke auth ที่ขาด แต่ยังไม่บังคับ `CHAT_PROVIDER_LIVE_VERIFIED=1` หรือ `IMAGE_GENERATION_LIVE_VERIFIED=1`.
 
-Run the full local or staging provider gate only when the backend is allowed to reach OpenRouter:
+รัน full local หรือ staging provider gate เฉพาะเมื่อ backend ติดต่อ OpenRouter ได้:
 
 ```bash
 bun run qa:live
 ```
 
-`qa:live` runs the local QA gate and then one `api:smoke:live` pass. That live pass already checks chat and image generation, so do not chain `smoke:chat` or `smoke:image:live` afterward unless you are retrying one failed provider path.
-When staging is verifying providers for the first time, run `api:smoke:live` or the narrower live smoke commands before marking verification flags. After the live chat call succeeds, set `CHAT_PROVIDER_LIVE_VERIFIED=1`. After the live image call succeeds, set `IMAGE_GENERATION_LIVE_VERIFIED=1`, then rerun the final production gate.
+`qa:live` รัน local QA gate แล้วตามด้วย `api:smoke:live` หนึ่งรอบ. Live pass นี้ตรวจทั้ง chat และ image generation แล้ว จึงไม่ควร chain `smoke:chat` หรือ `smoke:image:live` ต่อ ยกเว้นกำลัง retry provider path เดี่ยวที่ fail.
+เมื่อ staging กำลัง verify providers ครั้งแรก ให้รัน `api:smoke:live` หรือ live smoke commands ที่แคบกว่า ก่อน mark verification flags. หลัง live chat call สำเร็จ ให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`. หลัง live image call สำเร็จ ให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`, แล้ว rerun final production gate.
 
-For a deployed backend, use the smoke-only live gate with `SMOKE_API_BASE_URL` and smoke auth variables when retrying provider connectivity. Do not point `backend:check`, `qa:local`, or `qa:live` at production data unless you intentionally want the automated persistence tests to create and archive test records there.
+สำหรับ deployed backend ให้ใช้ smoke-only live gate พร้อม `SMOKE_API_BASE_URL` และ smoke auth variables ตอน retry provider connectivity. ห้ามชี้ `backend:check`, `qa:local`, หรือ `qa:live` ไปที่ production data เว้นแต่ตั้งใจให้ automated persistence tests สร้างและ archive test records ที่นั่นจริง ๆ.
 
 ```bash
 bun run smoke:live

@@ -135,6 +135,7 @@ Verified:
 - CI runs deploy readiness self-test, and the manual Production Smoke workflow prints `deploy:status` before strict production checks.
 - Local `staging:verify` and `production:check` now print `deploy:status` before strict smoke gates, so failed staging/production runs include blocker details and next steps in the same CLI log.
 - README and predeploy guard now document and enforce the same deploy-status-first behavior for CLI staging/production gates.
+- Deployment QA automated-checks section now uses Thai-first local/staging/live gate guidance while preserving exact commands, env names, and smoke responsibilities.
 - `RELEASE_HANDOFF.md` is available as the no-secrets final release handoff template, and predeploy checks verify it stays documented.
 - `release:handoff:check` verifies the release handoff template and can require all handoff fields with `--filled` before sharing a real release note.
 - `release:handoff:test` covers filled handoff validation, blank-field detection, secret-shaped value detection, and the importable release handoff runner.
