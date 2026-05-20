@@ -1,12 +1,18 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
-import { hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile, runDeployEnvDoctor } from './deploy-env-doctor'
+import { formatDeployDoctorStatus, hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile, runDeployEnvDoctor } from './deploy-env-doctor'
 import { runDeployEnvDoctorSelfTest } from './deploy-env-doctor-self-test'
 
 const tempDir = join(import.meta.dir, '..', '.tmp', 'deploy-env-doctor-unit')
 
 describe('deploy env doctor helpers', () => {
+  test('formats deploy doctor statuses in Thai', () => {
+    expect(formatDeployDoctorStatus('pass')).toBe('ผ่าน')
+    expect(formatDeployDoctorStatus('warn')).toBe('เตือน')
+    expect(formatDeployDoctorStatus('fail')).toBe('ไม่ผ่าน')
+  })
+
   test('parses flags and key value arguments without running the doctor', () => {
     const args = parseArgs(['--backend-env', 'backend.env', '--allow-unverified-image', '--frontend-env', 'frontend.env'])
 
@@ -113,6 +119,8 @@ describe('deploy env doctor helpers', () => {
       expect(result.fail).toBe(0)
       expect(result.findings.some((finding) => finding.area === 'cross-check' && finding.check === 'Supabase URL match' && finding.status === 'pass')).toBe(true)
       expect(lines[0]).toBe('Deploy env doctor')
+      expect(lines.join('\n')).toContain('ผ่าน -')
+      expect(lines.join('\n')).not.toContain('PASS -')
       expect(lines.join('\n')).not.toContain(anonKey)
       expect(lines.join('\n')).not.toContain(serviceRoleKey)
     } finally {

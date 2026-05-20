@@ -27,6 +27,15 @@ export type DeployEnvDoctorResult = {
 let requireImageLiveVerified = true
 let findings: Finding[] = []
 
+export function formatDeployDoctorStatus(status: Status) {
+  const labels: Record<Status, string> = {
+    pass: 'ผ่าน',
+    warn: 'เตือน',
+    fail: 'ไม่ผ่าน',
+  }
+  return labels[status]
+}
+
 export async function runDeployEnvDoctor(argv = process.argv.slice(2), writeLine: (line: string) => void = (line) => console.log(line)): Promise<DeployEnvDoctorResult> {
 const args = parseArgs(argv)
 const backendEnvPath = resolveFromRoot(args.get('backend-env') ?? 'apps/backend/.env')
@@ -60,7 +69,7 @@ writeLine(`backendEnv: ${displayPath(backendEnvPath)}`)
 writeLine(`frontendEnv: ${displayPath(frontendEnvPath)}`)
 
 for (const finding of findings) {
-  const label = finding.status === 'pass' ? 'PASS' : finding.status === 'warn' ? 'WARN' : 'FAIL'
+  const label = formatDeployDoctorStatus(finding.status)
   writeLine(`${label} - ${finding.area} ${finding.check}: ${finding.detail}`)
 }
 
