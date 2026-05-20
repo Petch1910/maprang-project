@@ -261,7 +261,7 @@ Workflow พิมพ์ `bun run deploy:status` ก่อน strict production 
 input เสริม `run_image` จะตรวจ live image provider path และใช้ image provider credits.
 เมื่อเปิดทั้ง `run_chat` และ `run_image` workflow จะใช้ `api:smoke:live` เพียงรอบเดียว เพื่อเช็ก chat กับ image พร้อมกันโดยไม่ยิง provider ซ้ำ.
 
-## Production Environment ที่ต้องมี
+## ค่า environment production ที่ต้องมี (Production Environment)
 
 ใช้ `PRODUCTION_SETUP.md` เป็น source of truth สำหรับ production env values และ Supabase setup.
 
@@ -310,7 +310,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 
 `VITE_SUPABASE_ANON_KEY` เป็น frontend public anon key แต่ยังถูก bake เข้า static build เหมือนค่า `VITE_*` อื่น ๆ.
 
-## Supabase Storage
+## พื้นที่จัดเก็บของ Supabase (Supabase Storage)
 
 - สร้าง bucket ให้ชื่อตรงกับ `SUPABASE_STORAGE_BUCKET`.
 - ใช้ service role key เฉพาะฝั่ง backend.
@@ -321,7 +321,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 - GitHub `Production Smoke` workflow จะ fail ตั้งแต่ต้นถ้า repository secrets `SUPABASE_URL` หรือ `SUPABASE_SERVICE_ROLE_KEY` ขาด เพราะ production storage ต้องตรวจชน bucket จริง.
 - มันจะ fail ตั้งแต่ต้นเช่นกันถ้าไม่มี `SMOKE_ADMIN_API_KEY` เพราะ final production smoke ต้อง exercise admin reports และ audit logs แทนการ skip admin-only APIs.
 
-## Mobile QA
+## การทดสอบมือถือ (Mobile QA)
 
 รันหนึ่งรอบที่ 390x844 และอีกหนึ่งรอบที่ 430x932 หรือใช้เครื่องจริงที่ใกล้ที่สุด.
 
@@ -330,7 +330,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 - Wallet: balance card, usage rows, และ token history cards ตัดบรรทัดโดยไม่ clip ข้อความไทยยาว ๆ.
 - Moderation: queue filters, action buttons, report dialogs, และ admin audit details ใช้ได้โดยไม่พึ่ง desktop hover.
 
-## Manual QA
+## การทดสอบด้วยมือ (Manual QA)
 
 - ใช้ `ABUSE_QA_CHECKLIST.md` เป็นรอบ exploratory security เพิ่มเติมหลัง automated gates ผ่าน โดยเฉพาะ SQL-like input, broken access, prompt injection, frontend XSS/link safety, admin audit logs, และ token/rate-limit.
 - เปิด `/health` และยืนยัน `ok=true`, `databaseConnected=true`, และ `avatarStorage` เป็นค่าที่คาดหวัง.
@@ -351,7 +351,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 - เปิด Wallet และยืนยันว่า token transaction history แสดง chat debits และ admin adjustments.
 - เลือก adult/general content mode และยืนยันว่า `/me/content-settings` persist server-side rating cap.
 
-## Release Notes Template
+## แม่แบบ release notes (Release Notes Template)
 
 - Commit or build id:
 - Backend URL:

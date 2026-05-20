@@ -25,7 +25,7 @@
 - Static guard: `bun run security:audit` fails if any backend `/admin` route block is missing `requireAdminApiKey`.
 - Guard อัตโนมัติ: `backend-security-audit.test.ts`, `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
 
-## Frontend XSS / Link Safety / ความปลอดภัยของลิงก์
+## ความปลอดภัย frontend XSS และลิงก์ (Frontend XSS / Link Safety)
 
 - ห้ามใช้ `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, หรือ `window.open()` ใน frontend source จนกว่าจะมี sanitizer และ security review ชัดเจน
 - ลิงก์ที่เปิดแท็บใหม่ด้วย `target="_blank"` ต้องมี `rel="noopener noreferrer"` เพื่อกัน opener/tabnabbing

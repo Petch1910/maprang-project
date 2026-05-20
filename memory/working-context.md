@@ -9,6 +9,7 @@ Last updated: 2026-05-20
 - Root README และ `evals/README.md` ใช้หัวข้อไทย-first สำหรับชั้นความรู้, ชั้นประเมินผล, ตัวตรวจพรอมป์, ชุดทดสอบหลัก, และคำสั่ง โดยยังคงคำอังกฤษสำคัญไว้ในวงเล็บเพื่อให้ค้นหาและ guard อัตโนมัติได้.
 - Root README หัวข้อเครื่องมืออ่านโค้ด, ความจำโปรเจกต์, การส่งต่องาน, สถานะ deploy, และ Docker build เป็น Thai-first แล้วเพื่อให้ entrypoint เอกสารสอดคล้องกับ UI/QA language direction.
 - `AGENTS.md` และ `agent.md` ใช้หัวข้อ Thai-first สำหรับขอบเขต การสานต่องาน QA gates product direction safety/core systems production blockers และ definition of done แล้ว โดยยังคงคำอังกฤษในวงเล็บเพื่อค้นหาได้.
+- Deployment QA, Production Setup, Release Handoff, Security Checklist, production checklist memory, และ knowledge wiki ใช้ heading Thai-first สำหรับ production env, storage, mobile/manual QA, release notes, env setup, QA gates, security, commands, runtime knowledge, gates, และ compile flow แล้ว.
 
 ## เป้าหมายปัจจุบัน
 

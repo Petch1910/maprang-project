@@ -2,7 +2,7 @@
 
 ไฟล์นี้สรุปค่าที่ต้องมีแบบชัดเจนก่อน deploy Maprang ออกจาก local development.
 
-## Admin Key
+## คีย์ผู้ดูแล (Admin Key)
 
 สร้าง `ADMIN_API_KEY` ที่ยาวและสุ่มจริงในเครื่อง แล้วนำไปใส่เฉพาะ hosting provider หรือ secret manager:
 
@@ -12,7 +12,7 @@ bun -e "const b=new Uint8Array(32);crypto.getRandomValues(b);console.log([...b].
 
 ห้าม commit ไฟล์ `.env` จริง ให้ใส่ค่าเหล่านี้โดยตรงใน hosting provider หรือ secret manager.
 
-## Backend Env
+## ค่า env ฝั่ง backend (Backend Env)
 
 เริ่มจาก `apps/backend/.env.production.example`.
 
@@ -78,7 +78,7 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 
 `deploy:doctor` จับ production mistakes ที่พบบ่อยก่อน deploy เช่น Supabase dashboard URLs, anon key ไม่ตรงกัน, service role key หลุดไปอยู่ frontend env, local/non-https CORS origins, สลับ OpenAI/OpenRouter key, ขาด `sslmode=require`, และ image generation ที่ยังไม่ได้ live-verified. ช่วง early staging สามารถเพิ่ม `--allow-unverified-image` ได้เฉพาะตอนที่ยังรอรัน `smoke:image:live`.
 
-## Frontend Env
+## ค่า env ฝั่ง frontend (Frontend Env)
 
 เริ่มจาก `apps/frontend/.env.production.example`.
 
@@ -90,7 +90,7 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 
 ค่า `VITE_*` ทั้งหมดจะถูก compile เข้า frontend bundle ตอน build.
 
-## Supabase Setup
+## ตั้งค่า Supabase (Supabase Setup)
 
 1. สร้าง Supabase project.
 2. คัดลอก project URL ไปใส่ `SUPABASE_URL` และ `VITE_SUPABASE_URL`.

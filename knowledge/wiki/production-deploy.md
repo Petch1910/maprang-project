@@ -6,7 +6,7 @@ production readiness ต้องมี infrastructure จริงและ liv
 
 ค่าที่ถูกใส่ใน env ยังไม่พอ เพราะ key ของผู้ให้บริการอาจยังล้มจากโควตา, rate limit, billing, สิทธิ์ model, หรือ network restrictions ได้
 
-## Gates ที่ต้องผ่าน
+## เกตที่ต้องผ่าน (Gates)
 
 - URL backend จริง.
 - URL frontend จริง.

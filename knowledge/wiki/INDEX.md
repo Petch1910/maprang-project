@@ -9,7 +9,7 @@ Wiki นี้คือชั้นที่มนุษย์อ่านได
 - [Creator Studio](./creator-studio.md)
 - [Production Deploy](./production-deploy.md)
 
-## Flow การ compile
+## ลำดับการ compile (Flow)
 
 ```text
 raw source notes -> wiki pages -> structured JSON -> backend prompt/rule use

@@ -22,7 +22,7 @@
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 - ใช้ `/admin/health` ไล่ทำ next action ของแต่ละ blocker ก่อนรัน final gate ซ้ำ.
 
-## Commands
+## คำสั่ง (Commands)
 
 เช็คความมั่นใจฝั่ง local:
 

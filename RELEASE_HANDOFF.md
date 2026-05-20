@@ -23,7 +23,7 @@ bun run release:handoff:check -- --filled
 - ผู้รับผิดชอบ:
 - Environment: staging / production
 
-## URLs ที่ deploy แล้ว
+## ลิงก์ที่ deploy แล้ว (Deployed URLs)
 
 - Frontend URL:
 - Backend URL:
@@ -37,7 +37,7 @@ bun run release:handoff:check -- --filled
 - ผล migration:
 - Prisma migration version:
 
-## Auth, Storage และ CORS
+## ระบบ auth/storage และ CORS (Auth, Storage และ CORS)
 
 - โหมด auth:
 - Supabase project ref:
@@ -57,7 +57,7 @@ bun run release:handoff:check -- --filled
 - ผล live smoke รูป:
 - ค่า `IMAGE_GENERATION_LIVE_VERIFIED`:
 
-## QA gates
+## เกต QA (QA gates)
 
 - `bun run qa:local`:
 - `bun run e2e:smoke`:
