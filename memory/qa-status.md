@@ -5,6 +5,7 @@ Last updated: 2026-05-20
 ## Repo-owned QA update 2026-05-20
 
 - Golden roleplay eval fixture Thai-first pass: `bun run eval:local`, `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังแปล `evals/golden-roleplay.json`.
+- Local eval formatting regression fixture now uses Thai-first failure text, verified with `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 
 ## Gate local ล่าสุด
 

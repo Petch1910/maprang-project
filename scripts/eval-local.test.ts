@@ -28,7 +28,7 @@ describe('local eval output formatting', () => {
     const output = formatLocalEvalRun({
       passed: false,
       scenarioCount: 1,
-      failures: ['scenario-a: missing required text "Scene Objective"'],
+      failures: ['scenario-a: ไม่พบข้อความที่ต้องมี "เป้าหมายของฉาก"'],
       results: [{ id: 'scenario-a', estimatedTokens: 777 }],
     })
 
@@ -36,7 +36,7 @@ describe('local eval output formatting', () => {
     expect(output.stdout).toEqual(['eval - scenario-a: ประมาณ 777 โทเคนของพรอมป์'])
     expect(output.stderr).toEqual([
       'Local eval ไม่ผ่าน:',
-      '- scenario-a: missing required text "Scene Objective"',
+      '- scenario-a: ไม่พบข้อความที่ต้องมี "เป้าหมายของฉาก"',
     ])
   })
 })
