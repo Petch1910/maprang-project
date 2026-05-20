@@ -130,7 +130,22 @@ const defaultRequiredSnippets = [
   'frontend-route-audit.ts',
 ]
 
-const defaultForbiddenSnippets = ['รัน eval', 'prompt-control', 'token budget', 'accordion', ' disabled ']
+const defaultForbiddenSnippets = [
+  'รัน eval',
+  'prompt-control',
+  'token budget',
+  'accordion',
+  ' disabled ',
+  'Automated route smoke',
+  'desktop/mobile',
+  'browser console',
+  'page error',
+  'horizontal overflow',
+  'handler ว่าง',
+  'ข้อความ placeholder',
+  'text encoding',
+  'mojibake',
+]
 
 export type RouteMenuAuditCheckOptions = {
   markdown: string

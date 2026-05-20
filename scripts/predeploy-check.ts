@@ -1124,13 +1124,15 @@ const checks: Check[] = [
           'passes when documented rows, routes, navigation, and preloads align',
           'reports missing navigation coverage',
           'reports stale mixed-language copy in route menu documentation',
+          'Automated route smoke',
+          'horizontal overflow',
           'runs the committed route/menu doc check through an importable runner',
         ],
         'scripts/route-menu-doc-check.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['defaultForbiddenSnippets', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
+        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(

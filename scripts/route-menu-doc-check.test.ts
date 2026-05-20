@@ -106,6 +106,7 @@ describe('route menu doc check', () => {
         | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | เงื่อนไขปิดปุ่ม/Guard | สถานะว่าง |
         | --- | --- | --- | --- | --- | --- |
         | Home | / | รัน eval | ตรวจ prompt-control และ token budget | ปุ่ม disabled เมื่อยังไม่พร้อม | helpful |
+        Automated route smoke บน desktop/mobile ดัก browser console/page error และ horizontal overflow พร้อม handler ว่าง ข้อความ placeholder text encoding mojibake
       `,
       appContent: `
         const routePreloads = { '/': () => import('./Home') }
@@ -124,6 +125,15 @@ describe('route menu doc check', () => {
         'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "prompt-control"',
         'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "token budget"',
         'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย " disabled "',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "Automated route smoke"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "desktop/mobile"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "browser console"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "page error"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "horizontal overflow"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "handler ว่าง"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "ข้อความ placeholder"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "text encoding"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "mojibake"',
       ]),
     )
   })
