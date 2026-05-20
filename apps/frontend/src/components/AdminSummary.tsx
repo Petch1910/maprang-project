@@ -5,6 +5,14 @@ type AdminSummaryProps = {
   onRefresh: () => Promise<void>
 }
 
+const characterStatusLabels: Record<string, string> = {
+  DRAFT: 'ดราฟต์',
+  REVIEW: 'รอตรวจ',
+  PUBLISHED: 'เผยแพร่แล้ว',
+  REJECTED: 'ถูกปฏิเสธ',
+  ARCHIVED: 'เก็บแล้ว',
+}
+
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-lg border border-slate-900/10 bg-white/75 p-3">
@@ -42,7 +50,7 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
           <div className="mt-3 rounded-lg bg-slate-50 p-3 text-xs font-bold text-slate-500">
             <div className="flex flex-wrap gap-2">
               <span>{summary.totals.messages.toLocaleString()} ข้อความ</span>
-              <span>{summary.totals.loreEntries.toLocaleString()} lore</span>
+              <span>{summary.totals.loreEntries.toLocaleString()} คลังความจำ</span>
               <span>{summary.totals.favorites.toLocaleString()} ถูกใจ</span>
               <span>${Number(summary.totals.cost).toFixed(6)}</span>
             </div>
@@ -60,7 +68,7 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
                   <span className="truncate text-slate-500">
                     {character.chatCount} แชท · {character.viewCount} เข้าชม · {character.favoriteCount} ถูกใจ
                   </span>
-                  <span className="font-bold text-slate-400">{character.status}</span>
+                  <span className="font-bold text-slate-400">{characterStatusLabels[character.status ?? ''] ?? character.status ?? 'ไม่ทราบ'}</span>
                 </div>
               ))}
             </div>
@@ -68,7 +76,7 @@ export function AdminSummary({ summary, onRefresh }: AdminSummaryProps) {
         </>
       ) : (
         <p className="m-0 rounded-lg border border-dashed border-slate-900/15 bg-white/60 p-3 text-sm text-slate-500">
-          ยังไม่มีข้อมูล dashboard
+          ยังไม่มีข้อมูลแดชบอร์ด
         </p>
       )}
     </section>

@@ -71,6 +71,7 @@ Results:
 - Frontend API fallback error wording now passes Thai-first coverage via `frontend:static:audit:test` and full `frontend:check`.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.
 - `frontend:static:audit:test` now also blocks stale English chat-selection accessibility labels such as `Select chat`.
+- Admin summary Thai status labels now pass full `frontend:check`.
 - `frontend:static:audit:test` now also blocks stale mixed Creator Studio copy such as `image provider`, `production ควรตั้งค่า`, `Lobby ดูน่ากด`, `แกน prompt`, and `backend ช่วยร่าง`.
 - `frontend:static:audit:test` now also blocks stale mixed Admin Health operational copy such as `backend ยังไม่พร้อมเต็ม`, `health response จาก backend`, `provider จริง`, `final gate`, and `mobile overflow`.
 - Creator Draft image-provider copy now passes focused backend coverage with Thai-first missing-provider, configured-failure, and billing-limit messages.
