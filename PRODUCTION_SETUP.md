@@ -1,27 +1,27 @@
-# Production Setup
+# ตั้งค่า Production
 
-This file lists the exact values needed before deploying Maprang outside local development.
+ไฟล์นี้สรุปค่าที่ต้องมีแบบชัดเจนก่อน deploy Maprang ออกจาก local development.
 
 ## Admin Key
 
-Generate a strong `ADMIN_API_KEY` locally and add it only to your hosting provider or secret manager:
+สร้าง `ADMIN_API_KEY` ที่ยาวและสุ่มจริงในเครื่อง แล้วนำไปใส่เฉพาะ hosting provider หรือ secret manager:
 
 ```bash
 bun -e "const b=new Uint8Array(32);crypto.getRandomValues(b);console.log([...b].map(x=>x.toString(16).padStart(2,'0')).join(''))"
 ```
 
-Do not commit real `.env` files. Add these values directly to the hosting provider or secret manager.
+ห้าม commit ไฟล์ `.env` จริง ให้ใส่ค่าเหล่านี้โดยตรงใน hosting provider หรือ secret manager.
 
 ## Backend Env
 
-Start from `apps/backend/.env.production.example`.
+เริ่มจาก `apps/backend/.env.production.example`.
 
-Required:
+ค่าที่จำเป็น:
 
 - `NODE_ENV=production`
 - `DATABASE_URL`
 - `OPENROUTER_API_KEY`
-- `CHAT_PROVIDER_LIVE_VERIFIED=1` only after live chat smoke passes
+- `CHAT_PROVIDER_LIVE_VERIFIED=1` ตั้งเฉพาะหลัง live chat smoke ผ่านจริง
 - `MODEL_TEMPERATURE=0.85`
 - `MODEL_MAX_OUTPUT_TOKENS=1600`
 - `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420`
@@ -41,7 +41,7 @@ Required:
 - `SUPABASE_SIGNED_URL_EXPIRES_IN=3600`
 - `IMAGE_GENERATION_API_KEY or OPENAI_API_KEY`
 
-Required for production Creator Studio image generation:
+ค่าที่จำเป็นสำหรับการสร้างรูปจริงใน Creator Studio บน production:
 
 - `IMAGE_GENERATION_API_KEY`
 - `IMAGE_GENERATION_MODEL`
@@ -49,75 +49,75 @@ Required for production Creator Studio image generation:
 - `IMAGE_GENERATION_QUALITY`
 - `IMAGE_GENERATION_OUTPUT_FORMAT`
 - `IMAGE_GENERATION_OUTPUT_COMPRESSION`
-- `IMAGE_GENERATION_LIVE_VERIFIED=1` only after live image smoke passes
+- `IMAGE_GENERATION_LIVE_VERIFIED=1` ตั้งเฉพาะหลัง live image smoke ผ่านจริง
 
 `DATABASE_URL` ต้องเป็น production Postgres URL จริงพร้อม `sslmode=require` ห้ามทิ้งค่าตัวอย่าง `USER:PASSWORD@HOST/DATABASE` ไว้ เพราะ `env:check` จะปฏิเสธค่า credential ตัวอย่าง, database แบบ localhost, และ URL production ที่ไม่มี `sslmode=require`.
 
-`OPENROUTER_API_KEY` powers creator text drafting and chat responses. It must be an OpenRouter key that starts with `sk-or-`, not an OpenAI `sk-proj-` key. Having a valid-looking key is not enough for production readiness: run `bun run smoke:chat` or `bun run api:smoke:live` against staging first, then set `CHAT_PROVIDER_LIVE_VERIFIED=1` only after the backend returns a real model reply with usage accounting. Real creator avatar generation is a separate image-provider path; if `IMAGE_GENERATION_API_KEY` is not configured, Creator Studio will still draft Thai character content but will label the avatar as a temporary system placeholder.
+`OPENROUTER_API_KEY` ใช้สำหรับร่างข้อความใน Creator Studio และตอบแชท ต้องเป็น key ของ OpenRouter ที่ขึ้นต้นด้วย `sk-or-` ไม่ใช่ OpenAI key แบบ `sk-proj-`. แค่ key หน้าตาถูกต้องยังไม่พอสำหรับ production readiness: ให้รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging ก่อน แล้วตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` เฉพาะหลัง backend คืนคำตอบจริงจากโมเดลพร้อม usage accounting. การสร้าง avatar จริงเป็นคนละเส้นทางกับ image provider; ถ้าไม่ได้ตั้ง `IMAGE_GENERATION_API_KEY`, Creator Studio ยังร่างเนื้อหาตัวละครภาษาไทยได้ แต่จะระบุว่ารูปเป็น placeholder ชั่วคราวของระบบ.
 
-`MODEL_TEMPERATURE`, `MODEL_MAX_OUTPUT_TOKENS`, and `MODEL_MIN_ROLEPLAY_REPLY_CHARS` control chat feel. Keep `MODEL_MAX_OUTPUT_TOKENS` around `1600` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS` around `420` for roleplay so bots have room to answer with 4-6 short paragraphs instead of one-line replies. `deploy:doctor` fails production env below the baseline `MODEL_MAX_OUTPUT_TOKENS=1200` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320`, because lower values make live roleplay QA too easy to pass with thin replies. If a character response is shorter than this guard and the player did not ask for brevity, the backend makes one continuation pass and charges the combined usage.
+`MODEL_TEMPERATURE`, `MODEL_MAX_OUTPUT_TOKENS`, และ `MODEL_MIN_ROLEPLAY_REPLY_CHARS` คุมจังหวะและความยาวแชท แนะนำให้ใช้ `MODEL_MAX_OUTPUT_TOKENS` ใกล้ `1600` และ `MODEL_MIN_ROLEPLAY_REPLY_CHARS` ใกล้ `420` สำหรับ roleplay เพื่อให้บอทมีพื้นที่ตอบ 4-6 ย่อหน้าสั้น แทนการตอบบรรทัดเดียว. `deploy:doctor` จะ fail production env ที่ต่ำกว่า baseline `MODEL_MAX_OUTPUT_TOKENS=1200` และ `MODEL_MIN_ROLEPLAY_REPLY_CHARS=320` เพราะค่าที่ต่ำกว่านั้นทำให้ live roleplay QA ผ่านง่ายเกินด้วยคำตอบบาง ๆ. ถ้าคำตอบตัวละครสั้นกว่า guard นี้และผู้เล่นไม่ได้ขอให้ตอบสั้น backend จะทำ continuation pass หนึ่งครั้งและคิด usage รวม.
 
-`CHAT_PROVIDER_RETRY_*` and `CREATOR_DRAFT_RETRY_*` make provider failures less brittle during traffic spikes or truncated JSON responses. The defaults retry chat twice and creator drafting three times with a short delay, while still failing fast for credential, billing, and policy errors.
+`CHAT_PROVIDER_RETRY_*` และ `CREATOR_DRAFT_RETRY_*` ทำให้ provider failures ทนขึ้นตอน traffic spike หรือ JSON ตอบกลับถูกตัด ค่า default จะ retry แชท 2 ครั้งและ creator draft 3 ครั้งพร้อม delay สั้น ๆ แต่ยัง fail เร็วสำหรับ credential, billing, และ policy errors.
 
 สำหรับ production ให้ตั้งค่า OpenAI image key จริงก่อนเปิด Creator Studio ให้ผู้ใช้ทั่วไป backend จะเรียก OpenAI Images endpoint แล้วอัปโหลด avatar ที่สร้างผ่าน pipeline เก็บรูปชุดเดียวกับระบบ avatar.
 การมี image key อย่างเดียวไม่พอสำหรับ production readiness เพราะ billing หรือ quota ของผู้ให้บริการยัง fail ได้ ให้รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging หรือ production ก่อน `api:smoke:live` อาจเตือนว่า `/ready` ยังรอ chat/image live verification ซึ่งเป็นเรื่องปกติของรอบตรวจแรกก่อนตั้ง flag ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image call ผ่านเท่านั้น แล้ว rerun production gate สุดท้าย.
 ถ้า live image smoke รายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` จุดแก้อยู่ที่บัญชีผู้ให้บริการสร้างรูป: เพิ่มหรือรีเซ็ตวงเงิน/โควตา แล้ว rerun live smoke เดิม ให้คง `IMAGE_GENERATION_LIVE_VERIFIED=0` จนกว่ารอบ rerun จะคืนรูปที่สร้างจริงแบบ configured แทน placeholder.
 
-After adding backend env values, validate them:
+หลังเพิ่ม backend env แล้ว ให้ตรวจค่าด้วย:
 
 ```bash
 cd apps/backend
 bun run env:check
 ```
 
-To validate backend and frontend env files together without printing secret values, run this from the repo root:
+ถ้าต้องการตรวจ backend และ frontend env พร้อมกันโดยไม่พิมพ์ secret values ให้รันจาก repo root:
 
 ```bash
 bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/frontend/.env
 ```
 
-`deploy:doctor` catches common production mistakes before deploy, including Supabase dashboard URLs, mismatched anon keys, service role keys accidentally placed in frontend env, local/non-https CORS origins, OpenAI/OpenRouter key mixups, missing `sslmode=require`, and image generation that has not been live-verified yet. During early staging you can add `--allow-unverified-image` only while you are still waiting to run `smoke:image:live`.
+`deploy:doctor` จับ production mistakes ที่พบบ่อยก่อน deploy เช่น Supabase dashboard URLs, anon key ไม่ตรงกัน, service role key หลุดไปอยู่ frontend env, local/non-https CORS origins, สลับ OpenAI/OpenRouter key, ขาด `sslmode=require`, และ image generation ที่ยังไม่ได้ live-verified. ช่วง early staging สามารถเพิ่ม `--allow-unverified-image` ได้เฉพาะตอนที่ยังรอรัน `smoke:image:live`.
 
 ## Frontend Env
 
-Start from `apps/frontend/.env.production.example`.
+เริ่มจาก `apps/frontend/.env.production.example`.
 
-Required:
+ค่าที่จำเป็น:
 
 - `VITE_API_BASE_URL`
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
-All `VITE_*` values are compiled into the frontend bundle at build time.
+ค่า `VITE_*` ทั้งหมดจะถูก compile เข้า frontend bundle ตอน build.
 
 ## Supabase Setup
 
-1. Create a Supabase project.
-2. Copy the project URL to `SUPABASE_URL` and `VITE_SUPABASE_URL`.
-3. Set `SUPABASE_JWT_ISSUER` to `<SUPABASE_URL>/auth/v1`.
-4. Copy the anon public key to `VITE_SUPABASE_ANON_KEY` and backend `SUPABASE_ANON_KEY`.
-5. Copy the service role key to backend-only `SUPABASE_SERVICE_ROLE_KEY`.
-6. Create a storage bucket named `avatars`.
-7. Set `SUPABASE_STORAGE_BUCKET=avatars`.
-8. Choose storage access:
-   - Production: private bucket with `SUPABASE_STORAGE_ACCESS=signed`.
-   - Development only: public buckets are supported by code, but production readiness fails until signed URLs are used.
+1. สร้าง Supabase project.
+2. คัดลอก project URL ไปใส่ `SUPABASE_URL` และ `VITE_SUPABASE_URL`.
+3. ตั้ง `SUPABASE_JWT_ISSUER` เป็น `<SUPABASE_URL>/auth/v1`.
+4. คัดลอก anon public key ไปใส่ `VITE_SUPABASE_ANON_KEY` และ backend `SUPABASE_ANON_KEY`.
+5. คัดลอก service role key ไปใส่เฉพาะ backend-only `SUPABASE_SERVICE_ROLE_KEY`.
+6. สร้าง storage bucket ชื่อ `avatars`.
+7. ตั้ง `SUPABASE_STORAGE_BUCKET=avatars`.
+8. เลือกรูปแบบ storage access:
+   - Production: bucket private พร้อม `SUPABASE_STORAGE_ACCESS=signed`.
+   - Development only: code รองรับ public buckets ได้ แต่ production readiness จะ fail จนกว่าจะใช้ signed URLs.
 
-After the Supabase project is active and backend Supabase env values are available locally, you can let the repo verify or create the bucket:
+หลัง Supabase project พร้อมและ backend Supabase env ใช้ได้ในเครื่อง ให้ repo ตรวจหรือสร้าง bucket ได้ด้วย:
 
 ```bash
 bun run supabase:storage:setup
 ```
 
-This command keeps the bucket private, uploads a tiny smoke image, creates a signed URL, fetches it, and cleans the object up. For a non-mutating check, run:
+คำสั่งนี้จะคง bucket เป็น private, อัปโหลด smoke image ขนาดเล็ก, สร้าง signed URL, fetch URL นั้น, แล้วลบ object ทิ้ง ถ้าต้องการตรวจแบบไม่แก้ข้อมูล ให้รัน:
 
 ```bash
 bun run supabase:storage:check
 ```
 
-Current implementation stores stable backend avatar URLs such as `/uploads/avatars/<filename>`. The backend serves local files in development and redirects to Supabase public or signed URLs in production.
+implementation ปัจจุบันเก็บ stable backend avatar URLs เช่น `/uploads/avatars/<filename>`. Backend จะ serve local files ใน development และ redirect ไป Supabase public หรือ signed URLs ใน production.
 
-Keep RLS enabled on the public app tables. Supabase Advisor may show `RLS Enabled No Policy` as an INFO notice; that is expected while the frontend uses the backend API instead of direct Supabase table access. Add explicit RLS policies only if you intentionally expose an app table to `anon` or `authenticated` through the Supabase Data API.
+เปิด RLS ไว้บน public app tables. Supabase Advisor อาจแสดง `RLS Enabled No Policy` เป็น INFO notice ซึ่งเป็นเรื่องปกติเมื่อ frontend ใช้ backend API แทนการเข้าตาราง Supabase โดยตรง. เพิ่ม explicit RLS policies เฉพาะกรณีตั้งใจ expose app table ให้ `anon` หรือ `authenticated` ผ่าน Supabase Data API.
 
 ## Deployment Order
 

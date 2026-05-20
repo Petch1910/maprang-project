@@ -288,7 +288,7 @@ const checks: Check[] = [
           'SUPABASE_STORAGE_ACCESS=signed',
           'bun run supabase:storage:setup',
           'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY',
-          'private bucket with `SUPABASE_STORAGE_ACCESS=signed`',
+          'Production: bucket private พร้อม `SUPABASE_STORAGE_ACCESS=signed`',
           'RELEASE_HANDOFF.md',
           '/ready',
         ],
