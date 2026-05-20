@@ -26,7 +26,7 @@ Last updated: 2026-05-20
 สถานะ: static/unit/build QA พร้อมแล้ว; final local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
 Verified:
-- Latest full `qa:repo` after documentation command audit passes; backend tests pass 157 tests with 506 expects, docs command audit checks 189 references, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
+- Latest full `qa:repo` after documentation command audit passes; backend tests pass 157 tests with 506 expects, docs command audit checks 189 จุดอ้างอิง, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
 - Latest full `qa:local` attempt reached final runtime smoke and then failed because Docker Desktop/Postgres plus backend `http://127.0.0.1:3000` were not running in this desktop session.
 - Latest direct `deploy:status` also fails at backend root preflight for the same reason: `http://127.0.0.1:3000` is not running.
 - Backend tests pass: 157 pass, 0 fail, 506 expects.

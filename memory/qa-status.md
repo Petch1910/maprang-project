@@ -4,7 +4,7 @@ Last updated: 2026-05-20
 
 ## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-20
 
-- Documentation command audit pass: `bun run docs:commands`, `bun run docs:commands:test`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `git diff --check` ผ่านหลังเพิ่ม gate ตรวจ `bun run ...` ในเอกสารหลัก 189 references.
+- Documentation command audit pass: `bun run docs:commands`, `bun run docs:commands:test`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `git diff --check` ผ่านหลังเพิ่ม gate ตรวจ `bun run ...` ในเอกสารหลัก 189 จุดอ้างอิง.
 - `qa:repo`, CI, และ Production Smoke ตอนนี้รัน `docs:commands` กับ `docs:commands:test` เพื่อกัน command drift ระหว่าง root package, backend package, frontend package, และเอกสาร deploy/handoff.
 - Predeploy command-doc integration pass: `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run docs:commands:test` ผ่านหลังให้ `predeploy:check` เรียก `collectDocsCommandAuditResult` โดยตรง.
 - Golden roleplay eval fixture Thai-first pass: `bun run eval:local`, `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังแปล `evals/golden-roleplay.json`.
@@ -26,7 +26,7 @@ Last updated: 2026-05-20
 
 สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
-ล่าสุด `bun run qa:repo` ผ่านครบหลังเพิ่ม documentation command audit: docs command audit ตรวจ 189 references, import-cycle audit ตรวจ 125 source files / 278 import edges, backend 157 pass, 0 fail, 506 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.4KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
+ล่าสุด `bun run qa:repo` ผ่านครบหลังเพิ่ม documentation command audit: docs command audit ตรวจ 189 จุดอ้างอิง, import-cycle audit ตรวจ 125 source files / 278 import edges, backend 157 pass, 0 fail, 506 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.4KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
 
 คำสั่งที่ยืนยันแล้ว:
 - `bun run qa:local`

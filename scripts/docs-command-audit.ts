@@ -129,7 +129,7 @@ export async function collectDocsCommandAuditResult(
     .filter((reference) => !packageScripts[reference.context].has(reference.script))
     .map(
       (reference) =>
-        `${reference.file}:${reference.line} อ้าง \`bun run ${reference.script}\` ใน context \`${reference.context}\` แต่ package นั้นไม่มี script นี้`,
+        `${reference.file}:${reference.line} อ้าง \`bun run ${reference.script}\` ในบริบท package \`${reference.context}\` แต่ package นั้นไม่มี script นี้`,
     )
 
   return {
@@ -150,7 +150,7 @@ export async function runDocsCommandAudit(
     return 1
   }
 
-  writeLine(`ผ่าน - ตรวจคำสั่งในเอกสารแล้ว (${result.checkedReferences} references)`)
+  writeLine(`ผ่าน - ตรวจคำสั่งในเอกสารแล้ว (${result.checkedReferences} จุดอ้างอิง)`)
   return 0
 }
 
