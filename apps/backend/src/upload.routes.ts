@@ -13,7 +13,7 @@ export const uploadRoutes = new Elysia()
     try {
       uploaded = await uploadAvatarFile({ file, origin: new URL(request.url).origin })
     } catch (error) {
-      console.error('Avatar upload failed:', error)
+      console.error('อัปโหลด avatar ไม่สำเร็จ:', error)
       set.status = 502
       return { error: 'avatar_storage_unavailable', message: avatarStorageMessages.unavailable }
     }
@@ -46,7 +46,7 @@ export const uploadRoutes = new Elysia()
 
       return file
     } catch (error) {
-      console.error('Avatar resolve failed:', error)
+      console.error('โหลด avatar ไม่สำเร็จ:', error)
       set.status = 502
       return { error: 'avatar_storage_unavailable', message: avatarStorageMessages.unavailable }
     }

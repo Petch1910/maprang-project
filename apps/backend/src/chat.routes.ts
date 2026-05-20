@@ -71,7 +71,7 @@ export const chatRoutes = new Elysia()
           }
         }
 
-        console.error('Chat error:', error)
+        console.error('แชทไม่สำเร็จ:', error)
         return {
           reply: 'บริการ AI ขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง',
           chatId: responseChatId(body.chatId),
