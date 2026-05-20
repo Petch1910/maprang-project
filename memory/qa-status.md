@@ -2,6 +2,10 @@
 
 Last updated: 2026-05-20
 
+## Repo-owned QA update 2026-05-20
+
+- Golden roleplay eval fixture Thai-first pass: `bun run eval:local`, `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังแปล `evals/golden-roleplay.json`.
+
 ## Gate local ล่าสุด
 
 สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
