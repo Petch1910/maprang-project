@@ -82,6 +82,28 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches direct raw error object logging', () => {
+    expect(
+      messagesFor(`
+        try {
+          await seed()
+        } catch (error) {
+          console.error(error)
+        }
+      `, 'prisma/seed.ts'),
+    ).toContain('ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.')
+
+    expect(
+      messagesFor(`
+        try {
+          await seed()
+        } catch (error) {
+          console.error(summarizeSeedError(error))
+        }
+      `, 'prisma/seed.ts'),
+    ).toEqual([])
+  })
+
   test('catches admin routes without admin api key guards', () => {
     expect(
       messagesFor(`

@@ -71,6 +71,10 @@ const patterns = [
     pattern: /console\.(?:error|warn)\([^)\n]*providerFailure[^)\n]*,\s*error\b/g,
     message: 'ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.',
   },
+  {
+    pattern: /console\.error\(\s*error\s*\)/g,
+    message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
+  },
 ]
 
 export function collectBackendSecurityFindingsFromSource(file: string, content: string): BackendSecurityFinding[] {

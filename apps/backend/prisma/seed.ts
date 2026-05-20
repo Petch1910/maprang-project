@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
+import { summarizeSeedError } from './seed-error'
 
 if (!process.env.DATABASE_URL) {
   throw new Error('ต้องตั้ง DATABASE_URL ก่อน seed ฐานข้อมูล')
@@ -148,7 +149,7 @@ try {
   await main()
 } catch (error) {
   console.error('seed ข้อมูลพื้นฐานไม่สำเร็จ:')
-  console.error(error)
+  console.error(summarizeSeedError(error))
   process.exit(1)
 } finally {
   await prisma.$disconnect()
