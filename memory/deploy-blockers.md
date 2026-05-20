@@ -6,7 +6,7 @@
 
 ### URL ของระบบหลังบ้านและหน้าบ้าน
 
-สถานะ: ยังติดอยู่จนกว่าจะมี hosting สำหรับ staging/production จริง
+สถานะ: ยังติดอยู่จนกว่าจะมี hosting สำหรับสเตจจิง/โปรดักชันจริง
 
 ปัญหาปัจจุบัน:
 - smoke environment ยังชี้ไปที่ URL local ของ backend/frontend.
@@ -27,14 +27,14 @@ guard ใน repo:
 สถานะ: ยังต้องยืนยันกับ staging
 
 ปัญหาปัจจุบัน:
-- live chat smoke เคยได้คำตอบจริงจากโมเดล พร้อม token usage และ wallet debit แล้วหนึ่งรอบ
-- live chat smoke รอบถัดมาวิ่งเข้าทาง provider failure
+- การทดสอบแชทจริงเคยได้คำตอบจริงจากโมเดล พร้อมข้อมูลโทเคนที่ใช้และ wallet debit แล้วหนึ่งรอบ
+- การทดสอบแชทจริงรอบถัดมาวิ่งเข้าทาง provider failure
 - provider failure ถูกจัดประเภทเป็น `usage.providerFailure` แล้ว แต่เส้นทาง live provider ยังต้องผ่าน staging smoke แบบสะอาดก่อน production
 - smoke doctor รอบ local ล่าสุดยังรายงาน `chatStatus=needs_live_smoke` และ `chatLiveVerified=false`
 
 สิ่งที่ต้องทำ:
 - รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging.
-- ยืนยันว่ามีคำตอบจริงจากโมเดล, `chatId`, token usage, และรายการ wallet ชนิด `CHAT_USAGE` ที่ตรงกัน
+- ยืนยันว่ามีคำตอบจริงจากโมเดล, `chatId`, ข้อมูลโทเคนที่ใช้, และรายการ wallet ชนิด `CHAT_USAGE` ที่ตรงกัน
 - ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` เฉพาะ environment นั้นหลัง smoke ผ่านจริงเท่านั้น
 
 ### การยืนยัน live image provider
@@ -42,7 +42,7 @@ guard ใน repo:
 สถานะ: ติดบัญชี/โควตาของ provider
 
 ปัญหาปัจจุบัน:
-- `bun run smoke:image:live` fallback เป็น placeholder เพราะผู้ให้บริการสร้างรูปรายงาน billing hard limit
+- `bun run smoke:image:live` ถอยกลับเป็นภาพตัวอย่าง เพราะผู้ให้บริการสร้างรูปรายงาน billing hard limit
 - smoke doctor รอบ local ล่าสุดยังรายงาน `imageStatus=needs_live_smoke` และ `imageLiveVerified=false`
 
 สิ่งที่ต้องทำ:

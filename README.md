@@ -19,7 +19,7 @@ cp apps/backend/.env.example apps/backend/.env
 ใส่ `OPENROUTER_API_KEY`. ค่า Supabase เป็น optional สำหรับ local dev. Avatar uploads จะใช้ local disk เป็นค่าเริ่มต้น และจะเปลี่ยนไปใช้ Supabase Storage เมื่อมี `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, และ `SUPABASE_STORAGE_BUCKET`.
 อย่า track ไฟล์ `.env` และ `.env.*` จริงใน git. Repo อนุญาตเฉพาะ env templates เช่น `.env.example` และ `.env.production.example`; `secrets:check` จะ fail ถ้ามี tracked `.env` จริง.
 
-Creator Studio ร่างเนื้อหาตัวละครภาษาไทยผ่าน OpenRouter ได้. การสร้าง AI avatar จริงเป็น optional และต้องมี `IMAGE_GENERATION_API_KEY`; ถ้าไม่มี key ระบบจะใช้ placeholder image ชั่วคราวที่ระบุชัด แต่ยังเติม character fields ให้ได้.
+Creator Studio ร่างเนื้อหาตัวละครภาษาไทยผ่าน OpenRouter ได้. การสร้าง AI avatar จริงเป็นตัวเลือกเสริมและต้องมี `IMAGE_GENERATION_API_KEY`; ถ้าไม่มี key ระบบจะใช้ภาพตัวอย่างชั่วคราวที่ระบุชัด แต่ยังเติม character fields ให้ได้.
 
 3. ตั้งค่า Frontend env:
 
@@ -236,7 +236,7 @@ bun run smoke:live
 bun run production:check
 ```
 
-คำสั่งนี้จะรัน production health gate แบบเข้ม, Supabase signed-avatar storage smoke, และ live API smoke รวมถึง real chat กับ real image-generation checks ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็น placeholder เพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะล้ม.
+คำสั่งนี้จะรัน production health gate แบบเข้ม, Supabase signed-avatar storage smoke, และ live API smoke รวมถึงการตรวจแชทจริงกับการสร้างรูปจริง ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็นภาพตัวอย่างเพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะล้ม.
 script จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้สรุป blocker และ next steps แสดงก่อน gate เข้ม fail.
 
 ถ้าต้องการตรวจ repo-owned surfaces ทั้งหมดก่อน final live provider/domain gate ให้รัน:

@@ -61,7 +61,7 @@ bun run smoke:image:live
 ## ห้ามทำ
 
 - ห้ามตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จาก local smoke ที่ถูก skip.
-- ห้ามตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ขณะที่ image generation ยัง fallback เป็น placeholder.
+- ห้ามตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ขณะที่ image generation ยังถอยกลับเป็นภาพตัวอย่าง.
 - ห้าม deploy ด้วย CORS ที่เป็น local หรือไม่ใช่ HTTPS.
 - ห้ามวาง secrets ลงในไฟล์ memory.
 - อย่าชี้ `qa:local` หรือ backend tests ที่ใช้ DB ไปยัง production data ยกเว้นตั้งใจสร้าง test record จริง.

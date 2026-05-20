@@ -20,7 +20,7 @@ bun run qa:local
 
 `qa:local` ใช้ `qa:repo` เป็นฐานก่อน แล้วค่อยเพิ่ม runtime smoke ที่ต้องมี backend/Postgres จริง ได้แก่ `smoke:doctor`, `smoke:local`, และ `api:smoke`.
 
-Gate นี้ไม่เรียก live AI provider. มันตรวจ committed secrets, committed-secret scan path regressions, API route coverage mapping, import-cycle architecture regressions, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend API error-message regressions, frontend bundle/static/route และ route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, live chat smoke validation regressions, local smoke helper regressions, command plan ของ e2e smoke ฝั่งเบราว์เซอร์, predeploy guard wiring regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, และ avatar upload. Local API smoke ยังส่ง `skipImageProvider=true` สำหรับ creator draft checks จึงตรวจ endpoint shape ได้โดยไม่ใช้เครดิตสร้างรูป; live image generation อยู่ใน `api:smoke:live`, `smoke:image:live`, และ `production:check`.
+Gate นี้ไม่เรียก live AI provider. มันตรวจ committed secrets, committed-secret scan path regressions, API route coverage mapping, import-cycle architecture regressions, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend API error-message regressions, frontend bundle/static/route และ route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, validation ของการทดสอบแชทจริง, local smoke helper regressions, command plan ของ e2e smoke ฝั่งเบราว์เซอร์, predeploy guard wiring regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, และ avatar upload. Local API smoke ยังส่ง `skipImageProvider=true` สำหรับ creator draft checks จึงตรวจ endpoint shape ได้โดยไม่ใช้เครดิตสร้างรูป; live image generation อยู่ใน `api:smoke:live`, `smoke:image:live`, และ `production:check`.
 Real `.env` และ `.env.*` files ต้องไม่ถูก track. `secrets:check` จะ ignore local untracked env files เพื่อความสะดวกของ developer แต่จะ fail ถ้าไฟล์นั้นถูก commit หรือ tracked.
 
 ถ้าต้องการตรวจ backend API coverage โดยไม่รัน full suite:
@@ -76,7 +76,7 @@ bun run e2e:smoke
 
 `e2e:smoke` เปิด home page, Character Lobby, Creator Studio, My Chats, Events, Profile, Wallet, Moderation,
 `/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, และ seeded chat ทั้งเดสก์ท็อป/มือถือ. มันยังตรวจ Character Lobby relationship contract, chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow เมื่อมี admin key,
-route rendering, browser console errors, และ horizontal overflow. มันไม่ส่งข้อความแชทจริง จึงไม่ใช้เครดิตผู้ให้บริการตอน UI smoke testing.
+route rendering, ข้อผิดพลาดในคอนโซล/หน้าเบราว์เซอร์, และการล้นแนวนอน. มันไม่ส่งข้อความแชทจริง จึงไม่ใช้เครดิตผู้ให้บริการตอน UI smoke testing.
 
 สำหรับ full local predeploy gate พร้อมการตรวจเบราว์เซอร์:
 
@@ -168,7 +168,7 @@ bun run deploy:check
 bun run smoke:doctor
 ```
 
-`smoke:doctor` ผ่านได้สำหรับ local development แต่ยังพิมพ์ `productionReady`, `productionBlockerCount`, `productionBlockers`, และ `nextSteps` ตามลำดับไว้ให้ดูเสมอ ให้ถือ blocker เหล่านั้นเป็นงานของ staging/production แล้วค่อยยืนยันด้วย `smoke:ready` กับ backend URL จริง.
+`smoke:doctor` ผ่านได้สำหรับ local development แต่ยังพิมพ์ `productionReady`, `productionBlockerCount`, `productionBlockers`, และ `nextSteps` ตามลำดับไว้ให้ดูเสมอ ให้ถือ blocker เหล่านั้นเป็นงานของสเตจจิง/โปรดักชัน แล้วค่อยยืนยันด้วย `smoke:ready` กับ backend URL จริง.
 มันยังพิมพ์ `securityPosture` เพื่อให้เห็นเร็วว่า CIA/AAA checks ตอนนี้พร้อมกี่ข้อ.
 ถ้า `/health` รายงาน production env ไม่ถูกต้อง `smoke:doctor` จะพิมพ์ `missingRequired` และ `invalidEnv` ด้วย เพื่อให้เห็นทางแก้ก่อน `/ready` ล้ม.
 
@@ -191,7 +191,7 @@ bun run smoke:chat
 `smoke:chat` และ `api:smoke:live` จะเช็ก `/me/usage` ก่อนเรียกผู้ให้บริการ AI จริง ผู้ใช้ smoke ต้องมี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` เพื่อให้การทดสอบหยุดก่อนใช้เครดิตผู้ให้บริการถ้าบัญชียังเติมไม่พอ `smoke:chat` เหมาะสำหรับ retry/debug เฉพาะทาง ส่วน gate สุดท้ายให้ใช้ `production:check`
 
 ถ้า `smoke:chat` รายงาน `usage.providerFailure` แปลว่าแอป ฐานข้อมูล และเส้นทางแชทติดต่อได้แล้ว แต่ backend ยังเรียกผู้ให้บริการภายนอกไม่สำเร็จ ให้ตรวจการเชื่อมต่อออกไป `https://openrouter.ai`, `OPENROUTER_API_KEY`, เครดิตกับโควตา, สิทธิ์โมเดลที่เลือก, และ log ระบบหลังบ้าน.
-อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่า live chat smoke จะได้คำตอบจริงจากโมเดล, `chatId`, token usage, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน.
+อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่าการทดสอบแชทจริงจะได้คำตอบจริงจากโมเดล, `chatId`, ข้อมูลโทเคนที่ใช้, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน.
 
 ตรวจว่าตั้งค่าผู้ให้บริการสร้างรูปไว้แล้วโดยยังไม่ใช้เครดิตสร้างรูป:
 
@@ -199,13 +199,13 @@ bun run smoke:chat
 bun run smoke:image
 ```
 
-ถ้าต้องการสร้าง avatar จริงหนึ่งรูปบน staging/production ผ่านผู้ให้บริการที่ตั้งค่าไว้ ให้ opt in ชัดเจน:
+ถ้าต้องการสร้าง avatar จริงหนึ่งรูปบนสเตจจิง/โปรดักชันผ่านผู้ให้บริการที่ตั้งค่าไว้ ให้ opt in ชัดเจน:
 
 ```bash
 bun run smoke:image:live
 ```
 
-ค่าเริ่มต้นของ `smoke:image` จะตรวจแค่ `/health` ถ้าใช้ `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1` ระบบจะเรียก `/creator/ai-draft`, คาดหวัง `image.provider="configured"`, และ fail ถ้า Creator Studio ถอยกลับไปใช้ภาพ placeholder ในเครื่อง โหมด live นี้อาจใช้ทั้งเครดิตข้อความและเครดิตสร้างรูป.
+ค่าเริ่มต้นของ `smoke:image` จะตรวจแค่ `/health` ถ้าใช้ `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1` ระบบจะเรียก `/creator/ai-draft`, คาดหวัง `image.provider="configured"`, และ fail ถ้า Creator Studio ถอยกลับไปใช้ภาพตัวอย่างในเครื่อง โหมด live นี้อาจใช้ทั้งเครดิตข้อความและเครดิตสร้างรูป.
 ถ้า live run รายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` อย่าเพิ่งตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ให้เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป, rerun `bun run smoke:image:live`, และ mark live verification เฉพาะหลังเส้นทางสร้างรูปจริงคืนค่า `image.provider="configured"`.
 
 สำหรับ backend ที่ deploy แล้ว ให้ชี้ smoke tests ไปที่ backend URL จริง และควรใช้ Supabase user token:
@@ -246,8 +246,8 @@ SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT=3000 SMOKE_API_BASE_URL=https://api.example.com
 - API smoke ยืนยัน chat menu mutations ด้วยการ rename seeded chat หนึ่งรายการ, archive, ตรวจ archived list, แล้ว restore กลับมาเป็น active chats.
 - API smoke ยืนยัน admin prompt inspection คืน redacted prompt snapshots, section accounting, และ prompt diffs.
 - Import-cycle audit ยืนยัน app และ QA source imports ไม่เกิด cycle.
-- Image smoke ยืนยัน backend root identity, Creator Studio image generation config, และ avatar ที่ generate แบบ live opt-in ไม่ถอยกลับเป็น placeholder.
-- Live chat smoke ยืนยัน backend root identity ก่อนใช้ provider credits แล้วตรวจ backend-to-OpenRouter chat, chat persistence, และ usage accounting.
+- Image smoke ยืนยัน backend root identity, Creator Studio image generation config, และ avatar ที่ generate แบบ live opt-in ไม่ถอยกลับเป็นภาพตัวอย่าง.
+- Live chat smoke ยืนยัน backend root identity ก่อนใช้เครดิตผู้ให้บริการ แล้วตรวจ backend-to-OpenRouter chat, chat persistence, และบัญชีการใช้งาน.
 
 Deploy checks ชุดเดียวกันยังรันใน GitHub Actions ผ่าน `.github/workflows/ci.yml`.
 CI ยังรัน seeded local backend smoke test และ build Docker images ของ backend/frontend โดยไม่ push images.
@@ -257,8 +257,8 @@ CI ยังรัน seeded local backend smoke test และ build Docker ima
 Workflow จะปฏิเสธ backend URL ที่เป็น local หรือไม่ใช่ https และต้องมี signed Supabase storage smoke secrets ก่อนถึงขั้นที่ใช้เครดิต provider.
 มันยังรัน `bun run predeploy:check`, `bun run predeploy:check:test`, secrets/secret-pattern/memory/knowledge/eval/security/API/menu audits พร้อม audit regression tests, `bun run release:handoff:check`, และ `bun run release:handoff:test` ก่อนตรวจ smoke configuration เพื่อจับ repository drift ก่อน storage/provider checks.
 Workflow พิมพ์ `bun run deploy:status` ก่อน strict production doctor เพื่อให้ log มี blocker details และ next steps อยู่ในที่เดียว.
-ทุก workflow run จะตรวจ admin summary, non-mutating wallet token validation, moderation report creation validation, moderation reports, non-mutating admin report validation, และ audit logs ผ่าน `SMOKE_ADMIN_API_KEY`. input เสริม `run_chat` จะตรวจ live AI provider path และใช้ provider credits ด้วย. input `min_token_balance_for_chat` map ไปที่ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` และค่าเริ่มต้นคือ `1000`.
-input เสริม `run_image` จะตรวจ live image provider path และใช้ image provider credits.
+ทุก workflow run จะตรวจ admin summary, non-mutating wallet token validation, moderation report creation validation, moderation reports, non-mutating admin report validation, และ audit logs ผ่าน `SMOKE_ADMIN_API_KEY`. input เสริม `run_chat` จะตรวจ live AI provider path และใช้เครดิตผู้ให้บริการด้วย. input `min_token_balance_for_chat` map ไปที่ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` และค่าเริ่มต้นคือ `1000`.
+input เสริม `run_image` จะตรวจ live image provider path และใช้เครดิตผู้ให้บริการสร้างรูป.
 เมื่อเปิดทั้ง `run_chat` และ `run_image` workflow จะใช้ `api:smoke:live` เพียงรอบเดียว เพื่อเช็ก chat กับ image พร้อมกันโดยไม่ยิง provider ซ้ำ.
 
 ## ค่า environment production ที่ต้องมี (Production Environment)
@@ -270,7 +270,7 @@ Backend:
 - `NODE_ENV=production`
 - `DATABASE_URL` เป็น Postgres production จริงพร้อม `sslmode=require`
 - `OPENROUTER_API_KEY` เป็น OpenRouter key ที่ขึ้นต้นด้วย `sk-or-`
-- `CHAT_PROVIDER_LIVE_VERIFIED=1` หลัง live chat smoke ผ่านจริง
+- `CHAT_PROVIDER_LIVE_VERIFIED=1` หลังการทดสอบแชทจริงผ่าน
 - `CORS_ORIGINS`
 - `ADMIN_API_KEY`
 
