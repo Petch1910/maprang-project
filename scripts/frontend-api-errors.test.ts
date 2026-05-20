@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { ApiError, streamChatMessage, type ChatStreamEvent } from '../apps/frontend/src/lib/api'
+import {
+  ApiError,
+  logUnexpectedError,
+  safeBrowserErrorSummary,
+  streamChatMessage,
+  type ChatStreamEvent,
+} from '../apps/frontend/src/lib/api'
 
 describe('frontend API errors', () => {
   test('prefers backend Thai user messages over machine-readable codes', () => {
@@ -79,5 +85,27 @@ describe('frontend API errors', () => {
         },
       },
     ])
+  })
+
+  test('summarizes browser errors before logging', () => {
+    expect(safeBrowserErrorSummary(new Error('secret-like-url https://example.invalid?token=leak'))).toEqual({
+      name: 'Error',
+    })
+    expect(safeBrowserErrorSummary('plain failure')).toEqual({ type: 'string' })
+
+    const originalConsoleError = console.error
+    const calls: unknown[][] = []
+    try {
+      console.error = (...args: unknown[]) => {
+        calls.push(args)
+      }
+
+      logUnexpectedError('โหลดข้อมูลไม่สำเร็จ:', new Error('secret-like-url https://example.invalid?token=leak'))
+      logUnexpectedError('api error should stay quiet', new ApiError('/chat', 500, { message: 'หลังบ้านไม่พร้อม' }))
+    } finally {
+      console.error = originalConsoleError
+    }
+
+    expect(calls).toEqual([['โหลดข้อมูลไม่สำเร็จ:', { name: 'Error' }]])
   })
 })

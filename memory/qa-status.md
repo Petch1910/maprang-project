@@ -377,3 +377,4 @@ Last updated: 2026-05-20
 - Frontend chat stream parser pass: เพิ่ม `frontend:api:test` ให้ `streamChatMessage` parse event ที่ถูกแบ่งข้าม network chunk ได้ครบทั้ง delta และ done usage.
 - Backend route log hardening pass: route แชทและอัปโหลดรูปตัวละคร log เฉพาะ `safeRouteErrorSummary` แทน raw error object และ security audit จะ fail ถ้า `.routes.ts` log `error` ดิบกลับมา.
 - Seed script log hardening pass: seed/QA seed สรุป error ก่อนเขียน log แทน `console.error(error)` และ backend security audit จะ fail ถ้า raw error object log กลับมาใน source.
+- Frontend console log hardening pass: เพิ่ม `logUnexpectedError` ให้ browser console log เฉพาะ summary ที่ปลอดภัย และ frontend static audit จะ fail ถ้า source กลับไป `console.error(..., error)` ดิบ.

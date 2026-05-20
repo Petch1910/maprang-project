@@ -184,6 +184,10 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {
+    pattern: /console\.error\([^)\n]*,\s*error\b/g,
+    message: 'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+  },
+  {
     pattern: /setNote\(\s*error\s+instanceof\s+Error\s*\?\s*error\.message/g,
     message: 'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
   },

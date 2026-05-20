@@ -5,7 +5,7 @@ import {
   createReport,
   fetchCharacter,
   fetchRelationshipPresets,
-  shouldLogUnexpectedError,
+  logUnexpectedError,
   type Character,
   type RelationshipPreset,
 } from '../lib/api'
@@ -96,7 +96,7 @@ export function CharacterLobbyPage() {
       .catch((error) => {
         if (cancelled) return
         setPresetError('ใช้รายการความสัมพันธ์สำรองในเครื่องอยู่')
-        if (shouldLogUnexpectedError(error)) console.error('โหลดชุดความสัมพันธ์เริ่มต้นไม่สำเร็จ:', error)
+        logUnexpectedError('โหลดชุดความสัมพันธ์เริ่มต้นไม่สำเร็จ:', error)
       })
       .finally(() => {
         if (!cancelled) setIsPresetLoading(false)

@@ -103,6 +103,7 @@ describe('frontend static audit', () => {
         eval(userInput)
         const fn = new Function(userInput)
         window.open(url, '_blank')
+        console.error('โหลดข้อมูลไม่สำเร็จ:', error)
       `,
       'RiskyFrontendFixture.tsx',
     )
@@ -113,6 +114,7 @@ describe('frontend static audit', () => {
       'ห้ามใช้ eval() ใน frontend source',
       'ห้ามใช้ new Function() ใน frontend source',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
     ])
   })
 

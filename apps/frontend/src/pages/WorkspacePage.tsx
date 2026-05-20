@@ -19,10 +19,10 @@ import {
   fetchHealthStatus,
   fetchLoreEntries,
   fetchUsageSummary,
+  logUnexpectedError,
   resetCharacterPrompt,
   sendChatMessage,
   setCharacterFavorite,
-  shouldLogUnexpectedError,
   streamChatMessage,
   trackCharacterView,
   updateCharacter,
@@ -73,7 +73,7 @@ function isExpectedUserApiError(error: unknown) {
 }
 
 function logUnexpectedWorkspaceError(label: string, error: unknown) {
-  if (shouldLogUnexpectedError(error)) console.error(label, error)
+  logUnexpectedError(label, error)
 }
 
 function hasStoredAdminKey() {

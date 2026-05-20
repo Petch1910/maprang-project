@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchRelationshipPresets, shouldLogUnexpectedError, type RelationshipPreset } from '../lib/api'
+import { fetchRelationshipPresets, logUnexpectedError, type RelationshipPreset } from '../lib/api'
 import { parseTags } from '../lib/tagAnalysis'
 
 export function RelationshipPresetPicker({
@@ -16,7 +16,7 @@ export function RelationshipPresetPicker({
     fetchRelationshipPresets()
       .then((data) => setPresets(data.presets))
       .catch((error) => {
-        if (shouldLogUnexpectedError(error)) console.error('โหลดพรีเซ็ตความสัมพันธ์ไม่สำเร็จ:', error)
+        logUnexpectedError('โหลดพรีเซ็ตความสัมพันธ์ไม่สำเร็จ:', error)
       })
   }, [])
 

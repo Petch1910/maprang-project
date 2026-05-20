@@ -6,8 +6,8 @@ import {
   ApiError,
   clearAdminApiKey,
   fetchUsageSummary,
+  logUnexpectedError,
   setAdminApiKey,
-  shouldLogUnexpectedError,
   type UsageSummary,
 } from '../lib/api'
 import { useAppDispatch } from '../store/hooks'
@@ -92,7 +92,7 @@ export function WalletPage() {
       dispatch(setTokenBalance(data.user.tokenBalance))
       setNote('ข้อมูลโทเคนอัปเดตแล้ว')
     } catch (error) {
-      if (shouldLogUnexpectedError(error)) console.error('โหลดกระเป๋าโทเคนไม่สำเร็จ:', error)
+      logUnexpectedError('โหลดกระเป๋าโทเคนไม่สำเร็จ:', error)
       setNote(errorMessage(error))
     } finally {
       setIsLoading(false)
@@ -120,7 +120,7 @@ export function WalletPage() {
       dispatch(setTokenBalance(data.user.tokenBalance))
       setNote(`${amount > 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(amount).toLocaleString()} โทเคนแล้ว`)
     } catch (error) {
-      if (shouldLogUnexpectedError(error)) console.error('ปรับโทเคนไม่สำเร็จ:', error)
+      logUnexpectedError('ปรับโทเคนไม่สำเร็จ:', error)
       setNote(
         error instanceof ApiError && error.status === 401
           ? 'ADMIN_API_KEY ไม่ถูกต้องหรือยังไม่ได้บันทึกในเบราว์เซอร์นี้'

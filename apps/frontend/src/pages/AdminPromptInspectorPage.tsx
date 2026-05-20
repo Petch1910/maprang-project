@@ -15,8 +15,8 @@ import {
   clearAdminApiKey,
   fetchCharacters,
   inspectAdminPrompt,
+  logUnexpectedError,
   setAdminApiKey,
-  shouldLogUnexpectedError,
   type Character,
   type PromptInspectorDiff,
   type PromptInspectorResponse,
@@ -189,7 +189,7 @@ export function AdminPromptInspectorPage() {
       setSelectedCharacterId((current) => current || rows[0]?.id || '')
       setNote(rows.length > 0 ? `โหลดตัวละครแล้ว ${rows.length} รายการ` : 'ยังไม่มีตัวละครให้ตรวจ')
     } catch (error) {
-      if (shouldLogUnexpectedError(error)) console.error('โหลดตัวละครสำหรับตรวจพรอมป์ไม่สำเร็จ:', error)
+      logUnexpectedError('โหลดตัวละครสำหรับตรวจพรอมป์ไม่สำเร็จ:', error)
       setCharacters([])
       setSelectedCharacterId('')
       setNote('โหลดตัวละครไม่สำเร็จ')
@@ -241,7 +241,7 @@ export function AdminPromptInspectorPage() {
       setResult(data)
       setNote(`ตรวจแล้ว ${data.snapshot.totals.sectionCount} ส่วน / ${data.snapshot.totals.estimatedTokens.toLocaleString()} โทเคน`)
     } catch (error) {
-      if (shouldLogUnexpectedError(error)) console.error('ตรวจพรอมป์ไม่สำเร็จ:', error)
+      logUnexpectedError('ตรวจพรอมป์ไม่สำเร็จ:', error)
       setResult(null)
       setNote(apiErrorMessage(error))
     } finally {

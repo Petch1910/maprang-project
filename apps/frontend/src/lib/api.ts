@@ -40,6 +40,15 @@ export function shouldLogUnexpectedError(error: unknown) {
   return true
 }
 
+export function safeBrowserErrorSummary(error: unknown) {
+  if (error instanceof Error) return { name: error.name || 'Error' }
+  return { type: typeof error }
+}
+
+export function logUnexpectedError(label: string, error: unknown) {
+  if (shouldLogUnexpectedError(error)) console.error(label, safeBrowserErrorSummary(error))
+}
+
 function localValue(key: string) {
   if (typeof window === 'undefined') return null
   return window.localStorage.getItem(key)
