@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   buildSmokeAuthHeaders,
+  formatFetchErrorReason,
   formatPayload,
   smokeApiBaseUrl,
   smokeTargetIsLocal,
@@ -42,6 +43,16 @@ describe('smoke helpers', () => {
     expect(tryParseJson('not json')).toBeNull()
     expect(formatPayload({ ok: false }, 'fallback')).toBe('{"ok":false}')
     expect(formatPayload(null, 'x'.repeat(600))).toHaveLength(500)
+  })
+
+  test('formats common fetch failures with Thai-first diagnostics', () => {
+    expect(formatFetchErrorReason(new Error('Unable to connect. Is the computer able to access the url?'))).toBe(
+      'เชื่อมต่อไม่ได้ ตรวจว่า backend เปิดอยู่และพอร์ตถูกต้อง',
+    )
+    expect(formatFetchErrorReason(new Error('operation timed out'))).toBe(
+      'หมดเวลารอการเชื่อมต่อ ตรวจ network หรือ backend',
+    )
+    expect(formatFetchErrorReason('custom upstream error')).toBe('custom upstream error')
   })
 
   test('validates backend root identity payloads', () => {

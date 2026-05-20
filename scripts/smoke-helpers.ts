@@ -50,7 +50,7 @@ export async function readJson<T>(path: string, init?: RequestInit): Promise<T> 
   try {
     response = await fetch(url, init)
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error)
+    const reason = formatFetchErrorReason(error)
     throw new Error(`ติดต่อ backend ที่ ${apiBaseUrl} ไม่สำเร็จ ให้เริ่ม backend ตรวจ SMOKE_API_BASE_URL แล้วลองใหม่ (${reason})`)
   }
 
@@ -76,4 +76,21 @@ export function tryParseJson(value: string) {
 export function formatPayload(payload: unknown, fallback: string) {
   if (payload) return JSON.stringify(payload)
   return fallback.slice(0, 500)
+}
+
+export function formatFetchErrorReason(error: unknown) {
+  const reason = error instanceof Error ? error.message : String(error)
+  const normalized = reason.toLowerCase()
+  if (
+    normalized.includes('unable to connect') ||
+    normalized.includes('econnrefused') ||
+    normalized.includes('connection refused') ||
+    normalized.includes('fetch failed')
+  ) {
+    return 'เชื่อมต่อไม่ได้ ตรวจว่า backend เปิดอยู่และพอร์ตถูกต้อง'
+  }
+  if (normalized.includes('timeout') || normalized.includes('timed out')) {
+    return 'หมดเวลารอการเชื่อมต่อ ตรวจ network หรือ backend'
+  }
+  return reason
 }
