@@ -25,7 +25,7 @@ Verified:
 - Route/menu document check diagnostics now use Thai-first output for missing navigation, missing audit/preload rows, weak status labels, stale mixed-language copy, and pass/fail summaries.
 - Frontend static audit now guards a focused set of English UI label regressions for Thai-first pages, including Admin Health, Prompt Inspector, Automated Evals, Relationship Contract, Chat budget, Supabase/Auth labels, and route/menu surface names.
 - Frontend static audit diagnostics now report Thai-first failure messages for button accessibility, placeholder controls, raw error exposure, ApiError fallback, mixed UI copy, mojibake, and stale Vite starter files.
-- Frontend static audit now also guards XSS/opener regressions such as `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, and `target="_blank"` links without `rel="noopener noreferrer"`.
+- Frontend static audit now also guards XSS/opener regressions such as `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, `window.open()`, and `target="_blank"` links without `rel="noopener noreferrer"`.
 - `ABUSE_QA_CHECKLIST.md` now gives a manual pre-release checklist for SQL-like input, broken access, auth spoofing, prompt control, frontend XSS/link safety, admin audit logs, token/rate limit, and storage/avatar abuse cases.
 - Frontend unexpected-error console labels across Workspace, Wallet, Admin Moderation, Prompt Inspector, Admin Evals, Character Lobby, and Relationship preset picker now use Thai-first diagnostics instead of `Load ... error` labels.
 - Frontend route audit and bundle budget CLI output now report Thai-first pass/fail guidance while keeping exact file, route, and chunk names for debugging.

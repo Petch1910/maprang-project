@@ -180,6 +180,10 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ new Function() ใน frontend source',
   },
   {
+    pattern: /\bwindow\.open\s*\(/g,
+    message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
+  },
+  {
     pattern: /setNote\(\s*error\s+instanceof\s+Error\s*\?\s*error\.message/g,
     message: 'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
   },

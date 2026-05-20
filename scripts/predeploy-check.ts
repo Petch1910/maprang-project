@@ -1054,6 +1054,7 @@ const checks: Check[] = [
           '\\.innerHTML\\s*=',
           '\\beval\\s*\\(',
           '\\bnew\\s+Function\\s*\\(',
+          '\\bwindow\\.open\\s*\\(',
           `targetValue === '_blank'`,
           'setNote\\(\\s*error\\s+instanceof\\s+Error\\s*\\?\\s*error\\.message',
           'state\\.error\\s*=\\s*action\\.error\\.message',
