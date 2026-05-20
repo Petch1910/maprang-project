@@ -59,6 +59,8 @@ describe('chat runtime state', () => {
       sceneNotes: [],
     })
     expect(runtime.memory.relationshipTimeline.at(-1)?.label).toBe('vulnerability')
+    expect(runtime.memory.relationshipTimeline.at(-1)?.summary).toContain('ผู้ใช้เปิดเผยความเปราะบาง')
+    expect(runtime.memory.relationshipTimeline.at(-1)?.summary).not.toContain('User shared vulnerability')
     expect(runtime.relationshipState.affinity).toBeGreaterThan(0)
     expect(runtime.relationshipState.trust).toBeGreaterThan(0)
   })
@@ -123,6 +125,7 @@ describe('chat runtime state', () => {
     expect(runtime.relationshipState.affinity).toBeGreaterThan(60)
     expect(runtime.relationshipState.trust).toBeGreaterThan(60)
     expect(runtime.memory.relationshipTimeline.at(-1)?.type).toBe('scene')
+    expect(runtime.memory.relationshipTimeline.at(-1)?.summary).toContain('จบด้วย outcome=accepted')
   })
 
   test('preserves explicit world state in runtime prompt context', () => {

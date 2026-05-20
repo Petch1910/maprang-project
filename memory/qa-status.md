@@ -312,3 +312,4 @@ Last updated: 2026-05-20
 - `predeploy:check` ตอนนี้ guard หัวข้อ prompt runtime ภาษาไทยใน Context Service และ Prompt Inspector Service พร้อม forbid heading อังกฤษเก่าใน source runtime.
 - Backend runtime prompt copy Thai-first pass: focused `chat.runtime.test.ts`, `scene.runtime.test.ts`, `creator-draft.service.test.ts`, `eval:local`, `predeploy:check:test`, full `backend:check` ผ่าน 151 tests / 473 expect calls, และ `predeploy:check`, `secrets:check`, `git diff --check` ผ่าน.
 - Relationship Engine hidden prompt Thai-first pass: focused `relationship.engine.test.ts`, `eval:local`, full `backend:check` ผ่าน 152 tests / 479 expect calls, และ `predeploy:check` guard บล็อก English relationship prompt labels เก่า.
+- Relationship timeline summary Thai-first pass: focused `chat.runtime.test.ts`, full `backend:check` ผ่าน 152 tests / 482 expect calls, และ `predeploy:check` guard บล็อก English timeline summary เก่า.

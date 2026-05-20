@@ -234,6 +234,11 @@ const checks: Check[] = [
       requireIncludes(config, ['คุณคือ Maprang', '4-6 ย่อหน้าสั้น', 'อย่างน้อย 5 ประโยคสมบูรณ์'], 'apps/backend/src/config.ts')
       requireIncludes(chatService, ['3-5 ย่อหน้าสั้น', 'ห้ามเขียนซ้ำข้อความก่อนหน้า'], 'apps/backend/src/chat.service.ts')
       requireIncludes(
+        chatService,
+        ['ผู้ใช้เปิดเผยความเปราะบาง', 'แรงกดดันจากผู้ใช้กระทบ trust/fear', 'จบด้วย outcome='],
+        'apps/backend/src/chat.service.ts',
+      )
+      requireIncludes(
         creatorDraftService,
         ['สร้างดราฟต์ตัวละครโรลเพลย์ภาษาไทยสำหรับ Maprang AI', 'ตอบเป็น JSON เท่านั้น', 'คุณคือผู้ออกแบบตัวละครภาษาไทยระดับ senior'],
         'apps/backend/src/creator-draft.service.ts',
@@ -265,7 +270,15 @@ const checks: Check[] = [
       )
       forbidIncludes(
         chatService,
-        ['2-4 short paragraphs', '3-5 short paragraphs', 'The previous assistant turn was too short', 'Do not repeat the previous text'],
+        [
+          '2-4 short paragraphs',
+          '3-5 short paragraphs',
+          'The previous assistant turn was too short',
+          'Do not repeat the previous text',
+          'User shared vulnerability',
+          'User pressure affected trust/fear',
+          'ended as',
+        ],
         'apps/backend/src/chat.service.ts',
       )
       forbidIncludes(

@@ -292,3 +292,4 @@ Verified:
 - `predeploy:check` เพิ่ม guard เพื่อบังคับหัวข้อพรอมป์ไทย-first ใน `context.service.ts` และ `prompt-inspector.service.ts` พร้อมกัน old English headings เช่น `Platform prompt-control policy`, `Runtime instructions`, `Runtime memory`, และ `User message` ไม่ให้กลับมาใน runtime source.
 - Backend runtime prompt copy สำหรับ default assistant, continuation instruction, Creator Draft, Scene Engine, และ local eval fixture ถูกปรับเป็น Thai-first แล้ว โดยยังคง schema keys, env names, และ command names เป็นอังกฤษเท่าที่จำเป็นต่อระบบ.
 - Relationship Engine hidden prompt guidance ตอนนี้ใช้ Thai-first สำหรับ prompt profile และ relationship state block แล้ว โดยยังคง machine values เช่น `status`, `tone`, `affinity`, และ hook codes ไว้เพื่อให้ระบบ parse/debug ได้เสถียร.
+- Relationship timeline summaries ที่ถูกบันทึกกลับเข้า runtime memory ตอนนี้เป็น Thai-first สำหรับ vulnerability, pressure, และ scene outcome summaries แล้ว.

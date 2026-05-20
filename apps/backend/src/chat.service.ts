@@ -816,7 +816,7 @@ function buildRelationshipTimeline({
       turn: turnCount,
       type: 'message',
       label: 'vulnerability',
-      summary: `User shared vulnerability while relationship is ${relationship.status}/${relationship.tone}.`,
+      summary: `ผู้ใช้เปิดเผยความเปราะบาง ขณะความสัมพันธ์อยู่ที่ ${relationship.status}/${relationship.tone}.`,
       createdAt: now,
     })
   }
@@ -826,7 +826,7 @@ function buildRelationshipTimeline({
       turn: turnCount,
       type: 'message',
       label: signals.threatening ? 'threatening-pressure' : 'negative-pressure',
-      summary: `User pressure affected trust/fear while relationship is ${relationship.status}.`,
+      summary: `แรงกดดันจากผู้ใช้กระทบ trust/fear ขณะความสัมพันธ์อยู่ที่ ${relationship.status}.`,
       createdAt: now,
     })
   }
@@ -836,7 +836,7 @@ function buildRelationshipTimeline({
       turn: turnCount,
       type: 'scene',
       label: latestOutcome.outcome,
-      summary: `${latestOutcome.title} ended as ${latestOutcome.outcome}.`,
+      summary: `ฉาก ${latestOutcome.title} จบด้วย outcome=${latestOutcome.outcome}.`,
       createdAt: now,
     })
   }
