@@ -73,7 +73,7 @@ export function buildSmokeDoctorReport(
     warnings.push('คำเตือน: OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า `smoke:local` อาจผ่านได้ แต่ `smoke:chat` จะไม่ผ่าน')
   }
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
-    warnings.push('คำเตือน: image generation provider ยังไม่ได้ตั้งค่า Creator Studio จะใช้ avatar placeholder')
+    warnings.push('คำเตือน: ยังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูป Creator Studio จะใช้ภาพตัวอย่างชั่วคราว')
   }
   if (health.model) {
     const maxOutputTokens = health.model.maxOutputTokens ?? 0

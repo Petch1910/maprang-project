@@ -96,6 +96,42 @@ describe('smoke doctor report', () => {
     expect(report.stderr.join('\n')).toContain('วิธีแก้ deploy:')
   })
 
+  test('warns with Thai-first copy when image generation provider is missing', () => {
+    const report = buildSmokeDoctorReport(
+      healthyPayload({
+        checks: {
+          databaseConfigured: true,
+          databaseConnected: true,
+          openRouterConfigured: true,
+          imageGenerationConfigured: false,
+        },
+        model: {
+          name: 'google/gemini-2.0-flash-001',
+          chatProvider: {
+            configured: true,
+            liveVerified: true,
+            productionReady: true,
+            status: 'verified',
+          },
+          imageGeneration: {
+            configured: false,
+            liveVerified: false,
+            productionReady: false,
+            status: 'missing_provider',
+          },
+        },
+      }),
+      {
+        apiBaseUrl: 'https://api.maprang.example',
+        isLocalSmokeTarget: false,
+      },
+    )
+
+    expect(report.warnings).toContain(
+      'คำเตือน: ยังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูป Creator Studio จะใช้ภาพตัวอย่างชั่วคราว',
+    )
+  })
+
   test('warns when roleplay reply budget passes baseline but is below recommendation', () => {
     const report = buildSmokeDoctorReport(
       healthyPayload({
