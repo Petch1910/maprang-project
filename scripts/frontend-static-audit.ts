@@ -157,12 +157,12 @@ export function auditLinksWithAst(content: string, file: string) {
 export const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
 
 export const suspiciousPatterns = [
-  { pattern: /href=(["'])#\1/g, message: 'ลิงก์ใช้ href="#" เป็น placeholder' },
-  { pattern: /to=(["'])#\1/g, message: 'ลิงก์ Router ใช้ to="#" เป็น placeholder' },
-  { pattern: /to=\{\s*(["'])#\1\s*\}/g, message: 'ลิงก์ Router ใช้ to={"#"} เป็น placeholder' },
+  { pattern: /href=(["'])#\1/g, message: 'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /to=(["'])#\1/g, message: 'ลิงก์ Router ใช้ to="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /to=\{\s*(["'])#\1\s*\}/g, message: 'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
   { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick ว่างเปล่า' },
-  { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'frontend source ยัง throw not implemented' },
-  { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบ placeholder' },
+  { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'frontend source ยังโยน not implemented' },
+  { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบข้อความรอทำ' },
   {
     pattern: /dangerouslySetInnerHTML\s*=/g,
     message: 'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
@@ -237,7 +237,7 @@ export const suspiciousPatterns = [
     pattern: /ยังไม่ใช่ปุ่มในแอปเครื่องนี้/g,
     message: 'พบข้อความ staging checklist ที่กำกวมเหมือนปุ่มปลอม',
   },
-  { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'พบข้อความไทยแนวเร็วๆนี้ที่เป็น placeholder' },
+  { pattern: /\u0e40\u0e23\u0e47\u0e27\s*\u0e46\s*\u0e19\u0e35\u0e49/g, message: 'พบข้อความไทยแนวเร็วๆนี้ที่เป็นข้อความรอทำ' },
   { pattern: /\uFFFD/g, message: 'พบ replacement character อาจเป็น encoding เสีย' },
   { pattern: /[\u0080-\u009F]/g, message: 'พบ C1 control character อาจเป็น mojibake' },
   {

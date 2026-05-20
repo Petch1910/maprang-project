@@ -84,10 +84,10 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
-      'ลิงก์ใช้ href="#" เป็น placeholder',
-      'ลิงก์ Router ใช้ to={"#"} เป็น placeholder',
+      'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน',
+      'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ปุ่มหรือลิงก์มี onClick ว่างเปล่า',
-      'frontend source ยัง throw not implemented',
+      'frontend source ยังโยน not implemented',
       'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
       'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',
       'ApiError ต้องใช้ payload.message ก่อน payload.error',
@@ -128,7 +128,7 @@ describe('frontend static audit', () => {
 
     expect(findings.map((finding) => finding.message)).toEqual(
       expect.arrayContaining([
-        'พบข้อความไทยแนวเร็วๆนี้ที่เป็น placeholder',
+        'พบข้อความไทยแนวเร็วๆนี้ที่เป็นข้อความรอทำ',
         'พบ replacement character อาจเป็น encoding เสีย',
         'พบ C1 control character อาจเป็น mojibake',
         'พบลำดับตัวอักษรไทยที่มักเป็น UTF-8 mojibake',

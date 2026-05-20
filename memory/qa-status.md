@@ -345,3 +345,4 @@ Last updated: 2026-05-20
 - Deploy/runbook/memory wording Thai-first pass: เกลา README, DEPLOYMENT_QA, STAGING_RUNBOOK, memory deploy blockers, และ production checklist ให้ลดคำว่า placeholder/token usage/provider credits/desktop-mobile ในข้อความส่งต่องาน โดยคงชื่อ command/env ที่ระบบต้อง parse ไว้.
 - Agent guide blocker wording Thai-first pass: เกลา `agent.md` ให้สถานะตัวกั้นโปรดักชัน, image generation fallback, และ verification flags อ่านเป็นไทยนำ โดยคงชื่อ env ที่ระบบต้องใช้ไว้เหมือนเดิม.
 - Route/menu doc-check diagnostics Thai-first pass: ปรับข้อความ fail ของ `routeMenuAuditRows` จำนวนแถวน้อย, area/route ซ้ำ, และ `App.tsx` ไม่มี route ให้เป็นไทยนำ พร้อม regression test ใน `route-menu:audit:test`.
+- Frontend static audit diagnostics Thai-first pass: เปลี่ยนข้อความ fail สำหรับลิงก์ `#`, Router `#`, `not implemented`, และข้อความรอทำให้สื่อว่าเป็นค่าตัวอย่าง/ปุ่มตันชัดขึ้น พร้อม `frontend:static:audit:test`.
