@@ -27,6 +27,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).toContain('ข้ามผู้ให้บริการสร้างรูปสำหรับ local smoke')
     expect(apiSmoke).toContain('chat validation ไม่ควรคืน chatId')
     expect(apiSmoke).toContain('ไม่ผ่านด้วยสถานะ')
+    expect(apiSmoke).toContain('response ว่าง')
     expect(apiSmoke).toContain('formatApiSmokeStatus(result.status)')
     expect(apiSmoke).not.toContain('missing tokenBalance')
     expect(apiSmoke).not.toContain('readiness รอการยืนยัน live provider')
@@ -36,6 +37,10 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).not.toContain('ข้าม provider สำหรับ local smoke')
     expect(apiSmoke).not.toContain('chat validation should not return a chatId')
     expect(apiSmoke).not.toContain('failed with ${response.status}')
+    expect(apiSmoke).not.toContain('empty response')
+    expect(apiSmoke).not.toContain('JSON error payload')
+    expect(apiSmoke).not.toContain("maxChars=${saved.persona.maxChars ?? 'unknown'}")
+    expect(apiSmoke).not.toContain("payload.image?.provider ?? 'missing'")
     expect(apiSmoke).not.toContain('result.status.toUpperCase()')
   })
 

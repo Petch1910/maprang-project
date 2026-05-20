@@ -193,6 +193,7 @@ Last updated: 2026-05-20
 - API smoke validation-path provider-failure diagnostics now pass `api:smoke:test` and `predeploy:check`.
 - API smoke endpoint assertion diagnostics now pass Thai-first coverage via `api:smoke:test`, `predeploy:check`, `secrets:check`, and `git diff --check`; full `api:smoke` still waits for the local backend/Postgres runtime when not already running.
 - API smoke readiness/image detail output localization now passes `api:smoke:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
+- API smoke readiness and expected-error fallback wording now passes Thai-first coverage for `response ว่าง`, `สถานะ`, `ไม่ทราบ`, and `ไม่มีข้อความ` via `api:smoke:test`.
 - API smoke result status labels now pass Thai-first coverage via `api:smoke:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Roleplay depth budget bump to 1600/420: pass via backend chat/env/health tests, live chat smoke helper test, deploy doctor test, and API smoke helper test.
 - Runtime prompt depth alignment: pass via `context.service.test`, `chat.runtime.test`, `knowledge:audit`, and `predeploy:check`; predeploy now blocks stale shorter 3-6/4-sentence/7-12-sentence guidance from returning.

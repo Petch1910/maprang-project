@@ -156,7 +156,7 @@ await warnable('GET /ready', async () => {
   const ready = readyResponse.payload
   if (!readyResponse.ok || !ready.ok || ready.readiness?.status !== 'ready') {
     const failures = ready.readiness?.failures ?? []
-    const reason = failures.join(', ') || `status ${readyResponse.status}`
+    const reason = failures.join(', ') || `สถานะ ${readyResponse.status}`
     if (live && isOnlyLiveVerificationFailure(failures)) {
       return {
         ok: false,
@@ -234,7 +234,7 @@ await check('GET/PATCH /me/persona', async () => {
     body: JSON.stringify({ persona: current.persona.persona }),
   })
 
-  return `maxChars=${saved.persona.maxChars ?? 'unknown'}`
+  return `maxChars=${saved.persona.maxChars ?? 'ไม่ทราบ'}`
 })
 
 await check('GET /relationship/presets', async () => {
@@ -432,7 +432,7 @@ await warnable('POST /creator/ai-draft', async () => {
     }),
   })
   if (!payload.draft?.name || !payload.draft.greeting) throw new Error('draft ยังขาดช่องข้อความที่จำเป็น')
-  const imageProvider = payload.image?.provider ?? 'missing'
+  const imageProvider = payload.image?.provider ?? 'ไม่มี'
   const detail = `แหล่งร่าง=${payload.source ?? 'ไม่ทราบ'}, รูป=${imageProvider}`
   if (imageProvider !== 'configured') {
     const issue = creatorImageIssue(payload)
@@ -808,7 +808,7 @@ if (adminHeaders) {
     }>('/admin/evals/local', {
       headers: adminHeaders,
     })
-    if (!payload.passed) throw new Error(`local eval ไม่ผ่าน; failCount=${payload.failCount ?? 'unknown'}`)
+    if (!payload.passed) throw new Error(`local eval ไม่ผ่าน; failCount=${payload.failCount ?? 'ไม่ทราบ'}`)
     if (!payload.scenarioCount || !payload.results?.length) throw new Error('ยังไม่มี local eval scenarios')
     if (!payload.results.some((result) => result.id === 'prompt-injection-defense' && result.passed)) {
       throw new Error('ยังไม่มีผลทดสอบ prompt injection eval')
@@ -919,7 +919,7 @@ async function readReadyPayload() {
   const raw = await response.text()
   const payload = raw ? tryParseJson(raw) : null
   if (!payload || typeof payload !== 'object') {
-    throw new Error(`/ready ไม่คืน JSON: ${raw.slice(0, 500) || 'empty response'}`)
+    throw new Error(`/ready ไม่คืน JSON: ${raw.slice(0, 500) || 'response ว่าง'}`)
   }
 
   return {
@@ -934,7 +934,7 @@ async function readExpectedError(path: string, init: RequestInit) {
   const raw = await response.text()
   const parsed = raw ? tryParseJson(raw) : null
   if (!parsed || typeof parsed !== 'object') {
-    throw new Error(`${path} ไม่คืน JSON error payload: ${raw.slice(0, 500) || 'empty response'}`)
+    throw new Error(`${path} ไม่คืน JSON ของ error ที่คาดไว้: ${raw.slice(0, 500) || 'response ว่าง'}`)
   }
 
   if (response.ok) throw new Error(`${path} สำเร็จทั้งที่ควรเป็น error`)
@@ -953,10 +953,10 @@ function assertExpectedErrorPayload(
   label = 'error ที่คาดไว้',
 ) {
   if (result.status !== expectedStatus || result.payload.error !== expectedError) {
-    throw new Error(`${label} ควรได้ ${expectedError} ${expectedStatus} แต่ได้ ${result.status} ${result.payload.error ?? 'unknown'}`)
+    throw new Error(`${label} ควรได้ ${expectedError} ${expectedStatus} แต่ได้สถานะ ${result.status} ${result.payload.error ?? 'ไม่ทราบ'}`)
   }
   if (!result.payload.message?.includes(expectedMessage)) {
-    throw new Error(`${label} ควรได้ข้อความไทย "${expectedMessage}" แต่ได้ ${result.payload.message ?? 'missing'}`)
+    throw new Error(`${label} ควรได้ข้อความไทย "${expectedMessage}" แต่ได้ ${result.payload.message ?? 'ไม่มีข้อความ'}`)
   }
 }
 
