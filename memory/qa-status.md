@@ -379,3 +379,4 @@ Last updated: 2026-05-20
 - Seed script log hardening pass: seed/QA seed สรุป error ก่อนเขียน log แทน `console.error(error)` และ backend security audit จะ fail ถ้า raw error object log กลับมาใน source.
 - Frontend console log hardening pass: เพิ่ม `logUnexpectedError` ให้ browser console log เฉพาะ summary ที่ปลอดภัย และ frontend static audit จะ fail ถ้า source กลับไป `console.error(..., error)` ดิบ.
 - Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด log hardening ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 155 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
+- Predeploy frontend log guard pass: `predeploy:check` ตอนนี้ล็อก `logUnexpectedError` และ raw frontend console error pattern ไว้ใน static audit/security checklist.
