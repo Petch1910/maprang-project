@@ -287,8 +287,19 @@ export function WorkspacePage() {
     }
   }, [])
 
+  const refreshWorkspaceAuth = useCallback(async () => {
+    try {
+      await getAuthState()
+      return true
+    } catch (error) {
+      logUnexpectedWorkspaceError('โหลดสถานะบัญชีไม่สำเร็จ:', error)
+      setConnectionNote('โหลดสถานะบัญชีไม่สำเร็จ แต่ยังใช้โหมดในเครื่องต่อได้')
+      return false
+    }
+  }, [])
+
   async function reloadWorkspaceAfterAuthChange() {
-    await getAuthState()
+    await refreshWorkspaceAuth()
     await loadHealthStatus()
     const loadedCharacters = await loadCharacters()
     const nextCharacter = loadedCharacters.find((item) => item.id === character.id) ?? loadedCharacters[0] ?? fallbackCharacter
@@ -381,7 +392,7 @@ export function WorkspacePage() {
         setIsLoading(true)
         setConnectionNote('กำลังโหลดแชทที่บันทึกไว้...')
       }
-      await getAuthState()
+      await refreshWorkspaceAuth()
       await loadHealthStatus()
 
       try {
@@ -423,6 +434,7 @@ export function WorkspacePage() {
     loadLoreEntries,
     loadUsageSummary,
     openChat,
+    refreshWorkspaceAuth,
     relationshipSeed,
     routeCharacterId,
     routeChatId,

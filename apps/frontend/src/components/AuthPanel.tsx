@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { DEFAULT_USER_ID, setApiUserId } from '../lib/api'
-import { getAuthState, getSupabase, syncApiAuthFromSession, type AuthState } from '../lib/auth'
+import { DEFAULT_USER_ID, logUnexpectedError, setApiUserId } from '../lib/api'
+import { getAuthState, getSupabase, isSupabaseConfigured, syncApiAuthFromSession, type AuthState } from '../lib/auth'
 
 type AuthPanelProps = {
   onAuthChanged: () => Promise<void>
@@ -16,6 +16,10 @@ function signInErrorMessage(error: unknown) {
   return 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจอีเมล รหัสผ่าน หรือสถานะ Supabase แล้วลองใหม่'
 }
 
+function authFailureMessage(action: string) {
+  return `${action}ไม่สำเร็จ กรุณาลองใหม่หรือตรวจการตั้งค่า Supabase`
+}
+
 export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   const [authState, setAuthState] = useState<AuthState>({ isConfigured: false, session: null, user: null })
   const [email, setEmail] = useState('')
@@ -24,16 +28,26 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   const [note, setNote] = useState('')
   const [isBusy, setIsBusy] = useState(false)
 
-  const refreshAuthState = useCallback(async () => {
-    const next = await getAuthState()
-    setAuthState(next)
+  const refreshAuthState = useCallback(async (options?: { silent?: boolean }) => {
+    try {
+      const next = await getAuthState()
+      setAuthState(next)
+      return true
+    } catch (error) {
+      logUnexpectedError('โหลดสถานะบัญชีไม่สำเร็จ:', error)
+      setAuthState({ isConfigured: isSupabaseConfigured, session: null, user: null })
+      if (!options?.silent) setNote(authFailureMessage('โหลดสถานะบัญชี'))
+      return false
+    }
   }, [])
 
   useEffect(() => {
-    void refreshAuthState()
+    let isMounted = true
+    void refreshAuthState({ silent: true })
     let unsubscribe: (() => void) | undefined
 
     void getSupabase().then((client) => {
+      if (!isMounted) return
       if (!client) return
       const {
         data: { subscription },
@@ -47,20 +61,29 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
         void onAuthChanged()
       })
       unsubscribe = () => subscription.unsubscribe()
+    }).catch((error) => {
+      logUnexpectedError('เชื่อมต่อระบบบัญชีไม่สำเร็จ:', error)
+      if (isMounted) setNote(authFailureMessage('เชื่อมต่อระบบบัญชี'))
     })
 
-    return () => unsubscribe?.()
+    return () => {
+      isMounted = false
+      unsubscribe?.()
+    }
   }, [onAuthChanged, refreshAuthState])
 
   const signIn = async () => {
-    const supabase = await getSupabase()
-    if (!supabase) return
     setIsBusy(true)
     setNote('')
     try {
+      const supabase = await getSupabase()
+      if (!supabase) {
+        setNote('ยังไม่ได้ตั้งค่า Supabase จึงใช้โหมด dev ในเครื่อง')
+        return
+      }
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
-      await refreshAuthState()
+      await refreshAuthState({ silent: true })
       await onAuthChanged()
       setNote('เข้าสู่ระบบแล้ว')
     } catch (error) {
@@ -71,24 +94,40 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   }
 
   const signOut = async () => {
-    const supabase = await getSupabase()
-    if (!supabase) return
     setIsBusy(true)
     setNote('')
     try {
-      await supabase.auth.signOut()
-      await refreshAuthState()
+      const supabase = await getSupabase()
+      if (!supabase) {
+        setNote('ยังไม่ได้ตั้งค่า Supabase จึงไม่มี session ให้ปิด')
+        return
+      }
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      await refreshAuthState({ silent: true })
       await onAuthChanged()
       setNote('ออกจากระบบแล้ว')
+    } catch (error) {
+      logUnexpectedError('ออกจากระบบไม่สำเร็จ:', error)
+      setNote(authFailureMessage('ออกจากระบบ'))
     } finally {
       setIsBusy(false)
     }
   }
 
   const applyDevUser = async () => {
-    setApiUserId(devUserId.trim() || DEFAULT_USER_ID)
-    await onAuthChanged()
-    setNote('อัปเดต dev user แล้ว')
+    setIsBusy(true)
+    setNote('')
+    try {
+      setApiUserId(devUserId.trim() || DEFAULT_USER_ID)
+      await onAuthChanged()
+      setNote('อัปเดต dev user แล้ว')
+    } catch (error) {
+      logUnexpectedError('อัปเดต dev user ไม่สำเร็จ:', error)
+      setNote(authFailureMessage('อัปเดต dev user'))
+    } finally {
+      setIsBusy(false)
+    }
   }
 
   return (
@@ -140,7 +179,12 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
       ) : (
         <div className="flex flex-col gap-2">
           <input className={inputClass} value={devUserId} onChange={(event) => setDevUserId(event.target.value)} />
-          <button type="button" className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white" onClick={applyDevUser}>
+          <button
+            type="button"
+            className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white disabled:opacity-60"
+            disabled={isBusy}
+            onClick={applyDevUser}
+          >
             ใช้ dev user
           </button>
         </div>
