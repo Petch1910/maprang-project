@@ -150,6 +150,7 @@ Results:
 - `eval:local:test` now runs in `qa:local`, CI, and Production Smoke to guard local eval CLI pass/fail output formatting.
 - Local eval CLI output now passes Thai-first coverage via `eval:local:test`.
 - Predeploy now verifies the shared secret pattern source, its regression test, and the matching QA documentation remain present.
+- Predeploy now verifies backend security audit keeps route error response and routeErrorResponse mapping guards wired.
 - CI predeploy now runs `release:handoff:check`, `release:handoff:test`, and `secrets:patterns:test` as explicit gates.
 - CI predeploy now runs `security:audit`, `api:audit`, and `route-menu:audit` as explicit static gates.
 - API route audit now auto-discovers `apps/backend/index.ts` plus backend `*.routes.ts` files, covers `GET /`, and API smoke, local smoke, plus browser e2e smoke verify the root `maprang-backend` identity response; `api:audit:test` now locks discovery and root coverage.

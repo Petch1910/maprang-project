@@ -108,6 +108,7 @@ Verified:
 - `.gitignore` ignores real `.env.*` files while allowing `.env.example` and `.env.production.example` templates; predeploy verifies this rule.
 - `secrets:patterns:test` now locks the split between strict repo secret scanning and stricter memory/release handoff scanning, and it runs inside `qa:local`, CI, and Production Smoke.
 - `predeploy:check` verifies the shared secret pattern source, regression test, and QA documentation so secret-audit wiring cannot drift silently.
+- `predeploy:check` verifies backend security audit keeps the route error response and routeErrorResponse mapping guards wired.
 - CI predeploy now runs the release handoff check, self-test, and secret pattern regression test directly, not only through `qa:local`.
 - CI predeploy now runs security, API route, and route/menu static audits directly before deploy checks.
 - API route audit now auto-discovers `apps/backend/index.ts` plus backend `*.routes.ts` files and covers `GET /`, while API smoke, local smoke, and browser e2e smoke verify the backend root identity response before deeper checks, so new route files and the backend root endpoint cannot drift outside the coverage map; route audit regression tests lock this behavior.
