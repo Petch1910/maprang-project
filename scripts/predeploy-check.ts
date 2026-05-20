@@ -327,16 +327,16 @@ const checks: Check[] = [
       requireIncludes(
         handoff,
         [
-          'Release Handoff Template',
-          'Do not paste secrets',
-          'Deployed URLs',
-          'Database And Migrations',
-          'Auth, Storage, And CORS',
-          'AI Provider Verification',
-          'QA Gates',
-          'Admin Checks',
-          'Known Limitations',
-          'Release Decision',
+          'แม่แบบส่งมอบ release',
+          'ห้ามวาง secrets',
+          'URLs ที่ deploy แล้ว',
+          'ฐานข้อมูลและ migrations',
+          'Auth, Storage และ CORS',
+          'การยืนยันผู้ให้บริการ AI',
+          'QA gates',
+          'การตรวจฝั่งผู้ดูแล',
+          'ข้อจำกัดที่ยังรู้ก่อนปล่อย',
+          'การตัดสินใจปล่อย',
         ],
         'RELEASE_HANDOFF.md',
       )
@@ -351,7 +351,7 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')
       requireIncludes(
         script,
-        ['checkReleaseHandoffContent', 'collectReleaseHandoffCheckResult', 'runReleaseHandoffCheck', '--filled', 'forbiddenPatterns', 'Release handoff check ไม่ผ่าน'],
+        ['checkReleaseHandoffContent', 'collectReleaseHandoffCheckResult', 'runReleaseHandoffCheck', '--filled', 'forbiddenPatterns', 'ตรวจ release handoff ไม่ผ่าน'],
         'scripts/release-handoff-check.ts',
       )
       requireIncludes(

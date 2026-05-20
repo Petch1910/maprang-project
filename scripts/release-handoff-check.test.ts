@@ -2,69 +2,69 @@ import { describe, expect, test } from 'bun:test'
 import { checkReleaseHandoffContent, collectReleaseHandoffCheckResult, runReleaseHandoffCheck } from './release-handoff-check'
 
 const filledHandoff = [
-  '# Release Handoff Template',
+  '# แม่แบบส่งมอบ release',
   '',
-  '## Release Identity',
-  '- Release date: 2026-05-19',
+  '## ตัวตนของ release',
+  '- วันที่ release: 2026-05-19',
   '- Git commit: abc1234',
   '- Branch: main',
-  '- Owner: release lead',
+  '- ผู้รับผิดชอบ: release lead',
   '- Environment: production',
   '',
-  '## Deployed URLs',
+  '## URLs ที่ deploy แล้ว',
   '- Frontend URL: https://app.maprang.example',
   '- Backend URL: https://api.maprang.example',
   '- Health URL: https://api.maprang.example/health',
   '- Ready URL: https://api.maprang.example/ready',
   '',
-  '## Database And Migrations',
+  '## ฐานข้อมูลและ migrations',
   '- Database host/provider: managed postgres',
-  '- Migration command: bunx prisma migrate deploy',
-  '- Migration result: pass',
+  '- คำสั่ง migration: bunx prisma migrate deploy',
+  '- ผล migration: pass',
   '- Prisma migration version: 20260513103000_add_lore_parent_index',
   '',
-  '## Auth, Storage, And CORS',
-  '- Auth mode: supabase-jwt',
+  '## Auth, Storage และ CORS',
+  '- โหมด auth: supabase-jwt',
   '- Supabase project ref: project-ref-only',
-  '- Avatar storage provider: supabase',
-  '- Avatar storage access: signed',
-  '- Signed URL expiry: 3600',
+  '- ผู้ให้บริการ avatar storage: supabase',
+  '- รูปแบบการเข้าถึง avatar storage: signed',
+  '- อายุ signed URL: 3600',
   '- CORS origins: https://app.maprang.example',
   '',
-  '## AI Provider Verification',
-  '- Chat model: google/gemini-2.0-flash-001',
-  '- Chat live smoke command: bun run smoke:chat',
-  '- Chat live smoke result: pass',
-  '- `CHAT_PROVIDER_LIVE_VERIFIED` value: 1',
-  '- Image model: gpt-image-1.5',
-  '- Image live smoke command: bun run smoke:image:live',
-  '- Image live smoke result: pass',
-  '- `IMAGE_GENERATION_LIVE_VERIFIED` value: 1',
+  '## การยืนยันผู้ให้บริการ AI',
+  '- โมเดลแชท: google/gemini-2.0-flash-001',
+  '- คำสั่ง live smoke แชท: bun run smoke:chat',
+  '- ผล live smoke แชท: pass',
+  '- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 1',
+  '- โมเดลสร้างรูป: gpt-image-1.5',
+  '- คำสั่ง live smoke รูป: bun run smoke:image:live',
+  '- ผล live smoke รูป: pass',
+  '- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`: 1',
   '',
-  '## QA Gates',
+  '## QA gates',
   '- `bun run qa:local`: pass',
   '- `bun run e2e:smoke`: pass',
   '- `bun run staging:verify`: pass',
   '- `bun run production:check`: pass',
   '- GitHub Production Smoke run: pass',
   '',
-  '## Admin Checks',
+  '## การตรวจฝั่งผู้ดูแล',
   '- `/admin/health`: pass',
   '- `/admin/prompt-inspector`: pass',
   '- `/admin/evals`: pass',
-  '- Moderation reports: pass',
-  '- Admin audit logs: pass',
+  '- รายงาน moderation: pass',
+  '- audit logs ของผู้ดูแล: pass',
   '',
-  '## Known Limitations',
-  '- Open blockers: none',
-  '- Provider quota risks: monitored',
-  '- Manual follow-ups: none',
-  '- Rollback trigger: provider outage',
+  '## ข้อจำกัดที่ยังรู้ก่อนปล่อย',
+  '- ตัวกั้นที่ยังเปิดอยู่: none',
+  '- ความเสี่ยงโควตาผู้ให้บริการ: monitored',
+  '- งาน follow-up ที่ต้องทำมือ: none',
+  '- เงื่อนไข rollback: provider outage',
   '',
-  '## Release Decision',
+  '## การตัดสินใจปล่อย',
   '- Go / no-go: go',
-  '- Approved by: release lead',
-  '- Notes: ready',
+  '- ผู้อนุมัติ: release lead',
+  '- หมายเหตุ: ready',
   '',
 ].join('\n')
 
@@ -78,7 +78,7 @@ describe('release handoff check', () => {
 
     expect(checkReleaseHandoffContent(template)).toEqual([])
     expect(checkReleaseHandoffContent(template, { requireFilled: true })).toEqual(
-      expect.arrayContaining(['บรรทัด 4 ยังว่างอยู่: - Release date:', 'บรรทัด 5 ยังว่างอยู่: - Git commit:']),
+      expect.arrayContaining(['บรรทัด 4 ยังว่างอยู่: - วันที่ release:', 'บรรทัด 5 ยังว่างอยู่: - Git commit:']),
     )
   })
 
@@ -86,11 +86,11 @@ describe('release handoff check', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef'].join('-')
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`
     const unsafe = filledHandoff
-      .replace('## Release Decision', '## Decision')
+      .replace('## การตัดสินใจปล่อย', '## Decision')
       .replace('project-ref-only', `${fakeOpenRouterKey}\n- Debug token: ${fakeGithubToken}`)
 
     expect(checkReleaseHandoffContent(unsafe)).toEqual(
-      expect.arrayContaining(['ยังไม่มี section: Release Decision', 'พบ OpenRouter key', 'พบ GitHub token']),
+      expect.arrayContaining(['ยังไม่มี section: การตัดสินใจปล่อย', 'พบ OpenRouter key', 'พบ GitHub token']),
     )
   })
 

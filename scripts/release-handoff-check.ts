@@ -6,16 +6,16 @@ const root = join(import.meta.dir, '..')
 const file = join(root, 'RELEASE_HANDOFF.md')
 
 const requiredSections = [
-  'Release Handoff Template',
-  'Release Identity',
-  'Deployed URLs',
-  'Database And Migrations',
-  'Auth, Storage, And CORS',
-  'AI Provider Verification',
-  'QA Gates',
-  'Admin Checks',
-  'Known Limitations',
-  'Release Decision',
+  'แม่แบบส่งมอบ release',
+  'ตัวตนของ release',
+  'URLs ที่ deploy แล้ว',
+  'ฐานข้อมูลและ migrations',
+  'Auth, Storage และ CORS',
+  'การยืนยันผู้ให้บริการ AI',
+  'QA gates',
+  'การตรวจฝั่งผู้ดูแล',
+  'ข้อจำกัดที่ยังรู้ก่อนปล่อย',
+  'การตัดสินใจปล่อย',
 ]
 
 const forbiddenPatterns = [
@@ -63,7 +63,7 @@ export async function runReleaseHandoffCheck(
 ) {
   const result = await collectReleaseHandoffCheckResult(argv.includes('--filled'))
   if (!result.ok) {
-    writeError('Release handoff check ไม่ผ่าน:')
+    writeError('ตรวจ release handoff ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }

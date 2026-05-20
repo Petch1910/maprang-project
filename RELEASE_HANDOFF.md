@@ -1,63 +1,63 @@
-# Release Handoff Template
+# แม่แบบส่งมอบ release
 
-Use this template after `production:check` passes and before sending real users to the release. Do not paste secrets,
-tokens, private database URLs, service role keys, or raw user data into this file.
+ใช้แม่แบบนี้หลัง `production:check` ผ่าน และก่อนเปิดให้ผู้ใช้จริงเข้า release ห้ามวาง secrets,
+tokens, private database URLs, service role keys, หรือข้อมูลผู้ใช้ดิบลงในไฟล์นี้.
 
-Check the template before commit:
+ตรวจแม่แบบก่อน commit:
 
 ```bash
 bun run release:handoff:check
 ```
 
-After filling every field for a real release, run:
+หลังกรอกทุกช่องสำหรับ release จริง ให้รัน:
 
 ```bash
 bun run release:handoff:check -- --filled
 ```
 
-## Release Identity
+## ตัวตนของ release
 
-- Release date:
+- วันที่ release:
 - Git commit:
 - Branch:
-- Owner:
+- ผู้รับผิดชอบ:
 - Environment: staging / production
 
-## Deployed URLs
+## URLs ที่ deploy แล้ว
 
 - Frontend URL:
 - Backend URL:
 - Health URL:
 - Ready URL:
 
-## Database And Migrations
+## ฐานข้อมูลและ migrations
 
 - Database host/provider:
-- Migration command:
-- Migration result:
+- คำสั่ง migration:
+- ผล migration:
 - Prisma migration version:
 
-## Auth, Storage, And CORS
+## Auth, Storage และ CORS
 
-- Auth mode:
+- โหมด auth:
 - Supabase project ref:
-- Avatar storage provider:
-- Avatar storage access:
-- Signed URL expiry:
+- ผู้ให้บริการ avatar storage:
+- รูปแบบการเข้าถึง avatar storage:
+- อายุ signed URL:
 - CORS origins:
 
-## AI Provider Verification
+## การยืนยันผู้ให้บริการ AI
 
-- Chat model:
-- Chat live smoke command:
-- Chat live smoke result:
-- `CHAT_PROVIDER_LIVE_VERIFIED` value:
-- Image model:
-- Image live smoke command:
-- Image live smoke result:
-- `IMAGE_GENERATION_LIVE_VERIFIED` value:
+- โมเดลแชท:
+- คำสั่ง live smoke แชท:
+- ผล live smoke แชท:
+- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`:
+- โมเดลสร้างรูป:
+- คำสั่ง live smoke รูป:
+- ผล live smoke รูป:
+- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`:
 
-## QA Gates
+## QA gates
 
 - `bun run qa:local`:
 - `bun run e2e:smoke`:
@@ -65,23 +65,23 @@ bun run release:handoff:check -- --filled
 - `bun run production:check`:
 - GitHub Production Smoke run:
 
-## Admin Checks
+## การตรวจฝั่งผู้ดูแล
 
 - `/admin/health`:
 - `/admin/prompt-inspector`:
 - `/admin/evals`:
-- Moderation reports:
-- Admin audit logs:
+- รายงาน moderation:
+- audit logs ของผู้ดูแล:
 
-## Known Limitations
+## ข้อจำกัดที่ยังรู้ก่อนปล่อย
 
-- Open blockers:
-- Provider quota risks:
-- Manual follow-ups:
-- Rollback trigger:
+- ตัวกั้นที่ยังเปิดอยู่:
+- ความเสี่ยงโควตาผู้ให้บริการ:
+- งาน follow-up ที่ต้องทำมือ:
+- เงื่อนไข rollback:
 
-## Release Decision
+## การตัดสินใจปล่อย
 
 - Go / no-go:
-- Approved by:
-- Notes:
+- ผู้อนุมัติ:
+- หมายเหตุ:

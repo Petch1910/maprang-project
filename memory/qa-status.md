@@ -47,6 +47,7 @@ Results:
 - Full local QA was rerun after the latest Thai-first frontend/admin copy and Creator Draft image-provider copy passes; `qa:local` still passes across backend, frontend, local smoke, API smoke, audits, evals, and predeploy.
 - Secrets check: pass.
 - Secret scan and release handoff diagnostic localization: pass via `secrets:check:test`, `release:handoff:test`, `secrets:check`, and `release:handoff:check`.
+- Release handoff template Thai-first sections: pass via `release:handoff:test`, `release:handoff:check`, and `predeploy:check:test`.
 - Memory audit: pass.
 - Knowledge audit: pass.
 - Memory/knowledge audit diagnostic localization: pass via `vault:audit:test`, `memory:audit`, and `knowledge:audit`.

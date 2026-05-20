@@ -135,6 +135,7 @@ Verified:
 - `release:handoff:test` covers filled handoff validation, blank-field detection, secret-shaped value detection, and the importable release handoff runner.
 - Secret audits share `scripts/secret-patterns.ts` and catch private key blocks, GitHub tokens, Google API keys, and Slack tokens across repo, memory, knowledge, and release handoff checks.
 - Secret scan and release handoff checks now use Thai-first diagnostics for tracked env files, detected secret-shaped values, missing handoff sections, blank filled-mode fields, and pass/fail summaries.
+- Release handoff template now uses Thai-first section names and field labels, and the release handoff checker/predeploy guard now require those Thai-first sections while still preserving exact command/env names.
 - `secrets:check` now fails on tracked `.env`/`.env.*` files while still ignoring untracked local env files used for development, and exports an importable runner for CI/dashboard reuse.
 - `.gitignore` ignores real `.env.*` files while allowing `.env.example` and `.env.production.example` templates; predeploy verifies this rule.
 - `secrets:patterns:test` now locks the split between strict repo secret scanning and stricter memory/release handoff scanning, and it runs inside `qa:local`, CI, and Production Smoke.
