@@ -1,8 +1,27 @@
 import { describe, expect, test } from 'bun:test'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
 import { buildApiSmokeSummary, runApiSmoke, type ApiSmokeResult } from './api-smoke'
 
+const root = join(import.meta.dir, '..')
+
+async function readRepoFile(path: string) {
+  return readFile(join(root, path), 'utf8')
+}
+
 describe('api smoke helpers', () => {
+  test('keeps API smoke diagnostics Thai-first', async () => {
+    const apiSmoke = await readRepoFile('scripts/api-smoke.ts')
+
+    expect(apiSmoke).toContain('ยังไม่มี tokenBalance')
+    expect(apiSmoke).toContain('chat validation ไม่ควรคืน chatId')
+    expect(apiSmoke).toContain('ไม่ผ่านด้วยสถานะ')
+    expect(apiSmoke).not.toContain('missing tokenBalance')
+    expect(apiSmoke).not.toContain('chat validation should not return a chatId')
+    expect(apiSmoke).not.toContain('failed with ${response.status}')
+  })
+
   test('allows live smoke to continue only for live verification readiness failures', () => {
     expect(
       isOnlyLiveVerificationFailure([

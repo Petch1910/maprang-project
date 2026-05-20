@@ -134,11 +134,11 @@ await check('GET /', async () => {
 
 await check('GET /health', async () => {
   healthStatus = await readJson<HealthSmokePayload>('/health')
-  if (!healthStatus.ok) throw new Error('health ok=false')
+  if (!healthStatus.ok) throw new Error('health คืน ok=false')
   if (!healthStatus.checks?.databaseConnected) throw new Error('databaseConnected=false')
-  if (typeof healthStatus.model?.promptBudgetTokens !== 'number') throw new Error('missing promptBudgetTokens')
-  if (typeof healthStatus.model?.promptHistoryMaxMessages !== 'number') throw new Error('missing promptHistoryMaxMessages')
-  return 'backend and database ready'
+  if (typeof healthStatus.model?.promptBudgetTokens !== 'number') throw new Error('ยังไม่มี promptBudgetTokens')
+  if (typeof healthStatus.model?.promptHistoryMaxMessages !== 'number') throw new Error('ยังไม่มี promptHistoryMaxMessages')
+  return 'backend และ database พร้อมใช้งาน'
 })
 
 await warnable('GET /ready', async () => {
@@ -150,19 +150,19 @@ await warnable('GET /ready', async () => {
     if (live && isOnlyLiveVerificationFailure(failures)) {
       return {
         ok: false,
-        detail: `readiness is waiting for live provider verification; continuing provider smoke so verification flags can be set after success (${reason})`,
+        detail: `readiness รอการยืนยัน live provider; จะรัน provider smoke ต่อเพื่อให้ตั้ง verification flags ได้หลังผ่านจริง (${reason})`,
       }
     }
-    throw new Error(`not ready: ${reason}`)
+    throw new Error(`ยังไม่พร้อม: ${reason}`)
   }
-  return { ok: true, detail: 'readiness gate ready' }
+  return { ok: true, detail: 'readiness gate พร้อมใช้งาน' }
 })
 
 const characters = await runRequired('GET /characters', async () => {
   const payload = await readJson<{ characters?: Array<{ id: string; name: string }> }>('/characters?view=admin&limit=10', {
     headers: authHeaders,
   })
-  if (!payload.characters?.length) throw new Error('no characters returned')
+  if (!payload.characters?.length) throw new Error('API ไม่คืนรายการตัวละคร')
   return payload.characters
 })
 
@@ -172,7 +172,7 @@ await check('GET /characters/:id', async () => {
   const payload = await readJson<{ character?: { id: string; name: string } }>(`/characters/${primaryCharacter.id}`, {
     headers: authHeaders,
   })
-  if (payload.character?.id !== primaryCharacter.id) throw new Error('wrong character returned')
+  if (payload.character?.id !== primaryCharacter.id) throw new Error('API คืนตัวละครไม่ตรงกับที่ขอ')
   return payload.character.name
 })
 
@@ -187,11 +187,11 @@ await check('GET /me/usage', async () => {
     }
     wallet?: { transactions?: unknown[] }
   }>('/me/usage', { headers: authHeaders })
-  if (typeof payload.user?.tokenBalance !== 'number') throw new Error('missing tokenBalance')
-  if (typeof payload.usage?.totalCost !== 'string') throw new Error('missing totalCost')
-  if (!Array.isArray(payload.usage.byModel)) throw new Error('missing usage byModel')
-  if (!Array.isArray(payload.usage.daily) || payload.usage.daily.length !== 7) throw new Error('missing 7 day usage trend')
-  if (typeof payload.usage.estimate?.averageTokensPerRequest !== 'number') throw new Error('missing usage estimate')
+  if (typeof payload.user?.tokenBalance !== 'number') throw new Error('ยังไม่มี tokenBalance')
+  if (typeof payload.usage?.totalCost !== 'string') throw new Error('ยังไม่มี totalCost')
+  if (!Array.isArray(payload.usage.byModel)) throw new Error('ยังไม่มี usage.byModel')
+  if (!Array.isArray(payload.usage.daily) || payload.usage.daily.length !== 7) throw new Error('ยังไม่มีกราฟ usage 7 วัน')
+  if (typeof payload.usage.estimate?.averageTokensPerRequest !== 'number') throw new Error('ยังไม่มี usage estimate')
   return `tokenBalance=${payload.user.tokenBalance}, cost=${payload.usage.totalCost}, transactions=${payload.wallet?.transactions?.length ?? 0}`
 })
 
@@ -199,7 +199,7 @@ await check('GET /me/content-settings', async () => {
   const payload = await readJson<{ contentSettings?: { maxRating?: string } }>('/me/content-settings', {
     headers: authHeaders,
   })
-  if (!payload.contentSettings?.maxRating) throw new Error('missing content settings')
+  if (!payload.contentSettings?.maxRating) throw new Error('ยังไม่มี content settings')
   return payload.contentSettings.maxRating
 })
 
@@ -207,7 +207,7 @@ await check('GET/PATCH /me/persona', async () => {
   const current = await readJson<{ persona?: { persona?: string; updatedAt?: string | null; maxChars?: number } }>('/me/persona', {
     headers: authHeaders,
   })
-  if (typeof current.persona?.persona !== 'string') throw new Error('missing persona payload')
+  if (typeof current.persona?.persona !== 'string') throw new Error('ยังไม่มี persona payload')
 
   const marker = `API smoke persona ${Date.now()}`
   const saved = await readJson<{ persona?: { persona?: string; updatedAt?: string | null; maxChars?: number } }>('/me/persona', {
@@ -215,8 +215,8 @@ await check('GET/PATCH /me/persona', async () => {
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({ persona: marker }),
   })
-  if (saved.persona?.persona !== marker) throw new Error('persona was not saved')
-  if (!saved.persona.updatedAt) throw new Error('persona updatedAt missing')
+  if (saved.persona?.persona !== marker) throw new Error('persona ไม่ถูกบันทึก')
+  if (!saved.persona.updatedAt) throw new Error('persona ยังไม่มี updatedAt')
 
   await readJson<{ persona?: { persona?: string } }>('/me/persona', {
     method: 'PATCH',
@@ -229,16 +229,16 @@ await check('GET/PATCH /me/persona', async () => {
 
 await check('GET /relationship/presets', async () => {
   const payload = await readJson<{ presets?: unknown[] }>('/relationship/presets')
-  if (payload.presets?.length !== 24) throw new Error(`all presets expected 24, got ${payload.presets?.length ?? 0}`)
+  if (payload.presets?.length !== 24) throw new Error(`preset ทั้งหมดควรมี 24 รายการ แต่ได้ ${payload.presets?.length ?? 0}`)
   const contractPayload = await readJson<{ presets?: Array<{ id?: string; surfaces?: string[] }> }>('/relationship/presets?surface=contract')
   const creatorPayload = await readJson<{ presets?: Array<{ id?: string; surfaces?: string[] }> }>('/relationship/presets?surface=creator')
-  if (contractPayload.presets?.length !== 19) throw new Error(`contract presets expected 19, got ${contractPayload.presets?.length ?? 0}`)
-  if (creatorPayload.presets?.length !== 24) throw new Error(`creator presets expected 24, got ${creatorPayload.presets?.length ?? 0}`)
-  if (!contractPayload.presets.some((preset) => preset.id === 'soulmate')) throw new Error('contract presets missing soulmate')
-  if (contractPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('contract presets include creator-only preset')
-  if (!creatorPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('creator presets missing safe-family-bond')
-  if (!contractPayload.presets.every((preset) => preset.surfaces?.includes('contract'))) throw new Error('contract preset surface missing')
-  if (!creatorPayload.presets.every((preset) => preset.surfaces?.includes('creator'))) throw new Error('creator preset surface missing')
+  if (contractPayload.presets?.length !== 19) throw new Error(`contract preset ควรมี 19 รายการ แต่ได้ ${contractPayload.presets?.length ?? 0}`)
+  if (creatorPayload.presets?.length !== 24) throw new Error(`creator preset ควรมี 24 รายการ แต่ได้ ${creatorPayload.presets?.length ?? 0}`)
+  if (!contractPayload.presets.some((preset) => preset.id === 'soulmate')) throw new Error('contract preset ยังไม่มี soulmate')
+  if (contractPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('contract preset มี creator-only preset ปนอยู่')
+  if (!creatorPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('creator preset ยังไม่มี safe-family-bond')
+  if (!contractPayload.presets.every((preset) => preset.surfaces?.includes('contract'))) throw new Error('contract preset ยังไม่มี surface contract ครบ')
+  if (!creatorPayload.presets.every((preset) => preset.surfaces?.includes('creator'))) throw new Error('creator preset ยังไม่มี surface creator ครบ')
   return `${payload.presets.length} presets, ${contractPayload.presets.length} contract, ${creatorPayload.presets.length} creator`
 })
 
@@ -251,7 +251,7 @@ await check('POST /relationship/preview', async () => {
       messages: ['hello', 'thank you for telling me'],
     }),
   })
-  if (!payload.preview?.turns?.length) throw new Error('preview returned no turns')
+  if (!payload.preview?.turns?.length) throw new Error('relationship preview ไม่คืน turn')
   return `${payload.preview.turns.length} turns`
 })
 
@@ -263,8 +263,8 @@ await check('POST /relationship/validate', async () => {
       tags: ['thai', 'roleplay', 'slow-burn', 'relationship-ready', 'scene-ready'],
     }),
   })
-  if (!payload.seed?.route) throw new Error('missing relationship seed route')
-  if (!Array.isArray(payload.issues)) throw new Error('missing relationship validation issues')
+  if (!payload.seed?.route) throw new Error('ยังไม่มี relationship seed route')
+  if (!Array.isArray(payload.issues)) throw new Error('ยังไม่มีรายการ relationship validation issues')
   return `route=${payload.seed.route}, issues=${payload.issues.length}`
 })
 
@@ -297,11 +297,11 @@ await check('POST/PATCH /characters + lore runtime', async () => {
       }),
     })
     const characterId = created.character?.id
-    if (!characterId) throw new Error('character create did not return id')
+    if (!characterId) throw new Error('สร้างตัวละครแล้วไม่ได้คืน id')
     createdCharacterIds.push(characterId)
 
     const loaded = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}`, { headers: authHeaders })
-    if (loaded.character?.id !== characterId) throw new Error('created character could not be loaded')
+    if (loaded.character?.id !== characterId) throw new Error('โหลดตัวละครที่เพิ่งสร้างไม่ได้')
 
     const patchedTagline = `แก้ไขโดย API smoke ${marker}`
     const patched = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}`, {
@@ -312,28 +312,28 @@ await check('POST/PATCH /characters + lore runtime', async () => {
         tags: ['api-smoke', 'thai', 'slow-burn', 'scene-ready'],
       }),
     })
-    if (patched.character?.tagline !== patchedTagline) throw new Error('character patch did not persist tagline')
-    if (!patched.character.tags?.includes('scene-ready')) throw new Error('character patch did not persist tags')
+    if (patched.character?.tagline !== patchedTagline) throw new Error('แก้ไข tagline ของตัวละครแล้วไม่ถูกบันทึก')
+    if (!patched.character.tags?.includes('scene-ready')) throw new Error('แก้ไข tag ของตัวละครแล้วไม่ถูกบันทึก')
 
     const viewed = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/view`, {
       method: 'POST',
       headers: authHeaders,
     })
-    if (typeof viewed.character?.viewCount !== 'number') throw new Error('view endpoint did not return viewCount')
+    if (typeof viewed.character?.viewCount !== 'number') throw new Error('view endpoint ไม่คืน viewCount')
 
     const favorited = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/favorite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify({ favorite: true }),
     })
-    if (!favorited.character?.isFavorite) throw new Error('favorite endpoint did not mark character as favorite')
+    if (!favorited.character?.isFavorite) throw new Error('favorite endpoint ไม่ได้ตั้งค่าตัวละครเป็นรายการโปรด')
 
     const unfavorited = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/favorite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify({ favorite: false }),
     })
-    if (unfavorited.character?.isFavorite) throw new Error('favorite endpoint did not remove favorite')
+    if (unfavorited.character?.isFavorite) throw new Error('favorite endpoint ไม่ได้เอาตัวละครออกจากรายการโปรด')
 
     const lore = await readJson<{ loreEntry?: SmokeLoreEntry }>(`/characters/${characterId}/lore`, {
       method: 'POST',
@@ -346,7 +346,7 @@ await check('POST/PATCH /characters + lore runtime', async () => {
       }),
     })
     createdLoreId = lore.loreEntry?.id ?? null
-    if (!createdLoreId) throw new Error('lore create did not return id')
+    if (!createdLoreId) throw new Error('สร้าง lore แล้วไม่ได้คืน id')
 
     const patchedLore = await readJson<{ loreEntry?: SmokeLoreEntry }>(`/lore/${createdLoreId}`, {
       method: 'PATCH',
@@ -356,13 +356,13 @@ await check('POST/PATCH /characters + lore runtime', async () => {
         priority: 4,
       }),
     })
-    if (patchedLore.loreEntry?.priority !== 4) throw new Error('lore patch did not persist priority')
+    if (patchedLore.loreEntry?.priority !== 4) throw new Error('แก้ไข priority ของ lore แล้วไม่ถูกบันทึก')
 
     const deletedLore = await readJson<{ ok?: boolean }>(`/lore/${createdLoreId}`, {
       method: 'DELETE',
       headers: authHeaders,
     })
-    if (!deletedLore.ok) throw new Error('lore delete endpoint returned ok=false')
+    if (!deletedLore.ok) throw new Error('lore delete endpoint คืน ok=false')
     createdLoreId = null
 
     const duplicated = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/duplicate`, {
@@ -370,15 +370,15 @@ await check('POST/PATCH /characters + lore runtime', async () => {
       headers: authHeaders,
     })
     const duplicatedId = duplicated.character?.id
-    if (!duplicatedId || duplicatedId === characterId) throw new Error('duplicate endpoint did not return a new character id')
+    if (!duplicatedId || duplicatedId === characterId) throw new Error('duplicate endpoint ไม่ได้คืน character id ใหม่')
     createdCharacterIds.push(duplicatedId)
 
     const reset = await readJson<{ character?: SmokeCharacter }>(`/characters/${characterId}/reset-prompt`, {
       method: 'POST',
       headers: authHeaders,
     })
-    if (reset.character?.id !== characterId) throw new Error('reset prompt returned the wrong character')
-    if (!reset.character.systemPrompt) throw new Error('reset prompt did not return systemPrompt')
+    if (reset.character?.id !== characterId) throw new Error('reset prompt คืนตัวละครไม่ตรงกับที่ขอ')
+    if (!reset.character.systemPrompt) throw new Error('reset prompt ไม่คืน systemPrompt')
 
     return `characterId=${characterId}, duplicateId=${duplicatedId}, lore=created/updated/deleted`
   } finally {
@@ -421,7 +421,7 @@ await warnable('POST /creator/ai-draft', async () => {
       },
     }),
   })
-  if (!payload.draft?.name || !payload.draft.greeting) throw new Error('draft missing required text fields')
+  if (!payload.draft?.name || !payload.draft.greeting) throw new Error('draft ยังขาดช่องข้อความที่จำเป็น')
   const imageProvider = payload.image?.provider ?? 'missing'
   const detail = `source=${payload.source ?? 'unknown'}, image=${imageProvider}`
   if (imageProvider !== 'configured') {
@@ -430,7 +430,7 @@ await warnable('POST /creator/ai-draft', async () => {
     if (!live) {
       return {
         ok: true,
-        detail: `${detail}; provider skipped for local smoke`,
+        detail: `${detail}; ข้าม provider สำหรับ local smoke`,
       }
     }
     return {
@@ -454,14 +454,14 @@ await check('POST /chat validation', async () => {
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
       characterId: "' OR 1=1 --",
-      message: 'chat validation smoke should never call the live provider',
+      message: 'chat validation smoke ต้องไม่เรียก live provider',
       history: [],
     }),
   })
 
-  if (!payload.reply?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('chat validation did not return Thai invalid character id')
-  if (payload.chatId !== null && payload.chatId !== undefined) throw new Error('chat validation should not return a chatId')
-  if ((payload.usage?.totalTokens ?? 0) !== 0) throw new Error('chat validation path should not use tokens')
+  if (!payload.reply?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('chat validation ไม่คืนข้อความไทยสำหรับ character id ไม่ถูกต้อง')
+  if (payload.chatId !== null && payload.chatId !== undefined) throw new Error('chat validation ไม่ควรคืน chatId')
+  if ((payload.usage?.totalTokens ?? 0) !== 0) throw new Error('chat validation path ไม่ควรใช้ token')
   if (payload.usage?.providerFailure) {
     throw new Error(`เส้นทางตรวจ validation ของแชทไม่ควรเรียกผู้ให้บริการ แต่พบ providerFailure: ${payload.usage.providerFailure.code}`)
   }
@@ -498,7 +498,7 @@ if (live) {
     return `chatId=${chatResult.chatId}, tokens=${chatResult.totalTokens}, minBalance=${minSmokeTokenBalance}, replyChars=${chatResult.replyChars}, minRoleplayReplyChars=${minRoleplayReplyChars}`
   })
 } else {
-  record('POST /chat', 'skip', 'live model call skipped; run `bun run api:smoke:live`')
+  record('POST /chat', 'skip', 'ข้าม live model call; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
 }
 
 await check('POST /chat/stream', async () => {
@@ -507,31 +507,31 @@ await check('POST /chat/stream', async () => {
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
       characterId: "' OR 1=1 --",
-      message: 'stream validation smoke should never call the live provider',
+      message: 'stream validation smoke ต้องไม่เรียก live provider',
       history: [],
     }),
   })
 
   const delta = events.find((event): event is Extract<StreamSmokeEvent, { type: 'delta' }> => event.type === 'delta')
   const done = events.find((event): event is Extract<StreamSmokeEvent, { type: 'done' }> => event.type === 'done')
-  if (!delta?.content?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('stream did not return Thai validation delta')
-  if (!done) throw new Error('stream did not return done event')
-  if ((done.usage?.totalTokens ?? 0) !== 0) throw new Error('stream validation path should not use tokens')
+  if (!delta?.content?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('stream ไม่คืน validation delta ภาษาไทย')
+  if (!done) throw new Error('stream ไม่คืน done event')
+  if ((done.usage?.totalTokens ?? 0) !== 0) throw new Error('stream validation path ไม่ควรใช้ token')
   if (done.usage?.providerFailure) {
     throw new Error(`เส้นทางตรวจ validation ของสตรีมไม่ควรเรียกผู้ให้บริการ แต่พบ providerFailure: ${done.usage.providerFailure.code}`)
   }
-  return `${events.length} SSE events, validation path uncharged`
+  return `${events.length} SSE events, validation path ไม่ถูกคิด token`
 })
 
 const activeChats = await runRequired('GET /chats', async () => {
   const payload = await readJson<{ chats?: ChatSummary[] }>('/chats', { headers: authHeaders })
-  if (!payload.chats) throw new Error('missing chats array')
+  if (!payload.chats) throw new Error('ยังไม่มี chats array')
   return payload.chats
 })
 
 await check('GET /chats?archived=true', async () => {
   const payload = await readJson<{ chats?: ChatSummary[] }>('/chats?archived=true', { headers: authHeaders })
-  if (!payload.chats) throw new Error('missing archived chats array')
+  if (!payload.chats) throw new Error('ยังไม่มี archived chats array')
   return `${payload.chats.length} archived chats`
 })
 
@@ -549,7 +549,7 @@ if (activeChats.length > 0) {
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify({ title: smokeTitle }),
       })
-      if (renamed.chat?.id !== chat.id || renamed.chat.title !== smokeTitle) throw new Error('chat title was not updated')
+      if (renamed.chat?.id !== chat.id || renamed.chat.title !== smokeTitle) throw new Error('แก้ชื่อแชทแล้วไม่ถูกบันทึก')
 
       const restoredTitle = await readJson<{ chat?: { id?: string; title?: string | null } }>(`/chats/${chat.id}`, {
         method: 'PATCH',
@@ -557,7 +557,7 @@ if (activeChats.length > 0) {
         body: JSON.stringify({ title: originalTitle }),
       })
       if (restoredTitle.chat?.id !== chat.id || restoredTitle.chat.title !== originalTitle) {
-        throw new Error('chat title was not restored')
+        throw new Error('คืนชื่อแชทเดิมไม่สำเร็จ')
       }
       titleRestored = true
 
@@ -565,23 +565,23 @@ if (activeChats.length > 0) {
         method: 'PATCH',
         headers: authHeaders,
       })
-      if (!archived.ok) throw new Error('archive endpoint returned ok=false')
+      if (!archived.ok) throw new Error('archive endpoint คืน ok=false')
       chatArchived = true
 
       const archivedList = await readJson<{ chats?: ChatSummary[] }>('/chats?archived=true', { headers: authHeaders })
       const archivedChat = archivedList.chats?.find((item) => item.id === chat.id)
-      if (!archivedChat?.isArchived) throw new Error('archived chat was not returned by archived list')
+      if (!archivedChat?.isArchived) throw new Error('แชทที่จัดเก็บแล้วไม่อยู่ในรายการ archived')
 
       const restored = await readJson<{ ok?: boolean }>(`/chats/${chat.id}/restore`, {
         method: 'PATCH',
         headers: authHeaders,
       })
-      if (!restored.ok) throw new Error('restore endpoint returned ok=false')
+      if (!restored.ok) throw new Error('restore endpoint คืน ok=false')
       chatArchived = false
 
       const activeList = await readJson<{ chats?: ChatSummary[] }>('/chats', { headers: authHeaders })
       if (!activeList.chats?.some((item) => item.id === chat.id && !item.isArchived)) {
-        throw new Error('restored chat was not returned by active list')
+        throw new Error('แชทที่กู้คืนแล้วไม่อยู่ในรายการ active')
       }
     } finally {
       if (!titleRestored) {
@@ -603,15 +603,15 @@ if (activeChats.length > 0) {
       }
     }
 
-    return 'rename, archive, and restore worked'
+    return 'rename, archive และ restore ใช้งานได้'
   })
 
   await check('GET /chats/:id/messages', async () => {
     const payload = await readJson<{ chat?: { id?: string; messages?: unknown[] } }>(`/chats/${activeChats[0].id}/messages`, {
       headers: authHeaders,
     })
-    if (payload.chat?.id !== activeChats[0].id) throw new Error('wrong chat returned')
-    if (!Array.isArray(payload.chat.messages)) throw new Error('missing messages array')
+    if (payload.chat?.id !== activeChats[0].id) throw new Error('API คืนแชทไม่ตรงกับที่ขอ')
+    if (!Array.isArray(payload.chat.messages)) throw new Error('ยังไม่มี messages array')
     return `${payload.chat.messages.length} messages`
   })
 
@@ -628,12 +628,12 @@ if (activeChats.length > 0) {
         location,
         weather: 'dry run',
         mood: 'stable QA',
-        sceneNotes: ['API smoke should persist world state without changing messages.'],
+        sceneNotes: ['API smoke ต้องบันทึก world state โดยไม่เปลี่ยนข้อความในแชท'],
       }),
     })
-    if (patchPayload.chatId !== activeChats[0].id) throw new Error('world state patch returned wrong chat')
-    if (patchPayload.worldState?.location !== location) throw new Error('world state location was not patched')
-    if (!patchPayload.worldState.sceneNotes?.length) throw new Error('world state notes were not patched')
+    if (patchPayload.chatId !== activeChats[0].id) throw new Error('world state patch คืนแชทไม่ตรงกับที่ขอ')
+    if (patchPayload.worldState?.location !== location) throw new Error('world state location ไม่ถูกบันทึก')
+    if (!patchPayload.worldState.sceneNotes?.length) throw new Error('world state notes ไม่ถูกบันทึก')
 
     const getPayload = await readJson<{
       chatId?: string
@@ -641,13 +641,13 @@ if (activeChats.length > 0) {
     }>(`/chats/${activeChats[0].id}/world-state`, {
       headers: authHeaders,
     })
-    if (getPayload.chatId !== activeChats[0].id) throw new Error('world state get returned wrong chat')
-    if (getPayload.worldState?.location !== location) throw new Error('world state get did not return patched location')
+    if (getPayload.chatId !== activeChats[0].id) throw new Error('world state get คืนแชทไม่ตรงกับที่ขอ')
+    if (getPayload.worldState?.location !== location) throw new Error('world state get ไม่คืน location ที่บันทึกไว้')
     return getPayload.worldState.mood ?? 'world-state-updated'
   })
 } else {
-  record('GET /chats/:id/messages', 'skip', 'no active chats returned')
-  record('PATCH/GET /chats/:id/world-state', 'skip', 'no active chats returned')
+  record('GET /chats/:id/messages', 'skip', 'ไม่มี active chat ให้ตรวจ')
+  record('PATCH/GET /chats/:id/world-state', 'skip', 'ไม่มี active chat ให้ตรวจ')
 }
 
 await check('DELETE /chats/:id validation', async () => {
@@ -656,14 +656,14 @@ await check('DELETE /chats/:id validation', async () => {
     headers: authHeaders,
   })
   assertExpectedErrorPayload(payload, 400, 'invalid_chat_id', 'รหัสแชทไม่ถูกต้อง')
-  return 'invalid chat id rejected before delete'
+  return 'ปฏิเสธ chat id ไม่ถูกต้องก่อนลบ'
 })
 
 await check('GET /characters/:id/lore', async () => {
   const payload = await readJson<{ loreEntries?: unknown[] }>(`/characters/${primaryCharacter.id}/lore`, {
     headers: authHeaders,
   })
-  if (!payload.loreEntries) throw new Error('missing loreEntries array')
+  if (!payload.loreEntries) throw new Error('ยังไม่มี loreEntries array')
   return `${payload.loreEntries.length} lore entries`
 })
 
@@ -678,14 +678,14 @@ await check('POST /reports validation', async () => {
     }),
   })
   assertExpectedErrorPayload(payload, 400, 'invalid_character_id', 'รหัสตัวละครไม่ถูกต้อง')
-  return 'SQL-like report character id rejected before persistence'
+  return 'ปฏิเสธ character id ลักษณะ SQL-like ก่อนบันทึก report'
 })
 
 await check('PATCH /me/content-settings', async () => {
   const current = await readJson<{ contentSettings?: { isAdult?: boolean; maxRating?: string } }>('/me/content-settings', {
     headers: authHeaders,
   })
-  if (!current.contentSettings?.maxRating) throw new Error('missing current content settings')
+  if (!current.contentSettings?.maxRating) throw new Error('ยังไม่มี content settings ปัจจุบัน')
 
   const payload = await readJson<{ contentSettings?: { isAdult?: boolean; maxRating?: string } }>('/me/content-settings', {
     method: 'PATCH',
@@ -697,7 +697,7 @@ await check('PATCH /me/content-settings', async () => {
   })
   const nextMaxRating = payload.contentSettings?.maxRating
   if (nextMaxRating !== current.contentSettings.maxRating) {
-    throw new Error(`content setting changed unexpectedly: ${nextMaxRating}`)
+    throw new Error(`content setting เปลี่ยนโดยไม่คาดคิด: ${nextMaxRating}`)
   }
   return nextMaxRating
 })
@@ -722,7 +722,7 @@ await check('PUT/GET /creator/draft', async () => {
   const saved = await readJson<{ draft?: { creatorBrief?: string } | null }>('/creator/draft', {
     headers: authHeaders,
   })
-  if (saved.draft?.creatorBrief !== marker) throw new Error('creator draft was not saved')
+  if (saved.draft?.creatorBrief !== marker) throw new Error('creator draft ไม่ถูกบันทึก')
 
   await readJson<{ ok: boolean }>('/creator/draft', {
     method: 'PUT',
@@ -733,9 +733,9 @@ await check('PUT/GET /creator/draft', async () => {
   const cleared = await readJson<{ draft?: unknown | null }>('/creator/draft', {
     headers: authHeaders,
   })
-  if (cleared.draft !== null) throw new Error('creator draft was not cleared')
+  if (cleared.draft !== null) throw new Error('creator draft ไม่ถูกล้าง')
 
-  return 'saved and cleared'
+  return 'บันทึกและล้าง draft สำเร็จ'
 })
 
 if (adminHeaders) {
@@ -743,7 +743,7 @@ if (adminHeaders) {
     const payload = await readJson<{ totals?: { users?: number; characters?: number } }>('/admin/summary', {
       headers: adminHeaders,
     })
-    if (typeof payload.totals?.users !== 'number') throw new Error('missing admin totals')
+    if (typeof payload.totals?.users !== 'number') throw new Error('ยังไม่มี admin totals')
     return `users=${payload.totals.users}, characters=${payload.totals.characters ?? 0}`
   })
 
@@ -754,7 +754,7 @@ if (adminHeaders) {
       body: JSON.stringify({ amount: 1, reason: 'non-mutating smoke validation' }),
     })
     assertExpectedErrorPayload(payload, 400, 'invalid_user_id', 'รหัสผู้ใช้ไม่ถูกต้อง')
-    return 'invalid admin wallet user id rejected before mutation'
+    return 'ปฏิเสธ admin wallet user id ไม่ถูกต้องก่อนเปลี่ยนข้อมูล'
   })
 
   await check('POST /admin/prompt-inspector', async () => {
@@ -776,15 +776,15 @@ if (adminHeaders) {
         runtimeNote: 'Smoke runtime note: verify context inspector without calling the live model.',
       }),
     })
-    if (!payload.snapshot?.redacted) throw new Error('prompt inspector did not return a redacted snapshot')
-    if (!payload.snapshot.prompt?.includes('Platform prompt-control policy')) throw new Error('missing prompt-control policy')
+    if (!payload.snapshot?.redacted) throw new Error('prompt inspector ไม่คืน redacted snapshot')
+    if (!payload.snapshot.prompt?.includes('Platform prompt-control policy')) throw new Error('ยังไม่มี prompt-control policy')
     if (!payload.snapshot.sections?.some((section) => section.title === 'Runtime memory')) {
-      throw new Error('missing runtime memory section')
+      throw new Error('ยังไม่มี runtime memory section')
     }
     if (!payload.snapshot.totals?.estimatedTokens || !payload.snapshot.totals.sectionCount) {
-      throw new Error('missing prompt totals')
+      throw new Error('ยังไม่มี prompt totals')
     }
-    if (!payload.diff || !Array.isArray(payload.diff.changedSections)) throw new Error('missing prompt diff')
+    if (!payload.diff || !Array.isArray(payload.diff.changedSections)) throw new Error('ยังไม่มี prompt diff')
     return `sections=${payload.snapshot.totals.sectionCount}, estimatedTokens=${payload.snapshot.totals.estimatedTokens}`
   })
 
@@ -798,17 +798,17 @@ if (adminHeaders) {
     }>('/admin/evals/local', {
       headers: adminHeaders,
     })
-    if (!payload.passed) throw new Error(`local eval did not pass; failCount=${payload.failCount ?? 'unknown'}`)
-    if (!payload.scenarioCount || !payload.results?.length) throw new Error('missing local eval scenarios')
+    if (!payload.passed) throw new Error(`local eval ไม่ผ่าน; failCount=${payload.failCount ?? 'unknown'}`)
+    if (!payload.scenarioCount || !payload.results?.length) throw new Error('ยังไม่มี local eval scenarios')
     if (!payload.results.some((result) => result.id === 'prompt-injection-defense' && result.passed)) {
-      throw new Error('missing prompt injection eval result')
+      throw new Error('ยังไม่มีผลทดสอบ prompt injection eval')
     }
     return `${payload.passCount ?? payload.results.length}/${payload.scenarioCount} scenarios`
   })
 
   await check('GET /admin/reports', async () => {
     const payload = await readJson<{ reports?: unknown[] }>('/admin/reports?limit=5', { headers: adminHeaders })
-    if (!payload.reports) throw new Error('missing reports array')
+    if (!payload.reports) throw new Error('ยังไม่มี reports array')
     return `${payload.reports.length} reports`
   })
 
@@ -818,26 +818,26 @@ if (adminHeaders) {
       headers: { 'Content-Type': 'application/json', ...adminHeaders },
       body: JSON.stringify({ status: 'REVIEWED' }),
     })
-    assertExpectedErrorPayload(patch, 400, 'invalid_report_id', 'รหัสรายงานไม่ถูกต้อง', 'PATCH invalid id')
+    assertExpectedErrorPayload(patch, 400, 'invalid_report_id', 'รหัสรายงานไม่ถูกต้อง', 'PATCH id ไม่ถูกต้อง')
 
     const action = await readExpectedError('/admin/reports/not-a-uuid/actions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...adminHeaders },
       body: JSON.stringify({ action: 'ARCHIVE_MESSAGE' }),
     })
-    assertExpectedErrorPayload(action, 400, 'invalid_report_id', 'รหัสรายงานไม่ถูกต้อง', 'POST action invalid id')
+    assertExpectedErrorPayload(action, 400, 'invalid_report_id', 'รหัสรายงานไม่ถูกต้อง', 'POST action id ไม่ถูกต้อง')
 
-    return 'invalid admin report ids rejected before mutation'
+    return 'ปฏิเสธ admin report id ไม่ถูกต้องก่อนเปลี่ยนข้อมูล'
   })
 
   await check('GET /admin/audit-logs', async () => {
     const payload = await readJson<{ logs?: unknown[] }>('/admin/audit-logs?limit=5', { headers: adminHeaders })
-    if (!payload.logs) throw new Error('missing audit logs array')
+    if (!payload.logs) throw new Error('ยังไม่มี audit logs array')
     return `${payload.logs.length} logs`
   })
 } else {
   const status: ApiSmokeStatus = requireAdmin ? 'fail' : 'skip'
-  const detail = 'SMOKE_ADMIN_API_KEY or local ADMIN_API_KEY was not available'
+  const detail = 'ยังไม่มี SMOKE_ADMIN_API_KEY หรือ ADMIN_API_KEY local'
   record('GET /admin/summary', status, detail)
   record('PATCH /admin/users/:id/tokens validation', status, detail)
   record('POST /admin/prompt-inspector', status, detail)
@@ -884,23 +884,23 @@ async function bestEffort(name: string, fn: () => Promise<unknown>) {
   try {
     await fn()
   } catch (error) {
-    writeWarn(`Warning: could not ${name}: ${error instanceof Error ? error.message : String(error)}`)
+    writeWarn(`คำเตือน: ทำงานเสริม "${name}" ไม่สำเร็จ: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
 async function readStreamEvents(path: string, init: RequestInit) {
   const response = await fetch(`${apiBaseUrl}${path}`, init)
   const raw = await response.text()
-  if (!response.ok) throw new Error(`${path} failed with ${response.status}: ${raw.slice(0, 500)}`)
+  if (!response.ok) throw new Error(`${path} ไม่ผ่านด้วยสถานะ ${response.status}: ${raw.slice(0, 500)}`)
   const contentType = response.headers.get('content-type') ?? ''
-  if (!contentType.includes('text/event-stream')) throw new Error(`${path} did not return an event stream: ${contentType}`)
+  if (!contentType.includes('text/event-stream')) throw new Error(`${path} ไม่คืน event stream: ${contentType}`)
 
   const events = raw
     .split(/\r?\n/)
     .filter((line) => line.startsWith('data: '))
     .map((line) => JSON.parse(line.slice('data: '.length)) as StreamSmokeEvent)
 
-  if (events.length === 0) throw new Error(`${path} returned no SSE data events`)
+  if (events.length === 0) throw new Error(`${path} ไม่คืน SSE data event`)
   return events
 }
 
@@ -909,7 +909,7 @@ async function readReadyPayload() {
   const raw = await response.text()
   const payload = raw ? tryParseJson(raw) : null
   if (!payload || typeof payload !== 'object') {
-    throw new Error(`/ready did not return JSON: ${raw.slice(0, 500) || 'empty response'}`)
+    throw new Error(`/ready ไม่คืน JSON: ${raw.slice(0, 500) || 'empty response'}`)
   }
 
   return {
@@ -924,10 +924,10 @@ async function readExpectedError(path: string, init: RequestInit) {
   const raw = await response.text()
   const parsed = raw ? tryParseJson(raw) : null
   if (!parsed || typeof parsed !== 'object') {
-    throw new Error(`${path} did not return a JSON error payload: ${raw.slice(0, 500) || 'empty response'}`)
+    throw new Error(`${path} ไม่คืน JSON error payload: ${raw.slice(0, 500) || 'empty response'}`)
   }
 
-  if (response.ok) throw new Error(`${path} unexpectedly succeeded`)
+  if (response.ok) throw new Error(`${path} สำเร็จทั้งที่ควรเป็น error`)
 
   return {
     status: response.status,
@@ -940,13 +940,13 @@ function assertExpectedErrorPayload(
   expectedStatus: number,
   expectedError: string,
   expectedMessage: string,
-  label = 'expected error',
+  label = 'error ที่คาดไว้',
 ) {
   if (result.status !== expectedStatus || result.payload.error !== expectedError) {
-    throw new Error(`${label} expected ${expectedError} ${expectedStatus}, got ${result.status} ${result.payload.error ?? 'unknown'}`)
+    throw new Error(`${label} ควรได้ ${expectedError} ${expectedStatus} แต่ได้ ${result.status} ${result.payload.error ?? 'unknown'}`)
   }
   if (!result.payload.message?.includes(expectedMessage)) {
-    throw new Error(`${label} expected Thai message "${expectedMessage}", got ${result.payload.message ?? 'missing'}`)
+    throw new Error(`${label} ควรได้ข้อความไทย "${expectedMessage}" แต่ได้ ${result.payload.message ?? 'missing'}`)
   }
 }
 
