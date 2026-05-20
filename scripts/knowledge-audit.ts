@@ -65,7 +65,7 @@ export async function collectKnowledgeAuditResult(): Promise<KnowledgeAuditResul
   const readme = await readRepoFile('knowledge/README.md')
   requireIncludes(
     readme,
-    ['Runtime Usage', 'Structured Packs', 'Never store secrets', '[Wiki Index](./wiki/INDEX.md)'],
+    ['การใช้งาน runtime', 'ชุดข้อมูล structured', 'ห้ามเก็บ secrets', '[ดัชนี Wiki](./wiki/INDEX.md)'],
     'knowledge/README.md',
     findings,
   )

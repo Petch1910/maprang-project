@@ -63,7 +63,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
   const readme = await readRepoFile('memory/README.md')
   requireIncludes(
     readme,
-    ['Never store secrets', 'Update Protocol', '[Working Context](./working-context.md)', '[Deploy Blockers](./deploy-blockers.md)'],
+    ['ห้ามเก็บ secrets', 'ขั้นตอนอัปเดต', '[บริบทงานปัจจุบัน](./working-context.md)', '[ตัวกั้นก่อน deploy](./deploy-blockers.md)'],
     'memory/README.md',
   )
 

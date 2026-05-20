@@ -1,33 +1,33 @@
-# Maprang Knowledge Layer
+# ชั้นความรู้ของ Maprang
 
-This folder separates long-running product knowledge from runtime user data.
+โฟลเดอร์นี้แยก product knowledge ระยะยาวออกจาก runtime user data.
 
-## Layers
+## ชั้นข้อมูล
 
-- `raw/`: source material such as TOR notes, UX references, provider docs, and policy notes.
-- `wiki/`: human-readable Markdown compiled from raw sources.
-- `structured/`: JSON knowledge packs that backend code can load, validate, and use in prompts or rule engines.
+- `raw/`: เอกสารต้นทาง เช่น TOR notes, UX references, provider docs, และ policy notes.
+- `wiki/`: Markdown สำหรับมนุษย์อ่านที่สรุปจาก raw sources.
+- `structured/`: JSON knowledge packs ที่ backend load, validate, และนำไปใช้ใน prompts หรือ rule engines ได้.
 
-Start from the [Wiki Index](./wiki/INDEX.md) for product context.
+เริ่มอ่าน product context จาก [ดัชนี Wiki](./wiki/INDEX.md).
 
-## Structured Packs
+## ชุดข้อมูล structured
 
-The first runtime packs are chat style, creator guidance, relationship rules, scene rules, and content policy.
+runtime packs ชุดแรกครอบคลุม chat style, creator guidance, relationship rules, scene rules, และ content policy.
 
-## Rules
+## กฎ
 
-- Never store secrets, access tokens, private keys, database passwords, or service role keys.
-- Store env variable names only, not their real values.
-- Keep structured files deterministic and schema-versioned.
-- Run `bun run knowledge:audit` after editing this folder.
+- ห้ามเก็บ secrets, access tokens, private keys, database passwords, หรือ service role keys.
+- เก็บเฉพาะชื่อ env variable ไม่เก็บค่าจริง.
+- ทำให้ structured files deterministic และมี schema version.
+- รัน `bun run knowledge:audit` หลังแก้โฟลเดอร์นี้.
 
-## Runtime Usage
+## การใช้งาน runtime
 
-The backend loads `knowledge/structured/*.json` through `knowledge.service.ts`.
-The first runtime use is conservative:
+backend โหลด `knowledge/structured/*.json` ผ่าน `knowledge.service.ts`.
+การใช้งาน runtime ช่วงแรกตั้งใจให้ conservative:
 
-- Chat system prompts get a compact style and policy guide.
-- Creator AI draft prompts get character creation guidance.
-- Health/readiness exposes structured knowledge status.
+- Chat system prompts ได้ style และ policy guide แบบกระชับ.
+- Creator AI draft prompts ได้ character creation guidance.
+- Health/readiness แสดง structured knowledge status.
 
-Future use can expand this into editable relationship rules, scene rules, recommendation rules, and admin-managed knowledge packs.
+อนาคตสามารถขยายเป็น relationship rules, scene rules, recommendation rules, และ admin-managed knowledge packs ที่แก้ไขได้.

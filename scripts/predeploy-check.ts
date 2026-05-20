@@ -586,7 +586,7 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"memory:audit"', 'bun scripts/memory-audit.ts', 'bun run memory:audit'], 'package.json')
       requireIncludes(packageJson, ['"vault:audit:test"', 'bun test scripts/markdown-audit-helpers.test.ts'], 'package.json')
       requireIncludes(readme, ['memory/README.md', 'Project Memory'], 'README.md')
-      requireIncludes(memoryReadme, ['Never store secrets', 'Update Protocol', 'Working Context', 'Deploy Blockers'], 'memory/README.md')
+      requireIncludes(memoryReadme, ['ห้ามเก็บ secrets', 'ขั้นตอนอัปเดต', 'บริบทงานปัจจุบัน', 'ตัวกั้นก่อน deploy'], 'memory/README.md')
       requireIncludes(workingContext, ['Current Local Status', 'Current Production Status'], 'memory/working-context.md')
       requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
       requireIncludes(
@@ -617,7 +617,7 @@ const checks: Check[] = [
       const knowledgeAudit = await readRepoFile('scripts/knowledge-audit.ts')
       requireIncludes(packageJson, ['"knowledge:audit"', 'bun scripts/knowledge-audit.ts', 'bun run knowledge:audit'], 'package.json')
       requireIncludes(readme, ['Knowledge Layer', 'knowledge/README.md', 'bun run knowledge:audit'], 'README.md')
-      requireIncludes(knowledgeReadme, ['Runtime Usage', 'Structured Packs', 'Never store secrets'], 'knowledge/README.md')
+      requireIncludes(knowledgeReadme, ['การใช้งาน runtime', 'ชุดข้อมูล structured', 'ห้ามเก็บ secrets'], 'knowledge/README.md')
       requireIncludes(wikiIndex, ['Maprang Product', 'Relationship Engine', 'Creator Studio', 'Production Deploy'], 'knowledge/wiki/INDEX.md')
       requireIncludes(
         backendKnowledge,
