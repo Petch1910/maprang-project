@@ -11,7 +11,7 @@ describe('provider smoke guard helpers', () => {
 
   test('formats provider failure messages without allowing verification flags too early', () => {
     expect(providerFailureIssue({ code: 'rate_limit', retryable: true, userMessage: 'try later' })).toContain(
-      'ลองใหม่ได้หลัง cooldown',
+      'ลองใหม่ได้หลังช่วงพัก',
     )
     expect(providerFailureIssue({ code: 'invalid_key', retryable: false })).toContain(
       'ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1',

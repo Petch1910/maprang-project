@@ -4,6 +4,14 @@
 
 ## ตรวจอัตโนมัติ
 
+รัน repo-owned deterministic gate ก่อนเมื่อยังไม่มี backend runtime, Postgres, หรือ staging URL จริง:
+
+```bash
+bun run qa:repo
+```
+
+`qa:repo` ครอบคลุม secrets, memory/knowledge/eval, static/security/API/menu audits, helper tests, backend tests, frontend build, และ predeploy wiring โดยไม่เรียก runtime smoke ที่ต้องมี service เปิดอยู่.
+
 รัน full local gate เมื่อ Postgres, backend, และ frontend พร้อม:
 
 ```bash

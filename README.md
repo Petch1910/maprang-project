@@ -176,6 +176,12 @@ bunx prisma migrate deploy
 ## การตรวจปัจจุบัน
 
 ```bash
+bun run qa:repo
+```
+
+ใช้คำสั่งนี้เมื่อต้องตรวจ repo-owned checks ที่ไม่ต้องพึ่ง backend runtime, Postgres ที่เปิดอยู่, หรือ staging URL จริง. มันเหมาะกับงาน agent ต่อเนื่อง, งานเอกสาร, guard, unit/static tests, backend/frontend build, และ predeploy wiring ก่อนค่อยไปขั้น runtime smoke.
+
+```bash
 bun run qa:local
 ```
 

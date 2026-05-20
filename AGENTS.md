@@ -30,7 +30,7 @@ bun run secrets:check
 git diff --check
 ```
 
-For code, API, or UI changes, also run the narrow test for the touched area. Use `bun run qa:local` or `bun run e2e:smoke` when behavior or route coverage changes.
+For code, API, or UI changes, also run the narrow test for the touched area. Use `bun run qa:repo` for deterministic repo-owned checks that do not need a running backend/Postgres, and use `bun run qa:local` or `bun run e2e:smoke` when behavior or route coverage changes and runtime services are available.
 
 ## Commit And Push
 

@@ -28,6 +28,8 @@ Verified:
 - Frontend static audit now also guards XSS/opener regressions such as `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, `window.open()`, and `target="_blank"` links without `rel="noopener noreferrer"`.
 - `ABUSE_QA_CHECKLIST.md` now gives a manual pre-release checklist for SQL-like input, broken access, auth spoofing, prompt control, frontend XSS/link safety, admin audit logs, token/rate limit, and storage/avatar abuse cases.
 - Secret pattern scanning now also catches Anthropic keys, Hugging Face tokens, and Stripe live secret keys in committed source/docs in addition to existing OpenRouter/OpenAI/JWT/platform token shapes.
+- `qa:repo` is now available as a deterministic repo-owned gate that runs audits, helper tests, backend checks, frontend checks, and predeploy wiring without runtime smoke that needs a running backend/Postgres/browser.
+- Provider smoke guard regression tests now align with the current Thai-first retry wording for rate-limit provider failures.
 - Frontend unexpected-error console labels across Workspace, Wallet, Admin Moderation, Prompt Inspector, Admin Evals, Character Lobby, and Relationship preset picker now use Thai-first diagnostics instead of `Load ... error` labels.
 - Frontend route audit and bundle budget CLI output now report Thai-first pass/fail guidance while keeping exact file, route, and chunk names for debugging.
 - Predeploy, API smoke, bundle budget, audit, eval, memory, knowledge, release handoff, route/menu, and deploy doctor self-test CLI summaries now use Thai-first pass/fail prefixes instead of `ok -` or `fail -`, with focused regression tests on the changed runners.

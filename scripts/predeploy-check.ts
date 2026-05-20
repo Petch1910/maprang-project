@@ -437,6 +437,7 @@ const checks: Check[] = [
           '"secrets:patterns:test"',
           '"qa:seed"',
           '"e2e:smoke"',
+          '"qa:repo"',
           '"qa:full"',
           '"staging:check"',
           '"staging:verify"',
@@ -463,6 +464,7 @@ const checks: Check[] = [
       requireIncludes(deploymentQa, ['TypeScript import-equals `require()`', 'CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
+      const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
       const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
       const stagingCheck = packageJson.scripts?.['staging:check'] ?? ''
       const stagingVerify = packageJson.scripts?.['staging:verify'] ?? ''
@@ -472,6 +474,12 @@ const checks: Check[] = [
       }
       if (qaLive.includes('smoke:chat') || qaLive.includes('smoke:image')) {
         throw new Error('package.json qa:live ไม่ควรยิง provider ซ้ำจากคำสั่งนอก api:smoke:live')
+      }
+      if (!qaRepo.includes('predeploy:check') || !qaRepo.includes('backend:check') || !qaRepo.includes('frontend:check')) {
+        throw new Error('package.json qa:repo ต้องครอบ predeploy, backend, และ frontend checks แบบ deterministic')
+      }
+      if (/(^|&&\s*)bun run (?:smoke:local|api:smoke|e2e:smoke)(?:\s|&&|$)/.test(qaRepo)) {
+        throw new Error('package.json qa:repo ต้องไม่เรียก runtime smoke ที่ต้องมี backend/Postgres หรือ browser จริง')
       }
       if (!qaLocal.includes('secrets:patterns:test')) {
         throw new Error('package.json qa:local ต้องรัน secrets:patterns:test เพื่อจับ regression ของ secret pattern กลาง')

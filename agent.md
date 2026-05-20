@@ -141,6 +141,7 @@ bun run backend:check
 bun run frontend:check
 bun run api:smoke
 bun run e2e:smoke
+bun run qa:repo
 bun run qa:local
 bun run qa:full
 bun run predeploy:check
