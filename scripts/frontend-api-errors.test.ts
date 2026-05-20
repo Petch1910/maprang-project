@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { ApiError } from '../apps/frontend/src/lib/api'
+import { ApiError, streamChatMessage, type ChatStreamEvent } from '../apps/frontend/src/lib/api'
 
 describe('frontend API errors', () => {
   test('prefers backend Thai user messages over machine-readable codes', () => {
@@ -28,5 +28,56 @@ describe('frontend API errors', () => {
     const error = new ApiError('/uploads/avatar', 502, null)
 
     expect(error.message).toBe('คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่ (สถานะ 502)')
+  })
+
+  test('parses chat stream events split across network chunks', async () => {
+    const originalFetch = globalThis.fetch
+    const encoder = new TextEncoder()
+    const events: ChatStreamEvent[] = []
+
+    try {
+      globalThis.fetch = (async () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode('data: {"type":"delta","content":"สวัสดี"}\n'))
+              controller.enqueue(
+                encoder.encode(
+                  '\ndata: {"type":"done","chatId":"550e8400-e29b-41d4-a716-446655440000","usage":{"totalTokens":0,"cost":0,"modelName":"test-model","contextLoreCount":0,"tokenBalance":42}}\n\n',
+                ),
+              )
+              controller.close()
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'text/event-stream' } },
+        )) as typeof fetch
+
+      await streamChatMessage(
+        {
+          message: 'ทดสอบสตรีม',
+          characterId: '550e8400-e29b-41d4-a716-446655440001',
+          chatId: null,
+          history: [],
+        },
+        (event) => events.push(event),
+      )
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+
+    expect(events).toEqual([
+      { type: 'delta', content: 'สวัสดี' },
+      {
+        type: 'done',
+        chatId: '550e8400-e29b-41d4-a716-446655440000',
+        usage: {
+          totalTokens: 0,
+          cost: 0,
+          modelName: 'test-model',
+          contextLoreCount: 0,
+          tokenBalance: 42,
+        },
+      },
+    ])
   })
 })
