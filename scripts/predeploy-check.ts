@@ -61,6 +61,8 @@ const requiredFiles = [
   'scripts/api-smoke-helpers.ts',
   'scripts/api-smoke-helpers.test.ts',
   'scripts/api-route-audit.test.ts',
+  'scripts/docs-command-audit.ts',
+  'scripts/docs-command-audit.test.ts',
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
   'scripts/frontend-static-audit.test.ts',

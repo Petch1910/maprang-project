@@ -16,8 +16,10 @@ bun install
 bunx prisma generate
 bunx prisma migrate deploy
 bun run start
-bun run backend:check
+bun run deploy:check
 ```
+
+ถ้ารันจาก repo root ให้ใช้ `bun run backend:check`.
 
 ## ค่า env (Env)
 

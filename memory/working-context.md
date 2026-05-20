@@ -4,6 +4,9 @@ Last updated: 2026-05-20
 
 ## อัปเดตงานใน repo (Repo-owned update) 2026-05-20
 
+- เพิ่ม `docs:commands` และ `docs:commands:test` เพื่อตรวจว่าเอกสารหลักอ้าง `bun run ...` ตรงกับ package context จริง ทั้ง root docs, app READMEs, release/deploy handoff, route/menu audit, และ staging/production runbooks.
+- `qa:repo`, CI predeploy/secrets layer, และ Production Smoke ถูกผูกให้รัน command-doc audit แล้ว เพื่อกัน README หรือ deploy docs แนะนำ script ที่ไม่มีอยู่จริงในตำแหน่งที่ผู้ใช้รัน.
+- README ของ backend/frontend package เปลี่ยนคำสั่ง app-local check เป็น `bun run deploy:check` และแยกบอกชัดว่าถ้ารันจาก repo root ให้ใช้ `bun run backend:check` / `bun run frontend:check`.
 - `evals/golden-roleplay.json` ใช้คำอธิบาย สถานการณ์ lore และ runtime memory แบบ Thai-first แล้ว เพื่อให้ชุด deterministic prompt eval สอดคล้องกับ runtime prompt ที่แปลเป็นไทยก่อนหน้านี้.
 - สถานการณ์ prompt injection ยังตั้งใจคง `userMessage` ภาษาอังกฤษไว้ เพื่อทดสอบการโจมตีข้ามภาษาและยืนยันว่า prompt-control policy อยู่เหนือข้อความผู้ใช้ที่ไม่น่าเชื่อถือ.
 - Root README และ `evals/README.md` ใช้หัวข้อไทย-first สำหรับชั้นความรู้, ชั้นประเมินผล, ตัวตรวจพรอมป์, ชุดทดสอบหลัก, และคำสั่ง โดยยังคงคำอังกฤษสำคัญไว้ในวงเล็บเพื่อให้ค้นหาและ guard อัตโนมัติได้.
@@ -11,7 +14,7 @@ Last updated: 2026-05-20
 - `AGENTS.md` และ `agent.md` ใช้หัวข้อ Thai-first สำหรับขอบเขต การสานต่องาน QA gates product direction safety/core systems production blockers และ definition of done แล้ว โดยยังคงคำอังกฤษในวงเล็บเพื่อค้นหาได้.
 - Deployment QA, Production Setup, Release Handoff, Security Checklist, production checklist memory, และ knowledge wiki ใช้ heading Thai-first สำหรับ production env, storage, mobile/manual QA, release notes, env setup, QA gates, security, commands, runtime knowledge, gates, และ compile flow แล้ว.
 - QA runner polish ล่าสุดทำให้ eval/readiness/smoke doctor/deploy status/release handoff/API smoke/local smoke/e2e smoke diagnostics เป็น Thai-first มากขึ้น โดยยังคง command/env/route/provider keys ที่ต้องใช้ debug ไว้.
-- Full deterministic `bun run qa:repo` ผ่านหลังชุด frontend auth hardening ล่าสุด ครอบคลุม backend tests 157 pass / 506 expect calls, frontend build/bundle, audits, evals, smoke helper tests และ predeploy guards; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
+- Full deterministic `bun run qa:repo` ผ่านหลังเพิ่ม documentation command audit ล่าสุด ครอบคลุม backend tests 157 pass / 506 expect calls, import-cycle audit 125 source files / 278 import edges, frontend build/bundle, audits, evals, smoke helper tests และ predeploy guards; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 
 ## เป้าหมายปัจจุบัน
 
@@ -22,7 +25,7 @@ Last updated: 2026-05-20
 สถานะ: static/unit/build QA พร้อมแล้ว; final local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
 Verified:
-- Latest full `qa:repo` after frontend auth hardening passes; backend tests now pass 157 tests with 506 expects, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
+- Latest full `qa:repo` after documentation command audit passes; backend tests pass 157 tests with 506 expects, docs command audit checks 189 references, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
 - Latest full `qa:local` attempt reached final runtime smoke and then failed because Docker Desktop/Postgres plus backend `http://127.0.0.1:3000` were not running in this desktop session.
 - Latest direct `deploy:status` also fails at backend root preflight for the same reason: `http://127.0.0.1:3000` is not running.
 - Backend tests pass: 157 pass, 0 fail, 506 expects.

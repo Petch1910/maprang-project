@@ -4,6 +4,8 @@ Last updated: 2026-05-20
 
 ## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-20
 
+- Documentation command audit pass: `bun run docs:commands`, `bun run docs:commands:test`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `git diff --check` ผ่านหลังเพิ่ม gate ตรวจ `bun run ...` ในเอกสารหลัก 189 references.
+- `qa:repo`, CI, และ Production Smoke ตอนนี้รัน `docs:commands` กับ `docs:commands:test` เพื่อกัน command drift ระหว่าง root package, backend package, frontend package, และเอกสาร deploy/handoff.
 - Golden roleplay eval fixture Thai-first pass: `bun run eval:local`, `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังแปล `evals/golden-roleplay.json`.
 - Local eval formatting regression fixture now uses Thai-first failure text, verified with `bun run eval:local:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 - README/evals docs headings are Thai-first while preserving searchable English terms in parentheses; `predeploy:check:test` and `predeploy:check` now guard the Thai-first headings.
@@ -23,7 +25,7 @@ Last updated: 2026-05-20
 
 สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
-ล่าสุด `bun run qa:repo` ผ่านครบหลังชุด frontend auth hardening: backend 157 pass, 0 fail, 506 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.4KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
+ล่าสุด `bun run qa:repo` ผ่านครบหลังเพิ่ม documentation command audit: docs command audit ตรวจ 189 references, import-cycle audit ตรวจ 125 source files / 278 import edges, backend 157 pass, 0 fail, 506 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.4KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
 
 คำสั่งที่ยืนยันแล้ว:
 - `bun run qa:local`
@@ -130,7 +132,7 @@ Last updated: 2026-05-20
 - Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - Frontend auth promise hardening now passes `frontend:check` and `frontend:static:audit:test`; AuthPanel/session refresh/sign-out/dev-user flows no longer leave Supabase failures as unhandled promise rejections.
 - Predeploy now guards AuthPanel and workspace auth failure wiring so Supabase/session promise handling cannot drift back to uncaught UI failures silently.
-- Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด frontend auth hardening และ predeploy guard ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 157 pass / 506 expect calls, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
+- Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังเพิ่ม documentation command audit และ predeploy/CI/Production Smoke wiring ล่าสุด ครอบคลุม secrets, memory/knowledge, docs command audit, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 157 pass / 506 expect calls, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - Frontend API fallback error wording now passes Thai-first coverage via `frontend:static:audit:test` and full `frontend:check`.
 - Frontend `ApiError` backend-message precedence now passes `frontend:api:test`, `frontend:static:audit:test`, and full `frontend:check`; the static audit blocks the old payload.error-first constructor and `payloadError` fallback patterns.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.

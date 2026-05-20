@@ -39,6 +39,14 @@ bun run import-cycle:audit
 
 `import-cycle:audit` scan relative TypeScript imports, re-exports, dynamic imports, TypeScript import-equals `require()`, และ CommonJS `require()` calls ใน backend, frontend, scripts, seed data, Playwright config, และ e2e smoke files. คำสั่งนี้อยู่ใน `qa:local`, CI, และ Production Smoke เพื่อกัน architecture cycles กลับมาแบบเงียบ ๆ.
 
+ถ้าต้องการตรวจว่าเอกสารหลักอ้าง `bun run ...` ตรงกับ package context จริง:
+
+```bash
+bun run docs:commands
+```
+
+`docs:commands` ตรวจ root docs, app READMEs, release/deploy handoff, route/menu audit, และ staging/production runbooks เพื่อกันคำสั่งที่ไม่มีอยู่จริง เช่น command ของ root หลุดไปอยู่ใน README ของ app package หรือ command ของ app ถูกเขียนเหมือนรันจาก repo root.
+
 ถ้าต้องการตรวจ production env files ก่อน deploy โดยไม่พิมพ์ secret values:
 
 ```bash

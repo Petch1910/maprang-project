@@ -14,8 +14,10 @@ React + Vite frontend สำหรับ Maprang AI.
 bun install
 bun run dev --host 127.0.0.1
 bun run build
-bun run frontend:check
+bun run deploy:check
 ```
+
+ถ้ารันจาก repo root ให้ใช้ `bun run frontend:check`.
 
 ## ค่า env (Env)
 

@@ -19,6 +19,8 @@ jobs:
       - run: bun run memory:audit
       - run: bun run knowledge:audit
       - run: bun run vault:audit:test
+      - run: bun run docs:commands
+      - run: bun run docs:commands:test
       - run: bun run eval:local
       - run: bun run eval:local:test
 
@@ -35,6 +37,8 @@ jobs:
       - run: bun run secrets:check:test
       - run: bun run secrets:patterns:test
       - run: bun run vault:audit:test
+      - run: bun run docs:commands
+      - run: bun run docs:commands:test
       - run: bun run eval:local:test
       - run: bun run security:audit
       - run: bun run security:audit:test
