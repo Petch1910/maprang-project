@@ -20,7 +20,7 @@ bun run qa:local
 
 `qa:local` ใช้ `qa:repo` เป็นฐานก่อน แล้วค่อยเพิ่ม runtime smoke ที่ต้องมี backend/Postgres จริง ได้แก่ `smoke:doctor`, `smoke:local`, และ `api:smoke`.
 
-Gate นี้ไม่เรียก live AI provider. มันตรวจ committed secrets, committed-secret scan path regressions, API route coverage mapping, import-cycle architecture regressions, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend API error-message regressions, frontend bundle/static/route และ route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, live chat smoke validation regressions, local smoke helper regressions, browser e2e smoke command-plan regressions, predeploy guard wiring regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, และ avatar upload. Local API smoke ยังส่ง `skipImageProvider=true` สำหรับ creator draft checks จึงตรวจ endpoint shape ได้โดยไม่ใช้ image credits; live image generation อยู่ใน `api:smoke:live`, `smoke:image:live`, และ `production:check`.
+Gate นี้ไม่เรียก live AI provider. มันตรวจ committed secrets, committed-secret scan path regressions, API route coverage mapping, import-cycle architecture regressions, API smoke helper regressions, memory/knowledge vault helper regressions, local eval output regressions, frontend API error-message regressions, frontend bundle/static/route และ route/menu audit regressions, smoke auth helper regressions, provider smoke guard regressions, smoke doctor blocker regressions, readiness smoke summary regressions, image smoke fallback regressions, live chat smoke validation regressions, local smoke helper regressions, command plan ของ e2e smoke ฝั่งเบราว์เซอร์, predeploy guard wiring regressions, DB-required backend check planning, Supabase signed-storage helper regressions, deploy status formatting, deploy env doctor helper regressions, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, และ avatar upload. Local API smoke ยังส่ง `skipImageProvider=true` สำหรับ creator draft checks จึงตรวจ endpoint shape ได้โดยไม่ใช้เครดิตสร้างรูป; live image generation อยู่ใน `api:smoke:live`, `smoke:image:live`, และ `production:check`.
 Real `.env` และ `.env.*` files ต้องไม่ถูก track. `secrets:check` จะ ignore local untracked env files เพื่อความสะดวกของ developer แต่จะ fail ถ้าไฟล์นั้นถูก commit หรือ tracked.
 
 ถ้าต้องการตรวจ backend API coverage โดยไม่รัน full suite:
@@ -45,7 +45,7 @@ bun run import-cycle:audit
 bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/frontend/.env
 ```
 
-สำหรับ early staging เท่านั้น ให้เพิ่ม `--allow-unverified-image` จนกว่า live image smoke จะผ่านและตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`.
+สำหรับ early staging เท่านั้น ให้เพิ่ม `--allow-unverified-image` จนกว่าการทดสอบสร้างรูปจริงจะผ่านและตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`.
 
 ถ้าต้องการสรุป backend deploy readiness และ next steps ปัจจุบันโดยไม่ fail กับ staging/provider blockers ที่คาดไว้:
 
@@ -67,7 +67,7 @@ readiness rules ด้านล่างมี deterministic self-test:
 bun run deploy:readiness:test
 ```
 
-ถ้าต้องการ seed browser QA data ที่ทำซ้ำได้ และรัน Playwright end-to-end smoke บน desktop/mobile viewports:
+ถ้าต้องการ seed browser QA data ที่ทำซ้ำได้ และรัน Playwright end-to-end smoke บนเดสก์ท็อป/มือถือ:
 
 ```bash
 bun run qa:seed
@@ -75,10 +75,10 @@ bun run e2e:smoke
 ```
 
 `e2e:smoke` เปิด home page, Character Lobby, Creator Studio, My Chats, Events, Profile, Wallet, Moderation,
-`/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, และ seeded chat ทั้ง desktop/mobile viewports. มันยังตรวจ Character Lobby relationship contract, chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow เมื่อมี admin key,
-route rendering, browser console errors, และ horizontal overflow. มันไม่ส่ง live chat message จึงไม่ใช้ provider credits ตอน UI smoke testing.
+`/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, และ seeded chat ทั้งเดสก์ท็อป/มือถือ. มันยังตรวจ Character Lobby relationship contract, chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow เมื่อมี admin key,
+route rendering, browser console errors, และ horizontal overflow. มันไม่ส่งข้อความแชทจริง จึงไม่ใช้เครดิตผู้ให้บริการตอน UI smoke testing.
 
-สำหรับ full local predeploy gate พร้อม browser smoke:
+สำหรับ full local predeploy gate พร้อมการตรวจเบราว์เซอร์:
 
 ```bash
 bun run qa:full
@@ -107,7 +107,7 @@ bun run qa:live
 ```
 
 `qa:live` รัน local QA gate แล้วตามด้วย `api:smoke:live` หนึ่งรอบ. Live pass นี้ตรวจทั้ง chat และ image generation แล้ว จึงไม่ควร chain `smoke:chat` หรือ `smoke:image:live` ต่อ ยกเว้นกำลัง retry provider path เดี่ยวที่ fail.
-เมื่อ staging กำลัง verify providers ครั้งแรก ให้รัน `api:smoke:live` หรือ live smoke commands ที่แคบกว่า ก่อน mark verification flags. หลัง live chat call สำเร็จ ให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`. หลัง live image call สำเร็จ ให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`, แล้ว rerun final production gate.
+เมื่อ staging กำลัง verify providers ครั้งแรก ให้รัน `api:smoke:live` หรือ live smoke commands ที่แคบกว่า ก่อน mark verification flags. หลังการเรียกแชทจริงสำเร็จ ให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`. หลังการสร้างรูปจริงสำเร็จ ให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`, แล้ว rerun final production gate.
 
 สำหรับ deployed backend ให้ใช้ smoke-only live gate พร้อม `SMOKE_API_BASE_URL` และ smoke auth variables ตอน retry provider connectivity. ห้ามชี้ `backend:check`, `qa:local`, หรือ `qa:live` ไปที่ production data เว้นแต่ตั้งใจให้ automated persistence tests สร้างและ archive test records ที่นั่นจริง ๆ.
 
