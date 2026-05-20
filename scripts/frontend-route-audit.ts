@@ -119,7 +119,7 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
         const name = attribute.name.getText(sourceFile)
         if (name !== 'to' && name !== 'href') continue
         const value = attributeStringValue(attribute, sourceFile)
-        if (value) checkPath(value, attribute, `attribute ${name}`)
+        if (value) checkPath(value, attribute, `ค่า ${name}`)
       }
     }
 
@@ -148,7 +148,7 @@ export async function collectFrontendRouteAuditResult(): Promise<FrontendRouteAu
       ok: false,
       declaredRoutes,
       findings: [],
-      failure: 'Frontend route audit ไม่ผ่าน: ไม่พบ <Route path="..."> ใน App.tsx',
+      failure: 'ตรวจ route หน้าบ้านไม่ผ่าน: ไม่พบ <Route path="..."> ใน App.tsx',
     }
   }
 
@@ -181,12 +181,12 @@ export async function runFrontendRouteAudit(
       return 1
     }
 
-    writeError('Frontend route audit ไม่ผ่าน:')
+    writeError('ตรวจ route หน้าบ้านไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding.file}:${finding.line} ${finding.message}`)
     return 1
   }
 
-  writeLine(`ผ่าน - frontend route audit ผ่านแล้ว (${result.declaredRoutes.length} routes)`)
+  writeLine(`ผ่าน - frontend route audit ผ่านแล้ว (${result.declaredRoutes.length} รายการ)`)
   return 0
 }
 

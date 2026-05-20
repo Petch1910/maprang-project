@@ -53,7 +53,7 @@ describe('frontend route audit', () => {
 
     expect(findings.map((finding) => finding.message)).toEqual([
       'คำสั่ง navigate ชี้ไปที่ /missing แต่ App.tsx ไม่มี Route ที่ตรงกัน',
-      'attribute to ชี้ไปที่ /ghost แต่ App.tsx ไม่มี Route ที่ตรงกัน',
+      'ค่า to ชี้ไปที่ /ghost แต่ App.tsx ไม่มี Route ที่ตรงกัน',
     ])
   })
 
@@ -68,6 +68,8 @@ describe('frontend route audit', () => {
     expect(result.findings).toEqual([])
     expect(exitCode).toBe(0)
     expect(lines[0]).toContain('ผ่าน - frontend route audit ผ่านแล้ว')
+    expect(lines[0]).toContain('รายการ')
+    expect(lines[0]).not.toContain(' routes')
     expect(errors).toEqual([])
   })
 })
