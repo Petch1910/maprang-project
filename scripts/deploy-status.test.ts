@@ -206,7 +206,8 @@ describe('deploy status formatting', () => {
 
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('Deploy status ไม่ผ่าน: backend unavailable')
+    expect(errors.join('\n')).toContain('ตรวจสถานะ deploy ไม่ผ่าน: backend unavailable')
+    expect(errors.join('\n')).not.toContain('Deploy status ไม่ผ่าน')
     expect(errors.join('\n')).toContain('วิธีแก้ในเครื่อง:')
     expect(errors.join('\n')).toContain('URL ระบบหลังบ้านที่ deploy แล้ว')
     expect(errors.join('\n')).not.toContain('วิธีแก้ local:')

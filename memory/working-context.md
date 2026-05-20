@@ -76,6 +76,7 @@ Verified:
 - README, Deployment QA, Production Setup, and deploy blockers now use Thai-first live provider handoff wording for smoke wallet checks, `usage.providerFailure`, image billing/quota, and DB example-value rejection while preserving exact env names and commands.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
 - Smoke doctor and deploy status root/health failure hints now avoid mixed `วิธีแก้ local`, `วิธีแก้ deploy`, `backend root`, `deployed backend`, and `frontend/static proxy` wording while keeping `SMOKE_API_BASE_URL` and identity payload guidance exact.
+- Deploy status runtime error prefixes now use Thai-first `ตรวจสถานะ deploy ไม่ผ่าน` wording while keeping JSON payload keys stable.
 - Deploy readiness health rows now use Thai-first ready/default/unknown labels such as `พร้อม`, `ยังไม่พร้อม`, `ไม่ทราบ`, and `ค่าเริ่มต้น` while preserving exact row keys for CLI/dashboard parsing.
 - Deploy blocker handoff memory now uses Thai-first headings, status, current-issue, required-action, and not-blocker wording while preserving exact env names, commands, and provider flags.
 - Memory inbox and production checklist now use Thai-first handoff wording while preserving exact smoke/deploy commands, env names, and production-data safety warnings.
