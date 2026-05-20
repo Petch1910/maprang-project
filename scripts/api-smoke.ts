@@ -160,7 +160,7 @@ await warnable('GET /ready', async () => {
     if (live && isOnlyLiveVerificationFailure(failures)) {
       return {
         ok: false,
-        detail: `readiness รอการยืนยัน live provider; จะรัน provider smoke ต่อเพื่อให้ตั้ง verification flags ได้หลังผ่านจริง (${reason})`,
+        detail: `readiness รอการยืนยันผู้ให้บริการจริง; จะรัน smoke ผู้ให้บริการต่อเพื่อให้ตั้งค่า verification หลังผ่านจริง (${reason})`,
       }
     }
     throw new Error(`ยังไม่พร้อม: ${reason}`)
@@ -433,14 +433,14 @@ await warnable('POST /creator/ai-draft', async () => {
   })
   if (!payload.draft?.name || !payload.draft.greeting) throw new Error('draft ยังขาดช่องข้อความที่จำเป็น')
   const imageProvider = payload.image?.provider ?? 'missing'
-  const detail = `source=${payload.source ?? 'unknown'}, image=${imageProvider}`
+  const detail = `แหล่งร่าง=${payload.source ?? 'ไม่ทราบ'}, รูป=${imageProvider}`
   if (imageProvider !== 'configured') {
     const issue = creatorImageIssue(payload)
     if (requireLiveImage) throw new Error(issue)
     if (!live) {
       return {
         ok: true,
-        detail: `${detail}; ข้าม provider สำหรับ local smoke`,
+        detail: `${detail}; ข้ามผู้ให้บริการสร้างรูปสำหรับ local smoke`,
       }
     }
     return {
