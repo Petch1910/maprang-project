@@ -10,15 +10,15 @@ export type E2eSmokeLogger = Pick<typeof console, 'log' | 'error'>
 export function e2eSmokeSteps(): E2eSmokeStep[] {
   return [
     {
-      label: 'QA seed: reset before browser smoke',
+      label: 'QA seed: reset ก่อน browser smoke',
       command: ['bun', 'run', 'qa:seed'],
     },
     {
-      label: 'Playwright smoke: desktop and mobile routes',
+      label: 'Playwright smoke: routes desktop และ mobile',
       command: ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'],
     },
     {
-      label: 'QA seed: restore demo data after browser smoke',
+      label: 'QA seed: คืน demo data หลัง browser smoke',
       command: ['bun', 'run', 'qa:seed'],
       alwaysRun: true,
     },
@@ -37,7 +37,7 @@ async function runStep(step: E2eSmokeStep, runner: E2eSmokeRunner, logger: E2eSm
   logger.log(`\n${step.label}`)
   const exitCode = await runner(step)
   if (exitCode !== 0) {
-    throw new Error(`${step.label} failed with exit code ${exitCode}`)
+    throw new Error(`${step.label} ไม่ผ่านด้วย exit code ${exitCode}`)
   }
 }
 
@@ -47,7 +47,7 @@ export async function runE2eSmoke(
   steps: E2eSmokeStep[] = e2eSmokeSteps(),
 ) {
   const [reset, browserSmoke, restore] = steps
-  if (!reset || !browserSmoke || !restore) throw new Error('e2e smoke requires reset, browser smoke, and restore steps')
+  if (!reset || !browserSmoke || !restore) throw new Error('e2e smoke ต้องมีขั้น reset, browser smoke, และ restore')
 
   let exitCode = 0
 

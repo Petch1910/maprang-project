@@ -142,6 +142,7 @@ Results:
 - Supabase signed-storage setup failure guidance now passes Thai-first coverage via `supabase:storage:test`.
 - `smoke:local:test` now runs in `qa:local`, CI, and Production Smoke to guard local smoke helper behavior and the importable local smoke runner without calling the backend.
 - `e2e:smoke:test` now runs in `qa:local`, CI, and Production Smoke to guard browser smoke seed reset/restore command ordering without launching Playwright.
+- E2E smoke command-label localization now passes `e2e:smoke:test` and `predeploy:check`.
 - Backend tests and health/API smoke now cover prompt budget config and history trimming behavior.
 - Backend tests now cover chat provider failure classification for invalid credentials, quota exhaustion, rate limits, and timeouts.
 - Live chat smoke scripts now fail on `usage.providerFailure` metadata instead of matching old fallback text.

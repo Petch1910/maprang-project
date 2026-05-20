@@ -170,6 +170,7 @@ Verified:
 - Supabase signed-storage setup failures now use Thai-first guidance for missing env, signed-access requirements, bucket privacy, signed URL, upload, fetch, and cleanup errors.
 - Local smoke now exports testable helpers and an importable smoke runner for smoke character selection, avatar upload validation, cleanup, and QA summary formatting; `smoke:local:test` covers them without hitting the backend.
 - Browser e2e smoke now exports a testable command plan, and `e2e:smoke:test` guards seed reset, Playwright execution, and seed restore ordering without launching the browser.
+- E2E smoke command labels and failure text now use Thai-first wording while preserving the QA seed and Playwright identifiers.
 - Secret scanning now exports path-rule helpers, and `secrets:check:test` guards tracked `.env` rejection plus source/docs/config scan selection.
 - Local eval CLI now exports output formatting helpers, and `eval:local:test` guards pass/fail summary output without rerunning the deterministic prompt suite.
 - Local eval CLI pass/fail summaries and prompt token estimates now use Thai-first output while preserving scenario ids for debugging.
