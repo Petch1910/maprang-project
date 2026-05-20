@@ -45,6 +45,10 @@ describe('frontend static audit', () => {
           payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
             ? payload.error
             : 'fallback'
+        const payloadError =
+          payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
+            ? payload.error
+            : 'fallback'
       `,
       'Fixture.tsx',
     )
@@ -57,6 +61,7 @@ describe('frontend static audit', () => {
       'surfaces raw auth/provider error message to users',
       'surfaces raw Redux async error message to users',
       'ApiError should prefer payload.message before payload.error',
+      'ApiError should not surface payload.error as user-facing fallback',
     ])
   })
 

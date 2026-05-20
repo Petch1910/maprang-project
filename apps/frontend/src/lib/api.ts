@@ -4,6 +4,13 @@ export { API_BASE_URL }
 
 export const DEFAULT_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const genericApiErrorMessage = 'คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'
+
+function payloadString(payload: unknown, key: 'message' | 'error') {
+  if (!payload || typeof payload !== 'object') return ''
+  const value = (payload as Record<string, unknown>)[key]
+  return typeof value === 'string' ? value.trim() : ''
+}
 
 export class ApiError extends Error {
   path: string
@@ -11,15 +18,7 @@ export class ApiError extends Error {
   payload: unknown
 
   constructor(path: string, status: number, payload: unknown) {
-    const payloadMessage =
-      payload && typeof payload === 'object' && 'message' in payload && typeof payload.message === 'string'
-        ? payload.message
-        : null
-    const payloadError =
-      payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
-        ? payload.error
-        : `${path} ไม่สำเร็จ (status ${status})`
-    const message = payloadMessage ?? payloadError
+    const message = payloadString(payload, 'message') || `${genericApiErrorMessage} (สถานะ ${status})`
     super(message)
     this.name = 'ApiError'
     this.path = path

@@ -400,6 +400,7 @@ const checks: Check[] = [
           '"import-cycle:audit:test"',
           '"api:audit:test"',
           '"api:smoke:test"',
+          '"frontend:api:test"',
           '"frontend:bundle:test"',
           '"frontend:static:audit:test"',
           '"frontend:route:audit:test"',
@@ -486,6 +487,9 @@ const checks: Check[] = [
       }
       if (!qaLocal.includes('api:smoke:test')) {
         throw new Error('package.json qa:local must run api:smoke:test so API smoke helper regressions are caught')
+      }
+      if (!qaLocal.includes('frontend:api:test')) {
+        throw new Error('package.json qa:local must run frontend:api:test so frontend API error regressions are caught')
       }
       if (!qaLocal.includes('frontend:bundle:test')) {
         throw new Error('package.json qa:local must run frontend:bundle:test so bundle budget regressions are caught')
@@ -1226,6 +1230,7 @@ const checks: Check[] = [
           'bun run api:audit',
           'bun run api:audit:test',
           'bun run api:smoke:test',
+          'bun run frontend:api:test',
           'bun run frontend:bundle:test',
           'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
@@ -1280,6 +1285,7 @@ const checks: Check[] = [
           'bun run api:audit',
           'bun run api:audit:test',
           'bun run api:smoke:test',
+          'bun run frontend:api:test',
           'bun run frontend:bundle:test',
           'bun run frontend:static:audit:test',
           'bun run frontend:route:audit:test',
