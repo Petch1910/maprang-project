@@ -68,7 +68,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
   )
 
   const workingContext = await readRepoFile('memory/working-context.md')
-  requireIncludes(workingContext, ['Last updated:', 'Current Goal', 'Current Local Status', 'Current Production Status'], 'memory/working-context.md')
+  requireIncludes(workingContext, ['Last updated:', 'Current Goal', 'Current Local Status', 'สถานะ production ปัจจุบัน'], 'memory/working-context.md')
 
   const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
   requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'smoke:chat', 'smoke:image:live'], 'memory/deploy-blockers.md')

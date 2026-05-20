@@ -205,24 +205,24 @@ Verified:
 - Production deploy knowledge wiki now documents reply-budget baselines/recommendations and the deploy-status-first staging gate order.
 - Production deploy knowledge wiki now uses Thai-first deploy gate wording for real backend/frontend URLs, production CORS, signed avatar storage, live chat/image provider smoke, and staging verification while preserving exact command/env names.
 
-## Current Production Status
+## สถานะ production ปัจจุบัน
 
-Status: blocked by real environment and provider verification
+สถานะ: ยังถูกกั้นด้วย environment จริงและการยืนยันผู้ให้บริการจริง
 
-Known blockers:
-- Backend URL is still local in current smoke environment.
-- Frontend backend URL is still local in current smoke environment.
-- `CORS_ORIGINS` is still local/non-production in current smoke environment.
-- Chat provider needs stable live smoke verification before setting `CHAT_PROVIDER_LIVE_VERIFIED=1`.
-- Image provider live smoke is blocked by provider billing hard limit. Keep `IMAGE_GENERATION_LIVE_VERIFIED=0`.
-- Structured knowledge must remain valid through `bun run knowledge:audit` before deploy.
-- Prompt/context assembly must remain valid through `bun run eval:local` before deploy.
+ตัวกั้นที่รู้แล้ว:
+- Backend URL ใน smoke environment ปัจจุบันยังเป็น local.
+- Frontend backend URL ใน smoke environment ปัจจุบันยังเป็น local.
+- `CORS_ORIGINS` ใน smoke environment ปัจจุบันยังเป็น local/non-production.
+- ผู้ให้บริการแชทต้องผ่าน live smoke แบบเสถียรก่อนตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`.
+- live smoke ของผู้ให้บริการสร้างรูปยังติด billing hard limit ให้คง `IMAGE_GENERATION_LIVE_VERIFIED=0`.
+- Structured knowledge ต้องยังผ่าน `bun run knowledge:audit` ก่อน deploy.
+- Prompt/context assembly ต้องยังผ่าน `bun run eval:local` ก่อน deploy.
 
-## Most Important Next Steps
+## ขั้นตอนสำคัญถัดไป
 
-1. Deploy staging backend and frontend.
-2. Set real staging URLs and HTTPS-only production-like CORS.
-3. Run `staging:verify` against the deployed staging backend.
-4. Run ordered live provider smoke against staging, preferably `api:smoke:live`.
-5. Set verification flags only after live smoke passes.
-6. Rerun `production:check`.
+1. Deploy backend และ frontend staging.
+2. ตั้ง staging URLs จริงและ CORS แบบ HTTPS-only ให้เหมือน production.
+3. รัน `staging:verify` กับ backend staging ที่ deploy แล้ว.
+4. รัน smoke ผู้ให้บริการจริงกับ staging ตามลำดับ โดยแนะนำ `api:smoke:live`.
+5. ตั้ง verification flags หลัง live smoke ผ่านจริงเท่านั้น.
+6. รัน `production:check` ซ้ำ.

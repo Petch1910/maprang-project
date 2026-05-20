@@ -49,6 +49,7 @@ Results:
 - Secret scan and release handoff diagnostic localization: pass via `secrets:check:test`, `release:handoff:test`, `secrets:check`, and `release:handoff:check`.
 - Release handoff template Thai-first sections: pass via `release:handoff:test`, `release:handoff:check`, and `predeploy:check:test`.
 - Memory audit: pass.
+- Production memory handoff wording for blockers, next steps, and live provider verification is Thai-first.
 - Knowledge audit: pass.
 - Memory/knowledge audit diagnostic localization: pass via `vault:audit:test`, `memory:audit`, and `knowledge:audit`.
 - Production deploy knowledge wiki: updated to reflect reply-budget gates, staging/deploy-status order, and Thai-first gate wording for backend/frontend URLs, CORS, storage, and live provider smoke.

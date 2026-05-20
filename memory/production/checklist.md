@@ -4,8 +4,8 @@
 
 ## ก่อนขึ้น production
 
-- Deploy staging backend.
-- Deploy staging frontend.
+- Deploy backend staging.
+- Deploy frontend staging.
 - ตั้ง backend URL จริงให้ frontend.
 - ตั้ง domain frontend จริงแบบ HTTPS ใน backend CORS.
 - รัน migrations กับ staging database.
@@ -15,8 +15,8 @@
 - รัน `bun run deploy:status` เพื่อยืนยันว่า blocker และ next steps แสดงชัด.
 - รัน `bun run staging:check`.
 - หลังมี staging domains แล้ว ให้รัน `bun run staging:verify` พร้อม `SMOKE_API_BASE_URL` และ `SMOKE_ADMIN_API_KEY`.
-- รัน live provider smoke ตามลำดับ.
-- ตั้ง provider live verification flags หลัง live smoke ผ่านจริงเท่านั้น.
+- รัน smoke ผู้ให้บริการจริงตามลำดับ.
+- ตั้งค่า live verification flags ของผู้ให้บริการหลัง smoke ผ่านจริงเท่านั้น.
 - รัน `bun run production:check`.
 - กรอก `RELEASE_HANDOFF.md` หลัง `production:check` ผ่าน โดยไม่ใส่ secrets หรือ private database URLs.
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
@@ -50,7 +50,7 @@ SMOKE_API_BASE_URL=https://<backend-staging-domain> SMOKE_ADMIN_API_KEY=<admin-k
 bun run production:check
 ```
 
-ตรวจ live provider แบบเจาะจุด:
+ตรวจผู้ให้บริการจริงแบบเจาะจุด:
 
 ```bash
 bun run api:smoke:live

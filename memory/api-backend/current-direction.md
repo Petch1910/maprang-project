@@ -12,8 +12,8 @@ Backend ควรให้ความสำคัญกับ explicit guards, 
 - Prompt-control context ครอบ untrusted character text.
 - Admin actions มี audit log coverage.
 - Token wallet debit ค่า chat usage โดยไม่ให้ overdraft.
-- Local smoke ข้ามการใช้เงิน live provider แต่ยังตรวจ endpoint shape.
-- Live provider paths ถูกแยกเป็น gates ของตัวเอง.
+- Local smoke ข้ามการใช้เครดิตผู้ให้บริการจริง แต่ยังตรวจ endpoint shape.
+- เส้นทางผู้ให้บริการจริงถูกแยกเป็น gate ของตัวเอง.
 - Structured knowledge packs ป้อน chat/creator prompt guidance และแสดงผ่าน health/readiness.
 - Deterministic prompt/context evals คุม roleplay depth, prompt-control ordering, lore injection, และ relationship/scene continuity.
 - Admin Prompt Inspector แสดง redacted prompt snapshots, section token estimates, retrieved lore, และ previous/current prompt diffs โดยไม่ใช้ live model tokens.
