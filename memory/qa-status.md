@@ -41,6 +41,7 @@ Last updated: 2026-05-20
 - Route/menu document check localization now passes `route-menu:audit:test` and `route-menu:audit`.
 - Thai-first UI label regression guard: pass via `frontend:static:audit:test`.
 - Frontend static audit diagnostic localization: pass via `frontend:static:audit:test`, `frontend:check`, and `predeploy:check`.
+- Frontend unexpected-error console labels now use Thai-first wording across Workspace, Wallet, Admin Moderation, Prompt Inspector, Admin Evals, Character Lobby, and Relationship preset picker; verified with `frontend:check`.
 - Frontend route audit and bundle budget diagnostic localization: pass via `frontend:route:audit:test`, `frontend:bundle:test`, and `frontend:check`.
 - Predeploy/API smoke/audit summary prefix localization: pass via `predeploy:check:test`, `api:smoke:test`, `frontend:bundle:test`, `api:audit:test`, `security:audit:test`, `frontend:static:audit:test`, `frontend:route:audit:test`, `import-cycle:audit:test`, `vault:audit:test`, `release:handoff:test`, `route-menu:audit:test`, `deploy:doctor:self-test`, `memory:audit`, `knowledge:audit`, `release:handoff:check`, `api:audit`, `security:audit`, `import-cycle:audit`, `route-menu:audit`, and `predeploy:check`.
 - Full local QA was rerun after the latest Thai UI copy guards and route/menu mixed-language guard; `qa:local` still passes across backend, frontend, local smoke, and API smoke.

@@ -167,7 +167,7 @@ export function AdminModerationPage() {
       setNote(data.reports.length > 0 ? `โหลดรายงานแล้ว ${data.reports.length} รายการ` : 'ไม่มีรายงานที่ตรงกับตัวกรองนี้')
     } catch (error) {
       if (!isExpectedAdminAuthError(error) && shouldLogUnexpectedError(error)) {
-        console.error('Load admin reports error:', error)
+        console.error('โหลดคิวรายงานผู้ดูแลไม่สำเร็จ:', error)
       }
       setReports([])
       setAuditLogs([])
@@ -208,7 +208,7 @@ export function AdminModerationPage() {
       setAuditLogs(auditData.logs)
       setNote(`ปรับสถานะรายงานเป็น ${statusLabel(nextStatus)} แล้ว`)
     } catch (error) {
-      if (shouldLogUnexpectedError(error)) console.error('Update report status error:', error)
+      if (shouldLogUnexpectedError(error)) console.error('ปรับสถานะรายงานไม่สำเร็จ:', error)
       setNote(error instanceof ApiError && error.status === 403 ? 'ยังไม่ได้เปิดสิทธิ์ผู้ดูแล หรือรหัสผู้ดูแลไม่ถูกต้อง' : 'ปรับสถานะรายงานไม่ได้')
     } finally {
       setUpdatingId('')
@@ -224,7 +224,7 @@ export function AdminModerationPage() {
       setAuditLogs(auditData.logs)
       setNote(action === 'HIDE_CHARACTER' ? 'ซ่อนตัวละครและปิดรายงานแล้ว' : 'จัดเก็บข้อความและปิดรายงานแล้ว')
     } catch (error) {
-      if (shouldLogUnexpectedError(error)) console.error('Apply report action error:', error)
+      if (shouldLogUnexpectedError(error)) console.error('ทำคำสั่งดูแลรายงานไม่สำเร็จ:', error)
       setNote(error instanceof ApiError && error.status === 403 ? 'ยังไม่ได้เปิดสิทธิ์ผู้ดูแล หรือรหัสผู้ดูแลไม่ถูกต้อง' : 'ทำคำสั่งดูแลรายงานไม่ได้')
     } finally {
       setUpdatingId('')

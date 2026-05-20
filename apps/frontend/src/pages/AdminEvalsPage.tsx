@@ -133,7 +133,7 @@ export function AdminEvalsPage() {
       setRun(data)
       setNote(data.passed ? `ชุดทดสอบผ่าน ${data.passCount}/${data.scenarioCount} เคส` : `ชุดทดสอบไม่ผ่าน ${data.failCount} เคส`)
     } catch (error) {
-      if (shouldLogUnexpectedError(error)) console.error('Load admin evals error:', error)
+      if (shouldLogUnexpectedError(error)) console.error('โหลดชุดทดสอบผู้ดูแลไม่สำเร็จ:', error)
       setRun(null)
       setNote(apiErrorMessage(error))
     } finally {

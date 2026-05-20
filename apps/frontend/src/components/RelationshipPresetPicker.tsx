@@ -16,7 +16,7 @@ export function RelationshipPresetPicker({
     fetchRelationshipPresets()
       .then((data) => setPresets(data.presets))
       .catch((error) => {
-        if (shouldLogUnexpectedError(error)) console.error('Load relationship presets error:', error)
+        if (shouldLogUnexpectedError(error)) console.error('โหลดพรีเซ็ตความสัมพันธ์ไม่สำเร็จ:', error)
       })
   }, [])
 

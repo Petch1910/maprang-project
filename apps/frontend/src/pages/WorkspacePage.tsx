@@ -216,7 +216,7 @@ export function WorkspacePage() {
       }
       setConnectionNote('ฐานข้อมูลและบริการ AI เชื่อมต่อแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Load health status error:', error)
+      logUnexpectedWorkspaceError('โหลดสถานะระบบไม่สำเร็จ:', error)
       setHealthStatus(null)
       setConnectionNote('เชื่อมต่อบริการแชทไม่ได้')
     }
@@ -227,7 +227,7 @@ export function WorkspacePage() {
       const data = await fetchUsageSummary()
       reduxDispatch(setTokenBalance(data.user.tokenBalance))
     } catch (error) {
-      logUnexpectedWorkspaceError('Load usage summary error:', error)
+      logUnexpectedWorkspaceError('โหลดสรุปการใช้โทเคนไม่สำเร็จ:', error)
     }
   }, [reduxDispatch])
 
@@ -245,7 +245,7 @@ export function WorkspacePage() {
         setAdminSummary(null)
         return
       }
-      logUnexpectedWorkspaceError('Load admin summary error:', error)
+      logUnexpectedWorkspaceError('โหลดสรุปผู้ดูแลไม่สำเร็จ:', error)
       setAdminSummary(null)
     }
   }, [])
@@ -256,7 +256,7 @@ export function WorkspacePage() {
       const data = await fetchChats()
       setChatHistory((data.chats ?? []).filter(isPlayableChatSummary))
     } catch (error) {
-      logUnexpectedWorkspaceError('Load chat history error:', error)
+      logUnexpectedWorkspaceError('โหลดประวัติแชทไม่สำเร็จ:', error)
       setChatHistory([])
     } finally {
       setIsHistoryLoading(false)
@@ -280,7 +280,7 @@ export function WorkspacePage() {
         setLoreEntries([])
         return
       }
-      logUnexpectedWorkspaceError('Load lore error:', error)
+      logUnexpectedWorkspaceError('โหลดคลังความรู้ไม่สำเร็จ:', error)
       setLoreEntries([])
     } finally {
       setIsLoreLoading(false)
@@ -345,7 +345,7 @@ export function WorkspacePage() {
       setCharacter(data.character)
       setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
     } catch (error) {
-      logUnexpectedWorkspaceError('Track character view error:', error)
+      logUnexpectedWorkspaceError('บันทึกยอดเข้าชมตัวละครไม่สำเร็จ:', error)
     }
     await loadLoreEntries(nextCharacter.id)
   }
@@ -368,7 +368,7 @@ export function WorkspacePage() {
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
       await loadLoreEntries(data.chat.character.id)
     } catch (error) {
-      logUnexpectedWorkspaceError('Open chat error:', error)
+      logUnexpectedWorkspaceError('เปิดแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsLoading(false)
@@ -404,7 +404,7 @@ export function WorkspacePage() {
           await loadLoreEntries(firstCharacter.id)
         }
       } catch (error) {
-        logUnexpectedWorkspaceError('Load character error:', error)
+        logUnexpectedWorkspaceError('โหลดตัวละครไม่สำเร็จ:', error)
         setConnectionNote('เชื่อมต่อบริการแชทไม่ได้')
       }
 
@@ -436,7 +436,7 @@ export function WorkspacePage() {
       await loadAdminSummary()
       setConnectionNote('จัดเก็บแชทแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Archive chat error:', error)
+      logUnexpectedWorkspaceError('จัดเก็บแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
@@ -447,7 +447,7 @@ export function WorkspacePage() {
       await loadChatHistory()
       setConnectionNote('เปลี่ยนชื่อแชทแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Rename chat error:', error)
+      logUnexpectedWorkspaceError('เปลี่ยนชื่อแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'เปลี่ยนชื่อแชทไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
@@ -460,7 +460,7 @@ export function WorkspacePage() {
       await loadAdminSummary()
       setConnectionNote('ลบแชทแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Delete chat error:', error)
+      logUnexpectedWorkspaceError('ลบแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ลบแชทไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
@@ -472,7 +472,7 @@ export function WorkspacePage() {
       if (character.id === data.character.id) setCharacter(data.character)
       setConnectionNote(favorite ? `เพิ่ม ${data.character.name} ในรายการโปรดแล้ว` : `นำ ${data.character.name} ออกจากรายการโปรดแล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Favorite character error:', error)
+      logUnexpectedWorkspaceError('อัปเดตรายการโปรดไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
@@ -486,7 +486,7 @@ export function WorkspacePage() {
       setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
       setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Save character error:', error)
+      logUnexpectedWorkspaceError('บันทึกตัวละครไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
@@ -506,7 +506,7 @@ export function WorkspacePage() {
       setChatLog([createGreeting(data.character)])
       setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Create character error:', error)
+      logUnexpectedWorkspaceError('สร้างตัวละครไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
@@ -526,7 +526,7 @@ export function WorkspacePage() {
       setChatLog([createGreeting(data.character)])
       setConnectionNote(`อัปเดต ${character.name} แล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Duplicate character error:', error)
+      logUnexpectedWorkspaceError('คัดลอกตัวละครไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
@@ -542,7 +542,7 @@ export function WorkspacePage() {
       setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
       setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Reset prompt error:', error)
+      logUnexpectedWorkspaceError('รีเซ็ตพรอมป์ไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'รีเซ็ตพรอมป์ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
@@ -565,7 +565,7 @@ export function WorkspacePage() {
       setConnectionNote(`อัปเดต ${character.name} แล้ว`)
       await loadLoreEntries(nextCharacter.id)
     } catch (error) {
-      logUnexpectedWorkspaceError('Delete character error:', error)
+      logUnexpectedWorkspaceError('ลบตัวละครไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingCharacter(false)
@@ -579,7 +579,7 @@ export function WorkspacePage() {
       setLoreEntries((prev) => [data.loreEntry, ...prev])
       setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Create lore error:', error)
+      logUnexpectedWorkspaceError('สร้างคลังความรู้ไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
@@ -593,7 +593,7 @@ export function WorkspacePage() {
       setLoreEntries((prev) => prev.map((entry) => (entry.id === loreId ? data.loreEntry : entry)))
       setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Update lore error:', error)
+      logUnexpectedWorkspaceError('แก้ไขคลังความรู้ไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
@@ -607,7 +607,7 @@ export function WorkspacePage() {
       setLoreEntries((prev) => prev.filter((entry) => entry.id !== loreId))
       setConnectionNote('อัปเดต lore แล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Delete lore error:', error)
+      logUnexpectedWorkspaceError('ลบคลังความรู้ไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsSavingLore(false)
@@ -690,7 +690,7 @@ export function WorkspacePage() {
       await loadChatHistory()
       await loadAdminSummary()
     } catch (error) {
-      if (!isExpectedUserApiError(error)) logUnexpectedWorkspaceError('Chat error:', error)
+      if (!isExpectedUserApiError(error)) logUnexpectedWorkspaceError('ส่งแชทไม่สำเร็จ:', error)
       const streamMessage = apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่')
       if (!shouldUseNonStreamingFallback(error)) {
         setConnectionNote(streamMessage)
@@ -741,7 +741,7 @@ export function WorkspacePage() {
         if (completedChatId) await syncOpenChatMessages(completedChatId)
         await loadChatHistory()
       } catch (fallbackError) {
-        if (!isExpectedUserApiError(fallbackError)) logUnexpectedWorkspaceError('Chat fallback error:', fallbackError)
+        if (!isExpectedUserApiError(fallbackError)) logUnexpectedWorkspaceError('ส่งแชทแบบสำรองไม่สำเร็จ:', fallbackError)
         const fallbackMessage = apiErrorMessage(
           fallbackError,
           streamMessage || 'เชื่อมต่อบริการ AI ไม่ได้ กรุณาตรวจการตั้งค่าระบบแชท',
@@ -791,7 +791,7 @@ export function WorkspacePage() {
       }))
       setConnectionNote('บันทึกสถานะโลกของแชทนี้แล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Save world state error:', error)
+      logUnexpectedWorkspaceError('บันทึกสถานะโลกไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'บันทึกสถานะโลกไม่สำเร็จ กรุณาลองใหม่'))
       throw error
     } finally {
@@ -812,7 +812,7 @@ export function WorkspacePage() {
         },
       })
     } catch (error) {
-      logUnexpectedWorkspaceError('Sync chat messages error:', error)
+      logUnexpectedWorkspaceError('ซิงก์ข้อความแชทไม่สำเร็จ:', error)
     }
   }
 
@@ -872,7 +872,7 @@ export function WorkspacePage() {
       setReportTarget(null)
       await loadAdminSummary()
     } catch (error) {
-      logUnexpectedWorkspaceError('Report error:', error)
+      logUnexpectedWorkspaceError('ส่งรายงานไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ส่งรายงานไม่ได้ กรุณาลองใหม่หลังแชทซิงก์เสร็จ'))
     } finally {
       setIsReporting(false)
