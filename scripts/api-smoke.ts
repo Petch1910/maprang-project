@@ -459,11 +459,11 @@ await check('POST /chat validation', async () => {
     }),
   })
 
-  if (!payload.reply?.includes('Invalid character id')) throw new Error('chat validation did not return invalid character id')
+  if (!payload.reply?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('chat validation did not return Thai invalid character id')
   if (payload.chatId !== null && payload.chatId !== undefined) throw new Error('chat validation should not return a chatId')
   if ((payload.usage?.totalTokens ?? 0) !== 0) throw new Error('chat validation path should not use tokens')
   if (payload.usage?.providerFailure) throw new Error(`chat validation path returned provider failure: ${payload.usage.providerFailure.code}`)
-  return 'invalid character id rejected before provider call'
+  return 'ปฏิเสธรหัสตัวละครไม่ถูกต้องก่อนเรียกผู้ให้บริการ'
 })
 
 if (live) {
@@ -512,7 +512,7 @@ await check('POST /chat/stream', async () => {
 
   const delta = events.find((event): event is Extract<StreamSmokeEvent, { type: 'delta' }> => event.type === 'delta')
   const done = events.find((event): event is Extract<StreamSmokeEvent, { type: 'done' }> => event.type === 'done')
-  if (!delta?.content?.includes('Invalid character id')) throw new Error('stream did not return validation delta')
+  if (!delta?.content?.includes('รหัสตัวละครไม่ถูกต้อง')) throw new Error('stream did not return Thai validation delta')
   if (!done) throw new Error('stream did not return done event')
   if ((done.usage?.totalTokens ?? 0) !== 0) throw new Error('stream validation path should not use tokens')
   if (done.usage?.providerFailure) throw new Error(`stream validation path returned provider failure: ${done.usage.providerFailure.code}`)

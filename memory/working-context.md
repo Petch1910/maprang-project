@@ -11,7 +11,7 @@ Bring Maprang AI to a production-ready state before deploy. The local system sho
 Status: local QA ready
 
 Verified:
-- Backend tests pass: 135 pass, 0 fail.
+- Backend tests pass: 136 pass, 0 fail.
 - Frontend deploy check passes.
 - Local API smoke passes: 32 pass, 0 fail, 1 live chat skip.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
@@ -26,6 +26,7 @@ Verified:
 - Frontend Redux fallback errors for failed character/chat loading are now Thai-first, and the static audit blocks the old `Could not load...` copy from returning.
 - Frontend auth and Redux load failures no longer surface raw provider/browser English error messages directly; they now map to Thai-first user-facing notes, and frontend static/predeploy guards block the old raw-error patterns from returning.
 - Frontend API fallback errors now use Thai-first `ApiError` messages when a backend response has no JSON error string, and the static audit blocks stale `failed with status` wording from returning.
+- Backend chat validation/access/token/rating/empty-provider fallback replies now use centralized Thai-first copy, and short-reply continuation skips those operational replies instead of trying to extend them as roleplay.
 - Frontend content rating labels shown in Explore/Character Lobby are now Thai-first, and the static audit blocks stale `Teen romance`, `Mature 18+`, and `Restricted 18+` labels from returning.
 - Chat selection accessibility labels in the sidebar and My Chats are now Thai-first, and the static audit blocks stale `Select chat` labels from returning.
 - Admin summary top-character rows now show Thai-first character status labels and Thai dashboard/lore wording instead of raw enum/mixed labels.

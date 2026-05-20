@@ -95,6 +95,27 @@ export type ChatProviderFailure = {
   userMessage: string
 }
 
+const contentRatingLabels: Record<ContentRating, string> = {
+  general: 'ทั่วไป',
+  teen_romance: 'โรแมนซ์วัยรุ่น',
+  mature_18: 'ผู้ใหญ่ 18+',
+  restricted_18: 'จำกัด 18+',
+}
+
+export const chatReplyMessages = {
+  invalidUserId: 'รหัสผู้ใช้ไม่ถูกต้อง',
+  invalidCharacterId: 'รหัสตัวละครไม่ถูกต้อง',
+  invalidChatId: 'รหัสแชทไม่ถูกต้อง',
+  messageTooLong: (maxLength: number) =>
+    `ข้อความยาวเกินไป กรุณาย่อให้เหลือไม่เกิน ${maxLength.toLocaleString()} ตัวอักษร`,
+  characterNotFound: 'ไม่พบตัวละครนี้',
+  characterUnavailable: 'ตัวละครนี้เป็นส่วนตัวหรือยังไม่พร้อมให้แชท',
+  ratingTooHigh: (rating: ContentRating) =>
+    `ตัวละครนี้อยู่ในเรต ${contentRatingLabels[rating]} กรุณาเปิดโหมดเนื้อหาที่สูงกว่าก่อนเริ่มแชท`,
+  insufficientTokens: 'โทเคนของบัญชีนี้ไม่พอ กรุณาเติมโควตาก่อนคุยต่อ',
+  emptyProviderReply: 'มะปรางยังสร้างคำตอบไม่ได้ในตอนนี้ ลองส่งข้อความอีกครั้งนะ',
+}
+
 type PersistResult = {
   chatId: string
   tokenBalance: number | null
@@ -403,6 +424,14 @@ function isOperationalReply(reply: string) {
   const normalized = reply.toLowerCase()
   return (
     normalized.startsWith('invalid ') ||
+    reply === chatReplyMessages.invalidUserId ||
+    reply === chatReplyMessages.invalidCharacterId ||
+    reply === chatReplyMessages.invalidChatId ||
+    reply === chatReplyMessages.insufficientTokens ||
+    reply === chatReplyMessages.characterNotFound ||
+    reply === chatReplyMessages.characterUnavailable ||
+    reply === chatReplyMessages.emptyProviderReply ||
+    reply.startsWith('ตัวละครนี้อยู่ในเรต ') ||
     normalized.includes('out of tokens') ||
     normalized.includes('temporarily unavailable') ||
     normalized.includes('openrouter_api_key is not configured') ||
@@ -454,19 +483,19 @@ function appendRoleplayContinuation(reply: string, continuation: string) {
 
 function validateChatInput(input: Pick<SendChatInput, 'characterId' | 'chatId' | 'message' | 'userId'>) {
   if (!isUuid(input.userId)) {
-    return 'Invalid user id.'
+    return chatReplyMessages.invalidUserId
   }
 
   if (input.characterId && !isUuid(input.characterId)) {
-    return 'Invalid character id.'
+    return chatReplyMessages.invalidCharacterId
   }
 
   if (input.chatId && !isUuid(input.chatId)) {
-    return 'Invalid chat id.'
+    return chatReplyMessages.invalidChatId
   }
 
   if (input.message.trim().length > maxInputChars) {
-    return `Message is too long. Please shorten it to ${maxInputChars.toLocaleString()} characters or less.`
+    return chatReplyMessages.messageTooLong(maxInputChars)
   }
 
   return null
@@ -732,14 +761,14 @@ function chatRatingError(character: CharacterWithTags | null, maxRating?: Conten
   const rating = characterContentRating(character)
   const allowed = normalizeMaxRating(maxRating)
   if (ratingAllowed(rating, allowed)) return null
-  return `This character is rated ${rating}. Enable a higher content mode before starting this chat.`
+  return chatReplyMessages.ratingTooHigh(rating)
 }
 
 function chatCharacterAccessError(character: CharacterWithTags | null, userId: string) {
-  if (!character) return 'Character not found.'
+  if (!character) return chatReplyMessages.characterNotFound
   if (character.status === 'PUBLISHED' && character.visibility === 'PUBLIC') return null
   if (character.creatorId === userId) return null
-  return 'This character is private or not available for chat.'
+  return chatReplyMessages.characterUnavailable
 }
 
 function clip(value: string, maxLength: number) {
@@ -1159,7 +1188,7 @@ export async function sendChat(input: SendChatInput) {
   const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
   if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
     return {
-      reply: 'This account is out of tokens. Please add quota before continuing.',
+      reply: chatReplyMessages.insufficientTokens,
       chatId: responseChatId(input.chatId),
       usage: {
         promptTokens: 0,
@@ -1239,7 +1268,7 @@ export async function sendChat(input: SendChatInput) {
     }
   }
 
-  let reply = completion.choices[0]?.message?.content?.trim() || 'Maprang could not produce a reply yet. Please try asking again.'
+  let reply = completion.choices[0]?.message?.content?.trim() || chatReplyMessages.emptyProviderReply
   let usage = usageFromCompletion(completion)
   const extension = await extendShortRoleplayReply({
     character,
@@ -1365,7 +1394,7 @@ export function streamChat(input: SendChatInput) {
         const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
         streamTokenBalance = tokenBalance
         if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
-          const reply = 'This account is out of tokens. Please add quota before continuing.'
+          const reply = chatReplyMessages.insufficientTokens
           send({ type: 'delta', content: reply })
           send({
             type: 'done',
@@ -1439,7 +1468,7 @@ export function streamChat(input: SendChatInput) {
           }
         }
 
-        let trimmedReply = reply.trim() || 'Maprang could not produce a reply yet. Please try asking again.'
+        let trimmedReply = reply.trim() || chatReplyMessages.emptyProviderReply
         const extension = await extendShortRoleplayReply({
           character,
           messages,

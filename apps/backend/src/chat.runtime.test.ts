@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   applyPromptBudget,
   buildRoleplayContinuationInstruction,
+  chatReplyMessages,
   classifyChatProviderError,
   isTransientChatProviderError,
   sendChat,
@@ -159,7 +160,7 @@ describe('chat id validation guard', () => {
       userId: 'not-a-user-id',
     })
 
-    expect(result.reply).toBe('Invalid user id.')
+    expect(result.reply).toBe(chatReplyMessages.invalidUserId)
     expect(result.chatId).toBeNull()
   })
 })
@@ -192,6 +193,26 @@ describe('roleplay reply quality guard', () => {
         minChars: 120,
       }),
     ).toBe(false)
+  })
+
+  test('does not extend Thai-first operational replies', () => {
+    for (const reply of [
+      chatReplyMessages.invalidCharacterId,
+      chatReplyMessages.characterNotFound,
+      chatReplyMessages.characterUnavailable,
+      chatReplyMessages.insufficientTokens,
+      chatReplyMessages.emptyProviderReply,
+      chatReplyMessages.ratingTooHigh('restricted_18'),
+    ]) {
+      expect(
+        shouldExtendShortRoleplayReply({
+          character: { id: 'character' },
+          userMessage: 'เล่าต่อแบบละเอียด',
+          reply,
+          minChars: 1000,
+        }),
+      ).toBe(false)
+    }
   })
 
   test('builds continuation instruction that avoids repeating the previous answer', () => {
