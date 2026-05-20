@@ -1158,7 +1158,7 @@ const checks: Check[] = [
       requireIncludes(
         staging,
         [
-          'Supabase Staging',
+          'Supabase สำหรับ Staging',
           'SUPABASE_STORAGE_ACCESS=signed',
           'bun run supabase:storage:setup',
           'Render',

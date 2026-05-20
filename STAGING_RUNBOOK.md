@@ -1,14 +1,14 @@
-# Staging Runbook
+# คู่มือรัน Staging
 
-เป้าหมายคือปล่อย staging ให้เหมือน production จริงก่อนเปิด production เพื่อจับปัญหา env, DB, CORS, storage, image provider และ UI flow แบบ end-to-end
+เป้าหมายคือปล่อย staging ให้เหมือน production จริงก่อนเปิด production เพื่อจับปัญหา env, DB, CORS, storage, ผู้ให้บริการสร้างรูป และ UI flow แบบ end-to-end
 
-## 1. Supabase Staging
+## 1. Supabase สำหรับ Staging
 
 - สร้าง Supabase project สำหรับ staging แยกจาก production
 - สร้าง Storage bucket ชื่อ `avatars`
 - แนะนำให้ bucket เป็น private แล้วให้ backend สร้าง signed URL
 - หลังใส่ค่า Supabase backend env แล้ว รัน `bun run supabase:storage:setup` เพื่อให้ repo สร้าง/ตรวจ bucket, อัปโหลดไฟล์ smoke, สร้าง signed URL และลบไฟล์ทดสอบ
-- ตั้ง backend env:
+- ตั้ง env ฝั่ง backend:
   - `SUPABASE_URL=https://<project-ref>.supabase.co`
   - `SUPABASE_JWT_ISSUER=https://<project-ref>.supabase.co/auth/v1`
   - `SUPABASE_SERVICE_ROLE_KEY=<service-role-key>`
@@ -17,17 +17,17 @@
   - `SUPABASE_STORAGE_BUCKET=avatars`
   - `SUPABASE_STORAGE_ACCESS=signed`
   - `SUPABASE_SIGNED_URL_EXPIRES_IN=3600`
-- ตั้ง frontend env:
+- ตั้ง env ฝั่ง frontend:
   - `VITE_SUPABASE_URL=https://<project-ref>.supabase.co`
   - `VITE_SUPABASE_ANON_KEY=<anon-key>`
 
-## 2. Backend Staging
+## 2. Backend สำหรับ Staging
 
 - Deploy backend บน Render หรือ Railway
 - ตั้ง `DATABASE_URL` เป็น Postgres staging จริง พร้อม `sslmode=require`
 - ตั้ง `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, token cost และ rate-limit env
 - ตั้ง `MODEL_TEMPERATURE=0.85`, `MODEL_MAX_OUTPUT_TOKENS=1600`, `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420` และใช้ค่า retry default เพื่อให้แชท roleplay ไม่ตอบสั้นเกินและทน provider timeout ชั่วคราวได้ดีขึ้น
-- ตั้ง `IMAGE_GENERATION_API_KEY` หรือ provider จริง ถ้าต้องการให้ Creator Studio สร้างรูปจริง
+- ตั้ง `IMAGE_GENERATION_API_KEY` หรือผู้ให้บริการจริง ถ้าต้องการให้ Creator Studio สร้างรูปจริง
 - รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging ให้ผ่านก่อน แล้วค่อยตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`
 - รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging ให้ผ่านก่อน แล้วค่อยตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`
 - ตั้ง `ADMIN_API_KEY` เป็นค่าสุ่มยาวใหม่สำหรับ staging
@@ -40,7 +40,7 @@
 bunx prisma migrate deploy
 ```
 
-## 3. Frontend Staging
+## 3. Frontend สำหรับ Staging
 
 - Deploy frontend บน domain ทดลอง
 - ตั้ง:
@@ -78,7 +78,7 @@ E2E_BASE_URL=https://<frontend-staging-domain> E2E_API_BASE_URL=https://<backend
 bun run staging:check
 ```
 
-Staging CORS must pass the same `local/non-https CORS` rule as production before live provider smoke is treated as release evidence.
+Staging CORS ต้องผ่านกฎ `local/non-https CORS` ชุดเดียวกับ production ก่อนใช้ผล live provider smoke เป็นหลักฐานสำหรับ release.
 
 คำสั่งนี้เช็กโค้ด, backend tests, frontend build, Playwright desktop/mobile, signed storage จริง, และ admin API smoke โดยไม่ถือว่า domain/live provider พร้อม production แทน `production:check`
 
@@ -93,10 +93,10 @@ Staging CORS must pass the same `local/non-https CORS` rule as production before
 - `/ready` ผ่าน
 - `/admin/health` แสดง DB connected
 - `/admin/health` แสดง CIA/AAA Security Posture พร้อมครบ หรือมีเหตุผลชัดเจนถ้ายังไม่ครบ
-- OpenRouter configured
+- OpenRouter ตั้งค่าพร้อม
 - OpenRouter chat provider ต้องผ่าน live smoke และตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`
-- Image provider configured และต้องผ่าน live smoke พร้อมตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ถ้าจะเปิดฟีเจอร์สร้างรูปจริงใน production
-- Supabase Auth configured ทั้ง backend/frontend
+- ผู้ให้บริการสร้างรูปต้องตั้งค่าพร้อมและผ่าน live smoke พร้อมตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ถ้าจะเปิดฟีเจอร์สร้างรูปจริงใน production
+- Supabase Auth ตั้งค่าพร้อมทั้ง backend/frontend
 - avatar storage เป็น Supabase + signed URL
 - CORS เป็น frontend domain จริงแบบ `https://` ไม่ใช่ localhost หรือ `http://`
 - `production:check` ผ่านโดยไม่มี `productionBlockers`

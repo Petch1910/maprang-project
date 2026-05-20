@@ -78,6 +78,8 @@ Verified:
 - Root README evaluation, Prompt Inspector, local readiness, live smoke, production check, and staging verify guidance now avoids stale mixed-English handoff wording while preserving exact commands, routes, env names, and workflow semantics.
 - Predeploy now checks the Thai-first README snippets for secret-pattern regression coverage and staging verify deploy-status guidance instead of the older English wording.
 - Deployment QA handoff now uses Thai-first eval, smoke, GitHub Production Smoke, required production env, Supabase storage, mobile QA, and manual QA guidance while preserving exact commands, env names, route names, and workflow inputs.
+- Staging runbook now uses Thai-first headings and staging CORS/provider/auth checklist wording while preserving exact deploy commands, env names, and `local/non-https CORS` guard phrase.
+- Predeploy route/menu staging guard now tracks the Thai-first `Supabase สำหรับ Staging` heading.
 - Backend and frontend app-level READMEs now describe Maprang-specific responsibilities, commands, env boundaries, and deployment references instead of stale Bun/Vite starter template text.
 - Project map, UI/UX direction, and API/backend direction handoff docs now use Thai-first guidance while preserving route names, commands, and technical identifiers.
 - Knowledge wiki core pages now use Thai-first product, creator, relationship, and production deploy guidance while preserving structured knowledge paths and gate command names.

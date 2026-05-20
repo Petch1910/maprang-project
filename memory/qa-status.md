@@ -57,6 +57,8 @@ Last updated: 2026-05-20
 - Root README eval/prompt-inspector/local-readiness/live-smoke/staging-verify wording now uses Thai-first handoff copy and will be checked by `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check` in this docs scope.
 - Predeploy README wording guard now tracks the Thai-first secret-pattern and staging verify deploy-status snippets, with `predeploy:check:test` included in this scope's verification.
 - Deployment QA remaining handoff sections now use Thai-first eval/smoke/workflow/env/storage/mobile/manual guidance and will be guarded by `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check` in this doc-only scope.
+- Staging runbook Thai-first headings and CORS/provider checklist wording will be guarded by `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check` in this docs scope.
+- Predeploy route/menu staging guard now expects `Supabase สำหรับ Staging`, with `predeploy:check:test` included in this scope's verification.
 - Backend/frontend app README replacement now passes `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Production deploy knowledge wiki: updated to reflect reply-budget gates, staging/deploy-status order, and Thai-first gate wording for backend/frontend URLs, CORS, storage, and live provider smoke.
 - Local prompt/context eval: pass.
