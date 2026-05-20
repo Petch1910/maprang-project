@@ -4,7 +4,7 @@ Last updated: 2026-05-20
 
 ## Latest Local Gate
 
-Status: passing
+Status: static/unit/build gates passing; full local smoke needs Docker/Postgres and backend running
 
 Commands verified:
 - `bun run qa:local`
@@ -20,6 +20,7 @@ Commands verified:
 - `git diff --check`
 
 Results:
+- Latest `bun run qa:local` attempt on this machine reached the final runtime smoke phase but failed because Docker Desktop/Postgres and the backend at `http://127.0.0.1:3000` were not running; all preceding static/unit/build gates in that run passed.
 - Backend tests: 147 pass, 0 fail.
 - API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.

@@ -189,6 +189,7 @@ bun run qa:local
 ```
 
 Use this as the normal local readiness gate. It checks secrets, secret-pattern regression tests, memory and knowledge audits, deterministic prompt/context evals, API route coverage mapping, import-cycle architecture audit, deploy/predeploy wiring, backend tests, frontend build, backend root identity, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, and avatar upload. Local API smoke skips the external image provider for creator draft checks so routine QA is deterministic; live avatar generation is verified only by `api:smoke:live`, `smoke:image:live`, or `production:check`.
+The final local smoke steps expect Docker Desktop/Postgres to be running and the backend to answer at `http://127.0.0.1:3000`; if Docker is stopped or the backend is not started, `smoke:doctor` fails before the API smoke can run.
 It also audits the project memory vault and runtime knowledge packs so long-running context cannot silently lose required files or pick up secret-shaped values.
 The secrets gate ignores untracked local env files for normal development, but it rejects tracked `.env` or `.env.*` files before commit/CI.
 
