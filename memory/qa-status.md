@@ -382,3 +382,4 @@ Last updated: 2026-05-20
 - Predeploy frontend log guard pass: `predeploy:check` ตอนนี้ล็อก `logUnexpectedError` และ raw frontend console error pattern ไว้ใน static audit/security checklist.
 - Backend route raw-throw guard pass: `/chat/stream` route คืน `routeErrorResponse('unknown_error')` พร้อม safe log เมื่อเกิด synchronous failure และ backend security audit จะ fail ถ้า `.routes.ts` กลับไป `throw error` ดิบ.
 - Predeploy route raw-throw guard pass: `predeploy:check` ตอนนี้ล็อก `rawRouteErrorThrowPattern` และ regression test `catches route raw error throws` ไว้ใน security audit wiring.
+- Prompt Inspector redaction expansion pass: snapshot/retrieval redaction ตอนนี้ครอบ Anthropic, Hugging Face, Stripe live, GitHub, Google, Slack, private key block, OpenRouter/OpenAI, Postgres URL, env secret และ JWT-like values; focused test และ `backend:check` ผ่าน 155 tests / 498 expect calls.

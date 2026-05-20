@@ -3,6 +3,13 @@ import { buildPromptInspectorSnapshot, diffPromptSnapshots, estimatePromptTokens
 
 const fakeOpenRouterKey = ['sk', 'or-v1', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
 const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+const fakeAnthropicKey = ['sk', 'ant', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+const fakeHuggingFaceToken = ['hf', 'ABCDEFGHIJKLMNOPQRSTUVWX'].join('_')
+const fakeStripeKey = ['sk', 'live', 'abcdefghijklmnopqrstuvwxyz123456'].join('_')
+const fakeGitHubToken = ['ghp', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij'].join('_')
+const fakeGoogleKey = ['AI', 'za', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi'].join('')
+const fakeSlackToken = ['xoxb', '123456789012', 'abcdefghijklmnopqrstuvwx'].join('-')
+const fakePrivateKey = [`${'-----BEGIN '}${'PRIVATE KEY-----'}`, 'abc123', `${'-----END '}${'PRIVATE KEY-----'}`].join('\n')
 
 const fixtureCharacter = {
   id: 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
@@ -23,9 +30,16 @@ describe('prompt inspector service', () => {
       character: fixtureCharacter,
       loreEntries: [
         {
-          keyword: 'rain',
-          aliases: ['storm', `OPENROUTER_API_KEY=${fakeOpenRouterKey}`],
-          content: `Rain means the character is hiding worry behind jokes. DATABASE_URL=${fakeDatabaseUrl}`,
+          keyword: fakeGitHubToken,
+          aliases: ['storm', `OPENROUTER_API_KEY=${fakeOpenRouterKey}`, fakeGoogleKey],
+          content: [
+            `Rain means the character is hiding worry behind jokes. DATABASE_URL=${fakeDatabaseUrl}`,
+            `Anthropic key ${fakeAnthropicKey}`,
+            `Hugging Face token ${fakeHuggingFaceToken}`,
+            `Stripe key ${fakeStripeKey}`,
+            `Slack token ${fakeSlackToken}`,
+            fakePrivateKey,
+          ].join('\n'),
           priority: 3,
         },
       ],
@@ -46,9 +60,16 @@ describe('prompt inspector service', () => {
     expect(snapshot.prompt).toContain('[REDACTED_SECRET]')
     expect(snapshot.prompt).not.toContain(fakeOpenRouterKey)
     expect(snapshot.prompt).not.toContain(fakeDatabaseUrl)
+    expect(snapshot.prompt).not.toContain(fakeAnthropicKey)
+    expect(snapshot.prompt).not.toContain(fakeHuggingFaceToken)
+    expect(snapshot.prompt).not.toContain(fakeStripeKey)
+    expect(snapshot.prompt).not.toContain(fakeGitHubToken)
+    expect(snapshot.prompt).not.toContain(fakeGoogleKey)
+    expect(snapshot.prompt).not.toContain(fakeSlackToken)
+    expect(snapshot.prompt).not.toContain('-----BEGIN')
     expect(snapshot.totals.estimatedTokens).toBeGreaterThan(0)
     expect(snapshot.sections.length).toBeGreaterThan(5)
-    expect(snapshot.retrieval.lore[0]?.keyword).toBe('rain')
+    expect(snapshot.retrieval.lore[0]?.keyword).toBe('[REDACTED_SECRET]')
     expect(snapshot.retrieval.lore[0]?.aliases.join(' ')).toContain('[REDACTED_SECRET]')
     expect(snapshot.retrieval.lore[0]?.preview).toContain('[REDACTED_SECRET]')
     expect(snapshot.retrieval.lore[0]?.preview).not.toContain(fakeDatabaseUrl)
