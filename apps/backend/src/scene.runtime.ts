@@ -311,7 +311,7 @@ export function buildScenePrompt(sceneState: SceneState) {
     `โหมดฉาก: ${sceneState.mode}.`,
     sceneState.activeScene
       ? `ฉากที่กำลังเล่น: ${sceneState.activeScene.title}. เป้าหมาย: ${sceneState.activeScene.objective}`
-      : 'Sandbox mode: ดำเนินโรลเพลย์อิสระต่อไป ห้ามบังคับ pending events ให้กลายเป็นฉากทันที',
+      : 'โหมด sandbox: ดำเนินโรลเพลย์อิสระต่อไป ห้ามบังคับ pending events ให้กลายเป็นฉากทันที',
     sceneState.pendingEvents.length > 0 && sceneState.mode === 'sandbox'
       ? `มีแจ้งเตือนฉากที่รอให้ผู้ใช้เลือก: ${sceneState.pendingEvents
           .map((event) => `${event.code} (${event.title})`)

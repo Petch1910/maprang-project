@@ -269,7 +269,7 @@ const checks: Check[] = [
       )
       forbidIncludes(
         sceneRuntime,
-        ['Scene engine state', 'Pending scene notifications', 'Let the character open up carefully', 'Run a focused relationship scene'],
+        ['Scene engine state', 'Pending scene notifications', 'Sandbox mode: continue', 'Let the character open up carefully', 'Run a focused relationship scene'],
         'apps/backend/src/scene.runtime.ts',
       )
       forbidIncludes(
