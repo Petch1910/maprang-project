@@ -76,6 +76,7 @@ Verified:
 - Decision records 0001-0005 now use Thai-first rationale and implementation notes for SocratiCode, memory vault, live provider verification, adult-mode warnings, and memory audit setup.
 - Decision records 0006-0010 now use Thai-first rationale for runtime knowledge, deterministic evals, staged observability, Prompt Inspector, and Admin Automated Evals.
 - Decision records 0011-0014 now use Thai-first rationale for world state, usage/cost intelligence, prompt budgeting, and provider failure classification.
+- Live chat and live image smoke failure output now uses Thai-first wording for provider failures, missing reply/id/usage, short replies, wallet debit mismatch, image placeholder fallback, missing image URLs, and SVG placeholder results.
 - Smoke doctor now warns about missing image-generation configuration with Thai-first Creator Studio placeholder guidance.
 - Smoke doctor roleplay reply-budget recommendation warnings now use Thai-first wording while preserving exact budget values and env names.
 - Live chat smoke, image smoke, provider smoke guard hints, and API smoke image issue text now use Thai-first failure/fix wording while preserving exact verification flags, env names, commands, and provider terms.

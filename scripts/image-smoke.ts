@@ -87,15 +87,15 @@ export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   if (draft.image?.provider !== 'configured') {
     const warnings = draft.warnings?.filter(Boolean).join('; ')
     const issue = warnings || draft.image?.note || 'no warnings'
-    return `Image smoke กลับไปใช้ภาพตัวอย่างระบบ: ${issue}${providerFailureHint(issue)}`
+    return `ตรวจรูป smoke กลับไปใช้ภาพตัวอย่างระบบ: ${issue}${providerFailureHint(issue)}`
   }
 
   if (!draft.image.url) {
-    return 'Image smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป'
+    return 'ตรวจรูป smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป'
   }
 
   if (draft.image.url.startsWith('data:image/svg+xml')) {
-    return 'Image smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ'
+    return 'ตรวจรูป smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ'
   }
 
   return null
@@ -139,7 +139,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
     health = await (options.readHealth ?? (() => readJson<ImageSmokeHealthPayload>('/health')))()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Image smoke ไม่ผ่าน: ${message}`)
+    writeError(`ตรวจรูป smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 
@@ -177,7 +177,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
         })))()
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Image smoke ไม่ผ่าน: ${message}`)
+    writeError(`ตรวจรูป smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 

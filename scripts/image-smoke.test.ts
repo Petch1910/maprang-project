@@ -57,13 +57,13 @@ describe('image smoke helpers', () => {
     ).toContain('เพดานวงเงิน')
 
     expect(liveImageDraftFailure({ image: { provider: 'configured' } })).toBe(
-      'Image smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป',
+      'ตรวจรูป smoke ใช้ผู้ให้บริการที่ตั้งค่าแล้ว แต่ไม่พบ URL รูป',
     )
     expect(
       liveImageDraftFailure({
         image: { provider: 'configured', url: 'data:image/svg+xml;base64,abc' },
       }),
-    ).toBe('Image smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ')
+    ).toBe('ตรวจรูป smoke ได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ')
   })
 
   test('formats successful live-image payload and classifies generated URL kind', () => {

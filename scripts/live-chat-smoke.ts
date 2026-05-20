@@ -59,9 +59,9 @@ export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN
 }
 
 export function providerFailureIssue(failure: ProviderFailure) {
-  const userMessage = failure.userMessage ? ` ข้อความจาก provider: ${failure.userMessage}` : ''
+  const userMessage = failure.userMessage ? ` ข้อความจากผู้ให้บริการ: ${failure.userMessage}` : ''
   const retry = failure.retryable ? ' ลองใหม่ได้หลัง cooldown' : ' ต้องแก้ config/quota/admin ก่อน'
-  return `Live chat ติดต่อ backend ได้แล้ว แต่ AI provider คืน ${failure.code ?? 'unknown'}.${retry}${userMessage} ตรวจ outbound network ไป OpenRouter, OPENROUTER_API_KEY, เครดิต/quota ของ provider, rate limits, model access, และ backend logs ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`
+  return `ตรวจ live chat ติดต่อระบบหลังบ้านได้แล้ว แต่ผู้ให้บริการ AI คืน ${failure.code ?? 'unknown'}.${retry}${userMessage} ตรวจ outbound network ไป OpenRouter, OPENROUTER_API_KEY, เครดิต/quota ของ provider, rate limits, model access, และ backend logs ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`
 }
 
 export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[]) {
@@ -87,13 +87,13 @@ export function validateLiveChatSmokeResponse(chat: LiveChatSmokeResponse, minRo
   }
 
   if (!chat.reply) {
-    throw new Error('Live chat ไม่ได้คืน AI reply: reply ว่าง')
+    throw new Error('ตรวจ live chat ไม่ได้คืน AI reply: reply ว่าง')
   }
 
-  if (!chat.chatId) throw new Error('Live chat ไม่ได้สร้าง chat id')
-  if (!chat.usage?.totalTokens) throw new Error('Live chat ไม่ได้คืน token usage')
+  if (!chat.chatId) throw new Error('ตรวจ live chat ไม่ได้สร้าง chat id')
+  if (!chat.usage?.totalTokens) throw new Error('ตรวจ live chat ไม่ได้คืน token usage')
   if (chat.reply.length < minRoleplayReplyChars) {
-    throw new Error(`Live chat reply สั้นเกินไปสำหรับ roleplay QA ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร Reply: ${chat.reply}`)
+    throw new Error(`คำตอบ live chat สั้นเกินไปสำหรับ roleplay QA ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร Reply: ${chat.reply}`)
   }
 
   return {
@@ -213,7 +213,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     const chatDebit = findMatchingChatDebit(walletAfter.wallet?.transactions, chatResult.totalTokens)
 
     if (!chatDebit) {
-      throw new Error('Live chat คืน token usage แล้ว แต่ไม่พบ CHAT_USAGE wallet transaction ที่ตรงกัน')
+      throw new Error('ตรวจ live chat คืน token usage แล้ว แต่ไม่พบ CHAT_USAGE wallet transaction ที่ตรงกัน')
     }
 
     writeLine(
@@ -235,7 +235,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     return 0
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    writeError(`Live chat smoke ไม่ผ่าน: ${message}`)
+    writeError(`ตรวจ live chat smoke ไม่ผ่าน: ${message}`)
     return 1
   }
 }

@@ -110,6 +110,7 @@ Results:
 - Decision records 0001-0005 Thai-first localization now passes `memory:audit`, `secrets:check`, and `predeploy:check`.
 - Decision records 0006-0010 Thai-first localization now passes `memory:audit`, `secrets:check`, and `predeploy:check`.
 - Decision records 0011-0014 Thai-first localization now passes `memory:audit`, `secrets:check`, and `predeploy:check`.
+- Live chat/image smoke failure-output localization now passes `smoke:chat:test`, `smoke:image:test`, `provider:smoke:guards:test`, and `predeploy:check`.
 - Smoke doctor missing image-generation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor roleplay reply-budget recommendation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.
 - Smoke doctor success output and deploy env doctor self-test localization now pass `smoke:doctor:test`, `deploy:doctor:self-test`, and `deploy:doctor:test`.
