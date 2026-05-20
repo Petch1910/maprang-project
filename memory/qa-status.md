@@ -358,3 +358,4 @@ Last updated: 2026-05-20
 - Smoke doctor runner output Thai-first pass: เปลี่ยน smoke doctor success/failure output เป็น "ผ่าน - ตรวจ smoke doctor ผ่านแล้ว" และ "ตรวจ smoke doctor ไม่ผ่าน" พร้อม regression tests.
 - Deploy status/smoke doctor env text Thai-first pass: เปลี่ยน text output ของ env/readiness failure จาก `missingRequired`/`invalidEnv` เป็น `env จำเป็นที่ขาด`/`env ไม่ถูกต้อง` โดยคง JSON keys เดิมสำหรับ automation.
 - Release handoff runner output Thai-first pass: เปลี่ยนผลตรวจ release handoff เป็น "ตรวจเอกสารส่งมอบ release" พร้อม regression test.
+- Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด Thai-first QA runner polish ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 152 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
