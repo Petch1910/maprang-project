@@ -54,6 +54,7 @@ Last updated: 2026-05-20
 - Memory/knowledge audit diagnostic localization: pass via `vault:audit:test`, `memory:audit`, and `knowledge:audit`.
 - Root README entrypoint Thai-first wording now passes `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Root README production/current verification Thai-first wording now passes `predeploy:check:test`, `predeploy:check`, `secrets:check`, and `git diff --check`.
+- Backend/frontend app README replacement now passes `predeploy:check`, `secrets:check`, and `git diff --check`.
 - Production deploy knowledge wiki: updated to reflect reply-budget gates, staging/deploy-status order, and Thai-first gate wording for backend/frontend URLs, CORS, storage, and live provider smoke.
 - Local prompt/context eval: pass.
 - Route/menu audit: pass.

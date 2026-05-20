@@ -75,6 +75,7 @@ Verified:
 - Memory and knowledge README entry points now use Thai-first safety, update, layer, and runtime usage wording, with vault audits and predeploy guarding the Thai snippets.
 - Root README entrypoint now uses Thai-first local setup, SocratiCode, memory, agent handoff, deploy status, knowledge layer, and eval layer wording while preserving exact commands, env names, and URLs.
 - Root README production checklist and current verification sections now use Thai-first release handoff, env, smoke, local readiness, route/import/deploy checks, and staging gate guidance while preserving exact commands/env names.
+- Backend and frontend app-level READMEs now describe Maprang-specific responsibilities, commands, env boundaries, and deployment references instead of stale Bun/Vite starter template text.
 - Project map, UI/UX direction, and API/backend direction handoff docs now use Thai-first guidance while preserving route names, commands, and technical identifiers.
 - Knowledge wiki core pages now use Thai-first product, creator, relationship, and production deploy guidance while preserving structured knowledge paths and gate command names.
 - Raw knowledge inbox and decision index now use Thai-first entry-point wording while preserving decision links and safety boundaries.
