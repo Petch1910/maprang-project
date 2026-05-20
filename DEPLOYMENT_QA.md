@@ -170,7 +170,7 @@ bun run smoke:doctor
 
 `smoke:doctor` ผ่านได้สำหรับ local development แต่ยังพิมพ์ `productionReady`, `productionBlockerCount`, `productionBlockers`, และ `nextSteps` ตามลำดับไว้ให้ดูเสมอ ให้ถือ blocker เหล่านั้นเป็นงานของสเตจจิง/โปรดักชัน แล้วค่อยยืนยันด้วย `smoke:ready` กับ backend URL จริง.
 มันยังพิมพ์ `securityPosture` เพื่อให้เห็นเร็วว่า CIA/AAA checks ตอนนี้พร้อมกี่ข้อ.
-ถ้า `/health` รายงาน production env ไม่ถูกต้อง `smoke:doctor` จะพิมพ์ `missingRequired` และ `invalidEnv` ด้วย เพื่อให้เห็นทางแก้ก่อน `/ready` ล้ม.
+ถ้า `/health` รายงาน production env ไม่ถูกต้อง `smoke:doctor` จะพิมพ์ `env จำเป็นที่ขาด` และ `env ไม่ถูกต้อง` ด้วย เพื่อให้เห็นทางแก้ก่อน `/ready` ล้ม.
 
 ถ้าต้องการตรวจ traffic-readiness แบบเข้มขึ้น ให้รัน:
 

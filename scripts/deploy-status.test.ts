@@ -87,7 +87,7 @@ describe('deploy status formatting', () => {
     )
 
     expect(text).toContain('สถานะ deploy Maprang')
-    expect(text).toContain('rootIdentity: maprang-backend')
+    expect(text).toContain('root identity ระบบหลังบ้าน: maprang-backend')
     expect(text).toContain('stagingBlockerCount: 2')
     expect(text).toContain('backend URL ยังเป็น local')
     expect(text).toContain('CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https')
@@ -139,8 +139,9 @@ describe('deploy status formatting', () => {
       'production env ไม่ถูกต้อง: MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
     )
     expect(text).toContain(
-      'invalidEnv: MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
+      'env ไม่ถูกต้อง: MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
     )
+    expect(text).not.toContain('invalidEnv:')
     expect(text).toContain('productionReady: false')
   })
 

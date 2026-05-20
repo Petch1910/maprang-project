@@ -210,6 +210,10 @@ describe('smoke doctor report', () => {
     expect(report.stdout.join('\n')).toContain(
       'production env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
     )
+    expect(report.stdout.join('\n')).toContain(
+      'env ไม่ถูกต้อง: MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production',
+    )
+    expect(report.stdout.join('\n')).not.toContain('invalidEnv:')
     expect(report.warnings.join('\n')).not.toContain('งบคำตอบ roleplay ต่ำกว่าค่าแนะนำ 1600/420')
   })
 

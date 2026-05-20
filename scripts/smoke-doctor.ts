@@ -53,12 +53,12 @@ export function buildSmokeDoctorReport(
     stdout.push(`${name}: ${value}`)
   }
 
-  if (health.env?.missingRequired?.length) stdout.push(`missingRequired: ${health.env.missingRequired.join(', ')}`)
+  if (health.env?.missingRequired?.length) stdout.push(`env จำเป็นที่ขาด: ${health.env.missingRequired.join(', ')}`)
   if (health.env?.missingRecommended?.length) {
-    stdout.push(`missingRecommended: ${health.env.missingRecommended.join(', ')}`)
+    stdout.push(`env แนะนำที่ขาด: ${health.env.missingRecommended.join(', ')}`)
   }
-  if (health.env?.invalid?.length) stdout.push(`invalidEnv: ${health.env.invalid.join('; ')}`)
-  if (health.databaseError) stdout.push(`databaseError: ${health.databaseError}`)
+  if (health.env?.invalid?.length) stdout.push(`env ไม่ถูกต้อง: ${health.env.invalid.join('; ')}`)
+  if (health.databaseError) stdout.push(`ข้อผิดพลาดฐานข้อมูล: ${health.databaseError}`)
 
   const failures = healthFailures(health)
 

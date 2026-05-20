@@ -94,13 +94,13 @@ export function formatDeployStatusText(
   for (const [name, value] of buildHealthRows(health, options.apiBaseUrl)) {
     lines.push(`${name}: ${value}`)
   }
-  if (payload.rootIdentity.service) lines.push(`rootIdentity: ${payload.rootIdentity.service}`)
+  if (payload.rootIdentity.service) lines.push(`root identity ระบบหลังบ้าน: ${payload.rootIdentity.service}`)
 
-  if (health.env?.missingRequired?.length) lines.push(`missingRequired: ${health.env.missingRequired.join(', ')}`)
-  if (health.env?.missingRecommended?.length) lines.push(`missingRecommended: ${health.env.missingRecommended.join(', ')}`)
-  if (health.env?.invalid?.length) lines.push(`invalidEnv: ${health.env.invalid.join('; ')}`)
-  if (health.databaseError) lines.push(`databaseError: ${health.databaseError}`)
-  if (failures.length > 0) lines.push(`healthFailures: ${failures.join('; ')}`)
+  if (health.env?.missingRequired?.length) lines.push(`env จำเป็นที่ขาด: ${health.env.missingRequired.join(', ')}`)
+  if (health.env?.missingRecommended?.length) lines.push(`env แนะนำที่ขาด: ${health.env.missingRecommended.join(', ')}`)
+  if (health.env?.invalid?.length) lines.push(`env ไม่ถูกต้อง: ${health.env.invalid.join('; ')}`)
+  if (health.databaseError) lines.push(`ข้อผิดพลาดฐานข้อมูล: ${health.databaseError}`)
+  if (failures.length > 0) lines.push(`ปัญหา health: ${failures.join('; ')}`)
 
   lines.push('')
   lines.push(`stagingReady: ${readiness.stagingReady}`)

@@ -356,3 +356,4 @@ Last updated: 2026-05-20
 - Frontend/static and backend/security runner output Thai-first pass: เปลี่ยน runner heading ของ static audit และ security audit เป็น "ตรวจ static หน้าบ้าน" กับ "ตรวจ security ระบบหลังบ้าน" พร้อม regression tests.
 - Eval/readiness runner output Thai-first pass: เปลี่ยน local eval output เป็น "ประเมิน/ตรวจ eval ในเครื่อง" และ readiness smoke failure เป็น "ตรวจ readiness ไม่ผ่าน" พร้อม focused regression tests.
 - Smoke doctor runner output Thai-first pass: เปลี่ยน smoke doctor success/failure output เป็น "ผ่าน - ตรวจ smoke doctor ผ่านแล้ว" และ "ตรวจ smoke doctor ไม่ผ่าน" พร้อม regression tests.
+- Deploy status/smoke doctor env text Thai-first pass: เปลี่ยน text output ของ env/readiness failure จาก `missingRequired`/`invalidEnv` เป็น `env จำเป็นที่ขาด`/`env ไม่ถูกต้อง` โดยคง JSON keys เดิมสำหรับ automation.
