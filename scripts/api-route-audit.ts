@@ -357,23 +357,23 @@ export async function runApiRouteAudit(
   const discoveredRoutes = await discoverRoutes()
   const { missingCoverage, staleCoverage, weakCoverage, byOwner } = auditRouteCoverage(discoveredRoutes)
 
-  writeLine(`API route audit: ${discoveredRoutes.length} routes discovered`)
+  writeLine(`API route audit: พบ ${discoveredRoutes.length} routes`)
   for (const [owner, count] of [...byOwner.entries()].sort(([a], [b]) => a.localeCompare(b))) {
     writeLine(`- ${owner}: ${count}`)
   }
 
   if (missingCoverage.length > 0) {
-    writeError('API route audit failed: missing coverage map entries')
+    writeError('API route audit ไม่ผ่าน: มี route ที่ยังไม่มี coverage map')
     for (const route of missingCoverage) writeError(`- ${route.key} (${route.file})`)
   }
 
   if (staleCoverage.length > 0) {
-    writeError('API route audit failed: stale coverage map entries')
+    writeError('API route audit ไม่ผ่าน: coverage map มี route เก่าที่ไม่เจอใน source')
     for (const key of staleCoverage) writeError(`- ${key}`)
   }
 
   if (weakCoverage.length > 0) {
-    writeError('API route audit failed: routes with no coverage levels')
+    writeError('API route audit ไม่ผ่าน: มี route ที่ยังไม่มีระดับ coverage')
     for (const route of weakCoverage) writeError(`- ${route.key}`)
   }
 
@@ -381,7 +381,7 @@ export async function runApiRouteAudit(
     return 1
   }
 
-  writeLine('ok - backend API route audit passed')
+  writeLine('ok - backend API route audit ผ่านแล้ว')
   return 0
 }
 
