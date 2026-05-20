@@ -13,6 +13,10 @@ describe('predeploy check wiring', () => {
     const predeploy = await readRepoFile('scripts/predeploy-check.ts')
 
     expect(predeploy).toContain('ไฟล์ deploy ที่จำเป็นต้องมีครบ')
+    expect(predeploy).toContain('หัวข้อ Markdown สำคัญต้องเป็น Thai-first')
+    expect(predeploy).toContain('assertThaiFirstMarkdownHeadings')
+    expect(predeploy).toContain('memory/decisions/0014-add-chat-provider-failure-classification.md')
+    expect(predeploy).toContain('^#\\s+\\d{4}\\s+-\\s+')
     expect(predeploy).toContain('ยังไม่มีข้อความที่ต้องมี')
     expect(predeploy).toContain("result.ok ? 'ผ่าน' : 'ไม่ผ่าน'")
     expect(predeploy).not.toContain("result.ok ? 'ok' : 'fail'")

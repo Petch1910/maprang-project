@@ -14,6 +14,7 @@ Last updated: 2026-05-20
 - Memory vault and decision-record headings are Thai-first; `memory:audit` and `predeploy:check` pass, with only technical acronyms such as `API`/`URL` intentionally left as headings.
 - Render deploy guide, staging runbook, and abuse QA sign-off headings are Thai-first; heading scan, `predeploy:check`, and `memory:audit` pass.
 - Main document H1 titles are Thai-first while preserving searchable English names in parentheses; H1 scan, `predeploy:check`, `memory:audit`, and `knowledge:audit` pass.
+- `predeploy:check` now guards Thai-first Markdown headings across the main docs, app READMEs, memory vault, and knowledge wiki, while allowing technical `API`/`URL` headings and numeric decision ids.
 
 ## เกต local ล่าสุด (Gate local)
 

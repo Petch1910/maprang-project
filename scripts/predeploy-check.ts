@@ -85,6 +85,51 @@ const requiredFiles = [
   'scripts/supabase-storage-setup.test.ts',
 ]
 
+const markdownHeadingFiles = [
+  'README.md',
+  'AGENTS.md',
+  'agent.md',
+  'ABUSE_QA_CHECKLIST.md',
+  'DEPLOY_RENDER.md',
+  'DEPLOYMENT_QA.md',
+  'PRODUCTION_SETUP.md',
+  'RELEASE_HANDOFF.md',
+  'ROUTE_MENU_AUDIT.md',
+  'SECURITY_CHECKLIST.md',
+  'STAGING_RUNBOOK.md',
+  'apps/backend/README.md',
+  'apps/frontend/README.md',
+  'evals/README.md',
+  'knowledge/README.md',
+  'knowledge/raw/README.md',
+  'knowledge/wiki/INDEX.md',
+  'knowledge/wiki/creator-studio.md',
+  'knowledge/wiki/maprang-product.md',
+  'knowledge/wiki/production-deploy.md',
+  'knowledge/wiki/relationship-engine.md',
+  'memory/README.md',
+  'memory/api-backend/current-direction.md',
+  'memory/deploy-blockers.md',
+  'memory/production/checklist.md',
+  'memory/qa-status.md',
+  'memory/ui-ux/current-direction.md',
+  'memory/working-context.md',
+  'memory/decisions/0001-use-socraticode-local-tool.md',
+  'memory/decisions/0002-add-markdown-memory-vault.md',
+  'memory/decisions/0003-separate-live-provider-verification.md',
+  'memory/decisions/0004-adult-mode-conflict-policy.md',
+  'memory/decisions/0005-audit-memory-in-local-qa.md',
+  'memory/decisions/0006-add-runtime-knowledge-layer.md',
+  'memory/decisions/0007-add-deterministic-roleplay-evals.md',
+  'memory/decisions/0008-stage-background-observability-tooling.md',
+  'memory/decisions/0009-add-admin-prompt-inspector.md',
+  'memory/decisions/0010-add-admin-automated-evals.md',
+  'memory/decisions/0011-add-chat-world-state-controller.md',
+  'memory/decisions/0012-add-usage-cost-intelligence.md',
+  'memory/decisions/0013-add-prompt-budgeting.md',
+  'memory/decisions/0014-add-chat-provider-failure-classification.md',
+]
+
 async function assertFile(path: string) {
   await access(join(root, path))
 }
@@ -107,6 +152,20 @@ function forbidIncludes(content: string, values: string[], file: string) {
   }
 }
 
+function assertThaiFirstMarkdownHeadings(content: string, file: string) {
+  const allowedTechnicalHeadings = [/^#{1,6}\s+API\b/, /^#{1,6}\s+URL\b/, /^#\s+\d{4}\s+-\s+/]
+  const offenders = content
+    .split(/\r?\n/)
+    .map((line, index) => ({ line, number: index + 1 }))
+    .filter(({ line }) => /^#{1,6}\s+[A-Za-z0-9]/.test(line))
+    .filter(({ line }) => !allowedTechnicalHeadings.some((pattern) => pattern.test(line)))
+
+  if (offenders.length > 0) {
+    const details = offenders.map(({ line, number }) => `${number}: ${line}`).join('; ')
+    throw new Error(`${file} ยังมีหัวข้อ Markdown ที่ไม่ได้ขึ้นต้นแบบ Thai-first: ${details}`)
+  }
+}
+
 const checks: Check[] = [
   {
     name: 'ไฟล์ deploy ที่จำเป็นต้องมีครบ',
@@ -114,6 +173,14 @@ const checks: Check[] = [
       await Promise.all(requiredFiles.map(assertFile))
       const gitignore = await readRepoFile('.gitignore')
       requireIncludes(gitignore, ['.env.*', '!.env.example', '!.env.production.example'], '.gitignore')
+    },
+  },
+  {
+    name: 'หัวข้อ Markdown สำคัญต้องเป็น Thai-first',
+    run: async () => {
+      for (const file of markdownHeadingFiles) {
+        assertThaiFirstMarkdownHeadings(await readRepoFile(file), file)
+      }
     },
   },
   {
