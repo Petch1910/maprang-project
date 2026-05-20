@@ -46,6 +46,7 @@ describe('predeploy check wiring', () => {
     expect(qaLocal).toContain('bun run api:smoke')
     expect(qaLocalCoverage).toContain('bun run predeploy:check:test')
     expect(qaLocalCoverage).toContain('bun run deploy:doctor:self-test')
+    expect(ciWorkflow.match(/name: Install root dependencies[\s\S]*?run: bun install --frozen-lockfile/g)?.length ?? 0).toBeGreaterThanOrEqual(2)
     expect(ciWorkflow).toContain('bun run predeploy:check:test')
     expect(ciWorkflow).toContain('bun run deploy:doctor:self-test')
     expect(productionSmoke).toContain('bun run predeploy:check:test')

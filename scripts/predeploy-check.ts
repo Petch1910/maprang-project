@@ -1368,6 +1368,10 @@ const checks: Check[] = [
         ],
         '.github/workflows/ci.yml',
       )
+      const ciRootInstallCount = ciWorkflow.match(/name: Install root dependencies[\s\S]*?run: bun install --frozen-lockfile/g)?.length ?? 0
+      if (ciRootInstallCount < 2) {
+        throw new Error('CI ต้องติดตั้ง root dependencies ก่อนรัน secrets และ predeploy repo-owned gates')
+      }
     },
   },
 ]
