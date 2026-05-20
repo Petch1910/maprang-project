@@ -160,7 +160,7 @@ await warnable('GET /ready', async () => {
     if (live && isOnlyLiveVerificationFailure(failures)) {
       return {
         ok: false,
-        detail: `readiness รอการยืนยันผู้ให้บริการจริง; จะรัน smoke ผู้ให้บริการต่อเพื่อให้ตั้งค่า verification หลังผ่านจริง (${reason})`,
+        detail: `readiness รอการยืนยันผู้ให้บริการจริง; จะรันทดสอบผู้ให้บริการต่อเพื่อให้ตั้งค่า flag หลังผ่านจริง (${reason})`,
       }
     }
     throw new Error(`ยังไม่พร้อม: ${reason}`)
@@ -202,7 +202,7 @@ await check('GET /me/usage', async () => {
   if (!Array.isArray(payload.usage.byModel)) throw new Error('ยังไม่มี usage.byModel')
   if (!Array.isArray(payload.usage.daily) || payload.usage.daily.length !== 7) throw new Error('ยังไม่มีกราฟ usage 7 วัน')
   if (typeof payload.usage.estimate?.averageTokensPerRequest !== 'number') throw new Error('ยังไม่มี usage estimate')
-  return `tokenBalance=${payload.user.tokenBalance}, cost=${payload.usage.totalCost}, transactions=${payload.wallet?.transactions?.length ?? 0}`
+  return `โทเคนคงเหลือ=${payload.user.tokenBalance}, ค่าใช้จ่าย=${payload.usage.totalCost}, รายการกระเป๋า=${payload.wallet?.transactions?.length ?? 0}`
 })
 
 await check('GET /me/content-settings', async () => {
@@ -440,7 +440,7 @@ await warnable('POST /creator/ai-draft', async () => {
     if (!live) {
       return {
         ok: true,
-        detail: `${detail}; ข้ามผู้ให้บริการสร้างรูปสำหรับ local smoke`,
+        detail: `${detail}; ข้ามผู้ให้บริการสร้างรูปสำหรับการตรวจในเครื่อง`,
       }
     }
     return {
@@ -464,7 +464,7 @@ await check('POST /chat validation', async () => {
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
       characterId: "' OR 1=1 --",
-      message: 'chat validation smoke ต้องไม่เรียก live provider',
+      message: 'ตรวจ validation ของแชทต้องไม่เรียกผู้ให้บริการจริง',
       history: [],
     }),
   })
@@ -505,10 +505,10 @@ if (live) {
     })
     const minRoleplayReplyChars = Math.max(420, healthStatus?.model?.minRoleplayReplyChars ?? 420)
     const chatResult = validateLiveChatSmokeResponse(payload, minRoleplayReplyChars)
-    return `chatId=${chatResult.chatId}, tokens=${chatResult.totalTokens}, minBalance=${minSmokeTokenBalance}, replyChars=${chatResult.replyChars}, minRoleplayReplyChars=${minRoleplayReplyChars}`
+    return `chatId=${chatResult.chatId}, โทเคน=${chatResult.totalTokens}, ยอดขั้นต่ำ=${minSmokeTokenBalance}, ความยาวคำตอบ=${chatResult.replyChars}, ขั้นต่ำคำตอบโรลเพลย์=${minRoleplayReplyChars}`
   })
 } else {
-  record('POST /chat', 'skip', 'ข้าม live model call; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
+  record('POST /chat', 'skip', 'ข้ามการเรียกโมเดลจริง; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
 }
 
 await check('POST /chat/stream', async () => {
@@ -517,7 +517,7 @@ await check('POST /chat/stream', async () => {
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
       characterId: "' OR 1=1 --",
-      message: 'stream validation smoke ต้องไม่เรียก live provider',
+      message: 'ตรวจ validation ของสตรีมต้องไม่เรียกผู้ให้บริการจริง',
       history: [],
     }),
   })
@@ -530,7 +530,7 @@ await check('POST /chat/stream', async () => {
   if (done.usage?.providerFailure) {
     throw new Error(`เส้นทางตรวจ validation ของสตรีมไม่ควรเรียกผู้ให้บริการ แต่พบ providerFailure: ${done.usage.providerFailure.code}`)
   }
-  return `${events.length} SSE events, validation path ไม่ถูกคิด token`
+  return `${events.length} SSE events, เส้นทาง validation ไม่ถูกคิดโทเคน`
 })
 
 const activeChats = await runRequired('GET /chats', async () => {
@@ -542,7 +542,7 @@ const activeChats = await runRequired('GET /chats', async () => {
 await check('GET /chats?archived=true', async () => {
   const payload = await readJson<{ chats?: ChatSummary[] }>('/chats?archived=true', { headers: authHeaders })
   if (!payload.chats) throw new Error('ยังไม่มี archived chats array')
-  return `${payload.chats.length} archived chats`
+  return `แชทที่จัดเก็บแล้ว ${payload.chats.length} รายการ`
 })
 
 if (activeChats.length > 0) {
@@ -813,13 +813,13 @@ if (adminHeaders) {
     if (!payload.results.some((result) => result.id === 'prompt-injection-defense' && result.passed)) {
       throw new Error('ยังไม่มีผลทดสอบ prompt injection eval')
     }
-    return `${payload.passCount ?? payload.results.length}/${payload.scenarioCount} scenarios`
+    return `ผ่าน ${payload.passCount ?? payload.results.length}/${payload.scenarioCount} สถานการณ์`
   })
 
   await check('GET /admin/reports', async () => {
     const payload = await readJson<{ reports?: unknown[] }>('/admin/reports?limit=5', { headers: adminHeaders })
     if (!payload.reports) throw new Error('ยังไม่มี reports array')
-    return `${payload.reports.length} reports`
+    return `รายงาน ${payload.reports.length} รายการ`
   })
 
   await check('PATCH/POST /admin/reports validation', async () => {
@@ -843,7 +843,7 @@ if (adminHeaders) {
   await check('GET /admin/audit-logs', async () => {
     const payload = await readJson<{ logs?: unknown[] }>('/admin/audit-logs?limit=5', { headers: adminHeaders })
     if (!payload.logs) throw new Error('ยังไม่มี audit logs array')
-    return `${payload.logs.length} logs`
+    return `บันทึก audit ${payload.logs.length} รายการ`
   })
 } else {
   const status: ApiSmokeStatus = requireAdmin ? 'fail' : 'skip'
