@@ -446,4 +446,49 @@ describe('creator AI draft', () => {
       globalThis.fetch = previousFetch
     }
   })
+
+  test('keeps non-Error provider failure reasons Thai-first', async () => {
+    const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousFetch = globalThis.fetch
+
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    process.env.IMAGE_GENERATION_API_KEY = 'image-key'
+    globalThis.fetch = (async () => {
+      throw 'raw provider failure'
+    }) as typeof fetch
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'ตัวละครทดสอบ provider raw failure',
+          imagePrompt: 'cinematic portrait',
+        },
+        completionWith(
+          JSON.stringify({
+            name: 'ริน | RIN',
+            tagline: 'คนที่เก็บความจริงไว้ใต้รอยยิ้ม',
+            description: 'ตัวละครทดสอบ provider raw failure',
+            biography: 'รินเคยเสียบางอย่างไปและยังไม่พร้อมเล่า',
+            scenario: 'คุณพบเธอในสถานีรถไฟตอนฝนตก',
+            systemPrompt: 'คุณคือริน ตอบเป็นภาษาไทยและไม่เขียนแทนผู้เล่น',
+            compactPrompt: 'ริน: slow-burn mystery',
+            characterAnchor: 'นิ่งแต่ใส่ใจ',
+            constraints: 'อย่าเขียนแทนผู้เล่น',
+            greeting: 'ฝนตกหนักนะ เธอจะไปทางเดียวกันไหม',
+            tags: 'roleplay, thai, slow-burn',
+          }),
+        ),
+      )
+
+      expect(result.image.provider).toBe('placeholder')
+      expect(result.image.note).toContain('ไม่ทราบสาเหตุ')
+      expect(result.warnings.some((warning) => warning.includes('unknown error'))).toBe(false)
+    } finally {
+      restoreOpenRouterKey(previousOpenRouterKey)
+      if (previousImageKey === undefined) delete process.env.IMAGE_GENERATION_API_KEY
+      else process.env.IMAGE_GENERATION_API_KEY = previousImageKey
+      globalThis.fetch = previousFetch
+    }
+  })
 })

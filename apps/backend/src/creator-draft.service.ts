@@ -439,7 +439,7 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
       )
       source = 'ai'
     } catch (error) {
-      const reason = error instanceof Error ? clip(error.message, 160) : 'unknown error'
+      const reason = error instanceof Error ? clip(error.message, 160) : 'ไม่ทราบสาเหตุ'
       warnings.push(`สร้างเนื้อหาด้วยโมเดลไม่สำเร็จ จึงใช้ดราฟต์สำรองในเครื่อง: ${reason}`)
     }
   } else {
@@ -464,7 +464,7 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
     try {
       configuredImage = await generateConfiguredImage(imagePrompt, safeInput.origin)
     } catch (error) {
-      const reason = error instanceof Error ? friendlyImageFailureReason(error.message) : 'unknown error'
+      const reason = error instanceof Error ? friendlyImageFailureReason(error.message) : 'ไม่ทราบสาเหตุ'
       imageFailureReason = reason
       warnings.push(`สร้างรูปด้วยผู้ให้บริการสร้างรูปไม่สำเร็จ จึงใช้ภาพตัวอย่างระบบ: ${reason}`)
     }
