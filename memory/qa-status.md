@@ -23,7 +23,7 @@ Last updated: 2026-05-20
 
 สถานะ: static/unit/build gates ผ่านแล้ว; full local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
-ล่าสุด `bun run qa:repo` ผ่านครบหลังชุด shared redaction hardening: backend 157 pass, 0 fail, 506 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.1KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
+ล่าสุด `bun run qa:repo` ผ่านครบหลังชุด frontend auth hardening: backend 157 pass, 0 fail, 506 expect calls; frontend build/bundle ผ่าน โดย bundle หลักประมาณ 269.1KB/350KB และ chunk หน้าแชทประมาณ 228.4KB/260KB; DB persistence suites ยัง skip ตามปกติเมื่อ local Postgres ไม่ได้รัน.
 
 คำสั่งที่ยืนยันแล้ว:
 - `bun run qa:local`
@@ -130,6 +130,7 @@ Last updated: 2026-05-20
 - Frontend load/auth failure handling now maps raw provider/browser error messages to Thai-first notes before showing them to users, with static/predeploy regression guards for raw auth/provider and Redux async error display patterns.
 - Frontend auth promise hardening now passes `frontend:check` and `frontend:static:audit:test`; AuthPanel/session refresh/sign-out/dev-user flows no longer leave Supabase failures as unhandled promise rejections.
 - Predeploy now guards AuthPanel and workspace auth failure wiring so Supabase/session promise handling cannot drift back to uncaught UI failures silently.
+- Full deterministic repo gate pass: `bun run qa:repo` ผ่านหลังชุด frontend auth hardening และ predeploy guard ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, release/deploy/predeploy guards, backend tests 157 pass / 506 expect calls, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - Frontend API fallback error wording now passes Thai-first coverage via `frontend:static:audit:test` and full `frontend:check`.
 - Frontend `ApiError` backend-message precedence now passes `frontend:api:test`, `frontend:static:audit:test`, and full `frontend:check`; the static audit blocks the old payload.error-first constructor and `payloadError` fallback patterns.
 - `frontend:static:audit:test` now also blocks stale English content-rating badges such as `Teen romance`, `Mature 18+`, and `Restricted 18+`.
