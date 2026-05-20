@@ -49,8 +49,22 @@ describe('frontend bundle budget check', () => {
     )
 
     expect(exitCode).toBe(0)
-    expect(lines[0]).toBe('Frontend bundle budget:')
-    expect(lines.at(-1)).toBe('ok - frontend bundle budget ผ่านแล้ว')
+    expect(lines[0]).toBe('งบขนาด bundle ฝั่ง frontend:')
+    expect(lines.at(-1)).toBe('ผ่าน - frontend bundle budget ผ่านแล้ว')
     expect(errors).toEqual([])
+  })
+
+  test('prints Thai-first failure prefixes from the runner', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runFrontendBundleCheck(
+      (line) => lines.push(line),
+      (line) => errors.push(line),
+      async () => [{ file: 'Everything-huge.js', bytes: 700 * 1024 }],
+    )
+
+    expect(exitCode).toBe(1)
+    expect(lines[0]).toBe('งบขนาด bundle ฝั่ง frontend:')
+    expect(errors.every((line) => line.startsWith('ไม่ผ่าน - '))).toBe(true)
   })
 })

@@ -83,17 +83,17 @@ export async function runFrontendBundleCheck(
   const sizes = await readSizes()
   const result = evaluateFrontendBundleBudgets(sizes)
 
-  writeLine('Frontend bundle budget:')
-  writeLine(`- main index: ${result.mainIndex ? formatKb(result.mainIndex.bytes) : 'ไม่พบ'} / ${budgets.mainIndexKb}KB`)
-  writeLine(`- chat route: ${result.chatRoom ? formatKb(result.chatRoom.bytes) : 'ไม่พบ'} / ${budgets.chatRoomKb}KB`)
+  writeLine('งบขนาด bundle ฝั่ง frontend:')
+  writeLine(`- bundle หลัก: ${result.mainIndex ? formatKb(result.mainIndex.bytes) : 'ไม่พบ'} / ${budgets.mainIndexKb}KB`)
+  writeLine(`- chunk หน้าแชท: ${result.chatRoom ? formatKb(result.chatRoom.bytes) : 'ไม่พบ'} / ${budgets.chatRoomKb}KB`)
   writeLine(`- chunk ใหญ่สุด: ${result.largest.map((item) => `${item.file} ${formatKb(item.bytes)}`).join(', ')}`)
 
   if (result.failures.length > 0) {
-    for (const failure of result.failures) writeError(`fail - ${failure}`)
+    for (const failure of result.failures) writeError(`ไม่ผ่าน - ${failure}`)
     return 1
   }
 
-  writeLine('ok - frontend bundle budget ผ่านแล้ว')
+  writeLine('ผ่าน - frontend bundle budget ผ่านแล้ว')
   return 0
 }
 
