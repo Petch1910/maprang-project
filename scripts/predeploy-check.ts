@@ -779,7 +779,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployReadiness,
-        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน', 'RELEASE_HANDOFF.md'],
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน', 'RELEASE_HANDOFF.md'],
         'scripts/deploy-readiness.ts',
       )
       requireIncludes(

@@ -138,13 +138,13 @@ describe('deploy readiness evaluation', () => {
     expect(readiness.stagingReady).toBe(false)
     expect(readiness.productionReady).toBe(false)
     expect(readiness.stagingBlockers).toEqual(['backend URL ยังเป็น local', 'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https'])
-    expect(readiness.productionBlockers).toContain('live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน')
-    expect(readiness.productionBlockers).toContain('live smoke ของ image generation ยังไม่ได้ยืนยันผ่าน')
+    expect(readiness.productionBlockers).toContain('live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน')
+    expect(readiness.productionBlockers).toContain('live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน')
     expect(nextSteps).toContain(
       'backend URL ยังเป็น local: ตั้ง SMOKE_API_BASE_URL และ frontend VITE_API_BASE_URL เป็น deployed backend URL',
     )
     expect(nextSteps).not.toContain(
-      'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน: รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging/production แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน',
+      'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน: รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging/production แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน',
     )
   })
 
@@ -184,7 +184,7 @@ describe('deploy readiness evaluation', () => {
         'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https',
         'คลังความรู้ structured ยังไม่ผ่าน',
         'OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า',
-        'image generation provider ยังไม่ได้ตั้งค่า',
+        'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่า',
         'DATABASE_URL ยังไม่ได้ตั้งค่า',
         'production env ไม่ถูกต้อง: CORS_ORIGINS ต้องเป็น https origin ใน production',
       ]),

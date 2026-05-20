@@ -216,10 +216,10 @@ export function readinessFailures(health: HealthStatus) {
     if (!health.checks.adminAuthConfigured) failures.push('ADMIN_API_KEY ยังไม่ได้ตั้งค่า')
     if (!health.checks.imageGenerationConfigured) failures.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY ยังไม่ได้ตั้งค่า')
     if (!health.model.chatProvider.liveVerified) {
-      failures.push('live smoke ของ chat provider ยังไม่ผ่านการยืนยัน')
+      failures.push('live smoke ของผู้ให้บริการแชทยังไม่ผ่านการยืนยัน')
     }
     if (!health.model.imageGeneration.liveVerified) {
-      failures.push('live smoke ของ image generation ยังไม่ผ่านการยืนยัน')
+      failures.push('live smoke ของระบบสร้างรูปยังไม่ผ่านการยืนยัน')
     }
     if (health.security.avatarStorage !== 'supabase') failures.push('production avatar storage ต้องใช้ Supabase')
     if (health.security.avatarStorageAccess !== 'signed') failures.push('production avatar storage access ต้องใช้ signed URL')

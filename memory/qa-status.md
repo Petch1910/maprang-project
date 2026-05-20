@@ -84,6 +84,7 @@ Results:
 - Backend relationship validation copy now passes Thai-first coverage via `bun test apps\backend\src\relationship.engine.test.ts`, focused character validation tests, and full `backend:check` with 132 pass.
 - Backend character quality notes now pass Thai-first coverage via `bun test apps\backend\src\character.validation.test.ts` and full `backend:check` with 133 pass.
 - Backend runtime env/readiness copy now passes Thai-first coverage via `bun test apps\backend\src\env.test.ts apps\backend\src\health.service.test.ts scripts\deploy-readiness.test.ts scripts\deploy-status.test.ts scripts\smoke-doctor.test.ts scripts\api-smoke-helpers.test.ts`, `backend:check`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
+- Deploy readiness provider blocker wording now passes `bun test apps\backend\src\health.service.test.ts`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
 - Deploy env doctor image-key wording now passes through `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.
 - Smoke doctor missing image-generation warning now passes Thai-first coverage via `bun run smoke:doctor:test`.

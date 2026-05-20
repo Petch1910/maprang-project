@@ -70,8 +70,8 @@ export type DeployReadiness = {
 }
 
 const liveVerificationBlockers = new Set([
-  'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน',
-  'live smoke ของ image generation ยังไม่ได้ยืนยันผ่าน',
+  'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน',
+  'live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน',
 ])
 
 export function isLocalOrigin(origin: string) {
@@ -175,18 +175,18 @@ export function evaluateDeployReadiness(
     addProductionBlocker('OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า', 'ตั้ง OPENROUTER_API_KEY ใน backend host secrets')
   } else if (!(health.model?.chatProvider?.productionReady ?? health.model?.chatProvider?.liveVerified)) {
     addProductionBlocker(
-      'live smoke ของ chat provider ยังไม่ได้ยืนยันผ่าน',
+      'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน',
       `รัน \`${health.model?.chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'}\` หรือ \`bun run api:smoke:live\` กับ staging/production แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน`,
     )
   }
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
     addProductionBlocker(
-      'image generation provider ยังไม่ได้ตั้งค่า',
+      'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่า',
       'ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ใน backend host secrets',
     )
   } else if (!(health.model?.imageGeneration?.productionReady ?? health.model?.imageGeneration?.liveVerified)) {
     addProductionBlocker(
-      'live smoke ของ image generation ยังไม่ได้ยืนยันผ่าน',
+      'live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน',
       `รัน \`${health.model?.imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'}\` หรือ \`bun run api:smoke:live\` กับ staging/production แล้วตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1 หลังผ่าน`,
     )
   }

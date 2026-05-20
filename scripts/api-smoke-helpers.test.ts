@@ -6,8 +6,8 @@ describe('api smoke helpers', () => {
   test('allows live smoke to continue only for live verification readiness failures', () => {
     expect(
       isOnlyLiveVerificationFailure([
-        'live smoke ของ chat provider ยังไม่ผ่านการยืนยัน',
-        'live smoke ของ image generation ยังไม่ผ่านการยืนยัน',
+        'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน',
+        'live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน',
       ]),
     ).toBe(true)
 
@@ -15,7 +15,7 @@ describe('api smoke helpers', () => {
     expect(isOnlyLiveVerificationFailure(['ฐานข้อมูลยังเชื่อมต่อไม่ได้'])).toBe(false)
     expect(
       isOnlyLiveVerificationFailure([
-        'live smoke ของ chat provider ยังไม่ผ่านการยืนยัน',
+        'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน',
         'CORS_ORIGINS is empty, local, or non-https',
       ]),
     ).toBe(false)

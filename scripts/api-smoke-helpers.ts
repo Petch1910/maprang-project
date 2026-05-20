@@ -14,6 +14,10 @@ export function isOnlyLiveVerificationFailure(failures: string[]) {
       return (
         normalized.includes('chat provider live smoke has not been verified') ||
         normalized.includes('image generation live smoke has not been verified') ||
+        normalized.includes('live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน') ||
+        normalized.includes('live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน') ||
+        normalized.includes('live smoke ของผู้ให้บริการแชทยังไม่ผ่านการยืนยัน') ||
+        normalized.includes('live smoke ของระบบสร้างรูปยังไม่ผ่านการยืนยัน') ||
         normalized.includes('live smoke ของ chat provider ยังไม่ผ่านการยืนยัน') ||
         normalized.includes('live smoke ของ image generation ยังไม่ผ่านการยืนยัน')
       )

@@ -218,8 +218,8 @@ describe('readiness gate', () => {
       ),
     ).toEqual(
       expect.arrayContaining([
-        'live smoke ของ chat provider ยังไม่ผ่านการยืนยัน',
-        'live smoke ของ image generation ยังไม่ผ่านการยืนยัน',
+        'live smoke ของผู้ให้บริการแชทยังไม่ผ่านการยืนยัน',
+        'live smoke ของระบบสร้างรูปยังไม่ผ่านการยืนยัน',
       ]),
     )
   })

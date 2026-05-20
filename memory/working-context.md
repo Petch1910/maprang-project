@@ -53,6 +53,7 @@ Verified:
 - Backend character quality review notes now return Thai-first creator guidance for missing name/tagline/description/biography/scenario/system prompt/compact prompt/greeting/tags.
 - Backend runtime env validation, health readiness failures, security posture details, deploy readiness blockers, deploy status output, and smoke doctor blocker output now use Thai-first copy while preserving exact env names, commands, and provider names.
 - Deploy env doctor image-key diagnostics now use Thai-first wording for missing, valid, short, misrouted OpenRouter, and unknown provider key shapes while preserving exact env names.
+- Deploy readiness and backend readiness failures now use Thai-first provider labels for live chat verification, live image verification, and missing image-generation setup.
 - Smoke doctor, deploy status, and readiness smoke failure guidance now use Thai-first local/staging/deploy fix wording while preserving exact commands, env names, and service identifiers.
 - Smoke doctor now warns about missing image-generation configuration with Thai-first Creator Studio placeholder guidance.
 - Smoke doctor roleplay reply-budget recommendation warnings now use Thai-first wording while preserving exact budget values and env names.
