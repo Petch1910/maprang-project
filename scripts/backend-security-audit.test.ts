@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { collectBackendSecurityFindings, collectBackendSecurityFindingsFromSource, collectSourceFiles, runBackendSecurityAudit } from './backend-security-audit'
 
-function messagesFor(content: string) {
-  return collectBackendSecurityFindingsFromSource('fixture.ts', content).map((finding) => finding.message)
+function messagesFor(content: string, file = 'fixture.ts') {
+  return collectBackendSecurityFindingsFromSource(file, content).map((finding) => finding.message)
 }
 
 describe('backend security audit', () => {
@@ -103,6 +103,30 @@ describe('backend security audit', () => {
             return deleteCharacter(params.id)
           })
       `),
+    ).toEqual([])
+  })
+
+  test('catches route error responses without Thai-first messages', () => {
+    expect(
+      messagesFor(`
+        export const reportRoutes = new Elysia()
+          .post('/reports', ({ set }) => {
+            set.status = 503
+            return { error: 'database_not_configured' }
+          })
+      `, 'report.routes.ts'),
+    ).toContain('route error response is missing a Thai-first message; use routeErrorResponse or include message.')
+  })
+
+  test('allows route error responses with explicit messages or route helper', () => {
+    expect(
+      messagesFor(`
+        export const uploadRoutes = new Elysia()
+          .post('/uploads/avatar', () => {
+            if (!file) return { error: 'avatar_file_required', message: avatarStorageMessages.fileRequired }
+            return routeErrorResponse('database_not_configured')
+          })
+      `, 'upload.routes.ts'),
     ).toEqual([])
   })
 

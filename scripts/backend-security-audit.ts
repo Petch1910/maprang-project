@@ -40,6 +40,7 @@ const adminRoutePattern =
   /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/admin\b[^'"`]*\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
 const uuidParamRoutePattern =
   /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/[^'"`]*\/:id(?:\/[^'"`]*)?\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
+const rawRouteErrorResponsePattern = /return\s+\{\s*error:\s*(['"`])[a-z0-9_]+\1\s*\}/g
 
 const patterns = [
   {
@@ -93,6 +94,16 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
       line: lineFor(content, match.index ?? 0),
       message: 'route with /:id is missing rejectInvalidUuid guard before resource access.',
     })
+  }
+
+  if (file.endsWith('.routes.ts')) {
+    for (const match of content.matchAll(rawRouteErrorResponsePattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: 'route error response is missing a Thai-first message; use routeErrorResponse or include message.',
+      })
+    }
   }
 
   return findings
