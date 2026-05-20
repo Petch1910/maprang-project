@@ -83,7 +83,8 @@ describe('route id validation', () => {
       error: 'admin_unauthorized',
       message: 'กรุณาใช้สิทธิ์ผู้ดูแลเพื่อใช้งานส่วนนี้',
     })
-    expect(routeErrorMessage('unknown_error')).toBe('รหัสที่ส่งมาไม่ถูกต้อง')
+    expect(routeErrorMessage('unknown_error')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
+    expect(routeErrorMessage('new_unmapped_code')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
   })
 
   test('returns Thai-first messages when lore persistence is unavailable', async () => {

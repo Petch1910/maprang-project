@@ -38,6 +38,7 @@ Verified:
 - Backend report route validation, access, persistence, not-found, and admin-action errors now return Thai-first `message` fields while preserving machine-readable codes for frontend handling.
 - Backend admin summary/token/audit/eval/prompt-inspector routes now return Thai-first `message` fields for access, persistence, unavailable, and token-adjustment errors while preserving machine-readable codes.
 - Backend user usage/content-settings/persona routes now share centralized Thai-first `message` fields for persistence and user-not-found errors.
+- Backend route error fallback now returns a generic Thai retry message for unmapped codes instead of mislabeling non-ID failures as invalid IDs; explicit ID guards still use `invalid_id`.
 - Backend production auth failures now return Thai-first 401 messages for missing login and invalid/expired Supabase tokens.
 - Frontend content rating labels shown in Explore/Character Lobby are now Thai-first, and the static audit blocks stale `Teen romance`, `Mature 18+`, and `Restricted 18+` labels from returning.
 - Chat selection accessibility labels in the sidebar and My Chats are now Thai-first, and the static audit blocks stale `Select chat` labels from returning.

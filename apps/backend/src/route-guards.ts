@@ -38,11 +38,12 @@ export const routeErrorMessages: Record<string, string> = {
   report_not_found: 'ไม่พบรายงานนี้',
   character_report_required: 'รายงานนี้ไม่ได้ผูกกับตัวละคร',
   unauthorized: 'กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้',
+  unknown_error: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
   user_not_found: 'ไม่พบผู้ใช้นี้',
 }
 
 export function routeErrorMessage(error: string) {
-  return routeErrorMessages[error] ?? routeErrorMessages.invalid_id
+  return routeErrorMessages[error] ?? routeErrorMessages.unknown_error
 }
 
 export function routeErrorResponse(error: string) {

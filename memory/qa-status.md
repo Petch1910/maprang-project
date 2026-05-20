@@ -99,6 +99,7 @@ Results:
 - Backend report route access/persistence/admin-action error copy now passes Thai-first coverage via `bun test apps\backend\src\route-id-validation.test.ts apps\backend\src\report.service.test.ts` and full `backend:check` with 145 pass.
 - Backend admin route access/persistence/token-adjustment error copy now passes Thai-first coverage via `bun test apps\backend\src\admin.prompt-inspector.routes.test.ts apps\backend\src\admin.service.test.ts` and full `backend:check` with 146 pass.
 - Backend user route persistence error copy now passes Thai-first coverage via `bun test apps\backend\src\user.service.test.ts` and full `backend:check` with 147 pass.
+- Backend route error fallback copy now passes focused route-id coverage and full `backend:check` with 147 pass, 460 expect calls.
 - Full `api:smoke` was not rerun in this delta because Docker Desktop/Postgres is not available in the local environment; `api:smoke:test` still passes and the changed smoke validation assertion now expects the Thai invalid-character reply.
 - Profile/tag helper and route/menu staging copy now pass Thai-first coverage via `frontend:static:audit:test`, `frontend:check`, `route-menu:audit`, `route-menu:audit:test`, and `predeploy:check`; the static audit also blocks stale `backend`/`prompt`/`runtime`/`persona` helper wording from returning.
 - `frontend:static:audit:test` now also blocks stale mixed prompt/admin tooling copy such as `System prompt`, `redacted prompt`, `Runtime note`, `prompt snapshot`, `admin API`, and `frontend domain`.
