@@ -352,3 +352,4 @@ Last updated: 2026-05-20
 - Full deterministic repo gate pass: `qa:repo` ผ่านหลังชุด QA diagnostics ล่าสุด ครอบคลุม secrets, memory/knowledge, eval, security/import/API audits, smoke helper tests, deploy/predeploy guards, backend tests 152 pass, และ frontend build/bundle; DB persistence suites skip เฉพาะเพราะไม่มี Postgres local ในรอบนี้.
 - Frontend route audit diagnostics Thai-first pass: เปลี่ยน path finding จาก `attribute to` เป็น "ค่า to" และ summary จาก `routes` เป็น "รายการ" พร้อม `frontend:route:audit:test`.
 - Memory/knowledge audit diagnostics Thai-first pass: เปลี่ยน pass/fail summary จาก `markdown files`, `knowledge files`, และ `structured packs` เป็น "ไฟล์ Markdown", "ไฟล์ความรู้", และ "ชุด structured" พร้อม vault audit regression.
+- Route/menu doc-check runner Thai-first pass: เปลี่ยน runner output จาก `document check`/`surfaces` เป็น "ตรวจเอกสาร route/menu"/"พื้นที่" พร้อม regression ใน `route-menu:audit:test`.

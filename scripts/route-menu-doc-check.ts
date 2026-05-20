@@ -271,12 +271,12 @@ export async function runRouteMenuDocCheck(
   const result = await collectRouteMenuDocCheckResult()
 
   if (result.findings.length > 0) {
-    writeError('Route/menu document check ไม่ผ่าน:')
+    writeError('ตรวจเอกสาร route/menu ไม่ผ่าน:')
     for (const finding of result.findings) writeError(`- ${finding}`)
     return 1
   }
 
-  writeLine(`ผ่าน - route/menu document check ผ่านแล้ว (${result.auditedSurfaces} surfaces)`)
+  writeLine(`ผ่าน - ตรวจเอกสาร route/menu ผ่านแล้ว (${result.auditedSurfaces} พื้นที่)`)
   return 0
 }
 
