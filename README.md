@@ -152,7 +152,7 @@ Local API smoke covers this endpoint and `/admin/evals/local` when `ADMIN_API_KE
 - Keep `MODEL_MAX_OUTPUT_TOKENS=1600` and `MODEL_MIN_ROLEPLAY_REPLY_CHARS=420` for richer roleplay replies; short character turns get one backend continuation pass unless the player asks for brevity.
 - Keep the default provider retry env values unless staging shows repeated transient 5xx/timeout errors.
 - Run live chat smoke before production and set `CHAT_PROVIDER_LIVE_VERIFIED=1` only after the backend returns a real model reply with token usage.
-- Set `IMAGE_GENERATION_API_KEY` if Creator Studio should generate real avatar images instead of placeholders. Before production, run live image smoke and set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after billing/quota passes.
+- Set `IMAGE_GENERATION_API_KEY` if Creator Studio should generate real avatar images instead of placeholders. Before production, run live image smoke and set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after provider billing/quota passes.
 - Set `VITE_API_BASE_URL` to the deployed backend URL.
 - Set `NODE_ENV=production`.
 - Set `CORS_ORIGINS` to deployed frontend origins only.
@@ -222,7 +222,7 @@ Run the full local or staging provider gate only when the backend can reach Open
 bun run qa:live
 ```
 
-`qa:live` and `api:smoke:live` call real providers. They can fail when the key exists but billing, quota, model access, provider rate limits, or outbound networking is not ready; chat failures are reported as `usage.providerFailure` so the smoke output points at the actual failure class. Treat that as a staging blocker before production. `api:smoke:live` checks `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` before the live chat call and covers one live chat plus one live image-generation call, so use `smoke:chat` or `smoke:image:live` only when you want to retry one provider path by itself. Avoid running separate live smoke commands in parallel on quota-limited accounts; use `api:smoke:live` for a single ordered pass. The first successful live chat verification should be followed by setting `CHAT_PROVIDER_LIVE_VERIFIED=1`; the first successful live image verification should be followed by setting `IMAGE_GENERATION_LIVE_VERIFIED=1`; then rerun the final production gate.
+`qa:live` and `api:smoke:live` call real providers. They can fail even when the key exists if billing, quota, model access, provider rate limits, or outbound networking is not ready; chat failures are reported as `usage.providerFailure` so the smoke output points at the actual failure class. Treat that as a staging blocker before production. `api:smoke:live` checks `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` before the live chat call and covers one live chat plus one live image-generation call, so use `smoke:chat` or `smoke:image:live` only when you want to retry one provider path by itself. Avoid running separate live smoke commands in parallel on quota-limited accounts; use `api:smoke:live` for a single ordered pass. The first successful live chat verification should be followed by setting `CHAT_PROVIDER_LIVE_VERIFIED=1`; the first successful live image verification should be followed by setting `IMAGE_GENERATION_LIVE_VERIFIED=1`; then rerun the final production gate.
 
 For an already deployed backend, use the smoke-only live gate with `SMOKE_API_BASE_URL` and smoke auth variables when you only want to retry provider connectivity without running persistence tests against production data:
 
@@ -236,7 +236,7 @@ For production/staging go/no-go, use:
 bun run production:check
 ```
 
-This runs the strict production health gate, Supabase signed-avatar storage smoke, and live API smoke, including real chat and real image-generation checks. It will fail if the `avatars` bucket cannot issue signed URLs or if image generation falls back to a placeholder because of billing or quota limits.
+This runs the strict production health gate, Supabase signed-avatar storage smoke, and live API smoke, including real chat and real image-generation checks. It will fail if the `avatars` bucket cannot issue signed URLs or if image generation falls back to a placeholder because provider billing/quota is not ready.
 The script prints `bun run deploy:status` first, so the blocker summary and next steps appear before the strict gate fails.
 
 When you want to verify all repo-owned surfaces before the final live provider/domain gate, run:

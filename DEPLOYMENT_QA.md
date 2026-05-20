@@ -189,7 +189,7 @@ bun run smoke:chat
 
 `smoke:chat` and `api:smoke:live` check `/me/usage` before they call the AI provider. The smoke user must have at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`, so the test fails before spending provider credits when the smoke account is not topped up. `smoke:chat` is a targeted retry/debug command; use `production:check` for the final go/no-go gate.
 
-If `smoke:chat` reports `usage.providerFailure`, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. Check outbound network access to `https://openrouter.ai`, `OPENROUTER_API_KEY`, provider credits/quota, selected model access, and backend logs.
+If `smoke:chat` reports `usage.providerFailure`, the app, database, and chat route were reachable, but the backend could not complete the outbound provider request. ตรวจ network ออกไปที่ `https://openrouter.ai`, `OPENROUTER_API_KEY`, เครดิต/โควตา, สิทธิ์โมเดลที่เลือก, และ backend logs.
 Do not set `CHAT_PROVIDER_LIVE_VERIFIED=1` until a live chat smoke returns a real model reply, `chatId`, token usage, and a matching `CHAT_USAGE` wallet transaction.
 
 To verify that the image generation provider is configured without spending image credits:
@@ -204,8 +204,8 @@ To generate one real staging/production avatar through the configured image prov
 bun run smoke:image:live
 ```
 
-`smoke:image` only checks `/health` by default. With `bun run smoke:image:live` or `SMOKE_IMAGE_LIVE=1`, it calls `/creator/ai-draft`, expects `image.provider="configured"`, and fails if Creator Studio falls back to the local placeholder image. This live mode can spend both text and image provider credits.
-If the live run reports `billing_hard_limit_reached`, `billing hard limit`, or `insufficient_quota`, do not set `IMAGE_GENERATION_LIVE_VERIFIED=1` yet. Increase or reset the image provider billing limit/quota, rerun `bun run smoke:image:live`, and only mark live verification after the generated image path returns `image.provider="configured"`.
+`smoke:image` only checks `/health` by default. With `bun run smoke:image:live` or `SMOKE_IMAGE_LIVE=1`, it calls `/creator/ai-draft`, expects `image.provider="configured"`, and fails if Creator Studio falls back to the local placeholder image. โหมด live นี้อาจใช้ทั้งเครดิตข้อความและเครดิตสร้างรูป.
+If the live run reports `billing_hard_limit_reached`, `billing hard limit`, or `insufficient_quota`, do not set `IMAGE_GENERATION_LIVE_VERIFIED=1` yet. เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป, rerun `bun run smoke:image:live`, and only mark live verification after the generated image path returns `image.provider="configured"`.
 
 For a deployed backend, point the smoke tests at the backend URL. Prefer a Supabase user token:
 

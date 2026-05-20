@@ -42,11 +42,11 @@ Required:
 Status: blocked by provider account
 
 Current issue:
-- `bun run smoke:image:live` falls back to placeholder because image provider reports billing hard limit.
+- `bun run smoke:image:live` falls back to placeholder because the image provider reports a billing hard limit.
 - Latest local smoke doctor still reports `imageStatus=needs_live_smoke` and `imageLiveVerified=false`.
 
 Required:
-- Increase or reset the image provider billing/quota limit.
+- เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป.
 - Rerun `bun run smoke:image:live` or `bun run api:smoke:live`.
 - Set `IMAGE_GENERATION_LIVE_VERIFIED=1` only after generated image provider returns `configured`.
 

@@ -100,7 +100,7 @@ Staging CORS must pass the same `local/non-https CORS` rule as production before
 - avatar storage เป็น Supabase + signed URL
 - CORS เป็น frontend domain จริงแบบ `https://` ไม่ใช่ localhost หรือ `http://`
 - `production:check` ผ่านโดยไม่มี `productionBlockers`
-- `api:smoke:live` หรือ `smoke:chat` ต้องผ่านสำหรับแชท ถ้า OpenRouter คืน `usage.providerFailure` ยังห้ามถือว่าพร้อม production
-- `api:smoke:live` หรือ `smoke:image:live` ต้องผ่านสำหรับรูป ถ้า image provider ติด billing/quota ยังห้ามถือว่าพร้อม production
+- `api:smoke:live` หรือ `smoke:chat` ต้องผ่านสำหรับแชท ถ้าระบบคืนรหัส `providerFailure` จาก OpenRouter ยังห้ามถือว่าพร้อม production
+- `api:smoke:live` หรือ `smoke:image:live` ต้องผ่านสำหรับรูป ถ้าผู้ให้บริการสร้างรูปติดวงเงินหรือโควตา ยังห้ามถือว่าพร้อม production
 - `e2e:smoke` ผ่าน desktop และ mobile
 - Route/Menu Audit ไม่มีปุ่มหลักที่กดแล้วไม่เกิดผล

@@ -87,6 +87,7 @@ Results:
 - Backend runtime env/readiness copy now passes Thai-first coverage via `bun test apps\backend\src\env.test.ts apps\backend\src\health.service.test.ts scripts\deploy-readiness.test.ts scripts\deploy-status.test.ts scripts\smoke-doctor.test.ts scripts\api-smoke-helpers.test.ts`, `backend:check`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
 - Deploy readiness provider blocker wording now passes `bun test apps\backend\src\health.service.test.ts`, `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, `api:smoke:test`, and `predeploy:check`.
 - Deploy readiness next-step fix wording now passes `deploy:readiness:test`, `deploy:status:test`, `smoke:doctor:test`, and `predeploy:check`.
+- Staging/production live provider documentation wording now passes `predeploy:check`, `memory:audit`, `secrets:check`, and `git diff --check`.
 - Deploy env doctor image-key wording now passes through `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Runtime env and deploy env doctor database placeholder wording now passes `bun test apps\backend\src\env.test.ts`, `deploy:doctor:test`, `deploy:doctor:self-test`, and `predeploy:check`.
 - Smoke/deploy CLI failure guidance now passes Thai-first coverage via `bun run deploy:status:test`, `bun run smoke:doctor:test`, `bun run smoke:ready:test`, and `predeploy:check`.
