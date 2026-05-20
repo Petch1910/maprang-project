@@ -161,6 +161,36 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches route raw error logging', () => {
+    expect(
+      messagesFor(`
+        export const uploadRoutes = new Elysia()
+          .post('/uploads/avatar', async () => {
+            try {
+              return await uploadAvatarFile()
+            } catch (error) {
+              console.error('อัปโหลดรูปตัวละครไม่สำเร็จ:', error)
+              return { error: 'avatar_storage_unavailable', message: 'พื้นที่เก็บรูปตัวละครยังไม่พร้อมใช้งาน' }
+            }
+          })
+      `, 'upload.routes.ts'),
+    ).toContain('route log raw error object ตรงๆ ไม่ได้; ใช้ safeRouteErrorSummary เพื่อกันข้อมูลลับหลุด log.')
+
+    expect(
+      messagesFor(`
+        export const uploadRoutes = new Elysia()
+          .post('/uploads/avatar', async () => {
+            try {
+              return await uploadAvatarFile()
+            } catch (error) {
+              console.error('อัปโหลดรูปตัวละครไม่สำเร็จ:', safeRouteErrorSummary(error))
+              return { error: 'avatar_storage_unavailable', message: 'พื้นที่เก็บรูปตัวละครยังไม่พร้อมใช้งาน' }
+            }
+          })
+      `, 'upload.routes.ts'),
+    ).toEqual([])
+  })
+
   test('extracts route error message keys and helper calls for explicit-copy checks', () => {
     const known = collectKnownRouteErrorMessages(`
       export const routeErrorMessages: Record<string, string> = {

@@ -5,7 +5,7 @@ import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
 import { loreRoutes } from './lore.routes'
 import { reportRoutes } from './report.routes'
-import { rejectInvalidUuid, routeErrorMessage, routeErrorResponse } from './route-guards'
+import { rejectInvalidUuid, routeErrorMessage, routeErrorResponse, safeRouteErrorSummary } from './route-guards'
 
 const prisma = getPrisma()
 const shouldRunDbTest = createDbTestGate(prisma, 'route id validation')
@@ -85,6 +85,13 @@ describe('route id validation', () => {
     })
     expect(routeErrorMessage('unknown_error')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
     expect(routeErrorMessage('new_unmapped_code')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
+  })
+
+  test('route error log summary does not expose raw error messages', () => {
+    expect(safeRouteErrorSummary(new Error('secret-like-url https://example.invalid?token=leak'))).toEqual({
+      name: 'Error',
+    })
+    expect(safeRouteErrorSummary('plain failure')).toEqual({ type: 'string' })
   })
 
   test('returns Thai-first messages when lore persistence is unavailable', async () => {

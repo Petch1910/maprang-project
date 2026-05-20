@@ -50,6 +50,11 @@ export function routeErrorResponse(error: string) {
   return { error, message: routeErrorMessage(error) }
 }
 
+export function safeRouteErrorSummary(error: unknown) {
+  if (error instanceof Error) return { name: error.name || 'Error' }
+  return { type: typeof error }
+}
+
 export function rejectInvalidUuid(id: string, set: RouteSet, error = 'invalid_id') {
   if (isUuid(id)) return null
   set.status = 400

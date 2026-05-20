@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
 import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, sendChat, streamChat, updateChatTitle } from './chat.service'
 import { AuthError, isUuid, resolveRequestUserId } from './security'
-import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
+import { rejectInvalidUuid, routeErrorResponse, safeRouteErrorSummary } from './route-guards'
 import { loadChatWorldState, updateChatWorldState } from './world-state.service'
 
 function responseChatId(chatId?: string) {
@@ -71,7 +71,7 @@ export const chatRoutes = new Elysia()
           }
         }
 
-        console.error('แชทไม่สำเร็จ:', error)
+        console.error('แชทไม่สำเร็จ:', safeRouteErrorSummary(error))
         return {
           reply: 'บริการ AI ขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง',
           chatId: responseChatId(body.chatId),
