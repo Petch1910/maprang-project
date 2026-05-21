@@ -575,6 +575,7 @@ const checks: Check[] = [
           '"api:audit:test"',
           '"api:smoke:test"',
           '"frontend:api:test"',
+          '"frontend:env:test"',
           '"frontend:storage:test"',
           '"frontend:clipboard:test"',
           '"frontend:bundle:test"',
@@ -678,6 +679,9 @@ const checks: Check[] = [
       }
       if (!qaLocalCoverage.includes('frontend:api:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:api:test เพื่อจับ regression ของ error API ฝั่ง frontend')
+      }
+      if (!qaLocalCoverage.includes('frontend:env:test')) {
+        throw new Error('package.json qa:local ต้องรัน frontend:env:test เพื่อจับ regression ของ env/JWT ฝั่ง frontend')
       }
       if (!qaLocalCoverage.includes('frontend:storage:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:storage:test เพื่อจับ regression ของ localStorage ฝั่ง frontend')
@@ -1284,6 +1288,16 @@ const checks: Check[] = [
         await readRepoFile('scripts/frontend-api-errors.test.ts'),
         ['does not surface raw technical backend messages even when message exists', 'wraps malformed successful JSON responses in a Thai ApiError', 'wraps malformed chat stream events in a Thai ApiError', 'wraps interrupted chat stream reads in a Thai ApiError', 'safeApiUserMessage', 'parseChatStreamEvent', 'Cannot read properties of undefined'],
         'scripts/frontend-api-errors.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/frontend/src/lib/env.ts'),
+        ['supabaseJwtRole', 'decodeBase64Url', "padEnd(Math.ceil(normalized.length / 4) * 4, '=')"],
+        'apps/frontend/src/lib/env.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-env.test.ts'),
+        ['decodes Supabase JWT roles from unpadded base64url payloads', 'service_role', 'ignores invalid Supabase JWT role payloads without throwing'],
+        'scripts/frontend-env.test.ts',
       )
       requireIncludes(
         await readRepoFile('apps/frontend/src/lib/safeStorage.ts'),

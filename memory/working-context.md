@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Frontend env JWT guard เพิ่ม `supabaseJwtRole` ที่ decode base64url แบบเติม padding ได้ถูกต้อง เพื่อให้หน้า frontend readiness จับ `VITE_SUPABASE_ANON_KEY` ที่เป็น service role หรือ role ผิดได้แม้ JWT payload ไม่มี `=` padding; เพิ่ม `frontend:env:test` และผูกเข้า `qa:repo` แล้ว.
 - 2026-05-21: Image provider JSON hardening เพิ่ม `readImageProviderJson` ใน Creator Draft เพื่อให้ผู้ให้บริการสร้างรูปที่คืน HTTP 200 แต่ JSON พัง fallback เป็นภาพตัวอย่างพร้อม warning ภาษาไทย "ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง" แทน raw parser text.
 - 2026-05-21: Frontend API JSON hardening เพิ่ม `readApiJson`/`readErrorPayload` ให้ success response ที่ body ไม่ใช่ JSON ถูกห่อเป็น `ApiError` ภาษาไทย "API ตอบกลับไม่สมบูรณ์ กรุณาลองใหม่" แทน raw `SyntaxError`; ใช้ร่วมกับ `requestJson`, avatar upload, และ stream error payload แล้ว.
 - 2026-05-21: Creator Draft JSON hardening เปลี่ยน parser ของ AI draft ให้ห่อ JSON ที่โมเดลคืนมาพังเป็น `SyntaxError` ข้อความไทยที่ควบคุมได้ "โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์" โดยยัง retry ได้เหมือนเดิม และ warning จะไม่หลุด raw `Unexpected...`/`SyntaxError` ไปถึงครีเอเตอร์.

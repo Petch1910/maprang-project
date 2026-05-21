@@ -16,13 +16,18 @@ export function hasRealEnvValue(value: string | undefined) {
   )
 }
 
-function jwtRole(value: string | undefined) {
+function decodeBase64Url(value: string) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/')
+  return atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='))
+}
+
+export function supabaseJwtRole(value: string | undefined) {
   if (!value?.startsWith('eyJ')) return null
   const [, payload] = value.split('.')
   if (!payload) return null
 
   try {
-    const parsed = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))) as { role?: unknown }
+    const parsed = JSON.parse(decodeBase64Url(payload)) as { role?: unknown }
     return typeof parsed.role === 'string' ? parsed.role : null
   } catch {
     return null
@@ -69,7 +74,7 @@ export function frontendEnvWarnings() {
     }
   }
 
-  const supabaseAnonRole = jwtRole(SUPABASE_ANON_KEY)
+  const supabaseAnonRole = supabaseJwtRole(SUPABASE_ANON_KEY)
   if (supabaseAnonRole && supabaseAnonRole !== 'anon') {
     warnings.push('VITE_SUPABASE_ANON_KEY ต้องเป็น anon/public key ห้ามใช้ service role key หรือ role อื่น')
   }
