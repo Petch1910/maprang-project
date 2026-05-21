@@ -43,6 +43,7 @@ const uuidParamRoutePattern =
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = /console\.(?:error|warn)\([^)\n]*,\s*error\b/g
 const rawRouteErrorThrowPattern = /throw\s+error\b/g
+const rawRouteCatchMessagePattern = /catch\s*\(\s*error\s*\)\s*\{[\s\S]{0,800}?\bmessage\s*:\s*error\.message/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
 const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
@@ -131,6 +132,15 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
         file,
         line: lineFor(content, match.index ?? 0),
         message: 'route throw raw error object ตรงๆ ไม่ได้; คืน routeErrorResponse หรือ response ที่ควบคุมข้อความได้.',
+      })
+    }
+
+    for (const match of content.matchAll(rawRouteCatchMessagePattern)) {
+      if (match[0].includes('error instanceof AuthError')) continue
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.',
       })
     }
 

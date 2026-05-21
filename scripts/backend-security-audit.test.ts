@@ -299,6 +299,45 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches route catch responses that expose raw error messages', () => {
+    expect(
+      messagesFor(
+        `
+          export const chatRoutes = new Elysia()
+            .post('/chat', async () => {
+              try {
+                return await sendChat()
+              } catch (error) {
+                return { error: 'chat_failed', message: error.message }
+              }
+            })
+        `,
+        'chat.routes.ts',
+      ),
+    ).toContain('route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.')
+  })
+
+  test('allows route catch responses for controlled AuthError messages', () => {
+    expect(
+      messagesFor(
+        `
+          export const chatRoutes = new Elysia()
+            .post('/chat', async () => {
+              try {
+                return await sendChat()
+              } catch (error) {
+                if (error instanceof AuthError) {
+                  return { error: error.code, message: error.message }
+                }
+                return routeErrorResponse('unknown_error')
+              }
+            })
+        `,
+        'chat.routes.ts',
+      ),
+    ).toEqual([])
+  })
+
   test('extracts route error message keys and helper calls for explicit-copy checks', () => {
     const known = collectKnownRouteErrorMessages(`
       export const routeErrorMessages: Record<string, string> = {
