@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-21
 
-## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-20
+## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-21
 
 - 2026-05-21 admin eval safe-detail pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 17 tests / 28 expects, `bun run security:audit`, `bun run backend:check` ผ่าน 157 tests / 506 expects, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run import-cycle:audit` ผ่านหลังบล็อก raw error detail ใน route response; import-cycle ยังคง 125 source files / 279 import edges.
 - 2026-05-21 route catch raw-message guard pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 19 tests / 30 expects, `bun run security:audit`, `bun run predeploy:check:test`, และ `bun run predeploy:check` ผ่านหลังเพิ่ม rule กัน generic route catch คืน `message: error.message` โดยยัง allow controlled `AuthError`.
@@ -334,7 +334,7 @@ Last updated: 2026-05-21
 - `/admin/health` deploy checklist shows a concrete next action on each blocker card.
 - Console errors/warnings: none relevant.
 
-## บันทึก QA ล่าสุด 2026-05-20
+## บันทึก QA เดิมก่อนรอบ 2026-05-21
 
 - Runtime prompt heading Thai-first pass: `context.service.test.ts`, `prompt-inspector.service.test.ts`, `eval:local`, `eval:local:test`, `api:smoke:test`, `predeploy:check:test`, `backend:check`, `predeploy:check`, `secrets:check`, และ `git diff --check` ผ่านหลังแปลงหัวข้อ prompt/context runtime เป็นไทย-first.
 - `predeploy:check` ตอนนี้ guard หัวข้อ prompt runtime ภาษาไทยใน Context Service และ Prompt Inspector Service พร้อม forbid heading อังกฤษเก่าใน source runtime.

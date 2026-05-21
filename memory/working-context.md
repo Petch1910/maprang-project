@@ -2,7 +2,7 @@
 
 Last updated: 2026-05-21
 
-## อัปเดตงานใน repo (Repo-owned update) 2026-05-20
+## อัปเดตงานใน repo (Repo-owned update) 2026-05-21
 
 - 2026-05-21: `/admin/evals/local` ไม่ส่ง raw `error.message` กลับใน `detail` แล้ว โดยเปลี่ยนเป็น `safeRouteErrorSummary(error)` และเพิ่ม backend security audit rule กันการคืน `detail: error.message`, `detail: String(error)`, หรือ ternary raw error message กลับมาอีก.
 - 2026-05-21: backend security audit เสริม rule กัน route `catch (error)` คืน `message: error.message` ตรงๆ ใน generic error path แล้ว แต่ยังอนุญาต `AuthError` เพราะข้อความถูกควบคุมโดยระบบ auth.
@@ -309,7 +309,7 @@ Verified:
 5. ตั้ง verification flags หลัง live smoke ผ่านจริงเท่านั้น.
 6. รัน `production:check` ซ้ำ.
 
-## บันทึกล่าสุด 2026-05-20
+## บันทึกเดิมก่อนรอบ 2026-05-21
 
 - Signed-storage handoff wording, release handoff stale-label guard, stream chat validation guard, และ API smoke stream diagnostics ถูกปิดแล้ว; `qa:repo` ล่าสุดผ่านเต็มด้วย backend tests 153 pass และ frontend build/bundle ผ่าน.
 - Runtime context, Prompt Inspector, local eval fixture, และ promptfoo roleplay template ใช้หัวข้อพรอมป์แบบ Thai-first แล้ว: `กฎคุมพรอมป์ของแพลตฟอร์ม`, `คลังความรู้ที่เกี่ยวข้อง`, `คำสั่งขณะรัน`, `ความจำขณะรัน`, และ `ข้อความผู้ใช้`.
