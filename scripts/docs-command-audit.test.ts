@@ -50,6 +50,50 @@ describe('docs command audit', () => {
     ])
   })
 
+  test('tracks GitHub workflow working-directory contexts and job boundaries', () => {
+    const references = collectBunRunReferences(
+      '.github/workflows/ci.yml',
+      [
+        'jobs:',
+        '  backend:',
+        '    defaults:',
+        '      run:',
+        '        working-directory: apps/backend',
+        '    steps:',
+        '      - run: bun run deploy:check',
+        '  predeploy:',
+        '    steps:',
+        '      - run: bun run predeploy:check',
+      ].join('\n'),
+    )
+
+    expect(references.map(({ script, context }) => ({ script, context }))).toEqual([
+      { script: 'deploy:check', context: 'apps/backend' },
+      { script: 'predeploy:check', context: 'root' },
+    ])
+  })
+
+  test('tracks GitHub workflow cd changes inside run blocks', () => {
+    const references = collectBunRunReferences(
+      '.github/workflows/ci.yml',
+      [
+        'jobs:',
+        '  smoke-local:',
+        '    steps:',
+        '      - run: |',
+        '          cd apps/backend',
+        '          bun run start &',
+        '          cd ../..',
+        '          bun run smoke:doctor',
+      ].join('\n'),
+    )
+
+    expect(references.map(({ script, context }) => ({ script, context }))).toEqual([
+      { script: 'start', context: 'apps/backend' },
+      { script: 'smoke:doctor', context: 'root' },
+    ])
+  })
+
   test('runs the committed documentation command audit through an importable runner', async () => {
     const result = await collectDocsCommandAuditResult()
     const lines: string[] = []

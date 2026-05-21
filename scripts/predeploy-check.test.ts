@@ -14,7 +14,7 @@ describe('predeploy check wiring', () => {
 
     expect(predeploy).toContain('ไฟล์ deploy ที่จำเป็นต้องมีครบ')
     expect(predeploy).toContain('หัวข้อ Markdown สำคัญต้องเป็น Thai-first')
-    expect(predeploy).toContain('คำสั่งในเอกสารต้องตรงกับ package scripts')
+    expect(predeploy).toContain('คำสั่งในเอกสารและ workflow ต้องตรงกับ package scripts')
     expect(predeploy).toContain('collectDocsCommandAuditResult')
     expect(predeploy).toContain('assertThaiFirstMarkdownHeadings')
     expect(predeploy).toContain('memory/decisions/0014-add-chat-provider-failure-classification.md')

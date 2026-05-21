@@ -187,7 +187,7 @@ const checks: Check[] = [
     },
   },
   {
-    name: 'คำสั่งในเอกสารต้องตรงกับ package scripts',
+    name: 'คำสั่งในเอกสารและ workflow ต้องตรงกับ package scripts',
     run: async () => {
       const result = await collectDocsCommandAuditResult()
       if (result.findings.length > 0) {

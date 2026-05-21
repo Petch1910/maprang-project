@@ -1,9 +1,11 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-05-20
+Last updated: 2026-05-21
 
 ## อัปเดตงานใน repo (Repo-owned update) 2026-05-20
 
+- 2026-05-21: `docs:commands` ขยายจากเอกสาร Markdown ไปตรวจ GitHub Actions workflow ด้วย โดยเข้าใจ `working-directory`, job boundary, และ `cd apps/...` ใน run block เพื่อกัน CI/Production Smoke อ้าง `bun run ...` ผิด package.
+- 2026-05-21: `predeploy:check` ผ่านหลังเปลี่ยนชื่อ gate เป็น `คำสั่งในเอกสารและ workflow ต้องตรงกับ package scripts`; docs command audit ล่าสุดตรวจ 289 จุดอ้างอิง.
 - เพิ่ม `docs:commands` และ `docs:commands:test` เพื่อตรวจว่าเอกสารหลักอ้าง `bun run ...` ตรงกับ package context จริง ทั้ง root docs, app READMEs, release/deploy handoff, route/menu audit, และ staging/production runbooks.
 - `qa:repo`, CI predeploy/secrets layer, และ Production Smoke ถูกผูกให้รัน command-doc audit แล้ว เพื่อกัน README หรือ deploy docs แนะนำ script ที่ไม่มีอยู่จริงในตำแหน่งที่ผู้ใช้รัน.
 - `predeploy:check` เรียก command-doc audit โดยตรงแล้ว ดังนั้น `production:check` จะจับเอกสารที่อ้าง script ผิด context ได้แม้ไม่ได้รัน `qa:repo` ก่อน.
@@ -26,7 +28,7 @@ Last updated: 2026-05-20
 สถานะ: static/unit/build QA พร้อมแล้ว; final local smoke ยังต้องมี Docker/Postgres และ backend ที่รันอยู่
 
 Verified:
-- Latest full `qa:repo` after documentation command audit passes; backend tests pass 157 tests with 506 expects, docs command audit checks 189 จุดอ้างอิง, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
+- Latest full `qa:repo` after documentation command audit passes; backend tests pass 157 tests with 506 expects, docs command audit checks 289 จุดอ้างอิง after workflow coverage, frontend bundle budget remains under limits, and DB persistence suites still skip when local Postgres is unavailable.
 - Latest full `qa:local` attempt reached final runtime smoke and then failed because Docker Desktop/Postgres plus backend `http://127.0.0.1:3000` were not running in this desktop session.
 - Latest direct `deploy:status` also fails at backend root preflight for the same reason: `http://127.0.0.1:3000` is not running.
 - Backend tests pass: 157 pass, 0 fail, 506 expects.

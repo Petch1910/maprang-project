@@ -208,13 +208,13 @@ bun run import-cycle:audit
 
 คำสั่งนี้ยืนยันว่า backend, frontend, scripts, seed data, Playwright config, และ e2e smoke files ไม่มี circular relative imports.
 
-ถ้าต้องการตรวจว่าเอกสารหลักอ้างคำสั่ง `bun run ...` ตรงกับ package context จริง:
+ถ้าต้องการตรวจว่าเอกสารหลักและ GitHub Actions อ้างคำสั่ง `bun run ...` ตรงกับ package context จริง:
 
 ```bash
 bun run docs:commands
 ```
 
-คำสั่งนี้ช่วยกันเอกสาร deploy และ README ของ app แนะนำ script ที่ไม่มีอยู่จริงในตำแหน่งที่รัน.
+คำสั่งนี้ช่วยกันเอกสาร deploy, README ของ app, และ workflow แนะนำ script ที่ไม่มีอยู่จริงในตำแหน่งที่รัน.
 
 ถ้าต้องการตรวจ production env files ก่อน deploy โดยไม่พิมพ์ secret values:
 

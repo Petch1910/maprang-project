@@ -11,7 +11,7 @@ const packageFiles: Record<PackageContext, string> = {
   'apps/frontend': 'apps/frontend/package.json',
 }
 
-const auditedMarkdownFiles = [
+const auditedCommandFiles = [
   'README.md',
   'AGENTS.md',
   'agent.md',
@@ -27,6 +27,8 @@ const auditedMarkdownFiles = [
   'apps/frontend/README.md',
   'evals/README.md',
   'knowledge/README.md',
+  '.github/workflows/ci.yml',
+  '.github/workflows/production-smoke.yml',
 ]
 
 export type CommandReference = {
@@ -60,12 +62,29 @@ function contextFromCd(line: string): PackageContext | null {
   return null
 }
 
+function contextFromWorkflowWorkingDirectory(line: string): PackageContext | null {
+  if (/\bworking-directory:\s*apps[\\/]backend\b/.test(line)) return 'apps/backend'
+  if (/\bworking-directory:\s*apps[\\/]frontend\b/.test(line)) return 'apps/frontend'
+  return null
+}
+
+function isWorkflowFile(file: string) {
+  return file.startsWith('.github/workflows/')
+}
+
+function isWorkflowJobBoundary(line: string) {
+  return /^  [A-Za-z0-9_-]+:\s*$/.test(line)
+}
+
 function inferLineContext(file: string, lines: string[], index: number, current: PackageContext) {
   const line = lines[index]
   if (line.includes('repo root')) return 'root'
 
   const cdContext = contextFromCd(line)
   if (cdContext) return cdContext
+
+  const workflowContext = contextFromWorkflowWorkingDirectory(line)
+  if (workflowContext) return workflowContext
 
   if (file === 'DEPLOY_RENDER.md' && line.includes('Build command:')) {
     const previous = lines.slice(Math.max(0, index - 5), index).join('\n')
@@ -81,6 +100,7 @@ export function collectBunRunReferences(file: string, content: string): CommandR
   const references: CommandReference[] = []
   let context = defaultContextForFile(file)
   let inFence = false
+  const workflowFile = isWorkflowFile(file)
 
   lines.forEach((line, index) => {
     if (/^\s*```/.test(line)) {
@@ -89,8 +109,11 @@ export function collectBunRunReferences(file: string, content: string): CommandR
       return
     }
 
-    const lineContext = inferLineContext(file, lines, index, inFence ? context : defaultContextForFile(file))
-    if (inFence) context = lineContext
+    if (workflowFile && isWorkflowJobBoundary(line)) context = 'root'
+
+    const baseContext = inFence || workflowFile ? context : defaultContextForFile(file)
+    const lineContext = inferLineContext(file, lines, index, baseContext)
+    if (inFence || workflowFile) context = lineContext
 
     for (const match of line.matchAll(/\bbun\s+run\s+([A-Za-z0-9:_-]+)/g)) {
       references.push({
@@ -118,7 +141,7 @@ async function loadPackageScripts() {
 }
 
 export async function collectDocsCommandAuditResult(
-  files = auditedMarkdownFiles,
+  files = auditedCommandFiles,
 ): Promise<CommandAuditResult> {
   const packageScripts = await loadPackageScripts()
   const references = (
