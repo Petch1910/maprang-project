@@ -12,7 +12,7 @@
 - smoke environment ยังชี้ไปที่ URL local ของ backend/frontend.
 - ตรวจ runtime ล่าสุด 2026-05-21: `docker ps` ติดต่อ Docker Desktop ไม่ได้ และ `bun run deploy:status` ล้มที่ backend root preflight เพราะ `http://127.0.0.1:3000` ยังไม่ตอบ.
 - smoke doctor รอบ local ล่าสุดรายงานตัวกั้น staging 2 ข้อ: backend URL ยังเป็น local และ `CORS_ORIGINS` ว่าง, เป็น local, หรือไม่ใช่ HTTPS พร้อมคำแนะนำขั้นถัดไปแบบ Thai-first ใน CLI.
-- เมื่อ backend local หรือ staging ตอบได้ `bun run deploy:status` จะแสดงตัวกั้นชุดเดียวกันพร้อมลำดับขั้นถัดไป; ถ้า backend ยังไม่รัน คำสั่งจะ fail ที่ root identity preflight ก่อนอ่าน readiness และ `--json` จะคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity` เพื่อให้ automation อ่านต่อได้
+- เมื่อ backend local หรือ staging ตอบได้ `bun run deploy:status` จะแสดงตัวกั้นชุดเดียวกันพร้อมลำดับขั้นถัดไป; ถ้า backend ยังไม่รัน คำสั่งจะ fail ที่ root identity preflight ก่อนอ่าน readiness และ `--json` จะคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ automation อ่านต่อได้
 
 สิ่งที่ต้องทำ:
 - ตั้ง URL backend ที่ deploy แล้วให้ `SMOKE_API_BASE_URL`.

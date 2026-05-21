@@ -213,7 +213,7 @@ describe('deploy status formatting', () => {
     expect(payload.apiBaseUrl).toBe('http://127.0.0.1:3000')
     expect(payload.error).toBe('backend unavailable')
     expect(payload.failures).toEqual(['backend unavailable'])
-    expect(payload.rootIdentity.ok).toBeUndefined()
+    expect(payload.rootIdentity.ok).toBe(false)
     expect(payload.nextSteps.join('\n')).toContain('GET / คืน identity payload')
   })
 

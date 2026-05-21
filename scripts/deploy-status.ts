@@ -50,7 +50,7 @@ type DeployStatusFailurePayload = {
   failures: string[]
   nextSteps: string[]
   rootIdentity: {
-    ok: boolean | undefined
+    ok: boolean
     service?: string
   }
 }
@@ -178,7 +178,7 @@ function buildDeployStatusFailurePayload({
     failures: [error],
     nextSteps,
     rootIdentity: {
-      ok: rootIdentity?.ok,
+      ok: rootIdentity?.ok ?? false,
       service: rootIdentity?.service,
     },
   }
