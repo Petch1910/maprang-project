@@ -265,6 +265,34 @@ describe('creator AI draft', () => {
     }
   })
 
+  test('keeps broken model JSON warnings Thai-first without raw parser text', async () => {
+    const previousKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    delete process.env.IMAGE_GENERATION_API_KEY
+    delete process.env.OPENAI_API_KEY
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'ตัวละครทดสอบ JSON จากโมเดลพัง',
+        },
+        completionWith('{"name":"BROKEN"'),
+      )
+
+      const warningText = result.warnings.join('\n')
+      expect(result.source).toBe('fallback')
+      expect(warningText).toContain('โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์')
+      expect(warningText).not.toContain('Unexpected')
+      expect(warningText).not.toContain('SyntaxError')
+    } finally {
+      restoreOpenRouterKey(previousKey)
+      restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+      restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+    }
+  })
+
   test('uses GPT Image request shape when image provider is configured', async () => {
     const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
     const previousImageKey = process.env.IMAGE_GENERATION_API_KEY

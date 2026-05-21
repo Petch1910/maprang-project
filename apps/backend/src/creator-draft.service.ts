@@ -229,7 +229,11 @@ function extractJsonObject(value: string) {
 function parseJsonObject(value: string) {
   const unfenced = stripCodeFence(value)
   const raw = extractJsonObject(unfenced) || unfenced
-  return JSON.parse(raw) as Partial<CreatorDraftFields>
+  try {
+    return JSON.parse(raw) as Partial<CreatorDraftFields>
+  } catch {
+    throw new SyntaxError('โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์')
+  }
 }
 
 function providerStatus(error: unknown) {
