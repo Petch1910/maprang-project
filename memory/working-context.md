@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: API smoke เพิ่ม helper ตรวจ `error` response ให้เป็น machine-readable snake_case ก่อน assert รายละเอียด error แล้ว เพื่อให้ smoke validation/admin checks จับ raw message, ข้อความไทย, hyphen/camelCase, หรือ exception text ที่หลุดมาใน field `error` ได้ทันที; `predeploy:check` ล็อก regression test และการเรียก helper ไว้แล้ว และ `bun run qa:repo` ผ่านเต็มหลังเปลี่ยนชุดนี้.
 - 2026-05-21: backend security audit ปิด false negative ของ route catch ที่มี `AuthError` branch แล้วตามด้วย generic `message: error.message`; ตอนนี้ตรวจทีละตำแหน่งใน catch block แทน regex ก้อนเดียว และ `predeploy:check` ล็อก helper/test ใหม่ไว้แล้ว.
 - 2026-05-21: backend security audit ขยาย raw route catch message guard ให้จับ `message: String(error)` และ ternary `error instanceof Error ? error.message : String(error)` ด้วย เพื่อไม่ให้ generic catch ส่งรายละเอียด error ดิบกลับผู้ใช้.
 - 2026-05-21: `bun run qa:repo` ผ่านเต็มหลัง route catch message hardening ชุดล่าสุด จึงยืนยัน static/unit/build/audit/eval ฝั่ง repo-owned ยังเขียวทั้งหมด; runtime smoke ยังขึ้นกับ Docker/backend/staging ตาม blocker เดิม.

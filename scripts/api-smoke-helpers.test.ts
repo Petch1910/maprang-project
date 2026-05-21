@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
+import { assertMachineReadableErrorCode, creatorImageIssue, isMachineReadableErrorCode, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
 import { buildApiSmokeSummary, formatApiSmokeStatus, runApiSmoke, type ApiSmokeResult } from './api-smoke'
 
 const root = join(import.meta.dir, '..')
@@ -92,6 +92,20 @@ describe('api smoke helpers', () => {
         'CORS_ORIGINS is empty, local, or non-https',
       ]),
     ).toBe(false)
+  })
+
+  test('validates machine-readable API smoke error codes', () => {
+    expect(isMachineReadableErrorCode('invalid_chat_id')).toBe(true)
+    expect(isMachineReadableErrorCode('unknown_error')).toBe(true)
+    expect(isMachineReadableErrorCode('invalid-chat-id')).toBe(false)
+    expect(isMachineReadableErrorCode('InvalidChatId')).toBe(false)
+    expect(isMachineReadableErrorCode('รหัสแชทไม่ถูกต้อง')).toBe(false)
+    expect(isMachineReadableErrorCode('Cannot read properties of undefined')).toBe(false)
+    expect(isMachineReadableErrorCode(`x${'a'.repeat(80)}`)).toBe(false)
+
+    expect(() => assertMachineReadableErrorCode({ error: 'invalid_chat_id' }, 'DELETE /chats/:id')).not.toThrow()
+    expect(() => assertMachineReadableErrorCode({ error: 'รหัสแชทไม่ถูกต้อง' }, 'DELETE /chats/:id')).toThrow('machine-readable')
+    expect(() => assertMachineReadableErrorCode({ message: 'no code' }, 'DELETE /chats/:id')).toThrow('machine-readable')
   })
 
   test('builds image provider issues with actionable hints', () => {

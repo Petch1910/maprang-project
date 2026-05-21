@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
+import { assertMachineReadableErrorCode, creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
 import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
 import { apiBaseUrl, readJson, smokeAuthHeaders, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 
@@ -939,9 +939,12 @@ async function readExpectedError(path: string, init: RequestInit) {
 
   if (response.ok) throw new Error(`${path} สำเร็จทั้งที่ควรเป็น error`)
 
+  const payload = parsed as { error?: string; message?: string }
+  assertMachineReadableErrorCode(payload, `${path} error ที่คาดไว้`)
+
   return {
     status: response.status,
-    payload: parsed as { error?: string; message?: string },
+    payload,
   }
 }
 

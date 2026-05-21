@@ -1,5 +1,18 @@
 import { providerFailureHint } from './image-smoke'
 
+const machineReadableErrorCodePattern = /^[a-z][a-z0-9_]{0,79}$/
+
+export function isMachineReadableErrorCode(value: unknown) {
+  return typeof value === 'string' && machineReadableErrorCodePattern.test(value)
+}
+
+export function assertMachineReadableErrorCode(payload: { error?: unknown }, label = 'error ที่คาดไว้') {
+  if (!isMachineReadableErrorCode(payload.error)) {
+    const received = typeof payload.error === 'string' ? payload.error.slice(0, 120) : typeof payload.error
+    throw new Error(`${label} ต้องคืน error code แบบ machine-readable snake_case แต่ได้ ${received || 'ไม่มีค่า'}`)
+  }
+}
+
 export function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {
   const warnings = payload.warnings?.filter(Boolean).join('; ')
   const issue = warnings || payload.image?.note || 'ผู้ให้บริการสร้างรูปไม่ได้คืนรูปที่สร้างเสร็จแล้ว'

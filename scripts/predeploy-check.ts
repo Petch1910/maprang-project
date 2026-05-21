@@ -1229,12 +1229,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-smoke-helpers.test.ts'),
-        ['allows live smoke to continue only for live verification readiness failures', 'imports the API smoke runner without executing the smoke flow', 'builds API smoke summary counts for automation'],
+        ['allows live smoke to continue only for live verification readiness failures', 'validates machine-readable API smoke error codes', 'imports the API smoke runner without executing the smoke flow', 'builds API smoke summary counts for automation'],
         'scripts/api-smoke-helpers.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/api-smoke.ts'),
-        ['GET /', 'validateBackendRootIdentity', 'ApiSmokeRunnerOptions', 'buildApiSmokeSummary', 'runApiSmoke', 'if (import.meta.main) process.exit(await runApiSmoke())'],
+        ['GET /', 'validateBackendRootIdentity', 'assertMachineReadableErrorCode(payload', 'ApiSmokeRunnerOptions', 'buildApiSmokeSummary', 'runApiSmoke', 'if (import.meta.main) process.exit(await runApiSmoke())'],
         'scripts/api-smoke.ts',
       )
       requireIncludes(
