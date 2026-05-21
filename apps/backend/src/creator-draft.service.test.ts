@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { ChatCompletion } from 'openai/resources/chat/completions'
@@ -229,6 +230,60 @@ describe('creator AI draft', () => {
     expect(result.source).toBe('ai')
     expect(result.draft.name).toBe('มิน | MIN')
     expect(result.warnings).toEqual([])
+  })
+
+  test('redacts text-model retry classifier input before matching transient hints', async () => {
+    const source = readFileSync(new URL('./creator-draft.service.ts', import.meta.url), 'utf8')
+    const previousKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    const leakedProviderKey = ['sk', 'proj', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+    const leakedDatabaseUrl = ['postgresql://maprang:', 'retry-secret', '@db.example.com:5432/maprang?sslmode=require'].join('')
+    let attempts = 0
+
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    delete process.env.IMAGE_GENERATION_API_KEY
+    delete process.env.OPENAI_API_KEY
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'retry redaction character',
+        },
+        async () => {
+          attempts += 1
+          if (attempts === 1) throw new Error(`fetch failed ${leakedProviderKey} ${leakedDatabaseUrl}`)
+          return (await completionWith(
+            JSON.stringify({
+              name: 'RETRY',
+              tagline: 'retry smoke',
+              description: 'A retry redaction smoke-test character.',
+              biography: 'Created for text-model retry classification tests.',
+              scenario: 'A quiet room.',
+              systemPrompt: 'You are RETRY. Stay in character.',
+              compactPrompt: 'RETRY: smoke test.',
+              characterAnchor: 'Calm and observant.',
+              constraints: 'Do not write for the player.',
+              greeting: 'Hello.',
+              tags: 'roleplay, thai, slow-burn',
+            }),
+          )()) as ChatCompletion
+        },
+      )
+
+      expect(source).toContain('function creatorDraftRetryMessage')
+      expect(source).toContain('return redactSensitiveText(message).text.toLowerCase()')
+      expect(source).not.toContain('error.message.toLowerCase() : String(error).toLowerCase()')
+      expect(attempts).toBe(2)
+      expect(result.source).toBe('ai')
+      expect(result.warnings.join('\n')).not.toContain(leakedProviderKey)
+      expect(result.warnings.join('\n')).not.toContain(leakedDatabaseUrl)
+      expect(result.warnings.join('\n')).not.toContain('retry-secret')
+    } finally {
+      restoreOpenRouterKey(previousKey)
+      restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+      restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+    }
   })
 
   test('redacts secret-shaped text model failures before returning creator warnings', async () => {

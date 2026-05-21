@@ -245,13 +245,18 @@ function providerStatus(error: unknown) {
   return null
 }
 
+function creatorDraftRetryMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error)
+  return redactSensitiveText(message).text.toLowerCase()
+}
+
 function isRetryableCreatorDraftError(error: unknown) {
   const status = providerStatus(error)
   if (status && [408, 409, 425, 429, 500, 502, 503, 504].includes(status)) return true
 
   if (error instanceof SyntaxError) return true
 
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase()
+  const message = creatorDraftRetryMessage(error)
   return [
     'fetch failed',
     'network',
