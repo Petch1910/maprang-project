@@ -1197,13 +1197,33 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/backend-db-check.test.ts'),
-        ['DB availability before requiring DB-backed backend tests', 'REQUIRE_DB_TESTS', 'runs the DB check command plan through an importable runner'],
+        [
+          'DB availability before requiring DB-backed backend tests',
+          'REQUIRE_DB_TESTS',
+          'runs the DB check command plan through an importable runner',
+          'formats object-shaped required DB check diagnostics without stringifying raw objects',
+        ],
         'scripts/backend-db-check.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/backend-db-check.ts'),
         ['runBackendDbCheck', 'BackendDbCommandRunner', 'if (import.meta.main) process.exit(await runBackendDbCheck())'],
         'scripts/backend-db-check.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/backend/src/db.required-check.ts'),
+        ['redactUnknownDiagnosticText', 'summarizeDatabaseError'],
+        'apps/backend/src/db.required-check.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/backend/src/db.test-gate.test.ts'),
+        ['formats object-shaped DB-test skip diagnostics without stringifying raw objects'],
+        'apps/backend/src/db.test-gate.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/backend/src/health.service.test.ts'),
+        ['formats object-shaped database health diagnostics without stringifying raw objects'],
+        'apps/backend/src/health.service.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/supabase-storage-setup.test.ts'),

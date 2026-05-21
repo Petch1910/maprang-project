@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Backend DB/health diagnostics ใช้ `redactUnknownDiagnosticText` กับ non-Error/object-shaped failures แล้ว ทั้ง required DB check, DB-test gate skip reason, และ health database summary จึงไม่ stringify object ดิบก่อน redact.
 - 2026-05-21: Structured knowledge diagnostics ใช้ backend helper `redactUnknownDiagnosticText` แล้ว ทำให้ object-shaped knowledge load/parse errors ถูก redact โดยไม่ stringify object ดิบก่อนแสดง health/runtime diagnostics.
 - 2026-05-21: E2E smoke diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ object-shaped Playwright/restore errors ถูก redact โดยไม่ stringify object ดิบก่อนเขียน QA log.
 - 2026-05-21: Supabase Storage setup/fetch diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ object-shaped setup/network errors ถูก redact โดยไม่ stringify object ดิบก่อนเขียน CLI failure.

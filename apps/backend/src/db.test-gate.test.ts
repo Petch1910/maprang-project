@@ -45,4 +45,18 @@ describe('database test gate', () => {
     expect(message).not.toContain('super-secret')
     expect(message).not.toContain(fakeDatabaseUrl)
   })
+
+  test('formats object-shaped DB-test skip diagnostics without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = summarizeDbGateError({
+      message: `connect failed for DATABASE_URL=${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('ไม่ควร stringify raw object')
+      },
+    })
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
+  })
 })

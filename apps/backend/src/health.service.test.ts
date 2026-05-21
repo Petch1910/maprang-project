@@ -132,6 +132,20 @@ describe('readiness gate', () => {
     expect(message).not.toContain(fakeDatabaseUrl)
   })
 
+  test('formats object-shaped database health diagnostics without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = summarizeDatabaseError({
+      message: `connect failed for DATABASE_URL=${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('ไม่ควร stringify raw object')
+      },
+    })
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
+  })
+
   test('accepts a complete production health status', () => {
     expect(readinessFailures(health())).toEqual([])
   })

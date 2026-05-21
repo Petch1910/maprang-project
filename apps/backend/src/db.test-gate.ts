@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import { redactSensitiveText } from './redaction'
+import { redactSensitiveText, redactUnknownDiagnosticText } from './redaction'
 
 type DbGateOptions = {
   silent?: boolean
@@ -10,7 +10,7 @@ function redactDbGateDiagnostic(value: string, maxLength = 500) {
 }
 
 export function summarizeDbGateError(error: unknown) {
-  if (!(error instanceof Error)) return redactDbGateDiagnostic(String(error))
+  if (!(error instanceof Error)) return redactUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 
   const errorWithCode = error as Error & { code?: unknown }
   const code = typeof errorWithCode.code === 'string' ? ` (${redactDbGateDiagnostic(errorWithCode.code, 120)})` : ''

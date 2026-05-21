@@ -23,7 +23,7 @@ import {
 } from './config'
 import { validateRuntimeEnv } from './env'
 import { structuredKnowledgeHealth } from './knowledge.service'
-import { redactSensitiveText } from './redaction'
+import { redactSensitiveText, redactUnknownDiagnosticText } from './redaction'
 import { supabaseSignedUrlExpiresInSeconds, supabaseStorageAccess } from './storage.service'
 
 function redactDatabaseDiagnostic(value: string, maxLength = 500) {
@@ -31,7 +31,7 @@ function redactDatabaseDiagnostic(value: string, maxLength = 500) {
 }
 
 export function summarizeDatabaseError(error: unknown) {
-  if (!(error instanceof Error)) return redactDatabaseDiagnostic(String(error)) || 'ข้อผิดพลาดฐานข้อมูลไม่ทราบสาเหตุ'
+  if (!(error instanceof Error)) return redactUnknownDiagnosticText(error, 500) || 'ข้อผิดพลาดฐานข้อมูลไม่ทราบสาเหตุ'
 
   const errorWithCode = error as Error & { code?: unknown }
   const code = typeof errorWithCode.code === 'string' ? redactDatabaseDiagnostic(errorWithCode.code, 120) : ''

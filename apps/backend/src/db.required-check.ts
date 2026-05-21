@@ -1,13 +1,13 @@
 import 'dotenv/config'
 import { getPrisma } from './db'
-import { redactSensitiveText } from './redaction'
+import { redactSensitiveText, redactUnknownDiagnosticText } from './redaction'
 
 function redactDbDiagnostic(value: string, maxLength = 500) {
   return redactSensitiveText(value).text.slice(0, maxLength) || 'ไม่ทราบสาเหตุ'
 }
 
 export function summarizeDatabaseError(error: unknown) {
-  if (!(error instanceof Error)) return redactDbDiagnostic(String(error))
+  if (!(error instanceof Error)) return redactUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 
   const errorWithCode = error as Error & { code?: unknown }
   const code = typeof errorWithCode.code === 'string' ? ` (${redactDbDiagnostic(errorWithCode.code, 120)})` : ''

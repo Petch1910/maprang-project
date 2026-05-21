@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 backend DB/health object-shaped diagnostic pass: `bun test scripts\backend-db-check.test.ts apps\backend\src\db.test-gate.test.ts apps\backend\src\health.service.test.ts` ผ่าน 19 tests / 49 expects, `bun run backend:check` ผ่าน 170 tests / 578 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 78 expects, และ `bun run predeploy:check` ผ่านหลัง DB/health diagnostics ใช้ `redactUnknownDiagnosticText`.
 - 2026-05-21 structured knowledge object-shaped diagnostic pass: `bun test apps\backend\src\knowledge.service.test.ts` ผ่าน 5 tests / 16 expects, `bun run backend:check` ผ่าน 168 tests / 572 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 75 expects, และ `bun run predeploy:check` ผ่านหลัง `formatKnowledgeError` ใช้ `redactUnknownDiagnosticText`.
 - 2026-05-21 e2e smoke object-shaped diagnostic pass: `bun run e2e:smoke:test` ผ่าน 7 tests / 11 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 73 expects, และ `bun run predeploy:check` ผ่านหลัง `formatE2eSmokeError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 Supabase Storage setup object-shaped diagnostic pass: `bun run supabase:storage:test` ผ่าน 10 tests / 42 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 72 expects, และ `bun run predeploy:check` ผ่านหลัง `formatSupabaseStorageSetupError`/fetch failure path ใช้ `formatUnknownDiagnosticText`.
