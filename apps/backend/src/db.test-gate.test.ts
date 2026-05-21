@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import { createDbTestGate } from './db.test-gate'
+import { createDbTestGate, summarizeDbGateError } from './db.test-gate'
 
 const originalEnv = { ...process.env }
 
@@ -31,5 +31,18 @@ describe('database test gate', () => {
     const shouldRun = createDbTestGate(null, 'optional persistence suite')
 
     expect(await shouldRun({ silent: true })).toBe(false)
+  })
+
+  test('redacts secret-shaped values from DB-test skip diagnostics', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const error = new Error(`connect failed for DATABASE_URL=${fakeDatabaseUrl}`)
+    error.name = 'PrismaClientKnownRequestError'
+    ;(error as Error & { code: string }).code = 'P1001'
+
+    const message = summarizeDbGateError(error)
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
   })
 })

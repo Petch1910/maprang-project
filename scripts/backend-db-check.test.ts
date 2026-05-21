@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
+import { summarizeDatabaseError } from '../apps/backend/src/db.required-check'
 import { backendDbCheckSteps, runBackendDbCheck, type BackendDbCheckStep } from './backend-db-check'
 
 describe('backend db check command plan', () => {
@@ -56,5 +57,18 @@ describe('backend db check command plan', () => {
     expect(source).not.toContain('วิธีแก้ deploy')
     expect(source).not.toContain('network access')
     expect(source).not.toContain('backend service')
+  })
+
+  test('redacts secret-shaped values from required DB check diagnostics', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const error = new Error(`connect failed for DATABASE_URL=${fakeDatabaseUrl}`)
+    error.name = 'PrismaClientKnownRequestError'
+    ;(error as Error & { code: string }).code = 'P1001'
+
+    const message = summarizeDatabaseError(error)
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
   })
 })

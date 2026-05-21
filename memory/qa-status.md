@@ -4,6 +4,8 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 full repo QA pass after database diagnostic redaction: `bun run qa:repo` ผ่านครบหลังเพิ่ม DB diagnostic redaction โดยรวม backend 164 tests / 528 expects, import-cycle audit 127 source files / 304 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
+- 2026-05-21 database diagnostic redaction pass: `bun test scripts\backend-db-check.test.ts` ผ่าน 5 tests / 22 expects, `bun test apps\backend\src\db.test-gate.test.ts apps\backend\src\health.service.test.ts` ผ่าน 11 tests / 18 expects, `bun run backend:check:db:test` ผ่าน 5 tests / 22 expects, และ `bun run backend:check` ผ่าน 164 tests / 528 expects หลังเพิ่ม redaction ให้ required DB check, DB-test gate, และ health database summary.
 - 2026-05-21 full repo QA pass after structured knowledge diagnostic redaction: `bun run qa:repo` ผ่านครบหลังเพิ่ม `formatKnowledgeError` โดยรวม backend 162 tests / 522 expects, import-cycle audit 127 source files / 301 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
 - 2026-05-21 structured knowledge diagnostic redaction pass: `bun test apps\backend\src\knowledge.service.test.ts` ผ่าน 4 tests / 13 expects หลังเพิ่ม `formatKnowledgeError` ให้ runtime knowledge diagnostics.
 - 2026-05-21 predeploy check diagnostic redaction pass: `bun run predeploy:check:test` ผ่าน 3 tests / 51 expects และ `bun run predeploy:check` ผ่าน หลังเพิ่ม `formatPredeployCheckError`.

@@ -119,6 +119,19 @@ describe('readiness gate', () => {
     )
   })
 
+  test('redacts secret-shaped values from database health diagnostics', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const error = new Error(`connect failed for DATABASE_URL=${fakeDatabaseUrl}`)
+    error.name = 'PrismaClientKnownRequestError'
+    ;(error as Error & { code: string }).code = 'P1001'
+
+    const message = summarizeDatabaseError(error)
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
+  })
+
   test('accepts a complete production health status', () => {
     expect(readinessFailures(health())).toEqual([])
   })

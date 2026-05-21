@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Database diagnostics เพิ่ม redaction ให้ `db.required-check`, DB-test gate skip reason, และ backend `/health` database error summary ไม่สะท้อน secret-shaped value จาก Prisma/provider error; focused tests และ `backend:check` ครอบ regression แล้ว.
 - 2026-05-21: Structured knowledge diagnostics เพิ่ม `formatKnowledgeError` ให้ health/runtime knowledge status redact secret-shaped value ก่อนบันทึก error จากการอ่านโฟลเดอร์หรือ parse knowledge JSON; `knowledge.service.test.ts` ครอบ regression แล้ว.
 - 2026-05-21: Predeploy check diagnostics เพิ่ม `formatPredeployCheckError` ให้ check failure ที่ throw error ถูก redact ด้วย `formatDiagnosticText` ก่อนพิมพ์ผล gate; `predeploy:check:test` และ `predeploy:check` ครอบ regression แล้ว.
 - 2026-05-21: Deploy env doctor diagnostics เพิ่ม `formatDeployEnvDoctorError` ให้ env file read failure redact secret-shaped value ก่อนเข้า findings/output แล้ว; `deploy:doctor:test` ครอบ helper regression แล้ว.

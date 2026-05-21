@@ -1,22 +1,28 @@
 import type { PrismaClient } from '@prisma/client'
+import { redactSensitiveText } from './redaction'
 
 type DbGateOptions = {
   silent?: boolean
 }
 
-function summarizeDbGateError(error: unknown) {
-  if (!(error instanceof Error)) return String(error)
+function redactDbGateDiagnostic(value: string, maxLength = 500) {
+  return redactSensitiveText(value).text.slice(0, maxLength) || 'ไม่ทราบสาเหตุ'
+}
+
+export function summarizeDbGateError(error: unknown) {
+  if (!(error instanceof Error)) return redactDbGateDiagnostic(String(error))
 
   const errorWithCode = error as Error & { code?: unknown }
-  const code = typeof errorWithCode.code === 'string' ? ` (${errorWithCode.code})` : ''
+  const code = typeof errorWithCode.code === 'string' ? ` (${redactDbGateDiagnostic(errorWithCode.code, 120)})` : ''
+  const redactedMessage = redactDbGateDiagnostic(error.message, 1000)
   const usefulLine =
-    error.message
+    redactedMessage
       .split('\n')
       .map((line) => line.trim())
       .find((line) => line && !/^Invalid\b.*prisma.*invocation/i.test(line)) ?? error.name
 
   const detail = usefulLine && usefulLine !== error.name ? usefulLine : 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ'
-  return `${error.name}${code}: ${detail}`
+  return redactDbGateDiagnostic(`${error.name}${code}: ${detail}`)
 }
 
 export function createDbTestGate(prisma: PrismaClient | null, suiteName: string) {

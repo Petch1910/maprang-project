@@ -23,22 +23,28 @@ import {
 } from './config'
 import { validateRuntimeEnv } from './env'
 import { structuredKnowledgeHealth } from './knowledge.service'
+import { redactSensitiveText } from './redaction'
 import { supabaseSignedUrlExpiresInSeconds, supabaseStorageAccess } from './storage.service'
 
+function redactDatabaseDiagnostic(value: string, maxLength = 500) {
+  return redactSensitiveText(value).text.slice(0, maxLength) || 'ไม่ทราบสาเหตุ'
+}
+
 export function summarizeDatabaseError(error: unknown) {
-  if (!(error instanceof Error)) return 'ข้อผิดพลาดฐานข้อมูลไม่ทราบสาเหตุ'
+  if (!(error instanceof Error)) return redactDatabaseDiagnostic(String(error)) || 'ข้อผิดพลาดฐานข้อมูลไม่ทราบสาเหตุ'
 
   const errorWithCode = error as Error & { code?: unknown }
-  const code = typeof errorWithCode.code === 'string' ? errorWithCode.code : ''
+  const code = typeof errorWithCode.code === 'string' ? redactDatabaseDiagnostic(errorWithCode.code, 120) : ''
+  const redactedMessage = redactDatabaseDiagnostic(error.message, 1000)
   const firstUsefulLine =
-    error.message
+    redactedMessage
       .split('\n')
       .map((line) => line.trim())
       .find((line) => line && !/^Invalid\b.*prisma.*invocation/i.test(line)) ?? ''
   const detail = firstUsefulLine && firstUsefulLine !== error.name ? firstUsefulLine : 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ'
   const suffix = code ? ` (${code})` : ''
 
-  return `${error.name}${suffix}: ${detail}`
+  return redactDatabaseDiagnostic(`${error.name}${suffix}: ${detail}`)
 }
 
 function securityPosture({
