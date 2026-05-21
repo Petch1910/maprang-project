@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 local smoke object-shaped diagnostic pass: `bun run smoke:local:test` ผ่าน 8 tests / 32 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 67 expects, และ `bun run predeploy:check` ผ่านหลัง `formatLocalSmokeCaughtError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 smoke doctor object-shaped diagnostic pass: `bun run smoke:doctor:test` ผ่าน 10 tests / 50 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 66 expects, และ `bun run predeploy:check` ผ่านหลัง `formatSmokeDoctorCaughtError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 deploy status object-shaped diagnostic pass: `bun run deploy:status:test` ผ่าน 10 tests / 63 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 65 expects, และ `bun run predeploy:check` ผ่านหลัง `formatDeployStatusCaughtError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 API smoke object-shaped diagnostic pass: `bun run api:smoke:test` ผ่าน 11 tests / 96 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 64 expects, และ `bun run predeploy:check` ผ่านหลัง `formatApiSmokeCaughtError` ใช้ `formatUnknownDiagnosticText`.

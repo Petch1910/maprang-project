@@ -187,4 +187,19 @@ describe('local smoke helpers', () => {
     expect(errors.join('\n')).toContain('postgresql://[REDACTED_SECRET]')
     expect(errors.join('\n')).not.toContain('super-secret')
   })
+
+  test('formats object-shaped local smoke errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:local-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatLocalSmokeCaughtError({
+      message: `backend failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('local-object-secret')
+    expect(formatLocalSmokeCaughtError({ error: 'relationship preview failed' })).toBe('relationship preview failed')
+    expect(formatLocalSmokeCaughtError({ code: 'ECONNREFUSED' })).toBe('ไม่ทราบสาเหตุ')
+  })
 })

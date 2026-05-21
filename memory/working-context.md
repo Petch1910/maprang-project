@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Local smoke caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว เพื่อให้ local runtime smoke ไม่ stringify object-shaped errors ดิบก่อนเขียน failure summary.
 - 2026-05-21: Smoke doctor caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว เพื่อให้ root/health failure path ไม่ stringify object-shaped errors ดิบและยัง redact secret-shaped value ก่อนแสดงผล.
 - 2026-05-21: Deploy status caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทั้ง text/JSON failure path จึงรองรับ object-shaped errors โดยไม่ stringify object ดิบและยัง redact secret-shaped value.
 - 2026-05-21: API smoke caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ object-shaped smoke errors ถูก redact และไม่ถูก stringify ดิบก่อนประกอบผล smoke; predeploy ล็อก helper/test name ไว้แล้ว.

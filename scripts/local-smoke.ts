@@ -2,7 +2,7 @@ import { unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   apiBaseUrl,
-  formatDiagnosticText,
+  formatUnknownDiagnosticText,
   isLocalSmokeTarget,
   readJson,
   smokeAuthHeaders,
@@ -83,8 +83,7 @@ export async function cleanupLocalAvatarUpload(filename: string) {
 }
 
 export function formatLocalSmokeCaughtError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
