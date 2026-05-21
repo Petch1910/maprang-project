@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildSmokeDoctorReport, runSmokeDoctor } from './smoke-doctor'
+import { buildSmokeDoctorReport, formatSmokeDoctorCaughtError, runSmokeDoctor } from './smoke-doctor'
 import type { HealthPayload } from './deploy-readiness'
 
 function healthyPayload(overrides: Partial<HealthPayload> = {}): HealthPayload {
@@ -267,5 +267,35 @@ describe('smoke doctor report', () => {
     expect(lines.at(-1)).toBe('ผ่าน - ตรวจ smoke doctor ผ่านแล้ว')
     expect(warnings).toEqual([])
     expect(errors).toEqual([])
+  })
+
+  test('redacts secret-shaped values from smoke doctor caught errors', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const directMessage = formatSmokeDoctorCaughtError(new Error(`DATABASE_URL=${fakeDatabaseUrl}`))
+
+    expect(directMessage).toContain('[REDACTED_SECRET]')
+    expect(directMessage).not.toContain('super-secret')
+
+    const lines: string[] = []
+    const warnings: string[] = []
+    const errors: string[] = []
+    const exitCode = await runSmokeDoctor({
+      argv: ['bun', 'scripts/smoke-doctor.ts'],
+      apiBaseUrl: 'https://api.maprang.example',
+      isLocalSmokeTarget: false,
+      rootIdentityReader: async () => ({ ok: true, service: 'maprang-backend' }),
+      healthReader: async () => {
+        throw new Error(`health failed with DATABASE_URL=${fakeDatabaseUrl}`)
+      },
+      writeLine: (line) => lines.push(line),
+      writeWarning: (line) => warnings.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(warnings).toEqual([])
+    expect(errors.join('\n')).toContain('[REDACTED_SECRET]')
+    expect(errors.join('\n')).not.toContain('super-secret')
   })
 })

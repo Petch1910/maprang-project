@@ -1,5 +1,6 @@
 import {
   apiBaseUrl,
+  formatDiagnosticText,
   isLocalSmokeTarget,
   readJson,
   validateBackendRootIdentity,
@@ -149,6 +150,11 @@ export function buildSmokeDoctorReport(
   return { exitCode: 0, stdout, stderr, warnings }
 }
 
+export function formatSmokeDoctorCaughtError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunnerOptions = process.argv) {
   const options: SmokeDoctorRunnerOptions = Array.isArray(argvOrOptions) ? { argv: argvOrOptions } : argvOrOptions
   const argv = options.argv ?? process.argv
@@ -165,7 +171,7 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
   try {
     validateBackendRootIdentity(await rootIdentityReader())
   } catch (error) {
-    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
+    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${formatSmokeDoctorCaughtError(error)}`)
     writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
     writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า root ของระบบหลังบ้านที่ deploy แล้วไม่ใช่ proxy ของหน้าบ้าน/static')
     return 1
@@ -175,7 +181,7 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
   try {
     health = await healthReader()
   } catch (error) {
-    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${error instanceof Error ? error.message : String(error)}`)
+    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${formatSmokeDoctorCaughtError(error)}`)
     writeError('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่มระบบหลังบ้าน')
     writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่าระบบหลังบ้านที่ deploy แล้วเข้าถึงได้')
     return 1

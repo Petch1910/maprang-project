@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 smoke doctor diagnostic redaction pass: `bun run smoke:doctor:test` ผ่าน 9 tests / 46 expects หลังเพิ่ม `formatSmokeDoctorCaughtError` ให้ runner failure path.
 - 2026-05-21 deploy status diagnostic redaction pass: `bun run deploy:status:test` ผ่าน 9 tests / 59 expects หลังเพิ่ม `formatDeployStatusCaughtError` ให้ text/JSON failure paths.
 - 2026-05-21 readiness smoke runner diagnostic redaction pass: `bun run smoke:ready:test` ผ่าน 9 tests / 37 expects หลังเพิ่ม `formatReadinessSmokeCaughtError` ให้ runner failure path.
 - 2026-05-21 local smoke diagnostic redaction pass: `bun run smoke:local:test` ผ่าน 7 tests / 28 expects หลังเพิ่ม `formatLocalSmokeCaughtError` ให้ runner failure path.
