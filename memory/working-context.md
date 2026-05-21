@@ -6,6 +6,7 @@ Last updated: 2026-05-21
 
 - 2026-05-21: `/admin/evals/local` ไม่ส่ง raw `error.message` กลับใน `detail` แล้ว โดยเปลี่ยนเป็น `safeRouteErrorSummary(error)` และเพิ่ม backend security audit rule กันการคืน `detail: error.message`, `detail: String(error)`, หรือ ternary raw error message กลับมาอีก.
 - 2026-05-21: backend security audit เสริม rule กัน route `catch (error)` คืน `message: error.message` ตรงๆ ใน generic error path แล้ว แต่ยังอนุญาต `AuthError` เพราะข้อความถูกควบคุมโดยระบบ auth.
+- 2026-05-21: `bun run qa:repo` ผ่านเต็มหลัง route-error hardening ครอบคลุม security audit, backend/frontend checks, API route audit, route/menu audit, command-doc audit, evals, import-cycle, smoke helper tests, predeploy, และ bundle budget.
 - 2026-05-21: `docs:commands` ขยายจากเอกสาร Markdown ไปตรวจ GitHub Actions workflow ด้วย โดยเข้าใจ `working-directory`, job boundary, และ `cd apps/...` ใน run block เพื่อกัน CI/Production Smoke อ้าง `bun run ...` ผิด package.
 - 2026-05-21: `predeploy:check` ผ่านหลังเปลี่ยนชื่อ gate เป็น `คำสั่งในเอกสารและ workflow ต้องตรงกับ package scripts`; docs command audit ล่าสุดตรวจ 289 จุดอ้างอิง.
 - เพิ่ม `docs:commands` และ `docs:commands:test` เพื่อตรวจว่าเอกสารหลักอ้าง `bun run ...` ตรงกับ package context จริง ทั้ง root docs, app READMEs, release/deploy handoff, route/menu audit, และ staging/production runbooks.
