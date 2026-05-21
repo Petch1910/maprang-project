@@ -5,6 +5,7 @@ import contentReducer, { hydrateContent } from './slices/contentSlice'
 import draftsReducer, { hydrateDrafts } from './slices/draftsSlice'
 import eventsReducer from './slices/eventsSlice'
 import walletReducer from './slices/walletSlice'
+import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem } from '../lib/safeStorage'
 export type { RootState } from './types'
 
 type PersistedState = {
@@ -14,13 +15,13 @@ type PersistedState = {
 
 const persistedState = (() => {
   if (typeof window === 'undefined') return undefined
-  const raw = window.localStorage.getItem('maprang:redux:v1')
+  const raw = safeGetStorageItem(window.localStorage, 'maprang:redux:v1')
   if (!raw) return undefined
 
   try {
     return JSON.parse(raw) as PersistedState
   } catch {
-    window.localStorage.removeItem('maprang:redux:v1')
+    safeRemoveStorageItem(window.localStorage, 'maprang:redux:v1')
     return undefined
   }
 })()
@@ -42,7 +43,8 @@ if (typeof window !== 'undefined') {
 
   store.subscribe(() => {
     const state = store.getState()
-    window.localStorage.setItem(
+    safeSetStorageItem(
+      window.localStorage,
       'maprang:redux:v1',
       JSON.stringify({
         content: state.content,

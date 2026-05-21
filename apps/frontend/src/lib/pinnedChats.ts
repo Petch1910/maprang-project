@@ -1,18 +1,28 @@
+import { safeGetStorageItem, safeSetStorageItem } from './safeStorage'
+
 export const pinnedChatsStorageKey = 'maprang:pinned-chats:v1'
 
-export function loadPinnedChatIds() {
-  if (typeof window === 'undefined') return []
+export function loadPinnedChatIdsFromRaw(raw: string | null) {
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(pinnedChatsStorageKey) ?? '[]')
+    const parsed = JSON.parse(raw ?? '[]')
     return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : []
   } catch {
     return []
   }
 }
 
+export function serializePinnedChatIds(ids: string[]) {
+  return JSON.stringify(ids)
+}
+
+export function loadPinnedChatIds() {
+  if (typeof window === 'undefined') return []
+  return loadPinnedChatIdsFromRaw(safeGetStorageItem(window.localStorage, pinnedChatsStorageKey))
+}
+
 export function savePinnedChatIds(ids: string[]) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(pinnedChatsStorageKey, JSON.stringify(ids))
+  safeSetStorageItem(window.localStorage, pinnedChatsStorageKey, serializePinnedChatIds(ids))
 }
 
 export function togglePinnedChatId(ids: string[], id: string) {

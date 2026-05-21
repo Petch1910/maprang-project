@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Frontend persistence เพิ่ม `safeStorage` wrapper สำหรับ `localStorage` เพื่อกัน browser privacy/quota/storage-blocked error ทำให้ API auth, Redux persistence, Creator Draft auto-save, และ pinned chat ids ไม่ทำให้ UI crash เมื่อ storage อ่าน/เขียนไม่ได้; เพิ่ม `loadPinnedChatIdsFromRaw`/`serializePinnedChatIds` ให้ทดสอบ parser ได้ตรงและผูก `frontend:storage:test` เข้า `qa:repo` พร้อม predeploy guard แล้ว.
 - 2026-05-21: Frontend chat stream parser เพิ่ม `parseChatStreamEvent` และ safe stream-read wrapper เพื่อห่อ malformed SSE/JSON event หรือ stream interruption เป็น `ApiError` ภาษาไทย "สตรีมแชทขัดข้อง กรุณาลองใหม่" แทนการปล่อย `SyntaxError`/reader error ดิบขึ้น UI; regression test ครอบคลุม parser ตรง, event พังจาก network, และ reader ล้มกลางทางแล้ว.
 - 2026-05-21: Frontend `ApiError` เพิ่ม `safeApiUserMessage` เพื่อแสดงเฉพาะ backend `message` ที่เป็นข้อความไทยและไม่เข้าลักษณะ raw technical error; ถ้าเจอ `Cannot read`, `PrismaClient...`, `ECONNREFUSED`, `TypeError`, env/secret key names หรือข้อความ technical ที่ไม่มีภาษาไทย จะ fallback เป็นข้อความไทยกลางแทน และ predeploy guard ล็อก helper/test นี้ไว้แล้ว.
 - 2026-05-21: API smoke เพิ่ม helper ตรวจ `error` response ให้เป็น machine-readable snake_case ก่อน assert รายละเอียด error แล้ว เพื่อให้ smoke validation/admin checks จับ raw message, ข้อความไทย, hyphen/camelCase, หรือ exception text ที่หลุดมาใน field `error` ได้ทันที; `predeploy:check` ล็อก regression test และการเรียก helper ไว้แล้ว และ `bun run qa:repo` ผ่านเต็มหลังเปลี่ยนชุดนี้.

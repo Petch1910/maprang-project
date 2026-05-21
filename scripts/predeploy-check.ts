@@ -575,6 +575,7 @@ const checks: Check[] = [
           '"api:audit:test"',
           '"api:smoke:test"',
           '"frontend:api:test"',
+          '"frontend:storage:test"',
           '"frontend:bundle:test"',
           '"frontend:static:audit:test"',
           '"frontend:route:audit:test"',
@@ -676,6 +677,9 @@ const checks: Check[] = [
       }
       if (!qaLocalCoverage.includes('frontend:api:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:api:test เพื่อจับ regression ของ error API ฝั่ง frontend')
+      }
+      if (!qaLocalCoverage.includes('frontend:storage:test')) {
+        throw new Error('package.json qa:local ต้องรัน frontend:storage:test เพื่อจับ regression ของ localStorage ฝั่ง frontend')
       }
       if (!qaLocalCoverage.includes('frontend:bundle:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:bundle:test เพื่อจับ regression ของ bundle budget')
@@ -1256,6 +1260,21 @@ const checks: Check[] = [
         await readRepoFile('scripts/frontend-api-errors.test.ts'),
         ['does not surface raw technical backend messages even when message exists', 'wraps malformed chat stream events in a Thai ApiError', 'wraps interrupted chat stream reads in a Thai ApiError', 'safeApiUserMessage', 'parseChatStreamEvent', 'Cannot read properties of undefined'],
         'scripts/frontend-api-errors.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/frontend/src/lib/safeStorage.ts'),
+        ['safeGetStorageItem', 'safeSetStorageItem', 'safeRemoveStorageItem'],
+        'apps/frontend/src/lib/safeStorage.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-storage.test.ts'),
+        ['wraps localStorage reads, writes, and removals without throwing', 'parses pinned chat ids defensively'],
+        'scripts/frontend-storage.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/frontend/src/lib/pinnedChats.ts'),
+        ['loadPinnedChatIdsFromRaw', 'serializePinnedChatIds', 'safeSetStorageItem'],
+        'apps/frontend/src/lib/pinnedChats.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.test.ts'),

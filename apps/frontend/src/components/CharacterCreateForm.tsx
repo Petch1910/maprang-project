@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { generateCreatorAiDraft, uploadAvatar, fetchCreatorDraft, updateCreatorDraft, type CharacterInput, type CreatorAiDraftResponse } from '../lib/api'
 import { buildCharacterDraftFromImage, buildGeneratedAvatarDataUrl, mergeDraftTags } from '../lib/characterDraft'
+import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem } from '../lib/safeStorage'
 import { analyzeTags, normalizeTag, type TagAnalysis, type TagIssue } from '../lib/tagAnalysis'
 import { CreatorReadinessPanel } from './CreatorReadinessPanel'
 import { RelationshipPreviewPanel } from './RelationshipPreviewPanel'
@@ -89,7 +90,7 @@ type CreatorStoredDraft = {
 function loadStoredCreatorDraft(): CreatorStoredDraft | null {
   if (typeof window === 'undefined') return null
   try {
-    const raw = window.localStorage.getItem(creatorDraftStorageKey)
+    const raw = safeGetStorageItem(window.localStorage, creatorDraftStorageKey)
     if (!raw) return null
     const parsed = JSON.parse(raw) as CreatorStoredDraft
     if (!parsed || typeof parsed !== 'object') return null
@@ -101,7 +102,7 @@ function loadStoredCreatorDraft(): CreatorStoredDraft | null {
 
 function clearStoredCreatorDraft() {
   if (typeof window === 'undefined') return
-  window.localStorage.removeItem(creatorDraftStorageKey)
+  safeRemoveStorageItem(window.localStorage, creatorDraftStorageKey)
 }
 
 function mergeStoredForm(stored: CreatorStoredDraft | null) {
@@ -281,7 +282,7 @@ export function CharacterCreateForm({
             setGeneratedImages(dbDraft.generatedImages ?? [])
             setImageStyle(dbDraft.imageStyle ?? '')
             setNote('โหลดดราฟต์ล่าสุดจากระบบคลาวด์แล้ว คุณแก้ต่อได้ทันที')
-            window.localStorage.setItem(creatorDraftStorageKey, JSON.stringify(dbDraft))
+            safeSetStorageItem(window.localStorage, creatorDraftStorageKey, JSON.stringify(dbDraft))
           }
         }
       })
@@ -311,7 +312,7 @@ export function CharacterCreateForm({
       imageStyle,
       updatedAt: Date.now(),
     }
-    window.localStorage.setItem(creatorDraftStorageKey, JSON.stringify(payload))
+    safeSetStorageItem(window.localStorage, creatorDraftStorageKey, JSON.stringify(payload))
 
     const timeoutId = setTimeout(() => {
       updateCreatorDraft(payload).catch(() => {})

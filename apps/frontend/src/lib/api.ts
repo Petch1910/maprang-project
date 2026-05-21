@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './env'
+import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem } from './safeStorage'
 
 export { API_BASE_URL }
 
@@ -62,40 +63,40 @@ export function logUnexpectedError(label: string, error: unknown) {
 
 function localValue(key: string) {
   if (typeof window === 'undefined') return null
-  return window.localStorage.getItem(key)
+  return safeGetStorageItem(window.localStorage, key)
 }
 
 export function setApiUserId(userId: string) {
   if (typeof window === 'undefined') return
   if (!uuidPattern.test(userId)) return
-  window.localStorage.setItem('maprang:userId', userId)
+  safeSetStorageItem(window.localStorage, 'maprang:userId', userId)
 }
 
 export function setAdminApiKey(apiKey: string) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem('maprang:adminKey', apiKey)
+  safeSetStorageItem(window.localStorage, 'maprang:adminKey', apiKey)
 }
 
 export function clearAdminApiKey() {
   if (typeof window === 'undefined') return
-  window.localStorage.removeItem('maprang:adminKey')
+  safeRemoveStorageItem(window.localStorage, 'maprang:adminKey')
 }
 
 export function setAccessToken(accessToken: string) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem('maprang:accessToken', accessToken)
+  safeSetStorageItem(window.localStorage, 'maprang:accessToken', accessToken)
 }
 
 export function clearApiAuth() {
   if (typeof window === 'undefined') return
-  window.localStorage.removeItem('maprang:accessToken')
-  window.localStorage.removeItem('maprang:adminKey')
+  safeRemoveStorageItem(window.localStorage, 'maprang:accessToken')
+  safeRemoveStorageItem(window.localStorage, 'maprang:adminKey')
 }
 
 function authHeaders() {
   const storedUserId = localValue('maprang:userId')
   const userId = storedUserId && uuidPattern.test(storedUserId) ? storedUserId : DEFAULT_USER_ID
-  if (storedUserId && storedUserId !== userId) window.localStorage.removeItem('maprang:userId')
+  if (storedUserId && storedUserId !== userId) safeRemoveStorageItem(window.localStorage, 'maprang:userId')
   const adminKey = localValue('maprang:adminKey')
   const accessToken = localValue('maprang:accessToken')
   const shouldSendLocalUserId = import.meta.env.DEV || Boolean(adminKey)
