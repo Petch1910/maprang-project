@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 API smoke diagnostic redaction pass: `bun run api:smoke:test` ผ่าน 10 tests / 87 expects หลังเพิ่ม `formatApiSmokeDiagnostic` และ source guard กัน `raw.slice(0, 500)` ใน API smoke.
 - 2026-05-21 Supabase Storage diagnostic redaction pass: `bun run supabase:storage:test` ผ่าน 8 tests / 32 expects หลังผูก `formatDiagnosticText` กับ non-OK response body และ fetch failure ของ live storage operations.
 - 2026-05-21 full repo QA pass after readiness diagnostic redaction: `bun run qa:repo` ผ่านครบหลังเพิ่ม readiness diagnostic redaction โดยรวม backend 161 tests / 519 expects, security audit 24 tests / 40 expects, smoke helper 7 tests / 20 expects, readiness smoke 8 tests / 32 expects, import-cycle audit 127 source files / 295 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
 - 2026-05-21 readiness smoke diagnostic redaction pass: `bun test scripts\readiness-smoke.test.ts` และ `bun run smoke:ready:test` ผ่าน 8 tests / 32 expects หลังผูก `formatDiagnosticText` กับ `/ready` และ root identity diagnostics.

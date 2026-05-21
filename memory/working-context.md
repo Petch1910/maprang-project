@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: API smoke diagnostics เพิ่ม `formatApiSmokeDiagnostic` ให้ error path ของ stream, `/ready`, และ expected-error JSON ใช้ redaction ก่อน clip raw response body แล้ว; regression test ครอบ secret-shaped Postgres URL และ source guard กัน `raw.slice(0, 500)` กลับมาแล้ว.
 - 2026-05-21: Supabase Storage setup/check diagnostics ตอนนี้ใช้ `formatDiagnosticText` กับทั้ง non-OK response body และ fetch failure แล้ว ทำให้ `supabase:storage:check/setup` ไม่พ่น secret-shaped value จาก Supabase/proxy/network ลง log; `supabase:storage:test` ครอบ regression non-OK body และ network failure แล้ว.
 - 2026-05-21: Readiness smoke ใช้ `formatDiagnosticText` กับ fetch failure, non-JSON `/ready`, non-JSON root identity, และ root identity non-OK body แล้ว เพื่อไม่ให้ secret-shaped value จาก staging/proxy/backend หลุดใน deploy readiness logs; `smoke:ready:test` ครอบ regression แล้ว.
 - 2026-05-21: Shared smoke helper เพิ่ม `formatDiagnosticText` ที่ใช้ `redactSensitiveText` ก่อน clip diagnostics ทำให้ `readJson`, `formatPayload`, และ `formatFetchErrorReason` ไม่สะท้อน secret-shaped value จาก non-JSON response/proxy/fetch failure ลง smoke logs; `smoke:helpers:test` ครอบ regression แล้ว.

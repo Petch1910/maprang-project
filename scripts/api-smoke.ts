@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import {
   assertMachineReadableErrorCode,
   creatorImageIssue,
+  formatApiSmokeDiagnostic,
   isOnlyLiveVerificationFailure,
   parseApiSmokeStreamEvents,
   tryParseJson,
@@ -907,7 +908,7 @@ async function bestEffort(name: string, fn: () => Promise<unknown>) {
 async function readStreamEvents(path: string, init: RequestInit) {
   const response = await fetch(`${apiBaseUrl}${path}`, init)
   const raw = await response.text()
-  if (!response.ok) throw new Error(`${path} ไม่ผ่านด้วยสถานะ ${response.status}: ${raw.slice(0, 500)}`)
+  if (!response.ok) throw new Error(`${path} ไม่ผ่านด้วยสถานะ ${response.status}: ${formatApiSmokeDiagnostic(raw)}`)
   const contentType = response.headers.get('content-type') ?? ''
   if (!contentType.includes('text/event-stream')) throw new Error(`${path} ไม่คืน event stream: ${contentType}`)
 
@@ -919,7 +920,7 @@ async function readReadyPayload() {
   const raw = await response.text()
   const payload = raw ? tryParseJson(raw) : null
   if (!payload || typeof payload !== 'object') {
-    throw new Error(`/ready ไม่คืน JSON: ${raw.slice(0, 500) || 'response ว่าง'}`)
+    throw new Error(`/ready ไม่คืน JSON: ${formatApiSmokeDiagnostic(raw)}`)
   }
 
   return {
@@ -934,7 +935,7 @@ async function readExpectedError(path: string, init: RequestInit) {
   const raw = await response.text()
   const parsed = raw ? tryParseJson(raw) : null
   if (!parsed || typeof parsed !== 'object') {
-    throw new Error(`${path} ไม่คืน JSON ของ error ที่คาดไว้: ${raw.slice(0, 500) || 'response ว่าง'}`)
+    throw new Error(`${path} ไม่คืน JSON ของ error ที่คาดไว้: ${formatApiSmokeDiagnostic(raw)}`)
   }
 
   if (response.ok) throw new Error(`${path} สำเร็จทั้งที่ควรเป็น error`)

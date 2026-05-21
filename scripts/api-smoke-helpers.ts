@@ -1,4 +1,5 @@
 import { providerFailureHint } from './image-smoke'
+import { formatDiagnosticText } from './smoke-helpers'
 
 const machineReadableErrorCodePattern = /^[a-z][a-z0-9_]{0,79}$/
 
@@ -44,6 +45,10 @@ export function tryParseJson(value: string) {
   } catch {
     return null
   }
+}
+
+export function formatApiSmokeDiagnostic(value: string, maxLength = 500, emptyLabel = 'response ว่าง') {
+  return formatDiagnosticText(value, maxLength) || emptyLabel
 }
 
 export function parseApiSmokeStreamEvents<T = unknown>(raw: string, path = '/chat/stream') {
