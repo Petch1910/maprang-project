@@ -1077,7 +1077,12 @@ const checks: Check[] = [
       )
       requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false'], 'DEPLOYMENT_QA.md')
       requireIncludes(readme, ['bun run deploy:status', '`staging:verify` จะพิมพ์', 'stagingBlockerCount', 'rootIdentity.ok=false', 'สรุป blocker และ next steps'], 'README.md')
-      requireIncludes(stagingRunbook, ['bun run deploy:status', 'bun run staging:verify', 'bun run production:check'], 'STAGING_RUNBOOK.md')
+      requireIncludes(stagingRunbook, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', 'bun run staging:verify', 'bun run production:check'], 'STAGING_RUNBOOK.md')
+      requireIncludes(
+        await readRepoFile('memory/production/checklist.md'),
+        ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false'],
+        'memory/production/checklist.md',
+      )
     },
   },
   {
