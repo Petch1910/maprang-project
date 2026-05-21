@@ -18,6 +18,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('collectDocsCommandAuditResult')
     expect(predeploy).toContain('formatPredeployCheckError(error)')
     expect(predeploy).toContain('formatDiagnosticText(raw, 500)')
+    expect(predeploy).toContain('creatorDraftRetryMessage')
+    expect(predeploy).toContain('redacts text-model retry classifier input before matching transient hints')
     expect(predeploy).toContain('assertThaiFirstMarkdownHeadings')
     expect(predeploy).toContain('memory/decisions/0014-add-chat-provider-failure-classification.md')
     expect(predeploy).toContain('^#\\s+\\d{4}\\s+-\\s+')

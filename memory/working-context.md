@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Predeploy guard ล็อก Creator Draft retry classification redaction แล้ว โดย `predeploy:check` ตรวจ `creatorDraftRetryMessage`, source guard ห้าม raw lower-case error pattern เดิม และ regression test `redacts text-model retry classifier input before matching transient hints`.
 - 2026-05-21: Creator Draft retry classification ใช้ข้อความ text-model error ที่ผ่าน `redactSensitiveText` ก่อน match transient hints แล้ว ทำให้ provider key/DB URL ที่ติดมากับ error ไม่ค้างในเส้นทาง retry; `creator-draft.service.test.ts` ครอบทั้ง source guard และ retry สำเร็จหลัง error ที่มี secret-shaped value.
 - 2026-05-21: Chat provider classification ใช้ข้อความ provider ที่ผ่าน `redactSensitiveText` ก่อนจัดประเภท retry/credential/quota/timeout แล้ว เพื่อลดโอกาสที่ secret-shaped value จาก provider error จะค้างในเส้นทาง classification; `chat.runtime.test.ts` ครอบ regression หลายชนิด key/DB URL แล้ว.
 - 2026-05-21: Supabase Storage setup final catch diagnostics เพิ่ม `formatSupabaseStorageSetupError` ให้ runner redact secret-shaped value จาก operation error ก่อนเขียน CLI error; `supabase:storage:test` ครอบ regression final catch แล้ว.
