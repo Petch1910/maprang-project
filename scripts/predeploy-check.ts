@@ -576,6 +576,7 @@ const checks: Check[] = [
           '"api:smoke:test"',
           '"frontend:api:test"',
           '"frontend:storage:test"',
+          '"frontend:clipboard:test"',
           '"frontend:bundle:test"',
           '"frontend:static:audit:test"',
           '"frontend:route:audit:test"',
@@ -680,6 +681,9 @@ const checks: Check[] = [
       }
       if (!qaLocalCoverage.includes('frontend:storage:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:storage:test เพื่อจับ regression ของ localStorage ฝั่ง frontend')
+      }
+      if (!qaLocalCoverage.includes('frontend:clipboard:test')) {
+        throw new Error('package.json qa:local ต้องรัน frontend:clipboard:test เพื่อจับ regression ของ clipboard ฝั่ง frontend')
       }
       if (!qaLocalCoverage.includes('frontend:bundle:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:bundle:test เพื่อจับ regression ของ bundle budget')
@@ -1274,6 +1278,16 @@ const checks: Check[] = [
           'keeps frontend source on safe storage wrappers',
         ],
         'scripts/frontend-storage.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/frontend/src/lib/safeClipboard.ts'),
+        ['getSafeClipboard', 'safeWriteClipboardText'],
+        'apps/frontend/src/lib/safeClipboard.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-clipboard.test.ts'),
+        ['wraps clipboard writes without throwing', 'keeps frontend source on safe clipboard wrappers'],
+        'scripts/frontend-clipboard.test.ts',
       )
       requireIncludes(
         await readRepoFile('apps/frontend/src/lib/pinnedChats.ts'),

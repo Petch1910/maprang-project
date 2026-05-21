@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Frontend clipboard hardening เพิ่ม `safeClipboard` wrapper ให้ share character และ Prompt Inspector copy prompt ไม่ throw เมื่อ browser/insecure context ไม่อนุญาต clipboard; UI จะ fallback เป็นข้อความให้คัดลอกเอง และ `frontend:clipboard:test` scan กัน direct `navigator.clipboard`/`clipboard.writeText` กลับมาใน source.
 - 2026-05-21: Frontend storage hardening เก็บครบทุก callsite ที่เคยใช้ `localStorage.getItem/setItem/removeItem` ตรงใน `apps/frontend/src` แล้ว ทั้ง theme, admin key, persona saved-at, workspace admin check, wallet, Prompt Inspector, evals, moderation, และ dev user id; `frontend:storage:test` เพิ่ม source scan กัน direct localStorage call กลับมาในอนาคต.
 - 2026-05-21: Frontend persistence เพิ่ม `safeStorage` wrapper สำหรับ `localStorage` เพื่อกัน browser privacy/quota/storage-blocked error ทำให้ API auth, Redux persistence, Creator Draft auto-save, และ pinned chat ids ไม่ทำให้ UI crash เมื่อ storage อ่าน/เขียนไม่ได้; เพิ่ม `loadPinnedChatIdsFromRaw`/`serializePinnedChatIds` ให้ทดสอบ parser ได้ตรงและผูก `frontend:storage:test` เข้า `qa:repo` พร้อม predeploy guard แล้ว.
 - 2026-05-21: Frontend chat stream parser เพิ่ม `parseChatStreamEvent` และ safe stream-read wrapper เพื่อห่อ malformed SSE/JSON event หรือ stream interruption เป็น `ApiError` ภาษาไทย "สตรีมแชทขัดข้อง กรุณาลองใหม่" แทนการปล่อย `SyntaxError`/reader error ดิบขึ้น UI; regression test ครอบคลุม parser ตรง, event พังจาก network, และ reader ล้มกลางทางแล้ว.

@@ -22,6 +22,7 @@ import {
   type PromptInspectorResponse,
   type PromptInspectorSection,
 } from '../lib/api'
+import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
 import { safeGetStorageItem } from '../lib/safeStorage'
 
 const defaultMessage =
@@ -251,9 +252,9 @@ export function AdminPromptInspectorPage() {
   }
 
   async function copyPrompt() {
-    if (!result?.snapshot.prompt || typeof navigator === 'undefined' || !navigator.clipboard) return
-    await navigator.clipboard.writeText(result.snapshot.prompt)
-    setNote('คัดลอกพรอมป์ที่ปิดข้อมูลลับแล้ว')
+    if (!result?.snapshot.prompt) return
+    const copied = await safeWriteClipboardText(getSafeClipboard(), result.snapshot.prompt)
+    setNote(copied ? 'คัดลอกพรอมป์ที่ปิดข้อมูลลับแล้ว' : 'เบราว์เซอร์ไม่อนุญาตให้คัดลอกอัตโนมัติ ให้เลือกข้อความจากกล่องพรอมป์แทน')
   }
 
   return (

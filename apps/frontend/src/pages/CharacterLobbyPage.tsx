@@ -11,6 +11,7 @@ import {
 } from '../lib/api'
 import { displayCharacterDetail } from '../lib/characterDisplay'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
+import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/charactersSlice'
 import { saveContentSettings, selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
@@ -159,13 +160,8 @@ export function CharacterLobbyPage() {
   const shareCharacter = async () => {
     if (!character) return
     const url = `${window.location.origin}/characters/${character.id}`
-    try {
-      if (!navigator.clipboard) throw new Error('clipboard unavailable')
-      await navigator.clipboard.writeText(url)
-      setReportNote('คัดลอกลิงก์ตัวละครแล้ว')
-    } catch {
-      setReportNote(`คัดลอกลิงก์นี้: ${url}`)
-    }
+    const copied = await safeWriteClipboardText(getSafeClipboard(), url)
+    setReportNote(copied ? 'คัดลอกลิงก์ตัวละครแล้ว' : `คัดลอกลิงก์นี้: ${url}`)
   }
 
   return (

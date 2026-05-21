@@ -23,6 +23,7 @@ import type { Character, ChatMessage, ChatResponse, ChatRuntimeState, WorldState
 import { displayCharacterDetail, displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { characterStatusLabel, characterVisibilityLabel } from '../lib/characterLabels'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
+import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
 import { Composer } from './Composer'
 import { MessageBubble } from './MessageBubble'
 
@@ -380,10 +381,9 @@ function RightRail({
 
   const shareCharacter = () => {
     const url = `${window.location.origin}/characters/${character.id}`
-    showNotice('คัดลอกลิงก์ตัวละครแล้ว')
-    if (navigator.clipboard?.writeText) {
-      void navigator.clipboard.writeText(url).catch(() => undefined)
-    }
+    void safeWriteClipboardText(getSafeClipboard(), url).then((copied) => {
+      showNotice(copied ? 'คัดลอกลิงก์ตัวละครแล้ว' : `คัดลอกลิงก์นี้: ${url}`)
+    })
   }
 
   const saveWorldDraft = async () => {
