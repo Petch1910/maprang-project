@@ -1,6 +1,7 @@
 import {
   apiBaseUrl,
   formatDiagnosticText,
+  formatUnknownDiagnosticText,
   readJson,
   smokeAuthHeaders,
   validateBackendRootIdentity,
@@ -68,8 +69,7 @@ export function providerFailureIssue(failure: ProviderFailure) {
 }
 
 export function formatLiveChatSmokeCaughtError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[]) {

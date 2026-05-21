@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Live chat smoke caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ root/health/chat/wallet failure ที่เป็น object-shaped error ไม่ถูก stringify ดิบก่อนเขียนผล smoke.
 - 2026-05-21: Image smoke caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ provider/root/health failure ที่เป็น object-shaped error ไม่ถูก stringify ดิบก่อนเขียนผล live-image smoke.
 - 2026-05-21: Readiness smoke ใช้ `formatUnknownDiagnosticText` กับ runner caught errors และ fetch failure ของ `/ready`/root identity แล้ว ทำให้ object-shaped readiness errors ถูก redact โดยไม่ stringify object ดิบ.
 - 2026-05-21: Local smoke caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว เพื่อให้ local runtime smoke ไม่ stringify object-shaped errors ดิบก่อนเขียน failure summary.

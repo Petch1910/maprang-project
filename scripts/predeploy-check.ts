@@ -1549,6 +1549,7 @@ const checks: Check[] = [
         [
           'validates smoke token balance',
           'matches wallet debit',
+          'formats object-shaped live chat smoke errors without stringifying raw objects',
           'validates backend root identity before spending chat tokens',
           'runs live chat smoke through an importable runner',
         ],
@@ -1556,7 +1557,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/live-chat-smoke.ts'),
-        ['LiveChatSmokeRunnerOptions', 'validateBackendRootIdentity', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
+        ['LiveChatSmokeRunnerOptions', 'formatUnknownDiagnosticText', 'validateBackendRootIdentity', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
         'scripts/live-chat-smoke.ts',
       )
       requireIncludes(

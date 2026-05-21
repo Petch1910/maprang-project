@@ -219,6 +219,21 @@ describe('live chat smoke helpers', () => {
     expect(errors.join('\n')).not.toContain('super-secret')
   })
 
+  test('formats object-shaped live chat smoke errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:chat-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatLiveChatSmokeCaughtError({
+      message: `provider failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('chat-object-secret')
+    expect(formatLiveChatSmokeCaughtError({ error: 'wallet debit failed' })).toBe('wallet debit failed')
+    expect(formatLiveChatSmokeCaughtError({ code: 'ECONNREFUSED' })).toBe('ไม่ทราบสาเหตุ')
+  })
+
   test('returns a failure code without spending chat tokens when balance is too low', async () => {
     const lines: string[] = []
     const errors: string[] = []
