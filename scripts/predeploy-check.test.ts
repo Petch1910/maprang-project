@@ -17,7 +17,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('คำสั่งในเอกสารและ workflow ต้องตรงกับ package scripts')
     expect(predeploy).toContain('collectDocsCommandAuditResult')
     expect(predeploy).toContain('formatPredeployCheckError(error)')
-    expect(predeploy).toContain('formatDiagnosticText(raw, 500)')
+    expect(predeploy).toContain('formatUnknownDiagnosticText(error, 500)')
     expect(predeploy).toContain('formatUnknownDiagnosticText')
     expect(predeploy).toContain('formats unknown smoke diagnostics without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped API smoke errors without stringifying raw objects')
