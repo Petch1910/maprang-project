@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   ApiError,
   logUnexpectedError,
+  parseChatStreamEvent,
   safeBrowserErrorSummary,
   safeApiUserMessage,
   streamChatMessage,
@@ -100,6 +101,45 @@ describe('frontend API errors', () => {
         },
       },
     ])
+  })
+
+  test('wraps malformed chat stream events in a Thai ApiError', async () => {
+    expect(() => parseChatStreamEvent('not-json')).toThrow('สตรีมแชทขัดข้อง กรุณาลองใหม่')
+    expect(() => parseChatStreamEvent('{"content":"no type"}')).toThrow('สตรีมแชทขัดข้อง กรุณาลองใหม่')
+
+    const originalFetch = globalThis.fetch
+    const encoder = new TextEncoder()
+
+    try {
+      globalThis.fetch = (async () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode('data: not-json\n\n'))
+              controller.close()
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'text/event-stream' } },
+        )) as typeof fetch
+
+      await expect(
+        streamChatMessage(
+          {
+            message: 'ทดสอบสตรีม',
+            characterId: '550e8400-e29b-41d4-a716-446655440001',
+            chatId: null,
+            history: [],
+          },
+          () => {},
+        ),
+      ).rejects.toMatchObject({
+        name: 'ApiError',
+        status: 502,
+        message: 'สตรีมแชทขัดข้อง กรุณาลองใหม่',
+      })
+    } finally {
+      globalThis.fetch = originalFetch
+    }
   })
 
   test('summarizes browser errors before logging', () => {

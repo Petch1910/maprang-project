@@ -1249,12 +1249,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('apps/frontend/src/lib/api.ts'),
-        ['safeApiUserMessage', 'rawTechnicalMessagePattern', "safeApiUserMessage(payloadString(payload, 'message'))"],
+        ['safeApiUserMessage', 'rawTechnicalMessagePattern', "safeApiUserMessage(payloadString(payload, 'message'))", 'parseChatStreamEvent', 'chatStreamMalformedPayload'],
         'apps/frontend/src/lib/api.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-api-errors.test.ts'),
-        ['does not surface raw technical backend messages even when message exists', 'safeApiUserMessage', 'Cannot read properties of undefined'],
+        ['does not surface raw technical backend messages even when message exists', 'wraps malformed chat stream events in a Thai ApiError', 'safeApiUserMessage', 'parseChatStreamEvent', 'Cannot read properties of undefined'],
         'scripts/frontend-api-errors.test.ts',
       )
       requireIncludes(

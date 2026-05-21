@@ -307,6 +307,23 @@ export type ChatStreamEvent =
     }
   | { type: 'error'; message: string; chatId: string | null }
 
+const chatStreamMalformedPayload = { message: 'สตรีมแชทขัดข้อง กรุณาลองใหม่' }
+
+export function parseChatStreamEvent(raw: string) {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    throw new ApiError('/chat/stream', 502, chatStreamMalformedPayload)
+  }
+
+  if (!parsed || typeof parsed !== 'object' || typeof (parsed as { type?: unknown }).type !== 'string') {
+    throw new ApiError('/chat/stream', 502, chatStreamMalformedPayload)
+  }
+
+  return parsed as ChatStreamEvent
+}
+
 export type SavedChat = {
   id: string
   title: string | null
@@ -1120,7 +1137,7 @@ export async function streamChatMessage(
       .find((item) => item.startsWith('data: '))
 
     if (!line) return
-    onEvent(JSON.parse(line.slice(6)) as ChatStreamEvent)
+    onEvent(parseChatStreamEvent(line.slice(6)))
   }
 
   while (true) {
