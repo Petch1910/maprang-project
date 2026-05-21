@@ -48,11 +48,20 @@ const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
 const rawErrorCodePropertyPattern =
   /\berror\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
+const rawResponseJsonPattern = /\b[A-Za-z_$][\w$]*\.json\s*\(\s*\)/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
 const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
 const rawRouteCatchMessage = 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.'
 const rawRouteCatchErrorCode = 'route catch ห้ามคืน raw error ใน field error; ใช้ machine-readable code ที่ควบคุมได้.'
+const rawResponseJsonMessage = 'ห้าม parse response.json() ตรงใน runtime backend; ให้แยกเป็น read...Payload helper ที่ห่อ JSON พังเป็นข้อความไทยก่อน.'
+const allowedRawResponseJsonReaders = [
+  'readImageProviderJson',
+  'readSupabaseJwksPayload',
+  'readSupabaseSignedUrlPayload',
+  'readSupabaseUserPayload',
+  'readStorageJson',
+]
 
 const patterns = [
   {
@@ -119,6 +128,20 @@ function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number, 
   return messageIndex < findMatchingBrace(catchBlock, authBlockStart)
 }
 
+function isInsideAllowedRawResponseJsonReader(content: string, index: number) {
+  for (const functionName of allowedRawResponseJsonReaders) {
+    const functionPattern = new RegExp(`(?:export\\s+)?async\\s+function\\s+${functionName}\\s*\\(`, 'g')
+    for (const match of content.matchAll(functionPattern)) {
+      const openingBraceIndex = content.indexOf('{', match.index ?? 0)
+      if (openingBraceIndex < 0 || openingBraceIndex > index) continue
+      const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
+      if (index > openingBraceIndex && index < closingBraceIndex) return true
+    }
+  }
+
+  return false
+}
+
 function collectRawRouteCatchMessageFindings(file: string, content: string) {
   const findings: BackendSecurityFinding[] = []
   for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
@@ -161,6 +184,15 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
         message: item.message,
       })
     }
+  }
+
+  for (const match of content.matchAll(rawResponseJsonPattern)) {
+    if (isInsideAllowedRawResponseJsonReader(content, match.index ?? 0)) continue
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: rawResponseJsonMessage,
+    })
   }
 
   for (const match of content.matchAll(adminRoutePattern)) {

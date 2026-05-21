@@ -104,6 +104,28 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches raw response JSON parsing outside safe payload helpers', () => {
+    expect(
+      messagesFor(`
+        async function loadProviderResponse(response: Response) {
+          return (await response.json()) as { ok?: boolean }
+        }
+      `, 'apps/backend/src/provider.service.ts'),
+    ).toContain('ห้าม parse response.json() ตรงใน runtime backend; ให้แยกเป็น read...Payload helper ที่ห่อ JSON พังเป็นข้อความไทยก่อน.')
+
+    expect(
+      messagesFor(`
+        export async function readSupabaseUserPayload(response: Response) {
+          try {
+            return (await response.json()) as SupabaseUserResponse
+          } catch {
+            throw new Error(authErrorMessages.userMalformed)
+          }
+        }
+      `, 'apps/backend/src/security.ts'),
+    ).toEqual([])
+  })
+
   test('catches raw error message details in route responses', () => {
     const messages = messagesFor(
       `
