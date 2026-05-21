@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   buildLiveImageSmokePayload,
   buildSkippedImageSmokePayload,
+  formatImageSmokeCaughtError,
   imageGenerationIsConfigured,
   liveImageDraftFailure,
   runImageSmoke,
@@ -193,6 +194,33 @@ describe('image smoke helpers', () => {
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
     expect(errors.join('\n')).toContain('เพดานวงเงิน')
+  })
+
+  test('redacts secret-shaped values from image smoke caught errors', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    expect(formatImageSmokeCaughtError(new Error(`health failed ${fakeDatabaseUrl}`))).toContain(
+      'postgresql://[REDACTED_SECRET]',
+    )
+    expect(formatImageSmokeCaughtError(new Error(`health failed ${fakeDatabaseUrl}`))).not.toContain('super-secret')
+
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runImageSmoke({
+      argv: ['bun', 'image-smoke.ts', '--live'],
+      env: {},
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
+      readHealth: async () => health(),
+      readCreatorDraft: async () => {
+        throw new Error(`provider failed ${fakeDatabaseUrl}`)
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('postgresql://[REDACTED_SECRET]')
+    expect(errors.join('\n')).not.toContain('super-secret')
   })
 
   test('validates backend root identity before image provider checks', async () => {

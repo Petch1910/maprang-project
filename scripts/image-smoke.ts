@@ -1,4 +1,4 @@
-import { apiBaseUrl, readJson, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
+import { apiBaseUrl, formatDiagnosticText, readJson, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 
 export type ImageSmokeHealthPayload = {
   ok: boolean
@@ -124,6 +124,11 @@ export function buildLiveImageSmokePayload(
   }
 }
 
+export function formatImageSmokeCaughtError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
   const argv = options.argv ?? process.argv
   const env = options.env ?? process.env
@@ -138,7 +143,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
     validateBackendRootIdentity(await (options.readRootIdentity ?? (() => readJson<RootIdentityPayload>('/')))())
     health = await (options.readHealth ?? (() => readJson<ImageSmokeHealthPayload>('/health')))()
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatImageSmokeCaughtError(error)
     writeError(`ตรวจสร้างรูปไม่ผ่าน: ${message}`)
     return 1
   }
@@ -176,7 +181,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
           }),
         })))()
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatImageSmokeCaughtError(error)
     writeError(`ตรวจสร้างรูปจริงไม่ผ่าน: ${message}`)
     return 1
   }

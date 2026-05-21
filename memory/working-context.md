@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Image smoke catch diagnostics เพิ่ม `formatImageSmokeCaughtError` ให้ root/health preflight และ live creator draft failure redact secret-shaped value ก่อนเขียน CLI error; `smoke:image:test` ครอบ helper และ runner failure path แล้ว.
 - 2026-05-21: API smoke catch diagnostics ตอนนี้ใช้ `formatApiSmokeCaughtError` ใน `check`, `warnable`, `runRequired`, และ `bestEffort` แล้ว เพื่อไม่ให้ error object/string ที่มี secret-shaped value ถูกบันทึกเป็นผล smoke หรือ warning ตรงๆ; `api:smoke:test` ครอบ redaction และ source guard แล้ว.
 - 2026-05-21: API smoke diagnostics เพิ่ม `formatApiSmokeDiagnostic` ให้ error path ของ stream, `/ready`, และ expected-error JSON ใช้ redaction ก่อน clip raw response body แล้ว; regression test ครอบ secret-shaped Postgres URL และ source guard กัน `raw.slice(0, 500)` กลับมาแล้ว.
 - 2026-05-21: Supabase Storage setup/check diagnostics ตอนนี้ใช้ `formatDiagnosticText` กับทั้ง non-OK response body และ fetch failure แล้ว ทำให้ `supabase:storage:check/setup` ไม่พ่น secret-shaped value จาก Supabase/proxy/network ลง log; `supabase:storage:test` ครอบ regression non-OK body และ network failure แล้ว.
