@@ -76,6 +76,14 @@ const patterns = [
     pattern: /console\.error\(\s*error\s*\)/g,
     message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
   },
+  {
+    pattern: /\bdetail\s*:\s*error\s+instanceof\s+Error\s*\?\s*error\.message\b/g,
+    message: 'route response ห้ามส่ง raw error.message ใน detail; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
+  },
+  {
+    pattern: /\bdetail\s*:\s*(?:error\.message|String\(\s*error\s*\))/g,
+    message: 'route response ห้ามส่ง raw error detail ตรงๆ; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
+  },
 ]
 
 export function collectBackendSecurityFindingsFromSource(file: string, content: string): BackendSecurityFinding[] {

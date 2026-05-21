@@ -10,7 +10,7 @@ import {
   diffPromptSnapshots,
   type PromptInspectorRuntimeMemory,
 } from './prompt-inspector.service'
-import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
+import { rejectInvalidUuid, routeErrorResponse, safeRouteErrorSummary } from './route-guards'
 import { requireAdminApiKey, resolveRequestUserId } from './security'
 import { loadUserPersona } from './user.service'
 
@@ -136,7 +136,7 @@ export const adminRoutes = new Elysia()
       return {
         error: 'local_eval_unavailable',
         message: routeErrorResponse('local_eval_unavailable').message,
-        detail: error instanceof Error ? error.message : String(error),
+        detail: safeRouteErrorSummary(error),
       }
     }
   })
