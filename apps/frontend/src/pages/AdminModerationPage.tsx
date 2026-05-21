@@ -16,6 +16,7 @@ import {
   type ReportSummary,
   type ReportTargetType,
 } from '../lib/api'
+import { safeGetStorageItem } from '../lib/safeStorage'
 
 const statuses: Array<ReportStatus | ''> = ['', 'PENDING', 'REVIEWED', 'RESOLVED', 'REJECTED']
 const targetTypes: Array<ReportTargetType | ''> = ['', 'CHARACTER', 'MESSAGE']
@@ -113,10 +114,10 @@ export function AdminModerationPage() {
   const [updatingId, setUpdatingId] = useState('')
   const [auditLogs, setAuditLogs] = useState<AdminAuditLog[]>([])
   const [adminKeyInput, setAdminKeyInput] = useState(() =>
-    typeof window === 'undefined' ? '' : window.localStorage.getItem('maprang:adminKey') || '',
+    typeof window === 'undefined' ? '' : safeGetStorageItem(window.localStorage, 'maprang:adminKey') || '',
   )
   const [note, setNote] = useState(() =>
-    typeof window !== 'undefined' && window.localStorage.getItem('maprang:adminKey')
+    typeof window !== 'undefined' && safeGetStorageItem(window.localStorage, 'maprang:adminKey')
       ? 'กำลังโหลดคิวรายงาน...'
       : 'บันทึก ADMIN_API_KEY ก่อนเปิดคิวรายงาน',
   )
@@ -150,7 +151,7 @@ export function AdminModerationPage() {
   }, [normalizedSearch, reports])
 
   const loadReports = useCallback(async () => {
-    const storedAdminKey = typeof window === 'undefined' ? '' : window.localStorage.getItem('maprang:adminKey') || ''
+    const storedAdminKey = typeof window === 'undefined' ? '' : safeGetStorageItem(window.localStorage, 'maprang:adminKey') || ''
     if (!storedAdminKey.trim()) {
       setReports([])
       setAuditLogs([])

@@ -10,6 +10,7 @@ import {
   setAdminApiKey,
   type UsageSummary,
 } from '../lib/api'
+import { safeGetStorageItem } from '../lib/safeStorage'
 import { useAppDispatch } from '../store/hooks'
 import { setTokenBalance } from '../store/slices/walletSlice'
 
@@ -57,7 +58,7 @@ export function WalletPage() {
   const [isAdjusting, setIsAdjusting] = useState(false)
   const [adjustAmount, setAdjustAmount] = useState('1000')
   const [adminKeyInput, setAdminKeyInput] = useState(() =>
-    typeof window === 'undefined' ? '' : window.localStorage.getItem('maprang:adminKey') || '',
+    typeof window === 'undefined' ? '' : safeGetStorageItem(window.localStorage, 'maprang:adminKey') || '',
   )
   const [note, setNote] = useState('กำลังโหลดกระเป๋าโทเคน...')
 

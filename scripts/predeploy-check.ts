@@ -1268,7 +1268,11 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-storage.test.ts'),
-        ['wraps localStorage reads, writes, and removals without throwing', 'parses pinned chat ids defensively'],
+        [
+          'wraps localStorage reads, writes, and removals without throwing',
+          'parses pinned chat ids defensively',
+          'keeps frontend source on safe storage wrappers',
+        ],
         'scripts/frontend-storage.test.ts',
       )
       requireIncludes(

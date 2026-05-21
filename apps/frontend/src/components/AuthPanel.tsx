@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { DEFAULT_USER_ID, logUnexpectedError, setApiUserId } from '../lib/api'
 import { getAuthState, getSupabase, isSupabaseConfigured, syncApiAuthFromSession, type AuthState } from '../lib/auth'
+import { safeGetStorageItem } from '../lib/safeStorage'
 
 type AuthPanelProps = {
   onAuthChanged: () => Promise<void>
@@ -24,7 +25,9 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   const [authState, setAuthState] = useState<AuthState>({ isConfigured: false, session: null, user: null })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [devUserId, setDevUserId] = useState(() => localStorage.getItem('maprang:userId') || DEFAULT_USER_ID)
+  const [devUserId, setDevUserId] = useState(() =>
+    typeof window === 'undefined' ? DEFAULT_USER_ID : safeGetStorageItem(window.localStorage, 'maprang:userId') || DEFAULT_USER_ID,
+  )
   const [note, setNote] = useState('')
   const [isBusy, setIsBusy] = useState(false)
 

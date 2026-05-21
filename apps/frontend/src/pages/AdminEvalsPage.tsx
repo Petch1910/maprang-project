@@ -18,10 +18,11 @@ import {
   type EvalScenarioResult,
   type LocalEvalRun,
 } from '../lib/api'
+import { safeGetStorageItem } from '../lib/safeStorage'
 
 function getStoredAdminKey() {
   if (typeof window === 'undefined') return ''
-  return window.localStorage.getItem('maprang:adminKey') || ''
+  return safeGetStorageItem(window.localStorage, 'maprang:adminKey') || ''
 }
 
 function apiErrorMessage(error: unknown) {

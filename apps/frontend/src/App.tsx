@@ -21,6 +21,7 @@ import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chats
 import { loadContentSettings } from './store/slices/contentSlice'
 import { loadWalletSummary, selectTokenBalance, selectWalletLoading } from './store/slices/walletSlice'
 import { loadPersonaDraft } from './store/slices/draftsSlice'
+import { safeGetStorageItem, safeSetStorageItem } from './lib/safeStorage'
 
 const loadCreatorStudioPage = () => import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage }))
 const loadChatRoomPage = () => import('./pages/ChatRoomPage').then((module) => ({ default: module.ChatRoomPage }))
@@ -114,7 +115,7 @@ function NotFoundPage() {
 
 function initialDarkMode() {
   if (typeof window === 'undefined') return true
-  const stored = window.localStorage.getItem('maprang:theme:v2')
+  const stored = safeGetStorageItem(window.localStorage, 'maprang:theme:v2')
   if (stored === 'dark') return true
   if (stored === 'light') return false
   return true
@@ -142,7 +143,7 @@ function App() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    window.localStorage.setItem('maprang:theme:v2', isDarkMode ? 'dark' : 'light')
+    safeSetStorageItem(window.localStorage, 'maprang:theme:v2', isDarkMode ? 'dark' : 'light')
   }, [isDarkMode])
 
   const appRoutes = (

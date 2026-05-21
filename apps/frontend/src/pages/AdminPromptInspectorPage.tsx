@@ -22,6 +22,7 @@ import {
   type PromptInspectorResponse,
   type PromptInspectorSection,
 } from '../lib/api'
+import { safeGetStorageItem } from '../lib/safeStorage'
 
 const defaultMessage =
   'ช่วยตอบฉากนี้ให้มีรายละเอียดมากขึ้น คงบุคลิกเดิม ใช้บรรยากาศ ความรู้สึก และทิ้งจังหวะให้ผู้เล่นตอบต่อ'
@@ -31,7 +32,7 @@ const defaultRuntimeNote =
 
 function getStoredAdminKey() {
   if (typeof window === 'undefined') return ''
-  return window.localStorage.getItem('maprang:adminKey') || ''
+  return safeGetStorageItem(window.localStorage, 'maprang:adminKey') || ''
 }
 
 function apiErrorMessage(error: unknown) {

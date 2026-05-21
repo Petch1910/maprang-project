@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { saveContentSettings, selectContentSettings } from '../store/slices/contentSlice'
 import { savePersonaDraft, savePersonaDraftToCloud, selectPersonaDraft, selectPersonaUpdatedAt } from '../store/slices/draftsSlice'
 import { selectIsLowToken, selectTokenBalance } from '../store/slices/walletSlice'
+import { safeGetStorageItem, safeSetStorageItem } from '../lib/safeStorage'
 
 const personaTemplate = [
   'ชื่อ:',
@@ -39,7 +40,7 @@ const contentModes = [
 
 function initialSavedAt() {
   if (typeof window === 'undefined') return ''
-  return window.localStorage.getItem(personaSavedAtKey) ?? ''
+  return safeGetStorageItem(window.localStorage, personaSavedAtKey) ?? ''
 }
 
 function formatSavedAt(value: string) {
@@ -76,7 +77,7 @@ export function ProfilePage() {
   useEffect(() => {
     if (!personaUpdatedAt) return
     setSavedAt(personaUpdatedAt)
-    if (typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, personaUpdatedAt)
+    if (typeof window !== 'undefined') safeSetStorageItem(window.localStorage, personaSavedAtKey, personaUpdatedAt)
   }, [personaUpdatedAt])
 
   useEffect(
@@ -94,11 +95,11 @@ export function ProfilePage() {
         .unwrap()
         .then((saved) => {
           setPersonaNote('บันทึกตัวตนลงบัญชีแล้ว')
-          if (saved.updatedAt && typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, saved.updatedAt)
+          if (saved.updatedAt && typeof window !== 'undefined') safeSetStorageItem(window.localStorage, personaSavedAtKey, saved.updatedAt)
         })
         .catch(() => {
           setPersonaNote('บันทึกลงบัญชีไม่ได้ แต่ดราฟต์ในเครื่องยังอยู่')
-          if (typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, savedAtValue)
+          if (typeof window !== 'undefined') safeSetStorageItem(window.localStorage, personaSavedAtKey, savedAtValue)
         })
     }, 700)
   }
@@ -107,7 +108,7 @@ export function ProfilePage() {
     const nextSavedAt = new Date().toISOString()
     dispatch(savePersonaDraft(value))
     setSavedAt(nextSavedAt)
-    if (typeof window !== 'undefined') window.localStorage.setItem(personaSavedAtKey, nextSavedAt)
+    if (typeof window !== 'undefined') safeSetStorageItem(window.localStorage, personaSavedAtKey, nextSavedAt)
     schedulePersonaCloudSave(value, nextSavedAt)
   }
 

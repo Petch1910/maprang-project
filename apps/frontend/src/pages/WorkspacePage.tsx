@@ -45,6 +45,7 @@ import {
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
+import { safeGetStorageItem } from '../lib/safeStorage'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { isPlayableChatSummary } from '../store/slices/chatsSlice'
 import { selectContentSettings } from '../store/slices/contentSlice'
@@ -77,7 +78,7 @@ function logUnexpectedWorkspaceError(label: string, error: unknown) {
 }
 
 function hasStoredAdminKey() {
-  return typeof window !== 'undefined' && Boolean(window.localStorage.getItem('maprang:adminKey')?.trim())
+  return typeof window !== 'undefined' && Boolean(safeGetStorageItem(window.localStorage, 'maprang:adminKey')?.trim())
 }
 
 function shouldUseNonStreamingFallback(error: unknown) {
