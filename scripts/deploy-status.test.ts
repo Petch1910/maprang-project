@@ -262,4 +262,19 @@ describe('deploy status formatting', () => {
     expect(payload.error).toContain('[REDACTED_SECRET]')
     expect(payload.error).not.toContain('super-secret')
   })
+
+  test('formats object-shaped deploy status errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:deploy-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatDeployStatusCaughtError({
+      message: `health failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('deploy-object-secret')
+    expect(formatDeployStatusCaughtError({ error: 'root identity failed' })).toBe('root identity failed')
+    expect(formatDeployStatusCaughtError({ code: 'ECONNREFUSED' })).toBe('ไม่ทราบสาเหตุ')
+  })
 })

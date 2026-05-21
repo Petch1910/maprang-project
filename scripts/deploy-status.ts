@@ -1,6 +1,6 @@
 import {
   apiBaseUrl,
-  formatDiagnosticText,
+  formatUnknownDiagnosticText,
   isLocalSmokeTarget,
   readJson,
   validateBackendRootIdentity,
@@ -145,8 +145,7 @@ export function formatDeployStatusText(
 }
 
 export function formatDeployStatusCaughtError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 export async function runDeployStatus(options: DeployStatusRunnerOptions | string[] = {}) {

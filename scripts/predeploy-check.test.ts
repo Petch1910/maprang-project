@@ -21,6 +21,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('formatUnknownDiagnosticText')
     expect(predeploy).toContain('formats unknown smoke diagnostics without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped API smoke errors without stringifying raw objects')
+    expect(predeploy).toContain('formats object-shaped deploy status errors without stringifying raw objects')
     expect(predeploy).toContain('safeErrorTextForClassification')
     expect(predeploy).toContain('frontendErrorSecretPatterns')
     expect(predeploy).toContain('reports raw auth error classifier regressions')
