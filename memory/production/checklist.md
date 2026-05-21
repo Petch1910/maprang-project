@@ -1,6 +1,6 @@
 # เช็กลิสต์ production
 
-อัปเดตล่าสุด: 2026-05-20
+อัปเดตล่าสุด: 2026-05-21
 
 ## ก่อนขึ้น production
 
@@ -21,6 +21,7 @@
 - กรอก `RELEASE_HANDOFF.md` หลัง `production:check` ผ่าน โดยไม่ใส่ secrets หรือ private database URLs.
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 - ใช้ `/admin/health` ไล่ทำ next action ของแต่ละ blocker ก่อนรัน final gate ซ้ำ.
+- ยืนยัน repo-owned gate ล่าสุดด้วย `bun run qa:repo` หลัง security hardening ก่อนเริ่ม staging/live-provider รอบถัดไป.
 
 ## คำสั่ง (Commands)
 

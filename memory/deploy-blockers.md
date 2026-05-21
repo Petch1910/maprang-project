@@ -1,6 +1,6 @@
 # ตัวกั้นก่อน deploy
 
-อัปเดตล่าสุด: 2026-05-20
+อัปเดตล่าสุด: 2026-05-21
 
 ## ตัวกั้นที่ยังเปิดอยู่
 
@@ -52,6 +52,7 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
+- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` หลังเพิ่ม route-error hardening; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
 - backend test suite ฝั่ง local ผ่านแล้ว: 157 pass, 0 fail, 506 expect calls.
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว
