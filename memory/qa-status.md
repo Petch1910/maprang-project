@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 full repo QA pass after object-shaped diagnostics hardening: `bun run qa:repo` ผ่านครบหลังชุด Supabase/e2e/knowledge/DB/health/predeploy/chat provider unknown diagnostic hardening โดยรวม backend 171 tests / 580 expects, API route audit 48 routes, route/menu audit 14 surfaces, import-cycle audit 128 source files / 307 import edges, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
 - 2026-05-21 chat provider object-shaped classifier pass: `bun test apps\backend\src\chat.runtime.test.ts` ผ่าน 17 tests / 98 expects, `bun run backend:check` ผ่าน 171 tests / 580 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 79 expects, และ `bun run predeploy:check` ผ่านหลัง provider classifier ไม่ stringify object-shaped provider failures.
 - 2026-05-21 predeploy runner object-shaped diagnostic pass: `bun run predeploy:check:test` ผ่าน 3 tests / 78 expects และ `bun run predeploy:check` ผ่านหลัง `formatPredeployCheckError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 backend DB/health object-shaped diagnostic pass: `bun test scripts\backend-db-check.test.ts apps\backend\src\db.test-gate.test.ts apps\backend\src\health.service.test.ts` ผ่าน 19 tests / 49 expects, `bun run backend:check` ผ่าน 170 tests / 578 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 78 expects, และ `bun run predeploy:check` ผ่านหลัง DB/health diagnostics ใช้ `redactUnknownDiagnosticText`.
