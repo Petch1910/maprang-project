@@ -49,12 +49,14 @@ const rawErrorMessagePropertyPattern =
 const rawErrorCodePropertyPattern =
   /\berror\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
 const rawResponseJsonPattern = /\b[A-Za-z_$][\w$]*\.json\s*\(\s*\)/g
+const rawResponseTextPattern = /\b[A-Za-z_$][\w$]*\.text\s*\(\s*\)/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
 const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
 const rawRouteCatchMessage = 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.'
 const rawRouteCatchErrorCode = 'route catch ห้ามคืน raw error ใน field error; ใช้ machine-readable code ที่ควบคุมได้.'
 const rawResponseJsonMessage = 'ห้าม parse response.json() ตรงใน runtime backend; ให้แยกเป็น read...Payload helper ที่ห่อ JSON พังเป็นข้อความไทยก่อน.'
+const rawResponseTextMessage = 'ห้ามอ่าน response.text() จาก provider/Supabase แล้วใช้ตรงใน runtime backend; ต้องผ่าน redactSensitiveText ก่อนนำไป log หรือคืนเป็น diagnostic.'
 const allowedRawResponseJsonReaders = [
   'readImageProviderJson',
   'readSupabaseJwksPayload',
@@ -115,6 +117,38 @@ function findMatchingBrace(content: string, openingBraceIndex: number) {
   return content.length
 }
 
+function findMatchingParen(content: string, openingParenIndex: number) {
+  let depth = 0
+  let inString: string | null = null
+  let escaped = false
+
+  for (let index = openingParenIndex; index < content.length; index += 1) {
+    const char = content[index]
+
+    if (inString) {
+      if (escaped) {
+        escaped = false
+      } else if (char === '\\') {
+        escaped = true
+      } else if (char === inString) {
+        inString = null
+      }
+      continue
+    }
+
+    if (char === '"' || char === "'" || char === '`') {
+      inString = char
+    } else if (char === '(') {
+      depth += 1
+    } else if (char === ')') {
+      depth -= 1
+      if (depth === 0) return index
+    }
+  }
+
+  return content.length
+}
+
 function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number, messageSource: string) {
   if (!/\bmessage\s*:\s*error\.message\b/.test(messageSource)) return false
 
@@ -137,6 +171,17 @@ function isInsideAllowedRawResponseJsonReader(content: string, index: number) {
       const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
       if (index > openingBraceIndex && index < closingBraceIndex) return true
     }
+  }
+
+  return false
+}
+
+function isInsideRedactedTextCall(content: string, index: number) {
+  for (const match of content.matchAll(/\bredactSensitiveText\s*\(/g)) {
+    const openingParenIndex = content.indexOf('(', match.index ?? 0)
+    if (openingParenIndex < 0 || openingParenIndex > index) continue
+    const closingParenIndex = findMatchingParen(content, openingParenIndex)
+    if (index > openingParenIndex && index < closingParenIndex) return true
   }
 
   return false
@@ -192,6 +237,15 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
       file,
       line: lineFor(content, match.index ?? 0),
       message: rawResponseJsonMessage,
+    })
+  }
+
+  for (const match of content.matchAll(rawResponseTextPattern)) {
+    if (isInsideRedactedTextCall(content, match.index ?? 0)) continue
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: rawResponseTextMessage,
     })
   }
 

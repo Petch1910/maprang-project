@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Backend security audit เพิ่ม guard กัน runtime backend อ่าน `response.text()` จาก provider/Supabase แล้วนำไปใช้เป็น diagnostic โดยไม่ผ่าน `redactSensitiveText`; regression test ครอบทั้งเคสจับผิด, เคส redacted inline, และเคส redacted หลายบรรทัดแล้ว.
 - 2026-05-21: Security checklist ระบุ policy ใหม่ให้ backend/frontend ห้าม parse `response.json()` ตรงนอก safe JSON helper เพื่อให้ provider/Supabase/API JSON ที่พังถูกห่อเป็นข้อความไทยก่อนถึง log หรือ UI.
 - 2026-05-21: Deploy blockers current summary refresh ปรับ `memory/deploy-blockers.md` ส่วนที่ไม่ใช่ blocker ให้ตรงกับ gate ล่าสุดหลัง response JSON parsing guards โดยยังคง production blockers จริงเป็น staging/live-provider/environment เหมือนเดิม.
 - 2026-05-21: Agent handoff refresh ปรับ `agent.md` current status ให้ตรงกับ gate ล่าสุดหลังเพิ่ม frontend/backend response JSON parsing guards โดยระบุ backend 161 tests / 519 expects และ `qa:repo` รอบล่าสุดที่ผ่านแล้ว.

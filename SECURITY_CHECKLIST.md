@@ -25,6 +25,7 @@
 - Static guard: `bun run security:audit` fails if any backend `/admin` route block is missing `requireAdminApiKey`.
 - Backend route ต้องไม่ `throw error` หรือ log raw error object กลับไปตรงๆ; ให้คืน `routeErrorResponse`/ข้อความที่ควบคุมได้และใช้ safe summary ใน log
 - Backend runtime ต้องไม่ parse `response.json()` จาก provider/Supabase ตรงๆ นอก safe payload helper; external JSON ที่พังต้องถูกห่อเป็นข้อความไทยก่อนเสมอ
+- Backend runtime ต้องไม่นำ `response.text()` จาก provider/Supabase ไป log หรือคืนเป็น diagnostic ตรงๆ; ข้อความดิบจาก external response ต้องผ่าน `redactSensitiveText` ก่อนเสมอ
 - Guard อัตโนมัติ: `backend-security-audit.test.ts`, `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
 
 ## ความปลอดภัย frontend XSS และลิงก์ (Frontend XSS / Link Safety)

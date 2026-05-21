@@ -4,6 +4,8 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 full repo QA pass after response text redaction guard: `bun run qa:repo` ผ่านครบหลังเพิ่ม backend response text redaction guard โดยรวม backend 161 tests / 519 expects, security audit 24 tests / 40 expects, import-cycle audit 127 source files / 294 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
+- 2026-05-21 backend response text redaction guard pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 24 tests / 40 expects หลังเพิ่ม rule จับ raw `response.text()` diagnostic ที่ไม่ผ่าน `redactSensitiveText`; `bun run security:audit` ผ่านกับ source ปัจจุบัน.
 - 2026-05-21 security checklist response JSON policy pass: `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังเพิ่ม backend/frontend safe JSON parsing policy ลง `SECURITY_CHECKLIST.md`.
 - 2026-05-21 deploy blockers summary refresh pass: `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังปรับ current blocker summary ให้ตรงกับ backend 161 tests / 519 expects และ response JSON parsing guards.
 - 2026-05-21 agent handoff refresh pass: `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, และ `git diff --check` ผ่านหลังปรับ `agent.md` current status ให้ตรงกับ backend 161 tests / 519 expects และ response JSON parsing guard ล่าสุด.

@@ -126,6 +126,37 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches raw response text diagnostics without redaction', () => {
+    expect(
+      messagesFor(`
+        async function loadProviderFailure(response: Response) {
+          const detail = await response.text()
+          throw new Error(detail)
+        }
+      `, 'apps/backend/src/provider.service.ts'),
+    ).toContain('ห้ามอ่าน response.text() จาก provider/Supabase แล้วใช้ตรงใน runtime backend; ต้องผ่าน redactSensitiveText ก่อนนำไป log หรือคืนเป็น diagnostic.')
+
+    expect(
+      messagesFor(`
+        async function loadProviderFailure(response: Response) {
+          const detail = redactSensitiveText(await response.text().catch(() => '')).text
+          throw new Error(detail)
+        }
+      `, 'apps/backend/src/provider.service.ts'),
+    ).toEqual([])
+
+    expect(
+      messagesFor(`
+        async function loadProviderFailure(response: Response) {
+          const detail = redactSensitiveText(
+            await response.text(),
+          ).text
+          throw new Error(detail)
+        }
+      `, 'apps/backend/src/provider.service.ts'),
+    ).toEqual([])
+  })
+
   test('catches raw error message details in route responses', () => {
     const messages = messagesFor(
       `
