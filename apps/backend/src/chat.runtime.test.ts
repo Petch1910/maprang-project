@@ -301,6 +301,50 @@ describe('chat provider retry guard', () => {
     expect(quotaFailure.retryable).toBe(false)
   })
 
+  test('redacts secret-shaped provider details before classification output', () => {
+    const fakeOpenRouterKey = ['sk', 'or-v1', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+    const fakeProjectKey = ['sk', 'proj', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const cases = [
+      {
+        input: { status: 401, message: `invalid api key ${fakeOpenRouterKey}` },
+        code: 'invalid_credentials',
+        retryable: false,
+      },
+      {
+        input: { status: 402, message: `quota exhausted DATABASE_URL=${fakeDatabaseUrl}` },
+        code: 'quota_exhausted',
+        retryable: false,
+      },
+      {
+        input: { status: 429, message: `rate limit ${fakeProjectKey}` },
+        code: 'rate_limited',
+        retryable: true,
+      },
+      {
+        input: new Error(`fetch failed ${fakeDatabaseUrl}`),
+        code: 'provider_unavailable',
+        retryable: true,
+      },
+      {
+        input: `unexpected provider failure ${fakeOpenRouterKey} ${fakeDatabaseUrl}`,
+        code: 'unknown',
+        retryable: false,
+      },
+    ] as const
+
+    for (const item of cases) {
+      const failure = classifyChatProviderError(item.input)
+
+      expect(failure.code).toBe(item.code)
+      expect(failure.retryable).toBe(item.retryable)
+      expect(failure.userMessage).not.toContain(fakeOpenRouterKey)
+      expect(failure.userMessage).not.toContain(fakeProjectKey)
+      expect(failure.userMessage).not.toContain(fakeDatabaseUrl)
+      expect(failure.userMessage).not.toContain('super-secret')
+    }
+  })
+
   test('does not log raw stream provider errors after classification', () => {
     const source = readFileSync(new URL('./chat.service.ts', import.meta.url), 'utf8')
 

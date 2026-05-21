@@ -4,6 +4,8 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 full repo QA pass after chat provider classification redaction: `bun run qa:repo` ผ่านครบหลังเปลี่ยน chat provider classification ให้ redact ก่อนจัดประเภท โดยรวม backend 165 tests / 558 expects, import-cycle audit 127 source files / 305 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
+- 2026-05-21 chat provider classification redaction pass: `bun test apps\backend\src\chat.runtime.test.ts` ผ่าน 16 tests / 96 expects และ `bun run backend:check` ผ่าน 165 tests / 558 expects หลังเปลี่ยน provider error classification ให้ใช้ข้อความที่ redact แล้วก่อนจัดประเภท.
 - 2026-05-21 full repo QA pass after Supabase Storage final-catch redaction: `bun run qa:repo` ผ่านครบหลังเพิ่ม final-catch redaction โดยรวม backend 164 tests / 528 expects, import-cycle audit 127 source files / 304 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
 - 2026-05-21 Supabase Storage final-catch diagnostic redaction pass: `bun run supabase:storage:test` ผ่าน 9 tests / 37 expects หลังเพิ่ม `formatSupabaseStorageSetupError` ให้ runner catch path.
 - 2026-05-21 full repo QA pass after database diagnostic redaction: `bun run qa:repo` ผ่านครบหลังเพิ่ม DB diagnostic redaction โดยรวม backend 164 tests / 528 expects, import-cycle audit 127 source files / 304 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.

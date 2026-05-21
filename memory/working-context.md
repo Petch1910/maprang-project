@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Chat provider classification ใช้ข้อความ provider ที่ผ่าน `redactSensitiveText` ก่อนจัดประเภท retry/credential/quota/timeout แล้ว เพื่อลดโอกาสที่ secret-shaped value จาก provider error จะค้างในเส้นทาง classification; `chat.runtime.test.ts` ครอบ regression หลายชนิด key/DB URL แล้ว.
 - 2026-05-21: Supabase Storage setup final catch diagnostics เพิ่ม `formatSupabaseStorageSetupError` ให้ runner redact secret-shaped value จาก operation error ก่อนเขียน CLI error; `supabase:storage:test` ครอบ regression final catch แล้ว.
 - 2026-05-21: Database diagnostics เพิ่ม redaction ให้ `db.required-check`, DB-test gate skip reason, และ backend `/health` database error summary ไม่สะท้อน secret-shaped value จาก Prisma/provider error; focused tests และ `backend:check` ครอบ regression แล้ว.
 - 2026-05-21: Structured knowledge diagnostics เพิ่ม `formatKnowledgeError` ให้ health/runtime knowledge status redact secret-shaped value ก่อนบันทึก error จากการอ่านโฟลเดอร์หรือ parse knowledge JSON; `knowledge.service.test.ts` ครอบ regression แล้ว.

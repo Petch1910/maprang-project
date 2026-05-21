@@ -28,6 +28,7 @@ import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentR
 import { buildContextPrompt, loadRelevantLore, promptControlPolicy } from './context.service'
 import { getPrisma } from './db'
 import { estimatePromptTokens } from './prompt-inspector.service'
+import { redactSensitiveText } from './redaction'
 import { isUuid } from './security'
 import {
   applyRelationshipDelta,
@@ -279,9 +280,13 @@ function providerMessage(error: unknown) {
   return String(error)
 }
 
+function providerClassificationMessage(error: unknown) {
+  return redactSensitiveText(providerMessage(error)).text.toLowerCase()
+}
+
 export function classifyChatProviderError(error: unknown): ChatProviderFailure {
   const status = providerStatus(error)
-  const message = providerMessage(error).toLowerCase()
+  const message = providerClassificationMessage(error)
 
   if (
     status === 401 ||
@@ -359,7 +364,7 @@ export function isTransientChatProviderError(error: unknown) {
   const status = providerStatus(error)
   if (status && [408, 409, 425, 429, 500, 502, 503, 504].includes(status)) return true
 
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase()
+  const message = providerClassificationMessage(error)
   return [
     'fetch failed',
     'network',
