@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21 moderation disabled-reason pass: `bun run frontend:check`, `bun run route-menu:audit`, and `bun run route-menu:audit:test` passed after adding `title`/`aria-disabled` reasons to `/moderation` refresh and report action buttons; Browser QA at `http://127.0.0.1:5173/moderation?disabledReasonQa=1` confirmed the disabled refresh button shows `บันทึก ADMIN_API_KEY ก่อนรีเฟรช`, no disabled button is missing a reason, and no browser console errors were logged.
 - 2026-05-21 full deterministic repo QA pass after chat stream timeout/source guard: `bun run qa:repo` passed with backend 173 tests / 601 expects, API route audit 48 routes, route/menu audit 14 surfaces, import-cycle audit 128 source files / 307 import edges, local eval 3 scenarios, frontend static/route audit, TypeScript, Vite build, and bundle budget still under limits (main 269.1KB/350KB, chat 228.5KB/260KB). DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-21 frontend API timeout source-guard pass: `bun run frontend:api:test` passed 15 tests / 45 expects after adding a source-level regression that verifies all three frontend `fetch` call sites keep timeout/signal wiring through `apiRequestTimeoutMs`, `apiUploadTimeoutMs`, and `apiStreamConnectTimeoutMs`.
 

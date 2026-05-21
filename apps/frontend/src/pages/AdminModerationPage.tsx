@@ -345,10 +345,11 @@ export function AdminModerationPage() {
               ))}
             </select>
             <button type="button"
+              aria-disabled={isLoading || !hasAdminKey}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-900/10 bg-white px-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
               disabled={isLoading || !hasAdminKey}
               onClick={loadReports}
-              title={hasAdminKey ? 'โหลดคิวรายงานใหม่' : 'บันทึก ADMIN_API_KEY ก่อนรีเฟรช'}
+              title={isLoading ? 'กำลังโหลดคิวรายงาน' : hasAdminKey ? 'โหลดคิวรายงานใหม่' : 'บันทึก ADMIN_API_KEY ก่อนรีเฟรช'}
             >
               <RefreshCw size={16} />
               รีเฟรช
@@ -396,6 +397,22 @@ export function AdminModerationPage() {
         ) : (
           visibleReports.map((report) => {
             const targetPath = reportTargetPath(report)
+            const isUpdatingReport = updatingId === report.id
+            const isResolvedReport = report.status === 'RESOLVED'
+            const isMessageArchived = Boolean(report.message?.deletedAt)
+            const hideCharacterReason = isUpdatingReport
+              ? 'กำลังซ่อนตัวละครรายงานนี้'
+              : isResolvedReport
+                ? 'รายงานนี้จัดการแล้ว'
+                : ''
+            const archiveMessageReason = isUpdatingReport
+              ? 'กำลังจัดเก็บข้อความรายงานนี้'
+              : isResolvedReport
+                ? 'รายงานนี้จัดการแล้ว'
+                : isMessageArchived
+                  ? 'ข้อความนี้ถูกจัดเก็บแล้ว'
+                  : ''
+            const statusActionReason = isUpdatingReport ? 'กำลังอัปเดตรายงานนี้' : ''
             return (
               <article className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm" key={report.id}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -435,9 +452,11 @@ export function AdminModerationPage() {
                     )}
                     {report.targetType === 'CHARACTER' && (
                       <button
+                        aria-disabled={Boolean(hideCharacterReason)}
                         className="min-h-10 rounded-xl bg-slate-950 px-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60 sm:col-span-2"
-                        disabled={updatingId === report.id || report.status === 'RESOLVED'}
+                        disabled={Boolean(hideCharacterReason)}
                         onClick={() => applyAction(report.id, 'HIDE_CHARACTER')}
+                        title={hideCharacterReason || 'ซ่อนตัวละครและปิดรายงานนี้'}
                         type="button"
                       >
                         ซ่อนตัวละคร
@@ -445,36 +464,44 @@ export function AdminModerationPage() {
                     )}
                     {report.targetType === 'MESSAGE' && (
                       <button
+                        aria-disabled={Boolean(archiveMessageReason)}
                         className="min-h-10 rounded-xl bg-slate-950 px-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60 sm:col-span-2"
-                        disabled={updatingId === report.id || report.status === 'RESOLVED' || Boolean(report.message?.deletedAt)}
+                        disabled={Boolean(archiveMessageReason)}
                         onClick={() => applyAction(report.id, 'ARCHIVE_MESSAGE')}
+                        title={archiveMessageReason || 'จัดเก็บข้อความและปิดรายงานนี้'}
                         type="button"
                       >
                         จัดเก็บข้อความ
                       </button>
                     )}
                     <button
+                      aria-disabled={Boolean(statusActionReason)}
                       className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-sky-600 px-3 text-sm font-black text-white transition hover:bg-sky-700 disabled:opacity-60"
-                      disabled={updatingId === report.id}
+                      disabled={Boolean(statusActionReason)}
                       onClick={() => changeStatus(report.id, 'REVIEWED')}
+                      title={statusActionReason || 'ทำเครื่องหมายว่าตรวจแล้ว'}
                       type="button"
                     >
                       <AlertTriangle size={16} />
                       ตรวจแล้ว
                     </button>
                     <button
+                      aria-disabled={Boolean(statusActionReason)}
                       className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
-                      disabled={updatingId === report.id}
+                      disabled={Boolean(statusActionReason)}
                       onClick={() => changeStatus(report.id, 'RESOLVED')}
+                      title={statusActionReason || 'ทำเครื่องหมายว่าจัดการแล้ว'}
                       type="button"
                     >
                       <CheckCircle2 size={16} />
                       จัดการแล้ว
                     </button>
                     <button
+                      aria-disabled={Boolean(statusActionReason)}
                       className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-3 text-sm font-black text-slate-600 transition hover:bg-slate-50 disabled:opacity-60 sm:col-span-2"
-                      disabled={updatingId === report.id}
+                      disabled={Boolean(statusActionReason)}
                       onClick={() => changeStatus(report.id, 'REJECTED')}
+                      title={statusActionReason || 'ปฏิเสธรายงานนี้'}
                       type="button"
                     >
                       ปฏิเสธรายงาน
