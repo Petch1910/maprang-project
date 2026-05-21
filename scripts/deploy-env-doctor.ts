@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { isAbsolute, join, relative, resolve } from 'node:path'
+import { formatDiagnosticText } from './smoke-helpers'
 
 const root = join(import.meta.dir, '..')
 
@@ -58,14 +59,14 @@ let frontendEnv: EnvMap
 try {
   backendEnv = await readEnvFile(backendEnvPath)
 } catch (error) {
-  fail('backend', 'ไฟล์ env ระบบหลังบ้าน', `อ่านไฟล์ env ระบบหลังบ้านไม่ได้: ${errorMessage(error)}`)
+  fail('backend', 'ไฟล์ env ระบบหลังบ้าน', `อ่านไฟล์ env ระบบหลังบ้านไม่ได้: ${formatDeployEnvDoctorError(error)}`)
   backendEnv = new Map()
 }
 
 try {
   frontendEnv = await readEnvFile(frontendEnvPath)
 } catch (error) {
-  fail('frontend', 'ไฟล์ env หน้าบ้าน', `อ่านไฟล์ env หน้าบ้านไม่ได้: ${errorMessage(error)}`)
+  fail('frontend', 'ไฟล์ env หน้าบ้าน', `อ่านไฟล์ env หน้าบ้านไม่ได้: ${formatDeployEnvDoctorError(error)}`)
   frontendEnv = new Map()
 }
 
@@ -542,6 +543,7 @@ function fail(area: Area, check: string, detail: string) {
   findings.push({ area, status: 'fail', check, detail })
 }
 
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error)
+export function formatDeployEnvDoctorError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
 }

@@ -1,7 +1,17 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
-import { formatDeployDoctorArea, formatDeployDoctorStatus, hasRealValue, jwtRole, normalizeUrl, parseArgs, readEnvFile, runDeployEnvDoctor } from './deploy-env-doctor'
+import {
+  formatDeployDoctorArea,
+  formatDeployDoctorStatus,
+  formatDeployEnvDoctorError,
+  hasRealValue,
+  jwtRole,
+  normalizeUrl,
+  parseArgs,
+  readEnvFile,
+  runDeployEnvDoctor,
+} from './deploy-env-doctor'
 import { runDeployEnvDoctorSelfTest } from './deploy-env-doctor-self-test'
 
 const tempDir = join(import.meta.dir, '..', '.tmp', 'deploy-env-doctor-unit')
@@ -53,6 +63,14 @@ describe('deploy env doctor helpers', () => {
     } finally {
       await rm(tempDir, { recursive: true, force: true })
     }
+  })
+
+  test('redacts secret-shaped values from env file read errors', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatDeployEnvDoctorError(new Error(`read failed for DATABASE_URL=${fakeDatabaseUrl}`))
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
   })
 
   test('detects placeholder values and normalizes production URLs', () => {

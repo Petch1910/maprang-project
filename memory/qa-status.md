@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 deploy env doctor diagnostic redaction pass: `bun run deploy:doctor:test` ผ่าน 11 tests / 50 expects หลังเพิ่ม `formatDeployEnvDoctorError` ให้ env file read failure path.
 - 2026-05-21 e2e smoke diagnostic redaction pass: `bun run e2e:smoke:test` ผ่าน 6 tests / 10 expects หลังผูก `formatE2eSmokeError` กับ `formatDiagnosticText`.
 - 2026-05-21 smoke doctor diagnostic redaction pass: `bun run smoke:doctor:test` ผ่าน 9 tests / 46 expects หลังเพิ่ม `formatSmokeDoctorCaughtError` ให้ runner failure path.
 - 2026-05-21 deploy status diagnostic redaction pass: `bun run deploy:status:test` ผ่าน 9 tests / 59 expects หลังเพิ่ม `formatDeployStatusCaughtError` ให้ text/JSON failure paths.
