@@ -120,6 +120,7 @@ export function AdminEvalsPage() {
   const [note, setNote] = useState('บันทึก ADMIN_API_KEY แล้วกดรันชุดทดสอบเพื่อตรวจคุณภาพพรอมป์และบริบท')
 
   const hasAdminKey = adminKeyInput.trim().length > 0
+  const runDisabledReason = isLoading ? 'กำลังรันชุดทดสอบ' : !hasAdminKey ? 'บันทึก ADMIN_API_KEY ก่อนรันชุดทดสอบ' : ''
   const failedScenarios = useMemo(() => run?.results.filter((result) => !result.passed) ?? [], [run])
 
   const loadEvals = useCallback(async () => {
@@ -217,10 +218,12 @@ export function AdminEvalsPage() {
             {note}
           </p>
           <button
+            aria-disabled={Boolean(runDisabledReason)}
             className="inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-black text-white transition hover:bg-orange-600 disabled:opacity-60"
             data-testid="admin-evals-run"
-            disabled={!hasAdminKey || isLoading}
+            disabled={Boolean(runDisabledReason)}
             onClick={() => void loadEvals()}
+            title={runDisabledReason || 'รันชุดทดสอบคุณภาพพรอมป์และบริบท'}
             type="button"
           >
             {isLoading ? <Loader2 className="animate-spin" size={17} /> : <RefreshCw size={17} />}
