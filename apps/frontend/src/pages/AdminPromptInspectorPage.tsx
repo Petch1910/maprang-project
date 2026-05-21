@@ -177,6 +177,21 @@ export function AdminPromptInspectorPage() {
 
   const hasAdminKey = adminKeyInput.trim().length > 0
   const selectedCharacter = characters.find((character) => character.id === selectedCharacterId) ?? null
+  const refreshCharactersDisabledReason = isLoadingCharacters ? 'กำลังโหลดตัวละคร' : ''
+  const characterSelectDisabledReason = isLoadingCharacters
+    ? 'กำลังโหลดตัวละคร'
+    : characters.length === 0
+      ? 'ยังไม่มีตัวละครให้เลือก'
+      : ''
+  const inspectDisabledReason = isInspecting
+    ? 'กำลังตรวจพรอมป์'
+    : !hasAdminKey
+      ? 'บันทึก ADMIN_API_KEY ก่อนตรวจพรอมป์'
+      : !selectedCharacterId
+        ? 'เลือกตัวละครก่อนตรวจพรอมป์'
+        : !message.trim()
+          ? 'กรอกข้อความปัจจุบันก่อนตรวจพรอมป์'
+          : ''
   const maxSectionTokens = useMemo(
     () => Math.max(0, ...(result?.snapshot.sections.map((section) => section.estimatedTokens) ?? [0])),
     [result],
@@ -327,9 +342,11 @@ export function AdminPromptInspectorPage() {
           <div className="flex items-center justify-between gap-3">
             <p className="m-0 text-sm font-black text-slate-950">ข้อมูลตรวจ</p>
             <button
+              aria-disabled={Boolean(refreshCharactersDisabledReason)}
               className="inline-flex min-h-9 items-center gap-2 rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50"
-              disabled={isLoadingCharacters}
+              disabled={Boolean(refreshCharactersDisabledReason)}
               onClick={() => void loadCharacters()}
+              title={refreshCharactersDisabledReason || 'รีเฟรชรายชื่อตัวละคร'}
               type="button"
             >
               <RefreshCw size={14} />
@@ -340,10 +357,12 @@ export function AdminPromptInspectorPage() {
           <label className="block">
             <span className="mb-1 block text-xs font-black text-slate-500">ตัวละคร</span>
             <select
+              aria-disabled={Boolean(characterSelectDisabledReason)}
               className="min-h-11 w-full rounded-xl border border-slate-900/10 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-amber-500"
               data-testid="prompt-inspector-character-select"
-              disabled={isLoadingCharacters || characters.length === 0}
+              disabled={Boolean(characterSelectDisabledReason)}
               onChange={(event) => setSelectedCharacterId(event.target.value)}
+              title={characterSelectDisabledReason || 'เลือกตัวละครที่ต้องการตรวจพรอมป์'}
               value={selectedCharacterId}
             >
               {characters.length === 0 ? (
@@ -429,9 +448,11 @@ export function AdminPromptInspectorPage() {
           </label>
 
           <button
+            aria-disabled={Boolean(inspectDisabledReason)}
             className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-black text-white transition hover:bg-orange-600 disabled:opacity-60"
             data-testid="prompt-inspector-submit"
-            disabled={isInspecting || !hasAdminKey || !selectedCharacterId || !message.trim()}
+            disabled={Boolean(inspectDisabledReason)}
+            title={inspectDisabledReason || 'ตรวจพรอมป์แบบปิดข้อมูลลับ'}
             type="submit"
           >
             {isInspecting ? <Loader2 className="animate-spin" size={17} /> : <FileSearch size={17} />}
