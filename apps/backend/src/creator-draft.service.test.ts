@@ -453,6 +453,57 @@ describe('creator AI draft', () => {
     }
   })
 
+  test('keeps malformed image provider JSON warnings Thai-first', async () => {
+    const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    const previousFetch = globalThis.fetch
+
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    process.env.IMAGE_GENERATION_API_KEY = 'image-key'
+    delete process.env.OPENAI_API_KEY
+    globalThis.fetch = (async () =>
+      new Response('not-json', {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })) as unknown as typeof fetch
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'ตัวละครทดสอบ image JSON พัง',
+          imagePrompt: 'cinematic portrait',
+        },
+        completionWith(
+          JSON.stringify({
+            name: 'มาย | MAI',
+            tagline: 'คนที่อ่านบรรยากาศเก่งกว่าคำพูด',
+            description: 'ตัวละครทดสอบ image provider malformed JSON',
+            biography: 'มายเคยทำงานกับภาพถ่ายและจำรายละเอียดเล็ก ๆ ได้เสมอ',
+            scenario: 'คุณพบเธอในสตูดิโอหลังไฟดับ',
+            systemPrompt: 'คุณคือมาย ตอบเป็นภาษาไทยและไม่เขียนแทนผู้เล่น',
+            compactPrompt: 'มาย: observant slow-burn',
+            characterAnchor: 'ช่างสังเกต สุขุม และไม่รีบไว้ใจ',
+            constraints: 'อย่าเขียนแทนผู้เล่น',
+            greeting: 'ไฟดับแบบนี้ เธอยังอยากคุยต่อไหม',
+            tags: 'roleplay, thai, slow-burn',
+          }),
+        ),
+      )
+
+      const returnedText = `${result.image.note}\n${result.warnings.join('\n')}`
+      expect(result.image.provider).toBe('placeholder')
+      expect(returnedText).toContain('ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง')
+      expect(returnedText).not.toContain('Unexpected')
+      expect(returnedText).not.toContain('SyntaxError')
+    } finally {
+      restoreOpenRouterKey(previousOpenRouterKey)
+      restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+      restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+      globalThis.fetch = previousFetch
+    }
+  })
+
   test('redacts secret-shaped image provider failures before returning notes', async () => {
     const previousOpenRouterKey = process.env.OPENROUTER_API_KEY
     const previousImageKey = process.env.IMAGE_GENERATION_API_KEY

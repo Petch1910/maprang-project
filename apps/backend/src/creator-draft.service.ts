@@ -359,6 +359,14 @@ function safeFailureDetail(error: unknown, max = 160) {
   return clip(redactSensitiveText(error.message).text, max)
 }
 
+async function readImageProviderJson(response: Response) {
+  try {
+    return (await response.json()) as { data?: Array<{ b64_json?: string; url?: string }> }
+  } catch {
+    throw new Error('ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง')
+  }
+}
+
 async function generateConfiguredImage(prompt: string, origin?: string) {
   const apiKey = process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY
   if (!apiKey) return null
@@ -391,7 +399,7 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
     const detail = redactSensitiveText(await response.text().catch(() => '')).text
     throw new Error(`ผู้ให้บริการสร้างรูปตอบกลับ ${response.status}${detail ? `: ${clip(detail, 180)}` : ''}`)
   }
-  const payload = (await response.json()) as { data?: Array<{ b64_json?: string; url?: string }> }
+  const payload = await readImageProviderJson(response)
   const image = payload.data?.[0]
   if (image?.b64_json) {
     const outputFormat = String(body.output_format || 'png')

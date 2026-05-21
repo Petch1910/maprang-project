@@ -1518,7 +1518,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         creatorDraft,
-        ['redactSensitiveText', 'safeFailureDetail', 'friendlyImageFailureReason', 'ผู้ให้บริการสร้างรูปตอบกลับ', 'โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์'],
+        ['redactSensitiveText', 'safeFailureDetail', 'readImageProviderJson', 'friendlyImageFailureReason', 'ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง', 'โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์'],
         'apps/backend/src/creator-draft.service.ts',
       )
       requireIncludes(
@@ -1526,6 +1526,7 @@ const checks: Check[] = [
         [
           'redacts secret-shaped text model failures before returning creator warnings',
           'keeps broken model JSON warnings Thai-first without raw parser text',
+          'keeps malformed image provider JSON warnings Thai-first',
           'redacts secret-shaped image provider failures before returning notes',
           'not.toContain(leakedProviderKey)',
           "not.toContain('Unexpected')",
