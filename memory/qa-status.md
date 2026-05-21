@@ -2,6 +2,10 @@
 
 Last updated: 2026-05-21
 
+## บันทึกเพิ่ม 2026-05-21
+
+- 2026-05-21 route catch false-negative guard pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 20 tests / 31 expects, `bun run security:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run secrets:check` ผ่านหลังเปลี่ยน audit ให้ตรวจ `message: error.message` รายตำแหน่งใน catch block และยัง allow controlled `AuthError`.
+
 ## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-21
 
 - 2026-05-21 admin eval safe-detail pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 17 tests / 28 expects, `bun run security:audit`, `bun run backend:check` ผ่าน 157 tests / 506 expects, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run import-cycle:audit` ผ่านหลังบล็อก raw error detail ใน route response; import-cycle ยังคง 125 source files / 279 import edges.

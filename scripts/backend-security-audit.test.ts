@@ -317,6 +317,28 @@ describe('backend security audit', () => {
     ).toContain('route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.')
   })
 
+  test('catches generic raw error messages after an AuthError branch', () => {
+    expect(
+      messagesFor(
+        `
+          export const chatRoutes = new Elysia()
+            .post('/chat', async () => {
+              try {
+                return await sendChat()
+              } catch (error) {
+                if (error instanceof AuthError) {
+                  return { error: error.code, message: error.message }
+                }
+
+                return { error: 'chat_failed', message: error.message }
+              }
+            })
+        `,
+        'chat.routes.ts',
+      ),
+    ).toContain('route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.')
+  })
+
   test('allows route catch responses for controlled AuthError messages', () => {
     expect(
       messagesFor(

@@ -2,6 +2,10 @@
 
 Last updated: 2026-05-21
 
+## บันทึกเพิ่ม 2026-05-21
+
+- 2026-05-21: backend security audit ปิด false negative ของ route catch ที่มี `AuthError` branch แล้วตามด้วย generic `message: error.message`; ตอนนี้ตรวจทีละตำแหน่งใน catch block แทน regex ก้อนเดียว และ `predeploy:check` ล็อก helper/test ใหม่ไว้แล้ว.
+
 ## อัปเดตงานใน repo (Repo-owned update) 2026-05-21
 
 - 2026-05-21: `/admin/evals/local` ไม่ส่ง raw `error.message` กลับใน `detail` แล้ว โดยเปลี่ยนเป็น `safeRouteErrorSummary(error)` และเพิ่ม backend security audit rule กันการคืน `detail: error.message`, `detail: String(error)`, หรือ ternary raw error message กลับมาอีก.

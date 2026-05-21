@@ -43,10 +43,12 @@ const uuidParamRoutePattern =
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = /console\.(?:error|warn)\([^)\n]*,\s*error\b/g
 const rawRouteErrorThrowPattern = /throw\s+error\b/g
-const rawRouteCatchMessagePattern = /catch\s*\(\s*error\s*\)\s*\{[\s\S]{0,800}?\bmessage\s*:\s*error\.message/g
+const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
+const rawErrorMessagePropertyPattern = /\bmessage\s*:\s*error\.message\b/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
 const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
+const rawRouteCatchMessage = 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.'
 
 const patterns = [
   {
@@ -86,6 +88,52 @@ const patterns = [
     message: 'route response ห้ามส่ง raw error detail ตรงๆ; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
   },
 ]
+
+function findMatchingBrace(content: string, openingBraceIndex: number) {
+  let depth = 0
+  for (let index = openingBraceIndex; index < content.length; index += 1) {
+    const char = content[index]
+    if (char === '{') depth += 1
+    if (char === '}') {
+      depth -= 1
+      if (depth === 0) return index
+    }
+  }
+  return content.length
+}
+
+function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number) {
+  const beforeMessage = catchBlock.slice(0, messageIndex)
+  const authCheckIndex = beforeMessage.lastIndexOf('error instanceof AuthError')
+  if (authCheckIndex < 0) return false
+
+  const authBlockStart = catchBlock.indexOf('{', authCheckIndex)
+  if (authBlockStart < 0 || authBlockStart > messageIndex) return false
+
+  return messageIndex < findMatchingBrace(catchBlock, authBlockStart)
+}
+
+function collectRawRouteCatchMessageFindings(file: string, content: string) {
+  const findings: BackendSecurityFinding[] = []
+  for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
+    const openingBraceIndex = content.indexOf('{', catchMatch.index ?? 0)
+    if (openingBraceIndex < 0) continue
+
+    const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
+    const catchBlock = content.slice(openingBraceIndex + 1, closingBraceIndex)
+    for (const messageMatch of catchBlock.matchAll(rawErrorMessagePropertyPattern)) {
+      const blockMessageIndex = messageMatch.index ?? 0
+      if (isControlledAuthErrorMessage(catchBlock, blockMessageIndex)) continue
+
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + blockMessageIndex),
+        message: rawRouteCatchMessage,
+      })
+    }
+  }
+  return findings
+}
 
 export function collectBackendSecurityFindingsFromSource(file: string, content: string): BackendSecurityFinding[] {
   const findings: BackendSecurityFinding[] = []
@@ -135,14 +183,7 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
       })
     }
 
-    for (const match of content.matchAll(rawRouteCatchMessagePattern)) {
-      if (match[0].includes('error instanceof AuthError')) continue
-      findings.push({
-        file,
-        line: lineFor(content, match.index ?? 0),
-        message: 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.',
-      })
-    }
+    findings.push(...collectRawRouteCatchMessageFindings(file, content))
 
     for (const match of content.matchAll(rawRouteErrorResponsePattern)) {
       findings.push({
