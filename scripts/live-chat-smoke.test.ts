@@ -4,6 +4,7 @@ import {
   buildLiveChatSmokePayload,
   findMatchingChatDebit,
   formatLiveChatSmokeCaughtError,
+  liveChatSmokePrompt,
   providerFailureIssue,
   runLiveChatSmoke,
   selectLiveChatSmokeCharacter,
@@ -122,7 +123,7 @@ describe('live chat smoke helpers', () => {
     const errors: string[] = []
     const calls: string[] = []
     let usageReadCount = 0
-    const reader: LiveChatSmokeJsonReader = async (path) => {
+    const reader: LiveChatSmokeJsonReader = async (path, init) => {
       calls.push(path)
       if (path === '/health') {
         return {
@@ -140,6 +141,11 @@ describe('live chat smoke helpers', () => {
         return { wallet: { transactions: [{ id: 'debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1912 }] } } as never
       }
       if (path === '/chat') {
+        const body = JSON.parse(String(init?.body ?? '{}')) as { message?: string }
+        expect(body.message).toBe(liveChatSmokePrompt)
+        expect(body.message).toContain('ฉันนั่งลงตรงข้ามเธอ')
+        expect(body.message).toContain('ฉากโรลเพลย์ภาษาไทย')
+        expect(body.message).not.toContain('I sit across from you')
         return {
           reply: 'ก'.repeat(440),
           chatId: 'chat-1',
@@ -165,6 +171,13 @@ describe('live chat smoke helpers', () => {
     expect(payload.apiBaseUrl).toBe('https://api.maprang.example')
     expect(payload.walletTransactionId).toBe('debit')
     expect(errors).toEqual([])
+  })
+
+  test('uses a Thai-first prompt for live roleplay quality smoke', () => {
+    expect(liveChatSmokePrompt).toContain('ฉากโรลเพลย์ภาษาไทย')
+    expect(liveChatSmokePrompt).toContain('บรรยากาศ')
+    expect(liveChatSmokePrompt).toContain('เหลือพื้นที่ให้ฉันตอบต่อ')
+    expect(liveChatSmokePrompt).not.toMatch(/\bReply as\b|\bI sit\b|\bfeeling\b|\bpacing\b/)
   })
 
   test('validates backend root identity before spending chat tokens', async () => {

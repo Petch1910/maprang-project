@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Live chat smoke ใช้ `liveChatSmokePrompt` ภาษาไทยแล้ว เพื่อวัดคุณภาพ roleplay ไทยจริงแทน prompt อังกฤษ และ predeploy guard บล็อกข้อความ smoke เก่าที่เริ่มด้วย `I sit across from you`/`Reply as an atmospheric roleplay scene` ไม่ให้กลับมา.
 - 2026-05-21: World State prompt เปลี่ยนหัวข้อ runtime เป็น Thai-first แล้ว (`สถานะโลกปัจจุบัน`, `เวลา`, `สถานที่`, `สภาพอากาศ`, `อารมณ์บรรยากาศ`, `โน้ตฉาก`) และแก้ `cleanString` ให้ truncation รวม `...` ไม่เกิน limit จริงเพื่อคุม prompt budget/input sanitation.
 - 2026-05-21: Events Inbox (`/events`) ปรับ visual surface เป็น dark theme ให้เข้ากับห้องแชทมากขึ้น ลดการ์ดโทนน้ำตาลหนัก, ปรับ search/count/error/empty/event group/row CTA ให้เป็นพื้นผิวดำพร้อม accent ส้ม/ฟ้า/เขียว และคง behavior เดิมของ search/open-chat.
 - 2026-05-21: Staging runbook และ production checklist ระบุ `deploy-status --json` failure shape แล้ว โดย predeploy guard บังคับให้มี `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ CI/dashboard อ่านสาเหตุ root/health failure ได้ตรงกับ README/DEPLOYMENT_QA.

@@ -50,6 +50,9 @@ export type LiveChatSmokeRunnerOptions = {
   writeError?: (line: string) => void
 }
 
+export const liveChatSmokePrompt =
+  'ฉันนั่งลงตรงข้ามเธอ วางแก้วชาไว้ใกล้มือ แล้วถามเบาๆ ว่าวันนี้มีอะไรหนักใจหรือเปล่า ช่วยตอบเป็นฉากโรลเพลย์ภาษาไทยที่มีบรรยากาศ ความรู้สึก จังหวะการกระทำ และเหลือพื้นที่ให้ฉันตอบต่อ'
+
 export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000') {
   const value = Number(rawValue)
 
@@ -204,8 +207,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
         relationshipSeed: 'stranger',
         maxRating: 'restricted_18',
         history: [],
-        message:
-          'I sit across from you, set a cup of tea near your hand, and softly ask what has been weighing on you today. Reply as an atmospheric roleplay scene with feeling, pacing, and room for me to answer.',
+        message: liveChatSmokePrompt,
       }),
     })
     const chatResult = validateLiveChatSmokeResponse(chat, minRoleplayReplyChars)
