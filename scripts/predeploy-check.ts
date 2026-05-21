@@ -1056,6 +1056,8 @@ const checks: Check[] = [
       const authPanel = await readRepoFile('apps/frontend/src/components/AuthPanel.tsx')
       const workspacePage = await readRepoFile('apps/frontend/src/pages/WorkspacePage.tsx')
       const backendRedaction = await readRepoFile('apps/backend/src/redaction.ts')
+      const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
+      const chatRuntimeTest = await readRepoFile('apps/backend/src/chat.runtime.test.ts')
       const creatorDraft = await readRepoFile('apps/backend/src/creator-draft.service.ts')
       const creatorDraftTest = await readRepoFile('apps/backend/src/creator-draft.service.test.ts')
       const promptInspector = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
@@ -1531,6 +1533,21 @@ const checks: Check[] = [
         backendRedaction,
         ['redactSensitiveText', 'sk-ant-', 'hf_', 'sk_live_', 'github_pat_', 'AIza', 'xox', 'PRIVATE KEY', 'postgres'],
         'apps/backend/src/redaction.ts',
+      )
+      requireIncludes(
+        chatService,
+        ['providerClassificationMessage', 'return redactSensitiveText(providerMessage(error)).text.toLowerCase()'],
+        'apps/backend/src/chat.service.ts',
+      )
+      forbidIncludes(
+        chatService,
+        ['providerMessage(error).toLowerCase()'],
+        'apps/backend/src/chat.service.ts',
+      )
+      requireIncludes(
+        chatRuntimeTest,
+        ['redacts secret-shaped provider details before classification output', 'not.toContain(fakeDatabaseUrl)', 'not.toContain(fakeOpenRouterKey)'],
+        'apps/backend/src/chat.runtime.test.ts',
       )
       requireIncludes(
         creatorDraft,

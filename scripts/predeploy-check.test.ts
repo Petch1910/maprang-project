@@ -18,6 +18,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('collectDocsCommandAuditResult')
     expect(predeploy).toContain('formatPredeployCheckError(error)')
     expect(predeploy).toContain('formatDiagnosticText(raw, 500)')
+    expect(predeploy).toContain('providerClassificationMessage')
+    expect(predeploy).toContain('redacts secret-shaped provider details before classification output')
     expect(predeploy).toContain('creatorDraftRetryMessage')
     expect(predeploy).toContain('redacts text-model retry classifier input before matching transient hints')
     expect(predeploy).toContain('assertThaiFirstMarkdownHeadings')
