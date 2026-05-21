@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: `bun run qa:repo` passed again after the chat stream connect timeout and frontend API timeout source guard. Deterministic repo-owned QA remains green; remaining blockers are still real staging/production environment, live provider verification, and production database/Supabase setup rather than local code gates.
 - 2026-05-21: Frontend API fetch timeout source guard now checks `apps/frontend/src/lib/api.ts` directly from `scripts/frontend-api-errors.test.ts`, locking the three fetch surfaces (`apiRequestTimeoutMs`, `apiUploadTimeoutMs`, and `apiStreamConnectTimeoutMs`) so future frontend API calls do not drift back to unbounded requests.
 
 ## บันทึกเพิ่ม 2026-05-21
