@@ -81,6 +81,7 @@ const requiredFiles = [
   'scripts/image-smoke.test.ts',
   'scripts/live-chat-smoke.test.ts',
   'scripts/local-smoke.test.ts',
+  'scripts/e2e-smoke.ts',
   'scripts/e2e-smoke.test.ts',
   'scripts/check-secrets.test.ts',
   'scripts/secret-patterns.ts',
@@ -555,6 +556,8 @@ const checks: Check[] = [
       const frontendPackage = await readRepoFile('apps/frontend/package.json')
       const importCycleAudit = await readRepoFile('scripts/import-cycle-audit.ts')
       const importCycleAuditTest = await readRepoFile('scripts/import-cycle-audit.test.ts')
+      const e2eSmoke = await readRepoFile('scripts/e2e-smoke.ts')
+      const e2eSmokeTest = await readRepoFile('scripts/e2e-smoke.test.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const packageJson = JSON.parse(content) as { scripts?: Record<string, string> }
       requireIncludes(
@@ -631,6 +634,16 @@ const checks: Check[] = [
         'scripts/import-cycle-audit.test.ts',
       )
       requireIncludes(deploymentQa, ['TypeScript import-equals `require()`', 'CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
+      requireIncludes(
+        e2eSmoke,
+        ['formatE2eSmokeError', 'formatUnknownDiagnosticText', 'runE2eSmoke', 'if (import.meta.main)'],
+        'scripts/e2e-smoke.ts',
+      )
+      requireIncludes(
+        e2eSmokeTest,
+        ['formats object-shaped e2e smoke errors without stringifying raw objects', 'redacts secret-shaped values from e2e smoke errors'],
+        'scripts/e2e-smoke.test.ts',
+      )
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
       const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''

@@ -1,4 +1,4 @@
-import { formatDiagnosticText } from './smoke-helpers'
+import { formatUnknownDiagnosticText } from './smoke-helpers'
 
 export type E2eSmokeStep = {
   label: string
@@ -44,8 +44,7 @@ async function runStep(step: E2eSmokeStep, runner: E2eSmokeRunner, logger: E2eSm
 }
 
 export function formatE2eSmokeError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  const message = formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  const message = formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
   return `ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: ${message}`
 }
 

@@ -78,6 +78,17 @@ describe('e2e smoke command plan', () => {
     expect(formatE2eSmokeError('restore failed')).toBe('ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: restore failed')
   })
 
+  test('formats object-shaped e2e smoke errors without stringifying raw objects', () => {
+    const message = formatE2eSmokeError({
+      message: 'restore object failed',
+      toString() {
+        throw new Error('ไม่ควร stringify raw object')
+      },
+    })
+
+    expect(message).toBe('ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: restore object failed')
+  })
+
   test('redacts secret-shaped values from e2e smoke errors', () => {
     const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
     const message = formatE2eSmokeError(new Error(`Playwright failed with DATABASE_URL=${fakeDatabaseUrl}`))
