@@ -1,6 +1,12 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { assertMachineReadableErrorCode, creatorImageIssue, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
+import {
+  assertMachineReadableErrorCode,
+  creatorImageIssue,
+  isOnlyLiveVerificationFailure,
+  parseApiSmokeStreamEvents,
+  tryParseJson,
+} from './api-smoke-helpers'
 import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
 import { apiBaseUrl, readJson, smokeAuthHeaders, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 
@@ -905,13 +911,7 @@ async function readStreamEvents(path: string, init: RequestInit) {
   const contentType = response.headers.get('content-type') ?? ''
   if (!contentType.includes('text/event-stream')) throw new Error(`${path} ไม่คืน event stream: ${contentType}`)
 
-  const events = raw
-    .split(/\r?\n/)
-    .filter((line) => line.startsWith('data: '))
-    .map((line) => JSON.parse(line.slice('data: '.length)) as StreamSmokeEvent)
-
-  if (events.length === 0) throw new Error(`${path} ไม่คืน SSE data event`)
-  return events
+  return parseApiSmokeStreamEvents<StreamSmokeEvent>(raw, path)
 }
 
 async function readReadyPayload() {

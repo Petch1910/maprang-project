@@ -1,7 +1,14 @@
 import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { assertMachineReadableErrorCode, creatorImageIssue, isMachineReadableErrorCode, isOnlyLiveVerificationFailure, tryParseJson } from './api-smoke-helpers'
+import {
+  assertMachineReadableErrorCode,
+  creatorImageIssue,
+  isMachineReadableErrorCode,
+  isOnlyLiveVerificationFailure,
+  parseApiSmokeStreamEvents,
+  tryParseJson,
+} from './api-smoke-helpers'
 import { buildApiSmokeSummary, formatApiSmokeStatus, runApiSmoke, type ApiSmokeResult } from './api-smoke'
 
 const root = join(import.meta.dir, '..')
@@ -43,6 +50,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).toContain('ไม่ผ่านด้วยสถานะ')
     expect(apiSmoke).toContain('response ว่าง')
     expect(apiSmoke).toContain('formatApiSmokeStatus(result.status)')
+    expect(apiSmoke).toContain('parseApiSmokeStreamEvents<StreamSmokeEvent>(raw, path)')
     expect(apiSmoke).not.toContain('tokenBalance=${payload.user.tokenBalance}')
     expect(apiSmoke).not.toContain('cost=${payload.usage.totalCost}')
     expect(apiSmoke).not.toContain('transactions=${payload.wallet')
@@ -71,6 +79,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).not.toContain('failed with ${response.status}')
     expect(apiSmoke).not.toContain('empty response')
     expect(apiSmoke).not.toContain('JSON error payload')
+    expect(apiSmoke).not.toContain("JSON.parse(line.slice('data: '.length))")
     expect(apiSmoke).not.toContain("maxChars=${saved.persona.maxChars ?? 'unknown'}")
     expect(apiSmoke).not.toContain("payload.image?.provider ?? 'missing'")
     expect(apiSmoke).not.toContain('result.status.toUpperCase()')
@@ -119,6 +128,15 @@ describe('api smoke helpers', () => {
   test('parses JSON safely for API smoke response helpers', () => {
     expect(tryParseJson('{"ok":true}')).toEqual({ ok: true })
     expect(tryParseJson('not-json')).toBeNull()
+  })
+
+  test('parses API smoke stream events with Thai diagnostics', () => {
+    expect(parseApiSmokeStreamEvents('data: {"type":"delta","content":"สวัสดี"}\n\ndata: {"type":"done"}\n', '/chat/stream')).toEqual([
+      { type: 'delta', content: 'สวัสดี' },
+      { type: 'done' },
+    ])
+    expect(() => parseApiSmokeStreamEvents('data: not-json\n', '/chat/stream')).toThrow('คืน data event ที่ไม่ใช่ JSON')
+    expect(() => parseApiSmokeStreamEvents('event: done\n', '/chat/stream')).toThrow('ไม่คืน SSE data event')
   })
 
   test('imports the API smoke runner without executing the smoke flow', () => {

@@ -45,3 +45,22 @@ export function tryParseJson(value: string) {
     return null
   }
 }
+
+export function parseApiSmokeStreamEvents<T = unknown>(raw: string, path = '/chat/stream') {
+  const events: T[] = []
+
+  raw.split(/\r?\n/).forEach((line, index) => {
+    if (!line.startsWith('data: ')) return
+
+    const eventBody = line.slice('data: '.length)
+    const parsed = tryParseJson(eventBody)
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error(`${path} คืน data event ที่ไม่ใช่ JSON ที่บรรทัด ${index + 1}: ${eventBody.slice(0, 200) || 'response ว่าง'}`)
+    }
+
+    events.push(parsed as T)
+  })
+
+  if (events.length === 0) throw new Error(`${path} ไม่คืน SSE data event`)
+  return events
+}
