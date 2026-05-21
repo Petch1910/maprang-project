@@ -46,10 +46,13 @@ const rawRouteErrorThrowPattern = /throw\s+error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
+const rawErrorCodePropertyPattern =
+  /\berror\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
 const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
 const rawRouteCatchMessage = 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.'
+const rawRouteCatchErrorCode = 'route catch ห้ามคืน raw error ใน field error; ใช้ machine-readable code ที่ควบคุมได้.'
 
 const patterns = [
   {
@@ -132,6 +135,15 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
         file,
         line: lineFor(content, openingBraceIndex + 1 + blockMessageIndex),
         message: rawRouteCatchMessage,
+      })
+    }
+
+    for (const errorMatch of catchBlock.matchAll(rawErrorCodePropertyPattern)) {
+      const blockErrorIndex = errorMatch.index ?? 0
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + blockErrorIndex),
+        message: rawRouteCatchErrorCode,
       })
     }
   }
