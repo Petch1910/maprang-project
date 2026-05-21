@@ -55,14 +55,21 @@ async function readApiJson<T>(path: string, response: Response): Promise<T> {
   }
 }
 
+function isAbortLikeError(error: unknown) {
+  if (error instanceof DOMException && error.name === 'AbortError') return true
+  if (error && typeof error === 'object') {
+    return (error as { name?: unknown }).name === 'AbortError'
+  }
+  return false
+}
+
 export function shouldLogUnexpectedError(error: unknown) {
   if (error instanceof ApiError) return false
   if (error instanceof TypeError && error.message === 'Failed to fetch') return false
-  if (error instanceof DOMException && error.name === 'AbortError') return false
+  if (isAbortLikeError(error)) return false
   if (error && typeof error === 'object') {
     const namedError = error as { name?: unknown; path?: unknown; status?: unknown }
     if (namedError.name === 'ApiError') return false
-    if (namedError.name === 'AbortError') return false
     if (typeof namedError.path === 'string' && typeof namedError.status === 'number') return false
   }
   return true
@@ -647,6 +654,10 @@ export function apiRequestTimeoutMs(path: string, init?: RequestInit) {
   return 12_000
 }
 
+export function apiUploadTimeoutMs() {
+  return 60_000
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const timeoutMs = apiRequestTimeoutMs(path, init)
   const controller = init?.signal ? null : new AbortController()
@@ -898,21 +909,34 @@ export async function resetCharacterPrompt(characterId: string) {
   })
 }
 
-export async function uploadAvatar(file: File) {
+export async function uploadAvatar(file: File, timeoutMs = apiUploadTimeoutMs()) {
   const form = new FormData()
   form.append('file', file)
-  const response = await fetch(`${API_BASE_URL}/uploads/avatar`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: form,
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
-  if (!response.ok) {
-    const payload = await readErrorPayload(response)
-    throw new ApiError('/uploads/avatar', response.status, payload)
+  try {
+    const response = await fetch(`${API_BASE_URL}/uploads/avatar`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+      signal: controller.signal,
+    })
+
+    if (!response.ok) {
+      const payload = await readErrorPayload(response)
+      throw new ApiError('/uploads/avatar', response.status, payload)
+    }
+
+    return readApiJson<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>('/uploads/avatar', response)
+  } catch (error) {
+    if (isAbortLikeError(error)) {
+      throw new ApiError('/uploads/avatar', 408, { message: 'อัปโหลดรูปใช้เวลานานเกินไป กรุณาลองใหม่' })
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
   }
-
-  return readApiJson<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>('/uploads/avatar', response)
 }
 
 export async function setCharacterFavorite(characterId: string, favorite: boolean) {

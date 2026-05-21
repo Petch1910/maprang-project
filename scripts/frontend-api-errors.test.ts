@@ -2,12 +2,14 @@ import { describe, expect, test } from 'bun:test'
 import {
   ApiError,
   apiRequestTimeoutMs,
+  apiUploadTimeoutMs,
   fetchCharacters,
   logUnexpectedError,
   parseChatStreamEvent,
   safeBrowserErrorSummary,
   safeApiUserMessage,
   streamChatMessage,
+  uploadAvatar,
   type ChatStreamEvent,
 } from '../apps/frontend/src/lib/api'
 import { safeErrorTextForClassification } from '../apps/frontend/src/lib/safeError'
@@ -111,6 +113,33 @@ describe('frontend API errors', () => {
     expect(apiRequestTimeoutMs('/chats/chat-1', { method: 'PATCH' })).toBe(12_000)
     expect(apiRequestTimeoutMs('/chat', { method: 'POST' })).toBe(60_000)
     expect(apiRequestTimeoutMs('/creator/ai-draft', { method: 'POST' })).toBe(60_000)
+    expect(apiUploadTimeoutMs()).toBe(60_000)
+  })
+
+  test('aborts avatar uploads with a Thai ApiError instead of hanging', async () => {
+    const originalFetch = globalThis.fetch
+
+    try {
+      globalThis.fetch = ((_input, init) =>
+        new Promise((_resolve, reject) => {
+          const signal = init?.signal
+          expect(signal).toBeDefined()
+          signal?.addEventListener(
+            'abort',
+            () => reject(new DOMException('The operation was aborted', 'AbortError')),
+            { once: true },
+          )
+        })) as typeof fetch
+
+      await expect(uploadAvatar(new File(['avatar'], 'avatar.png', { type: 'image/png' }), 1)).rejects.toMatchObject({
+        name: 'ApiError',
+        path: '/uploads/avatar',
+        status: 408,
+        message: 'อัปโหลดรูปใช้เวลานานเกินไป กรุณาลองใหม่',
+      })
+    } finally {
+      globalThis.fetch = originalFetch
+    }
   })
 
   test('parses chat stream events split across network chunks', async () => {

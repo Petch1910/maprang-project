@@ -53,6 +53,7 @@ export function CharacterManager({
   const [visibility, setVisibility] = useState<CharacterInput['visibility']>(character.visibility ?? 'PUBLIC')
   const [status, setStatus] = useState<CharacterInput['status']>(character.status ?? 'PUBLISHED')
   const [saveNote, setSaveNote] = useState('')
+  const [saveNoteTone, setSaveNoteTone] = useState<'success' | 'error'>('success')
   const [isUploading, setIsUploading] = useState(false)
 
   useEffect(() => {
@@ -98,15 +99,22 @@ export function CharacterManager({
       visibility,
       status,
     })
+    setSaveNoteTone('success')
     setSaveNote('บันทึกตัวละครแล้ว')
   }
 
   const handleAvatarFile = async (file: File | null) => {
     if (!file) return
     setIsUploading(true)
+    setSaveNote('')
     try {
       const uploaded = await uploadAvatar(file)
       setAvatarUrl(uploaded.url)
+      setSaveNoteTone('success')
+      setSaveNote('อัปโหลดรูปตัวละครแล้ว')
+    } catch {
+      setSaveNoteTone('error')
+      setSaveNote('อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่')
     } finally {
       setIsUploading(false)
     }
@@ -297,7 +305,11 @@ export function CharacterManager({
           </button>
         </div>
 
-        {saveNote && <p className="m-0 text-xs font-bold text-green-700">{saveNote}</p>}
+        {saveNote && (
+          <p className={`m-0 text-xs font-bold ${saveNoteTone === 'error' ? 'text-rose-700' : 'text-green-700'}`}>
+            {saveNote}
+          </p>
+        )}
       </div>
     </section>
   )
