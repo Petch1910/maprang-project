@@ -27,6 +27,21 @@ describe('frontend API errors', () => {
     expect(message).not.toContain(jwtLikeValue)
   })
 
+  test('classifies plain object error messages without stringifying raw objects', () => {
+    const openRouterKey = `sk-or-v1-${'abcdef1234567890'.repeat(2)}`
+    const message = safeErrorTextForClassification({
+      message: `forbidden ${openRouterKey}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('forbidden')
+    expect(message).toContain('[redacted]')
+    expect(message).not.toContain(openRouterKey.toLowerCase())
+    expect(safeErrorTextForClassification({ message: 403 })).toBe('')
+  })
+
   test('prefers backend Thai user messages over machine-readable codes', () => {
     const error = new ApiError('/chat', 429, {
       error: 'rate_limited',

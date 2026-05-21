@@ -4,11 +4,20 @@ const frontendErrorSecretPatterns = [
   /\beyJ[A-Za-z0-9_-]{12,}\.[A-Za-z0-9_-]{12,}\.[A-Za-z0-9_-]{12,}\b/g,
 ]
 
+function errorMessageForClassification(error: unknown) {
+  if (error instanceof Error) return error.message
+  if (typeof error !== 'object' || error === null || !('message' in error)) return ''
+
+  const message = (error as { message?: unknown }).message
+  return typeof message === 'string' ? message : ''
+}
+
 export function safeErrorTextForClassification(error: unknown, maxLength = 300) {
-  if (!(error instanceof Error)) return ''
+  const rawMessage = errorMessageForClassification(error)
+  if (!rawMessage) return ''
   const redacted = frontendErrorSecretPatterns.reduce(
     (message, pattern) => message.replace(pattern, '[redacted]'),
-    error.message,
+    rawMessage,
   )
   return redacted.slice(0, maxLength).toLowerCase()
 }
