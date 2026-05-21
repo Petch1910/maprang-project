@@ -24,6 +24,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('formats object-shaped deploy status errors without stringifying raw objects')
     expect(predeploy).toContain('returns structured JSON when root identity cannot be read')
     expect(predeploy).toContain('returns structured JSON when health cannot be read after root identity passes')
+    expect(predeploy).toContain('rootIdentity.ok=false')
     expect(predeploy).toContain('formats object-shaped smoke doctor errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped local smoke errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped readiness errors without stringifying raw objects')

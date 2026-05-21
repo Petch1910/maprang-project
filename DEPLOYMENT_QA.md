@@ -67,7 +67,7 @@ bun run deploy:status
 bun scripts/deploy-status.ts --json
 ```
 
-JSON response มี fields top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` เพื่อให้ automation ไม่ต้อง parse nested readiness details.
+JSON response มี fields top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` เพื่อให้ automation ไม่ต้อง parse nested readiness details. ถ้า root identity หรือ `/health` อ่านไม่ได้ JSON จะยังคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ dashboard/CI อ่านสาเหตุได้โดยไม่ต้อง parse stderr.
 
 readiness rules ด้านล่างมี deterministic self-test:
 
