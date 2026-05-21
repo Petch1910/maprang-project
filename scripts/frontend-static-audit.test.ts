@@ -118,6 +118,39 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports raw response JSON parsing outside frontend API helpers', () => {
+    expect(
+      auditFrontendSourceFile(
+        `
+          async function loadCharacters() {
+            const response = await fetch('/characters')
+            return response.json()
+          }
+        `,
+        'ApiLeak.ts',
+      ).map((finding) => finding.message),
+    ).toContain('ห้าม parse response.json() ตรงใน frontend source; ให้ใช้ readApiJson/readErrorPayload เพื่อห่อ JSON พังเป็นข้อความไทยก่อน.')
+
+    expect(
+      auditFrontendSourceFile(
+        `
+          async function readErrorPayload(response: Response) {
+            return response.clone().json().catch(() => null)
+          }
+
+          async function readApiJson<T>(path: string, response: Response): Promise<T> {
+            try {
+              return (await response.json()) as T
+            } catch {
+              throw new ApiError(path, 502, malformedApiJsonPayload)
+            }
+          }
+        `,
+        'apps/frontend/src/lib/api.ts',
+      ),
+    ).toEqual([])
+  })
+
   test('reports Thai placeholder and mojibake text regressions', () => {
     const findings = auditSuspiciousPatterns(
       [

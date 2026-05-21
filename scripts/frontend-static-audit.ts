@@ -32,6 +32,38 @@ export function compact(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
 
+const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\.clone\(\))?\.json\s*\(\s*\)/g
+const rawFrontendResponseJsonMessage =
+  'ห้าม parse response.json() ตรงใน frontend source; ให้ใช้ readApiJson/readErrorPayload เพื่อห่อ JSON พังเป็นข้อความไทยก่อน.'
+const allowedFrontendResponseJsonReaders = ['readApiJson', 'readErrorPayload']
+
+function findMatchingBrace(content: string, openingBraceIndex: number) {
+  let depth = 0
+  for (let index = openingBraceIndex; index < content.length; index += 1) {
+    const char = content[index]
+    if (char === '{') depth += 1
+    if (char === '}') {
+      depth -= 1
+      if (depth === 0) return index
+    }
+  }
+  return content.length
+}
+
+function isInsideAllowedFrontendResponseJsonReader(content: string, index: number) {
+  for (const functionName of allowedFrontendResponseJsonReaders) {
+    const functionPattern = new RegExp(`(?:export\\s+)?async\\s+function\\s+${functionName}(?:<[^>]+>)?\\s*\\(`, 'g')
+    for (const match of content.matchAll(functionPattern)) {
+      const openingBraceIndex = content.indexOf('{', match.index ?? 0)
+      if (openingBraceIndex < 0 || openingBraceIndex > index) continue
+      const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
+      if (index > openingBraceIndex && index < closingBraceIndex) return true
+    }
+  }
+
+  return false
+}
+
 export function jsxAttributeValue(attribute: ts.JsxAttribute) {
   const initializer = attribute.initializer
   if (!initializer) return ''
@@ -284,8 +316,26 @@ export function auditSuspiciousPatterns(content: string, file: string) {
   return findings
 }
 
+export function auditRawResponseJsonParsing(content: string, file: string) {
+  const findings: Finding[] = []
+  for (const match of content.matchAll(rawFrontendResponseJsonPattern)) {
+    if (isInsideAllowedFrontendResponseJsonReader(content, match.index ?? 0)) continue
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: rawFrontendResponseJsonMessage,
+    })
+  }
+  return findings
+}
+
 export function auditFrontendSourceFile(content: string, file: string) {
-  return [...auditButtonsWithAst(content, file), ...auditLinksWithAst(content, file), ...auditSuspiciousPatterns(content, file)]
+  return [
+    ...auditButtonsWithAst(content, file),
+    ...auditLinksWithAst(content, file),
+    ...auditSuspiciousPatterns(content, file),
+    ...auditRawResponseJsonParsing(content, file),
+  ]
 }
 
 export async function collectFrontendStaticFindings() {
