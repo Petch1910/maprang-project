@@ -24,6 +24,7 @@
 - Admin actions ต้องมี `ADMIN_API_KEY` และมี audit log เมื่อเปลี่ยน report/status/token หรือซ่อน content
 - Static guard: `bun run security:audit` fails if any backend `/admin` route block is missing `requireAdminApiKey`.
 - Backend route ต้องไม่ `throw error` หรือ log raw error object กลับไปตรงๆ; ให้คืน `routeErrorResponse`/ข้อความที่ควบคุมได้และใช้ safe summary ใน log
+- Backend runtime ต้องไม่ parse `response.json()` จาก provider/Supabase ตรงๆ นอก safe payload helper; external JSON ที่พังต้องถูกห่อเป็นข้อความไทยก่อนเสมอ
 - Guard อัตโนมัติ: `backend-security-audit.test.ts`, `character.persistence.test.ts`, `chat.persistence.test.ts`, `chat.routes.security.test.ts`, `security.test.ts`, `user.service.test.ts`
 
 ## ความปลอดภัย frontend XSS และลิงก์ (Frontend XSS / Link Safety)
@@ -31,6 +32,7 @@
 - ห้ามใช้ `dangerouslySetInnerHTML`, `.innerHTML =`, `eval()`, `new Function()`, หรือ `window.open()` ใน frontend source จนกว่าจะมี sanitizer และ security review ชัดเจน
 - ลิงก์ที่เปิดแท็บใหม่ด้วย `target="_blank"` ต้องมี `rel="noopener noreferrer"` เพื่อกัน opener/tabnabbing
 - Browser console ต้องไม่ log raw error object ตรงๆ; ใช้ `logUnexpectedError` เพื่อสรุป error ก่อนเขียน log
+- Frontend API code ต้องไม่ parse `response.json()` ตรงนอก `readApiJson`/`readErrorPayload`; JSON ที่พังต้องกลายเป็น `ApiError` ภาษาไทยก่อนถึง UI
 - Static guard: `bun run frontend:static:audit:test` และ `bun run predeploy:check` ต้องจับ regression ชุดนี้ก่อน staging
 
 ## การคุมพรอมป์ (Prompt Control)
