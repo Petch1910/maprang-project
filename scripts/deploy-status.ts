@@ -1,4 +1,11 @@
-import { apiBaseUrl, isLocalSmokeTarget, readJson, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
+import {
+  apiBaseUrl,
+  formatDiagnosticText,
+  isLocalSmokeTarget,
+  readJson,
+  validateBackendRootIdentity,
+  type RootIdentityPayload,
+} from './smoke-helpers'
 import {
   buildHealthRows,
   buildNextDeploySteps,
@@ -137,6 +144,11 @@ export function formatDeployStatusText(
   return lines.join('\n')
 }
 
+export function formatDeployStatusCaughtError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 export async function runDeployStatus(options: DeployStatusRunnerOptions | string[] = {}) {
   const normalized = Array.isArray(options) ? { argv: options } : options
   const argv = normalized.argv ?? process.argv
@@ -154,7 +166,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
     rootIdentity = await readRootIdentity()
     validateBackendRootIdentity(rootIdentity)
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatDeployStatusCaughtError(error)
     if (jsonMode) {
       writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
     } else {
@@ -168,7 +180,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
   try {
     health = await readHealth()
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatDeployStatusCaughtError(error)
     if (jsonMode) {
       writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
     } else {

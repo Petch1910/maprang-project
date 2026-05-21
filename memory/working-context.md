@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Deploy status diagnostics เพิ่ม `formatDeployStatusCaughtError` ให้ root identity/health failure path ทั้ง text และ `--json` redact secret-shaped value ก่อนแสดงผลแล้ว; `deploy:status:test` ครอบ helper, text mode, และ JSON mode แล้ว.
 - 2026-05-21: Readiness smoke runner diagnostics เพิ่ม `formatReadinessSmokeCaughtError` ให้ root identity/readiness reader failure path redact secret-shaped value ก่อนเขียน CLI error แล้ว; `smoke:ready:test` ครอบ helper และ runner failure path แล้ว.
 - 2026-05-21: Local smoke diagnostics เพิ่ม `formatLocalSmokeCaughtError` ให้ runner failure path redact secret-shaped value ก่อนเขียน CLI error แล้ว; `smoke:local:test` ครอบ helper และ backend failure path แล้ว.
 - 2026-05-21: Live chat smoke diagnostics เพิ่ม `formatLiveChatSmokeCaughtError` และ redact `providerFailure.userMessage` ก่อนประกอบ CLI guidance แล้ว เพื่อไม่ให้ provider/proxy error ที่มี secret-shaped value หลุดใน live chat smoke logs; `smoke:chat:test` ครอบ helper, providerFailure, และ runner failure path แล้ว.

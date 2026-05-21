@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildDeployStatusPayload, formatDeployStatusText, runDeployStatus } from './deploy-status'
+import { buildDeployStatusPayload, formatDeployStatusCaughtError, formatDeployStatusText, runDeployStatus } from './deploy-status'
 import type { HealthPayload } from './deploy-readiness'
 
 function baseHealth(overrides: Partial<HealthPayload> = {}): HealthPayload {
@@ -216,5 +216,50 @@ describe('deploy status formatting', () => {
     expect(errors.join('\n')).toContain('วิธีแก้สเตจจิง:')
     expect(errors.join('\n')).toContain('URL ระบบหลังบ้านที่ deploy แล้ว')
     expect(errors.join('\n')).not.toContain('วิธีแก้ local:')
+  })
+
+  test('redacts secret-shaped values from deploy status caught errors', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const directMessage = formatDeployStatusCaughtError(new Error(`DATABASE_URL=${fakeDatabaseUrl}`))
+
+    expect(directMessage).toContain('[REDACTED_SECRET]')
+    expect(directMessage).not.toContain('super-secret')
+
+    const textLines: string[] = []
+    const textErrors: string[] = []
+    const textExitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts'],
+      currentApiBaseUrl: 'https://api.example.com',
+      currentIsLocalSmokeTarget: false,
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
+      readHealth: async () => {
+        throw new Error(`health failed with DATABASE_URL=${fakeDatabaseUrl}`)
+      },
+      writeLine: (line) => textLines.push(line),
+      writeError: (line) => textErrors.push(line),
+    })
+
+    expect(textExitCode).toBe(1)
+    expect(textLines).toEqual([])
+    expect(textErrors.join('\n')).toContain('[REDACTED_SECRET]')
+    expect(textErrors.join('\n')).not.toContain('super-secret')
+
+    const jsonLines: string[] = []
+    const jsonExitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts', '--json'],
+      currentApiBaseUrl: 'https://api.example.com',
+      currentIsLocalSmokeTarget: false,
+      readRootIdentity: async () => {
+        throw new Error(`root failed with DATABASE_URL=${fakeDatabaseUrl}`)
+      },
+      readHealth: async () => baseHealth(),
+      writeLine: (line) => jsonLines.push(line),
+      writeError: () => {},
+    })
+
+    expect(jsonExitCode).toBe(1)
+    const payload = JSON.parse(jsonLines.join('\n'))
+    expect(payload.error).toContain('[REDACTED_SECRET]')
+    expect(payload.error).not.toContain('super-secret')
   })
 })
