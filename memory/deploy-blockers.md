@@ -53,8 +53,8 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` หลังเพิ่ม frontend/backend response JSON guards, response text guards, frontend central API fetch guard, shared frontend error classifier hardening, predeploy/deploy doctor/status/smoke doctor/e2e/shared smoke/readiness runner/API/image/live-chat/local smoke diagnostic redaction, Supabase Storage setup/check/final-catch/object-shaped diagnostic redaction, structured knowledge object-shaped diagnostic redaction, database/health object-shaped diagnostic redaction, predeploy runner object-shaped diagnostic redaction, chat provider object-shaped classification hardening, และ Creator Draft retry classification redaction; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
-- backend test suite ฝั่ง local ผ่านแล้ว: 171 pass, 0 fail, 580 expect calls.
+- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` หลังเพิ่ม frontend/backend response JSON guards, response text guards, frontend central API fetch guard, shared frontend error classifier hardening, predeploy/deploy doctor/status/smoke doctor/e2e/shared smoke/readiness runner/API/image/live-chat/local smoke diagnostic redaction, Supabase Storage setup/check/final-catch/object-shaped diagnostic redaction, structured knowledge object-shaped diagnostic redaction, database/health object-shaped diagnostic redaction, predeploy runner object-shaped diagnostic redaction, chat provider object-shaped classification hardening, Creator Draft retry classification redaction, และ World State prompt Thai-first guard; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
+- backend test suite ฝั่ง local ผ่านแล้ว: 173 pass, 0 fail, 601 expect calls.
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว
 - Desktop/mobile e2e smoke ผ่านแล้ว
