@@ -34,6 +34,7 @@
 - ลิงก์ที่เปิดแท็บใหม่ด้วย `target="_blank"` ต้องมี `rel="noopener noreferrer"` เพื่อกัน opener/tabnabbing
 - Browser console ต้องไม่ log raw error object ตรงๆ; ใช้ `logUnexpectedError` เพื่อสรุป error ก่อนเขียน log
 - Frontend API code ต้องไม่ parse `response.json()` ตรงนอก `readApiJson`/`readErrorPayload`; JSON ที่พังต้องกลายเป็น `ApiError` ภาษาไทยก่อนถึง UI
+- Frontend API code ต้องไม่อ่าน `response.text()` ตรงใน source; plain-text/HTML/proxy failure ต้องถูกแปลงเป็น `ApiError` ข้อความไทยที่ควบคุมได้ก่อนแสดงผล
 - Static guard: `bun run frontend:static:audit:test` และ `bun run predeploy:check` ต้องจับ regression ชุดนี้ก่อน staging
 
 ## การคุมพรอมป์ (Prompt Control)
