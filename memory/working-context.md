@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Predeploy check diagnostics เพิ่ม `formatPredeployCheckError` ให้ check failure ที่ throw error ถูก redact ด้วย `formatDiagnosticText` ก่อนพิมพ์ผล gate; `predeploy:check:test` และ `predeploy:check` ครอบ regression แล้ว.
 - 2026-05-21: Deploy env doctor diagnostics เพิ่ม `formatDeployEnvDoctorError` ให้ env file read failure redact secret-shaped value ก่อนเข้า findings/output แล้ว; `deploy:doctor:test` ครอบ helper regression แล้ว.
 - 2026-05-21: E2E smoke diagnostics ผูก `formatE2eSmokeError` กับ `formatDiagnosticText` แล้ว เพื่อ redact secret-shaped value จาก Playwright/restore failure ก่อนเขียน QA log; `e2e:smoke:test` ครอบ regression แล้ว.
 - 2026-05-21: Smoke doctor diagnostics เพิ่ม `formatSmokeDoctorCaughtError` ให้ root identity/health failure path redact secret-shaped value ก่อนเขียน CLI error แล้ว; `smoke:doctor:test` ครอบ helper และ runner failure path แล้ว.

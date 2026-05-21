@@ -1,6 +1,7 @@
 import { access, readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { collectDocsCommandAuditResult } from './docs-command-audit'
+import { formatDiagnosticText } from './smoke-helpers'
 
 const root = join(import.meta.dir, '..')
 
@@ -1772,12 +1773,17 @@ const checks: Check[] = [
 ]
 
 const results: Array<{ name: string; ok: boolean; error?: string }> = []
+function formatPredeployCheckError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 for (const check of checks) {
   try {
     await check.run()
     results.push({ name: check.name, ok: true })
   } catch (error) {
-    results.push({ name: check.name, ok: false, error: error instanceof Error ? error.message : String(error) })
+    results.push({ name: check.name, ok: false, error: formatPredeployCheckError(error) })
   }
 }
 
