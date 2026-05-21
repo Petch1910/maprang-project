@@ -142,6 +142,40 @@ describe('frontend API errors', () => {
     }
   })
 
+  test('wraps interrupted chat stream reads in a Thai ApiError', async () => {
+    const originalFetch = globalThis.fetch
+
+    try {
+      globalThis.fetch = (async () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.error(new Error('provider stream secret failure'))
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'text/event-stream' } },
+        )) as typeof fetch
+
+      await expect(
+        streamChatMessage(
+          {
+            message: 'ทดสอบสตรีม',
+            characterId: '550e8400-e29b-41d4-a716-446655440001',
+            chatId: null,
+            history: [],
+          },
+          () => {},
+        ),
+      ).rejects.toMatchObject({
+        name: 'ApiError',
+        status: 502,
+        message: 'สตรีมแชทขัดข้อง กรุณาลองใหม่',
+      })
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
   test('summarizes browser errors before logging', () => {
     expect(safeBrowserErrorSummary(new Error('secret-like-url https://example.invalid?token=leak'))).toEqual({
       name: 'Error',

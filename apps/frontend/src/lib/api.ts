@@ -309,16 +309,20 @@ export type ChatStreamEvent =
 
 const chatStreamMalformedPayload = { message: 'สตรีมแชทขัดข้อง กรุณาลองใหม่' }
 
+function malformedChatStreamError() {
+  return new ApiError('/chat/stream', 502, chatStreamMalformedPayload)
+}
+
 export function parseChatStreamEvent(raw: string) {
   let parsed: unknown
   try {
     parsed = JSON.parse(raw)
   } catch {
-    throw new ApiError('/chat/stream', 502, chatStreamMalformedPayload)
+    throw malformedChatStreamError()
   }
 
   if (!parsed || typeof parsed !== 'object' || typeof (parsed as { type?: unknown }).type !== 'string') {
-    throw new ApiError('/chat/stream', 502, chatStreamMalformedPayload)
+    throw malformedChatStreamError()
   }
 
   return parsed as ChatStreamEvent
@@ -1140,19 +1144,24 @@ export async function streamChatMessage(
     onEvent(parseChatStreamEvent(line.slice(6)))
   }
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
 
-    buffer += decoder.decode(value, { stream: true })
+      buffer += decoder.decode(value, { stream: true })
+      buffer = buffer.replace(/\r\n/g, '\n')
+      const events = buffer.split('\n\n')
+      buffer = events.pop() ?? ''
+
+      for (const rawEvent of events) emitEvent(rawEvent)
+    }
+
+    buffer += decoder.decode()
     buffer = buffer.replace(/\r\n/g, '\n')
-    const events = buffer.split('\n\n')
-    buffer = events.pop() ?? ''
-
-    for (const rawEvent of events) emitEvent(rawEvent)
+    for (const rawEvent of buffer.split('\n\n').filter((event) => event.trim())) emitEvent(rawEvent)
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    throw malformedChatStreamError()
   }
-
-  buffer += decoder.decode()
-  buffer = buffer.replace(/\r\n/g, '\n')
-  for (const rawEvent of buffer.split('\n\n').filter((event) => event.trim())) emitEvent(rawEvent)
 }
