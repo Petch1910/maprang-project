@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   ApiError,
+  apiRequestTimeoutMs,
   fetchCharacters,
   logUnexpectedError,
   parseChatStreamEvent,
@@ -102,6 +103,14 @@ describe('frontend API errors', () => {
     } finally {
       globalThis.fetch = originalFetch
     }
+  })
+
+  test('uses short read timeouts without cutting off generation requests', () => {
+    expect(apiRequestTimeoutMs('/chats')).toBe(5_000)
+    expect(apiRequestTimeoutMs('/characters?view=public')).toBe(5_000)
+    expect(apiRequestTimeoutMs('/chats/chat-1', { method: 'PATCH' })).toBe(12_000)
+    expect(apiRequestTimeoutMs('/chat', { method: 'POST' })).toBe(60_000)
+    expect(apiRequestTimeoutMs('/creator/ai-draft', { method: 'POST' })).toBe(60_000)
   })
 
   test('parses chat stream events split across network chunks', async () => {

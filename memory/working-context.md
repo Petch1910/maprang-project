@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: My Chats (`/chats`) แยกสถานะ "โหลดรายการไม่ได้" ออกจาก empty state จริงแล้ว เมื่อ backend/local API ยังไม่ตอบ หน้าเว็บจะแสดงข้อความให้ตรวจระบบหลังบ้านพร้อมปุ่ม `รีเฟรชรายการ`, ไม่ขึ้นข้อความชวนเข้าใจผิดว่า `ยังไม่มีแชทที่บันทึกไว้`, และ frontend API helper ลด timeout ของ GET เหลือ 5 วินาทีโดยยังคง `/chat` กับ `/creator/ai-draft` ไว้ 60 วินาทีสำหรับงาน generation.
 - 2026-05-21: QA seed ตัวละคร `ป้องแป้ง | PONGPAENG` ไม่สั่ง `ตอบสั้นแต่มีชั้นเชิง` แล้ว เปลี่ยนเป็น `พูดกระชับแต่เป็นฉากครบ` พร้อมบรรยากาศ/แรงเสียดทานทางอารมณ์ เพื่อไม่ให้ seed ที่ผู้ใช้ทดสอบดึงคุณภาพคำตอบให้ห้วนเกินไป.
 - 2026-05-21: Live chat smoke ใช้ `liveChatSmokePrompt` ภาษาไทยแล้ว เพื่อวัดคุณภาพ roleplay ไทยจริงแทน prompt อังกฤษ และ predeploy guard บล็อกข้อความ smoke เก่าที่เริ่มด้วย `I sit across from you`/`Reply as an atmospheric roleplay scene` ไม่ให้กลับมา.
 - 2026-05-21: World State prompt เปลี่ยนหัวข้อ runtime เป็น Thai-first แล้ว (`สถานะโลกปัจจุบัน`, `เวลา`, `สถานที่`, `สภาพอากาศ`, `อารมณ์บรรยากาศ`, `โน้ตฉาก`) และแก้ `cleanString` ให้ truncation รวม `...` ไม่เกิน limit จริงเพื่อคุม prompt budget/input sanitation.

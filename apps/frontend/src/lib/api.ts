@@ -640,8 +640,15 @@ export type LoreInput = {
   parentLoreId: string | null
 }
 
+export function apiRequestTimeoutMs(path: string, init?: RequestInit) {
+  const method = (init?.method ?? 'GET').toUpperCase()
+  if (path === '/chat' || path === '/creator/ai-draft') return 60_000
+  if (method === 'GET') return 5_000
+  return 12_000
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const timeoutMs = path === '/chat' ? 60_000 : 12_000
+  const timeoutMs = apiRequestTimeoutMs(path, init)
   const controller = init?.signal ? null : new AbortController()
   const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null
 

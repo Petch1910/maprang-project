@@ -44,6 +44,7 @@ export function MyChatsPage() {
   const normalizedSearch = search.trim().toLowerCase()
   const sourceChats = filter === 'archived' ? archivedChats : chats
   const isListLoading = filter === 'archived' ? isArchivedLoading : isLoading
+  const hasListError = Boolean(error) || actionNote.includes('โหลดแชทที่จัดเก็บไว้ไม่สำเร็จ')
 
   const visibleChats = useMemo(() => {
     const pinOrder = new Map(pinnedChatIds.map((id, index) => [id, index]))
@@ -368,7 +369,9 @@ export function MyChatsPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-black text-slate-500">
         <span>
-          แสดง {visibleChats.length.toLocaleString()} จาก {sourceChats.length.toLocaleString()} แชท
+          {hasListError
+            ? 'ยังโหลดรายการแชทไม่ได้'
+            : `แสดง ${visibleChats.length.toLocaleString()} จาก ${sourceChats.length.toLocaleString()} แชท`}
         </span>
         {filter === 'pinned' && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">เฉพาะแชทที่ปักหมุดไว้</span>}
         {filter === 'pending' && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">เฉพาะแชทที่มีฉากรออยู่</span>}
@@ -434,8 +437,20 @@ export function MyChatsPage() {
       )}
 
       {error && (
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-sm font-bold text-amber-800">
-          โหลดรายการแชทไม่ได้
+        <div
+          className="flex flex-col gap-3 rounded-lg border border-rose-500/20 bg-rose-50 p-4 text-sm font-bold text-rose-700 shadow-[0_18px_44px_rgba(0,0,0,0.12)] sm:flex-row sm:items-center sm:justify-between"
+          data-testid="my-chats-load-error"
+          role="status"
+        >
+          <span>โหลดรายการแชทไม่ได้ ตรวจการเชื่อมต่อระบบหลังบ้านแล้วลองรีเฟรชอีกครั้ง</span>
+          <button
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-rose-500/20 bg-white px-3 text-xs font-black text-rose-700 transition hover:bg-rose-100"
+            onClick={refreshChats}
+            type="button"
+          >
+            <RefreshCw size={15} />
+            รีเฟรชรายการ
+          </button>
         </div>
       )}
 
@@ -637,9 +652,13 @@ export function MyChatsPage() {
           <div className="rounded-2xl border border-dashed border-slate-900/15 bg-white p-6 text-slate-500">
             <p className="m-0 text-sm leading-6">
               {filter === 'archived'
-                ? 'ยังไม่มีแชทที่จัดเก็บไว้ เมื่อจัดเก็บแชทจากเมนูสามจุด รายการจะมาอยู่ตรงนี้และสามารถเอากลับมาได้'
-                : sourceChats.length === 0
-                  ? 'ยังไม่มีแชทที่บันทึกไว้ เริ่มจากหน้าแรกแล้วห้องที่เล่นค้างไว้จะแสดงที่นี่พร้อมสถานะความสัมพันธ์และฉากที่รออยู่'
+                ? hasListError
+                  ? 'ยังโหลดแชทที่จัดเก็บไว้ไม่ได้ ลองรีเฟรชอีกครั้งหลังระบบหลังบ้านพร้อมใช้งาน'
+                  : 'ยังไม่มีแชทที่จัดเก็บไว้ เมื่อจัดเก็บแชทจากเมนูสามจุด รายการจะมาอยู่ตรงนี้และสามารถเอากลับมาได้'
+                : hasListError
+                  ? 'ยังโหลดรายการแชทไม่ได้ เมื่อระบบหลังบ้านพร้อมใช้งาน รายการแชทที่เล่นค้างไว้จะแสดงที่นี่พร้อมสถานะความสัมพันธ์และฉากที่รออยู่'
+                  : sourceChats.length === 0
+                    ? 'ยังไม่มีแชทที่บันทึกไว้ เริ่มจากหน้าแรกแล้วห้องที่เล่นค้างไว้จะแสดงที่นี่พร้อมสถานะความสัมพันธ์และฉากที่รออยู่'
                   : filter === 'pinned'
                   ? 'ยังไม่มีแชทที่ปักหมุดไว้ เปิดเมนูสามจุดบนแชทแล้วเลือกปักหมุดเพื่อเก็บไว้ด้านบน'
                   : 'ไม่พบแชทที่ตรงกับคำค้นหาหรือตัวกรองตอนนี้'}
