@@ -72,7 +72,15 @@ export function WalletPage() {
     return Math.trunc(Math.abs(amount))
   }, [adjustAmount])
   const hasAdminKey = adminKeyInput.trim().length > 0
-  const canAdjustTokens = Boolean(summary) && !isAdjusting && normalizedAdjustAmount > 0 && hasAdminKey
+  const adjustTokenDisabledReason = !summary
+    ? 'โหลดข้อมูลกระเป๋าโทเคนก่อนปรับยอด'
+    : isAdjusting
+      ? 'กำลังปรับยอดโทเคน'
+      : normalizedAdjustAmount <= 0
+        ? 'ใส่จำนวนโทเคนมากกว่า 0'
+        : !hasAdminKey
+          ? 'บันทึก ADMIN_API_KEY ก่อนปรับโทเคน'
+          : ''
   const balanceLabel = summary ? `${summary.user.tokenBalance.toLocaleString()} โทเคน` : isLoading ? 'กำลังโหลด...' : '0 โทเคน'
   const totalTokensLabel = summary ? summary.usage.totalTokens.toLocaleString() : isLoading ? '...' : '0'
   const requestCountLabel = summary ? summary.usage.requestCount.toLocaleString() : isLoading ? '...' : '0'
@@ -181,10 +189,12 @@ export function WalletPage() {
 
           <div className="grid gap-2">
             <button
+              aria-disabled={isLoading}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
               data-testid="wallet-refresh"
               disabled={isLoading}
               onClick={loadWallet}
+              title={isLoading ? 'กำลังโหลดกระเป๋าโทเคน' : 'รีเฟรชข้อมูลกระเป๋าโทเคน'}
               type="button"
             >
               <RefreshCw size={16} />
@@ -356,19 +366,23 @@ export function WalletPage() {
               value={adjustAmount}
             />
             <button
+              aria-disabled={Boolean(adjustTokenDisabledReason)}
               className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60"
               data-testid="wallet-adjust-add"
-              disabled={!canAdjustTokens}
+              disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(normalizedAdjustAmount)}
+              title={adjustTokenDisabledReason || 'เพิ่มโทเคนให้ผู้ใช้ปัจจุบัน'}
               type="button"
             >
               เพิ่ม
             </button>
             <button
+              aria-disabled={Boolean(adjustTokenDisabledReason)}
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-4 text-sm font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
               data-testid="wallet-adjust-debit"
-              disabled={!canAdjustTokens}
+              disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(-normalizedAdjustAmount)}
+              title={adjustTokenDisabledReason || 'หักโทเคนจากผู้ใช้ปัจจุบัน'}
               type="button"
             >
               หัก

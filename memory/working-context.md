@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Wallet page disabled controls now explain token-economy blockers. `/wallet` refresh has a loading title/aria state, and admin token add/debit buttons expose titles for missing wallet data, invalid amount, missing `ADMIN_API_KEY`, or in-flight adjustment; Route/Menu Audit now records those wallet guard reasons.
 - 2026-05-21: Moderation page disabled controls now explain themselves. `/moderation` refresh exposes `aria-disabled` plus a title for missing `ADMIN_API_KEY` or loading, and report action buttons expose titles for updating, already-resolved reports, and already-archived messages; Route/Menu Audit now documents those guard reasons instead of the older generic admin-key guard.
 - 2026-05-21: `bun run qa:repo` passed again after the chat stream connect timeout and frontend API timeout source guard. Deterministic repo-owned QA remains green; remaining blockers are still real staging/production environment, live provider verification, and production database/Supabase setup rather than local code gates.
 - 2026-05-21: Frontend API fetch timeout source guard now checks `apps/frontend/src/lib/api.ts` directly from `scripts/frontend-api-errors.test.ts`, locking the three fetch surfaces (`apiRequestTimeoutMs`, `apiUploadTimeoutMs`, and `apiStreamConnectTimeoutMs`) so future frontend API calls do not drift back to unbounded requests.
