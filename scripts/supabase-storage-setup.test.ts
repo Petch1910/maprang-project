@@ -197,9 +197,38 @@ describe('Supabase storage setup helpers', () => {
 
       await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.toThrow('postgresql://[REDACTED_SECRET]')
       await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.not.toThrow('super-secret')
+
+      const objectError = {
+        message: `network object failed DATABASE_URL=${fakeDatabaseUrl}`,
+        toString() {
+          throw new Error('ไม่ควร stringify raw object')
+        },
+      }
+      globalThis.fetch = (async () => {
+        throw objectError
+      }) as unknown as typeof fetch
+
+      await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.toThrow('postgresql://[REDACTED_SECRET]')
+      await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.not.toThrow('super-secret')
     } finally {
       globalThis.fetch = previousFetch
     }
+  })
+
+  test('formats object-shaped Supabase storage setup errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const objectError = {
+      message: `storage setup failed DATABASE_URL=${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('ไม่ควร stringify raw object')
+      },
+    }
+
+    const message = formatSupabaseStorageSetupError(objectError)
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
   })
 
   test('runner catch redacts secret-shaped operation errors before logging', async () => {

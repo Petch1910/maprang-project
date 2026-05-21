@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { formatDiagnosticText } from './smoke-helpers'
+import { formatDiagnosticText, formatUnknownDiagnosticText } from './smoke-helpers'
 
 const root = join(import.meta.dir, '..')
 const backendDir = join(root, 'apps', 'backend')
@@ -101,8 +101,7 @@ export function normalizeSignedUrl(signedPath: string, supabaseUrl: string) {
 }
 
 export function formatSupabaseStorageSetupError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 async function storageRequest(config: SupabaseStorageConfig, path: string, init: RequestInit = {}) {
@@ -118,8 +117,7 @@ async function storageRequest(config: SupabaseStorageConfig, path: string, init:
       },
     })
   } catch (error) {
-    const rawReason = error instanceof Error ? error.message : String(error)
-    const reason = formatDiagnosticText(rawReason, 500)
+    const reason = formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
     throw new Error(`ติดต่อ Supabase Storage ที่ ${config.supabaseUrl} ไม่สำเร็จ: ${reason}`)
   } finally {
     clearTimeout(timeoutId)

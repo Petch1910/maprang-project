@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Supabase Storage setup/fetch diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ object-shaped setup/network errors ถูก redact โดยไม่ stringify object ดิบก่อนเขียน CLI failure.
 - 2026-05-21: Deploy env doctor ใช้ `formatUnknownDiagnosticText` สำหรับ env file read errors แล้ว ทำให้ object-shaped env errors ถูก redact โดยไม่ stringify object ดิบก่อนบันทึก findings.
 - 2026-05-21: Live chat smoke caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ root/health/chat/wallet failure ที่เป็น object-shaped error ไม่ถูก stringify ดิบก่อนเขียนผล smoke.
 - 2026-05-21: Image smoke caught-error diagnostics ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ provider/root/health failure ที่เป็น object-shaped error ไม่ถูก stringify ดิบก่อนเขียนผล live-image smoke.

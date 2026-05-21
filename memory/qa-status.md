@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 Supabase Storage setup object-shaped diagnostic pass: `bun run supabase:storage:test` ผ่าน 10 tests / 42 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 72 expects, และ `bun run predeploy:check` ผ่านหลัง `formatSupabaseStorageSetupError`/fetch failure path ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 deploy env doctor object-shaped diagnostic pass: `bun run deploy:doctor:test` ผ่าน 12 tests / 54 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 71 expects, และ `bun run predeploy:check` ผ่านหลัง `formatDeployEnvDoctorError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 live chat smoke object-shaped diagnostic pass: `bun run smoke:chat:test` ผ่าน 10 tests / 44 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 70 expects, และ `bun run predeploy:check` ผ่านหลัง `formatLiveChatSmokeCaughtError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 image smoke object-shaped diagnostic pass: `bun run smoke:image:test` ผ่าน 11 tests / 42 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 69 expects, และ `bun run predeploy:check` ผ่านหลัง `formatImageSmokeCaughtError` ใช้ `formatUnknownDiagnosticText`.

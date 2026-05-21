@@ -1186,12 +1186,20 @@ const checks: Check[] = [
           'normalizes signed URL response paths',
           'runs Supabase storage setup through an importable runner',
           'live storage operations keep malformed JSON diagnostics Thai-first',
+          'formats object-shaped Supabase storage setup errors without stringifying raw objects',
         ],
         'scripts/supabase-storage-setup.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/supabase-storage-setup.ts'),
-        ['SupabaseStorageSetupRunnerOptions', 'readStorageJson', 'คืน JSON ไม่ถูกต้อง', 'runSupabaseStorageSetup', 'if (import.meta.main) process.exit(await runSupabaseStorageSetup())'],
+        [
+          'SupabaseStorageSetupRunnerOptions',
+          'formatUnknownDiagnosticText',
+          'readStorageJson',
+          'คืน JSON ไม่ถูกต้อง',
+          'runSupabaseStorageSetup',
+          'if (import.meta.main) process.exit(await runSupabaseStorageSetup())',
+        ],
         'scripts/supabase-storage-setup.ts',
       )
       requireIncludes(
