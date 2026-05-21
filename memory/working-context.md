@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Frontend API JSON hardening เพิ่ม `readApiJson`/`readErrorPayload` ให้ success response ที่ body ไม่ใช่ JSON ถูกห่อเป็น `ApiError` ภาษาไทย "API ตอบกลับไม่สมบูรณ์ กรุณาลองใหม่" แทน raw `SyntaxError`; ใช้ร่วมกับ `requestJson`, avatar upload, และ stream error payload แล้ว.
 - 2026-05-21: Creator Draft JSON hardening เปลี่ยน parser ของ AI draft ให้ห่อ JSON ที่โมเดลคืนมาพังเป็น `SyntaxError` ข้อความไทยที่ควบคุมได้ "โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์" โดยยัง retry ได้เหมือนเดิม และ warning จะไม่หลุด raw `Unexpected...`/`SyntaxError` ไปถึงครีเอเตอร์.
 - 2026-05-21: API smoke stream parser เพิ่ม `parseApiSmokeStreamEvents` เพื่อให้ `/chat/stream` smoke แปลง malformed SSE `data:` event เป็น diagnostic ภาษาไทยที่บอก path/บรรทัด แทนการปล่อย `SyntaxError` จาก `JSON.parse` ดิบ; `api:smoke:test` และ `predeploy:check` ล็อก regression นี้ไว้แล้ว.
 - 2026-05-21: Frontend clipboard hardening เพิ่ม `safeClipboard` wrapper ให้ share character และ Prompt Inspector copy prompt ไม่ throw เมื่อ browser/insecure context ไม่อนุญาต clipboard; UI จะ fallback เป็นข้อความให้คัดลอกเอง และ `frontend:clipboard:test` scan กัน direct `navigator.clipboard`/`clipboard.writeText` กลับมาใน source.

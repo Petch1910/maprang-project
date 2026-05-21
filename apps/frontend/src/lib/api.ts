@@ -9,6 +9,7 @@ const genericApiErrorMessage = 'คำสั่งนี้ไม่สำเร
 const thaiTextPattern = /[\u0e00-\u0e7f]/
 const rawTechnicalMessagePattern =
   /\b(?:Cannot read|PrismaClient\w*|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|TypeError|ReferenceError|SyntaxError|DATABASE_URL|OPENROUTER_API_KEY|SUPABASE_SERVICE_ROLE_KEY|service_role|SQLSTATE|stack trace|undefined)\b/i
+const malformedApiJsonPayload = { message: 'API ตอบกลับไม่สมบูรณ์ กรุณาลองใหม่' }
 
 function payloadString(payload: unknown, key: 'message' | 'error') {
   if (!payload || typeof payload !== 'object') return ''
@@ -36,6 +37,21 @@ export class ApiError extends Error {
     this.path = path
     this.status = status
     this.payload = payload
+  }
+}
+
+async function readErrorPayload(response: Response) {
+  return response
+    .clone()
+    .json()
+    .catch(() => null)
+}
+
+async function readApiJson<T>(path: string, response: Response): Promise<T> {
+  try {
+    return (await response.json()) as T
+  } catch {
+    throw new ApiError(path, 502, malformedApiJsonPayload)
   }
 }
 
@@ -642,14 +658,11 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    const payload = await response
-      .clone()
-      .json()
-      .catch(() => null)
+    const payload = await readErrorPayload(response)
     throw new ApiError(path, response.status, payload)
   }
 
-  return response.json() as Promise<T>
+  return readApiJson<T>(path, response)
 }
 
 export type CharacterListFilters = {
@@ -888,14 +901,11 @@ export async function uploadAvatar(file: File) {
   })
 
   if (!response.ok) {
-    const payload = await response
-      .clone()
-      .json()
-      .catch(() => null)
+    const payload = await readErrorPayload(response)
     throw new ApiError('/uploads/avatar', response.status, payload)
   }
 
-  return response.json() as Promise<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>
+  return readApiJson<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>('/uploads/avatar', response)
 }
 
 export async function setCharacterFavorite(characterId: string, favorite: boolean) {
@@ -1125,10 +1135,7 @@ export async function streamChatMessage(
   })
 
   if (!response.ok || !response.body) {
-    const payload = await response
-      .clone()
-      .json()
-      .catch(() => null)
+    const payload = await readErrorPayload(response)
     throw new ApiError('/chat/stream', response.status, payload)
   }
 

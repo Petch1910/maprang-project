@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   ApiError,
+  fetchCharacters,
   logUnexpectedError,
   parseChatStreamEvent,
   safeBrowserErrorSummary,
@@ -50,6 +51,26 @@ describe('frontend API errors', () => {
     const error = new ApiError('/uploads/avatar', 502, null)
 
     expect(error.message).toBe('คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่ (สถานะ 502)')
+  })
+
+  test('wraps malformed successful JSON responses in a Thai ApiError', async () => {
+    const originalFetch = globalThis.fetch
+
+    try {
+      globalThis.fetch = (async () =>
+        new Response('not-json', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })) as typeof fetch
+
+      await expect(fetchCharacters()).rejects.toMatchObject({
+        name: 'ApiError',
+        status: 502,
+        message: 'API ตอบกลับไม่สมบูรณ์ กรุณาลองใหม่',
+      })
+    } finally {
+      globalThis.fetch = originalFetch
+    }
   })
 
   test('parses chat stream events split across network chunks', async () => {
