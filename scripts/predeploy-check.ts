@@ -1191,6 +1191,7 @@ const checks: Check[] = [
           'catches raw error message details in route responses',
           'catches direct raw error details in route responses',
           'catches route catch responses that expose raw error messages',
+          'catches route catch responses that expose stringified raw errors',
           'catches generic raw error messages after an AuthError branch',
           'allows route catch responses for controlled AuthError messages',
           'catches admin routes without admin api key guards',

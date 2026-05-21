@@ -5,6 +5,7 @@ Last updated: 2026-05-21
 ## บันทึกเพิ่ม 2026-05-21
 
 - 2026-05-21: backend security audit ปิด false negative ของ route catch ที่มี `AuthError` branch แล้วตามด้วย generic `message: error.message`; ตอนนี้ตรวจทีละตำแหน่งใน catch block แทน regex ก้อนเดียว และ `predeploy:check` ล็อก helper/test ใหม่ไว้แล้ว.
+- 2026-05-21: backend security audit ขยาย raw route catch message guard ให้จับ `message: String(error)` และ ternary `error instanceof Error ? error.message : String(error)` ด้วย เพื่อไม่ให้ generic catch ส่งรายละเอียด error ดิบกลับผู้ใช้.
 
 ## อัปเดตงานใน repo (Repo-owned update) 2026-05-21
 

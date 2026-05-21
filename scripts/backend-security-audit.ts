@@ -44,7 +44,8 @@ const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bm
 const rawRouteErrorLogPattern = /console\.(?:error|warn)\([^)\n]*,\s*error\b/g
 const rawRouteErrorThrowPattern = /throw\s+error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
-const rawErrorMessagePropertyPattern = /\bmessage\s*:\s*error\.message\b/g
+const rawErrorMessagePropertyPattern =
+  /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
 const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
@@ -102,7 +103,9 @@ function findMatchingBrace(content: string, openingBraceIndex: number) {
   return content.length
 }
 
-function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number) {
+function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number, messageSource: string) {
+  if (!/\bmessage\s*:\s*error\.message\b/.test(messageSource)) return false
+
   const beforeMessage = catchBlock.slice(0, messageIndex)
   const authCheckIndex = beforeMessage.lastIndexOf('error instanceof AuthError')
   if (authCheckIndex < 0) return false
@@ -123,7 +126,7 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
     const catchBlock = content.slice(openingBraceIndex + 1, closingBraceIndex)
     for (const messageMatch of catchBlock.matchAll(rawErrorMessagePropertyPattern)) {
       const blockMessageIndex = messageMatch.index ?? 0
-      if (isControlledAuthErrorMessage(catchBlock, blockMessageIndex)) continue
+      if (isControlledAuthErrorMessage(catchBlock, blockMessageIndex, messageMatch[0] ?? '')) continue
 
       findings.push({
         file,

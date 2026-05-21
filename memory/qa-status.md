@@ -5,6 +5,7 @@ Last updated: 2026-05-21
 ## บันทึกเพิ่ม 2026-05-21
 
 - 2026-05-21 route catch false-negative guard pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 20 tests / 31 expects, `bun run security:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run secrets:check` ผ่านหลังเปลี่ยน audit ให้ตรวจ `message: error.message` รายตำแหน่งใน catch block และยัง allow controlled `AuthError`.
+- 2026-05-21 route catch stringified-message guard pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 21 tests / 33 expects, `bun run security:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run secrets:check` ผ่านหลังเพิ่มการจับ `message: String(error)` และ ternary raw error message ใน route catch.
 
 ## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-21
 
