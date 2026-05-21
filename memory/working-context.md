@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Deploy blockers current summary refresh ปรับ `memory/deploy-blockers.md` ส่วนที่ไม่ใช่ blocker ให้ตรงกับ gate ล่าสุดหลัง response JSON parsing guards โดยยังคง production blockers จริงเป็น staging/live-provider/environment เหมือนเดิม.
 - 2026-05-21: Agent handoff refresh ปรับ `agent.md` current status ให้ตรงกับ gate ล่าสุดหลังเพิ่ม frontend/backend response JSON parsing guards โดยระบุ backend 161 tests / 519 expects และ `qa:repo` รอบล่าสุดที่ผ่านแล้ว.
 - 2026-05-21: Frontend static audit เพิ่ม guard กัน `response.json()` ตรงใน frontend source นอก `readApiJson`/`readErrorPayload` เพื่อบังคับให้ API JSON ที่พังถูกห่อเป็น `ApiError` ข้อความไทยก่อนแสดงผล; `frontend-static-audit.test` ครอบเคสจับผิดและ allow helper แล้ว.
 - 2026-05-21: Backend security audit เพิ่ม guard กัน runtime backend parse `response.json()` ตรงนอก safe `read...Payload` helper เพื่อบังคับให้ external JSON ที่พังถูกห่อเป็นข้อความไทยก่อนเสมอ; `security:audit:test` ครอบทั้งเคสจับผิดและ allow helper แล้ว.
