@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Events Inbox (`/events`) ปรับ visual surface เป็น dark theme ให้เข้ากับห้องแชทมากขึ้น ลดการ์ดโทนน้ำตาลหนัก, ปรับ search/count/error/empty/event group/row CTA ให้เป็นพื้นผิวดำพร้อม accent ส้ม/ฟ้า/เขียว และคง behavior เดิมของ search/open-chat.
 - 2026-05-21: Staging runbook และ production checklist ระบุ `deploy-status --json` failure shape แล้ว โดย predeploy guard บังคับให้มี `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ CI/dashboard อ่านสาเหตุ root/health failure ได้ตรงกับ README/DEPLOYMENT_QA.
 - 2026-05-21: Deploy status JSON failure path เพิ่ม `failures`, `nextSteps`, และ `rootIdentity.ok=false` แล้ว สำหรับกรณี root identity หรือ `/health` อ่านไม่ได้ ทำให้ automation เห็นสาเหตุและขั้นถัดไปแม้ backend local/staging ยังไม่ตอบ.
 - 2026-05-21: `bun run qa:repo` ผ่านเต็มหลัง object-shaped diagnostics hardening ชุดล่าสุด ครอบ backend 171 tests / 580 expects, route/API/security/frontend/predeploy/eval/audit gates และ bundle budget ยังอยู่ในงบเดิม.
