@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   buildSmokeAuthHeaders,
+  formatDiagnosticText,
   formatFetchErrorReason,
   formatPayload,
   smokeApiBaseUrl,
@@ -43,6 +44,14 @@ describe('smoke helpers', () => {
     expect(tryParseJson('not json')).toBeNull()
     expect(formatPayload({ ok: false }, 'fallback')).toBe('{"ok":false}')
     expect(formatPayload(null, 'x'.repeat(600))).toHaveLength(500)
+  })
+
+  test('redacts secret-shaped values from smoke diagnostics', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    expect(formatDiagnosticText(`database=${fakeDatabaseUrl}`, 500)).toContain('postgresql://[REDACTED_SECRET]')
+    expect(formatPayload({ detail: fakeDatabaseUrl }, 'fallback')).toContain('postgresql://[REDACTED_SECRET]')
+    expect(formatPayload(null, `DATABASE_URL=${fakeDatabaseUrl}`)).toContain('[REDACTED_SECRET]')
+    expect(formatFetchErrorReason(new Error(`connection failed ${fakeDatabaseUrl}`))).toContain('postgresql://[REDACTED_SECRET]')
   })
 
   test('formats common fetch failures with Thai-first diagnostics', () => {

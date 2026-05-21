@@ -1,3 +1,5 @@
+import { redactSensitiveText } from '../apps/backend/src/redaction'
+
 export type SmokeEnv = {
   SMOKE_API_BASE_URL?: string
   SMOKE_USER_ID?: string
@@ -43,6 +45,10 @@ export function validateBackendRootIdentity(root: RootIdentityPayload) {
   if (root.service !== 'maprang-backend') throw new Error('root identity ของระบบหลังบ้านคืนชื่อ service ไม่ถูกต้อง')
 }
 
+export function formatDiagnosticText(value: string, maxLength: number) {
+  return redactSensitiveText(value).text.slice(0, maxLength)
+}
+
 export async function readJson<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${apiBaseUrl}${path}`
   let response: Response
@@ -60,7 +66,7 @@ export async function readJson<T>(path: string, init?: RequestInit): Promise<T> 
     throw new Error(`${path} ไม่ผ่านด้วยสถานะ ${response.status}: ${formatPayload(payload, raw || response.statusText)}`)
   }
   if (!payload) {
-    throw new Error(`${path} ไม่คืน JSON: ${raw.slice(0, 300) || 'response ว่าง'}`)
+    throw new Error(`${path} ไม่คืน JSON: ${formatDiagnosticText(raw, 300) || 'response ว่าง'}`)
   }
   return payload as T
 }
@@ -74,12 +80,12 @@ export function tryParseJson(value: string) {
 }
 
 export function formatPayload(payload: unknown, fallback: string) {
-  if (payload) return JSON.stringify(payload)
-  return fallback.slice(0, 500)
+  const text = payload ? JSON.stringify(payload) : fallback
+  return formatDiagnosticText(text, 500)
 }
 
 export function formatFetchErrorReason(error: unknown) {
-  const reason = error instanceof Error ? error.message : String(error)
+  const reason = formatDiagnosticText(error instanceof Error ? error.message : String(error), 500)
   const normalized = reason.toLowerCase()
   if (
     normalized.includes('unable to connect') ||
