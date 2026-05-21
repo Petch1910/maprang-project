@@ -35,6 +35,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('formats object-shaped DB-test skip diagnostics without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped database health diagnostics without stringifying raw objects')
     expect(predeploy).toContain('redactUnknownDiagnosticText')
+    expect(predeploy).toContain('object-shaped error')
     expect(predeploy).toContain('safeErrorTextForClassification')
     expect(predeploy).toContain('frontendErrorSecretPatterns')
     expect(predeploy).toContain('reports raw auth error classifier regressions')
