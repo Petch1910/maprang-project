@@ -407,6 +407,10 @@ Last updated: 2026-05-21
 
 สถานะ: ผ่านสำหรับ Admin Health, Admin Evals, และ Chat UI interaction
 
+อัปเดต 2026-05-21:
+- World State prompt Thai-first pass: `bun test apps/backend/src/world-state.service.test.ts apps/backend/src/chat.runtime.test.ts` ผ่าน 19 tests / 119 expects หลังเปลี่ยนหัวข้อ runtime world state เป็นไทยและล็อก truncation ไม่ให้เกิน limit.
+- Predeploy world-state guard pass: `bun run predeploy:check:test` ผ่าน 3 tests / 87 expects หลังเพิ่ม guard ให้ `predeploy:check` บังคับ `apps/backend/src/world-state.service.ts` ใช้หัวข้อไทยและ forbid `World state`, `Time:`, `Location:`, `Scene notes:` กลับมา.
+
 ตรวจแล้ว:
 - `/admin/health` renders.
 - `/admin/prompt-inspector` renders and can call the admin prompt snapshot flow when an admin key is available.

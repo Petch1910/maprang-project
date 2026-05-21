@@ -284,6 +284,7 @@ const checks: Check[] = [
       const promptInspectorService = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
       const relationshipEngine = await readRepoFile('apps/backend/src/relationship.engine.ts')
       const sceneRuntime = await readRepoFile('apps/backend/src/scene.runtime.ts')
+      const worldStateService = await readRepoFile('apps/backend/src/world-state.service.ts')
       const chatStyleGuide = await readRepoFile('knowledge/structured/chat-style-guide.json')
       const backendEnv = await readRepoFile('apps/backend/src/env.ts')
       const backendEnvTest = await readRepoFile('apps/backend/src/env.test.ts')
@@ -330,6 +331,11 @@ const checks: Check[] = [
         'apps/backend/src/scene.runtime.ts',
       )
       requireIncludes(
+        worldStateService,
+        ['สถานะโลกปัจจุบัน', 'เวลา:', 'สถานที่:', 'สภาพอากาศ:', 'อารมณ์บรรยากาศ:', 'โน้ตฉาก:', 'ถือว่านี่คือสถานะโลกปัจจุบัน'],
+        'apps/backend/src/world-state.service.ts',
+      )
+      requireIncludes(
         relationshipEngine,
         ['สถานะ Relationship Engine', 'ตัวปรับพรอมป์', 'ใช้เป็นทิศทางพฤติกรรมแบบซ่อนอยู่'],
         'apps/backend/src/relationship.engine.ts',
@@ -371,6 +377,11 @@ const checks: Check[] = [
         sceneRuntime,
         ['Scene engine state', 'Pending scene notifications', 'Sandbox mode: continue', 'Let the character open up carefully', 'Run a focused relationship scene'],
         'apps/backend/src/scene.runtime.ts',
+      )
+      forbidIncludes(
+        worldStateService,
+        ['World state', 'Time:', 'Location:', 'Weather:', 'Ambient mood:', 'Scene notes:', 'Treat this as the current world state'],
+        'apps/backend/src/world-state.service.ts',
       )
       forbidIncludes(
         relationshipEngine,

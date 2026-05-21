@@ -166,7 +166,11 @@ describe('chat runtime state', () => {
     const prompt = buildWorldStatePrompt(runtime.memory.worldState)
 
     expect(coerceWorldState(runtime.memory.worldState).location).toBe('rainy rooftop')
-    expect(prompt).toContain('World state')
+    expect(prompt).toContain('สถานะโลกปัจจุบัน')
+    expect(prompt).toContain('สถานที่: rainy rooftop')
+    expect(prompt).toContain('ถือว่านี่คือสถานะโลกปัจจุบัน')
+    expect(prompt).not.toContain('World state')
+    expect(prompt).not.toContain('Location:')
     expect(prompt).toContain('rainy rooftop')
     expect(prompt).toContain('confession scene')
   })

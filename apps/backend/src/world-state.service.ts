@@ -37,7 +37,10 @@ function asRecord(value: unknown): Record<string, unknown> {
 function cleanString(value: unknown, maxLength: number) {
   if (typeof value !== 'string') return ''
   const cleaned = value.replace(/\s+/g, ' ').trim()
-  return cleaned.length > maxLength ? `${cleaned.slice(0, maxLength - 1)}...` : cleaned
+  if (cleaned.length <= maxLength) return cleaned
+  const suffix = '...'
+  if (maxLength <= suffix.length) return suffix.slice(0, maxLength)
+  return `${cleaned.slice(0, maxLength - suffix.length)}${suffix}`
 }
 
 function cleanSceneNotes(value: unknown) {
@@ -95,15 +98,15 @@ export function buildWorldStatePrompt(value: unknown) {
   if (!hasWorldStateContent(value)) return ''
   const worldState = coerceWorldState(value)
   const lines = [
-    worldState.timeOfDay ? `Time: ${worldState.timeOfDay}` : '',
-    worldState.location ? `Location: ${worldState.location}` : '',
-    worldState.weather ? `Weather: ${worldState.weather}` : '',
-    worldState.mood ? `Ambient mood: ${worldState.mood}` : '',
-    worldState.sceneNotes.length > 0 ? `Scene notes: ${worldState.sceneNotes.join(' | ')}` : '',
-    'Treat this as the current world state. Preserve it unless the player or scene clearly changes it.',
+    worldState.timeOfDay ? `เวลา: ${worldState.timeOfDay}` : '',
+    worldState.location ? `สถานที่: ${worldState.location}` : '',
+    worldState.weather ? `สภาพอากาศ: ${worldState.weather}` : '',
+    worldState.mood ? `อารมณ์บรรยากาศ: ${worldState.mood}` : '',
+    worldState.sceneNotes.length > 0 ? `โน้ตฉาก: ${worldState.sceneNotes.join(' | ')}` : '',
+    'ถือว่านี่คือสถานะโลกปัจจุบัน รักษาไว้เว้นแต่ผู้เล่นหรือฉากเปลี่ยนอย่างชัดเจน',
   ].filter(Boolean)
 
-  return `World state:\n${lines.join('\n')}`
+  return `สถานะโลกปัจจุบัน:\n${lines.join('\n')}`
 }
 
 export async function loadChatWorldState(chatId: string, userId = defaultUserId) {
