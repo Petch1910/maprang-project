@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 chat provider object-shaped classifier pass: `bun test apps\backend\src\chat.runtime.test.ts` ผ่าน 17 tests / 98 expects, `bun run backend:check` ผ่าน 171 tests / 580 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 79 expects, และ `bun run predeploy:check` ผ่านหลัง provider classifier ไม่ stringify object-shaped provider failures.
 - 2026-05-21 predeploy runner object-shaped diagnostic pass: `bun run predeploy:check:test` ผ่าน 3 tests / 78 expects และ `bun run predeploy:check` ผ่านหลัง `formatPredeployCheckError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 backend DB/health object-shaped diagnostic pass: `bun test scripts\backend-db-check.test.ts apps\backend\src\db.test-gate.test.ts apps\backend\src\health.service.test.ts` ผ่าน 19 tests / 49 expects, `bun run backend:check` ผ่าน 170 tests / 578 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 78 expects, และ `bun run predeploy:check` ผ่านหลัง DB/health diagnostics ใช้ `redactUnknownDiagnosticText`.
 - 2026-05-21 structured knowledge object-shaped diagnostic pass: `bun test apps\backend\src\knowledge.service.test.ts` ผ่าน 5 tests / 16 expects, `bun run backend:check` ผ่าน 168 tests / 572 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 75 expects, และ `bun run predeploy:check` ผ่านหลัง `formatKnowledgeError` ใช้ `redactUnknownDiagnosticText`.

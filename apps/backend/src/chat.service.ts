@@ -276,6 +276,7 @@ function providerMessage(error: unknown) {
     if (typeof message === 'string') return message
     const errorField = (error as { error?: unknown }).error
     if (typeof errorField === 'string') return errorField
+    return ''
   }
   return String(error)
 }

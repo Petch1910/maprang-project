@@ -1638,7 +1638,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         chatRuntimeTest,
-        ['redacts secret-shaped provider details before classification output', 'not.toContain(fakeDatabaseUrl)', 'not.toContain(fakeOpenRouterKey)'],
+        [
+          'redacts secret-shaped provider details before classification output',
+          'classifies object-shaped provider failures without stringifying raw objects',
+          'not.toContain(fakeDatabaseUrl)',
+          'not.toContain(fakeOpenRouterKey)',
+        ],
         'apps/backend/src/chat.runtime.test.ts',
       )
       requireIncludes(

@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Chat provider classifier ไม่ stringify object-shaped provider failures ที่ไม่มี `message`/`error` แล้ว โดยจัดเป็น `unknown` ผ่านข้อความผู้ใช้แบบปลอดภัยแทน `[object Object]`.
 - 2026-05-21: Predeploy runner formatter ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ check ที่ throw object-shaped error ไม่ถูก stringify object ดิบก่อนแสดงผล gate.
 - 2026-05-21: Backend DB/health diagnostics ใช้ `redactUnknownDiagnosticText` กับ non-Error/object-shaped failures แล้ว ทั้ง required DB check, DB-test gate skip reason, และ health database summary จึงไม่ stringify object ดิบก่อน redact.
 - 2026-05-21: Structured knowledge diagnostics ใช้ backend helper `redactUnknownDiagnosticText` แล้ว ทำให้ object-shaped knowledge load/parse errors ถูก redact โดยไม่ stringify object ดิบก่อนแสดง health/runtime diagnostics.

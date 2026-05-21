@@ -345,6 +345,17 @@ describe('chat provider retry guard', () => {
     }
   })
 
+  test('classifies object-shaped provider failures without stringifying raw objects', () => {
+    const failure = classifyChatProviderError({
+      toString() {
+        throw new Error('ไม่ควร stringify raw object')
+      },
+    })
+
+    expect(failure.code).toBe('unknown')
+    expect(failure.userMessage).not.toContain('[object Object]')
+  })
+
   test('does not log raw stream provider errors after classification', () => {
     const source = readFileSync(new URL('./chat.service.ts', import.meta.url), 'utf8')
 

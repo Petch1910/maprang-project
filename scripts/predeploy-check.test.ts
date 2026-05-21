@@ -43,6 +43,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('redacts secret-shaped provider details before classification output')
     expect(predeploy).toContain('creatorDraftRetryRawMessage')
     expect(predeploy).toContain('creatorDraftRetryMessage')
+    expect(predeploy).toContain('classifies object-shaped provider failures without stringifying raw objects')
     expect(predeploy).toContain('retries object-shaped text model errors without stringifying raw objects')
     expect(predeploy).toContain('redacts text-model retry classifier input before matching transient hints')
     expect(predeploy).toContain('assertThaiFirstMarkdownHeadings')
