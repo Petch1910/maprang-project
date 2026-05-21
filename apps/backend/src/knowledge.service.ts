@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
-import { redactSensitiveText } from './redaction'
+import { redactUnknownDiagnosticText } from './redaction'
 
 function findProjectRoot() {
   const candidates = [
@@ -122,8 +122,7 @@ function readJsonFile(file: KnowledgeFileName) {
 }
 
 export function formatKnowledgeError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return redactSensitiveText(raw).text.slice(0, 500) || 'ไม่ทราบสาเหตุ'
+  return redactUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 export function loadStructuredKnowledge({ force = false } = {}): StructuredKnowledge {

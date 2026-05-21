@@ -35,4 +35,18 @@ describe('structured knowledge service', () => {
     expect(message).not.toContain('super-secret')
     expect(message).not.toContain(fakeDatabaseUrl)
   })
+
+  test('formats object-shaped knowledge diagnostics without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatKnowledgeError({
+      message: `โหลด knowledge ไม่ผ่าน DATABASE_URL=${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('ไม่ควร stringify raw object')
+      },
+    })
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
+  })
 })

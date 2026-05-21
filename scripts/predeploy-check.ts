@@ -833,8 +833,21 @@ const checks: Check[] = [
       requireIncludes(wikiIndex, ['โมเดลผลิตภัณฑ์ Maprang', 'Relationship Engine', 'Creator Studio', 'Production Deploy'], 'knowledge/wiki/INDEX.md')
       requireIncludes(
         backendKnowledge,
-        ['buildChatKnowledgePrompt', 'buildCreatorKnowledgePrompt', 'structuredKnowledgeHealth', 'ชุดความรู้ structured ของ Maprang', 'รูปทรงคำตอบ', 'ชุดความรู้ครีเอเตอร์ของ Maprang'],
+        [
+          'buildChatKnowledgePrompt',
+          'buildCreatorKnowledgePrompt',
+          'structuredKnowledgeHealth',
+          'redactUnknownDiagnosticText',
+          'ชุดความรู้ structured ของ Maprang',
+          'รูปทรงคำตอบ',
+          'ชุดความรู้ครีเอเตอร์ของ Maprang',
+        ],
         'apps/backend/src/knowledge.service.ts',
+      )
+      requireIncludes(
+        await readRepoFile('apps/backend/src/knowledge.service.test.ts'),
+        ['formats object-shaped knowledge diagnostics without stringifying raw objects', 'redacts secret-shaped values from knowledge diagnostics'],
+        'apps/backend/src/knowledge.service.test.ts',
       )
       requireIncludes(
         knowledgeAudit,
@@ -1590,7 +1603,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         backendRedaction,
-        ['redactSensitiveText', 'sk-ant-', 'hf_', 'sk_live_', 'github_pat_', 'AIza', 'xox', 'PRIVATE KEY', 'postgres'],
+        ['redactSensitiveText', 'redactUnknownDiagnosticText', 'sk-ant-', 'hf_', 'sk_live_', 'github_pat_', 'AIza', 'xox', 'PRIVATE KEY', 'postgres'],
         'apps/backend/src/redaction.ts',
       )
       requireIncludes(
