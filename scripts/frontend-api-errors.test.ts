@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   ApiError,
   apiRequestTimeoutMs,
+  apiStreamConnectTimeoutMs,
   apiUploadTimeoutMs,
   fetchCharacters,
   logUnexpectedError,
@@ -114,6 +115,7 @@ describe('frontend API errors', () => {
     expect(apiRequestTimeoutMs('/chat', { method: 'POST' })).toBe(60_000)
     expect(apiRequestTimeoutMs('/creator/ai-draft', { method: 'POST' })).toBe(60_000)
     expect(apiUploadTimeoutMs()).toBe(60_000)
+    expect(apiStreamConnectTimeoutMs()).toBe(60_000)
   })
 
   test('aborts avatar uploads with a Thai ApiError instead of hanging', async () => {
@@ -191,6 +193,43 @@ describe('frontend API errors', () => {
         },
       },
     ])
+  })
+
+  test('aborts chat streams that never connect without cutting active streams', async () => {
+    const originalFetch = globalThis.fetch
+
+    try {
+      globalThis.fetch = ((_input, init) =>
+        new Promise((_resolve, reject) => {
+          const signal = init?.signal
+          expect(signal).toBeDefined()
+          signal?.addEventListener(
+            'abort',
+            () => reject(new DOMException('The operation was aborted', 'AbortError')),
+            { once: true },
+          )
+        })) as typeof fetch
+
+      await expect(
+        streamChatMessage(
+          {
+            message: 'ทดสอบสตรีม',
+            characterId: '550e8400-e29b-41d4-a716-446655440001',
+            chatId: null,
+            history: [],
+          },
+          () => {},
+          { timeoutMs: 1 },
+        ),
+      ).rejects.toMatchObject({
+        name: 'ApiError',
+        path: '/chat/stream',
+        status: 408,
+        message: 'เชื่อมต่อสตรีมแชทใช้เวลานานเกินไป กรุณาลองใหม่',
+      })
+    } finally {
+      globalThis.fetch = originalFetch
+    }
   })
 
   test('wraps malformed chat stream events in a Thai ApiError', async () => {

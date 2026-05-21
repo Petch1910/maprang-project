@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Frontend chat streaming เพิ่ม timeout เฉพาะช่วงเชื่อมต่อสตรีมแล้ว (`apiStreamConnectTimeoutMs=60_000`) ถ้า `/chat/stream` ไม่เริ่มตอบจะ abort เป็น `ApiError` ภาษาไทยสถานะ 408 แต่หลังได้ response แล้วจะไม่ตัดกลาง stream เพื่อรักษา UX text streaming.
 - 2026-05-21: `bun run qa:repo` ผ่านเต็มหลังชุด My Chats backend-down UX, disabled reasons, route/menu handoff, และ avatar upload timeout แล้ว สถานะ repo-owned deterministic gate ยังเขียว โดย blocker ที่เหลือยังเป็น environment/staging/live-provider จริงตามเดิม ไม่ใช่ code gate local.
 - 2026-05-21: Frontend avatar upload ไม่ปล่อย request ค้างแล้ว `uploadAvatar` ใช้ timeout 60 วินาทีพร้อม AbortController และคืน `ApiError` ภาษาไทยสถานะ 408 เมื่ออัปโหลดรูปใช้เวลานานเกินไป; หน้าแก้ไขตัวละครแสดง note สำเร็จ/ล้มเหลวของการอัปโหลดรูปด้วยสีที่ถูกต้องแทนการเงียบเมื่ออัปโหลดพัง.
 - 2026-05-21: Route/Menu Audit สำหรับ `/chats` อัปเดตให้ตรงกับ behavior ใหม่แล้ว ทั้งใน `ROUTE_MENU_AUDIT.md` และ `routeMenuAuditRows`: ระบุปุ่ม `รีเฟรชรายการ`, สถานะ `ยังโหลดรายการแชทไม่ได้`, และเหตุผล disabled ของโหมดเลือกหลายแชท พร้อมเพิ่ม required snippet ใน `route-menu-doc-check` กันเอกสาร drift กลับไปเป็น empty state เก่า.

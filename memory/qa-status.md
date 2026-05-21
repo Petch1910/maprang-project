@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 chat stream connect timeout pass: `bun run frontend:api:test` ผ่าน 14 tests / 39 expects หลังเพิ่ม regression ที่จำลอง `/chat/stream` ไม่เริ่มตอบและยืนยันว่า abort เป็น `ApiError` ภาษาไทยสถานะ 408 โดยไม่ตัดสตรีมหลังเชื่อมต่อสำเร็จ; `bun run frontend:check` ผ่าน static/route audit, TypeScript, Vite build และ bundle budget.
 - 2026-05-21 full deterministic repo QA pass after My Chats and upload hardening: `bun run qa:repo` ผ่านครบหลังปรับ `/chats`, route/menu handoff, และ avatar upload timeout โดยรวม backend 173 tests / 601 expects, API route audit 48 routes, route/menu audit 14 พื้นที่, import-cycle audit 128 source files / 307 import edges, local eval 3 สถานการณ์, frontend build/bundle ผ่าน โดย main 269.1KB/350KB และ chat 228.5KB/260KB; DB persistence suites ยัง skip เฉพาะเพราะไม่มี Postgres local.
 - 2026-05-21 avatar upload timeout pass: `bun run frontend:api:test` ผ่าน 13 tests / 36 expects หลังเพิ่ม regression ที่จำลอง upload ค้างและยืนยันว่า `uploadAvatar` abort เป็น `ApiError` ภาษาไทยสถานะ 408; `bun run frontend:check` ผ่าน static/route audit, TypeScript, Vite build และ bundle budget หลังหน้าแก้ไขตัวละครแสดง note สำเร็จ/ล้มเหลวของการอัปโหลดรูป.
 - 2026-05-21 Route/Menu My Chats handoff pass: `bun run route-menu:audit:test` ผ่าน 6 tests / 13 expects และ `bun run route-menu:audit` ผ่าน 14 พื้นที่ หลัง `ROUTE_MENU_AUDIT.md`, `routeMenuAuditRows`, และ `route-menu-doc-check` ระบุ `รีเฟรชรายการ` กับ `ยังโหลดรายการแชทไม่ได้` ของ `/chats` เพื่อไม่ให้เอกสารกลับไปอธิบาย empty state เก่า.

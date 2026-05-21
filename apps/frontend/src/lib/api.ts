@@ -658,6 +658,10 @@ export function apiUploadTimeoutMs() {
   return 60_000
 }
 
+export function apiStreamConnectTimeoutMs() {
+  return 60_000
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const timeoutMs = apiRequestTimeoutMs(path, init)
   const controller = init?.signal ? null : new AbortController()
@@ -1155,15 +1159,30 @@ export async function streamChatMessage(
     history: Array<{ role: 'user' | 'assistant'; content: string }>
   },
   onEvent: (event: ChatStreamEvent) => void,
+  options: { timeoutMs?: number } = {},
 ) {
-  const response = await fetch(`${API_BASE_URL}/chat/stream`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-    },
-    body: JSON.stringify({ ...input, chatId: input.chatId ?? undefined }),
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs ?? apiStreamConnectTimeoutMs())
+  let response: Response
+
+  try {
+    response = await fetch(`${API_BASE_URL}/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ ...input, chatId: input.chatId ?? undefined }),
+      signal: controller.signal,
+    })
+  } catch (error) {
+    if (isAbortLikeError(error)) {
+      throw new ApiError('/chat/stream', 408, { message: 'เชื่อมต่อสตรีมแชทใช้เวลานานเกินไป กรุณาลองใหม่' })
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   if (!response.ok || !response.body) {
     const payload = await readErrorPayload(response)
