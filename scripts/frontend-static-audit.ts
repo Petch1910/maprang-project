@@ -34,11 +34,15 @@ export function compact(value: string) {
 
 const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\.clone\(\))?\.json\s*\(\s*\)/g
 const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\.clone\(\))?\.text\s*\(\s*\)/g
+const rawFrontendFetchPattern = /\bfetch\s*\(/g
 const rawFrontendResponseJsonMessage =
   'ห้าม parse response.json() ตรงใน frontend source; ให้ใช้ readApiJson/readErrorPayload เพื่อห่อ JSON พังเป็นข้อความไทยก่อน.'
 const rawFrontendResponseTextMessage =
   'ห้ามอ่าน response.text() ตรงใน frontend source; ให้ backend/API helper แปลงเป็น ApiError ข้อความไทยที่ควบคุมได้ก่อนถึง UI.'
+const rawFrontendFetchMessage =
+  'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.'
 const allowedFrontendResponseJsonReaders = ['readApiJson', 'readErrorPayload']
+const allowedFrontendFetchFiles = new Set(['apps/frontend/src/lib/api.ts'])
 
 function findMatchingBrace(content: string, openingBraceIndex: number) {
   let depth = 0
@@ -344,11 +348,25 @@ export function auditRawResponseTextParsing(content: string, file: string) {
   return findings
 }
 
+export function auditRawFrontendFetchUsage(content: string, file: string) {
+  if (allowedFrontendFetchFiles.has(file)) return []
+  const findings: Finding[] = []
+  for (const match of content.matchAll(rawFrontendFetchPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: rawFrontendFetchMessage,
+    })
+  }
+  return findings
+}
+
 export function auditFrontendSourceFile(content: string, file: string) {
   return [
     ...auditButtonsWithAst(content, file),
     ...auditLinksWithAst(content, file),
     ...auditSuspiciousPatterns(content, file),
+    ...auditRawFrontendFetchUsage(content, file),
     ...auditRawResponseJsonParsing(content, file),
     ...auditRawResponseTextParsing(content, file),
   ]

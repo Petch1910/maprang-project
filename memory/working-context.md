@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Frontend static audit เพิ่ม guard กัน direct `fetch` นอก `apps/frontend/src/lib/api.ts` เพื่อให้ทุกหน้าใช้ API helper กลางสำหรับ auth/error/stream/diagnostics; regression test ครอบทั้งเคสจับผิดใน page และ allow ใน API helper แล้ว.
 - 2026-05-21: Frontend static audit เพิ่ม guard กัน `response.text()` ตรงใน frontend source เพื่อบังคับให้ plain-text/proxy/API failure ถูกแปลงเป็น `ApiError` ข้อความไทยที่ควบคุมได้ก่อนถึง UI; regression test ครอบทั้ง `response.text()` และ `response.clone().text()` แล้ว.
 - 2026-05-21: Backend security audit เพิ่ม guard กัน runtime backend อ่าน `response.text()` จาก provider/Supabase แล้วนำไปใช้เป็น diagnostic โดยไม่ผ่าน `redactSensitiveText`; regression test ครอบทั้งเคสจับผิด, เคส redacted inline, และเคส redacted หลายบรรทัดแล้ว.
 - 2026-05-21: Security checklist ระบุ policy ใหม่ให้ backend/frontend ห้าม parse `response.json()` ตรงนอก safe JSON helper เพื่อให้ provider/Supabase/API JSON ที่พังถูกห่อเป็นข้อความไทยก่อนถึง log หรือ UI.

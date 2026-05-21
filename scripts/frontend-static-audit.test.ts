@@ -3,6 +3,7 @@ import {
   auditButtonsWithAst,
   auditFrontendSourceFile,
   auditLinksWithAst,
+  auditRawFrontendFetchUsage,
   auditRawResponseTextParsing,
   auditSuspiciousPatterns,
   collectFrontendStaticFindings,
@@ -175,6 +176,30 @@ describe('frontend static audit', () => {
         'ApiTextLeak.ts',
       ).map((finding) => finding.message),
     ).toContain('ห้ามอ่าน response.text() ตรงใน frontend source; ให้ backend/API helper แปลงเป็น ApiError ข้อความไทยที่ควบคุมได้ก่อนถึง UI.')
+  })
+
+  test('reports direct frontend fetch outside the central API helper', () => {
+    expect(
+      auditRawFrontendFetchUsage(
+        `
+          async function loadCharacters() {
+            return fetch('/characters')
+          }
+        `,
+        'apps/frontend/src/pages/ExplorePage.tsx',
+      ).map((finding) => finding.message),
+    ).toContain('ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.')
+
+    expect(
+      auditRawFrontendFetchUsage(
+        `
+          export async function requestJson(path: string) {
+            return fetch(path)
+          }
+        `,
+        'apps/frontend/src/lib/api.ts',
+      ),
+    ).toEqual([])
   })
 
   test('reports Thai placeholder and mojibake text regressions', () => {
