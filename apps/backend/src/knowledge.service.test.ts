@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildChatKnowledgePrompt, buildCreatorKnowledgePrompt, loadStructuredKnowledge } from './knowledge.service'
+import { buildChatKnowledgePrompt, buildCreatorKnowledgePrompt, formatKnowledgeError, loadStructuredKnowledge } from './knowledge.service'
 
 describe('structured knowledge service', () => {
   test('loads and validates required knowledge packs', () => {
@@ -25,5 +25,14 @@ describe('structured knowledge service', () => {
     expect(prompt).toContain('ชุดความรู้ครีเอเตอร์ของ Maprang')
     expect(prompt).toContain('หลักการร่างตัวละครสำหรับครีเอเตอร์')
     expect(prompt).toContain('คุณภาพตัวละครที่ต้องมี')
+  })
+
+  test('redacts secret-shaped values from knowledge diagnostics', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatKnowledgeError(new Error(`โหลด knowledge ไม่ผ่าน DATABASE_URL=${fakeDatabaseUrl}`))
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
   })
 })

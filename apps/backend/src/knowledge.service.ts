@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
+import { redactSensitiveText } from './redaction'
 
 function findProjectRoot() {
   const candidates = [
@@ -120,6 +121,11 @@ function readJsonFile(file: KnowledgeFileName) {
   return asRecord(JSON.parse(raw))
 }
 
+export function formatKnowledgeError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return redactSensitiveText(raw).text.slice(0, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 export function loadStructuredKnowledge({ force = false } = {}): StructuredKnowledge {
   if (cachedKnowledge && !force) return cachedKnowledge
 
@@ -132,7 +138,7 @@ export function loadStructuredKnowledge({ force = false } = {}): StructuredKnowl
   try {
     existingFiles = readdirSync(structuredRoot).filter((file) => file.endsWith('.json'))
   } catch (error) {
-    errors.push(error instanceof Error ? error.message : String(error))
+    errors.push(formatKnowledgeError(error))
   }
 
   for (const file of requiredKnowledgeFiles) {
@@ -156,7 +162,7 @@ export function loadStructuredKnowledge({ force = false } = {}): StructuredKnowl
       })
       errors.push(...fileErrors.map((issue) => `${file}: ${issue}`))
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
+      const message = formatKnowledgeError(error)
       files.push({ file, ok: false, errors: [message] })
       errors.push(`${file}: ${message}`)
     }

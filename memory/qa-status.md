@@ -4,6 +4,8 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 full repo QA pass after structured knowledge diagnostic redaction: `bun run qa:repo` ผ่านครบหลังเพิ่ม `formatKnowledgeError` โดยรวม backend 162 tests / 522 expects, import-cycle audit 127 source files / 301 import edges, API route audit 48 routes, route/menu audit 14 surfaces, frontend bundle budget main 269.1KB/350KB กับ chat 228.5KB/260KB.
+- 2026-05-21 structured knowledge diagnostic redaction pass: `bun test apps\backend\src\knowledge.service.test.ts` ผ่าน 4 tests / 13 expects หลังเพิ่ม `formatKnowledgeError` ให้ runtime knowledge diagnostics.
 - 2026-05-21 predeploy check diagnostic redaction pass: `bun run predeploy:check:test` ผ่าน 3 tests / 51 expects และ `bun run predeploy:check` ผ่าน หลังเพิ่ม `formatPredeployCheckError`.
 - 2026-05-21 deploy env doctor diagnostic redaction pass: `bun run deploy:doctor:test` ผ่าน 11 tests / 50 expects หลังเพิ่ม `formatDeployEnvDoctorError` ให้ env file read failure path.
 - 2026-05-21 e2e smoke diagnostic redaction pass: `bun run e2e:smoke:test` ผ่าน 6 tests / 10 expects หลังผูก `formatE2eSmokeError` กับ `formatDiagnosticText`.
