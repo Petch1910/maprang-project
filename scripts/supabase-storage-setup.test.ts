@@ -172,6 +172,35 @@ describe('Supabase storage setup helpers', () => {
     }
   })
 
+  test('live storage operation failures redact secret-shaped diagnostics', async () => {
+    const previousFetch = globalThis.fetch
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const config = resolveSupabaseStorageConfig({
+      SUPABASE_URL: 'https://project-ref.supabase.co',
+      SUPABASE_SERVICE_ROLE_KEY: 'service-role',
+      SUPABASE_STORAGE_ACCESS: 'signed',
+    })
+
+    try {
+      globalThis.fetch = (async () =>
+        new Response(`storage failed ${fakeDatabaseUrl}`, {
+          status: 500,
+        })) as unknown as typeof fetch
+
+      await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.toThrow('postgresql://[REDACTED_SECRET]')
+      await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.not.toThrow('super-secret')
+
+      globalThis.fetch = (async () => {
+        throw new Error(`network failed ${fakeDatabaseUrl}`)
+      }) as unknown as typeof fetch
+
+      await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.toThrow('postgresql://[REDACTED_SECRET]')
+      await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.not.toThrow('super-secret')
+    } finally {
+      globalThis.fetch = previousFetch
+    }
+  })
+
   test('returns a failure code when check mode finds a public bucket', async () => {
     const lines: string[] = []
     const errors: string[] = []

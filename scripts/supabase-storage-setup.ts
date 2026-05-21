@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { formatDiagnosticText } from './smoke-helpers'
 
 const root = join(import.meta.dir, '..')
 const backendDir = join(root, 'apps', 'backend')
@@ -112,7 +113,8 @@ async function storageRequest(config: SupabaseStorageConfig, path: string, init:
       },
     })
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error)
+    const rawReason = error instanceof Error ? error.message : String(error)
+    const reason = formatDiagnosticText(rawReason, 500)
     throw new Error(`ติดต่อ Supabase Storage ที่ ${config.supabaseUrl} ไม่สำเร็จ: ${reason}`)
   } finally {
     clearTimeout(timeoutId)
@@ -121,7 +123,7 @@ async function storageRequest(config: SupabaseStorageConfig, path: string, init:
 
 async function parseError(response: Response) {
   const text = await response.text().catch(() => '')
-  return text.slice(0, 500) || response.statusText
+  return formatDiagnosticText(text, 500) || response.statusText
 }
 
 async function readStorageJson<T>(response: Response, label: string) {
