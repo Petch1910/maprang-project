@@ -159,6 +159,7 @@ function SceneBar({
   const scene = runtimeState.sceneState
   const activeScene = scene.activeScene
   const pendingEvent = scene.pendingEvents.find((event) => event.status === 'pending') ?? scene.pendingEvents[0]
+  const sceneActionDisabledReason = isLoading ? 'ระบบกำลังตอบอยู่ รอให้จบก่อนจัดการฉาก' : ''
 
   if (activeScene) {
     return (
@@ -170,10 +171,24 @@ function SceneBar({
             <p className="m-0 mt-0.5 line-clamp-1 text-xs text-white/60">{activeScene.objective}</p>
           </div>
           <div className="flex gap-2">
-            <button className="min-h-8 rounded-lg bg-white px-3 text-xs font-black text-slate-950" disabled={isLoading} onClick={() => onSceneAction('accept')} type="button">
+            <button
+              aria-disabled={isLoading}
+              className="min-h-8 rounded-lg bg-white px-3 text-xs font-black text-slate-950"
+              disabled={isLoading}
+              onClick={() => onSceneAction('accept')}
+              title={sceneActionDisabledReason || 'รับผลฉากนี้'}
+              type="button"
+            >
               รับผล
             </button>
-            <button className="min-h-8 rounded-lg bg-white/10 px-3 text-xs font-black text-white" disabled={isLoading} onClick={() => onSceneAction('resolve')} type="button">
+            <button
+              aria-disabled={isLoading}
+              className="min-h-8 rounded-lg bg-white/10 px-3 text-xs font-black text-white"
+              disabled={isLoading}
+              onClick={() => onSceneAction('resolve')}
+              title={sceneActionDisabledReason || 'จบฉากนี้'}
+              type="button"
+            >
               จบฉาก
             </button>
           </div>
@@ -192,10 +207,24 @@ function SceneBar({
           <p className="m-0 mt-0.5 line-clamp-1 text-xs text-amber-50/65">{pendingEvent.prompt}</p>
         </div>
         <div className="flex gap-2">
-          <button className="min-h-8 rounded-lg bg-amber-200 px-3 text-xs font-black text-amber-950" disabled={isLoading} onClick={() => onSceneAction('enter', pendingEvent.code)} type="button">
+          <button
+            aria-disabled={isLoading}
+            className="min-h-8 rounded-lg bg-amber-200 px-3 text-xs font-black text-amber-950"
+            disabled={isLoading}
+            onClick={() => onSceneAction('enter', pendingEvent.code)}
+            title={sceneActionDisabledReason || 'เข้าสู่ฉากสำคัญ'}
+            type="button"
+          >
             เข้าฉาก
           </button>
-          <button className="min-h-8 rounded-lg bg-white/10 px-3 text-xs font-black text-white" disabled={isLoading} onClick={() => onSceneAction('hold', pendingEvent.code)} type="button">
+          <button
+            aria-disabled={isLoading}
+            className="min-h-8 rounded-lg bg-white/10 px-3 text-xs font-black text-white"
+            disabled={isLoading}
+            onClick={() => onSceneAction('hold', pendingEvent.code)}
+            title={sceneActionDisabledReason || 'เก็บฉากนี้ไว้ก่อน'}
+            type="button"
+          >
             ไว้ก่อน
           </button>
         </div>
@@ -354,6 +383,19 @@ function RightRail({
   const activeScene = runtimeState?.sceneState.activeScene
   const pendingEvents = runtimeState?.sceneState.pendingEvents?.filter((event) => event.status === 'pending') ?? []
   const worldState = runtimeState?.memory.worldState
+  const worldStateFieldDisabledReason = !chatId
+    ? 'เริ่มแชทก่อนแก้สถานะโลก'
+    : isWorldStateSaving
+      ? 'กำลังบันทึกสถานะโลก'
+      : ''
+  const worldStateSaveDisabledReason = !chatId
+    ? 'เริ่มแชทก่อนบันทึกสถานะโลก'
+    : !onSaveWorldState
+      ? 'ระบบบันทึกสถานะโลกยังไม่พร้อม'
+      : isWorldStateSaving
+        ? 'กำลังบันทึกสถานะโลก'
+        : ''
+  const favoriteDisabledReason = isFavoritePending ? 'กำลังอัปเดตไลก์ตัวละคร' : ''
 
   useEffect(() => {
     setWorldDraft({
@@ -431,10 +473,12 @@ function RightRail({
               <span>เวลาในเรื่อง</span>
               <input
                 className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                aria-disabled={Boolean(worldStateFieldDisabledReason)}
                 data-testid="chat-world-state-time"
-                disabled={!chatId || isWorldStateSaving}
+                disabled={Boolean(worldStateFieldDisabledReason)}
                 onChange={(event) => setWorldDraft((value) => ({ ...value, timeOfDay: event.target.value }))}
                 placeholder="เช่น เที่ยงคืน, เช้าวันฝนตก"
+                title={worldStateFieldDisabledReason || 'ตั้งเวลาในเรื่อง'}
                 value={worldDraft.timeOfDay}
               />
             </label>
@@ -442,10 +486,12 @@ function RightRail({
               <span>สถานที่</span>
               <input
                 className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                aria-disabled={Boolean(worldStateFieldDisabledReason)}
                 data-testid="chat-world-state-location"
-                disabled={!chatId || isWorldStateSaving}
+                disabled={Boolean(worldStateFieldDisabledReason)}
                 onChange={(event) => setWorldDraft((value) => ({ ...value, location: event.target.value }))}
                 placeholder="เช่น ห้องสมุดชั้นสอง"
+                title={worldStateFieldDisabledReason || 'ตั้งสถานที่ของฉาก'}
                 value={worldDraft.location}
               />
             </label>
@@ -453,10 +499,12 @@ function RightRail({
               <span>สภาพอากาศ</span>
               <input
                 className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                aria-disabled={Boolean(worldStateFieldDisabledReason)}
                 data-testid="chat-world-state-weather"
-                disabled={!chatId || isWorldStateSaving}
+                disabled={Boolean(worldStateFieldDisabledReason)}
                 onChange={(event) => setWorldDraft((value) => ({ ...value, weather: event.target.value }))}
                 placeholder="เช่น ฝนเบา ๆ, ร้อนอบอ้าว"
+                title={worldStateFieldDisabledReason || 'ตั้งสภาพอากาศของฉาก'}
                 value={worldDraft.weather}
               />
             </label>
@@ -464,10 +512,12 @@ function RightRail({
               <span>อารมณ์ฉาก</span>
               <input
                 className="min-h-9 w-full rounded-lg border border-white/10 bg-black/24 px-3 text-sm font-bold text-white outline-none focus:border-orange-300/45"
+                aria-disabled={Boolean(worldStateFieldDisabledReason)}
                 data-testid="chat-world-state-mood"
-                disabled={!chatId || isWorldStateSaving}
+                disabled={Boolean(worldStateFieldDisabledReason)}
                 onChange={(event) => setWorldDraft((value) => ({ ...value, mood: event.target.value }))}
                 placeholder="เช่น อึดอัดแต่นุ่มนวล"
+                title={worldStateFieldDisabledReason || 'ตั้งอารมณ์ของฉาก'}
                 value={worldDraft.mood}
               />
             </label>
@@ -475,19 +525,23 @@ function RightRail({
               <span>โน้ตฉาก</span>
               <textarea
                 className="min-h-20 w-full resize-none rounded-lg border border-white/10 bg-black/24 px-3 py-2 text-sm font-bold leading-6 text-white outline-none focus:border-orange-300/45"
+                aria-disabled={Boolean(worldStateFieldDisabledReason)}
                 data-testid="chat-world-state-notes"
-                disabled={!chatId || isWorldStateSaving}
+                disabled={Boolean(worldStateFieldDisabledReason)}
                 onChange={(event) => setWorldDraft((value) => ({ ...value, sceneNotes: event.target.value }))}
                 placeholder="หนึ่งบรรทัดต่อหนึ่งโน้ต สูงสุด 5 รายการ"
+                title={worldStateFieldDisabledReason || 'เพิ่มโน้ตฉาก'}
                 value={worldDraft.sceneNotes}
               />
             </label>
           </div>
           <button
             className="min-h-9 w-full rounded-lg bg-white px-3 text-xs font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
+            aria-disabled={Boolean(worldStateSaveDisabledReason)}
             data-testid="chat-world-state-save"
-            disabled={!chatId || !onSaveWorldState || isWorldStateSaving}
+            disabled={Boolean(worldStateSaveDisabledReason)}
             onClick={saveWorldDraft}
+            title={worldStateSaveDisabledReason || 'บันทึกสถานะโลก'}
             type="button"
           >
             {chatId ? (isWorldStateSaving ? 'กำลังบันทึก...' : 'บันทึกสถานะโลก') : 'เริ่มแชทก่อนบันทึก'}
@@ -644,8 +698,10 @@ function RightRail({
           className={`grid min-h-12 place-items-center rounded-lg transition hover:bg-white/7 hover:text-white ${
             character.isFavorite ? 'text-rose-200' : ''
           }`}
+          aria-disabled={Boolean(favoriteDisabledReason)}
           disabled={isFavoritePending}
           onClick={toggleFavorite}
+          title={favoriteDisabledReason || (character.isFavorite ? 'เลิกไลก์ตัวละคร' : 'ไลก์ตัวละคร')}
         >
           <Heart fill={character.isFavorite ? 'currentColor' : 'none'} size={17} />
           <span>ไลก์</span>
