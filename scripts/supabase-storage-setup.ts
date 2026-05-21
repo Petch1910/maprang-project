@@ -100,6 +100,11 @@ export function normalizeSignedUrl(signedPath: string, supabaseUrl: string) {
   return `${normalizedSupabaseUrl}/storage/v1/${signedPath.replace(/^\//, '')}`
 }
 
+export function formatSupabaseStorageSetupError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 async function storageRequest(config: SupabaseStorageConfig, path: string, init: RequestInit = {}) {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 20_000)
@@ -291,7 +296,7 @@ export async function runSupabaseStorageSetup(
     )
     return 0
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatSupabaseStorageSetupError(error)
     writeError(`ตั้งค่า Supabase storage ไม่ผ่าน: ${message}`)
     return 1
   }

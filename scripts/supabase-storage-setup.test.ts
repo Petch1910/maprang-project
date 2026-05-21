@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   encodedPath,
+  formatSupabaseStorageSetupError,
   liveSupabaseStorageOperations,
   loadEnvContent,
   normalizeSignedUrl,
@@ -199,6 +200,43 @@ describe('Supabase storage setup helpers', () => {
     } finally {
       globalThis.fetch = previousFetch
     }
+  })
+
+  test('runner catch redacts secret-shaped operation errors before logging', async () => {
+    const errors: string[] = []
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const operations: SupabaseStorageOperations = {
+      getBucket: async () => {
+        throw new Error(`storage setup failed DATABASE_URL=${fakeDatabaseUrl}`)
+      },
+      createBucket: async () => {},
+      updateBucketPrivate: async () => {},
+      uploadSmokeImage: async () => {},
+      createSignedUrl: async () => 'https://project-ref.supabase.co/signed',
+      verifySignedUrl: async () => {},
+      deleteObject: async () => {},
+    }
+
+    const exitCode = await runSupabaseStorageSetup(
+      {
+        SUPABASE_URL: 'https://project-ref.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'service-role',
+        SUPABASE_STORAGE_ACCESS: 'signed',
+      },
+      ['bun', 'script', '--check'],
+      {
+        loadEnvFiles: false,
+        operations,
+        writeLine: () => undefined,
+        writeError: (line) => errors.push(line),
+      },
+    )
+
+    expect(exitCode).toBe(1)
+    expect(errors.join('\n')).toContain('[REDACTED_SECRET]')
+    expect(errors.join('\n')).not.toContain('super-secret')
+    expect(errors.join('\n')).not.toContain(fakeDatabaseUrl)
+    expect(formatSupabaseStorageSetupError(new Error(fakeDatabaseUrl))).toContain('[REDACTED_SECRET]')
   })
 
   test('returns a failure code when check mode finds a public bucket', async () => {
