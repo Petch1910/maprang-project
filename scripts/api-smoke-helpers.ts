@@ -51,6 +51,11 @@ export function formatApiSmokeDiagnostic(value: string, maxLength = 500, emptyLa
   return formatDiagnosticText(value, maxLength) || emptyLabel
 }
 
+export function formatApiSmokeCaughtError(error: unknown, maxLength = 500) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatApiSmokeDiagnostic(raw, maxLength, 'ไม่ทราบสาเหตุ')
+}
+
 export function parseApiSmokeStreamEvents<T = unknown>(raw: string, path = '/chat/stream') {
   const events: T[] = []
 

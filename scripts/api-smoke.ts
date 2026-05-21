@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import {
   assertMachineReadableErrorCode,
   creatorImageIssue,
+  formatApiSmokeCaughtError,
   formatApiSmokeDiagnostic,
   isOnlyLiveVerificationFailure,
   parseApiSmokeStreamEvents,
@@ -130,7 +131,7 @@ async function check(name: string, fn: () => Promise<string | void>) {
     const detail = await fn()
     record(name, 'pass', detail || 'ok')
   } catch (error) {
-    record(name, 'fail', error instanceof Error ? error.message : String(error))
+    record(name, 'fail', formatApiSmokeCaughtError(error))
   }
 }
 
@@ -139,7 +140,7 @@ async function warnable(name: string, fn: () => Promise<{ ok: boolean; detail: s
     const result = await fn()
     record(name, result.ok ? 'pass' : 'warn', result.detail)
   } catch (error) {
-    record(name, 'fail', error instanceof Error ? error.message : String(error))
+    record(name, 'fail', formatApiSmokeCaughtError(error))
   }
 }
 
@@ -891,7 +892,7 @@ async function runRequired<T>(name: string, fn: () => Promise<T>) {
     record(name, 'pass', 'ok')
     return value
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatApiSmokeCaughtError(error)
     record(name, 'fail', message)
     throw new Error(`${name}: ${message}`)
   }
@@ -901,7 +902,7 @@ async function bestEffort(name: string, fn: () => Promise<unknown>) {
   try {
     await fn()
   } catch (error) {
-    writeWarn(`คำเตือน: ทำงานเสริม "${name}" ไม่สำเร็จ: ${error instanceof Error ? error.message : String(error)}`)
+    writeWarn(`คำเตือน: ทำงานเสริม "${name}" ไม่สำเร็จ: ${formatApiSmokeCaughtError(error)}`)
   }
 }
 

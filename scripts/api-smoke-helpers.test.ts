@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import {
   assertMachineReadableErrorCode,
   creatorImageIssue,
+  formatApiSmokeCaughtError,
   formatApiSmokeDiagnostic,
   isMachineReadableErrorCode,
   isOnlyLiveVerificationFailure,
@@ -49,6 +50,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).toContain('ตัวตรวจพรอมป์ไม่คืน snapshot ที่ปิดข้อมูลลับ')
     expect(apiSmoke).toContain('ยังไม่มีรายการ audit log')
     expect(apiSmoke).toContain('ไม่ผ่านด้วยสถานะ')
+    expect(apiSmoke).toContain('formatApiSmokeCaughtError(error)')
     expect(apiSmoke).toContain('formatApiSmokeDiagnostic(raw)')
     expect(apiSmoke).toContain('formatApiSmokeStatus(result.status)')
     expect(apiSmoke).toContain('parseApiSmokeStreamEvents<StreamSmokeEvent>(raw, path)')
@@ -78,6 +80,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).not.toContain('stream validation path ไม่ควรใช้ token')
     expect(apiSmoke).not.toContain('SSE events')
     expect(apiSmoke).not.toContain('failed with ${response.status}')
+    expect(apiSmoke).not.toContain('error instanceof Error ? error.message : String(error)')
     expect(apiSmoke).not.toContain('empty response')
     expect(apiSmoke).not.toContain('raw.slice(0, 500)')
     expect(apiSmoke).not.toContain('JSON error payload')
@@ -136,7 +139,10 @@ describe('api smoke helpers', () => {
     const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
     expect(formatApiSmokeDiagnostic(`upstream failed ${fakeDatabaseUrl}`)).toContain('postgresql://[REDACTED_SECRET]')
     expect(formatApiSmokeDiagnostic(`upstream failed ${fakeDatabaseUrl}`)).not.toContain('super-secret')
+    expect(formatApiSmokeCaughtError(new Error(`caught ${fakeDatabaseUrl}`))).toContain('postgresql://[REDACTED_SECRET]')
+    expect(formatApiSmokeCaughtError(new Error(`caught ${fakeDatabaseUrl}`))).not.toContain('super-secret')
     expect(formatApiSmokeDiagnostic('')).toBe('response ว่าง')
+    expect(formatApiSmokeCaughtError('')).toBe('ไม่ทราบสาเหตุ')
   })
 
   test('parses API smoke stream events with Thai diagnostics', () => {
