@@ -25,7 +25,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     route: '/characters/:characterId',
     control: 'สัญญาความสัมพันธ์, เริ่มแชท, คัดลอกลิงก์, รายงาน',
     result: 'เลือก seed แล้วปุ่มเริ่มแชทพาไป /chat พร้อม relationship_seed, รายงานเปิด dialog',
-    disabledReason: 'ปุ่มรายงานถูกปิดระหว่างส่งรายงานหรือยังไม่มีข้อมูลตัวละคร',
+    disabledReason: 'ปุ่มรายงาน/แชร์/เริ่มแชทมี title บอกว่ากำลังส่งรายงาน, ยังโหลดตัวละครไม่ได้, หรือผู้ใช้ต้องเปิดโหมดผู้ใหญ่ก่อน',
     emptyState: 'ถ้าไม่พบตัวละครจะแสดง note โหลด/ผิดพลาดแทนหน้าว่าง',
     status: 'ready',
   },

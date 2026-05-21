@@ -132,6 +132,13 @@ export function CharacterLobbyPage() {
   const rating = character ? characterRating(character) : 'general'
   const canView = canViewRating(rating, content.maxRating)
   const canStartChat = Boolean(character) && canView
+  const reportDisabledReason = isReporting ? 'กำลังส่งรายงาน' : !character ? 'โหลดตัวละครก่อนรายงาน' : ''
+  const shareDisabledReason = !character ? 'โหลดตัวละครก่อนแชร์' : ''
+  const startChatDisabledReason = !character
+    ? 'โหลดตัวละครก่อนเริ่มแชท'
+    : !canView
+      ? 'เปิดโหมดผู้ใหญ่หรือปรับระดับเนื้อหาก่อนเริ่มแชท'
+      : ''
   const seed = contractSeeds.find((item) => item.id === selectedSeedId) ?? contractSeeds[0] ?? fallbackRelationshipSeeds[0]
 
   const reportCharacter = async ({ reason, details }: ReportDialogSubmit) => {
@@ -189,19 +196,23 @@ export function CharacterLobbyPage() {
             </div>
             <div className="flex gap-2">
               <button
+                aria-disabled={Boolean(reportDisabledReason)}
                 className="min-h-11 flex-1 rounded-xl border border-white/10 bg-white/6 font-black text-white/78 transition hover:bg-white/10 disabled:opacity-60"
                 data-testid="character-report-button"
-                disabled={isReporting || !character}
+                disabled={Boolean(reportDisabledReason)}
                 onClick={() => setIsReportDialogOpen(true)}
+                title={reportDisabledReason || 'รายงานตัวละครนี้'}
                 type="button"
               >
                 รายงาน
               </button>
               <button
+                aria-disabled={Boolean(shareDisabledReason)}
                 className="min-h-11 flex-1 rounded-xl border border-white/10 bg-white/6 font-black text-white/78 transition hover:bg-white/10 disabled:opacity-60"
                 data-testid="character-share-button"
-                disabled={!character}
+                disabled={Boolean(shareDisabledReason)}
                 onClick={shareCharacter}
+                title={shareDisabledReason || 'คัดลอกลิงก์ตัวละคร'}
                 type="button"
               >
                 แชร์
@@ -313,6 +324,7 @@ export function CharacterLobbyPage() {
                 className="block min-h-12 w-full rounded-2xl bg-white/10 px-5 py-3 text-center font-black text-white/35 disabled:cursor-not-allowed"
                 data-testid="character-start-chat-disabled"
                 disabled
+                title={startChatDisabledReason || 'ยังเริ่มแชทไม่ได้'}
                 type="button"
               >
                 เริ่มแชท
