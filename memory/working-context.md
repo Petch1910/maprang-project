@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Backend Supabase auth JSON hardening เพิ่ม `readSupabaseJwksPayload` และ `readSupabaseUserPayload` ให้ JWKS/auth user response ที่ HTTP 200 แต่ JSON พังถูกห่อเป็นข้อความไทย `Supabase JWKS ตอบกลับ JSON ไม่ถูกต้อง` หรือ `Supabase auth user ตอบกลับ JSON ไม่ถูกต้อง` แทน raw parser error; backend security tests ครอบเคส malformed payload แล้ว.
 - 2026-05-21: Backend avatar signed URL hardening เพิ่ม `readSupabaseSignedUrlPayload` ให้ runtime avatar redirect path ห่อ Supabase signed URL JSON ที่พังเป็นข้อความไทย `Supabase ส่งข้อมูล signed URL ของรูปตัวละครไม่ถูกต้อง`; backend storage tests ครอบเคส malformed payload แล้ว.
 - 2026-05-21: Supabase Storage setup hardening เพิ่ม `readStorageJson` ให้ live storage helper ของ `supabase:storage:check/setup` รายงาน `อ่าน bucket คืน JSON ไม่ถูกต้อง` หรือ `สร้าง signed URL คืน JSON ไม่ถูกต้อง` เมื่อ Supabase คืน success status แต่ JSON พัง แทน raw parser error.
 - 2026-05-21: Frontend env JWT guard เพิ่ม `supabaseJwtRole` ที่ decode base64url แบบเติม padding ได้ถูกต้อง เพื่อให้หน้า frontend readiness จับ `VITE_SUPABASE_ANON_KEY` ที่เป็น service role หรือ role ผิดได้แม้ JWT payload ไม่มี `=` padding; เพิ่ม `frontend:env:test` และผูกเข้า `qa:repo` แล้ว.

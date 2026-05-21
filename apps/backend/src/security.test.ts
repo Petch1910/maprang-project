@@ -8,6 +8,8 @@ import {
   rateLimitKey,
   rateLimitReplyMessage,
   rateLimitRequestKey,
+  readSupabaseJwksPayload,
+  readSupabaseUserPayload,
   requireAdminApiKey,
   resolveRequestUserId,
   routeRateLimitMax,
@@ -120,6 +122,15 @@ describe('security helpers', () => {
     expect(body.error).toBe('rate_limited')
     expect(body.message).toBe(rateLimitReplyMessage)
     expect(body.message).toContain('ส่งคำขอถี่เกินไป')
+  })
+
+  test('wraps malformed Supabase auth payloads in Thai-first errors', async () => {
+    await expect(readSupabaseJwksPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
+      authErrorMessages.jwksMalformed,
+    )
+    await expect(readSupabaseUserPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
+      authErrorMessages.userMalformed,
+    )
   })
 
   test('request user resolution keeps local dev fallback when Supabase issuer is not configured', async () => {
