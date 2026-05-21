@@ -221,4 +221,31 @@ describe('readiness smoke summary', () => {
     expect(errors.join('\n')).toContain('[REDACTED_SECRET]')
     expect(errors.join('\n')).not.toContain('super-secret')
   })
+
+  test('formats object-shaped readiness errors without stringifying raw objects', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:ready-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const objectError = {
+      message: `root failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    }
+
+    const directMessage = formatReadinessSmokeCaughtError(objectError)
+    expect(directMessage).toContain('postgresql://[REDACTED_SECRET]')
+    expect(directMessage).not.toContain('ready-object-secret')
+    expect(formatReadinessSmokeCaughtError({ error: 'readiness failed' })).toBe('readiness failed')
+    expect(formatReadinessSmokeCaughtError({ code: 'ECONNREFUSED' })).toBe('ไม่ทราบสาเหตุ')
+
+    try {
+      await readReadiness('https://api.example.com', async () => {
+        throw objectError
+      })
+      throw new Error('expected readReadiness to fail')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      expect(message).toContain('postgresql://[REDACTED_SECRET]')
+      expect(message).not.toContain('ready-object-secret')
+    }
+  })
 })

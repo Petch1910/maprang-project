@@ -1511,6 +1511,7 @@ const checks: Check[] = [
           'summarizes a ready payload',
           'keeps readiness failures visible',
           'validates backend root identity before readiness',
+          'formats object-shaped readiness errors without stringifying raw objects',
           'runs readiness smoke through an importable runner',
         ],
         'scripts/readiness-smoke.test.ts',
@@ -1520,6 +1521,7 @@ const checks: Check[] = [
         [
           'ReadinessSmokeRunnerOptions',
           'readBackendRootIdentity',
+          'formatUnknownDiagnosticText',
           'validateBackendRootIdentity',
           'runReadinessSmoke',
           'if (import.meta.main) process.exit(await runReadinessSmoke())',
