@@ -20,6 +20,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('formatDiagnosticText(raw, 500)')
     expect(predeploy).toContain('safeErrorTextForClassification')
     expect(predeploy).toContain('frontendErrorSecretPatterns')
+    expect(predeploy).toContain('reports raw auth error classifier regressions')
+    expect(predeploy).toContain('error\\\\.message\\\\.toLowerCase')
     expect(predeploy).toContain('providerClassificationMessage')
     expect(predeploy).toContain('redacts secret-shaped provider details before classification output')
     expect(predeploy).toContain('creatorDraftRetryMessage')
