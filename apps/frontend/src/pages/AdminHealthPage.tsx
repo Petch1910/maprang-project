@@ -279,6 +279,7 @@ export function AdminHealthPage() {
     detail: healthStatus?.securityPosture?.[item.key]?.detail ?? 'รอคำตอบสถานะจากระบบหลังบ้าน',
   }))
   const postureReadyCount = postureRows.filter((row) => row.ok).length
+  const refreshDisabledReason = isLoading ? 'กำลังโหลดสถานะระบบ' : ''
 
   return (
     <div className="space-y-5 p-4 sm:p-6 lg:p-8">
@@ -300,8 +301,11 @@ export function AdminHealthPage() {
           <div className="grid gap-2 sm:grid-cols-3 lg:w-auto">
             <button
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+              aria-disabled={isLoading}
+              data-testid="admin-health-refresh"
               disabled={isLoading}
               onClick={() => void loadHealth()}
+              title={refreshDisabledReason || 'รีเฟรชสถานะระบบ'}
               type="button"
             >
               <RefreshCw size={16} />

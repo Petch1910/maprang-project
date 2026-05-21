@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Admin Health refresh state now explains itself. `/admin/health` refresh exposes `aria-disabled`, `data-testid`, and a title that says `กำลังโหลดสถานะระบบ` while health data is loading, then returns to `รีเฟรชสถานะระบบ`; Route/Menu Audit now documents the exact disabled-state reason.
 - 2026-05-21: Character Lobby disabled controls now expose user-facing reasons. `/characters/:characterId` report/share/start-chat controls show titles for loading character data, report submission in progress, or adult-mode gating; Route/Menu Audit now documents the same lobby guard behavior.
 - 2026-05-21: Prompt Inspector disabled controls now explain the missing prerequisite. `/admin/prompt-inspector` refresh, character select, and submit button expose titles for loading characters, no characters, missing `ADMIN_API_KEY`, missing selected character, missing current message, or in-flight inspection; Route/Menu Audit now documents those guard reasons.
 - 2026-05-21: Admin Evals run button now has an explicit disabled reason. `/admin/evals` exposes `aria-disabled` plus a title telling admins to save `ADMIN_API_KEY` before running, or to wait while the suite is running; Route/Menu Audit documents the same guard behavior for the automated quality test page.
