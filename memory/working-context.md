@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Creator Draft retry classifier รองรับ provider error แบบ plain object แล้ว โดยดึงเฉพาะ `message`/`error` string, ไม่ stringify object ดิบ, ยัง redact ก่อน match retry hints, และ predeploy ล็อก regression test ชุดนี้ไว้.
 - 2026-05-21: Frontend error classifier helper รองรับ plain object ที่มี `message` เป็น string แล้ว โดยยังไม่ stringify object ดิบและยัง redact secret-shaped value ก่อนใช้ classify auth/admin errors.
 - 2026-05-21: Predeploy guard ล็อก frontend raw auth/admin error classifier audit เพิ่มแล้ว โดยตรวจ regression test `reports raw auth error classifier regressions` และ source pattern ของ `error.message.toLowerCase`, `String(error).toLowerCase`, `.test(error.message)`, และ `error.message.match`.
 - 2026-05-21: Frontend error classifier ใช้ helper กลาง `safeErrorTextForClassification` แล้วทั้ง AuthPanel sign-in และ Admin Moderation auth check โดย sanitize secret-shaped value ก่อน match Supabase/admin hints; frontend static audit และ predeploy guard บล็อก `error.message.toLowerCase()`, `String(error).toLowerCase()`, `.test(error.message)`, และ `error.message.match(...)` regression แล้ว.

@@ -286,6 +286,60 @@ describe('creator AI draft', () => {
     }
   })
 
+  test('retries object-shaped text model errors without stringifying raw objects', async () => {
+    const previousKey = process.env.OPENROUTER_API_KEY
+    const previousImageKey = process.env.IMAGE_GENERATION_API_KEY
+    const previousOpenAiKey = process.env.OPENAI_API_KEY
+    const leakedProviderKey = ['sk', 'proj', 'abcdefghijklmnopqrstuvwxyz123456'].join('-')
+    let attempts = 0
+
+    process.env.OPENROUTER_API_KEY = 'test-key'
+    delete process.env.IMAGE_GENERATION_API_KEY
+    delete process.env.OPENAI_API_KEY
+
+    try {
+      const result = await generateCreatorDraft(
+        {
+          brief: 'object-shaped retry character',
+        },
+        async () => {
+          attempts += 1
+          if (attempts === 1) {
+            throw {
+              message: `temporarily unavailable ${leakedProviderKey}`,
+              toString() {
+                throw new Error('raw object should not be stringified')
+              },
+            }
+          }
+          return (await completionWith(
+            JSON.stringify({
+              name: 'OBJ',
+              tagline: 'object retry smoke',
+              description: 'A retry smoke-test character.',
+              biography: 'Created for object-shaped retry classification tests.',
+              scenario: 'A quiet room.',
+              systemPrompt: 'You are OBJ. Stay in character.',
+              compactPrompt: 'OBJ: smoke test.',
+              characterAnchor: 'Calm and observant.',
+              constraints: 'Do not write for the player.',
+              greeting: 'Hello.',
+              tags: 'roleplay, thai, slow-burn',
+            }),
+          )()) as ChatCompletion
+        },
+      )
+
+      expect(attempts).toBe(2)
+      expect(result.source).toBe('ai')
+      expect(result.warnings.join('\n')).not.toContain(leakedProviderKey)
+    } finally {
+      restoreOpenRouterKey(previousKey)
+      restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
+      restoreEnvValue('OPENAI_API_KEY', previousOpenAiKey)
+    }
+  })
+
   test('redacts secret-shaped text model failures before returning creator warnings', async () => {
     const previousKey = process.env.OPENROUTER_API_KEY
     const previousImageKey = process.env.IMAGE_GENERATION_API_KEY

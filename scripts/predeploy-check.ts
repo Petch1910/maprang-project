@@ -1578,7 +1578,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         creatorDraft,
-        ['redactSensitiveText', 'creatorDraftRetryMessage', 'safeFailureDetail', 'readImageProviderJson', 'friendlyImageFailureReason', 'ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง', 'โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์'],
+        ['redactSensitiveText', 'creatorDraftRetryRawMessage', 'creatorDraftRetryMessage', 'safeFailureDetail', 'readImageProviderJson', 'friendlyImageFailureReason', 'ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง', 'โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์'],
         'apps/backend/src/creator-draft.service.ts',
       )
       forbidIncludes(
@@ -1590,6 +1590,7 @@ const checks: Check[] = [
         creatorDraftTest,
         [
           'redacts text-model retry classifier input before matching transient hints',
+          'retries object-shaped text model errors without stringifying raw objects',
           'redacts secret-shaped text model failures before returning creator warnings',
           'keeps broken model JSON warnings Thai-first without raw parser text',
           'keeps malformed image provider JSON warnings Thai-first',

@@ -245,8 +245,20 @@ function providerStatus(error: unknown) {
   return null
 }
 
+function creatorDraftRetryRawMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+  if (error && typeof error === 'object') {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string') return message
+    const errorField = (error as { error?: unknown }).error
+    if (typeof errorField === 'string') return errorField
+    return ''
+  }
+  return String(error)
+}
+
 function creatorDraftRetryMessage(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error)
+  const message = creatorDraftRetryRawMessage(error)
   return redactSensitiveText(message).text.toLowerCase()
 }
 
