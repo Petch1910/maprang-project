@@ -1,4 +1,4 @@
-import { apiBaseUrl, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
+import { apiBaseUrl, formatDiagnosticText, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
 
 export type ReadinessPayload = {
   ok: boolean
@@ -141,7 +141,7 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
   try {
     response = await fetchImpl(`${apiBase}/ready`)
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error)
+    const reason = formatDiagnosticText(error instanceof Error ? error.message : String(error), 500)
     throw new Error(`ติดต่อ endpoint ความพร้อมที่ ${apiBase}/ready ไม่ได้ (${reason})`)
   }
 
@@ -150,7 +150,7 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
   try {
     payload = JSON.parse(raw) as ReadinessPayload
   } catch {
-    throw new Error(`/ready ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'response ว่าง'}`)
+    throw new Error(`/ready ไม่ได้คืน JSON: ${formatDiagnosticText(raw, 300) || 'response ว่าง'}`)
   }
 
   return { response, payload }
@@ -161,7 +161,7 @@ export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: t
   try {
     response = await fetchImpl(`${apiBase}/`)
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error)
+    const reason = formatDiagnosticText(error instanceof Error ? error.message : String(error), 500)
     throw new Error(`ติดต่อ root identity ของระบบหลังบ้านที่ ${apiBase}/ ไม่ได้ (${reason})`)
   }
 
@@ -170,10 +170,10 @@ export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: t
   try {
     payload = JSON.parse(raw) as RootIdentityPayload
   } catch {
-    throw new Error(`/ ไม่ได้คืน JSON: ${raw.slice(0, 300) || 'response ว่าง'}`)
+    throw new Error(`/ ไม่ได้คืน JSON: ${formatDiagnosticText(raw, 300) || 'response ว่าง'}`)
   }
 
-  if (!response.ok) throw new Error(`/ ตอบ ${response.status}: ${raw.slice(0, 300) || response.statusText}`)
+  if (!response.ok) throw new Error(`/ ตอบ ${response.status}: ${formatDiagnosticText(raw, 300) || response.statusText}`)
   validateBackendRootIdentity(payload)
   return payload
 }

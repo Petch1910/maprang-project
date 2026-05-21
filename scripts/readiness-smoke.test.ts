@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   buildReadinessSummary,
   formatReadinessSummary,
+  readReadiness,
   readBackendRootIdentity,
   runReadinessSmoke,
   type ReadinessPayload,
@@ -167,5 +168,30 @@ describe('readiness smoke summary', () => {
     })
 
     expect(payload).toEqual({ ok: true, service: 'maprang-backend' })
+  })
+
+  test('redacts secret-shaped values from readiness response diagnostics', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+
+    try {
+      await readReadiness('https://api.example.com', async () => new Response(`DATABASE_URL=${fakeDatabaseUrl}`, { status: 502 }))
+      throw new Error('expected readReadiness to fail')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      expect(message).toContain('[REDACTED_SECRET]')
+      expect(message).not.toContain('super-secret')
+    }
+
+    try {
+      await readBackendRootIdentity(
+        'https://api.example.com',
+        async () => new Response(JSON.stringify({ ok: false, detail: fakeDatabaseUrl }), { status: 500 }),
+      )
+      throw new Error('expected readBackendRootIdentity to fail')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      expect(message).toContain('postgresql://[REDACTED_SECRET]')
+      expect(message).not.toContain('super-secret')
+    }
   })
 })
