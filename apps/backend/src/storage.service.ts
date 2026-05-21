@@ -29,6 +29,7 @@ export const avatarStorageMessages = {
   uploadFailed: (status: number) => `อัปโหลดรูปตัวละครไป Supabase ไม่สำเร็จ สถานะ ${status}`,
   signedUrlFailed: (status: number) => `สร้างลิงก์รูปตัวละครแบบ signed URL ไม่สำเร็จ สถานะ ${status}`,
   signedUrlMissing: 'Supabase ไม่ได้ส่ง signed URL ของรูปตัวละครกลับมา',
+  signedUrlMalformed: 'Supabase ส่งข้อมูล signed URL ของรูปตัวละครไม่ถูกต้อง',
   unavailable: 'พื้นที่เก็บรูปตัวละครยังไม่พร้อมใช้งาน กรุณาลองใหม่หรือติดต่อผู้ดูแลระบบ',
 }
 
@@ -56,6 +57,14 @@ export function normalizeSupabaseSignedUrl(supabaseUrl: string, signedPath: stri
   if (signedPath.startsWith('/storage/v1/')) return `${baseUrl}${signedPath}`
   if (signedPath.startsWith('/object/')) return `${baseUrl}/storage/v1${signedPath}`
   return `${baseUrl}/storage/v1/${signedPath.replace(/^\//, '')}`
+}
+
+export async function readSupabaseSignedUrlPayload(response: Response) {
+  try {
+    return (await response.json()) as { signedURL?: string; signedUrl?: string }
+  } catch {
+    throw new Error(avatarStorageMessages.signedUrlMalformed)
+  }
 }
 
 function supabaseStorageConfig() {
@@ -117,7 +126,7 @@ export async function resolveAvatarLocation(filename: string) {
   })
   if (!response.ok) throw new Error(avatarStorageMessages.signedUrlFailed(response.status))
 
-  const body = (await response.json()) as { signedURL?: string; signedUrl?: string }
+  const body = await readSupabaseSignedUrlPayload(response)
   const signedPath = body.signedURL ?? body.signedUrl
   if (!signedPath) throw new Error(avatarStorageMessages.signedUrlMissing)
   return {

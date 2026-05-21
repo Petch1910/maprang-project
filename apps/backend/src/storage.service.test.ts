@@ -4,6 +4,7 @@ import {
   avatarStorageMessages,
   avatarUrl,
   normalizeSupabaseSignedUrl,
+  readSupabaseSignedUrlPayload,
   safeAvatarFilename,
   supabaseStorageAccess,
 } from './storage.service'
@@ -54,6 +55,13 @@ describe('storage service', () => {
     expect(avatarStorageMessages.uploadFailed(502)).toContain('อัปโหลดรูปตัวละคร')
     expect(avatarStorageMessages.signedUrlFailed(500)).toContain('signed URL')
     expect(avatarStorageMessages.signedUrlMissing).toContain('signed URL')
+    expect(avatarStorageMessages.signedUrlMalformed).toContain('signed URL')
     expect(avatarStorageMessages.unavailable).toContain('พื้นที่เก็บรูปตัวละคร')
+  })
+
+  test('wraps malformed Supabase signed URL payloads in Thai-first errors', async () => {
+    await expect(readSupabaseSignedUrlPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
+      'Supabase ส่งข้อมูล signed URL ของรูปตัวละครไม่ถูกต้อง',
+    )
   })
 })
