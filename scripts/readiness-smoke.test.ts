@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   buildReadinessSummary,
+  formatReadinessSmokeCaughtError,
   formatReadinessSummary,
   readReadiness,
   readBackendRootIdentity,
@@ -193,5 +194,31 @@ describe('readiness smoke summary', () => {
       expect(message).toContain('postgresql://[REDACTED_SECRET]')
       expect(message).not.toContain('super-secret')
     }
+  })
+
+  test('redacts secret-shaped values from readiness runner caught errors', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const directMessage = formatReadinessSmokeCaughtError(new Error(`DATABASE_URL=${fakeDatabaseUrl}`))
+
+    expect(directMessage).toContain('[REDACTED_SECRET]')
+    expect(directMessage).not.toContain('super-secret')
+
+    const errors: string[] = []
+    const exitCode = await runReadinessSmoke({
+      apiBaseUrl: 'https://api.example.com',
+      rootIdentityReader: async () => {
+        throw new Error(`root failed with DATABASE_URL=${fakeDatabaseUrl}`)
+      },
+      readinessReader: async () => ({
+        response: { ok: true, status: 200 },
+        payload: readyPayload(),
+      }),
+      writeLine: () => {},
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(errors.join('\n')).toContain('[REDACTED_SECRET]')
+    expect(errors.join('\n')).not.toContain('super-secret')
   })
 })

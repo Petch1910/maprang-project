@@ -136,6 +136,11 @@ export function formatReadinessSummary(summary: ReadinessSummary) {
   return JSON.stringify(summary, null, 2)
 }
 
+export function formatReadinessSmokeCaughtError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetch = fetch) {
   let response: Response
   try {
@@ -190,7 +195,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
     rootIdentity = await rootIdentityReader(currentApiBaseUrl)
     validateBackendRootIdentity(rootIdentity)
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatReadinessSmokeCaughtError(error)
     writeError(`ตรวจ readiness ไม่ผ่าน: ${message}`)
     return 1
   }
@@ -199,7 +204,7 @@ export async function runReadinessSmoke(options: ReadinessSmokeRunnerOptions = {
   try {
     result = await readinessReader(currentApiBaseUrl)
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatReadinessSmokeCaughtError(error)
     writeError(`ตรวจ readiness ไม่ผ่าน: ${message}`)
     return 1
   }
