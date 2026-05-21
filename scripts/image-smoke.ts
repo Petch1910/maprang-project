@@ -1,4 +1,10 @@
-import { apiBaseUrl, formatDiagnosticText, readJson, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
+import {
+  apiBaseUrl,
+  formatUnknownDiagnosticText,
+  readJson,
+  validateBackendRootIdentity,
+  type RootIdentityPayload,
+} from './smoke-helpers'
 
 export type ImageSmokeHealthPayload = {
   ok: boolean
@@ -125,8 +131,7 @@ export function buildLiveImageSmokePayload(
 }
 
 export function formatImageSmokeCaughtError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {

@@ -223,6 +223,21 @@ describe('image smoke helpers', () => {
     expect(errors.join('\n')).not.toContain('super-secret')
   })
 
+  test('formats object-shaped image smoke errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:image-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatImageSmokeCaughtError({
+      message: `provider failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('image-object-secret')
+    expect(formatImageSmokeCaughtError({ error: 'image provider failed' })).toBe('image provider failed')
+    expect(formatImageSmokeCaughtError({ code: 'ECONNREFUSED' })).toBe('ไม่ทราบสาเหตุ')
+  })
+
   test('validates backend root identity before image provider checks', async () => {
     const lines: string[] = []
     const errors: string[] = []
