@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { isAbsolute, join, relative, resolve } from 'node:path'
-import { formatDiagnosticText } from './smoke-helpers'
+import { formatUnknownDiagnosticText } from './smoke-helpers'
 
 const root = join(import.meta.dir, '..')
 
@@ -544,6 +544,5 @@ function fail(area: Area, check: string, detail: string) {
 }
 
 export function formatDeployEnvDoctorError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }

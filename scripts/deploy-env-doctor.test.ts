@@ -73,6 +73,21 @@ describe('deploy env doctor helpers', () => {
     expect(message).not.toContain('super-secret')
   })
 
+  test('formats object-shaped env doctor errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:env-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatDeployEnvDoctorError({
+      message: `read failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('env-object-secret')
+    expect(formatDeployEnvDoctorError({ error: 'frontend env failed' })).toBe('frontend env failed')
+    expect(formatDeployEnvDoctorError({ code: 'ENOENT' })).toBe('ไม่ทราบสาเหตุ')
+  })
+
   test('detects placeholder values and normalizes production URLs', () => {
     expect(hasRealValue('postgresql://USER:PASSWORD@HOST:5432/DATABASE')).toBe(false)
     expect(hasRealValue('replace-with-long-random-admin-key')).toBe(false)
