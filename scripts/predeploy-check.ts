@@ -570,6 +570,7 @@ const checks: Check[] = [
       const e2eSmoke = await readRepoFile('scripts/e2e-smoke.ts')
       const e2eSmokeTest = await readRepoFile('scripts/e2e-smoke.test.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+      const qaSeed = await readRepoFile('apps/backend/prisma/qa-seed.ts')
       const packageJson = JSON.parse(content) as { scripts?: Record<string, string> }
       requireIncludes(
         content,
@@ -644,6 +645,12 @@ const checks: Check[] = [
         ["require('./legacy-helper')", "import legacy = require('./legacy-module')"],
         'scripts/import-cycle-audit.test.ts',
       )
+      requireIncludes(
+        qaSeed,
+        ['ป้องแป้ง | PONGPAENG', 'พูดกระชับแต่เป็นฉากครบ', 'มีบรรยากาศและแรงเสียดทานทางอารมณ์'],
+        'apps/backend/prisma/qa-seed.ts',
+      )
+      forbidIncludes(qaSeed, ['ตอบสั้นแต่มีชั้นเชิง'], 'apps/backend/prisma/qa-seed.ts')
       requireIncludes(deploymentQa, ['TypeScript import-equals `require()`', 'CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
       requireIncludes(
         e2eSmoke,
