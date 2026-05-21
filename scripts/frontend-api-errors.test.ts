@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import {
   ApiError,
   apiRequestTimeoutMs,
@@ -16,6 +17,16 @@ import {
 import { safeErrorTextForClassification } from '../apps/frontend/src/lib/safeError'
 
 describe('frontend API errors', () => {
+  test('keeps frontend API fetch calls timeout-capable', () => {
+    const source = readFileSync('apps/frontend/src/lib/api.ts', 'utf8')
+    expect(source.match(/\bfetch\(/g)?.length ?? 0).toBe(3)
+    expect(source).toContain('signal: init?.signal ?? controller?.signal')
+    expect(source.match(/signal:\s*controller\.signal/g)?.length ?? 0).toBe(2)
+    expect(source).toContain('apiRequestTimeoutMs')
+    expect(source).toContain('apiUploadTimeoutMs')
+    expect(source).toContain('apiStreamConnectTimeoutMs')
+  })
+
   test('sanitizes frontend error text before classification', () => {
     const openRouterKey = `sk-or-v1-${'1234567890abcdef'.repeat(2)}`
     const databaseUrl = 'postgresql://user:secret-password@db.example.com:5432/maprang?sslmode=require'

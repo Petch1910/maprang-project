@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Frontend API fetch timeout source guard now checks `apps/frontend/src/lib/api.ts` directly from `scripts/frontend-api-errors.test.ts`, locking the three fetch surfaces (`apiRequestTimeoutMs`, `apiUploadTimeoutMs`, and `apiStreamConnectTimeoutMs`) so future frontend API calls do not drift back to unbounded requests.
+
 ## บันทึกเพิ่ม 2026-05-21
 
 - 2026-05-21: Frontend chat streaming เพิ่ม timeout เฉพาะช่วงเชื่อมต่อสตรีมแล้ว (`apiStreamConnectTimeoutMs=60_000`) ถ้า `/chat/stream` ไม่เริ่มตอบจะ abort เป็น `ApiError` ภาษาไทยสถานะ 408 แต่หลังได้ response แล้วจะไม่ตัดกลาง stream เพื่อรักษา UX text streaming.

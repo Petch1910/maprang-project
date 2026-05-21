@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21 frontend API timeout source-guard pass: `bun run frontend:api:test` passed 15 tests / 45 expects after adding a source-level regression that verifies all three frontend `fetch` call sites keep timeout/signal wiring through `apiRequestTimeoutMs`, `apiUploadTimeoutMs`, and `apiStreamConnectTimeoutMs`.
+
 ## บันทึกเพิ่ม 2026-05-21
 
 - 2026-05-21 chat stream connect timeout pass: `bun run frontend:api:test` ผ่าน 14 tests / 39 expects หลังเพิ่ม regression ที่จำลอง `/chat/stream` ไม่เริ่มตอบและยืนยันว่า abort เป็น `ApiError` ภาษาไทยสถานะ 408 โดยไม่ตัดสตรีมหลังเชื่อมต่อสำเร็จ; `bun run frontend:check` ผ่าน static/route audit, TypeScript, Vite build และ bundle budget.
