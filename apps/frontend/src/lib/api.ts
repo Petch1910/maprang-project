@@ -5,11 +5,22 @@ export { API_BASE_URL }
 export const DEFAULT_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const genericApiErrorMessage = 'คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'
+const thaiTextPattern = /[\u0e00-\u0e7f]/
+const rawTechnicalMessagePattern =
+  /\b(?:Cannot read|PrismaClient\w*|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|TypeError|ReferenceError|SyntaxError|DATABASE_URL|OPENROUTER_API_KEY|SUPABASE_SERVICE_ROLE_KEY|service_role|SQLSTATE|stack trace|undefined)\b/i
 
 function payloadString(payload: unknown, key: 'message' | 'error') {
   if (!payload || typeof payload !== 'object') return ''
   const value = (payload as Record<string, unknown>)[key]
   return typeof value === 'string' ? value.trim() : ''
+}
+
+export function safeApiUserMessage(value: string) {
+  const message = value.trim()
+  if (!message) return ''
+  if (!thaiTextPattern.test(message)) return ''
+  if (rawTechnicalMessagePattern.test(message)) return ''
+  return message
 }
 
 export class ApiError extends Error {
@@ -18,7 +29,7 @@ export class ApiError extends Error {
   payload: unknown
 
   constructor(path: string, status: number, payload: unknown) {
-    const message = payloadString(payload, 'message') || `${genericApiErrorMessage} (สถานะ ${status})`
+    const message = safeApiUserMessage(payloadString(payload, 'message')) || `${genericApiErrorMessage} (สถานะ ${status})`
     super(message)
     this.name = 'ApiError'
     this.path = path

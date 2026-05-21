@@ -3,6 +3,7 @@ import {
   ApiError,
   logUnexpectedError,
   safeBrowserErrorSummary,
+  safeApiUserMessage,
   streamChatMessage,
   type ChatStreamEvent,
 } from '../apps/frontend/src/lib/api'
@@ -28,6 +29,20 @@ describe('frontend API errors', () => {
 
     expect(error.message).toBe('คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่ (สถานะ 503)')
     expect(error.message).not.toContain('database_not_configured')
+  })
+
+  test('does not surface raw technical backend messages even when message exists', () => {
+    expect(safeApiUserMessage('ส่งถี่เกินไป กรุณารอสักครู่แล้วลองใหม่')).toBe('ส่งถี่เกินไป กรุณารอสักครู่แล้วลองใหม่')
+    expect(safeApiUserMessage('Cannot read properties of undefined')).toBe('')
+    expect(safeApiUserMessage('PrismaClientKnownRequestError: ECONNREFUSED')).toBe('')
+    expect(safeApiUserMessage('TypeError: fetch failed')).toBe('')
+
+    const error = new ApiError('/chat', 500, {
+      error: 'unknown_error',
+      message: 'Cannot read properties of undefined',
+    })
+
+    expect(error.message).toBe('คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่ (สถานะ 500)')
   })
 
   test('falls back to Thai copy for non-json error payloads', () => {

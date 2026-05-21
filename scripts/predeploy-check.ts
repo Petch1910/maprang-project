@@ -1248,6 +1248,16 @@ const checks: Check[] = [
         'scripts/check-frontend-bundles.ts',
       )
       requireIncludes(
+        await readRepoFile('apps/frontend/src/lib/api.ts'),
+        ['safeApiUserMessage', 'rawTechnicalMessagePattern', "safeApiUserMessage(payloadString(payload, 'message'))"],
+        'apps/frontend/src/lib/api.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-api-errors.test.ts'),
+        ['does not surface raw technical backend messages even when message exists', 'safeApiUserMessage', 'Cannot read properties of undefined'],
+        'scripts/frontend-api-errors.test.ts',
+      )
+      requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.test.ts'),
         [
           'reports buttons without explicit type',
