@@ -1054,17 +1054,29 @@ const checks: Check[] = [
       const packageJson = await readRepoFile('package.json')
       const securityAudit = await readRepoFile('scripts/backend-security-audit.ts')
       const authPanel = await readRepoFile('apps/frontend/src/components/AuthPanel.tsx')
+      const adminModerationPage = await readRepoFile('apps/frontend/src/pages/AdminModerationPage.tsx')
+      const frontendSafeError = await readRepoFile('apps/frontend/src/lib/safeError.ts')
       const workspacePage = await readRepoFile('apps/frontend/src/pages/WorkspacePage.tsx')
       const backendRedaction = await readRepoFile('apps/backend/src/redaction.ts')
       requireIncludes(
+        frontendSafeError,
+        ['safeErrorTextForClassification', 'frontendErrorSecretPatterns'],
+        'apps/frontend/src/lib/safeError.ts',
+      )
+      requireIncludes(
         authPanel,
-        ['authClassifierText', 'authSecretPatterns'],
+        ['safeErrorTextForClassification'],
         'apps/frontend/src/components/AuthPanel.tsx',
       )
+      requireIncludes(
+        adminModerationPage,
+        ['safeErrorTextForClassification', "message.includes('admin_unauthorized')"],
+        'apps/frontend/src/pages/AdminModerationPage.tsx',
+      )
       forbidIncludes(
-        authPanel,
-        ['error.message.toLowerCase()'],
-        'apps/frontend/src/components/AuthPanel.tsx',
+        `${authPanel}\n${adminModerationPage}`,
+        ['error.message.toLowerCase()', '.test(error.message)', 'error.message.match('],
+        'apps/frontend auth/admin error classifiers',
       )
       const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
       const chatRuntimeTest = await readRepoFile('apps/backend/src/chat.runtime.test.ts')

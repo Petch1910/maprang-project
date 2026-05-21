@@ -16,6 +16,7 @@ import {
   type ReportSummary,
   type ReportTargetType,
 } from '../lib/api'
+import { safeErrorTextForClassification } from '../lib/safeError'
 import { safeGetStorageItem } from '../lib/safeStorage'
 
 const statuses: Array<ReportStatus | ''> = ['', 'PENDING', 'REVIEWED', 'RESOLVED', 'REJECTED']
@@ -68,7 +69,8 @@ function getApiErrorStatus(error: unknown) {
 function isExpectedAdminAuthError(error: unknown) {
   const status = getApiErrorStatus(error)
   if (status === 401 || status === 403) return true
-  return error instanceof Error && /admin_unauthorized|unauthorized|forbidden/i.test(error.message)
+  const message = safeErrorTextForClassification(error)
+  return message.includes('admin_unauthorized') || message.includes('unauthorized') || message.includes('forbidden')
 }
 
 function apiErrorMessage(error: unknown) {

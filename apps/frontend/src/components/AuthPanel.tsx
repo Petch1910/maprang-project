@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { DEFAULT_USER_ID, logUnexpectedError, setApiUserId } from '../lib/api'
 import { getAuthState, getSupabase, isSupabaseConfigured, syncApiAuthFromSession, type AuthState } from '../lib/auth'
+import { safeErrorTextForClassification } from '../lib/safeError'
 import { safeGetStorageItem } from '../lib/safeStorage'
 
 type AuthPanelProps = {
@@ -10,22 +11,8 @@ type AuthPanelProps = {
 const inputClass =
   'min-h-10 rounded-xl border border-slate-900/15 bg-white px-3 text-sm font-normal text-slate-900 outline-none focus:border-blue-500/60 focus:ring-4 focus:ring-blue-500/15'
 
-const authSecretPatterns = [
-  /sk-(?:or|proj|live|test|ant)-[A-Za-z0-9_-]{12,}/gi,
-  /(?:postgres(?:ql)?|mysql|mongodb):\/\/[^\s"'`]+/gi,
-  /\beyJ[A-Za-z0-9_-]{12,}\.[A-Za-z0-9_-]{12,}\.[A-Za-z0-9_-]{12,}\b/g,
-]
-
-function authClassifierText(error: unknown) {
-  if (!(error instanceof Error)) return ''
-  return authSecretPatterns
-    .reduce((message, pattern) => message.replace(pattern, '[redacted]'), error.message)
-    .slice(0, 300)
-    .toLowerCase()
-}
-
 function signInErrorMessage(error: unknown) {
-  const message = authClassifierText(error)
+  const message = safeErrorTextForClassification(error)
   if (message.includes('invalid') || message.includes('credentials')) return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
   if (message.includes('email not confirmed')) return 'ยังไม่ได้ยืนยันอีเมล'
   return 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจอีเมล รหัสผ่าน หรือสถานะ Supabase แล้วลองใหม่'

@@ -9,8 +9,24 @@ import {
   streamChatMessage,
   type ChatStreamEvent,
 } from '../apps/frontend/src/lib/api'
+import { safeErrorTextForClassification } from '../apps/frontend/src/lib/safeError'
 
 describe('frontend API errors', () => {
+  test('sanitizes frontend error text before classification', () => {
+    const openRouterKey = `sk-or-v1-${'1234567890abcdef'.repeat(2)}`
+    const databaseUrl = 'postgresql://user:secret-password@db.example.com:5432/maprang?sslmode=require'
+    const jwtLikeValue = `eyJ${'a'.repeat(16)}.eyJ${'b'.repeat(16)}.${'c'.repeat(16)}`
+    const message = safeErrorTextForClassification(
+      new Error(`admin_unauthorized ${openRouterKey} ${databaseUrl} ${jwtLikeValue}`),
+    )
+
+    expect(message).toContain('admin_unauthorized')
+    expect(message).toContain('[redacted]')
+    expect(message).not.toContain(openRouterKey.toLowerCase())
+    expect(message).not.toContain('secret-password')
+    expect(message).not.toContain(jwtLikeValue)
+  })
+
   test('prefers backend Thai user messages over machine-readable codes', () => {
     const error = new ApiError('/chat', 429, {
       error: 'rate_limited',
