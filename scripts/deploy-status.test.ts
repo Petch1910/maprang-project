@@ -193,6 +193,30 @@ describe('deploy status formatting', () => {
     expect(errors.join('\n')).toContain('วิธีแก้สเตจจิง:')
   })
 
+  test('returns structured JSON when root identity cannot be read', async () => {
+    const lines: string[] = []
+    const exitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts', '--json'],
+      currentApiBaseUrl: 'http://127.0.0.1:3000',
+      currentIsLocalSmokeTarget: true,
+      readRootIdentity: async () => {
+        throw new Error('backend unavailable')
+      },
+      readHealth: async () => baseHealth(),
+      writeLine: (line) => lines.push(line),
+      writeError: () => undefined,
+    })
+
+    const payload = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(1)
+    expect(payload.ok).toBe(false)
+    expect(payload.apiBaseUrl).toBe('http://127.0.0.1:3000')
+    expect(payload.error).toBe('backend unavailable')
+    expect(payload.failures).toEqual(['backend unavailable'])
+    expect(payload.rootIdentity.ok).toBeUndefined()
+    expect(payload.nextSteps.join('\n')).toContain('GET / คืน identity payload')
+  })
+
   test('returns a failure code without exiting when health cannot be read', async () => {
     const lines: string[] = []
     const errors: string[] = []
@@ -216,6 +240,29 @@ describe('deploy status formatting', () => {
     expect(errors.join('\n')).toContain('วิธีแก้สเตจจิง:')
     expect(errors.join('\n')).toContain('URL ระบบหลังบ้านที่ deploy แล้ว')
     expect(errors.join('\n')).not.toContain('วิธีแก้ local:')
+  })
+
+  test('returns structured JSON when health cannot be read after root identity passes', async () => {
+    const lines: string[] = []
+    const exitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts', '--json'],
+      currentApiBaseUrl: 'https://api.example.com',
+      currentIsLocalSmokeTarget: false,
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
+      readHealth: async () => {
+        throw new Error('health unavailable')
+      },
+      writeLine: (line) => lines.push(line),
+      writeError: () => undefined,
+    })
+
+    const payload = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(1)
+    expect(payload.ok).toBe(false)
+    expect(payload.error).toBe('health unavailable')
+    expect(payload.failures).toEqual(['health unavailable'])
+    expect(payload.rootIdentity).toEqual({ ok: true, service: 'maprang-backend' })
+    expect(payload.nextSteps.join('\n')).toContain('ฐานข้อมูล')
   })
 
   test('redacts secret-shaped values from deploy status caught errors', async () => {
@@ -261,6 +308,7 @@ describe('deploy status formatting', () => {
     const payload = JSON.parse(jsonLines.join('\n'))
     expect(payload.error).toContain('[REDACTED_SECRET]')
     expect(payload.error).not.toContain('super-secret')
+    expect(payload.failures.join('\n')).toContain('[REDACTED_SECRET]')
   })
 
   test('formats object-shaped deploy status errors without stringifying raw objects', () => {

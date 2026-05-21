@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Deploy status JSON failure path เพิ่ม `failures`, `nextSteps`, และ `rootIdentity` แล้ว สำหรับกรณี root identity หรือ `/health` อ่านไม่ได้ ทำให้ automation เห็นสาเหตุและขั้นถัดไปแม้ backend local/staging ยังไม่ตอบ.
 - 2026-05-21: `bun run qa:repo` ผ่านเต็มหลัง object-shaped diagnostics hardening ชุดล่าสุด ครอบ backend 171 tests / 580 expects, route/API/security/frontend/predeploy/eval/audit gates และ bundle budget ยังอยู่ในงบเดิม.
 - 2026-05-21: Chat provider classifier ไม่ stringify object-shaped provider failures ที่ไม่มี `message`/`error` แล้ว โดยจัดเป็น `unknown` ผ่านข้อความผู้ใช้แบบปลอดภัยแทน `[object Object]`.
 - 2026-05-21: Predeploy runner formatter ใช้ `formatUnknownDiagnosticText` แล้ว ทำให้ check ที่ throw object-shaped error ไม่ถูก stringify object ดิบก่อนแสดงผล gate.

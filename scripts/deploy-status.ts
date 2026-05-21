@@ -43,6 +43,18 @@ type DeployStatusPayload = {
   }
 }
 
+type DeployStatusFailurePayload = {
+  ok: false
+  apiBaseUrl: string
+  error: string
+  failures: string[]
+  nextSteps: string[]
+  rootIdentity: {
+    ok: boolean | undefined
+    service?: string
+  }
+}
+
 export type DeployStatusRunnerOptions = {
   argv?: string[]
   readRootIdentity?: () => Promise<RootIdentityPayload>
@@ -148,6 +160,30 @@ export function formatDeployStatusCaughtError(error: unknown) {
   return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
+function buildDeployStatusFailurePayload({
+  apiBaseUrl,
+  error,
+  rootIdentity,
+  nextSteps,
+}: {
+  apiBaseUrl: string
+  error: string
+  rootIdentity?: RootIdentityPayload
+  nextSteps: string[]
+}): DeployStatusFailurePayload {
+  return {
+    ok: false,
+    apiBaseUrl,
+    error,
+    failures: [error],
+    nextSteps,
+    rootIdentity: {
+      ok: rootIdentity?.ok,
+      service: rootIdentity?.service,
+    },
+  }
+}
+
 export async function runDeployStatus(options: DeployStatusRunnerOptions | string[] = {}) {
   const normalized = Array.isArray(options) ? { argv: options } : options
   const argv = normalized.argv ?? process.argv
@@ -167,7 +203,20 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
   } catch (error) {
     const message = formatDeployStatusCaughtError(error)
     if (jsonMode) {
-      writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
+      writeLine(
+        JSON.stringify(
+          buildDeployStatusFailurePayload({
+            apiBaseUrl: currentApiBaseUrl,
+            error: message,
+            nextSteps: [
+              'เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend',
+              'สเตจจิงต้องตั้ง SMOKE_API_BASE_URL เป็น URL ระบบหลังบ้านที่ deploy แล้ว ไม่ใช่ proxy ของหน้าบ้าน/static',
+            ],
+          }),
+          null,
+          2,
+        ),
+      )
     } else {
       writeError(`ตรวจสถานะ deploy ไม่ผ่าน: ${message}`)
       writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
@@ -181,7 +230,21 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
   } catch (error) {
     const message = formatDeployStatusCaughtError(error)
     if (jsonMode) {
-      writeLine(JSON.stringify({ ok: false, apiBaseUrl: currentApiBaseUrl, error: message }, null, 2))
+      writeLine(
+        JSON.stringify(
+          buildDeployStatusFailurePayload({
+            apiBaseUrl: currentApiBaseUrl,
+            error: message,
+            rootIdentity,
+            nextSteps: [
+              'เริ่มระบบหลังบ้านและฐานข้อมูล แล้วรัน deploy status ใหม่',
+              'สเตจจิงต้องตั้ง SMOKE_API_BASE_URL เป็น URL ระบบหลังบ้านที่ deploy แล้ว',
+            ],
+          }),
+          null,
+          2,
+        ),
+      )
     } else {
       writeError(`ตรวจสถานะ deploy ไม่ผ่าน: ${message}`)
       writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้านและฐานข้อมูล แล้วรัน `bun run deploy:status` ใหม่')

@@ -1018,6 +1018,8 @@ const checks: Check[] = [
           'local URL and CORS blockers',
           'surfaces invalid roleplay reply budget env in JSON and text readiness output',
           'validates backend root identity before health status',
+          'returns structured JSON when root identity cannot be read',
+          'returns structured JSON when health cannot be read after root identity passes',
           'formats object-shaped deploy status errors without stringifying raw objects',
           'runs deploy status JSON through an importable runner',
         ],
