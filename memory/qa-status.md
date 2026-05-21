@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 live chat smoke diagnostic redaction pass: `bun run smoke:chat:test` ผ่าน 9 tests / 40 expects หลัง redact caught errors และ `providerFailure.userMessage`.
 - 2026-05-21 image smoke catch diagnostic redaction pass: `bun run smoke:image:test` ผ่าน 10 tests / 38 expects หลังเพิ่ม `formatImageSmokeCaughtError` ให้ root/health และ live draft failure paths.
 - 2026-05-21 API smoke catch diagnostic redaction pass: `bun run api:smoke:test` ผ่าน 10 tests / 92 expects หลังเพิ่ม `formatApiSmokeCaughtError` ให้ catch paths ของ API smoke ไม่บันทึก raw error message/string ตรงๆ.
 - 2026-05-21 API smoke diagnostic redaction pass: `bun run api:smoke:test` ผ่าน 10 tests / 87 expects หลังเพิ่ม `formatApiSmokeDiagnostic` และ source guard กัน `raw.slice(0, 500)` ใน API smoke.

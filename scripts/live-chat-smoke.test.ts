@@ -3,6 +3,7 @@ import {
   assertSmokeUserHasTokenBalance,
   buildLiveChatSmokePayload,
   findMatchingChatDebit,
+  formatLiveChatSmokeCaughtError,
   providerFailureIssue,
   runLiveChatSmoke,
   selectLiveChatSmokeCharacter,
@@ -41,6 +42,11 @@ describe('live chat smoke helpers', () => {
     expect(issue).not.toContain('unknown')
     expect(issue).not.toContain('outbound network')
     expect(issue).not.toContain('backend logs')
+
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const secretIssue = providerFailureIssue({ retryable: false, userMessage: `quota failed ${fakeDatabaseUrl}` })
+    expect(secretIssue).toContain('postgresql://[REDACTED_SECRET]')
+    expect(secretIssue).not.toContain('super-secret')
 
     expect(() =>
       validateLiveChatSmokeResponse(
@@ -184,6 +190,33 @@ describe('live chat smoke helpers', () => {
     expect(calls).toEqual([])
     expect(lines).toEqual([])
     expect(errors.join('\n')).toContain('ชื่อ service ไม่ถูกต้อง')
+  })
+
+  test('redacts secret-shaped values from live chat smoke caught errors', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    expect(formatLiveChatSmokeCaughtError(new Error(`health failed ${fakeDatabaseUrl}`))).toContain(
+      'postgresql://[REDACTED_SECRET]',
+    )
+    expect(formatLiveChatSmokeCaughtError(new Error(`health failed ${fakeDatabaseUrl}`))).not.toContain('super-secret')
+
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runLiveChatSmoke({
+      env: { SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: '1000' },
+      apiBaseUrl: 'https://api.maprang.example',
+      readJson: async () => {
+        throw new Error(`backend failed ${fakeDatabaseUrl}`)
+      },
+      readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
+      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('postgresql://[REDACTED_SECRET]')
+    expect(errors.join('\n')).not.toContain('super-secret')
   })
 
   test('returns a failure code without spending chat tokens when balance is too low', async () => {

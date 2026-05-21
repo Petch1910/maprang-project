@@ -1,5 +1,6 @@
 import {
   apiBaseUrl,
+  formatDiagnosticText,
   readJson,
   smokeAuthHeaders,
   validateBackendRootIdentity,
@@ -59,10 +60,16 @@ export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN
 }
 
 export function providerFailureIssue(failure: ProviderFailure) {
-  const userMessage = failure.userMessage ? ` ข้อความจากผู้ให้บริการ: ${failure.userMessage}` : ''
+  const safeUserMessage = failure.userMessage ? formatDiagnosticText(failure.userMessage, 300) : ''
+  const userMessage = safeUserMessage ? ` ข้อความจากผู้ให้บริการ: ${safeUserMessage}` : ''
   const retry = failure.retryable ? ' ลองใหม่ได้หลังช่วงพัก' : ' ต้องแก้การตั้งค่า, โควตา หรือสิทธิ์ผู้ดูแลก่อน'
   const code = failure.code ?? 'ไม่ทราบรหัส'
   return `ตรวจแชทจริงติดต่อระบบหลังบ้านได้แล้ว แต่ผู้ให้บริการ AI คืน ${code}.${retry}${userMessage} ตรวจการเชื่อมต่อออกไป OpenRouter, OPENROUTER_API_KEY, เครดิต/โควตาของผู้ให้บริการ, ข้อจำกัดอัตราการเรียก, สิทธิ์เข้าถึงโมเดล, และ log ระบบหลังบ้านก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`
+}
+
+export function formatLiveChatSmokeCaughtError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 export function selectLiveChatSmokeCharacter(characters: LiveChatSmokeCharacter[]) {
@@ -235,7 +242,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
     )
     return 0
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatLiveChatSmokeCaughtError(error)
     writeError(`ตรวจแชทจริงไม่ผ่าน: ${message}`)
     return 1
   }

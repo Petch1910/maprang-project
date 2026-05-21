@@ -54,7 +54,7 @@
 
 - Confidentiality / การรักษาความลับ: Supabase JWT, คีย์ผู้ดูแล, private prompt fields ที่ซ่อนอยู่, signed avatar URLs ใน production, และนโยบายคุมพรอมป์.
 - Secret hygiene / สุขอนามัยของ secret: `secrets:check` สแกน source/docs ที่ commit แล้วเพื่อหา OpenRouter, OpenAI, Anthropic, Hugging Face, Stripe live keys, platform tokens, JWT-like secrets, และ fail ถ้ามีไฟล์ `.env`/`.env.*` ที่ถูก track; env local ที่ไม่ถูก track ยังใช้พัฒนาได้ตามปกติ.
-- Smoke/diagnostic scripts ที่แสดง response payload, fetch failure หรือ caught error รวมถึง `api:smoke`, `smoke:image` และ `supabase:storage:check/setup` ต้องใช้ `formatDiagnosticText`/`formatPayload` เพื่อ redact secret-shaped value ก่อนเขียน log หรือคืน error.
+- Smoke/diagnostic scripts ที่แสดง response payload, fetch failure หรือ caught error รวมถึง `api:smoke`, `smoke:image`, `smoke:chat` และ `supabase:storage:check/setup` ต้องใช้ `formatDiagnosticText`/`formatPayload` เพื่อ redact secret-shaped value ก่อนเขียน log หรือคืน error.
 - `.gitignore` ignores real `.env.*` files but explicitly allows `.env.example` and `.env.production.example` templates.
 - Integrity / ความถูกต้องของข้อมูล: Prisma query builder, raw SQL audit, route id validation, owner/admin guards, migrations, และ relationship/tag validation.
 - Availability / ความพร้อมใช้งาน: database readiness, OpenRouter readiness, rate-limit buckets, token guard, smoke tests, และ invalid-id 400/404 handling แทน 500.
