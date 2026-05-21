@@ -1,5 +1,5 @@
 import { providerFailureHint } from './image-smoke'
-import { formatDiagnosticText } from './smoke-helpers'
+import { formatDiagnosticText, formatUnknownDiagnosticText } from './smoke-helpers'
 
 const machineReadableErrorCodePattern = /^[a-z][a-z0-9_]{0,79}$/
 
@@ -52,8 +52,7 @@ export function formatApiSmokeDiagnostic(value: string, maxLength = 500, emptyLa
 }
 
 export function formatApiSmokeCaughtError(error: unknown, maxLength = 500) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatApiSmokeDiagnostic(raw, maxLength, 'ไม่ทราบสาเหตุ')
+  return formatUnknownDiagnosticText(error, maxLength) || 'ไม่ทราบสาเหตุ'
 }
 
 export function parseApiSmokeStreamEvents<T = unknown>(raw: string, path = '/chat/stream') {

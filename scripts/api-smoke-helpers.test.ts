@@ -145,6 +145,21 @@ describe('api smoke helpers', () => {
     expect(formatApiSmokeCaughtError('')).toBe('ไม่ทราบสาเหตุ')
   })
 
+  test('formats object-shaped API smoke errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:api-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatApiSmokeCaughtError({
+      message: `fetch failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('api-object-secret')
+    expect(formatApiSmokeCaughtError({ error: 'gateway timeout' })).toBe('gateway timeout')
+    expect(formatApiSmokeCaughtError({ code: 'ECONNRESET' })).toBe('ไม่ทราบสาเหตุ')
+  })
+
   test('parses API smoke stream events with Thai diagnostics', () => {
     expect(parseApiSmokeStreamEvents('data: {"type":"delta","content":"สวัสดี"}\n\ndata: {"type":"done"}\n', '/chat/stream')).toEqual([
       { type: 'delta', content: 'สวัสดี' },

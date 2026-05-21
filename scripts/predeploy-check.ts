@@ -1270,6 +1270,7 @@ const checks: Check[] = [
         [
           'allows live smoke to continue only for live verification readiness failures',
           'validates machine-readable API smoke error codes',
+          'formats object-shaped API smoke errors without stringifying raw objects',
           'parses API smoke stream events with Thai diagnostics',
           'imports the API smoke runner without executing the smoke flow',
           'builds API smoke summary counts for automation',
@@ -1292,7 +1293,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-smoke-helpers.ts'),
-        ['parseApiSmokeStreamEvents', 'คืน data event ที่ไม่ใช่ JSON'],
+        ['formatUnknownDiagnosticText', 'parseApiSmokeStreamEvents', 'คืน data event ที่ไม่ใช่ JSON'],
         'scripts/api-smoke-helpers.ts',
       )
       requireIncludes(

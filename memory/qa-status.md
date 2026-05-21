@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21 API smoke object-shaped diagnostic pass: `bun run api:smoke:test` ผ่าน 11 tests / 96 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 64 expects, และ `bun run predeploy:check` ผ่านหลัง `formatApiSmokeCaughtError` ใช้ `formatUnknownDiagnosticText`.
 - 2026-05-21 shared smoke unknown diagnostic helper pass: `bun run smoke:helpers:test` ผ่าน 8 tests / 24 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 63 expects, และ `bun run predeploy:check` ผ่านหลังเพิ่ม `formatUnknownDiagnosticText` กับ regression กัน object-shaped diagnostics ถูก stringify ดิบ.
 - 2026-05-21 Creator Draft object-shaped retry classifier pass: `bun test apps\backend\src\creator-draft.service.test.ts` ผ่าน 16 tests / 69 expects, `bun run backend:check` ผ่าน 167 tests / 569 expects, `bun run predeploy:check:test` ผ่าน 3 tests / 61 expects, และ `bun run predeploy:check` ผ่านหลังเพิ่ม `creatorDraftRetryRawMessage` เพื่อรองรับ plain object provider error โดยไม่ stringify object ดิบ.
 - 2026-05-21 frontend plain-object error classifier pass: `bun test scripts\frontend-api-errors.test.ts` ผ่าน 11 tests / 28 expects, `bun run frontend:static:audit:test` ผ่าน 17 tests / 25 expects, และ `bun run predeploy:check` ผ่านหลัง `safeErrorTextForClassification` รองรับ plain object `message` โดยไม่ stringify object ดิบ.
