@@ -49,6 +49,18 @@ export function formatDiagnosticText(value: string, maxLength: number) {
   return redactSensitiveText(value).text.slice(0, maxLength)
 }
 
+export function formatUnknownDiagnosticText(error: unknown, maxLength: number) {
+  if (error instanceof Error) return formatDiagnosticText(error.message, maxLength)
+  if (error && typeof error === 'object') {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string') return formatDiagnosticText(message, maxLength)
+    const errorField = (error as { error?: unknown }).error
+    if (typeof errorField === 'string') return formatDiagnosticText(errorField, maxLength)
+    return ''
+  }
+  return formatDiagnosticText(String(error), maxLength)
+}
+
 export async function readJson<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${apiBaseUrl}${path}`
   let response: Response
@@ -85,7 +97,7 @@ export function formatPayload(payload: unknown, fallback: string) {
 }
 
 export function formatFetchErrorReason(error: unknown) {
-  const reason = formatDiagnosticText(error instanceof Error ? error.message : String(error), 500)
+  const reason = formatUnknownDiagnosticText(error, 500)
   const normalized = reason.toLowerCase()
   if (
     normalized.includes('unable to connect') ||

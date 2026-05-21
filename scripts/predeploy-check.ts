@@ -1487,12 +1487,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.test.ts'),
-        ['defaults to local backend', 'does not impersonate a user by default against deployed targets', 'validates backend root identity payloads'],
+        ['defaults to local backend', 'does not impersonate a user by default against deployed targets', 'formats unknown smoke diagnostics without stringifying raw objects', 'validates backend root identity payloads'],
         'scripts/smoke-helpers.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.ts'),
-        ['validateBackendRootIdentity', 'maprang-backend'],
+        ['validateBackendRootIdentity', 'formatUnknownDiagnosticText', 'maprang-backend'],
         'scripts/smoke-helpers.ts',
       )
       requireIncludes(

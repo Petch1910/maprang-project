@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Shared smoke helper เพิ่ม `formatUnknownDiagnosticText` แล้ว เพื่อให้ smoke/deploy diagnostics ดึงข้อความจาก `Error`, plain object `message`/`error`, หรือ primitive แบบปลอดภัยโดยไม่ stringify object ดิบ; predeploy guard ล็อก regression test ไว้แล้ว.
 - 2026-05-21: Creator Draft retry classifier รองรับ provider error แบบ plain object แล้ว โดยดึงเฉพาะ `message`/`error` string, ไม่ stringify object ดิบ, ยัง redact ก่อน match retry hints, และ predeploy ล็อก regression test ชุดนี้ไว้.
 - 2026-05-21: Frontend error classifier helper รองรับ plain object ที่มี `message` เป็น string แล้ว โดยยังไม่ stringify object ดิบและยัง redact secret-shaped value ก่อนใช้ classify auth/admin errors.
 - 2026-05-21: Predeploy guard ล็อก frontend raw auth/admin error classifier audit เพิ่มแล้ว โดยตรวจ regression test `reports raw auth error classifier regressions` และ source pattern ของ `error.message.toLowerCase`, `String(error).toLowerCase`, `.test(error.message)`, และ `error.message.match`.

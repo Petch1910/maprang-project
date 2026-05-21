@@ -3,6 +3,7 @@ import {
   buildSmokeAuthHeaders,
   formatDiagnosticText,
   formatFetchErrorReason,
+  formatUnknownDiagnosticText,
   formatPayload,
   smokeApiBaseUrl,
   smokeTargetIsLocal,
@@ -52,6 +53,24 @@ describe('smoke helpers', () => {
     expect(formatPayload({ detail: fakeDatabaseUrl }, 'fallback')).toContain('postgresql://[REDACTED_SECRET]')
     expect(formatPayload(null, `DATABASE_URL=${fakeDatabaseUrl}`)).toContain('[REDACTED_SECRET]')
     expect(formatFetchErrorReason(new Error(`connection failed ${fakeDatabaseUrl}`))).toContain('postgresql://[REDACTED_SECRET]')
+  })
+
+  test('formats unknown smoke diagnostics without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatUnknownDiagnosticText(
+      {
+        message: `connection failed ${fakeDatabaseUrl}`,
+        toString() {
+          throw new Error('raw object should not be stringified')
+        },
+      },
+      500,
+    )
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('object-secret')
+    expect(formatUnknownDiagnosticText({ error: 'fetch failed' }, 500)).toBe('fetch failed')
+    expect(formatUnknownDiagnosticText({ code: 'ECONNREFUSED' }, 500)).toBe('')
   })
 
   test('formats common fetch failures with Thai-first diagnostics', () => {
