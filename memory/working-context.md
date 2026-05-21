@@ -9,6 +9,7 @@ Last updated: 2026-05-21
 - 2026-05-21: `bun run qa:repo` ผ่านเต็มหลัง route catch message hardening ชุดล่าสุด จึงยืนยัน static/unit/build/audit/eval ฝั่ง repo-owned ยังเขียวทั้งหมด; runtime smoke ยังขึ้นกับ Docker/backend/staging ตาม blocker เดิม.
 - 2026-05-21: backend security audit เพิ่ม guard ให้ route catch ห้ามใส่ raw `error.message` หรือ `String(error)` ลง field `error` แม้ response จะมี `message` แล้ว เพื่อบังคับให้ `error` เป็น machine-readable code ที่ควบคุมได้.
 - 2026-05-21: `routeErrorResponse` normalize unknown code เป็น `unknown_error` ทั้ง field `error` และ `message` แล้ว เพื่อไม่ให้ dynamic validation หรือ code ที่ไม่อยู่ใน `routeErrorMessages` หลุดกลับ API response.
+- 2026-05-21: `bun run qa:repo` ผ่านเต็มหลัง route error response normalization; backend tests ล่าสุดยัง 157 tests แต่ expect calls เพิ่มเป็น 507, security audit 22 tests / 35 expects, API route audit 48 routes, route/menu audit 14 surfaces, docs command audit 289 references, import-cycle 125 files / 279 edges, และ frontend bundle budget ยังผ่าน.
 
 ## อัปเดตงานใน repo (Repo-owned update) 2026-05-21
 
