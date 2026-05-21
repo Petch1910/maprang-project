@@ -2,6 +2,7 @@ import { unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   apiBaseUrl,
+  formatDiagnosticText,
   isLocalSmokeTarget,
   readJson,
   smokeAuthHeaders,
@@ -81,6 +82,11 @@ export async function cleanupLocalAvatarUpload(filename: string) {
   await unlink(join(import.meta.dir, '..', 'apps', 'backend', 'uploads', 'avatars', filename)).catch(() => {})
 }
 
+export function formatLocalSmokeCaughtError(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error)
+  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+}
+
 export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
   const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
   const currentIsLocalTarget = options.isLocalTarget ?? isLocalSmokeTarget
@@ -153,7 +159,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
     )
     return 0
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = formatLocalSmokeCaughtError(error)
     writeError(`ตรวจระบบ local ไม่ผ่าน: ${message}`)
     return 1
   }

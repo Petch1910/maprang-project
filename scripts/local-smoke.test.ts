@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   buildLocalSmokeSummary,
+  formatLocalSmokeCaughtError,
   pickSmokeCharacter,
   runLocalSmoke,
   validateAvatarUpload,
@@ -161,5 +162,29 @@ describe('local smoke helpers', () => {
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
     expect(errors).toEqual(['ตรวจระบบ local ไม่ผ่าน: ตัวอย่างความสัมพันธ์ไม่คืน turn ทดสอบ'])
+  })
+
+  test('redacts secret-shaped values from local smoke caught errors', async () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    expect(formatLocalSmokeCaughtError(new Error(`health failed ${fakeDatabaseUrl}`))).toContain(
+      'postgresql://[REDACTED_SECRET]',
+    )
+    expect(formatLocalSmokeCaughtError(new Error(`health failed ${fakeDatabaseUrl}`))).not.toContain('super-secret')
+
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runLocalSmoke({
+      readJson: async () => {
+        throw new Error(`backend failed ${fakeDatabaseUrl}`)
+      },
+      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(lines).toEqual([])
+    expect(errors.join('\n')).toContain('postgresql://[REDACTED_SECRET]')
+    expect(errors.join('\n')).not.toContain('super-secret')
   })
 })

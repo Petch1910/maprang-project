@@ -4,6 +4,7 @@ Last updated: 2026-05-21
 
 ## บันทึกเพิ่ม 2026-05-21
 
+- 2026-05-21: Local smoke diagnostics เพิ่ม `formatLocalSmokeCaughtError` ให้ runner failure path redact secret-shaped value ก่อนเขียน CLI error แล้ว; `smoke:local:test` ครอบ helper และ backend failure path แล้ว.
 - 2026-05-21: Live chat smoke diagnostics เพิ่ม `formatLiveChatSmokeCaughtError` และ redact `providerFailure.userMessage` ก่อนประกอบ CLI guidance แล้ว เพื่อไม่ให้ provider/proxy error ที่มี secret-shaped value หลุดใน live chat smoke logs; `smoke:chat:test` ครอบ helper, providerFailure, และ runner failure path แล้ว.
 - 2026-05-21: Image smoke catch diagnostics เพิ่ม `formatImageSmokeCaughtError` ให้ root/health preflight และ live creator draft failure redact secret-shaped value ก่อนเขียน CLI error; `smoke:image:test` ครอบ helper และ runner failure path แล้ว.
 - 2026-05-21: API smoke catch diagnostics ตอนนี้ใช้ `formatApiSmokeCaughtError` ใน `check`, `warnable`, `runRequired`, และ `bestEffort` แล้ว เพื่อไม่ให้ error object/string ที่มี secret-shaped value ถูกบันทึกเป็นผล smoke หรือ warning ตรงๆ; `api:smoke:test` ครอบ redaction และ source guard แล้ว.
