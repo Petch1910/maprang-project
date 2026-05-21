@@ -128,6 +128,8 @@ const defaultRequiredSnippets = [
   'bun run e2e:smoke',
   'bun run qa:full',
   'frontend-route-audit.ts',
+  'ยังโหลดรายการแชทไม่ได้',
+  'รีเฟรชรายการ',
 ]
 
 const defaultForbiddenSnippets = [
