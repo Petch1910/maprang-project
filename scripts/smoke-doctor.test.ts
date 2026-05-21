@@ -298,4 +298,19 @@ describe('smoke doctor report', () => {
     expect(errors.join('\n')).toContain('[REDACTED_SECRET]')
     expect(errors.join('\n')).not.toContain('super-secret')
   })
+
+  test('formats object-shaped smoke doctor errors without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:doctor-object-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = formatSmokeDoctorCaughtError({
+      message: `health failed ${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('raw object should not be stringified')
+      },
+    })
+
+    expect(message).toContain('postgresql://[REDACTED_SECRET]')
+    expect(message).not.toContain('doctor-object-secret')
+    expect(formatSmokeDoctorCaughtError({ error: 'root identity failed' })).toBe('root identity failed')
+    expect(formatSmokeDoctorCaughtError({ code: 'ECONNREFUSED' })).toBe('ไม่ทราบสาเหตุ')
+  })
 })

@@ -1,6 +1,6 @@
 import {
   apiBaseUrl,
-  formatDiagnosticText,
+  formatUnknownDiagnosticText,
   isLocalSmokeTarget,
   readJson,
   validateBackendRootIdentity,
@@ -151,8 +151,7 @@ export function buildSmokeDoctorReport(
 }
 
 export function formatSmokeDoctorCaughtError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error)
-  return formatDiagnosticText(raw, 500) || 'ไม่ทราบสาเหตุ'
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
 export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunnerOptions = process.argv) {
