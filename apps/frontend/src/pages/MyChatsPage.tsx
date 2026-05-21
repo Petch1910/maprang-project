@@ -297,6 +297,17 @@ export function MyChatsPage() {
     }
   }
 
+  const renameConfirmDisabledReason = renameTarget
+    ? !renameValue.trim()
+      ? 'กรอกชื่อแชทก่อนบันทึก'
+      : pendingAction === `rename:${renameTarget.id}`
+        ? 'กำลังบันทึกชื่อแชท'
+        : undefined
+    : undefined
+  const deleteConfirmDisabledReason =
+    deleteTarget && pendingAction === `delete:${deleteTarget.id}` ? 'กำลังลบแชทนี้' : undefined
+  const bulkDeleteConfirmDisabledReason = pendingAction === 'bulk-delete' ? 'กำลังลบแชทที่เลือก' : undefined
+
   return (
     <div className="space-y-4 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -543,6 +554,7 @@ export function MyChatsPage() {
                         aria-expanded={openMenuChatId === chat.id}
                         aria-haspopup="menu"
                         aria-label={`เปิดเมนูแชท ${chat.title || chat.characterName}`}
+                        aria-disabled={isBusy}
                         className="relative z-20 grid size-9 scroll-mt-28 touch-manipulation place-items-center rounded-lg border border-slate-900/10 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
                         data-testid={`my-chat-menu-${chat.id}`}
                         disabled={isBusy}
@@ -550,6 +562,7 @@ export function MyChatsPage() {
                           event.stopPropagation()
                           setOpenMenuChatId((current) => (current === chat.id ? null : chat.id))
                         }}
+                        title={isBusy ? 'กำลังจัดการแชทนี้' : `เปิดเมนูจัดการแชท ${chat.title || chat.characterName}`}
                         type="button"
                       >
                         <MoreHorizontal size={17} />
@@ -656,9 +669,11 @@ export function MyChatsPage() {
                   {isArchived && (
                     <button
                       className="inline-flex min-h-10 items-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
+                      aria-disabled={isBusy}
                       data-testid={`my-chat-restore-button-${chat.id}`}
                       disabled={isBusy}
                       onClick={() => void handleRestore(chat)}
+                      title={isBusy ? 'กำลังเอาแชทกลับมา' : 'เอาแชทนี้กลับมา'}
                       type="button"
                     >
                       เอากลับมา
@@ -733,9 +748,11 @@ export function MyChatsPage() {
               </button>
               <button
                 className="min-h-11 rounded-xl bg-slate-950 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                aria-disabled={Boolean(renameConfirmDisabledReason)}
                 data-testid="my-chat-rename-confirm"
-                disabled={!renameValue.trim() || pendingAction === `rename:${renameTarget.id}`}
+                disabled={Boolean(renameConfirmDisabledReason)}
                 onClick={() => void confirmRename()}
+                title={renameConfirmDisabledReason || 'บันทึกชื่อแชท'}
                 type="button"
               >
                 {pendingAction === `rename:${renameTarget.id}` ? 'กำลังบันทึก...' : 'บันทึก'}
@@ -763,9 +780,11 @@ export function MyChatsPage() {
               </button>
               <button
                 className="min-h-11 rounded-xl bg-rose-600 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                aria-disabled={Boolean(deleteConfirmDisabledReason)}
                 data-testid="my-chat-delete-confirm"
-                disabled={pendingAction === `delete:${deleteTarget.id}`}
+                disabled={Boolean(deleteConfirmDisabledReason)}
                 onClick={() => void confirmDelete()}
+                title={deleteConfirmDisabledReason || 'ยืนยันลบแชทนี้'}
                 type="button"
               >
                 {pendingAction === `delete:${deleteTarget.id}` ? 'กำลังลบ...' : 'ลบแชท'}
@@ -793,9 +812,11 @@ export function MyChatsPage() {
               </button>
               <button
                 className="min-h-11 rounded-xl bg-rose-600 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                aria-disabled={Boolean(bulkDeleteConfirmDisabledReason)}
                 data-testid="my-chats-bulk-delete-confirm"
-                disabled={pendingAction === 'bulk-delete'}
+                disabled={Boolean(bulkDeleteConfirmDisabledReason)}
                 onClick={() => void confirmBulkDelete()}
+                title={bulkDeleteConfirmDisabledReason || 'ยืนยันลบแชทที่เลือก'}
                 type="button"
               >
                 {pendingAction === 'bulk-delete' ? 'กำลังลบ...' : 'ลบแชท'}

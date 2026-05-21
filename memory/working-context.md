@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: My Chats disabled controls are more explicit. `/chats` now gives Thai `title`/`aria-disabled` reasons to busy per-chat menus, archived-chat restore buttons, rename confirm, delete confirm, and bulk-delete confirm states; Route/Menu Audit now records that toolbar, per-chat menu, restore, and confirmation dialogs all explain why they are locked.
 - 2026-05-21: Admin Health refresh state now explains itself. `/admin/health` refresh exposes `aria-disabled`, `data-testid`, and a title that says `กำลังโหลดสถานะระบบ` while health data is loading, then returns to `รีเฟรชสถานะระบบ`; Route/Menu Audit now documents the exact disabled-state reason.
 - 2026-05-21: Character Lobby disabled controls now expose user-facing reasons. `/characters/:characterId` report/share/start-chat controls show titles for loading character data, report submission in progress, or adult-mode gating; Route/Menu Audit now documents the same lobby guard behavior.
 - 2026-05-21: Prompt Inspector disabled controls now explain the missing prerequisite. `/admin/prompt-inspector` refresh, character select, and submit button expose titles for loading characters, no characters, missing `ADMIN_API_KEY`, missing selected character, missing current message, or in-flight inspection; Route/Menu Audit now documents those guard reasons.
