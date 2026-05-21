@@ -47,7 +47,8 @@ export function routeErrorMessage(error: string) {
 }
 
 export function routeErrorResponse(error: string) {
-  return { error, message: routeErrorMessage(error) }
+  const code = routeErrorMessages[error] ? error : 'unknown_error'
+  return { error: code, message: routeErrorMessage(code) }
 }
 
 export function safeRouteErrorSummary(error: unknown) {

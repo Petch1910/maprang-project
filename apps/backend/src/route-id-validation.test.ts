@@ -85,6 +85,10 @@ describe('route id validation', () => {
     })
     expect(routeErrorMessage('unknown_error')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
     expect(routeErrorMessage('new_unmapped_code')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
+    expect(routeErrorResponse('new_unmapped_code')).toEqual({
+      error: 'unknown_error',
+      message: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+    })
   })
 
   test('route error log summary does not expose raw error messages', () => {

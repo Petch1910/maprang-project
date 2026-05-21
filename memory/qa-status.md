@@ -8,6 +8,7 @@ Last updated: 2026-05-21
 - 2026-05-21 route catch stringified-message guard pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 21 tests / 33 expects, `bun run security:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run secrets:check` ผ่านหลังเพิ่มการจับ `message: String(error)` และ ternary raw error message ใน route catch.
 - 2026-05-21 full repo QA pass after route catch message hardening: `bun run qa:repo` ผ่านครบ รวม security audit 21 tests / 33 expects, backend 157 tests / 506 expects, API route audit 48 routes, route/menu audit 14 surfaces, docs command audit 289 references, import-cycle audit 125 source files / 279 import edges, และ frontend bundle budget หลัก 269.1KB/350KB กับหน้าแชท 228.4KB/260KB.
 - 2026-05-21 route catch raw-error-field guard pass: `bun test scripts\backend-security-audit.test.ts` ผ่าน 22 tests / 35 expects, `bun run security:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run secrets:check` ผ่านหลังเพิ่ม guard field `error` ไม่ให้คืน raw `error.message` หรือ `String(error)`.
+- 2026-05-21 route error response normalization pass: `bun test apps\backend\src\route-id-validation.test.ts` ผ่าน 6 tests / 23 expects, `bun run backend:check` ผ่าน 157 tests / 507 expects, `bun run predeploy:check:test`, `bun run predeploy:check`, และ `bun run secrets:check` ผ่านหลัง normalize unknown route error code เป็น `unknown_error`.
 
 ## อัปเดต QA งานใน repo (Repo-owned QA update) 2026-05-21
 

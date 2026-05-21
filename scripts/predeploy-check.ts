@@ -1047,6 +1047,8 @@ const checks: Check[] = [
       const creatorDraftTest = await readRepoFile('apps/backend/src/creator-draft.service.test.ts')
       const promptInspector = await readRepoFile('apps/backend/src/prompt-inspector.service.ts')
       const promptInspectorTest = await readRepoFile('apps/backend/src/prompt-inspector.service.test.ts')
+      const routeGuards = await readRepoFile('apps/backend/src/route-guards.ts')
+      const routeIdValidationTest = await readRepoFile('apps/backend/src/route-id-validation.test.ts')
       requireIncludes(
         checklist,
         [
@@ -1182,6 +1184,16 @@ const checks: Check[] = [
           '$queryRawUnsafe',
         ],
         'scripts/backend-security-audit.ts',
+      )
+      requireIncludes(
+        routeGuards,
+        ['const code = routeErrorMessages[error] ? error : \'unknown_error\'', 'return { error: code, message: routeErrorMessage(code) }'],
+        'apps/backend/src/route-guards.ts',
+      )
+      requireIncludes(
+        routeIdValidationTest,
+        ['routeErrorResponse(\'new_unmapped_code\')', 'error: \'unknown_error\''],
+        'apps/backend/src/route-id-validation.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/backend-security-audit.test.ts'),

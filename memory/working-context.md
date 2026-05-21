@@ -8,6 +8,7 @@ Last updated: 2026-05-21
 - 2026-05-21: backend security audit ขยาย raw route catch message guard ให้จับ `message: String(error)` และ ternary `error instanceof Error ? error.message : String(error)` ด้วย เพื่อไม่ให้ generic catch ส่งรายละเอียด error ดิบกลับผู้ใช้.
 - 2026-05-21: `bun run qa:repo` ผ่านเต็มหลัง route catch message hardening ชุดล่าสุด จึงยืนยัน static/unit/build/audit/eval ฝั่ง repo-owned ยังเขียวทั้งหมด; runtime smoke ยังขึ้นกับ Docker/backend/staging ตาม blocker เดิม.
 - 2026-05-21: backend security audit เพิ่ม guard ให้ route catch ห้ามใส่ raw `error.message` หรือ `String(error)` ลง field `error` แม้ response จะมี `message` แล้ว เพื่อบังคับให้ `error` เป็น machine-readable code ที่ควบคุมได้.
+- 2026-05-21: `routeErrorResponse` normalize unknown code เป็น `unknown_error` ทั้ง field `error` และ `message` แล้ว เพื่อไม่ให้ dynamic validation หรือ code ที่ไม่อยู่ใน `routeErrorMessages` หลุดกลับ API response.
 
 ## อัปเดตงานใน repo (Repo-owned update) 2026-05-21
 
