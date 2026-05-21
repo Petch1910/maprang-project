@@ -414,6 +414,16 @@ function SidebarContent({
     setDeleteTarget(null)
   }
 
+  const selectionActionDisabledReason =
+    selectedChatIds.length === 0 ? 'เลือกแชทอย่างน้อย 1 รายการก่อนจัดการ' : undefined
+  const renameConfirmDisabledReason = renameTarget
+    ? renameValue.trim().length === 0
+      ? 'กรอกชื่อแชทก่อนบันทึก'
+      : isRenaming
+        ? 'กำลังบันทึกชื่อแชท'
+        : undefined
+    : undefined
+
   const renderChatRow = (chat: ChatSummary, index = 0, rows: ChatSummary[] = regularChats) => (
     <SidebarChatRow
       chat={chat}
@@ -519,17 +529,21 @@ function SidebarContent({
           <div className="grid grid-cols-2 gap-2">
             <button type="button"
               className="min-h-9 rounded-lg bg-white px-2 text-xs font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-45"
+              aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-archive"
-              disabled={selectedChatIds.length === 0}
+              disabled={Boolean(selectionActionDisabledReason)}
               onClick={archiveSelectedChats}
+              title={selectionActionDisabledReason || 'จัดเก็บแชทที่เลือก'}
             >
               จัดเก็บ
             </button>
             <button type="button"
               className="min-h-9 rounded-lg bg-rose-500 px-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+              aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-delete"
-              disabled={selectedChatIds.length === 0}
+              disabled={Boolean(selectionActionDisabledReason)}
               onClick={deleteSelectedChats}
+              title={selectionActionDisabledReason || 'ลบแชทที่เลือก'}
             >
               ลบ
             </button>
@@ -647,9 +661,11 @@ function SidebarContent({
               </button>
               <button
                 className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
+                aria-disabled={Boolean(renameConfirmDisabledReason)}
                 data-testid="chat-rename-confirm"
-                disabled={isRenaming || renameValue.trim().length === 0}
+                disabled={Boolean(renameConfirmDisabledReason)}
                 onClick={() => void confirmRenameChat()}
+                title={renameConfirmDisabledReason || 'บันทึกชื่อแชท'}
                 type="button"
               >
                 {isRenaming ? 'กำลังบันทึก...' : 'บันทึก'}

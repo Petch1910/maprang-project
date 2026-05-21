@@ -274,15 +274,19 @@ function QuickStartPrompts({
   disabled: boolean
   onPick: (message: string) => void
 }) {
+  const disabledReason = disabled ? 'กำลังตอบอยู่หรือโทเคนไม่พอ จึงยังใช้คำชวนคุยไม่ได้' : ''
+
   return (
     <div className="mx-auto w-full max-w-3xl rounded-xl border border-white/10 bg-black/24 p-2.5 text-white shadow-[0_18px_52px_rgba(0,0,0,0.24)] backdrop-blur-xl">
       <div className="grid gap-2 sm:grid-cols-3">
         {starterPrompts.map((item) => (
           <button
             className="flex min-h-12 min-w-0 items-center gap-2 rounded-lg border border-white/10 bg-white/6 px-3 text-left text-xs font-black text-white/76 transition hover:border-orange-300/35 hover:bg-orange-500/12 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+            aria-disabled={disabled}
             disabled={disabled}
             key={item.label}
             onClick={() => onPick(item.value)}
+            title={disabledReason || item.label}
             type="button"
           >
             <item.icon className="flex-none text-orange-300" size={16} />

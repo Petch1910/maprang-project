@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Chat Sidebar and quick-start prompts now explain locked actions. Sidebar multi-select archive/delete buttons and rename confirm expose Thai `title`/`aria-disabled` reasons, and chat quick-start prompt buttons explain when they are disabled because the app is streaming or token balance is not enough; Route/Menu Audit now documents both chat-room and sidebar guard behavior.
 - 2026-05-21: My Chats disabled controls are more explicit. `/chats` now gives Thai `title`/`aria-disabled` reasons to busy per-chat menus, archived-chat restore buttons, rename confirm, delete confirm, and bulk-delete confirm states; Route/Menu Audit now records that toolbar, per-chat menu, restore, and confirmation dialogs all explain why they are locked.
 - 2026-05-21: Admin Health refresh state now explains itself. `/admin/health` refresh exposes `aria-disabled`, `data-testid`, and a title that says `กำลังโหลดสถานะระบบ` while health data is loading, then returns to `รีเฟรชสถานะระบบ`; Route/Menu Audit now documents the exact disabled-state reason.
 - 2026-05-21: Character Lobby disabled controls now expose user-facing reasons. `/characters/:characterId` report/share/start-chat controls show titles for loading character data, report submission in progress, or adult-mode gating; Route/Menu Audit now documents the same lobby guard behavior.
