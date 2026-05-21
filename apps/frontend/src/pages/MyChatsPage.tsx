@@ -69,6 +69,26 @@ export function MyChatsPage() {
       return new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
     })
   }, [filter, normalizedSearch, pinnedChatIds, sourceChats])
+  const selectAllDisabledReason =
+    visibleChats.length === 0 ? (hasListError ? 'ยังโหลดรายการแชทไม่ได้' : 'ไม่มีแชทให้เลือกในตัวกรองนี้') : undefined
+  const bulkArchiveDisabledReason =
+    selectedChatIds.length === 0
+      ? 'เลือกแชทอย่างน้อย 1 รายการก่อนจัดเก็บ'
+      : pendingAction === 'bulk-archive'
+        ? 'กำลังจัดเก็บแชทที่เลือก'
+        : undefined
+  const bulkRestoreDisabledReason =
+    selectedChatIds.length === 0
+      ? 'เลือกแชทอย่างน้อย 1 รายการก่อนเอากลับมา'
+      : pendingAction === 'bulk-restore'
+        ? 'กำลังเอาแชทที่เลือกกลับมา'
+        : undefined
+  const bulkDeleteDisabledReason =
+    selectedChatIds.length === 0
+      ? 'เลือกแชทอย่างน้อย 1 รายการก่อนลบ'
+      : pendingAction === 'bulk-delete'
+        ? 'กำลังลบแชทที่เลือก'
+        : undefined
 
   useEffect(() => {
     dispatch(loadChatSummaries())
@@ -394,40 +414,49 @@ export function MyChatsPage() {
             <p className="m-0 mt-1 text-xs font-bold text-white/55">จัดการหลายรายการได้จากแถบนี้ รายการที่จัดเก็บแล้วจะไม่แสดงในหน้าหลัก</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button type="button"
+            <button
+              aria-disabled={Boolean(selectAllDisabledReason)}
               className="min-h-10 rounded-xl border border-white/10 px-3 text-sm font-black text-white/75 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45"
               data-testid="my-chats-select-all"
-              disabled={visibleChats.length === 0}
+              disabled={Boolean(selectAllDisabledReason)}
               onClick={selectAllVisibleChats}
+              title={selectAllDisabledReason ?? 'เลือกแชททั้งหมดที่เห็น'}
+              type="button"
             >
               เลือกทั้งหมด
             </button>
             {filter === 'archived' ? (
               <button
+                aria-disabled={Boolean(bulkRestoreDisabledReason)}
                 className="min-h-10 rounded-xl bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
                 data-testid="my-chats-bulk-restore"
-                disabled={selectedChatIds.length === 0 || pendingAction === 'bulk-restore'}
+                disabled={Boolean(bulkRestoreDisabledReason)}
                 onClick={() => void handleBulkRestore()}
+                title={bulkRestoreDisabledReason ?? 'เอาแชทที่เลือกกลับมา'}
                 type="button"
               >
                 เอากลับมา
               </button>
             ) : (
               <button
+                aria-disabled={Boolean(bulkArchiveDisabledReason)}
                 className="min-h-10 rounded-xl bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
                 data-testid="my-chats-bulk-archive"
-                disabled={selectedChatIds.length === 0 || pendingAction === 'bulk-archive'}
+                disabled={Boolean(bulkArchiveDisabledReason)}
                 onClick={() => void handleBulkArchive()}
+                title={bulkArchiveDisabledReason ?? 'จัดเก็บแชทที่เลือก'}
                 type="button"
               >
                 จัดเก็บ
               </button>
             )}
             <button
+              aria-disabled={Boolean(bulkDeleteDisabledReason)}
               className="min-h-10 rounded-xl bg-rose-500 px-3 text-sm font-black text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-45"
               data-testid="my-chats-bulk-delete"
-              disabled={selectedChatIds.length === 0 || pendingAction === 'bulk-delete'}
+              disabled={Boolean(bulkDeleteDisabledReason)}
               onClick={() => setBulkDeleteIds(selectedChatIds)}
+              title={bulkDeleteDisabledReason ?? 'ลบแชทที่เลือก'}
               type="button"
             >
               ลบ
