@@ -18,6 +18,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('collectDocsCommandAuditResult')
     expect(predeploy).toContain('formatPredeployCheckError(error)')
     expect(predeploy).toContain('formatDiagnosticText(raw, 500)')
+    expect(predeploy).toContain('authClassifierText')
+    expect(predeploy).toContain('authSecretPatterns')
     expect(predeploy).toContain('providerClassificationMessage')
     expect(predeploy).toContain('redacts secret-shaped provider details before classification output')
     expect(predeploy).toContain('creatorDraftRetryMessage')

@@ -97,6 +97,21 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports raw auth error classifier regressions', () => {
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const rawAuthMessage = error.message.toLowerCase()
+          const rawStringMessage = String(error).toLowerCase()
+        `,
+        'AuthFixture.tsx',
+      ).map((finding) => finding.message),
+    ).toEqual([
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+    ])
+  })
+
   test('reports risky frontend DOM and code execution patterns', () => {
     const findings = auditSuspiciousPatterns(
       `

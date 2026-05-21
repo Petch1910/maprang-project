@@ -1056,6 +1056,16 @@ const checks: Check[] = [
       const authPanel = await readRepoFile('apps/frontend/src/components/AuthPanel.tsx')
       const workspacePage = await readRepoFile('apps/frontend/src/pages/WorkspacePage.tsx')
       const backendRedaction = await readRepoFile('apps/backend/src/redaction.ts')
+      requireIncludes(
+        authPanel,
+        ['authClassifierText', 'authSecretPatterns'],
+        'apps/frontend/src/components/AuthPanel.tsx',
+      )
+      forbidIncludes(
+        authPanel,
+        ['error.message.toLowerCase()'],
+        'apps/frontend/src/components/AuthPanel.tsx',
+      )
       const chatService = await readRepoFile('apps/backend/src/chat.service.ts')
       const chatRuntimeTest = await readRepoFile('apps/backend/src/chat.runtime.test.ts')
       const creatorDraft = await readRepoFile('apps/backend/src/creator-draft.service.ts')

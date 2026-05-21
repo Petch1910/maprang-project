@@ -227,6 +227,10 @@ export const suspiciousPatterns = [
     message: 'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
   },
   {
+    pattern: /\berror\.message\.toLowerCase\(\)|\bString\(error\)\.toLowerCase\(\)/g,
+    message: 'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+  },
+  {
     pattern: /setNote\(\s*error\s+instanceof\s+Error\s*\?\s*error\.message/g,
     message: 'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
   },
