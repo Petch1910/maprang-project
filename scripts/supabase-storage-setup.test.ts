@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   encodedPath,
+  liveSupabaseStorageOperations,
   loadEnvContent,
   normalizeSignedUrl,
   resolveSupabaseStorageConfig,
@@ -145,6 +146,30 @@ describe('Supabase storage setup helpers', () => {
     expect(payload.ok).toBe(true)
     expect(payload.access).toBe('signed')
     expect(errors).toEqual([])
+  })
+
+  test('live storage operations keep malformed JSON diagnostics Thai-first', async () => {
+    const previousFetch = globalThis.fetch
+    const config = resolveSupabaseStorageConfig({
+      SUPABASE_URL: 'https://project-ref.supabase.co',
+      SUPABASE_SERVICE_ROLE_KEY: 'service-role',
+      SUPABASE_STORAGE_ACCESS: 'signed',
+    })
+
+    try {
+      globalThis.fetch = (async () =>
+        new Response('not-json', {
+          headers: { 'Content-Type': 'application/json' },
+          status: 200,
+        })) as unknown as typeof fetch
+
+      await expect(liveSupabaseStorageOperations.getBucket(config)).rejects.toThrow('อ่าน bucket คืน JSON ไม่ถูกต้อง')
+      await expect(liveSupabaseStorageOperations.createSignedUrl(config, 'avatars/smoke.png')).rejects.toThrow(
+        'สร้าง signed URL คืน JSON ไม่ถูกต้อง',
+      )
+    } finally {
+      globalThis.fetch = previousFetch
+    }
   })
 
   test('returns a failure code when check mode finds a public bucket', async () => {

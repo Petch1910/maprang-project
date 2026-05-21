@@ -1154,12 +1154,13 @@ const checks: Check[] = [
           'validates production signed storage config',
           'normalizes signed URL response paths',
           'runs Supabase storage setup through an importable runner',
+          'live storage operations keep malformed JSON diagnostics Thai-first',
         ],
         'scripts/supabase-storage-setup.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/supabase-storage-setup.ts'),
-        ['SupabaseStorageSetupRunnerOptions', 'runSupabaseStorageSetup', 'if (import.meta.main) process.exit(await runSupabaseStorageSetup())'],
+        ['SupabaseStorageSetupRunnerOptions', 'readStorageJson', 'คืน JSON ไม่ถูกต้อง', 'runSupabaseStorageSetup', 'if (import.meta.main) process.exit(await runSupabaseStorageSetup())'],
         'scripts/supabase-storage-setup.ts',
       )
       requireIncludes(

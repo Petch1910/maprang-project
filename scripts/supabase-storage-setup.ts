@@ -124,11 +124,19 @@ async function parseError(response: Response) {
   return text.slice(0, 500) || response.statusText
 }
 
+async function readStorageJson<T>(response: Response, label: string) {
+  try {
+    return (await response.json()) as T
+  } catch {
+    throw new Error(`${label} คืน JSON ไม่ถูกต้อง`)
+  }
+}
+
 async function getBucket(config: SupabaseStorageConfig) {
   const response = await storageRequest(config, `/bucket/${encodeURIComponent(config.bucket)}`)
   if (response.status === 404) return { exists: false as const, public: null }
   if (!response.ok) throw new Error(`อ่าน bucket ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
-  const payload = (await response.json()) as { public?: boolean; id?: string; name?: string }
+  const payload = await readStorageJson<{ public?: boolean; id?: string; name?: string }>(response, 'อ่าน bucket')
   return { exists: true as const, public: payload.public === true }
 }
 
@@ -183,7 +191,7 @@ async function createSignedUrl(config: SupabaseStorageConfig, objectPath: string
     body: JSON.stringify({ expiresIn: config.expiresIn }),
   })
   if (!response.ok) throw new Error(`สร้าง signed URL ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
-  const payload = (await response.json()) as { signedURL?: string; signedUrl?: string }
+  const payload = await readStorageJson<{ signedURL?: string; signedUrl?: string }>(response, 'สร้าง signed URL')
   const signedPath = payload.signedURL ?? payload.signedUrl
   if (!signedPath) throw new Error('ผลลัพธ์ signed URL ไม่มี signedURL')
   return normalizeSignedUrl(signedPath, config.supabaseUrl)
