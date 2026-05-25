@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after API route AST discovery hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: API route discovery now uses TypeScript AST call parsing instead of a regex, so multiline Elysia route calls are covered while route order remains source-order stable for audit output.
 - 2026-05-25: Full deterministic repo QA passed after route/menu declared-route and navigation AST hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Route/menu doc-check now reads static navigation paths with TypeScript AST, covering object-literal `to`, JSX `to`, JSX expression string `to`, and static `href` values before comparing navigation rows to routes and preloads.
