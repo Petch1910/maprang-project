@@ -103,6 +103,7 @@ guard ใน repo:
 - Release handoff guard addendum 2026-05-25: release handoff scanning now rejects credential-bearing URLs anywhere in the file, including notes and rollback evidence, before commit/release evidence is accepted.
 - Release handoff guard addendum 2026-05-25: filled staging/production handoffs must also record frontend state QA gates (`frontend:env:test`, `frontend:storage:test`, `frontend:clipboard:test`) as pass/ผ่าน, not fail or warning text.
 - Route/Menu Audit guard addendum 2026-05-25: `needs-staging` rows must point to `STAGING_RUNBOOK.md` and `/admin/health`, while `future` rows must clearly describe future-only work so unfinished staging/future items cannot look like clickable production menus.
+- Route/Menu Audit guard addendum 2026-05-25: `future` rows must not point to real `/path` route tokens; promote the surface to `ready`/`guarded` only after route/preload/navigation QA exists.
 - Predeploy guard addendum 2026-05-25: `predeploy:check` now requires the Route/Menu Audit status-evidence snippets and regression fixture, so staging/future menu evidence cannot drift without failing the deploy gate.
 - Memory audit addendum 2026-05-25: `memory:audit` now also requires those Route/Menu Audit status-evidence notes in memory, so the blocker history cannot silently drop staging/future menu context.
 - Memory audit addendum 2026-05-25: `memory:audit` now also requires API route coverage quality and weak-coverage reason notes, so API smoke/admin/live-provider coverage status cannot silently disappear from handoff memory.

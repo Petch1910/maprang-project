@@ -292,6 +292,10 @@ function includesSome(value: string, snippets: string[]) {
   return snippets.some((snippet) => value.includes(snippet))
 }
 
+function hasRoutePathToken(route: string) {
+  return expectedRouteTokens(route).some((token) => token.startsWith('/'))
+}
+
 const defaultRequiredSnippets = [
   'Route/Menu Audit',
   '/admin/health',
@@ -423,6 +427,9 @@ export function auditRouteMenuDocumentation({
     }
     if (row.status === 'future' && !includesSome(rowEvidenceText, ['อนาคต', 'เผื่ออนาคต', 'ยังไม่แสดงเป็นเมนูให้กด'])) {
       findings.push(`routeMenuAuditRows "${row.area}" สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต ไม่ใช่เมนูที่พร้อมกด`)
+    }
+    if (row.status === 'future' && hasRoutePathToken(row.route)) {
+      findings.push(`routeMenuAuditRows "${row.area}" สถานะ future ต้องไม่อ้าง route แบบ /path จนกว่าจะเป็นเมนูที่พร้อมตรวจ`)
     }
   }
 

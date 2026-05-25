@@ -223,6 +223,40 @@ describe('route menu doc check', () => {
     )
   })
 
+  test('rejects future rows that point to real route paths', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Future | /world | group chat | future surface | not ready | future copy |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [
+        row({
+          area: 'Future',
+          route: '/world',
+          status: 'future',
+          result: 'เป็นงานเผื่ออนาคต',
+          disabledReason: 'ยังไม่แสดงเป็นเมนูให้กด',
+          emptyState: 'รอออกแบบอนาคต',
+        }),
+      ],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'routeMenuAuditRows "Future" สถานะ future ต้องไม่อ้าง route แบบ /path จนกว่าจะเป็นเมนูที่พร้อมตรวจ',
+      ]),
+    )
+  })
+
   test('reports stale mixed-language copy in route menu documentation', () => {
     const findings = auditRouteMenuDocumentation({
       markdown: `
