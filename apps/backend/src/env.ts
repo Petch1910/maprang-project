@@ -130,7 +130,7 @@ function invalidProductionValues() {
         invalid.push('DATABASE_URL ต้องเป็น Postgres connection string')
       }
       if (['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(databaseUrl.hostname)) {
-        invalid.push('DATABASE_URL ห้ามชี้ไป localhost ใน production')
+        invalid.push('DATABASE_URL ห้ามชี้ไป localhost/127.0.0.1/0.0.0.0/::1 ใน production')
       }
       const user = decodeURIComponent(databaseUrl.username).toLowerCase()
       const password = decodeURIComponent(databaseUrl.password).toLowerCase()

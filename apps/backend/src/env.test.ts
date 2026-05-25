@@ -174,17 +174,17 @@ describe('runtime env validation', () => {
     setCompleteProductionEnv()
     process.env.DATABASE_URL = 'postgresql://maprang:secret@localhost:5432/maprang?sslmode=require'
 
-    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL ห้ามชี้ไป localhost ใน production')
+    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL ห้ามชี้ไป localhost/127.0.0.1/0.0.0.0/::1 ใน production')
 
     setCompleteProductionEnv()
     process.env.DATABASE_URL = 'postgresql://maprang:secret@0.0.0.0:5432/maprang?sslmode=require'
 
-    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL')
+    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL ห้ามชี้ไป localhost/127.0.0.1/0.0.0.0/::1 ใน production')
 
     setCompleteProductionEnv()
     process.env.DATABASE_URL = 'postgresql://maprang:secret@[::1]:5432/maprang?sslmode=require'
 
-    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL')
+    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL ห้ามชี้ไป localhost/127.0.0.1/0.0.0.0/::1 ใน production')
 
     setCompleteProductionEnv()
     process.env.DATABASE_URL = 'postgresql://maprang:secret@db.example.net:5432/maprang'

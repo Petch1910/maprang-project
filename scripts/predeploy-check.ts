@@ -260,7 +260,9 @@ const checks: Check[] = [
           'ตัวกั้น production (Production Blockers)',
           'เงื่อนไขว่างานเสร็จ (Definition Of Done)',
           'Backend URL เป็น deployed HTTPS URL จริง',
+          'ไม่ใช่ localhost/loopback หรือ `http://`',
           '`CORS_ORIGINS` เป็น frontend HTTPS domain จริง',
+          'ไม่รวม localhost/loopback, `http://`, wildcard',
         ],
         'agent.md',
       )

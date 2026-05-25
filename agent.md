@@ -176,9 +176,9 @@ bun run smoke:image:live
 อย่า mark production ready จนกว่าสิ่งเหล่านี้ผ่านจริง:
 
 - `DATABASE_URL` เป็น production/staging Postgres จริง พร้อม `sslmode=require`
-- Backend URL เป็น deployed HTTPS URL จริง ไม่ใช่ localhost หรือ `http://`
+- Backend URL เป็น deployed HTTPS URL จริง ไม่ใช่ localhost/loopback หรือ `http://`
 - Frontend `VITE_API_BASE_URL` ชี้ backend จริง
-- `CORS_ORIGINS` เป็น frontend HTTPS domain จริง ไม่รวม localhost, `http://`, wildcard, หรือ backend URL ใน staging/production
+- `CORS_ORIGINS` เป็น frontend HTTPS domain จริง ไม่รวม localhost/loopback, `http://`, wildcard, หรือ backend URL ใน staging/production
 - Supabase project จริงพร้อม bucket `avatars` แบบ private + signed URL
 - `SUPABASE_STORAGE_ACCESS=signed`
 - `CHAT_PROVIDER_LIVE_VERIFIED=1` หลังการทดสอบแชทจริงผ่าน

@@ -141,7 +141,7 @@ try {
 
   const expectedMessages = [
     'ต้องเป็น production',
-    'ห้ามชี้ localhost',
+    'ห้ามชี้ localhost/127.0.0.1/0.0.0.0/::1',
     'OpenAI project key',
     'ต้องเป็น https://<project-ref>.supabase.co',
     'JWT role ต้องเป็น service_role',

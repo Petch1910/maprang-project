@@ -345,7 +345,7 @@ function auditDatabaseUrl(value: string | undefined) {
       fail('backend', 'DATABASE_URL', 'ต้องเป็น postgres/postgresql connection string')
       return
     }
-    if (isLocalHost(url.hostname)) fail('backend', 'DATABASE_URL', 'ห้ามชี้ localhost ใน production')
+    if (isLocalHost(url.hostname)) fail('backend', 'DATABASE_URL', 'ห้ามชี้ localhost/127.0.0.1/0.0.0.0/::1 ใน production')
     const username = decodeURIComponent(url.username).toLowerCase()
     const password = decodeURIComponent(url.password).toLowerCase()
     const databaseName = decodeURIComponent(url.pathname.replace(/^\//, '')).toLowerCase()

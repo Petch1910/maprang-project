@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Production loopback diagnostics now name localhost/127.0.0.1/0.0.0.0/::1 consistently in backend env validation and deploy env doctor output. `agent.md` production blockers now say localhost/loopback for deployed backend URL and CORS guidance, and predeploy locks that handoff wording.
 - 2026-05-25: Frontend deploy-env checks now reuse `isLocalOrPlaceholderUrl` for both frontend env warnings and Admin Health deploy cards. The helper treats `0.0.0.0`, `::1`/`[::1]`, placeholder/example URLs, and malformed URLs as unsafe for deployed frontend/backend/CORS settings.
 - 2026-05-25: Local URL detection guards now treat `0.0.0.0` and IPv6 loopback `::1`/`[::1]` as local across smoke helpers, deploy readiness, backend production env validation, deploy env doctor, and filled release handoff validation. This prevents staging/production handoff from accidentally accepting loopback deployment URLs or CORS origins that are not real deployed domains.
 - 2026-05-25: Predeploy now locks frontend Docker build-arg wiring for Supabase anon keys. `apps/frontend/Dockerfile` must keep `VITE_SUPABASE_ANON_PUBLIC` as the Docker build arg and map it to `VITE_SUPABASE_ANON_KEY` only during `bun run build`, and CI must pass `--build-arg VITE_SUPABASE_ANON_PUBLIC=ci-anon-public-key`.
