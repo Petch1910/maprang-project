@@ -681,12 +681,32 @@ const checks: Check[] = [
       requireIncludes(deploymentQa, ['TypeScript import-equals `require()`', 'CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
       requireIncludes(
         deploymentQa,
-        ['frontend API helper contract', 'apps/frontend/src/lib/api.ts', 'requestJson', 'fetch(API_BASE_URL...)', 'bun run frontend:static:audit', 'bun run frontend:route:audit'],
+        [
+          'frontend API helper contract',
+          'apps/frontend/src/lib/api.ts',
+          'requestJson',
+          'fetch(API_BASE_URL...)',
+          'bun run frontend:static:audit',
+          'bun run frontend:route:audit',
+          'bun run frontend:env:test',
+          'bun run frontend:storage:test',
+          'bun run frontend:clipboard:test',
+        ],
         'DEPLOYMENT_QA.md',
       )
       requireIncludes(
         readme,
-        ['frontend API helper contract', 'apps/frontend/src/lib/api.ts', 'requestJson', 'fetch(API_BASE_URL...)', 'bun run frontend:static:audit', 'bun run frontend:route:audit'],
+        [
+          'frontend API helper contract',
+          'apps/frontend/src/lib/api.ts',
+          'requestJson',
+          'fetch(API_BASE_URL...)',
+          'bun run frontend:static:audit',
+          'bun run frontend:route:audit',
+          'bun run frontend:env:test',
+          'bun run frontend:storage:test',
+          'bun run frontend:clipboard:test',
+        ],
         'README.md',
       )
       requireIncludes(

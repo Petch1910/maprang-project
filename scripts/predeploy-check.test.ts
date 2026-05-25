@@ -89,6 +89,8 @@ describe('predeploy check wiring', () => {
     const packageJson = JSON.parse(await readRepoFile('package.json')) as { scripts?: Record<string, string> }
     const ciWorkflow = await readRepoFile('.github/workflows/ci.yml')
     const productionSmoke = await readRepoFile('.github/workflows/production-smoke.yml')
+    const readme = await readRepoFile('README.md')
+    const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
 
     const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
     const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
@@ -147,6 +149,11 @@ describe('predeploy check wiring', () => {
     expect(productionSmoke).toContain('bun run frontend:clipboard:test')
     expect(productionSmoke).toContain('bun run frontend:static:audit')
     expect(productionSmoke).toContain('bun run frontend:route:audit')
+    for (const docs of [readme, deploymentQa]) {
+      expect(docs).toContain('bun run frontend:env:test')
+      expect(docs).toContain('bun run frontend:storage:test')
+      expect(docs).toContain('bun run frontend:clipboard:test')
+    }
     for (const command of [
       'bun run security:audit',
       'bun run import-cycle:audit',

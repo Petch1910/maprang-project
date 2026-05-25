@@ -213,6 +213,16 @@ bun run frontend:static:audit
 bun run frontend:route:audit
 ```
 
+Frontend state regression tests that are also covered by `qa:repo`, CI, and Production Smoke:
+
+```bash
+bun run frontend:env:test
+bun run frontend:storage:test
+bun run frontend:clipboard:test
+```
+
+Use this set to guard Supabase JWT/env parsing, localStorage persisted state, and clipboard helpers that the UI depends on.
+
 สองคำสั่งนี้เป็นส่วนหนึ่งของ `qa:repo`, CI, และ Production Smoke แล้ว จึงใช้เช็คเฉพาะหน้าบ้านได้โดยไม่ต้องจำ path ของสคริปต์ใน `scripts/`.
 
 คำสั่งนี้ยืนยันว่า backend, frontend, scripts, seed data, Playwright config, และ e2e smoke files ไม่มี circular relative imports.

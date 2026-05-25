@@ -44,6 +44,16 @@ bun run frontend:static:audit
 bun run frontend:route:audit
 ```
 
+Frontend state regression tests that workflow gates run directly:
+
+```bash
+bun run frontend:env:test
+bun run frontend:storage:test
+bun run frontend:clipboard:test
+```
+
+This set covers Supabase JWT/env parsing, localStorage persisted state, and clipboard helpers so deployed QA does not drift behind `qa:repo`.
+
 alias สองตัวนี้รันจาก repo root ได้ตรง ๆ และถูกครอบใน `qa:repo`, CI, และ Production Smoke เพื่อให้ local gate กับ workflow ใช้ audit ชุดเดียวกัน.
 
 `import-cycle:audit` scan relative TypeScript imports, re-exports, dynamic imports, TypeScript import-equals `require()`, และ CommonJS `require()` calls ใน backend, frontend, scripts, seed data, Playwright config, และ e2e smoke files. คำสั่งนี้อยู่ใน `qa:local`, CI, และ Production Smoke เพื่อกัน architecture cycles กลับมาแบบเงียบ ๆ.

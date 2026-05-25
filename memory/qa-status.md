@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 frontend state regression docs guard pass: `bun run docs:commands`, `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run secrets:check` passed after documenting the frontend env/storage/clipboard regression commands in README and Deployment QA and locking those snippets in predeploy; docs command audit now sees 315 references.
 - 2026-05-25 workflow frontend state regression gate pass: `bun run predeploy:check:test`, `bun run frontend:env:test`, `bun run frontend:storage:test`, `bun run frontend:clipboard:test`, `bun run predeploy:check`, `bun run docs:commands`, `bun run secrets:check`, and `git diff --check` passed after adding frontend env/storage/clipboard regression tests to CI and Production Smoke and locking those exact workflow run commands in predeploy.
 - 2026-05-25 frontend Router link opener guard pass: `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run docs:commands`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after extending the frontend static audit to catch `<Link>`/`<NavLink>` with `target="_blank"` and missing `rel="noopener noreferrer"`; docs command audit now sees 303 references.
 - 2026-05-25 staging runbook frontend audit dry-run guard pass: `bun run docs:commands`, `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run route-menu:audit` passed after adding `frontend:static:audit`, `frontend:route:audit`, and `route-menu:audit` to the staging pre-smoke flow; docs command audit now sees 302 references.

@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: README and Deployment QA now document the frontend env/storage/clipboard regression commands next to the frontend static/route audit aliases. Predeploy requires `bun run frontend:env:test`, `bun run frontend:storage:test`, and `bun run frontend:clipboard:test` in both docs so workflow coverage is visible during handoff.
 - 2026-05-25: CI and Production Smoke workflows now run the frontend env, storage, and clipboard regression tests directly alongside the existing API, bundle, static, route, and route-menu frontend gates. Predeploy workflow guards now require `bun run frontend:env:test`, `bun run frontend:storage:test`, and `bun run frontend:clipboard:test` as exact workflow run commands so deployed QA cannot drift behind `qa:repo`.
 - 2026-05-25: Frontend static audit now checks opener/tabnabbing protection on React Router `<Link>` and `<NavLink>` as well as plain `<a>` tags. Security checklist documents the expanded guard, and predeploy locks the Router-link regression test so route links with `target="_blank"` cannot drop `rel="noopener noreferrer"` silently.
 - 2026-05-25: Staging runbook now includes a pre-smoke frontend audit dry run from the repo root: `frontend:static:audit`, `frontend:route:audit`, and `route-menu:audit`. Predeploy requires those commands in `STAGING_RUNBOOK.md`, so staging handoff catches UI static/control, dead route, and route/menu doc drift before backend smoke.
