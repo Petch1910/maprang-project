@@ -44,6 +44,8 @@ const filledHandoff = [
   '## เกต QA (QA gates)',
   '- `bun run qa:local`: pass',
   '- `bun run e2e:smoke`: pass',
+  '- E2E_BASE_URL: https://app.maprang.example',
+  '- E2E_API_BASE_URL: https://api.maprang.example',
   '- `bun run frontend:env:test`: pass',
   '- `bun run frontend:storage:test`: pass',
   '- `bun run frontend:clipboard:test`: pass',
@@ -178,6 +180,19 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires production e2e smoke targets to match deployed origins', () => {
+    const unsafe = filledHandoff
+      .replace('- E2E_BASE_URL: https://app.maprang.example', '- E2E_BASE_URL: http://127.0.0.1:5173')
+      .replace('- E2E_API_BASE_URL: https://api.maprang.example', '- E2E_API_BASE_URL: https://api.other.example/path')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมี E2E_BASE_URL เป็น frontend deployed origin เดียวกับ Frontend URL',
+        'production release handoff ต้องมี E2E_API_BASE_URL เป็น backend deployed origin เดียวกับ Backend URL',
+      ]),
+    )
+  })
+
   test('reports missing sections and secret-shaped values', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef'].join('-')
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`
@@ -205,6 +220,8 @@ describe('release handoff check', () => {
 
   test('reports missing frontend state QA gates', () => {
     const stale = filledHandoff
+      .replace('- E2E_BASE_URL: https://app.maprang.example\n', '')
+      .replace('- E2E_API_BASE_URL: https://api.maprang.example\n', '')
       .replace('- `bun run frontend:env:test`: pass\n', '')
       .replace('- `bun run frontend:storage:test`: pass\n', '')
       .replace('- `bun run frontend:clipboard:test`: pass\n', '')

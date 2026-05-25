@@ -25,7 +25,7 @@ const forbiddenPatterns = [
 
 const forbiddenCopySnippets = ['ผู้ให้บริการ avatar storage', 'รูปแบบการเข้าถึง avatar storage']
 
-const requiredQaGateSnippets = ['`bun run frontend:env:test`', '`bun run frontend:storage:test`', '`bun run frontend:clipboard:test`']
+const requiredQaGateSnippets = ['`bun run frontend:env:test`', '`bun run frontend:storage:test`', '`bun run frontend:clipboard:test`', 'E2E_BASE_URL', 'E2E_API_BASE_URL']
 
 export type ReleaseHandoffCheckResult = {
   ok: boolean
@@ -112,6 +112,29 @@ function validateProductionQaResults(content: string, findings: string[]) {
   }
 }
 
+function isDeployedOrigin(value: string) {
+  const url = deployedHttpsUrl(value)
+  if (!url) return false
+  return value.trim().replace(/\/$/, '') === url.origin
+}
+
+function validateProductionE2eTargets(content: string, findings: string[]) {
+  const environment = fieldValue(content, 'Environment').toLowerCase()
+  if (!environment.includes('production')) return
+
+  const frontendOrigin = deployedHttpsUrl(fieldValue(content, 'Frontend URL'))?.origin ?? ''
+  const backendOrigin = deployedHttpsUrl(fieldValue(content, 'Backend URL'))?.origin ?? ''
+  const e2eFrontend = fieldValue(content, 'E2E_BASE_URL')
+  const e2eBackend = fieldValue(content, 'E2E_API_BASE_URL')
+
+  if (e2eFrontend && (!isDeployedOrigin(e2eFrontend) || (frontendOrigin && deployedHttpsUrl(e2eFrontend)?.origin !== frontendOrigin))) {
+    findings.push('production release handoff ต้องมี E2E_BASE_URL เป็น frontend deployed origin เดียวกับ Frontend URL')
+  }
+  if (e2eBackend && (!isDeployedOrigin(e2eBackend) || (backendOrigin && deployedHttpsUrl(e2eBackend)?.origin !== backendOrigin))) {
+    findings.push('production release handoff ต้องมี E2E_API_BASE_URL เป็น backend deployed origin เดียวกับ Backend URL')
+  }
+}
+
 export function checkReleaseHandoffContent(content: string, options: { requireFilled?: boolean } = {}) {
   const findings: string[] = []
 
@@ -140,6 +163,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateFilledReleaseHandoffUrls(content, findings)
     validateProductionVerificationFlags(content, findings)
     validateProductionQaResults(content, findings)
+    validateProductionE2eTargets(content, findings)
   }
 
   return findings

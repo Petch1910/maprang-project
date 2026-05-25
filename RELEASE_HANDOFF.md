@@ -61,6 +61,8 @@ bun run release:handoff:check -- --filled
 
 - `bun run qa:local`:
 - `bun run e2e:smoke`:
+- E2E_BASE_URL:
+- E2E_API_BASE_URL:
 - `bun run frontend:env:test`:
 - `bun run frontend:storage:test`:
 - `bun run frontend:clipboard:test`:
