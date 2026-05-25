@@ -71,6 +71,24 @@ describe('frontend route audit', () => {
     ])
   })
 
+  test('reports object literal navigation paths that point to undeclared routes', () => {
+    const findings = auditFile(
+      `
+        const navItems = [
+          { label: 'Chat', to: '/chat' },
+          { label: 'Ghost', to: '/ghost' },
+          { label: 'External', href: 'https://example.com' },
+        ]
+      `,
+      'Fixture.tsx',
+      ['/', '/chat'],
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      'ค่า to ใน object ชี้ไปที่ /ghost แต่ App.tsx ไม่มี Route ที่ตรงกัน',
+    ])
+  })
+
   test('reports route preload paths that point to undeclared routes', () => {
     const findings = auditRoutePreloads(
       `

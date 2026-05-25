@@ -50,6 +50,16 @@ export function attributeStringValue(attribute: ts.JsxAttribute, sourceFile: ts.
   return null
 }
 
+function propertyNameText(name: ts.PropertyName) {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) return name.text
+  return null
+}
+
+function expressionStringValue(expression: ts.Expression) {
+  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) return expression.text
+  return null
+}
+
 export function normalizeStaticPath(value: string) {
   if (!value.startsWith('/')) return null
   if (value.startsWith('//')) return null
@@ -173,6 +183,14 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
   }
 
   function visit(node: ts.Node) {
+    if (ts.isPropertyAssignment(node)) {
+      const name = propertyNameText(node.name)
+      if (name === 'to' || name === 'href') {
+        const value = expressionStringValue(node.initializer)
+        if (value) checkPath(value, node.initializer, `ค่า ${name} ใน object`)
+      }
+    }
+
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       for (const attribute of node.attributes.properties) {
         if (!ts.isJsxAttribute(attribute)) continue
@@ -187,10 +205,10 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
       node.expression.text === 'navigate' &&
-      node.arguments[0] &&
-      ts.isStringLiteral(node.arguments[0])
+      node.arguments[0]
     ) {
-      checkPath(node.arguments[0].text, node.arguments[0], 'คำสั่ง navigate')
+      const value = expressionStringValue(node.arguments[0])
+      if (value) checkPath(value, node.arguments[0], 'คำสั่ง navigate')
     }
 
     ts.forEachChild(node, visit)

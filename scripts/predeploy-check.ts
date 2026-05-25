@@ -1537,10 +1537,21 @@ const checks: Check[] = [
           'collects route preload paths from App routePreloads',
           'satisfies Record<string, unknown>',
           'reports static links and navigate calls',
+          'reports object literal navigation paths',
           'reports route preload paths that point to undeclared routes',
           'runs the committed frontend route audit through an importable runner',
         ],
         'scripts/frontend-route-audit.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/frontend-route-audit.ts'),
+        [
+          'propertyNameText',
+          'expressionStringValue',
+          'ค่า ${name} ใน object',
+          'ts.isPropertyAssignment',
+        ],
+        'scripts/frontend-route-audit.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-static-audit.ts'),
