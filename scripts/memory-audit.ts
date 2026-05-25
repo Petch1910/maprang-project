@@ -70,21 +70,54 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
   const workingContext = await readRepoFile('memory/working-context.md')
   requireIncludes(
     workingContext,
-    ['Last updated:', 'เป้าหมายปัจจุบัน', 'สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน', 'Route/Menu Audit', 'needs-staging', 'future'],
+    [
+      'Last updated:',
+      'เป้าหมายปัจจุบัน',
+      'สถานะ local ปัจจุบัน',
+      'สถานะ production ปัจจุบัน',
+      'Route/Menu Audit',
+      'needs-staging',
+      'future',
+      'API route audit',
+      'admin-smoke',
+      'live-smoke',
+      'manual-production',
+    ],
     'memory/working-context.md',
   )
 
   const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
   requireIncludes(
     deployBlockers,
-    ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'smoke:chat', 'smoke:image:live', 'Route/Menu Audit guard', 'STAGING_RUNBOOK.md', '/admin/health'],
+    [
+      'CHAT_PROVIDER_LIVE_VERIFIED',
+      'IMAGE_GENERATION_LIVE_VERIFIED',
+      'smoke:chat',
+      'smoke:image:live',
+      'Route/Menu Audit guard',
+      'STAGING_RUNBOOK.md',
+      '/admin/health',
+      'API route audit',
+      'weak coverage',
+      'admin-smoke',
+      'live-smoke',
+    ],
     'memory/deploy-blockers.md',
   )
 
   const qaStatus = await readRepoFile('memory/qa-status.md')
   requireIncludes(
     qaStatus,
-    ['bun run qa:local', 'Backend tests:', 'API smoke:', 'Gate production', 'route/menu status evidence', 'predeploy route/menu status evidence'],
+    [
+      'bun run qa:local',
+      'Backend tests:',
+      'API smoke:',
+      'Gate production',
+      'route/menu status evidence',
+      'predeploy route/menu status evidence',
+      'API route coverage quality guard',
+      'weak-coverage reason diagnostics',
+    ],
     'memory/qa-status.md',
   )
 

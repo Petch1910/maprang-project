@@ -96,3 +96,4 @@ guard ใน repo:
 - Route/Menu Audit guard addendum 2026-05-25: `needs-staging` rows must point to `STAGING_RUNBOOK.md` and `/admin/health`, while `future` rows must clearly describe future-only work so unfinished staging/future items cannot look like clickable production menus.
 - Predeploy guard addendum 2026-05-25: `predeploy:check` now requires the Route/Menu Audit status-evidence snippets and regression fixture, so staging/future menu evidence cannot drift without failing the deploy gate.
 - Memory audit addendum 2026-05-25: `memory:audit` now also requires those Route/Menu Audit status-evidence notes in memory, so the blocker history cannot silently drop staging/future menu context.
+- Memory audit addendum 2026-05-25: `memory:audit` now also requires API route coverage quality and weak-coverage reason notes, so API smoke/admin/live-provider coverage status cannot silently disappear from handoff memory.
