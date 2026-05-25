@@ -15,6 +15,8 @@ describe('frontend env helpers', () => {
     expect(isLocalOrPlaceholderUrl('http://[::1]:3000/health')).toBe(true)
     expect(isLocalOrPlaceholderUrl('https://api.example.com')).toBe(true)
     expect(isLocalOrPlaceholderUrl('https://<backend-domain>')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('http://api.maprang.ai')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('https://user:pass@api.maprang.ai')).toBe(true)
     expect(isLocalOrPlaceholderUrl('not-a-url')).toBe(true)
     expect(isLocalOrPlaceholderUrl('https://api.maprang.ai')).toBe(false)
   })

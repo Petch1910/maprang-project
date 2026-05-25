@@ -121,6 +121,10 @@ function invalidProductionValues() {
       const supabaseUrl = new URL(process.env.SUPABASE_URL!.trim())
       if (supabaseUrl.protocol !== 'https:' || !supabaseUrl.hostname.endsWith('.supabase.co')) {
         invalid.push('SUPABASE_URL ต้องเป็น URL รูปแบบ https://<project-ref>.supabase.co')
+      } else if (supabaseUrl.username || supabaseUrl.password) {
+        invalid.push('SUPABASE_URL ห้ามมี credential/userinfo ใน URL')
+      } else if (supabaseUrl.pathname !== '/' || supabaseUrl.search || supabaseUrl.hash) {
+        invalid.push('SUPABASE_URL ต้องเป็น project API origin เท่านั้น ห้ามมี path/query/hash')
       }
     } catch {
       invalid.push('SUPABASE_URL ต้องเป็น URL ที่ถูกต้อง')

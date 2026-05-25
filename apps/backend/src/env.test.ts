@@ -124,6 +124,20 @@ describe('runtime env validation', () => {
     expect(() => validateRuntimeEnv()).toThrow('SUPABASE_SERVICE_ROLE_KEY ต้องใช้ key role service_role')
   })
 
+  test('rejects production Supabase URLs with credentials or path data', () => {
+    setCompleteProductionEnv()
+    process.env.SUPABASE_URL = 'https://ops-user:ops-pass@maprang-prod.supabase.co'
+    process.env.SUPABASE_JWT_ISSUER = 'https://ops-user:ops-pass@maprang-prod.supabase.co/auth/v1'
+
+    expect(() => validateRuntimeEnv()).toThrow('SUPABASE_URL ห้ามมี credential/userinfo ใน URL')
+
+    setCompleteProductionEnv()
+    process.env.SUPABASE_URL = 'https://maprang-prod.supabase.co/project?from=dashboard#settings'
+    process.env.SUPABASE_JWT_ISSUER = 'https://maprang-prod.supabase.co/project?from=dashboard#settings/auth/v1'
+
+    expect(() => validateRuntimeEnv()).toThrow('SUPABASE_URL ต้องเป็น project API origin เท่านั้น ห้ามมี path/query/hash')
+  })
+
   test('rejects provider key and numeric production env mistakes', () => {
     setCompleteProductionEnv()
     process.env.OPENROUTER_API_KEY = 'sk-proj-openai-key'

@@ -434,11 +434,15 @@ function auditSupabaseUrl(value: string | undefined, area: Area, check: string) 
   if (!hasRealValue(value)) return
   try {
     const url = new URL(value!.trim())
-    if (url.protocol === 'https:' && url.hostname.endsWith('.supabase.co')) {
+    if (url.protocol !== 'https:' || !url.hostname.endsWith('.supabase.co')) {
+      fail(area, check, 'ต้องเป็น https://<project-ref>.supabase.co ไม่ใช่ dashboard URL')
+    } else if (url.username || url.password) {
+      fail(area, check, 'ห้ามมี credential/userinfo ใน URL')
+    } else if (url.pathname !== '/' || url.search || url.hash) {
+      fail(area, check, 'ต้องเป็น project API origin เท่านั้น ห้ามมี path/query/hash')
+    } else {
       pass(area, check, 'เป็น Supabase project API URL')
-      return
     }
-    fail(area, check, 'ต้องเป็น https://<project-ref>.supabase.co ไม่ใช่ dashboard URL')
   } catch {
     fail(area, check, 'ไม่ใช่ URL ที่ถูกต้อง')
   }
@@ -468,6 +472,7 @@ function auditHttpsNonLocalUrl(value: string | undefined, area: Area, check: str
     const url = new URL(value!.trim())
     if (url.protocol !== 'https:') fail(area, check, 'production URL ต้องใช้ https')
     else if (isLocalHost(url.hostname)) fail(area, check, 'production URL ห้ามเป็น localhost/127.0.0.1/0.0.0.0/::1')
+    else if (url.username || url.password) fail(area, check, 'production URL ห้ามมี credential/userinfo')
     else pass(area, check, 'เป็น https URL จริง')
   } catch {
     fail(area, check, 'ไม่ใช่ URL ที่ถูกต้อง')

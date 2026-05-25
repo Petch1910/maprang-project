@@ -39,6 +39,8 @@ export function isLocalOrPlaceholderUrl(value: string) {
   if (normalized.includes('example.com') || normalized.includes('<') || normalized.includes('>')) return true
   try {
     const url = new URL(value)
+    if (url.protocol !== 'https:') return true
+    if (url.username || url.password) return true
     return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname.toLowerCase())
   } catch {
     return true
@@ -68,6 +70,8 @@ export function frontendEnvWarnings() {
       const url = new URL(SUPABASE_URL!)
       if (url.protocol !== 'https:' || !url.hostname.endsWith('.supabase.co')) {
         warnings.push('VITE_SUPABASE_URL ต้องเป็น https://<project-ref>.supabase.co')
+      } else if (url.username || url.password || url.pathname !== '/' || url.search || url.hash) {
+        warnings.push('VITE_SUPABASE_URL ต้องเป็น project API origin เท่านั้น ห้ามมี credential, path, query หรือ hash')
       }
     } catch {
       warnings.push('VITE_SUPABASE_URL ไม่ใช่ URL ที่ถูกต้อง')
