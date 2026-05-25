@@ -23,6 +23,8 @@ bun run release:handoff:check -- --filled
 - ผู้รับผิดชอบ:
 - Environment: staging / production
 
+หมายเหตุ: เมื่อกรอก release จริง `Environment` ต้องเป็น `staging` หรือ `production` ตรง ๆ เท่านั้น เพื่อให้ gate ฝั่ง staging/production ทำงานครบ
+
 ## ลิงก์ที่ deploy แล้ว (Deployed URLs)
 
 หมายเหตุ: `Frontend URL` และ `Backend URL` ต้องเป็น deployed origin ล้วน เช่น `https://app.example.com` และ `https://api.example.com`; `Health URL` กับ `Ready URL` ต้องชี้ backend origin เดียวกันพร้อม path `/health` และ `/ready` โดยไม่มี query/hash.
@@ -92,3 +94,5 @@ bun run release:handoff:check -- --filled
 - Go / no-go:
 - ผู้อนุมัติ:
 - หมายเหตุ:
+
+หมายเหตุ: `bun run release:handoff:check -- --filled` จะผ่านเฉพาะเมื่อ `Go / no-go` เป็น `go` หลัง QA และ smoke ผ่านครบแล้วเท่านั้น

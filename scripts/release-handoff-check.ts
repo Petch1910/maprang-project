@@ -145,8 +145,8 @@ function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
 }
 
 function validateProductionVerificationFlags(content: string, findings: string[]) {
-  const environment = fieldValue(content, 'Environment').toLowerCase()
-  if (!environment.includes('production')) return
+  const environment = releaseEnvironment(content)
+  if (environment !== 'production') return
 
   if (fieldValueByCodeLabel(content, '`CHAT_PROVIDER_LIVE_VERIFIED`') !== '1') {
     findings.push('production release handoff ต้องมี CHAT_PROVIDER_LIVE_VERIFIED=1')
@@ -160,9 +160,25 @@ function isPassed(value: string) {
   return /^(pass|ผ่าน)\b/i.test(value.trim())
 }
 
+function releaseEnvironment(content: string) {
+  return fieldValue(content, 'Environment').trim().toLowerCase()
+}
+
+function validateFilledReleaseDecision(content: string, findings: string[]) {
+  const environment = releaseEnvironment(content)
+  if (!['staging', 'production'].includes(environment)) {
+    findings.push('Environment ใน release handoff ต้องเป็น staging หรือ production เท่านั้น')
+  }
+
+  const decision = fieldValue(content, 'Go / no-go').trim().toLowerCase()
+  if (decision !== 'go') {
+    findings.push('Go / no-go ใน release handoff ต้องเป็น go หลัง QA ผ่านครบก่อนแชร์ handoff')
+  }
+}
+
 function validateProductionQaResults(content: string, findings: string[]) {
-  const environment = fieldValue(content, 'Environment').toLowerCase()
-  if (!environment.includes('production')) return
+  const environment = releaseEnvironment(content)
+  if (environment !== 'production') return
 
   for (const label of ['`bun run qa:local`', '`bun run e2e:smoke`', '`bun run staging:verify`', '`bun run production:check`', 'GitHub Production Smoke run']) {
     const value = fieldValue(content, label)
@@ -171,8 +187,8 @@ function validateProductionQaResults(content: string, findings: string[]) {
 }
 
 function validateStagingQaResults(content: string, findings: string[]) {
-  const environment = fieldValue(content, 'Environment').toLowerCase()
-  if (!environment.includes('staging') || environment.includes('production')) return
+  const environment = releaseEnvironment(content)
+  if (environment !== 'staging') return
 
   for (const label of ['`bun run qa:local`', '`bun run e2e:smoke`', '`bun run staging:verify`']) {
     const value = fieldValue(content, label)
@@ -181,9 +197,9 @@ function validateStagingQaResults(content: string, findings: string[]) {
 }
 
 function deployedEvidenceEnvironment(content: string) {
-  const environment = fieldValue(content, 'Environment').toLowerCase()
-  if (environment.includes('production')) return 'production'
-  if (environment.includes('staging')) return 'staging'
+  const environment = releaseEnvironment(content)
+  if (environment === 'production') return 'production'
+  if (environment === 'staging') return 'staging'
   return ''
 }
 
@@ -234,6 +250,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
       .filter(({ line }) => line.startsWith('- ') && /:\s*$/.test(line))
     for (const field of blankFields) findings.push(`บรรทัด ${field.index} ยังว่างอยู่: ${field.line}`)
     validateFilledReleaseHandoffUrls(content, findings)
+    validateFilledReleaseDecision(content, findings)
     validateProductionVerificationFlags(content, findings)
     validateProductionQaResults(content, findings)
     validateStagingQaResults(content, findings)

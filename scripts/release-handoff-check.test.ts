@@ -93,6 +93,18 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires a concrete release environment in filled handoff', () => {
+    const unsafe = filledHandoff.replace('- Environment: production', '- Environment: prod')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toContain('Environment ใน release handoff ต้องเป็น staging หรือ production เท่านั้น')
+  })
+
+  test('requires go release decision in filled handoff', () => {
+    const unsafe = filledHandoff.replace('- Go / no-go: go', '- Go / no-go: no-go')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toContain('Go / no-go ใน release handoff ต้องเป็น go หลัง QA ผ่านครบก่อนแชร์ handoff')
+  })
+
   test('rejects local or insecure filled release URLs', () => {
     const unsafe = filledHandoff
       .replace('https://app.maprang.example', 'http://localhost:5173')

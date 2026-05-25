@@ -209,3 +209,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: release handoff QA gate presence now requires real `- label:` rows, so command names mentioned in notes cannot replace missing QA evidence rows.
 - Current addendum 2026-05-25: production live-provider verification flags in release handoff must be actual code-label field rows set to `1`; notes mentioning the flag names do not count.
 - Current addendum 2026-05-25: critical release handoff fields such as `Environment`, URL fields, `CORS origins`, and `Go / no-go` must be actual `- label:` rows.
+- Current addendum 2026-05-25: filled release handoff validation now requires exact `Environment: staging` or `Environment: production`, and requires `Go / no-go: go` before the handoff can be used as release evidence.
