@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Production/staging CORS guards now reject origins with path/query/hash across backend runtime env validation, deploy env doctor, and deploy readiness. This prevents values like `https://app.example.com/app` from passing handoff even though browser `Origin` headers never include paths. README, Deployment QA, Production Setup, Staging Runbook, Render docs, Security Checklist, and `agent.md` now mention the path/query/hash blocker.
 - 2026-05-25: Release handoff deployed URL validation now rejects credential-bearing HTTPS URLs such as `https://user:pass@host`. This keeps filled handoff URL fields aligned with the no-secrets release template instead of letting userinfo credentials hide inside otherwise valid HTTPS URLs.
 - 2026-05-25: Security checklist production CORS wording now matches deploy/release guards. The production must-pass section says `CORS_ORIGINS` must be frontend HTTPS origins only and must not use localhost/loopback, `http://`, wildcard, path/query, or backend URL; predeploy locks this copy to prevent security handoff drift.
 - 2026-05-25: Release handoff filled-mode URL validation now parses deployed URLs and CORS origins with `URL` instead of string-only checks. `release:handoff:check -- --filled` rejects malformed deployed URLs, comma-only CORS fields, CORS origins with paths/query/hash, loopback hosts, wildcard placeholders, and backend origins accidentally copied into `CORS origins`, while still accepting multiple real frontend HTTPS origins.

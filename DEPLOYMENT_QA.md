@@ -125,7 +125,7 @@ bun run staging:check
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
-`staging:verify` พิมพ์ `bun run deploy:status` ก่อน และ deploy status จะตรวจ backend root identity ก่อน health. จากนั้นรัน `smoke-doctor --strict-staging`, Supabase signed-storage check, `/ready`, และ admin-required API smoke กับ deployed backend. คำสั่งนี้ fail เมื่อเจอ localhost/loopback URLs, local/non-https CORS, signed storage ที่ขาด, readiness พัง, หรือ admin smoke auth ที่ขาด แต่ยังไม่บังคับ `CHAT_PROVIDER_LIVE_VERIFIED=1` หรือ `IMAGE_GENERATION_LIVE_VERIFIED=1`.
+`staging:verify` พิมพ์ `bun run deploy:status` ก่อน และ deploy status จะตรวจ backend root identity ก่อน health. จากนั้นรัน `smoke-doctor --strict-staging`, Supabase signed-storage check, `/ready`, และ admin-required API smoke กับ deployed backend. คำสั่งนี้ fail เมื่อเจอ localhost/loopback URLs, local/non-https CORS, CORS origin ที่มี path/query/hash, signed storage ที่ขาด, readiness พัง, หรือ admin smoke auth ที่ขาด แต่ยังไม่บังคับ `CHAT_PROVIDER_LIVE_VERIFIED=1` หรือ `IMAGE_GENERATION_LIVE_VERIFIED=1`.
 
 รัน full local หรือ staging provider gate เฉพาะเมื่อ backend ติดต่อ OpenRouter ได้:
 

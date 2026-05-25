@@ -86,7 +86,13 @@ export function isLocalOrigin(origin: string) {
 export function isUnsafeCorsOrigin(origin: string) {
   try {
     const url = new URL(origin)
-    return url.protocol !== 'https:' || ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname)
+    return (
+      url.protocol !== 'https:' ||
+      ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname) ||
+      url.pathname !== '/' ||
+      Boolean(url.search) ||
+      Boolean(url.hash)
+    )
   } catch {
     return true
   }
@@ -161,8 +167,8 @@ export function evaluateDeployReadiness(
   }
   if (!health.security?.corsOrigins?.length || health.security.corsOrigins.some(isUnsafeCorsOrigin)) {
     addProductionBlocker(
-      'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https',
-      'ตั้ง CORS_ORIGINS เป็น domain หน้าบ้านจริงแบบ https เท่านั้น',
+      'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน',
+      'ตั้ง CORS_ORIGINS เป็น origin หน้าบ้านจริงแบบ https เท่านั้น โดยไม่มี path/query/hash',
     )
   }
   if (!health.knowledge?.structured?.ok) {

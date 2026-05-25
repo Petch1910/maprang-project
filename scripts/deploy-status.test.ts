@@ -90,7 +90,7 @@ describe('deploy status formatting', () => {
     expect(text).toContain('root identity ระบบหลังบ้าน: maprang-backend')
     expect(text).toContain('stagingBlockerCount: 2')
     expect(text).toContain('backend URL ยังเป็น local')
-    expect(text).toContain('CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https')
+    expect(text).toContain('CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน')
     expect(text).toContain('ขั้นตอนถัดไป:')
     expect(text).toContain('วิธีแก้สเตจจิง:')
     expect(text).not.toContain('วิธีแก้ staging:')

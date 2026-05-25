@@ -108,6 +108,13 @@ describe('runtime env validation', () => {
     expect(() => validateRuntimeEnv()).toThrow('::1')
   })
 
+  test('rejects production CORS origins with path query or hash', () => {
+    setCompleteProductionEnv()
+    process.env.CORS_ORIGINS = 'https://app.maprang.example/app?from=deploy#top'
+
+    expect(() => validateRuntimeEnv()).toThrow('CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash ใน production')
+  })
+
   test('rejects mismatched Supabase issuer and anon storage key', () => {
     setCompleteProductionEnv()
     process.env.SUPABASE_JWT_ISSUER = 'https://other-project.supabase.co/auth/v1'

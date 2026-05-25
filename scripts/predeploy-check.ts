@@ -261,8 +261,8 @@ const checks: Check[] = [
           'เงื่อนไขว่างานเสร็จ (Definition Of Done)',
           'Backend URL เป็น deployed HTTPS URL จริง',
           'ไม่ใช่ localhost/loopback หรือ `http://`',
-          '`CORS_ORIGINS` เป็น frontend HTTPS domain จริง',
-          'ไม่รวม localhost/loopback, `http://`, wildcard',
+          '`CORS_ORIGINS` เป็น frontend HTTPS origin จริง',
+          'ไม่รวม localhost/loopback, `http://`, wildcard, path/query/hash',
         ],
         'agent.md',
       )
@@ -421,12 +421,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         backendEnv,
-        ['MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production'],
+        ['MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production', 'CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash ใน production'],
         'apps/backend/src/env.ts',
       )
       requireIncludes(
         backendEnvTest,
-        ['rejects production roleplay reply budget below baseline', 'MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production'],
+        ['rejects production roleplay reply budget below baseline', 'rejects production CORS origins with path query or hash', 'MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production'],
         'apps/backend/src/env.test.ts',
       )
     },
@@ -514,7 +514,7 @@ const checks: Check[] = [
           'IMAGE_GENERATION_API_KEY',
           'imageGenerationConfigured=true',
           'CORS_ORIGINS=https://<frontend-domain>',
-          'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, หรือ backend URL',
+          'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, path/query/hash, หรือ backend URL',
           'VITE_API_BASE_URL=https://<backend-domain>',
         ],
         'DEPLOY_RENDER.md',
@@ -907,7 +907,7 @@ const checks: Check[] = [
       requireIncludes(readme, ['memory/README.md', 'ความจำโปรเจกต์ (Project Memory)'], 'README.md')
       requireIncludes(memoryReadme, ['ห้ามเก็บ secrets', 'ขั้นตอนอัปเดต', 'บริบทงานปัจจุบัน', 'ตัวกั้นก่อน deploy'], 'memory/README.md')
       requireIncludes(workingContext, ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน'], 'memory/working-context.md')
-      requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED'], 'memory/deploy-blockers.md')
+      requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'path/query/hash'], 'memory/deploy-blockers.md')
       requireIncludes(
         productionChecklist,
         ['bun run deploy:doctor', 'bun run deploy:status', 'bun run api:smoke:live', 'อย่าชี้ `qa:local`'],
@@ -1134,7 +1134,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployReadiness,
-        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน', 'RELEASE_HANDOFF.md'],
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'url.pathname !== \'/\'', 'Boolean(url.search)', 'Boolean(url.hash)', 'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน', 'โดยไม่มี path/query/hash', 'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน', 'RELEASE_HANDOFF.md'],
         'scripts/deploy-readiness.ts',
       )
       requireIncludes(
@@ -1147,6 +1147,7 @@ const checks: Check[] = [
           'auditIntegerRangeWithRecommendedMin',
           'auditPreferredIntegerMin',
           'localhost/127.0.0.1/0.0.0.0/::1',
+          'ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash',
           'formatUnknownDiagnosticText',
           'คำตอบ roleplay ใน production',
         ],
@@ -1159,7 +1160,8 @@ const checks: Check[] = [
           'importable function without exiting',
           'Supabase URL match',
           'formats object-shaped env doctor errors without stringifying raw objects',
-          'fails production env when database or cors uses loopback hosts',
+          'fails production env when database or cors uses loopback hosts or origin paths',
+          'ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash',
           'fails production env when roleplay reply budget is below baseline',
           'warns when production env uses baseline roleplay reply budget below richer recommendation',
           'ควรตั้งอย่างน้อย 1200 สำหรับคำตอบ roleplay ใน production',
@@ -1945,7 +1947,7 @@ const checks: Check[] = [
       )
       requireIncludes(readme, ['local/non-https CORS', 'backend root identity'], 'README.md')
       requireIncludes(deploymentQa, ['local/non-https CORS', 'backend root identity'], 'DEPLOYMENT_QA.md')
-      requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS เป็น local หรือไม่ใช่ HTTPS', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
+      requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS เป็น local หรือไม่ใช่ HTTPS หรือมี path/query/hash', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
       forbidIncludes(
         await readRepoFile('ROUTE_MENU_AUDIT.md'),
         ['รัน eval', 'prompt-control', 'token budget', 'accordion', ' disabled '],
@@ -1953,10 +1955,10 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('DEPLOY_RENDER.md'),
-        ['CORS_ORIGINS=https://<frontend-domain>', 'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, หรือ backend URL'],
+        ['CORS_ORIGINS=https://<frontend-domain>', 'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, path/query/hash, หรือ backend URL'],
         'DEPLOY_RENDER.md',
       )
-      requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin'], 'STAGING_RUNBOOK.md')
+      requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin', 'path/query/hash, หรือ backend URL'], 'STAGING_RUNBOOK.md')
       requireIncludes(
         e2eSmoke,
         ['ตรวจเส้นทาง/เมนู', 'ตรวจพรอมป์ก่อนยิงโมเดล', 'กฎคุมพรอมป์ของแพลตฟอร์ม', 'ทดสอบคุณภาพพรอมป์และบริบท', 'สรุป blocker production', 'เช็กลิสต์ deploy', 'แถบแชท'],

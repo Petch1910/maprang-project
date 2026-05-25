@@ -165,7 +165,7 @@ describe('deploy readiness evaluation', () => {
 
     expect(readiness.stagingReady).toBe(false)
     expect(readiness.productionReady).toBe(false)
-    expect(readiness.stagingBlockers).toEqual(['backend URL ยังเป็น local', 'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https'])
+    expect(readiness.stagingBlockers).toEqual(['backend URL ยังเป็น local', 'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน'])
     expect(readiness.productionBlockers).toContain('live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน')
     expect(readiness.productionBlockers).toContain('live smoke ของระบบสร้างรูปยังไม่ได้ยืนยันผ่าน')
     expect(nextSteps).toContain(
@@ -209,7 +209,7 @@ describe('deploy readiness evaluation', () => {
       expect.arrayContaining([
         'auth mode ยังไม่ใช่ Supabase JWT',
         'พื้นที่เก็บรูปตัวละครยังไม่ใช่ Supabase signed URL',
-        'CORS_ORIGINS ว่าง เป็น local หรือไม่ใช่ https',
+        'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน',
         'คลังความรู้ structured ยังไม่ผ่าน',
         'OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า',
         'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่า',
@@ -273,6 +273,7 @@ describe('deploy readiness evaluation', () => {
     expect(isUnsafeCorsOrigin('https://0.0.0.0:5173')).toBe(true)
     expect(isUnsafeCorsOrigin('https://[::1]:5173')).toBe(true)
     expect(isUnsafeCorsOrigin('*')).toBe(true)
+    expect(isUnsafeCorsOrigin('https://app.example.com/path?from=deploy#top')).toBe(true)
     expect(isUnsafeCorsOrigin('https://app.example.com')).toBe(false)
   })
 })

@@ -175,7 +175,7 @@ describe('deploy env doctor helpers', () => {
     }
   })
 
-  test('fails production env when database or cors uses loopback hosts', async () => {
+  test('fails production env when database or cors uses loopback hosts or origin paths', async () => {
     const runnerDir = join(tempDir, 'loopback-hosts')
     await rm(runnerDir, { recursive: true, force: true })
     await mkdir(runnerDir, { recursive: true })
@@ -199,7 +199,7 @@ describe('deploy env doctor helpers', () => {
           'CHAT_PROVIDER_RETRY_DELAY_MS=350',
           'CREATOR_DRAFT_RETRY_ATTEMPTS=3',
           'CREATOR_DRAFT_RETRY_DELAY_MS=350',
-          'CORS_ORIGINS=https://[::1]:5173',
+          'CORS_ORIGINS=https://[::1]:5173,https://app.maprang.example/app?from=deploy',
           'ADMIN_API_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
           'SUPABASE_URL=https://abcdefghijklmnopqrst.supabase.co',
           'SUPABASE_JWT_ISSUER=https://abcdefghijklmnopqrst.supabase.co/auth/v1',
@@ -239,6 +239,14 @@ describe('deploy env doctor helpers', () => {
           area: 'backend',
           status: 'fail',
           check: 'CORS_ORIGINS',
+        }),
+      )
+      expect(result.findings).toContainEqual(
+        expect.objectContaining({
+          area: 'backend',
+          status: 'fail',
+          check: 'CORS_ORIGINS',
+          detail: 'ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash',
         }),
       )
     } finally {

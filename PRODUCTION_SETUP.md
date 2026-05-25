@@ -185,7 +185,7 @@ SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-t
 SMOKE_API_BASE_URL=https://api.example.com SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
 ```
 
-`production:check` คือ gate สุดท้ายแบบเข้ม. คำสั่งนี้จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้เห็น blocker summary และ next steps ก่อน strict smoke gates จะล้ม. Gate นี้จะล้มถ้า backend URL ยังเป็น local, auth ไม่ใช่ Supabase JWT, พื้นที่เก็บรูปตัวละครยังไม่ใช่ Supabase signed URL, bucket `avatars` จริง upload/fetch ผ่าน signed URLs ไม่ได้, CORS เป็น local หรือไม่ใช่ HTTPS, OpenRouter ยังไม่มี, image generation provider ยังไม่มี, หรือ live chat/image provider calls ล้ม.
+`production:check` คือ gate สุดท้ายแบบเข้ม. คำสั่งนี้จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้เห็น blocker summary และ next steps ก่อน strict smoke gates จะล้ม. Gate นี้จะล้มถ้า backend URL ยังเป็น local, auth ไม่ใช่ Supabase JWT, พื้นที่เก็บรูปตัวละครยังไม่ใช่ Supabase signed URL, bucket `avatars` จริง upload/fetch ผ่าน signed URLs ไม่ได้, CORS เป็น local หรือไม่ใช่ HTTPS หรือมี path/query/hash, OpenRouter ยังไม่มี, image generation provider ยังไม่มี, หรือ live chat/image provider calls ล้ม.
 
 ก่อนถึง final gate ให้ใช้ `staging:verify` กับ staging backend ที่ deploy แล้ว:
 
