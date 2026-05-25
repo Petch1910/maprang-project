@@ -227,6 +227,16 @@ const checks: Check[] = [
       if (result.findings.length > 0) {
         throw new Error(result.findings.join('; '))
       }
+      requireIncludes(
+        await readRepoFile('scripts/docs-command-audit.ts'),
+        ['collectDefaultAuditedCommandFiles', 'memory/decisions', 'readdir(join(root, \'memory/decisions\')'],
+        'scripts/docs-command-audit.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/docs-command-audit.test.ts'),
+        ['includes decision files in the default command audit set', '0018-add-test-coverage-audit-contract.md'],
+        'scripts/docs-command-audit.test.ts',
+      )
     },
   },
   {

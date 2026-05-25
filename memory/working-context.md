@@ -562,6 +562,7 @@ Verified:
 - Test coverage audit now discovers repo-owned `.test.ts`, `.test.tsx`, `.spec.ts`, and `.spec.tsx` files outside `node_modules`, fails orphan `scripts/` tests without root package scripts, fails root `*:test` scripts missing from `qa:repo`, and verifies backend/e2e suites stay wired through `backend:check` and `e2e:smoke`; `predeploy:check`, `qa:repo`, CI, and Production Smoke all run the new guard.
 - Latest full `qa:repo` pass after test-coverage audit wiring: docs command audit 330 refs, test coverage audit 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 177 pass / 609 expects, frontend route audit 13 routes, frontend build, and bundle budget pass.
 - Docs command audit now includes `memory/decisions/*.md` by default, so command references inside decision records are checked against package scripts; focused pass: `docs:commands:test`, `docs:commands` with 334 refs, and `predeploy:check`.
+- `predeploy:check` now locks the decision-file command audit wiring by requiring `collectDefaultAuditedCommandFiles`, the `memory/decisions` scan, and the regression fixture.
 
 ## สถานะ production ปัจจุบัน
 
