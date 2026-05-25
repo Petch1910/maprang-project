@@ -560,6 +560,7 @@ Verified:
 - API route coverage notes now use Thai-first descriptions for root identity, health/ready checks, wallet/profile, relationship, chat, storage, moderation, Prompt Inspector, and eval routes while preserving exact command names and route identifiers.
 - API route audit CLI heading, failure headings, and pass summary now use Thai-first output while keeping route keys and owner names stable for debugging.
 - Test coverage audit now discovers repo-owned `.test.ts`, `.test.tsx`, `.spec.ts`, and `.spec.tsx` files outside `node_modules`, fails orphan `scripts/` tests without root package scripts, fails root `*:test` scripts missing from `qa:repo`, and verifies backend/e2e suites stay wired through `backend:check` and `e2e:smoke`; `predeploy:check`, `qa:repo`, CI, and Production Smoke all run the new guard.
+- Latest full `qa:repo` pass after test-coverage audit wiring: docs command audit 330 refs, test coverage audit 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 177 pass / 609 expects, frontend route audit 13 routes, frontend build, and bundle budget pass.
 
 ## สถานะ production ปัจจุบัน
 
