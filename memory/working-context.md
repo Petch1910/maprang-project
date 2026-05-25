@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: `ROUTE_MENU_AUDIT.md` now documents the future-route rule directly: `future` rows are future-only and must not point to `/path` until route/preload/navigation QA exists; `route-menu:audit` and `predeploy:check` lock the note. Checks passed: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
 - 2026-05-25: Memory/predeploy guards now require the Route/Menu Audit future route-path note (`future` rows must not point to `/path`) to stay in working context, deploy blockers, and `memory-audit.ts`. Checks passed: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
 - 2026-05-25: Route/Menu Audit now rejects `future` rows that point to real `/path` route tokens, so future-only surfaces cannot look like clickable menus before they are ready for route/preload/navigation QA. Checks passed: `bun run route-menu:audit:test`, `bun run predeploy:check:test`, `bun run route-menu:audit`, and `bun run predeploy:check`.
 - 2026-05-25: `agent.md` now tells future agents that combined `api:smoke:live` JSON summary must omit `handoffEvidence` until chat normal, chat stream, and image evidence are complete with positive token/elapsed values; `predeploy:check` locks the addendum. Checks passed: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run memory:audit`, `bun run secrets:check`, and `git diff --check`.

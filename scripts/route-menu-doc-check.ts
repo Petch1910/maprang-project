@@ -299,6 +299,7 @@ function hasRoutePathToken(route: string) {
 const defaultRequiredSnippets = [
   'Route/Menu Audit',
   '/admin/health',
+  'ห้ามอ้าง route แบบ `/path`',
   'bun run frontend:static:audit',
   'bun run frontend:route:audit',
   'bun run route-menu:audit',

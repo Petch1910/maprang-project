@@ -2059,7 +2059,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'includesEvery', 'includesSome', 'hasRoutePathToken', 'STAGING_RUNBOOK.md', '/admin/health', 'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต', 'สถานะ future ต้องไม่อ้าง route แบบ /path', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
+        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'includesEvery', 'includesSome', 'hasRoutePathToken', 'STAGING_RUNBOOK.md', '/admin/health', 'ห้ามอ้าง route แบบ `/path`', 'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต', 'สถานะ future ต้องไม่อ้าง route แบบ /path', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(
