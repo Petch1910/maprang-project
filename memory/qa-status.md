@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 route/menu future-surface decision memory pass: decision `0017-route-menu-future-surface-contract.md` was added and linked from `memory/decisions/index.md`; `predeploy:check` required files now include the decision file.
 - 2026-05-25 full deterministic repo QA pass after route/menu future route guard: `bun run qa:repo` passed with docs command audit at 325 references, backend 177 tests / 609 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 292 import edges, local eval 3 scenarios, frontend build, and frontend bundle budget. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25 route/menu future-route doc note pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after `ROUTE_MENU_AUDIT.md` started documenting that `future` rows must not point to `/path` before route/preload/navigation QA exists.
 - 2026-05-25 memory future route-path guard pass: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after memory/predeploy guards started requiring the Route/Menu Audit note that `future` rows must not point to `/path` route tokens.

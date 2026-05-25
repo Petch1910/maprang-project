@@ -18,3 +18,4 @@
 - [0014 - เพิ่ม chat provider failure classification](./0014-add-chat-provider-failure-classification.md)
 - [0015 - ให้ Route/Menu disabled reasons เป็น UI contract](./0015-route-menu-disabled-reasons-contract.md)
 - [0016 - ให้ API route coverage เป็น quality contract](./0016-api-route-coverage-quality-contract.md)
+- [0017 - ให้ future surface ไม่อ้าง route จริงก่อนพร้อมตรวจ](./0017-route-menu-future-surface-contract.md)

@@ -136,6 +136,7 @@ const markdownHeadingFiles = [
   'memory/decisions/0014-add-chat-provider-failure-classification.md',
   'memory/decisions/0015-route-menu-disabled-reasons-contract.md',
   'memory/decisions/0016-api-route-coverage-quality-contract.md',
+  'memory/decisions/0017-route-menu-future-surface-contract.md',
 ]
 
 async function assertFile(path: string) {
