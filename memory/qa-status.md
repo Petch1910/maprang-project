@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 full deterministic repo QA pass after Route/Menu guard refresh: `bun run qa:repo` passed with backend 173 tests / 601 expects, API route audit 48 routes, route/menu audit 14 surfaces, import-cycle audit 128 source files / 307 import edges, local eval 3 scenarios, frontend static/route audit, TypeScript, Vite build, and bundle budget still under limits (main 269.1KB/350KB, chat 231.0KB/260KB). DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25 decision memory pass: `memory/decisions/0015-route-menu-disabled-reasons-contract.md` was added and `memory/decisions/index.md` was refreshed so Route/Menu disabled reasons are recorded as a UI contract for future agents.
 - 2026-05-25 My Chats route/menu handoff pass: `bun run route-menu:audit` and `bun run route-menu:audit:test` passed after `/chats` Route/Menu Audit started naming concrete disabled reasons for select-all, bulk archive/restore/delete, busy per-chat menus, and rename/delete dialogs.
 - 2026-05-25 route/menu concrete disabled-reason pass: `bun run route-menu:audit` and `bun run route-menu:audit:test` passed after replacing generic Chat Sidebar/Admin Health disabled-state wording with concrete selection-toolbar, rename-dialog, and Admin Health refresh/link behavior, and after adding required snippets for those handoff details.
