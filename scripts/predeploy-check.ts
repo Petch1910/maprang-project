@@ -1781,7 +1781,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.ts'),
-        ['validateBackendRootIdentity', 'deployedSmokeTargetIssues', 'formatSmokeTargetDiagnosticText', 'formatUnknownDiagnosticText', 'maprang-backend', '0.0.0.0', '[::1]', 'credential/userinfo', 'path/query/hash'],
+        ['validateBackendRootIdentity', 'deployedSmokeTargetIssues', 'formatSmokeTargetDiagnosticText', 'formatSmokeTargetPathDiagnosticText', 'formatUnknownDiagnosticText', 'maprang-backend', '0.0.0.0', '[::1]', 'credential/userinfo', 'path/query/hash'],
         'scripts/smoke-helpers.ts',
       )
       requireIncludes(
@@ -1795,6 +1795,7 @@ const checks: Check[] = [
           'summarizes a ready payload',
           'keeps readiness failures visible',
           'validates backend root identity before readiness',
+          'redacts userinfo from readiness endpoint diagnostics',
           'formats object-shaped readiness errors without stringifying raw objects',
           'runs readiness smoke through an importable runner',
         ],
@@ -1805,6 +1806,7 @@ const checks: Check[] = [
         [
           'ReadinessSmokeRunnerOptions',
           'readBackendRootIdentity',
+          'formatSmokeTargetPathDiagnosticText',
           'formatUnknownDiagnosticText',
           'validateBackendRootIdentity',
           'runReadinessSmoke',

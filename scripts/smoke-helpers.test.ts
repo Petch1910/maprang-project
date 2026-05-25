@@ -5,6 +5,7 @@ import {
   formatDiagnosticText,
   formatFetchErrorReason,
   formatSmokeTargetDiagnosticText,
+  formatSmokeTargetPathDiagnosticText,
   formatUnknownDiagnosticText,
   formatPayload,
   smokeApiBaseUrl,
@@ -74,6 +75,9 @@ describe('smoke helpers', () => {
     expect(formatFetchErrorReason(new Error(`connection failed ${fakeDatabaseUrl}`))).toContain('postgresql://[REDACTED_SECRET]')
     expect(formatSmokeTargetDiagnosticText('https://smoke-user:smoke-pass@api.example.com', 500)).toBe(
       'https://[REDACTED_USERINFO]@api.example.com/',
+    )
+    expect(formatSmokeTargetPathDiagnosticText('https://smoke-user:smoke-pass@api.example.com', '/ready', 500)).toBe(
+      'https://[REDACTED_USERINFO]@api.example.com/ready',
     )
   })
 

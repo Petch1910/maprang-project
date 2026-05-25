@@ -196,6 +196,30 @@ describe('readiness smoke summary', () => {
     }
   })
 
+  test('redacts userinfo from readiness endpoint diagnostics', async () => {
+    try {
+      await readReadiness('https://smoke-user:smoke-pass@api.example.com', async () => {
+        throw new Error('fetch failed')
+      })
+      throw new Error('expected readReadiness to fail')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      expect(message).toContain('https://[REDACTED_USERINFO]@api.example.com/ready')
+      expect(message).not.toContain('smoke-pass')
+    }
+
+    try {
+      await readBackendRootIdentity('https://smoke-user:smoke-pass@api.example.com', async () => {
+        throw new Error('fetch failed')
+      })
+      throw new Error('expected readBackendRootIdentity to fail')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      expect(message).toContain('https://[REDACTED_USERINFO]@api.example.com/')
+      expect(message).not.toContain('smoke-pass')
+    }
+  })
+
   test('redacts secret-shaped values from readiness runner caught errors', async () => {
     const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
     const directMessage = formatReadinessSmokeCaughtError(new Error(`DATABASE_URL=${fakeDatabaseUrl}`))

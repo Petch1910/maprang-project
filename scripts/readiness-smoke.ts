@@ -1,6 +1,7 @@
 import {
   apiBaseUrl,
   formatDiagnosticText,
+  formatSmokeTargetPathDiagnosticText,
   formatUnknownDiagnosticText,
   validateBackendRootIdentity,
   type RootIdentityPayload,
@@ -152,7 +153,7 @@ export async function readReadiness(apiBase = apiBaseUrl, fetchImpl: typeof fetc
     response = await fetchImpl(`${apiBase}/ready`)
   } catch (error) {
     const reason = formatUnknownDiagnosticText(error, 500)
-    throw new Error(`ติดต่อ endpoint ความพร้อมที่ ${apiBase}/ready ไม่ได้ (${reason})`)
+    throw new Error(`ติดต่อ endpoint ความพร้อมที่ ${formatSmokeTargetPathDiagnosticText(apiBase, '/ready', 300)} ไม่ได้ (${reason})`)
   }
 
   const raw = await response.text()
@@ -172,7 +173,7 @@ export async function readBackendRootIdentity(apiBase = apiBaseUrl, fetchImpl: t
     response = await fetchImpl(`${apiBase}/`)
   } catch (error) {
     const reason = formatUnknownDiagnosticText(error, 500)
-    throw new Error(`ติดต่อ root identity ของระบบหลังบ้านที่ ${apiBase}/ ไม่ได้ (${reason})`)
+    throw new Error(`ติดต่อ root identity ของระบบหลังบ้านที่ ${formatSmokeTargetPathDiagnosticText(apiBase, '/', 300)} ไม่ได้ (${reason})`)
   }
 
   const raw = await response.text()

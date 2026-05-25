@@ -89,6 +89,10 @@ export function formatSmokeTargetDiagnosticText(baseUrl: string, maxLength: numb
   return formatDiagnosticText(baseUrl, maxLength)
 }
 
+export function formatSmokeTargetPathDiagnosticText(baseUrl: string, path: string, maxLength: number) {
+  return formatDiagnosticText(`${formatSmokeTargetDiagnosticText(baseUrl, maxLength).replace(/\/$/, '')}${path}`, maxLength)
+}
+
 export function formatUnknownDiagnosticText(error: unknown, maxLength: number) {
   if (error instanceof Error) return formatDiagnosticText(error.message, maxLength)
   if (error && typeof error === 'object') {
