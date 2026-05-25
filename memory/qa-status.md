@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 full deterministic repo QA pass after frontend surface cleanup: `bun run qa:repo` passed after Redux persisted-state cleanup, API surface trimming, and deleting the unused relationship debug component. Backend stayed at 173 tests / 601 expects, API route audit covered 48 routes, route/menu audit covered 14 surfaces, import-cycle audit dropped to 122 source files / 290 import edges, local eval covered 3 scenarios, and frontend build/bundle stayed under budget with ChatRoom at 226.6KB / 260KB.
 - 2026-05-25 Unmounted relationship debug component cleanup pass: `rg RelationshipExplainability apps/frontend/src scripts` returned no remaining usage after deleting the unused component, and `bun run frontend:check` passed.
 - 2026-05-25 Frontend API surface cleanup pass: `rg fetchChatWorldState apps/frontend/src scripts` returned no remaining usage after removing the unused helper, and `bun run frontend:api:test` plus `bun run frontend:check` passed.
 - 2026-05-25 Redux persisted-state regression guard: `bun run frontend:storage:test` now covers legacy localStorage payloads with removed `showMature` and `creatorDraftUpdatedAt` fields, verifying hydrate reducers drop stale keys before state is persisted again.

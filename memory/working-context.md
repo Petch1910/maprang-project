@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after the latest frontend surface cleanup. `bun run qa:repo` is green after Redux persisted-state cleanup, API surface trimming, and deleting unused debug UI; backend remains 173 tests / 601 expects, API route audit covers 48 routes, route/menu audit covers 14 surfaces, import-cycle audit now sees 122 source files / 290 import edges, and frontend bundle budget remains under limit with ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Removed the unmounted `RelationshipExplainability` frontend component. Relationship state is now surfaced through the active Chat UI, Events/My Chats summaries, and Prompt Inspector instead of an unused debug card.
 - 2026-05-25: Frontend API surface was trimmed after the chat world-state flow settled. The unused `fetchChatWorldState` helper was removed; `/chat` still loads world state through saved chat messages and persists changes through `updateChatWorldState`.
 - 2026-05-25: Redux slices now sanitize away unused persisted fields. Unused `showMature`, `creatorDraftUpdatedAt`, `setWalletLoading`, `applyContentSettings`, `setShowMature`, and `markCreatorDraftSaved` paths were removed; content/drafts hydration now rebuilds only supported fields from localStorage so stale keys cannot re-enter Redux state.
