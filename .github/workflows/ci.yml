@@ -39,6 +39,8 @@ jobs:
       - run: bun run vault:audit:test
       - run: bun run docs:commands
       - run: bun run docs:commands:test
+      - run: bun run tests:audit
+      - run: bun run tests:audit:test
       - run: bun run eval:local:test
       - run: bun run security:audit
       - run: bun run security:audit:test

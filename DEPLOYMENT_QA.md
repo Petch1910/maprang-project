@@ -12,6 +12,8 @@ bun run qa:repo
 
 `qa:repo` ครอบคลุม secrets, memory/knowledge/eval, static/security/API/menu audits, helper tests, backend tests, frontend build, และ predeploy wiring โดยไม่เรียก runtime smoke ที่ต้องมี service เปิดอยู่.
 
+`qa:repo` ยังรัน `tests:audit` และ `tests:audit:test` เพื่อกัน test orphan: ไฟล์ทดสอบใหม่ใน `scripts/` ต้องมี root script รันตรง, root `*:test` ต้องถูกเรียกจาก `qa:repo`, backend tests ต้องผ่าน `backend:check`, และ browser e2e specs ต้องอยู่หลัง `e2e:smoke`.
+
 รัน full local gate เมื่อ Postgres, backend, และ frontend พร้อม:
 
 ```bash

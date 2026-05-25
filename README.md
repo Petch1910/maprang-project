@@ -235,6 +235,14 @@ Use this set to guard Supabase JWT/env parsing, localStorage persisted state, an
 bun run docs:commands
 ```
 
+ถ้าต้องการตรวจว่าไฟล์ทดสอบใหม่ทุกไฟล์ถูกผูกเข้า QA gate แล้ว:
+
+```bash
+bun run tests:audit
+```
+
+คำสั่งนี้ค้นหาไฟล์ `.test.ts`, `.test.tsx`, `.spec.ts`, และ `.spec.tsx` ของ repo โดยไม่แตะ `node_modules` แล้วจะ fail ถ้า test ใน `scripts/` ไม่มี root script รันตรง, root `*:test` ไม่อยู่ใน `qa:repo`, backend tests ไม่ถูกครอบด้วย `backend:check`, หรือ e2e specs ไม่ถูกครอบด้วย `e2e:smoke`.
+
 คำสั่งนี้ช่วยกันเอกสาร deploy, README ของ app, และ workflow แนะนำ script ที่ไม่มีอยู่จริงในตำแหน่งที่รัน.
 
 ถ้าต้องการตรวจ production env files ก่อน deploy โดยไม่พิมพ์ secret values:

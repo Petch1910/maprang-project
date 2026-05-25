@@ -2,6 +2,7 @@ import { access, readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { collectDocsCommandAuditResult } from './docs-command-audit'
 import { formatUnknownDiagnosticText } from './smoke-helpers'
+import { collectTestCoverageAuditResult } from './test-coverage-audit'
 
 const root = join(import.meta.dir, '..')
 
@@ -65,6 +66,8 @@ const requiredFiles = [
   'scripts/api-route-audit.test.ts',
   'scripts/docs-command-audit.ts',
   'scripts/docs-command-audit.test.ts',
+  'scripts/test-coverage-audit.ts',
+  'scripts/test-coverage-audit.test.ts',
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
   'scripts/frontend-static-audit.test.ts',
@@ -220,6 +223,15 @@ const checks: Check[] = [
     name: 'คำสั่งในเอกสารและ workflow ต้องตรงกับ package scripts',
     run: async () => {
       const result = await collectDocsCommandAuditResult()
+      if (result.findings.length > 0) {
+        throw new Error(result.findings.join('; '))
+      }
+    },
+  },
+  {
+    name: 'ไฟล์ทดสอบต้องถูกผูกเข้า QA gate',
+    run: async () => {
+      const result = await collectTestCoverageAuditResult()
       if (result.findings.length > 0) {
         throw new Error(result.findings.join('; '))
       }
@@ -951,6 +963,9 @@ const checks: Check[] = [
       if (!qaLocalCommands.includes('bun run eval:local:test')) {
         throw new Error('package.json qa:local ต้องรัน eval:local:test เพื่อจับ regression ของผลลัพธ์ local eval')
       }
+      if (!qaLocalCommands.includes('bun run tests:audit') || !qaLocalCommands.includes('bun run tests:audit:test')) {
+        throw new Error('package.json qa:local ต้องรัน tests:audit และ tests:audit:test เพื่อจับไฟล์ทดสอบที่ยังไม่ได้ผูกเข้า QA')
+      }
       if (!qaLocalCommands.includes('bun run security:audit') || !qaLocalCommands.includes('bun run security:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน security:audit และ security:audit:test เพื่อจับ backend security audit กับ regression')
       }
@@ -1552,6 +1567,10 @@ const checks: Check[] = [
           'frontend-route-audit.test.ts',
           '"route-menu:audit:test"',
           'route-menu-doc-check.test.ts',
+          '"tests:audit"',
+          'test-coverage-audit.ts',
+          '"tests:audit:test"',
+          'test-coverage-audit.test.ts',
           '"smoke:helpers:test"',
           'smoke-helpers.test.ts',
           '"provider:smoke:guards:test"',
@@ -1568,6 +1587,29 @@ const checks: Check[] = [
           'local-smoke.test.ts',
         ],
         'package.json',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/test-coverage-audit.ts'),
+        [
+          'collectRepoOwnedTestFiles',
+          'auditTestCoverage',
+          'collectTestCoverageAuditResult',
+          'runTestCoverageAudit',
+          'scripts/ แต่ยังไม่มี root package script',
+          'package.json qa:repo ยังไม่ได้รัน',
+        ],
+        'scripts/test-coverage-audit.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/test-coverage-audit.test.ts'),
+        [
+          'passes the committed repo test wiring',
+          'flags script tests without direct root package scripts',
+          'flags root test scripts missing from qa:repo',
+          'flags stale bun test file references',
+          'requires backend and e2e suite gates',
+        ],
+        'scripts/test-coverage-audit.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/backend-db-check.test.ts'),

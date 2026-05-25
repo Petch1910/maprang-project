@@ -559,6 +559,7 @@ Verified:
 - Production deploy knowledge wiki now uses Thai-first deploy gate wording for real backend/frontend URLs, production CORS, signed avatar storage, live chat/image provider smoke, and staging verification while preserving exact command/env names.
 - API route coverage notes now use Thai-first descriptions for root identity, health/ready checks, wallet/profile, relationship, chat, storage, moderation, Prompt Inspector, and eval routes while preserving exact command names and route identifiers.
 - API route audit CLI heading, failure headings, and pass summary now use Thai-first output while keeping route keys and owner names stable for debugging.
+- Test coverage audit now discovers repo-owned `.test.ts`, `.test.tsx`, `.spec.ts`, and `.spec.tsx` files outside `node_modules`, fails orphan `scripts/` tests without root package scripts, fails root `*:test` scripts missing from `qa:repo`, and verifies backend/e2e suites stay wired through `backend:check` and `e2e:smoke`; `predeploy:check`, `qa:repo`, CI, and Production Smoke all run the new guard.
 
 ## สถานะ production ปัจจุบัน
 
