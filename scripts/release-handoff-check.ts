@@ -158,9 +158,16 @@ function validateProductionQaResults(content: string, findings: string[]) {
   }
 }
 
-function validateProductionE2eTargets(content: string, findings: string[]) {
+function deployedEvidenceEnvironment(content: string) {
   const environment = fieldValue(content, 'Environment').toLowerCase()
-  if (!environment.includes('production')) return
+  if (environment.includes('production')) return 'production'
+  if (environment.includes('staging')) return 'staging'
+  return ''
+}
+
+function validateDeployedE2eTargets(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
 
   const frontendOrigin = deployedHttpsUrl(fieldValue(content, 'Frontend URL'))?.origin ?? ''
   const backendOrigin = deployedHttpsUrl(fieldValue(content, 'Backend URL'))?.origin ?? ''
@@ -168,10 +175,10 @@ function validateProductionE2eTargets(content: string, findings: string[]) {
   const e2eBackend = fieldValue(content, 'E2E_API_BASE_URL')
 
   if (e2eFrontend && (!isDeployedOrigin(e2eFrontend) || (frontendOrigin && deployedHttpsUrl(e2eFrontend)?.origin !== frontendOrigin))) {
-    findings.push('production release handoff ต้องมี E2E_BASE_URL เป็น frontend deployed origin เดียวกับ Frontend URL')
+    findings.push(`${environment} release handoff ต้องมี E2E_BASE_URL เป็น frontend deployed origin เดียวกับ Frontend URL`)
   }
   if (e2eBackend && (!isDeployedOrigin(e2eBackend) || (backendOrigin && deployedHttpsUrl(e2eBackend)?.origin !== backendOrigin))) {
-    findings.push('production release handoff ต้องมี E2E_API_BASE_URL เป็น backend deployed origin เดียวกับ Backend URL')
+    findings.push(`${environment} release handoff ต้องมี E2E_API_BASE_URL เป็น backend deployed origin เดียวกับ Backend URL`)
   }
 }
 
@@ -207,7 +214,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateFilledReleaseHandoffUrls(content, findings)
     validateProductionVerificationFlags(content, findings)
     validateProductionQaResults(content, findings)
-    validateProductionE2eTargets(content, findings)
+    validateDeployedE2eTargets(content, findings)
   }
 
   return findings

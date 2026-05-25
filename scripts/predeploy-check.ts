@@ -591,7 +591,8 @@ const checks: Check[] = [
           'validateFilledReleaseHandoffUrls',
           'validateProductionVerificationFlags',
           'validateProductionQaResults',
-          'validateProductionE2eTargets',
+          'deployedEvidenceEnvironment',
+          'validateDeployedE2eTargets',
           'ตรวจเอกสารส่งมอบ release ไม่ผ่าน',
         ],
         'scripts/release-handoff-check.ts',
@@ -601,7 +602,7 @@ const checks: Check[] = [
         ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'requires release URL origins and exact backend health paths', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'reports missing core production QA gate rows', 'reports missing critical release handoff fields', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
-      requireIncludes(test, ['requires production e2e smoke targets to match deployed origins', 'E2E_BASE_URL', 'E2E_API_BASE_URL'], 'scripts/release-handoff-check.test.ts')
+      requireIncludes(test, ['requires production e2e smoke targets to match deployed origins', 'requires staging e2e smoke targets to match deployed origins', 'E2E_BASE_URL', 'E2E_API_BASE_URL'], 'scripts/release-handoff-check.test.ts')
       requireIncludes(
         checkSecrets,
         ['collectSecretFindings', 'runSecretsCheck', 'SecretFinding', 'if (import.meta.main) process.exit(await runSecretsCheck())'],

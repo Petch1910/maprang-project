@@ -29,7 +29,7 @@ guard ใน repo:
 - `e2e:smoke` validates `E2E_BASE_URL` และ `E2E_API_BASE_URL` ก่อน Playwright เริ่มทำงาน: local dev ใช้ loopback `http://127.0.0.1` ได้ แต่ staging/production ต้องเป็น HTTPS origin และห้ามมี credential/userinfo หรือ path/query/hash
 - Playwright e2e config จะ start backend/frontend dev server เฉพาะ target ที่เป็น local loopback เท่านั้น; ถ้า `E2E_BASE_URL`/`E2E_API_BASE_URL` เป็น deployed HTTPS origins จะใช้ staging ที่ deploy แล้วโดยตรง
 - `runE2eSmoke` ส่ง env ชุดเดียวกับที่ validate แล้วเข้า seed/Playwright/restore runner steps เพื่อให้ automation ที่ import runner ไม่ตรวจ URL ชุดหนึ่งแต่รันอีกชุดหนึ่ง
-- `RELEASE_HANDOFF.md` ต้องบันทึก `E2E_BASE_URL`/`E2E_API_BASE_URL` ที่ใช้รัน browser smoke; production filled handoff จะ fail ถ้าค่าเหล่านี้ไม่ใช่ deployed origins เดียวกับ Frontend/Backend URL
+- `RELEASE_HANDOFF.md` ต้องบันทึก `E2E_BASE_URL`/`E2E_API_BASE_URL` ที่ใช้รัน browser smoke; staging/production filled handoff จะ fail ถ้าค่าเหล่านี้ไม่ใช่ deployed origins เดียวกับ Frontend/Backend URL
 - `RELEASE_HANDOFF.md` filled mode จะ fail ถ้า `Frontend URL`/`Backend URL` ไม่ใช่ deployed origins ล้วน หรือถ้า `Health URL`/`Ready URL` ไม่ชี้ backend origin เดียวกันที่ `/health` และ `/ready` โดยไม่มี query/hash
 - `RELEASE_HANDOFF.md` ต้องเก็บแถวหลักของ QA evidence ไว้ครบ: `qa:local`, `e2e:smoke`, `staging:verify`, `production:check`, และ GitHub Production Smoke run
 - `RELEASE_HANDOFF.md` ต้องเก็บ field สำคัญไว้ครบ เช่น `Environment`, deployed URL fields, `CORS origins`, และ `Go / no-go` เพื่อไม่ให้ลบแถวแล้วหลบ validation ได้

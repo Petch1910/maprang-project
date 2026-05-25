@@ -229,6 +229,20 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires staging e2e smoke targets to match deployed origins', () => {
+    const unsafe = filledHandoff
+      .replace('- Environment: production', '- Environment: staging')
+      .replace('- E2E_BASE_URL: https://app.maprang.example', '- E2E_BASE_URL: https://app.maprang.example/app')
+      .replace('- E2E_API_BASE_URL: https://api.maprang.example', '- E2E_API_BASE_URL: http://127.0.0.1:3000')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมี E2E_BASE_URL เป็น frontend deployed origin เดียวกับ Frontend URL',
+        'staging release handoff ต้องมี E2E_API_BASE_URL เป็น backend deployed origin เดียวกับ Backend URL',
+      ]),
+    )
+  })
+
   test('reports missing sections and secret-shaped values', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef'].join('-')
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`
