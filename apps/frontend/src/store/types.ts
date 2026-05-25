@@ -28,19 +28,6 @@ export type DraftsState = {
   creatorDraftUpdatedAt: string | null
 }
 
-export type PendingEventSummary = {
-  id: string
-  chatId: string
-  characterName: string
-  title: string
-  relationshipStatus: string
-  expiresAtTurn?: number
-}
-
-export type EventsState = {
-  pending: PendingEventSummary[]
-}
-
 export type WalletState = {
   tokenBalance: number
   lowTokenThreshold: number
@@ -52,6 +39,5 @@ export type RootState = {
   chats: ChatsState
   content: ContentState
   drafts: DraftsState
-  events: EventsState
   wallet: WalletState
 }

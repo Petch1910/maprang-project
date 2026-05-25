@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Redux no longer carries an unused `events` slice. Pending scene counts and Events Inbox state already derive from `chatsSlice`, so the empty `eventsSlice`, `EventsState`, and `PendingEventSummary` types were removed; frontend build now transforms one fewer module and the main bundle is 268.9KB / 350KB.
 - 2026-05-25: Chat quick-start prompt source is no longer duplicated. The unused generic assistant `starterPrompts` export was removed from `apps/frontend/src/lib/chat.ts`; the only remaining quick-start prompt set is the roleplay-oriented one in `ChatPanel`.
 - 2026-05-25: Root Bun starter residue was removed. The unused root `index.ts` that printed `Hello via Bun!` and the root package `"module": "index.ts"` entry were deleted; backend start scripts still live under `apps/backend`, and `docs:commands` plus `predeploy:check` confirm documented commands remain valid.
 - 2026-05-25: Frontend API client map was trimmed after the legacy UI removal. Unused character edit/delete/duplicate/reset helpers and unused lore CRUD helpers/types were removed from `apps/frontend/src/lib/api.ts`; current frontend source has no consumers for those names, while the backend API routes and smoke coverage remain intact.

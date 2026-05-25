@@ -3,7 +3,6 @@ import charactersReducer from './slices/charactersSlice'
 import chatsReducer from './slices/chatsSlice'
 import contentReducer, { hydrateContent } from './slices/contentSlice'
 import draftsReducer, { hydrateDrafts } from './slices/draftsSlice'
-import eventsReducer from './slices/eventsSlice'
 import walletReducer from './slices/walletSlice'
 import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem } from '../lib/safeStorage'
 export type { RootState } from './types'
@@ -32,7 +31,6 @@ export const store = configureStore({
     chats: chatsReducer,
     content: contentReducer,
     drafts: draftsReducer,
-    events: eventsReducer,
     wallet: walletReducer,
   },
 })
