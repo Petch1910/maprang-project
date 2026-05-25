@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after backend security route-call AST hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
+- 2026-05-25: Backend security audit now uses TypeScript AST route-call parsing for admin and `/:id` guard checks. Chained Elysia routes can no longer leak `requireAdminApiKey` or `rejectInvalidUuid` from one handler into the next route during static audit.
 - 2026-05-25: Full deterministic repo QA passed after API route AST discovery hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: API route discovery now uses TypeScript AST call parsing instead of a regex, so multiline Elysia route calls are covered while route order remains source-order stable for audit output.
 - 2026-05-25: Full deterministic repo QA passed after route/menu declared-route and navigation AST hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.

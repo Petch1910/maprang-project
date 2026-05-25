@@ -236,6 +236,20 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches chained admin routes without leaking guards between calls', () => {
+    expect(
+      messagesFor(
+        `
+          export const adminRoutes = new Elysia().get('/admin/summary', ({ request, set }) => {
+            if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+            return { ok: true }
+          }).get('/admin/audit-logs', () => ({ ok: true }))
+        `,
+        'apps/backend/src/admin.routes.ts',
+      ),
+    ).toContain('route ผู้ดูแลยังไม่มี requireAdminApiKey guard ใน block ของ handler.')
+  })
+
   test('catches resource id routes without UUID guards', () => {
     expect(
       messagesFor(`
@@ -258,6 +272,21 @@ describe('backend security audit', () => {
           })
       `),
     ).toEqual([])
+  })
+
+  test('catches chained id routes without leaking UUID guards between calls', () => {
+    expect(
+      messagesFor(
+        `
+          export const chatRoutes = new Elysia().get('/characters/:id', async ({ params, set }) => {
+            const invalidId = rejectInvalidUuid(params.id, set, 'invalid_character_id')
+            if (invalidId) return invalidId
+            return { ok: true }
+          }).get('/chats/:id/messages', async ({ params }) => ({ id: params.id }))
+        `,
+        'apps/backend/src/chat.routes.ts',
+      ),
+    ).toContain('route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึงข้อมูล.')
   })
 
   test('catches route error responses without Thai-first messages', () => {

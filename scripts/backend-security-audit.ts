@@ -1,5 +1,6 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
+import ts from 'typescript'
 
 const root = join(import.meta.dir, '..')
 const scannedTargets = ['apps/backend/index.ts', 'apps/backend/src', 'apps/backend/prisma']
@@ -36,10 +37,7 @@ function lineFor(content: string, index: number) {
   return content.slice(0, index).split(/\r?\n/).length
 }
 
-const adminRoutePattern =
-  /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/admin\b[^'"`]*\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
-const uuidParamRoutePattern =
-  /\.(get|post|patch|put|delete)\(\s*(?:\r?\n\s*)?(['"`])\/[^'"`]*\/:id(?:\/[^'"`]*)?\2[\s\S]*?(?=\r?\n\s*\.(?:get|post|patch|put|delete)\(|\s*$)/g
+const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = /console\.(?:error|warn)\([^)\n]*,\s*error\b/g
 const rawRouteErrorThrowPattern = /throw\s+error\b/g
@@ -64,6 +62,12 @@ const allowedRawResponseJsonReaders = [
   'readSupabaseUserPayload',
   'readStorageJson',
 ]
+
+type BackendRouteCall = {
+  path: string
+  handlerText: string
+  index: number
+}
 
 const patterns = [
   {
@@ -147,6 +151,53 @@ function findMatchingParen(content: string, openingParenIndex: number) {
   }
 
   return content.length
+}
+
+function stringLiteralText(expression: ts.Expression | undefined) {
+  if (!expression) return null
+  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) return expression.text
+  return null
+}
+
+export function collectBackendRouteCalls(file: string, content: string) {
+  const sourceFile = ts.createSourceFile(
+    file,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  )
+  const routes: BackendRouteCall[] = []
+
+  function visit(node: ts.Node) {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const methodName = node.expression.name.text.toLowerCase()
+      const path = routeMethods.has(methodName) ? stringLiteralText(node.arguments[0]) : null
+      if (path?.startsWith('/')) {
+        routes.push({
+          path,
+          handlerText: node.arguments
+            .slice(1)
+            .map((argument) => argument.getText(sourceFile))
+            .join('\n'),
+          index: node.expression.name.getStart(sourceFile),
+        })
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return routes.sort((a, b) => a.index - b.index)
+}
+
+function isAdminRoute(path: string) {
+  return path === '/admin' || path.startsWith('/admin/')
+}
+
+function hasUuidIdParam(path: string) {
+  return /(?:^|\/):id(?:\/|$)/.test(path)
 }
 
 function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number, messageSource: string) {
@@ -249,20 +300,24 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     })
   }
 
-  for (const match of content.matchAll(adminRoutePattern)) {
-    if (match[0].includes('requireAdminApiKey')) continue
+  const routeCalls = collectBackendRouteCalls(file, content)
+
+  for (const route of routeCalls) {
+    if (!isAdminRoute(route.path)) continue
+    if (route.handlerText.includes('requireAdminApiKey')) continue
     findings.push({
       file,
-      line: lineFor(content, match.index ?? 0),
+      line: lineFor(content, route.index),
       message: 'route ผู้ดูแลยังไม่มี requireAdminApiKey guard ใน block ของ handler.',
     })
   }
 
-  for (const match of content.matchAll(uuidParamRoutePattern)) {
-    if (match[0].includes('rejectInvalidUuid')) continue
+  for (const route of routeCalls) {
+    if (!hasUuidIdParam(route.path)) continue
+    if (route.handlerText.includes('rejectInvalidUuid')) continue
     findings.push({
       file,
-      line: lineFor(content, match.index ?? 0),
+      line: lineFor(content, route.index),
       message: 'route ที่มี /:id ยังไม่มี rejectInvalidUuid guard ก่อนเข้าถึงข้อมูล.',
     })
   }
