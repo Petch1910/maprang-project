@@ -3,6 +3,7 @@ import {
   assertSmokeUserHasTokenBalance,
   buildLiveChatSmokePayload,
   findMatchingChatDebit,
+  findMatchingChatDebits,
   formatLiveChatSmokeCaughtError,
   liveChatStreamSmokePrompt,
   liveChatSmokePrompt,
@@ -93,6 +94,14 @@ describe('live chat smoke helpers', () => {
     )
 
     expect(debit?.id).toBe('debit')
+    const [chatDebit, streamDebit] = findMatchingChatDebits(
+      [
+        { id: 'other', type: 'ADMIN_ADJUSTMENT', amount: 88, balanceAfter: 1200 },
+        { id: 'debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1112 },
+        { id: 'stream-debit', type: 'CHAT_USAGE', amount: -44, balanceAfter: 1068 },
+      ],
+      [chat.totalTokens, 44],
+    )!
     expect(
       buildLiveChatSmokePayload({
         baseUrl: 'https://api.maprang.example',
@@ -100,7 +109,8 @@ describe('live chat smoke helpers', () => {
         chatId: chat.chatId,
         model: chat.modelName,
         totalTokens: chat.totalTokens,
-        chatDebit: debit!,
+        chatDebit,
+        streamDebit,
         reply: chat.reply,
         minRoleplayReplyChars: 420,
         streamChatId: 'chat-1',
@@ -118,12 +128,36 @@ describe('live chat smoke helpers', () => {
       streamTotalTokens: 44,
       streamReplyChars: 160,
       walletTransactionId: 'debit',
+      streamWalletTransactionId: 'stream-debit',
       balanceAfter: 1112,
+      streamBalanceAfter: 1068,
       replyChars: 440,
       minRoleplayReplyChars: 420,
       nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน environment เป้าหมายนี้ แล้วรัน production:check ใหม่',
       replyPreview: 'ก'.repeat(120),
     })
+  })
+
+  test('requires distinct wallet debits for normal and stream chat', () => {
+    expect(
+      findMatchingChatDebits(
+        [
+          { id: 'only-debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1912 },
+          { id: 'admin', type: 'ADMIN_ADJUSTMENT', amount: 44, balanceAfter: 1956 },
+        ],
+        [88, 44],
+      ),
+    ).toBeNull()
+
+    expect(
+      findMatchingChatDebits(
+        [
+          { id: 'normal-debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1912 },
+          { id: 'stream-debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1824 },
+        ],
+        [88, 88],
+      )?.map((transaction) => transaction.id),
+    ).toEqual(['normal-debit', 'stream-debit'])
   })
 
   test('runs live chat smoke through an importable runner without provider calls', async () => {
@@ -146,7 +180,14 @@ describe('live chat smoke helpers', () => {
       if (path === '/me/usage') {
         usageReadCount += 1
         if (usageReadCount === 1) return { user: { tokenBalance: 2000 } } as never
-        return { wallet: { transactions: [{ id: 'debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1912 }] } } as never
+        return {
+          wallet: {
+            transactions: [
+              { id: 'debit', type: 'CHAT_USAGE', amount: -88, balanceAfter: 1912 },
+              { id: 'stream-debit', type: 'CHAT_USAGE', amount: -44, balanceAfter: 1868 },
+            ],
+          },
+        } as never
       }
       if (path === '/chat') {
         const body = JSON.parse(String(init?.body ?? '{}')) as { message?: string }
@@ -189,6 +230,7 @@ describe('live chat smoke helpers', () => {
     expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/me/usage', '/chat', '/chat/stream', '/me/usage'])
     expect(payload.apiBaseUrl).toBe('https://api.maprang.example')
     expect(payload.walletTransactionId).toBe('debit')
+    expect(payload.streamWalletTransactionId).toBe('stream-debit')
     expect(payload.streamTotalTokens).toBe(44)
     expect(payload.streamReplyChars).toBe(120)
     expect(errors).toEqual([])

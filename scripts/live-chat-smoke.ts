@@ -171,6 +171,29 @@ export function findMatchingChatDebit(transactions: LiveChatWalletTransaction[] 
   return transactions?.find((transaction) => transaction.type === 'CHAT_USAGE' && transaction.amount === -totalTokens) ?? null
 }
 
+export function findMatchingChatDebits(
+  transactions: LiveChatWalletTransaction[] | undefined,
+  totalTokenValues: number[],
+) {
+  const availableTransactions = transactions ?? []
+  const usedTransactionIds = new Set<string>()
+  const matchedDebits: LiveChatWalletTransaction[] = []
+
+  for (const totalTokens of totalTokenValues) {
+    const debit = availableTransactions.find(
+      (transaction) =>
+        !usedTransactionIds.has(transaction.id) && transaction.type === 'CHAT_USAGE' && transaction.amount === -totalTokens,
+    )
+
+    if (!debit) return null
+
+    usedTransactionIds.add(debit.id)
+    matchedDebits.push(debit)
+  }
+
+  return matchedDebits
+}
+
 export function buildLiveChatSmokePayload({
   baseUrl = apiBaseUrl,
   characterName,
@@ -178,6 +201,7 @@ export function buildLiveChatSmokePayload({
   model,
   totalTokens,
   chatDebit,
+  streamDebit,
   reply,
   minRoleplayReplyChars,
   streamChatId,
@@ -190,6 +214,7 @@ export function buildLiveChatSmokePayload({
   model: string | null
   totalTokens: number
   chatDebit: LiveChatWalletTransaction
+  streamDebit: LiveChatWalletTransaction
   reply: string
   minRoleplayReplyChars: number
   streamChatId: string
@@ -207,7 +232,9 @@ export function buildLiveChatSmokePayload({
     streamTotalTokens,
     streamReplyChars,
     walletTransactionId: chatDebit.id,
+    streamWalletTransactionId: streamDebit.id,
     balanceAfter: chatDebit.balanceAfter,
+    streamBalanceAfter: streamDebit.balanceAfter,
     replyChars: reply.length,
     minRoleplayReplyChars,
     nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน environment เป้าหมายนี้ แล้วรัน production:check ใหม่',
@@ -299,10 +326,15 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
       headers: authHeaders(),
     })
 
-    const chatDebit = findMatchingChatDebit(walletAfter.wallet?.transactions, chatResult.totalTokens)
+    const chatDebits = findMatchingChatDebits(walletAfter.wallet?.transactions, [
+      chatResult.totalTokens,
+      streamResult.totalTokens,
+    ])
+    const chatDebit = chatDebits?.[0] ?? null
+    const streamDebit = chatDebits?.[1] ?? null
 
-    if (!chatDebit) {
-      throw new Error('ตรวจแชทจริงคืนข้อมูลโทเคนที่ใช้แล้ว แต่ไม่พบรายการ wallet แบบ CHAT_USAGE ที่ตรงกัน')
+    if (!chatDebit || !streamDebit) {
+      throw new Error('ตรวจแชทจริงและสตรีมแชทจริงคืนข้อมูลโทเคนที่ใช้แล้ว แต่ไม่พบรายการ wallet แบบ CHAT_USAGE ครบทั้งสองเส้นทาง')
     }
 
     writeLine(
@@ -314,6 +346,7 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
           model: chatResult.modelName ?? health.model?.name ?? null,
           totalTokens: chatResult.totalTokens,
           chatDebit,
+          streamDebit,
           reply: chatResult.reply,
           minRoleplayReplyChars,
           streamChatId: streamResult.chatId,

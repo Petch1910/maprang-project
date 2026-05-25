@@ -237,3 +237,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: `POST /chat/stream` is a live-provider route in `api:audit` and must keep `live-smoke` coverage before deploy.
 - Current addendum 2026-05-25: `api:smoke:live` now runs a real `POST /chat/stream` provider stream so stream-chat live-smoke coverage has runtime evidence.
 - Current addendum 2026-05-25: `smoke:chat` also verifies live stream chat, so narrow chat live-smoke retry covers both `/chat` and `/chat/stream`.
+- Current addendum 2026-05-25: `smoke:chat` must find distinct `CHAT_USAGE` wallet debits for both normal live chat and live stream chat before chat-provider verification is trusted.

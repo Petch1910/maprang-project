@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 smoke chat stream wallet debit guard pass: `bun run smoke:chat:test`, `bun run predeploy:check:test`, and `bun run docs:commands` passed after `smoke:chat` started requiring separate `CHAT_USAGE` wallet transactions for normal live chat and live stream chat.
 - 2026-05-25 smoke chat stream verification pass: `bun run smoke:chat:test`, `bun run predeploy:check:test`, `bun run docs:commands`, and `bun run predeploy:check` passed after `smoke:chat` started verifying live stream chat in addition to normal live chat.
 - 2026-05-25 live stream chat smoke pass: `bun run api:smoke:test`, `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands`, `bun run memory:audit`, and `bun run secrets:check` passed after `api:smoke:live` started exercising `POST /chat/stream` with a real provider stream.
 - 2026-05-25 stream chat live-provider coverage guard pass: `bun run api:audit:test`, `bun run api:audit`, and `bun run predeploy:check:test` passed after `POST /chat/stream` joined the live-provider route set that requires `live-smoke` coverage before deploy.
