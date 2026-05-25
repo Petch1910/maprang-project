@@ -36,6 +36,7 @@ function targetLabel(targetType: ReportTargetType) {
 export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, onSubmit }: ReportDialogProps) {
   const [reason, setReason] = useState(reasons[0].id)
   const [details, setDetails] = useState('')
+  const submittingDisabledReason = isSubmitting ? 'กำลังส่งรายงาน รอให้เสร็จก่อน' : ''
 
   if (!isOpen || !target) return null
 
@@ -58,9 +59,11 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
           </div>
           <button type="button"
             aria-label="ปิดหน้าต่างรายงาน"
+            aria-disabled={isSubmitting}
             className="grid size-10 place-items-center rounded-full border border-white/10 bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white"
             disabled={isSubmitting}
             onClick={onClose}
+            title={submittingDisabledReason || 'ปิดหน้าต่างรายงาน'}
           >
             <X size={17} />
           </button>
@@ -77,9 +80,11 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
         </label>
         <select
           className="mt-2 min-h-11 w-full rounded-lg border border-white/10 bg-[#1f1f24] px-3 text-sm font-bold text-white outline-none transition focus:border-orange-500/70 focus:ring-4 focus:ring-orange-500/15"
+          aria-disabled={isSubmitting}
           disabled={isSubmitting}
           id="report-reason"
           onChange={(event) => setReason(event.target.value)}
+          title={submittingDisabledReason || 'เลือกเหตุผลรายงาน'}
           value={reason}
         >
           {reasons.map((item) => (
@@ -94,11 +99,13 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
         </label>
         <textarea
           className="mt-2 min-h-28 w-full resize-none rounded-lg border border-white/10 bg-[#1f1f24] p-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/30 focus:border-orange-500/70 focus:ring-4 focus:ring-orange-500/15"
+          aria-disabled={isSubmitting}
           disabled={isSubmitting}
           id="report-details"
           maxLength={800}
           onChange={(event) => setDetails(event.target.value)}
           placeholder="เพิ่มบริบทเพื่อช่วยให้ผู้ดูแลเข้าใจปัญหา"
+          title={submittingDisabledReason || 'รายละเอียดเพิ่มเติมสำหรับผู้ดูแล'}
           value={details}
         />
         <p className="m-0 mt-1 text-xs font-bold text-white/38">{details.length}/800</p>
@@ -106,17 +113,21 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
         <div className="mt-5 grid grid-cols-2 gap-2">
           <button type="button"
             className="min-h-11 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/74 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
+            aria-disabled={isSubmitting}
             data-testid="report-cancel"
             disabled={isSubmitting}
             onClick={onClose}
+            title={submittingDisabledReason || 'ยกเลิกรายงาน'}
           >
             ยกเลิก
           </button>
           <button type="button"
             className="min-h-11 rounded-lg bg-rose-600 px-4 text-sm font-black text-white transition hover:bg-rose-500 disabled:opacity-60"
+            aria-disabled={isSubmitting}
             data-testid="report-submit"
             disabled={isSubmitting}
             onClick={submit}
+            title={submittingDisabledReason || 'ส่งรายงานให้ผู้ดูแล'}
           >
             {isSubmitting ? 'กำลังส่ง...' : 'ส่งรายงาน'}
           </button>

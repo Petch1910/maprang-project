@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Report flow disabled states now explain themselves. Chat character reports, message report buttons, and the shared report dialog expose Thai titles and `aria-disabled` for report-in-flight states; Browser QA confirmed the chat report dialog opens from `/chat`, the form controls have clear titles, and no disabled control lacks a reason.
 - 2026-05-21: ChatPanel scene/world/favorite controls now explain locked states. Scene action buttons, world-state fields/save button, and the favorite button expose Thai titles and `aria-disabled` for streaming, no-chat-yet, save-in-progress, and favorite-update states; Browser QA confirmed the world-state panel no longer has disabled controls without reasons.
 - 2026-05-21: Chat Composer disabled reasons are now complete. The composer textarea, tool tray button, suggestion buttons, and submit button expose Thai titles for busy/empty-message/token-blocked states; submit now says `พิมพ์ข้อความก่อนส่ง` when the message is blank instead of implying it can send.
 - 2026-05-21: Chat Sidebar and quick-start prompts now explain locked actions. Sidebar multi-select archive/delete buttons and rename confirm expose Thai `title`/`aria-disabled` reasons, and chat quick-start prompt buttons explain when they are disabled because the app is streaming or token balance is not enough; Route/Menu Audit now documents both chat-room and sidebar guard behavior.
