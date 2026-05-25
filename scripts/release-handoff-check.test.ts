@@ -102,6 +102,19 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires live provider verification flags for production handoff', () => {
+    const unsafe = filledHandoff
+      .replace('- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 1', '- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 0')
+      .replace('- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`: 1', '- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`: 0')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมี CHAT_PROVIDER_LIVE_VERIFIED=1',
+        'production release handoff ต้องมี IMAGE_GENERATION_LIVE_VERIFIED=1',
+      ]),
+    )
+  })
+
   test('reports missing sections and secret-shaped values', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef'].join('-')
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`

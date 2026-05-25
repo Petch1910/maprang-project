@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Production release handoff validation now requires live provider verification flags. When `Environment: production`, `release:handoff:check -- --filled` fails unless `CHAT_PROVIDER_LIVE_VERIFIED` and `IMAGE_GENERATION_LIVE_VERIFIED` are both recorded as `1`.
 - 2026-05-25: Filled release handoff validation now rejects local or insecure release URLs. `release:handoff:check -- --filled` checks Frontend/Backend/Health/Ready URL fields for deployed HTTPS URLs and rejects CORS origins that include `http://`, localhost, `127.0.0.1`, or wildcard origins.
 - 2026-05-25: Full deterministic repo QA passed after frontend state workflow/docs/release-handoff guard updates. `bun run qa:repo` is green with docs command audit at 318 references, backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, frontend route audit 13 paths, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25: Release handoff now has explicit QA result fields for `bun run frontend:env:test`, `bun run frontend:storage:test`, and `bun run frontend:clipboard:test`. `release:handoff:check` now requires those QA gate snippets and has regression coverage so a real release handoff cannot drop frontend state verification silently.

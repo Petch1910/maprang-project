@@ -61,6 +61,18 @@ function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
   }
 }
 
+function validateProductionVerificationFlags(content: string, findings: string[]) {
+  const environment = fieldValue(content, 'Environment').toLowerCase()
+  if (!environment.includes('production')) return
+
+  if (!/`CHAT_PROVIDER_LIVE_VERIFIED`:\s*1\b/.test(content)) {
+    findings.push('production release handoff ต้องมี CHAT_PROVIDER_LIVE_VERIFIED=1')
+  }
+  if (!/`IMAGE_GENERATION_LIVE_VERIFIED`:\s*1\b/.test(content)) {
+    findings.push('production release handoff ต้องมี IMAGE_GENERATION_LIVE_VERIFIED=1')
+  }
+}
+
 export function checkReleaseHandoffContent(content: string, options: { requireFilled?: boolean } = {}) {
   const findings: string[] = []
 
@@ -87,6 +99,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
       .filter(({ line }) => line.startsWith('- ') && /:\s*$/.test(line))
     for (const field of blankFields) findings.push(`บรรทัด ${field.index} ยังว่างอยู่: ${field.line}`)
     validateFilledReleaseHandoffUrls(content, findings)
+    validateProductionVerificationFlags(content, findings)
   }
 
   return findings
