@@ -197,6 +197,22 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires staging QA gates to pass for staging handoff', () => {
+    const unsafe = filledHandoff
+      .replace('- Environment: production', '- Environment: staging')
+      .replace('- `bun run qa:local`: pass', '- `bun run qa:local`: fail')
+      .replace('- `bun run e2e:smoke`: pass', '- `bun run e2e:smoke`: fail')
+      .replace('- `bun run staging:verify`: pass', '- `bun run staging:verify`: fail')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมีผล QA ผ่าน: `bun run qa:local`',
+        'staging release handoff ต้องมีผล QA ผ่าน: `bun run e2e:smoke`',
+        'staging release handoff ต้องมีผล QA ผ่าน: `bun run staging:verify`',
+      ]),
+    )
+  })
+
   test('reports missing core production QA gate rows', () => {
     const stale = filledHandoff
       .replace('- `bun run qa:local`: pass\n', '')

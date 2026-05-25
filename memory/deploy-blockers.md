@@ -71,3 +71,4 @@ guard ใน repo:
 - Desktop/mobile e2e smoke ผ่านแล้ว
 - Supabase signed URL สำหรับพื้นที่เก็บรูปตัวละคร implement แล้ว และถูกตรวจโดย production gate
 - Relationship contract presets แยกจาก creator presets แล้ว และมี API smoke ครอบไว้
+- Release handoff guard addendum 2026-05-25: filled staging handoffs fail when `qa:local`, `e2e:smoke`, or `staging:verify` are recorded as anything other than pass/ผ่าน, so staging cannot be promoted with failed QA evidence.

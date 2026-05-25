@@ -158,6 +158,16 @@ function validateProductionQaResults(content: string, findings: string[]) {
   }
 }
 
+function validateStagingQaResults(content: string, findings: string[]) {
+  const environment = fieldValue(content, 'Environment').toLowerCase()
+  if (!environment.includes('staging') || environment.includes('production')) return
+
+  for (const label of ['`bun run qa:local`', '`bun run e2e:smoke`', '`bun run staging:verify`']) {
+    const value = fieldValue(content, label)
+    if (value && !isPassed(value)) findings.push(`staging release handoff ต้องมีผล QA ผ่าน: ${label}`)
+  }
+}
+
 function deployedEvidenceEnvironment(content: string) {
   const environment = fieldValue(content, 'Environment').toLowerCase()
   if (environment.includes('production')) return 'production'
@@ -214,6 +224,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateFilledReleaseHandoffUrls(content, findings)
     validateProductionVerificationFlags(content, findings)
     validateProductionQaResults(content, findings)
+    validateStagingQaResults(content, findings)
     validateDeployedE2eTargets(content, findings)
   }
 
