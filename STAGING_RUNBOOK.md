@@ -55,6 +55,14 @@ bunx prisma migrate deploy
 
 ก่อน deploy ให้ตรวจ env ทั้งสองฝั่งแบบไม่เปิดเผย secret:
 
+ก่อนยิง smoke staging ให้ตรวจ UI/static control และ route wiring จาก repo root เพื่อจับปุ่มตัน ลิงก์หลุด route และเอกสารเมนูที่ drift โดยไม่ต้องรอ backend staging:
+
+```bash
+bun run frontend:static:audit
+bun run frontend:route:audit
+bun run route-menu:audit
+```
+
 ```bash
 bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/frontend/.env --allow-unverified-image
 ```

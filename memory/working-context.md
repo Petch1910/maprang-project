@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Staging runbook now includes a pre-smoke frontend audit dry run from the repo root: `frontend:static:audit`, `frontend:route:audit`, and `route-menu:audit`. Predeploy requires those commands in `STAGING_RUNBOOK.md`, so staging handoff catches UI static/control, dead route, and route/menu doc drift before backend smoke.
 - 2026-05-25: Full deterministic repo QA passed after the frontend audit alias documentation and Route/Menu handoff refresh. `bun run qa:repo` is green with docs command audit at 299 references, backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, frontend route audit 13 paths, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Route/Menu Audit now lists the root frontend audit aliases `bun run frontend:static:audit` and `bun run frontend:route:audit` in its command block before `route-menu:audit`. Both route-menu doc-check and predeploy now require those aliases in `ROUTE_MENU_AUDIT.md`, keeping the UI static/control and route-wiring smoke handoff aligned with the root package scripts.
 - 2026-05-25: README and Deployment QA now document the direct frontend audit aliases `bun run frontend:static:audit` and `bun run frontend:route:audit`. Predeploy locks both docs so the frontend static/control and route-wiring checks stay visible alongside `qa:repo`, CI, and Production Smoke.
