@@ -140,6 +140,7 @@ const markdownHeadingFiles = [
   'memory/decisions/0015-route-menu-disabled-reasons-contract.md',
   'memory/decisions/0016-api-route-coverage-quality-contract.md',
   'memory/decisions/0017-route-menu-future-surface-contract.md',
+  'memory/decisions/0018-add-test-coverage-audit-contract.md',
 ]
 
 async function assertFile(path: string) {
@@ -281,7 +282,7 @@ const checks: Check[] = [
           'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
           'combined `api:smoke:live` JSON summary must omit `handoffEvidence`',
           'positive token/elapsed values',
-          '0017-route-menu-future-surface-contract.md',
+          '0018-add-test-coverage-audit-contract.md',
         ],
         'agent.md',
       )

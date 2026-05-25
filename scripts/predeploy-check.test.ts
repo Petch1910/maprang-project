@@ -83,6 +83,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('memory/decisions/0015-route-menu-disabled-reasons-contract.md')
     expect(predeploy).toContain('memory/decisions/0016-api-route-coverage-quality-contract.md')
     expect(predeploy).toContain('memory/decisions/0017-route-menu-future-surface-contract.md')
+    expect(predeploy).toContain('memory/decisions/0018-add-test-coverage-audit-contract.md')
     expect(predeploy).toContain('missingDecisionIndexEntries')
     expect(predeploy).toContain('apps/backend/src/world-state.service.ts')
     expect(predeploy).toContain('frontend API helper contract')
