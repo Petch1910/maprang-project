@@ -2183,8 +2183,34 @@ const checks: Check[] = [
       const productionSetup = await readRepoFile('PRODUCTION_SETUP.md')
       const deployRender = await readRepoFile('DEPLOY_RENDER.md')
       const e2eSmoke = await readRepoFile('tests/e2e/maprang-smoke.spec.ts')
-      requireIncludes(productionSetup, ['handoffEvidence', 'RELEASE_HANDOFF.md'], 'PRODUCTION_SETUP.md')
-      requireIncludes(deployRender, ['handoffEvidence', 'bun run api:smoke:live'], 'DEPLOY_RENDER.md')
+      requireIncludes(
+        productionSetup,
+        [
+          'handoffEvidence',
+          'RELEASE_HANDOFF.md',
+          'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
+          'Image smoke provider',
+          'Image smoke source',
+          'Image smoke urlKind',
+          'Image smoke elapsedMs',
+        ],
+        'PRODUCTION_SETUP.md',
+      )
+      requireIncludes(
+        deployRender,
+        [
+          'handoffEvidence',
+          'bun run api:smoke:live',
+          'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
+          'Image smoke provider',
+          'Image smoke source',
+          'Image smoke urlKind',
+          'Image smoke elapsedMs',
+        ],
+        'DEPLOY_RENDER.md',
+      )
       requireIncludes(
         audit,
         [
