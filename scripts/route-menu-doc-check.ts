@@ -88,6 +88,16 @@ function jsxAttributeStringValue(attribute: ts.JsxAttribute, sourceFile: ts.Sour
   return null
 }
 
+function propertyNameText(name: ts.PropertyName) {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) return name.text
+  return null
+}
+
+function expressionStringValue(expression: ts.Expression) {
+  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) return expression.text
+  return null
+}
+
 export function collectDeclaredRoutes(appContent: string) {
   const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const routes: string[] = []
@@ -113,18 +123,31 @@ export function collectDeclaredRoutes(appContent: string) {
 }
 
 export function collectStaticNavigationPaths(appContent: string) {
+  const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const paths = new Set<string>()
 
-  for (const match of appContent.matchAll(/\bto:\s*(["'])(\/[^"']*)\1/g)) {
-    const path = normalizeStaticPath(match[2])
+  function addPath(value: string | null) {
+    const path = value ? normalizeStaticPath(value) : null
     if (path) paths.add(path)
   }
 
-  for (const match of appContent.matchAll(/\bto=(["'])(\/[^"']*)\1/g)) {
-    const path = normalizeStaticPath(match[2])
-    if (path) paths.add(path)
+  function visit(node: ts.Node) {
+    if (ts.isPropertyAssignment(node) && propertyNameText(node.name) === 'to') {
+      addPath(expressionStringValue(node.initializer))
+    }
+
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      for (const attribute of node.attributes.properties) {
+        if (!ts.isJsxAttribute(attribute)) continue
+        const name = attribute.name.getText(sourceFile)
+        if (name === 'to' || name === 'href') addPath(jsxAttributeStringValue(attribute, sourceFile))
+      }
+    }
+
+    ts.forEachChild(node, visit)
   }
 
+  visit(sourceFile)
   return [...paths].sort()
 }
 
@@ -143,11 +166,6 @@ export function collectRoutePreloadPaths(appContent: string) {
       current = (current as { expression: ts.Expression }).expression
     }
     return current
-  }
-
-  function propertyNameText(name: ts.PropertyName) {
-    if (ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) return name.text
-    return null
   }
 
   function visit(node: ts.Node) {

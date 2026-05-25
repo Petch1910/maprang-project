@@ -1616,6 +1616,7 @@ const checks: Check[] = [
           'passes when documented rows, routes, navigation, and preloads align',
           'collects route preloads from typed object literals',
           'collects declared routes from JSX with multiline attributes',
+          'collects static navigation paths from object literals and JSX attributes',
           'reports missing navigation coverage',
           'reports stale mixed-language copy in route menu documentation',
           'Automated route smoke',
@@ -1631,7 +1632,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['collectDeclaredRoutes', 'jsxAttributeStringValue', 'collectRoutePreloadPaths', 'ts.SyntaxKind.SatisfiesExpression'],
+        ['collectDeclaredRoutes', 'collectStaticNavigationPaths', 'jsxAttributeStringValue', 'propertyNameText', 'collectRoutePreloadPaths', 'ts.SyntaxKind.SatisfiesExpression'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(

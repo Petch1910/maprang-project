@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Route/menu doc-check now reads static navigation paths with TypeScript AST, covering object-literal `to`, JSX `to`, JSX expression string `to`, and static `href` values before comparing navigation rows to routes and preloads.
 - 2026-05-25: Route/menu doc-check now reads declared React Router paths with TypeScript AST as well, so multiline `<Route path>` attributes are covered instead of relying on line-based regex matching.
 - 2026-05-25: Full deterministic repo QA passed after route preload AST hardening. `bun run qa:repo` is green with backend 173 tests / 601 expects, API audit covering 48 backend routes plus 34 frontend helper calls, route/menu audit covering 14 surfaces, import-cycle audit at 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Route preload parsing is now AST-based in both `frontend-route-audit` and `route-menu:audit`. The guards now handle typed or `satisfies` routePreloads object literals instead of depending on a newline-sensitive regex.

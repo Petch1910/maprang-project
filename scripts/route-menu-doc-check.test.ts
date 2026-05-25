@@ -6,6 +6,7 @@ import {
   collectDeclaredRoutes,
   collectRouteMenuDocCheckResult,
   collectRoutePreloadPaths,
+  collectStaticNavigationPaths,
   runRouteMenuDocCheck,
 } from './route-menu-doc-check'
 
@@ -93,6 +94,16 @@ describe('route menu doc check', () => {
         </Routes>
       `),
     ).toEqual(['/chat/:chatId?', '*'])
+  })
+
+  test('collects static navigation paths from object literals and JSX attributes', () => {
+    expect(
+      collectStaticNavigationPaths(`
+        const navItems = [{ to: '/' }, { to: '/chat' }];
+        <NavLink to={'/events'}>Events</NavLink>
+        <a href="/wallet?tab=usage">Wallet</a>
+      `),
+    ).toEqual(['/', '/chat', '/events', '/wallet'])
   })
 
   test('reports missing navigation coverage, empty fields, and weak status labels', () => {
