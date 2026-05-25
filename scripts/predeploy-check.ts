@@ -1674,6 +1674,7 @@ const checks: Check[] = [
           'assertMachineReadableErrorCode(payload',
           'parseApiSmokeStreamEvents<StreamSmokeEvent>(raw, path)',
           'POST /chat/stream live',
+          'validateLiveChatSmokeStream(events)',
           'deltaChars=',
           'findMatchingChatDebits',
           'walletDebits=',

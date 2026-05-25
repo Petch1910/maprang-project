@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: `api:smoke:live` stream validation now reuses `validateLiveChatSmokeStream`, keeping stream provider-failure handling aligned with `smoke:chat`. Focused checks passed: `bun run api:smoke:test`, `bun run predeploy:check:test`, and `bun run memory:audit`.
 - 2026-05-25: `api:smoke:live` now continues the normal live chat through `POST /chat/stream` and requires distinct `CHAT_USAGE` wallet debits for both provider paths before live chat verification can be trusted. Focused checks passed: `bun run api:smoke:test`, `bun run predeploy:check:test`, and `bun run docs:commands`.
 - 2026-05-25: `smoke:chat` now requires distinct wallet `CHAT_USAGE` debits for normal live chat and live stream chat before `CHAT_PROVIDER_LIVE_VERIFIED=1` can be trusted. Focused checks passed: `bun run smoke:chat:test`, `bun run predeploy:check:test`, and `bun run docs:commands`.
 - 2026-05-25: `smoke:chat` now verifies both normal live chat and live stream chat, matching the release handoff command that can be used for `CHAT_PROVIDER_LIVE_VERIFIED=1`. Focused checks passed: `bun run smoke:chat:test`, `bun run predeploy:check:test`, `bun run docs:commands`, and `bun run predeploy:check`.

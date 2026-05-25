@@ -239,3 +239,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: `smoke:chat` also verifies live stream chat, so narrow chat live-smoke retry covers both `/chat` and `/chat/stream`.
 - Current addendum 2026-05-25: `smoke:chat` must find distinct `CHAT_USAGE` wallet debits for both normal live chat and live stream chat before chat-provider verification is trusted.
 - Current addendum 2026-05-25: `api:smoke:live` must continue the normal live chat through `POST /chat/stream` and find distinct `CHAT_USAGE` wallet debits for both paths before chat-provider verification is trusted.
+- Current addendum 2026-05-25: `api:smoke:live` stream validation should reuse `validateLiveChatSmokeStream` so provider-failure guidance and stream completeness checks stay aligned with `smoke:chat`.

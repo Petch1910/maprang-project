@@ -36,6 +36,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('requires distinct wallet debits for normal and stream chat')
     expect(predeploy).toContain('findMatchingChatDebits')
     expect(predeploy).toContain('streamWalletTransactionId')
+    expect(predeploy).toContain('validateLiveChatSmokeStream(events)')
     expect(predeploy).toContain('walletDebits=')
     expect(predeploy).toContain('chatId: liveChatId')
     expect(predeploy).toContain('formats object-shaped env doctor errors without stringifying raw objects')

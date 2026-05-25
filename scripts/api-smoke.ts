@@ -13,6 +13,7 @@ import {
   assertSmokeUserHasTokenBalance,
   findMatchingChatDebits,
   parseMinSmokeTokenBalance,
+  validateLiveChatSmokeStream,
   validateLiveChatSmokeResponse,
 } from './live-chat-smoke'
 import {
@@ -583,24 +584,8 @@ if (live) {
       }),
     })
 
-    const reply = events
-      .filter((event): event is Extract<StreamSmokeEvent, { type: 'delta' }> => event.type === 'delta')
-      .map((event) => event.content ?? '')
-      .join('')
-      .trim()
-    const error = events.find((event): event is Extract<StreamSmokeEvent, { type: 'error' }> => event.type === 'error')
-    const done = events.find((event): event is Extract<StreamSmokeEvent, { type: 'done' }> => event.type === 'done')
-
-    if (error?.message) throw new Error(`สตรีมแชทจริงคืน error: ${error.message}`)
-    if (!done) throw new Error('สตรีมแชทจริงไม่คืน event ปิดท้าย')
-    if (done.usage?.providerFailure) {
-      throw new Error(`สตรีมแชทจริงเรียกผู้ให้บริการไม่สำเร็จ: ${done.usage.providerFailure.code ?? 'ไม่ทราบรหัส'}`)
-    }
-    if (!done.chatId) throw new Error('สตรีมแชทจริงไม่คืน chatId')
-    if ((done.usage?.totalTokens ?? 0) <= 0) throw new Error('สตรีมแชทจริงไม่คืนโทเคนที่ใช้')
-    if (reply.length < 80) throw new Error(`สตรีมแชทจริงคืนคำตอบสั้นเกินไป: ${reply}`)
-
-    const streamTotalTokens = done.usage?.totalTokens ?? 0
+    const streamResult = validateLiveChatSmokeStream(events)
+    const streamTotalTokens = streamResult.totalTokens
     const walletAfter = await readJson<{ wallet?: { transactions?: ApiSmokeWalletTransaction[] } }>('/me/usage', {
       headers: authHeaders,
     })
@@ -609,7 +594,7 @@ if (live) {
       throw new Error('แชทจริงและสตรีมแชทจริงคืนโทเคนแล้ว แต่ไม่พบรายการ wallet แบบ CHAT_USAGE ครบทั้งสองเส้นทาง')
     }
 
-    return `chatId=${done.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${reply.length}, walletDebits=${chatDebits.length}`
+    return `chatId=${streamResult.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${streamResult.replyChars}, walletDebits=${chatDebits.length}`
   })
 } else {
   record('POST /chat', 'skip', 'ข้ามการเรียกโมเดลจริง; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
