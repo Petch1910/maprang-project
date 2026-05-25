@@ -38,6 +38,36 @@ export type ApiSmokeResult = {
 
 export type ApiSmokeHandoffEvidence = Record<string, string | number>
 
+const requiredApiSmokeHandoffEvidenceFields = [
+  'Chat smoke normal chatId',
+  'Chat smoke normal tokens',
+  'Chat smoke normal walletTransactionId',
+  'Chat smoke stream chatId',
+  'Chat smoke stream tokens',
+  'Chat smoke stream walletTransactionId',
+  'Image smoke provider',
+  'Image smoke source',
+  'Image smoke urlKind',
+  'Image smoke elapsedMs',
+] as const
+
+const positiveNumberApiSmokeHandoffEvidenceFields = new Set<string>([
+  'Chat smoke normal tokens',
+  'Chat smoke stream tokens',
+  'Image smoke elapsedMs',
+])
+
+function hasCompleteApiSmokeHandoffEvidence(evidence: ApiSmokeHandoffEvidence | undefined) {
+  if (!evidence) return false
+  return requiredApiSmokeHandoffEvidenceFields.every((field) => {
+    const value = evidence[field]
+    if (value === undefined || value === null) return false
+    if (typeof value === 'string') return value.trim().length > 0
+    if (positiveNumberApiSmokeHandoffEvidenceFields.has(field)) return Number.isFinite(value) && value > 0
+    return Number.isFinite(value)
+  })
+}
+
 export function formatApiSmokeStatus(status: ApiSmokeStatus) {
   const labels: Record<ApiSmokeStatus, string> = {
     pass: 'ผ่าน',
@@ -123,7 +153,9 @@ export function buildApiSmokeSummary(
   },
 ) {
   const handoffEvidence =
-    options.handoffEvidence && Object.keys(options.handoffEvidence).length > 0 ? options.handoffEvidence : undefined
+    options.handoffEvidence && hasCompleteApiSmokeHandoffEvidence(options.handoffEvidence)
+      ? options.handoffEvidence
+      : undefined
   return {
     ok: results.every((result) => result.status !== 'fail'),
     apiBaseUrl: options.apiBaseUrl,

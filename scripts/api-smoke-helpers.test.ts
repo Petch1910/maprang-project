@@ -243,6 +243,44 @@ describe('api smoke helpers', () => {
         requireAdmin: true,
         handoffEvidence: {
           'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+          'Image smoke provider': 'configured',
+        },
+      }),
+    ).not.toHaveProperty('handoffEvidence')
+
+    expect(
+      buildApiSmokeSummary(results, {
+        apiBaseUrl: 'https://api.maprang.example',
+        live: true,
+        requireLiveImage: true,
+        requireAdmin: true,
+        handoffEvidence: {
+          'Chat smoke normal chatId': 'chat-normal-001',
+          'Chat smoke normal tokens': 0,
+          'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+          'Chat smoke stream chatId': 'chat-stream-001',
+          'Chat smoke stream tokens': 98,
+          'Chat smoke stream walletTransactionId': 'wallet-chat-stream-001',
+          'Image smoke provider': 'configured',
+          'Image smoke source': 'ai',
+          'Image smoke urlKind': 'remote-or-upload-url',
+          'Image smoke elapsedMs': 250,
+        },
+      }),
+    ).not.toHaveProperty('handoffEvidence')
+
+    expect(
+      buildApiSmokeSummary(results, {
+        apiBaseUrl: 'https://api.maprang.example',
+        live: true,
+        requireLiveImage: true,
+        requireAdmin: true,
+        handoffEvidence: {
+          'Chat smoke normal chatId': 'chat-normal-001',
+          'Chat smoke normal tokens': 145,
+          'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+          'Chat smoke stream chatId': 'chat-stream-001',
+          'Chat smoke stream tokens': 98,
           'Chat smoke stream walletTransactionId': 'wallet-chat-stream-001',
           'Image smoke provider': 'configured',
           'Image smoke source': 'ai',
@@ -261,7 +299,11 @@ describe('api smoke helpers', () => {
       skip: 1,
       fail: 1,
       handoffEvidence: {
+        'Chat smoke normal chatId': 'chat-normal-001',
+        'Chat smoke normal tokens': 145,
         'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+        'Chat smoke stream chatId': 'chat-stream-001',
+        'Chat smoke stream tokens': 98,
         'Chat smoke stream walletTransactionId': 'wallet-chat-stream-001',
         'Image smoke provider': 'configured',
         'Image smoke source': 'ai',
