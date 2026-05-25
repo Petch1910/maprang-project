@@ -27,7 +27,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 สถานะล่าสุดที่ต้องจำ:
 
 - Local QA พร้อมใช้งาน
-- Backend tests ล่าสุดผ่าน 173 tests / 601 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-25 หลัง disabled-control guard, Profile/Explore/Events route-menu hardening, route/menu snippet guards, deploy blocker handoff refresh, frontend build, และ bundle budget
+- Backend tests ล่าสุดผ่าน 174 tests / 605 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-25 หลัง local/loopback deploy guards, frontend env/Admin Health URL guard, frontend build, และ bundle budget
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile
 - โปรดักชันยังถูกกั้น เพราะต้องมีโดเมนสเตจจิง/ระบบหลังบ้าน/หน้าบ้านจริง, CORS จริง, การทดสอบแชทจริง และการทดสอบสร้างรูปจริง

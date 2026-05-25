@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after the local/loopback deploy guard series. `bun run qa:repo` is green with docs command audit at 318 references, backend 174 tests / 605 expects, API audit 48 backend routes plus 34 frontend helper calls, frontend route audit 13 paths, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25: Production loopback diagnostics now name localhost/127.0.0.1/0.0.0.0/::1 consistently in backend env validation and deploy env doctor output. `agent.md` production blockers now say localhost/loopback for deployed backend URL and CORS guidance, and predeploy locks that handoff wording.
 - 2026-05-25: Frontend deploy-env checks now reuse `isLocalOrPlaceholderUrl` for both frontend env warnings and Admin Health deploy cards. The helper treats `0.0.0.0`, `::1`/`[::1]`, placeholder/example URLs, and malformed URLs as unsafe for deployed frontend/backend/CORS settings.
 - 2026-05-25: Local URL detection guards now treat `0.0.0.0` and IPv6 loopback `::1`/`[::1]` as local across smoke helpers, deploy readiness, backend production env validation, deploy env doctor, and filled release handoff validation. This prevents staging/production handoff from accidentally accepting loopback deployment URLs or CORS origins that are not real deployed domains.

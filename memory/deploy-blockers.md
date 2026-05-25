@@ -53,7 +53,7 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง legacy frontend cleanup, stale chat editor/admin summary wiring cleanup, Profile/Explore route-menu hardening, disabled-control guards, route/menu snippet guards, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
+- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง local/loopback deploy guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
 - backend test suite ฝั่ง local ผ่านแล้ว: 173 pass, 0 fail, 601 expect calls.
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว
