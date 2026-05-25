@@ -557,6 +557,7 @@ const checks: Check[] = [
           'Chat smoke stream walletTransactionId',
           'Image smoke provider',
           'Image smoke elapsedMs',
+          'handoffEvidence',
           'เกต QA (QA gates)',
           '`bun run qa:local`',
           '`bun run e2e:smoke`',
