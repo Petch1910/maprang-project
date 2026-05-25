@@ -23,12 +23,6 @@ export const fallbackCharacter: Character = {
   chatCount: 0,
 }
 
-export const starterPrompts = [
-  'ช่วยคิดไอเดียคอนเทนต์ให้หน่อย',
-  'สรุปบทเรียนนี้แบบเข้าใจง่าย',
-  'ช่วยเขียนแคปชันภาษาไทยน่ารัก ๆ',
-]
-
 export function createGreeting(character: Character): ChatMessage {
   return {
     id: crypto.randomUUID(),

@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Chat quick-start prompt source is no longer duplicated. The unused generic assistant `starterPrompts` export was removed from `apps/frontend/src/lib/chat.ts`; the only remaining quick-start prompt set is the roleplay-oriented one in `ChatPanel`.
 - 2026-05-25: Root Bun starter residue was removed. The unused root `index.ts` that printed `Hello via Bun!` and the root package `"module": "index.ts"` entry were deleted; backend start scripts still live under `apps/backend`, and `docs:commands` plus `predeploy:check` confirm documented commands remain valid.
 - 2026-05-25: Frontend API client map was trimmed after the legacy UI removal. Unused character edit/delete/duplicate/reset helpers and unused lore CRUD helpers/types were removed from `apps/frontend/src/lib/api.ts`; current frontend source has no consumers for those names, while the backend API routes and smoke coverage remain intact.
 - 2026-05-25: Full deterministic repo QA passed after the legacy frontend cleanup. `bun run qa:repo` is green after removing unmounted frontend components and stale chat editor/admin summary wiring; backend remains 173 tests / 601 expects, API route audit still covers 48 routes, route/menu audit still covers 14 surfaces, import-cycle audit now sees 124 source files / 295 import edges, and frontend bundle budget remains under limit with ChatRoom at 226.6KB / 260KB.
