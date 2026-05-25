@@ -33,6 +33,34 @@ export type ReleaseHandoffCheckResult = {
   findings: string[]
 }
 
+function fieldValue(content: string, label: string) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return content.match(new RegExp(`^- ${escaped}:\\s*(.+)$`, 'm'))?.[1]?.trim() ?? ''
+}
+
+function looksLikeDeployedHttpsUrl(value: string) {
+  const normalized = value.toLowerCase()
+  return (
+    normalized.startsWith('https://') &&
+    !normalized.includes('localhost') &&
+    !normalized.includes('127.0.0.1') &&
+    !normalized.includes('<') &&
+    !normalized.includes('>')
+  )
+}
+
+function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
+  for (const label of ['Frontend URL', 'Backend URL', 'Health URL', 'Ready URL']) {
+    const value = fieldValue(content, label)
+    if (value && !looksLikeDeployedHttpsUrl(value)) findings.push(`URL ใน release handoff ต้องเป็น https deployed URL: ${label}`)
+  }
+
+  const corsOrigins = fieldValue(content, 'CORS origins').toLowerCase()
+  if (corsOrigins && (!corsOrigins.includes('https://') || corsOrigins.includes('http://') || corsOrigins.includes('localhost') || corsOrigins.includes('127.0.0.1') || corsOrigins.includes('*'))) {
+    findings.push('CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น')
+  }
+}
+
 export function checkReleaseHandoffContent(content: string, options: { requireFilled?: boolean } = {}) {
   const findings: string[] = []
 
@@ -58,6 +86,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
       .map((line, index) => ({ line: line.trim(), index: index + 1 }))
       .filter(({ line }) => line.startsWith('- ') && /:\s*$/.test(line))
     for (const field of blankFields) findings.push(`บรรทัด ${field.index} ยังว่างอยู่: ${field.line}`)
+    validateFilledReleaseHandoffUrls(content, findings)
   }
 
   return findings

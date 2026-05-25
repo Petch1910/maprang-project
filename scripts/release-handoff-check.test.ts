@@ -85,6 +85,23 @@ describe('release handoff check', () => {
     )
   })
 
+  test('rejects local or insecure filled release URLs', () => {
+    const unsafe = filledHandoff
+      .replace('https://app.maprang.example', 'http://localhost:5173')
+      .replaceAll('https://api.maprang.example', 'http://127.0.0.1:3000')
+      .replace('CORS origins: https://app.maprang.example', 'CORS origins: http://localhost:5173,*')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'URL ใน release handoff ต้องเป็น https deployed URL: Frontend URL',
+        'URL ใน release handoff ต้องเป็น https deployed URL: Backend URL',
+        'URL ใน release handoff ต้องเป็น https deployed URL: Health URL',
+        'URL ใน release handoff ต้องเป็น https deployed URL: Ready URL',
+        'CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น',
+      ]),
+    )
+  })
+
   test('reports missing sections and secret-shaped values', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef'].join('-')
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`
