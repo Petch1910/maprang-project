@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 predeploy route/menu status evidence wiring pass: `bun run predeploy:check:test` and `bun run predeploy:check` passed after predeploy started requiring the Route/Menu Audit `needs-staging`/`future` status-evidence checker snippets and regression fixture.
 - 2026-05-25 route/menu status evidence guard pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after route/menu documentation started requiring `needs-staging` rows to point to `STAGING_RUNBOOK.md` plus `/admin/health`, and `future` rows to say they are future work.
 - 2026-05-25 full deterministic repo QA pass after release credential-URL handoff guard: `bun run qa:repo` passed with docs command audit at 324 references, backend 177 tests / 609 expects, release handoff tests 44 pass / 60 expects, e2e smoke/config tests 13 pass, API audit 48 backend routes plus 34 frontend helper calls, frontend route audit 13 paths, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25 release credential-URL handoff guard pass: `bun run release:handoff:test`, `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run qa:repo` passed after release handoff scanning started rejecting credential-bearing URLs anywhere in the handoff content.

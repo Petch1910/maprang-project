@@ -1865,6 +1865,9 @@ const checks: Check[] = [
           "routePaths['wallet']",
           'navigate({ pathname: routePaths.health })',
           'reports missing navigation coverage',
+          'requires staging and future rows to explain their next surface',
+          'สถานะ needs-staging ต้องชี้งานค้างไปที่ STAGING_RUNBOOK.md และ /admin/health',
+          'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต',
           'reports stale mixed-language copy in route menu documentation',
           'Automated route smoke',
           'horizontal overflow',
@@ -1874,7 +1877,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
+        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'includesEvery', 'includesSome', 'STAGING_RUNBOOK.md', '/admin/health', 'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(
