@@ -17,3 +17,4 @@
 - [0013 - เพิ่ม prompt budgeting](./0013-add-prompt-budgeting.md)
 - [0014 - เพิ่ม chat provider failure classification](./0014-add-chat-provider-failure-classification.md)
 - [0015 - ให้ Route/Menu disabled reasons เป็น UI contract](./0015-route-menu-disabled-reasons-contract.md)
+- [0016 - ให้ API route coverage เป็น quality contract](./0016-api-route-coverage-quality-contract.md)
