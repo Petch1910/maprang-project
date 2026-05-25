@@ -304,14 +304,14 @@ export function auditRouteCoverage(discoveredRoutes: DiscoveredRoute[], coverage
 export function discoverRoutesFromSource(file: string, content: string) {
   const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
   const routes: Array<DiscoveredRoute & { index: number }> = []
+  const stringConstants = collectTopLevelStringConstants(sourceFile)
 
   function visit(node: ts.Node) {
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
       const methodName = node.expression.name.text.toLowerCase()
       if (['get', 'post', 'patch', 'put', 'delete'].includes(methodName)) {
         const pathArg = node.arguments[0]
-        const path =
-          pathArg && (ts.isStringLiteral(pathArg) || ts.isNoSubstitutionTemplateLiteral(pathArg)) ? pathArg.text : null
+        const path = pathArg ? literalStringValue(pathArg, stringConstants) : null
         if (path?.startsWith('/')) {
           routes.push({
             key: `${methodName.toUpperCase() as HttpMethod} ${path}`,

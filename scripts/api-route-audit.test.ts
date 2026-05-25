@@ -54,6 +54,26 @@ describe('api route audit', () => {
     expect(routes.map((route) => route.key)).toEqual(['GET /health', 'POST /chat', 'PATCH /characters/:id'])
   })
 
+  test('discovers Elysia routes from top-level path constants', () => {
+    const routes = discoverRoutesFromSource(
+      'fixture.routes.ts',
+      `
+        const healthPath = '/health' as const
+        const routePaths = {
+          chat: '/chat',
+          character: '/characters/:id',
+        } as const
+
+        export const routes = new Elysia()
+          .get(healthPath, () => ({ ok: true }))
+          .post(routePaths.chat, () => ({ ok: true }))
+          .patch(routePaths['character'], () => ({ ok: true }))
+      `,
+    )
+
+    expect(routes.map((route) => route.key)).toEqual(['GET /health', 'POST /chat', 'PATCH /characters/:id'])
+  })
+
   test('reports missing, stale, and weak coverage entries', () => {
     const discoveredRoutes: DiscoveredRoute[] = [
       { key: 'GET /health', file: 'fixture.routes.ts' },

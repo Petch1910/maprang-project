@@ -1366,6 +1366,7 @@ const checks: Check[] = [
         [
           'collects backend index and route files automatically',
           'discovers Elysia routes from source',
+          'discovers Elysia routes from top-level path constants',
           'reports missing, stale, and weak coverage entries',
           'collects frontend API helper calls with methods and dynamic ids',
           'collects frontend API helper calls from top-level route constants',
