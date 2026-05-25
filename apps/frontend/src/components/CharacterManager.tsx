@@ -76,6 +76,17 @@ export function CharacterManager({
 
   const tagAnalysis = analyzeTags(tags)
   const hasDangerConflict = tagAnalysis.issues.some((issue) => issue.level === 'danger')
+  const uploadDisabledReason = isUploading ? 'กำลังอัปโหลดรูปตัวละคร รอให้เสร็จก่อน' : ''
+  const saveDisabledReason = isSaving
+    ? 'กำลังบันทึกตัวละคร รอให้เสร็จก่อน'
+    : hasDangerConflict
+      ? 'แก้แท็กที่ขัดแย้งก่อนบันทึกตัวละคร'
+      : !name.trim()
+        ? 'กรอกชื่อตัวละครก่อนบันทึก'
+        : !systemPrompt.trim()
+          ? 'กรอกพรอมป์ระบบหรือบุคลิกก่อนบันทึก'
+          : ''
+  const savingDisabledReason = isSaving ? 'กำลังบันทึกตัวละคร รอให้เสร็จก่อน' : ''
 
   const handleSubmit = async () => {
     if (hasDangerConflict) return
@@ -174,10 +185,13 @@ export function CharacterManager({
           <input className={inputClass} value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} />
         </Field>
         <input
+          aria-disabled={isUploading}
+          aria-label="อัปโหลดรูปตัวละคร"
           accept="image/png,image/jpeg,image/webp,image/gif"
           className={inputClass}
           disabled={isUploading}
           onChange={(event) => void handleAvatarFile(event.target.files?.[0] ?? null)}
+          title={uploadDisabledReason || 'อัปโหลดรูปตัวละครจากเครื่อง'}
           type="file"
         />
 
@@ -275,8 +289,10 @@ export function CharacterManager({
 
         <button type="button"
           className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white transition hover:bg-blue-700 disabled:opacity-60"
+          aria-disabled={Boolean(saveDisabledReason)}
           onClick={handleSubmit}
           disabled={isSaving || hasDangerConflict || !name.trim() || !systemPrompt.trim()}
+          title={saveDisabledReason || 'บันทึกตัวละคร'}
         >
           {isSaving ? 'กำลังบันทึก...' : hasDangerConflict ? 'แก้แท็กที่ขัดแย้งก่อน' : 'บันทึกตัวละคร'}
         </button>
@@ -284,22 +300,28 @@ export function CharacterManager({
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <button type="button"
             className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+            aria-disabled={isSaving}
             onClick={onDuplicate}
             disabled={isSaving}
+            title={savingDisabledReason || 'ทำสำเนาตัวละครนี้'}
           >
             ทำสำเนา
           </button>
           <button type="button"
             className="min-h-10 rounded-xl border border-amber-500/25 bg-amber-50 px-3 text-xs font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60"
+            aria-disabled={isSaving}
             onClick={onResetPrompt}
             disabled={isSaving}
+            title={savingDisabledReason || 'รีเซ็ตพรอมป์ตัวละครนี้'}
           >
             รีเซ็ตพรอมป์
           </button>
           <button type="button"
             className="min-h-10 rounded-xl border border-red-500/25 bg-red-50 px-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+            aria-disabled={isSaving}
             onClick={onDelete}
             disabled={isSaving}
+            title={savingDisabledReason || 'ลบตัวละครนี้'}
           >
             ลบตัวละคร
           </button>

@@ -50,6 +50,15 @@ export function LoreManager({
     () => [...loreEntries].sort((a, b) => b.priority - a.priority || a.keyword.localeCompare(b.keyword)),
     [loreEntries],
   )
+  const refreshDisabledReason = isLoading ? 'กำลังโหลดคลังความรู้ รอให้เสร็จก่อน' : ''
+  const submitDisabledReason = isSaving
+    ? 'กำลังบันทึกคลังความรู้ รอให้เสร็จก่อน'
+    : !form.keyword.trim()
+      ? 'กรอกหัวข้อคลังความรู้ก่อนบันทึก'
+      : !form.content.trim()
+        ? 'กรอกรายละเอียดคลังความรู้ก่อนบันทึก'
+        : ''
+  const savingDisabledReason = isSaving ? 'กำลังบันทึกคลังความรู้ รอให้เสร็จก่อน' : ''
 
   useEffect(() => {
     setEditingId(null)
@@ -107,8 +116,10 @@ export function LoreManager({
         </div>
         <button type="button"
           className="min-h-8 rounded-full border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700"
+          aria-disabled={isLoading}
           onClick={onLoad}
           disabled={isLoading}
+          title={refreshDisabledReason || 'รีเฟรชคลังความรู้'}
         >
           รีเฟรช
         </button>
@@ -152,15 +163,19 @@ export function LoreManager({
           <div className="grid grid-cols-2 gap-2">
             <button type="button"
               className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white transition hover:bg-slate-800 disabled:opacity-60"
+              aria-disabled={Boolean(submitDisabledReason)}
               onClick={submit}
               disabled={isSaving || !form.keyword.trim() || !form.content.trim()}
+              title={submitDisabledReason || (editingId ? 'บันทึกคลังความรู้นี้' : 'เพิ่มคลังความรู้ใหม่')}
             >
               {isSaving ? 'กำลังบันทึก...' : editingId ? 'บันทึกคลังความรู้' : 'เพิ่มคลังความรู้'}
             </button>
             <button type="button"
               className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-bold text-slate-700"
+              aria-disabled={isSaving}
               onClick={reset}
               disabled={isSaving}
+              title={savingDisabledReason || 'ล้างฟอร์มคลังความรู้'}
             >
               ล้างฟอร์ม
             </button>
@@ -196,8 +211,10 @@ export function LoreManager({
               </button>
               <button type="button"
                 className="min-h-8 rounded-lg border border-red-500/20 bg-red-50 text-xs font-bold text-red-700"
+                aria-disabled={isSaving}
                 onClick={() => onDelete(entry.id)}
                 disabled={isSaving}
+                title={savingDisabledReason || `ลบคลังความรู้ ${entry.keyword}`}
               >
                 ลบ
               </button>

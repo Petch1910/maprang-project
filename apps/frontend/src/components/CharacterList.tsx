@@ -30,6 +30,7 @@ export function CharacterList({
     () => [...new Set(characters.flatMap((character) => character.tags))].sort(),
     [characters],
   )
+  const filterDisabledReason = isFiltering ? 'กำลังค้นหาตัวละคร รอให้เสร็จก่อน' : ''
 
   const applyFilters = async () => {
     setIsFiltering(true)
@@ -101,8 +102,10 @@ export function CharacterList({
           </select>
           <button type="button"
             className="min-h-9 rounded-lg bg-slate-900 px-3 text-xs font-extrabold text-white disabled:opacity-60"
+            aria-disabled={isFiltering}
             onClick={applyFilters}
             disabled={isFiltering}
+            title={filterDisabledReason || 'ค้นหาตัวละครตามตัวกรอง'}
           >
             {isFiltering ? '...' : 'ค้นหา'}
           </button>

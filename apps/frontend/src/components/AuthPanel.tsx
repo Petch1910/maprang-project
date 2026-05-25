@@ -31,6 +31,14 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   )
   const [note, setNote] = useState('')
   const [isBusy, setIsBusy] = useState(false)
+  const authBusyReason = isBusy ? 'กำลังทำรายการบัญชี รอให้เสร็จก่อน' : ''
+  const signInDisabledReason = isBusy
+    ? authBusyReason
+    : !email
+      ? 'กรอกอีเมลก่อนเข้าสู่ระบบ'
+      : !password
+        ? 'กรอกรหัสผ่านก่อนเข้าสู่ระบบ'
+        : ''
 
   const refreshAuthState = useCallback(async (options?: { silent?: boolean }) => {
     try {
@@ -162,8 +170,10 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
               />
               <button type="button"
                 className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white disabled:opacity-60"
+                aria-disabled={Boolean(signInDisabledReason)}
                 disabled={isBusy || !email || !password}
                 onClick={signIn}
+                title={signInDisabledReason || 'เข้าสู่ระบบด้วย Supabase'}
               >
                 เข้าสู่ระบบ
               </button>
@@ -173,8 +183,10 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
           {authState.user && (
             <button type="button"
               className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-extrabold text-slate-700 disabled:opacity-60"
+              aria-disabled={isBusy}
               disabled={isBusy}
               onClick={signOut}
+              title={authBusyReason || 'ออกจากระบบ'}
             >
               ออกจากระบบ
             </button>
@@ -186,8 +198,10 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
           <button
             type="button"
             className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white disabled:opacity-60"
+            aria-disabled={isBusy}
             disabled={isBusy}
             onClick={applyDevUser}
+            title={authBusyReason || 'ใช้ dev user นี้'}
           >
             ใช้ dev user
           </button>
