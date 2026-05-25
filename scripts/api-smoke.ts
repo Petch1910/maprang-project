@@ -16,6 +16,7 @@ import {
   validateLiveChatSmokeStream,
   validateLiveChatSmokeResponse,
 } from './live-chat-smoke'
+import { liveImageDraftFailure, type CreatorDraftPayload } from './image-smoke'
 import {
   apiBaseUrl as defaultApiBaseUrl,
   formatSmokeTargetDiagnosticText,
@@ -129,6 +130,18 @@ export function buildApiSmokeSummary(
     skip: results.filter((result) => result.status === 'skip').length,
     fail: results.filter((result) => result.status === 'fail').length,
   }
+}
+
+function imageSmokeUrlKind(url?: string) {
+  if (!url) return 'missing-url'
+  return url.startsWith('data:') ? 'data-url' : 'remote-or-upload-url'
+}
+
+function formatApiImageSmokeEvidence(payload: CreatorDraftPayload, elapsedMs: number) {
+  const provider = payload.image?.provider ?? 'none'
+  const source = payload.source ?? 'unknown'
+  const urlKind = imageSmokeUrlKind(payload.image?.url)
+  return `Image smoke provider=${provider}, Image smoke source=${source}, Image smoke urlKind=${urlKind}, Image smoke elapsedMs=${elapsedMs}`
 }
 
 export async function runApiSmoke(options: ApiSmokeRunnerOptions = {}) {
@@ -465,11 +478,9 @@ await check('POST/PATCH /characters + lore runtime', async () => {
 })
 
 await warnable('POST /creator/ai-draft', async () => {
-  const payload = await readJson<{
-    source?: string
+  const imageStartedAt = Date.now()
+  const payload = await readJson<CreatorDraftPayload & {
     draft?: { name?: string; greeting?: string }
-    image?: { provider?: string; note?: string }
-    warnings?: string[]
   }>('/creator/ai-draft', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -483,9 +494,26 @@ await warnable('POST /creator/ai-draft', async () => {
       },
     }),
   })
+  const imageElapsedMs = Math.max(1, Date.now() - imageStartedAt)
   if (!payload.draft?.name || !payload.draft.greeting) throw new Error('draft ยังขาดช่องข้อความที่จำเป็น')
   const imageProvider = payload.image?.provider ?? 'ไม่มี'
-  const detail = `แหล่งร่าง=${payload.source ?? 'ไม่ทราบ'}, รูป=${imageProvider}`
+  const detail = `แหล่งร่าง=${payload.source ?? 'ไม่ทราบ'}, รูป=${imageProvider}, ${formatApiImageSmokeEvidence(payload, imageElapsedMs)}`
+  const liveImageFailure = live ? liveImageDraftFailure(payload) : null
+  if (liveImageFailure) {
+    if (requireLiveImage) throw new Error(liveImageFailure)
+    return {
+      ok: false,
+      detail: `${detail}; ${liveImageFailure}`,
+    }
+  }
+  if (live && payload.source !== 'ai') {
+    const issue = 'source ของ live image smoke ต้องเป็น ai ก่อนใช้เป็นหลักฐาน release handoff'
+    if (requireLiveImage) throw new Error(issue)
+    return {
+      ok: false,
+      detail: `${detail}; ${issue}`,
+    }
+  }
   if (imageProvider !== 'configured') {
     const issue = creatorImageIssue(payload)
     if (requireLiveImage) throw new Error(issue)

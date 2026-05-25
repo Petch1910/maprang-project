@@ -69,6 +69,7 @@ guard ใน repo:
 - Local API smoke ผ่านแล้ว
 - API route audit now rejects weak coverage quality before deploy: admin routes need `admin-smoke`, live-provider routes including `POST /chat/stream` need `live-smoke`, manual-production-only coverage is too weak, and coverage notes must be filled.
 - `api:smoke:live` now includes normal live chat, live stream chat, and live image generation, so the remaining live-provider blocker requires one clean staging run before setting verification flags.
+- `api:smoke:live` now prints the live image handoff evidence rows (`Image smoke provider`, source, URL kind, elapsed milliseconds) and uses the same fallback/placeholder/missing URL/SVG validation as `smoke:image:live`, so the remaining image blocker is a real provider/staging run, not missing repo-owned evidence wiring.
 - `api:smoke:live` now continues the normal live chat through the stream route and requires separate `CHAT_USAGE` wallet debits for normal chat and stream chat.
 - `smoke:chat` now also verifies live stream chat, so using the narrow chat retry command still covers the stream provider path before setting `CHAT_PROVIDER_LIVE_VERIFIED=1`.
 - `smoke:chat` now requires separate `CHAT_USAGE` wallet debits for normal chat and stream chat, so a clean chat-provider verification also proves both billing paths are recorded.

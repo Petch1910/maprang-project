@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 API live image handoff evidence smoke pass: `bun run api:smoke:test`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands`, `bun run secrets:check`, `bun run memory:audit`, `git diff --check`, and full `bun run qa:repo` passed after `api:smoke:live` started printing `Image smoke provider`, source, URL kind, and elapsed milliseconds from `/creator/ai-draft`, while reusing `liveImageDraftFailure` and requiring `source=ai` before combined live smoke evidence can support release handoff.
 - 2026-05-25 release handoff live image evidence guard pass: `bun run release:handoff:test`, `bun run release:handoff:check`, `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands` passed after release handoff started requiring live image smoke evidence rows for provider, source, URL kind, and elapsed milliseconds.
 - 2026-05-25 release handoff live chat billing evidence guard pass: `bun run release:handoff:test`, `bun run release:handoff:check`, `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands` passed after release handoff started requiring normal chat and stream chat smoke evidence rows for chatId, token count, and wallet transaction id.
 - 2026-05-25 API live stream shared validation pass: `bun run api:smoke:test`, `bun run predeploy:check:test`, and `bun run memory:audit` passed after `api:smoke:live` started reusing `validateLiveChatSmokeStream` so stream provider-failure handling stays aligned with `smoke:chat`.
