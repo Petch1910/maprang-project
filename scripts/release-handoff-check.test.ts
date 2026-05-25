@@ -52,6 +52,10 @@ const filledHandoff = [
   '- คำสั่ง live smoke รูป: bun run smoke:image:live',
   '- ผล live smoke รูป: pass',
   '- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`: 1',
+  '- Image smoke provider: configured',
+  '- Image smoke source: ai',
+  '- Image smoke urlKind: remote-or-upload-url',
+  '- Image smoke elapsedMs: 1200',
   '',
   '## เกต QA (QA gates)',
   '- `bun run qa:local`: pass',
@@ -726,6 +730,47 @@ describe('release handoff check', () => {
       expect.arrayContaining([
         'staging release handoff ต้องมี Chat smoke normal chatId จาก live smoke จริง',
         'staging release handoff ต้องมี Chat smoke stream walletTransactionId จาก wallet CHAT_USAGE จริง',
+      ]),
+    )
+  })
+
+  test('requires live image evidence rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- Image smoke provider: configured\n', '- Provider note: Image smoke provider: configured\n')
+      .replace('- Image smoke source: ai\n', '')
+      .replace('- Image smoke urlKind: remote-or-upload-url\n', '')
+      .replace('- Image smoke elapsedMs: 1200\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี live image evidence field ใน release handoff: Image smoke provider',
+        'ยังไม่มี live image evidence field ใน release handoff: Image smoke source',
+        'ยังไม่มี live image evidence field ใน release handoff: Image smoke urlKind',
+        'ยังไม่มี live image evidence field ใน release handoff: Image smoke elapsedMs',
+      ]),
+    )
+  })
+
+  test('requires concrete live image evidence for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- Image smoke provider: configured', '- Image smoke provider: placeholder')
+      .replace('- Image smoke source: ai', '- Image smoke source: fallback')
+      .replace('- Image smoke urlKind: remote-or-upload-url', '- Image smoke urlKind: placeholder')
+      .replace('- Image smoke elapsedMs: 1200', '- Image smoke elapsedMs: 0')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมี Image smoke provider เป็น configured',
+        'production release handoff ต้องมี Image smoke source เป็น ai',
+        'production release handoff ต้องมี Image smoke urlKind จากรูปจริง',
+        'production release handoff ต้องมี Image smoke elapsedMs มากกว่า 0',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมี Image smoke provider เป็น configured',
+        'staging release handoff ต้องมี Image smoke elapsedMs มากกว่า 0',
       ]),
     )
   })

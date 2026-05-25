@@ -326,4 +326,4 @@ bun run smoke:chat
 bun run smoke:image:live
 ```
 
-`smoke:image:live` ตรวจ backend root identity ก่อนตรวจว่าผู้ให้บริการสร้างรูปที่ตั้งค่าไว้ generate รูปจริงได้. การมี key อย่างเดียวไม่พอ; billing และ model access ต้องพร้อมด้วย.
+`smoke:image:live` ตรวจ backend root identity ก่อนตรวจว่าผู้ให้บริการสร้างรูปที่ตั้งค่าไว้ generate รูปจริงได้. การมี key อย่างเดียวไม่พอ; billing และ model access ต้องพร้อมด้วย. หลังผ่านให้คัดค่า `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs` ลง `RELEASE_HANDOFF.md` เพื่อเป็นหลักฐานว่า live image path ใช้ provider จริง ไม่ใช่ภาพ fallback.

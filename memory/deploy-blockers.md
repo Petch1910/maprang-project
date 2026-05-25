@@ -73,6 +73,7 @@ guard ใน repo:
 - `smoke:chat` now also verifies live stream chat, so using the narrow chat retry command still covers the stream provider path before setting `CHAT_PROVIDER_LIVE_VERIFIED=1`.
 - `smoke:chat` now requires separate `CHAT_USAGE` wallet debits for normal chat and stream chat, so a clean chat-provider verification also proves both billing paths are recorded.
 - Release handoff now requires normal chat and stream chat smoke evidence rows for chatId, token count, and wallet transaction id; filled staging/production handoffs reject placeholder/pass-only ids and non-positive token counts.
+- Release handoff now requires live image smoke evidence rows for provider, source, URL kind, and elapsed milliseconds; filled staging/production handoffs reject placeholder image evidence before `IMAGE_GENERATION_LIVE_VERIFIED=1` is trusted.
 - API route audit weak coverage output now includes exact reasons per route so deploy operators can fix the missing smoke or note without rereading the coverage table.
 - README and Deployment QA now explain the API route coverage quality guard, so operators know weak coverage means missing smoke, manual-production-only coverage, or an empty note before deploy.
 - Frontend build และ bundle budget ผ่านแล้ว

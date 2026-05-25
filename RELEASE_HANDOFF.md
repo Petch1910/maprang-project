@@ -79,6 +79,10 @@ bun run release:handoff:check -- --filled
 - คำสั่ง live smoke รูป:
 - ผล live smoke รูป:
 - ค่า `IMAGE_GENERATION_LIVE_VERIFIED`:
+- Image smoke provider:
+- Image smoke source:
+- Image smoke urlKind:
+- Image smoke elapsedMs:
 
 ## เกต QA (QA gates)
 

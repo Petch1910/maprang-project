@@ -93,6 +93,14 @@ const requiredLiveChatEvidenceFieldLabels = [
 ]
 const requiredLiveChatEvidenceFieldSnippets = requiredLiveChatEvidenceFieldLabels
 
+const requiredLiveImageEvidenceFieldLabels = [
+  'Image smoke provider',
+  'Image smoke source',
+  'Image smoke urlKind',
+  'Image smoke elapsedMs',
+]
+const requiredLiveImageEvidenceFieldSnippets = requiredLiveImageEvidenceFieldLabels
+
 const requiredRiskFieldLabels = [
   'ตัวกั้นที่ยังเปิดอยู่',
   'ความเสี่ยงโควตาผู้ให้บริการ',
@@ -503,6 +511,25 @@ function validateDeployedLiveChatEvidence(content: string, findings: string[]) {
   }
 }
 
+function validateDeployedLiveImageEvidence(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  const provider = fieldValue(content, 'Image smoke provider')
+  if (provider && provider !== 'configured') findings.push(`${environment} release handoff ต้องมี Image smoke provider เป็น configured`)
+
+  const source = fieldValue(content, 'Image smoke source')
+  if (source && source !== 'ai') findings.push(`${environment} release handoff ต้องมี Image smoke source เป็น ai`)
+
+  const urlKind = fieldValue(content, 'Image smoke urlKind')
+  if (urlKind && !['data-url', 'remote-or-upload-url'].includes(urlKind)) {
+    findings.push(`${environment} release handoff ต้องมี Image smoke urlKind จากรูปจริง`)
+  }
+
+  const elapsedMs = fieldValue(content, 'Image smoke elapsedMs')
+  if (elapsedMs && !isPositiveIntegerEvidence(elapsedMs)) findings.push(`${environment} release handoff ต้องมี Image smoke elapsedMs มากกว่า 0`)
+}
+
 function validateFilledRiskRows(content: string, findings: string[]) {
   const environment = deployedEvidenceEnvironment(content)
   if (!environment) return
@@ -608,6 +635,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี live chat evidence field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredLiveImageEvidenceFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี live image evidence field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredRiskFieldLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี release risk field ใน release handoff: ${label}`)
   }
@@ -639,6 +670,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateDeployedAuthStorageResults(content, findings)
     validateDeployedAiProviderResults(content, findings)
     validateDeployedLiveChatEvidence(content, findings)
+    validateDeployedLiveImageEvidence(content, findings)
     validateFilledRiskRows(content, findings)
     validateDeployedAdminResults(content, findings)
     validateDeployedE2eTargets(content, findings)
