@@ -309,6 +309,16 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires critical release handoff fields as field rows', () => {
+    const stale = filledHandoff
+      .replace('- Environment: production\n', '- Release note: Environment: production\n')
+      .replace('- Frontend URL: https://app.maprang.example\n', '- Release note: Frontend URL: https://app.maprang.example\n')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining(['ยังไม่มี field ใน release handoff: Environment', 'ยังไม่มี field ใน release handoff: Frontend URL']),
+    )
+  })
+
   test('reports stale avatar-storage handoff labels', () => {
     const stale = filledHandoff
       .replace('ผู้ให้บริการพื้นที่เก็บรูปตัวละคร', 'ผู้ให้บริการ avatar storage')
