@@ -440,6 +440,10 @@ function pathFromFrontendExpression(expression: ts.Expression, stringConstants =
 }
 
 function pathFromFetchExpression(expression: ts.Expression, stringConstants = new Map<string, string>()): string | null {
+  if (ts.isBinaryExpression(expression) && expression.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+    return pathFromFetchBinaryExpression(expression, stringConstants)
+  }
+
   if (!ts.isTemplateExpression(expression)) return null
   if (expression.head.text !== '') return null
   const [baseSpan, ...pathSpans] = expression.templateSpans
@@ -462,6 +466,38 @@ function pathFromFetchExpression(expression: ts.Expression, stringConstants = ne
       rawPath += literalText
     }
   }
+  const path = normalizeFrontendApiPath(rawPath)
+  return path === '' || path === '/' ? null : path
+}
+
+function flattenStringConcatenation(expression: ts.Expression): ts.Expression[] {
+  const unwrapped = unwrapExpression(expression)
+  if (ts.isBinaryExpression(unwrapped) && unwrapped.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+    return [...flattenStringConcatenation(unwrapped.left), ...flattenStringConcatenation(unwrapped.right)]
+  }
+  return [unwrapped]
+}
+
+function pathFromFetchBinaryExpression(expression: ts.BinaryExpression, stringConstants = new Map<string, string>()) {
+  const parts = flattenStringConcatenation(expression)
+  const [basePart, ...pathParts] = parts
+  if (!basePart || basePart.getText() !== 'API_BASE_URL') return null
+  let rawPath = ''
+
+  for (const part of pathParts) {
+    const constantText = literalStringValue(part, stringConstants)
+    const dynamicText = part.getText()
+    if (constantText !== null) {
+      rawPath += constantText
+      continue
+    }
+    if (rawPath === '') return null
+    if (rawPath.includes('?') || dynamicText.includes('query')) {
+      return normalizeFrontendApiPath(rawPath)
+    }
+    rawPath += rawPath.endsWith('/') ? ':id' : '/:id'
+  }
+
   const path = normalizeFrontendApiPath(rawPath)
   return path === '' || path === '/' ? null : path
 }

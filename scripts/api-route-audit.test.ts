@@ -200,6 +200,32 @@ describe('api route audit', () => {
     ])
   })
 
+  test('collects frontend API helper fetch concatenation paths', () => {
+    const calls = collectFrontendApiCallsFromSource(
+      'apps/frontend/src/lib/api.ts',
+      `
+        const apiRoutes = {
+          upload: '/uploads/avatar',
+          character: '/characters',
+          stream: '/chat/stream',
+        } as const
+        const postMethod = 'POST' as const
+
+        export function upload() {
+          return fetch(API_BASE_URL + apiRoutes.upload, { method: postMethod })
+        }
+        export function loadCharacter(characterId: string) {
+          return fetch(API_BASE_URL + apiRoutes.character + '/' + characterId)
+        }
+        async function requestJson(path: string) {
+          return fetch(API_BASE_URL + path)
+        }
+      `,
+    )
+
+    expect(calls.map((call) => call.key)).toEqual(['POST /uploads/avatar', 'GET /characters/:id'])
+  })
+
   test('reports frontend API helper calls that do not match backend routes', () => {
     const calls = collectFrontendApiCallsFromSource(
       'apps/frontend/src/lib/api.ts',
