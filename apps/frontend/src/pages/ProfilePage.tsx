@@ -62,6 +62,7 @@ export function ProfilePage() {
   const contentSettings = useAppSelector(selectContentSettings)
   const [savedAt, setSavedAt] = useState(initialSavedAt)
   const [contentNote, setContentNote] = useState('')
+  const [isContentSaving, setIsContentSaving] = useState(false)
   const [personaNote, setPersonaNote] = useState('')
   const personaSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const personaLength = personaDraft.trim().length
@@ -113,12 +114,16 @@ export function ProfilePage() {
   }
 
   const updateContentMode = async (mode: (typeof contentModes)[number]) => {
+    if (isContentSaving) return
     setContentNote('กำลังบันทึกโหมดคอนเทนต์...')
+    setIsContentSaving(true)
     try {
       await dispatch(saveContentSettings({ isAdult: mode.isAdult, maxRating: mode.maxRating })).unwrap()
       setContentNote(`บันทึกโหมด ${mode.label} แล้ว`)
     } catch {
       setContentNote('บันทึกโหมดคอนเทนต์ไม่ได้ กรุณาเช็กการเชื่อมต่อระบบหลังบ้าน')
+    } finally {
+      setIsContentSaving(false)
     }
   }
 
@@ -192,17 +197,21 @@ export function ProfilePage() {
           <div className="mt-4 grid gap-2 md:grid-cols-3">
             {contentModes.map((mode) => {
               const isActive = contentSettings.isAdult === mode.isAdult && contentSettings.maxRating === mode.maxRating
+              const contentModeTitle = isContentSaving ? 'กำลังบันทึกโหมดคอนเทนต์ รอสักครู่ก่อนเปลี่ยนโหมด' : `เลือกโหมด ${mode.label}`
               return (
                 <button
+                  aria-disabled={isContentSaving}
                   aria-pressed={isActive}
-                  className={`min-h-24 rounded-lg border px-3 py-3 text-left transition ${
+                  className={`min-h-24 rounded-lg border px-3 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-70 ${
                     isActive
                       ? 'border-orange-500 bg-orange-50 text-orange-950 shadow-[0_12px_32px_rgba(249,115,22,0.12)]'
                       : 'border-slate-900/10 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                   data-testid={`profile-content-mode-${mode.maxRating}`}
+                  disabled={isContentSaving}
                   key={mode.maxRating}
                   onClick={() => void updateContentMode(mode)}
+                  title={contentModeTitle}
                   type="button"
                 >
                   <span className="block text-sm font-black">{mode.label}</span>

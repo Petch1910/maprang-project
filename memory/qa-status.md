@@ -1,7 +1,8 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-05-21
+Last updated: 2026-05-25
 
+- 2026-05-25 profile content-mode disabled-reason pass: `bun run frontend:check`, `bun run route-menu:audit`, and `bun run route-menu:audit:test` passed after adding `/profile` content-mode in-flight locking and updating Route/Menu Audit. Browser QA at `http://127.0.0.1:5173/profile?profileContentSavingQa=1` confirmed the profile route renders, content-mode buttons expose Thai titles, no disabled control lacks a title or aria-label, no framework overlay appears, and no browser console errors were logged.
 - 2026-05-21 full deterministic repo QA pass after disabled-control guard: `bun run qa:repo` passed with backend 173 tests / 601 expects, API route audit 48 routes, route/menu audit 14 surfaces, import-cycle audit 128 source files / 307 import edges, local eval 3 scenarios, frontend static/route audit, TypeScript, Vite build, and bundle budget still under limits (main 269.1KB/350KB, chat 231.0KB/260KB). DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-21 disabled-control static guard pass: `bun run frontend:static:audit:test` passed 18 tests / 26 expects after adding `auditDisabledControlsWithAst`, and `bun run frontend:check` passed with the new guard wired into the committed static audit. `git diff --check` also passed.
 - 2026-05-21 legacy component disabled-reason pass: `bun run frontend:check` passed after adding disabled reasons to `LoreManager`, `CharacterList`, `CharacterManager`, and `AuthPanel`. `git diff --check` passed, and the remaining source scan for unmatched component disabled patterns returned no additional rows outside already-audited surfaces.
