@@ -703,7 +703,8 @@ const checks: Check[] = [
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
       const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
       const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
-      const qaLocalCoverage = `${qaRepo} ${qaLocal}`
+      const qaRepoCommands = splitPackageScriptCommands(qaRepo)
+      const qaLocalOnlyCommands = splitPackageScriptCommands(qaLocal)
       const qaLocalCommands = splitPackageScriptCommands(qaRepo, qaLocal)
       const stagingCheck = packageJson.scripts?.['staging:check'] ?? ''
       const stagingVerify = packageJson.scripts?.['staging:verify'] ?? ''
@@ -714,25 +715,25 @@ const checks: Check[] = [
       if (qaLive.includes('smoke:chat') || qaLive.includes('smoke:image')) {
         throw new Error('package.json qa:live ไม่ควรยิง provider ซ้ำจากคำสั่งนอก api:smoke:live')
       }
-      if (!qaRepo.includes('predeploy:check') || !qaRepo.includes('backend:check') || !qaRepo.includes('frontend:check')) {
+      if (!qaRepoCommands.includes('bun run predeploy:check') || !qaRepoCommands.includes('bun run backend:check') || !qaRepoCommands.includes('bun run frontend:check')) {
         throw new Error('package.json qa:repo ต้องครอบ predeploy, backend, และ frontend checks แบบ deterministic')
       }
       if (/(^|&&\s*)bun run (?:smoke:local|api:smoke|e2e:smoke)(?:\s|&&|$)/.test(qaRepo)) {
         throw new Error('package.json qa:repo ต้องไม่เรียก runtime smoke ที่ต้องมี backend/Postgres หรือ browser จริง')
       }
-      if (!qaLocal.includes('bun run qa:repo') || !qaLocal.includes('bun run smoke:doctor') || !qaLocal.includes('bun run smoke:local') || !qaLocal.includes('bun run api:smoke')) {
+      if (!qaLocalOnlyCommands.includes('bun run qa:repo') || !qaLocalOnlyCommands.includes('bun run smoke:doctor') || !qaLocalOnlyCommands.includes('bun run smoke:local') || !qaLocalOnlyCommands.includes('bun run api:smoke')) {
         throw new Error('package.json qa:local ต้องต่อจาก qa:repo แล้วค่อยรัน runtime smoke สำหรับ backend/Postgres จริง')
       }
-      if (!qaLocalCoverage.includes('secrets:patterns:test')) {
+      if (!qaLocalCommands.includes('bun run secrets:patterns:test')) {
         throw new Error('package.json qa:local ต้องรัน secrets:patterns:test เพื่อจับ regression ของ secret pattern กลาง')
       }
-      if (!qaLocalCoverage.includes('secrets:check:test')) {
+      if (!qaLocalCommands.includes('bun run secrets:check:test')) {
         throw new Error('package.json qa:local ต้องรัน secrets:check:test เพื่อจับ regression ของเส้นทางสแกน secret ที่ commit แล้ว')
       }
-      if (!qaLocalCoverage.includes('vault:audit:test')) {
+      if (!qaLocalCommands.includes('bun run vault:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน vault:audit:test เพื่อจับ regression ของตัวช่วย audit memory/knowledge')
       }
-      if (!qaLocalCoverage.includes('eval:local:test')) {
+      if (!qaLocalCommands.includes('bun run eval:local:test')) {
         throw new Error('package.json qa:local ต้องรัน eval:local:test เพื่อจับ regression ของผลลัพธ์ local eval')
       }
       if (!qaLocalCommands.includes('bun run security:audit') || !qaLocalCommands.includes('bun run security:audit:test')) {
@@ -744,22 +745,22 @@ const checks: Check[] = [
       if (!qaLocalCommands.includes('bun run api:audit') || !qaLocalCommands.includes('bun run api:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน api:audit และ api:audit:test เพื่อจับ route audit กับ regression')
       }
-      if (!qaLocalCoverage.includes('api:smoke:test')) {
+      if (!qaLocalCommands.includes('bun run api:smoke:test')) {
         throw new Error('package.json qa:local ต้องรัน api:smoke:test เพื่อจับ regression ของตัวช่วย API smoke')
       }
-      if (!qaLocalCoverage.includes('frontend:api:test')) {
+      if (!qaLocalCommands.includes('bun run frontend:api:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:api:test เพื่อจับ regression ของ error API ฝั่ง frontend')
       }
-      if (!qaLocalCoverage.includes('frontend:env:test')) {
+      if (!qaLocalCommands.includes('bun run frontend:env:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:env:test เพื่อจับ regression ของ env/JWT ฝั่ง frontend')
       }
-      if (!qaLocalCoverage.includes('frontend:storage:test')) {
+      if (!qaLocalCommands.includes('bun run frontend:storage:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:storage:test เพื่อจับ regression ของ localStorage ฝั่ง frontend')
       }
-      if (!qaLocalCoverage.includes('frontend:clipboard:test')) {
+      if (!qaLocalCommands.includes('bun run frontend:clipboard:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:clipboard:test เพื่อจับ regression ของ clipboard ฝั่ง frontend')
       }
-      if (!qaLocalCoverage.includes('frontend:bundle:test')) {
+      if (!qaLocalCommands.includes('bun run frontend:bundle:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:bundle:test เพื่อจับ regression ของ bundle budget')
       }
       if (!qaLocalCommands.includes('bun run frontend:static:audit:test')) {
@@ -777,46 +778,46 @@ const checks: Check[] = [
       if (!qaLocalCommands.includes('bun run route-menu:audit') || !qaLocalCommands.includes('bun run route-menu:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน route-menu:audit และ route-menu:audit:test เพื่อจับเอกสาร route/menu กับ regression')
       }
-      if (!qaLocalCoverage.includes('smoke:helpers:test')) {
+      if (!qaLocalCommands.includes('bun run smoke:helpers:test')) {
         throw new Error('package.json qa:local ต้องรัน smoke:helpers:test เพื่อจับ regression ของ auth/url ใน smoke')
       }
-      if (!qaLocalCoverage.includes('provider:smoke:guards:test')) {
+      if (!qaLocalCommands.includes('bun run provider:smoke:guards:test')) {
         throw new Error('package.json qa:local ต้องรัน provider:smoke:guards:test เพื่อจับ regression ของ provider smoke guard')
       }
-      if (!qaLocalCoverage.includes('smoke:doctor:test')) {
+      if (!qaLocalCommands.includes('bun run smoke:doctor:test')) {
         throw new Error('package.json qa:local ต้องรัน smoke:doctor:test เพื่อจับ regression ของผลลัพธ์ blocker ใน smoke doctor')
       }
-      if (!qaLocalCoverage.includes('smoke:ready:test')) {
+      if (!qaLocalCommands.includes('bun run smoke:ready:test')) {
         throw new Error('package.json qa:local ต้องรัน smoke:ready:test เพื่อจับ regression ของผลลัพธ์ readiness smoke')
       }
-      if (!qaLocalCoverage.includes('smoke:image:test')) {
+      if (!qaLocalCommands.includes('bun run smoke:image:test')) {
         throw new Error('package.json qa:local ต้องรัน smoke:image:test เพื่อจับ regression ของ image smoke fallback')
       }
-      if (!qaLocalCoverage.includes('smoke:chat:test')) {
+      if (!qaLocalCommands.includes('bun run smoke:chat:test')) {
         throw new Error('package.json qa:local ต้องรัน smoke:chat:test เพื่อจับ regression ของการตรวจ live chat smoke')
       }
-      if (!qaLocalCoverage.includes('smoke:local:test')) {
+      if (!qaLocalCommands.includes('bun run smoke:local:test')) {
         throw new Error('package.json qa:local ต้องรัน smoke:local:test เพื่อจับ regression ของตัวช่วย local smoke')
       }
-      if (!qaLocalCoverage.includes('e2e:smoke:test')) {
+      if (!qaLocalCommands.includes('bun run e2e:smoke:test')) {
         throw new Error('package.json qa:local ต้องรัน e2e:smoke:test เพื่อจับ regression ของคำสั่ง browser smoke')
       }
-      if (!qaLocalCoverage.includes('backend:check:db:test')) {
+      if (!qaLocalCommands.includes('bun run backend:check:db:test')) {
         throw new Error('package.json qa:local ต้องรัน backend:check:db:test เพื่อจับ regression ของแผนเช็ค backend ที่ต้องใช้ DB')
       }
-      if (!qaLocalCoverage.includes('supabase:storage:test')) {
+      if (!qaLocalCommands.includes('bun run supabase:storage:test')) {
         throw new Error('package.json qa:local ต้องรัน supabase:storage:test เพื่อจับ regression ของตัวช่วย signed storage')
       }
-      if (!qaLocalCoverage.includes('deploy:status:test')) {
+      if (!qaLocalCommands.includes('bun run deploy:status:test')) {
         throw new Error('package.json qa:local ต้องรัน deploy:status:test เพื่อจับ regression ของผลลัพธ์ deploy status')
       }
-      if (!qaLocalCoverage.includes('deploy:doctor:test')) {
+      if (!qaLocalCommands.includes('bun run deploy:doctor:test')) {
         throw new Error('package.json qa:local ต้องรัน deploy:doctor:test เพื่อจับ regression ของตัวช่วย deploy env')
       }
-      if (!qaLocalCoverage.includes('deploy:doctor:self-test')) {
+      if (!qaLocalCommands.includes('bun run deploy:doctor:self-test')) {
         throw new Error('package.json qa:local ต้องรัน deploy:doctor:self-test เพื่อให้ self-test ของ deploy env CLI ยังถูกครอบไว้')
       }
-      if (!qaLocalCoverage.includes('predeploy:check:test')) {
+      if (!qaLocalCommands.includes('bun run predeploy:check:test')) {
         throw new Error('package.json qa:local ต้องรัน predeploy:check:test เพื่อจับ regression ของการผูก predeploy guard')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {

@@ -92,7 +92,10 @@ describe('predeploy check wiring', () => {
 
     const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
     const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
-    const qaLocalCoverage = `${qaRepo} ${qaLocal}`
+    const qaLocalOnlyCommands = qaLocal
+      .split(/\s*&&\s*/)
+      .map((command) => command.trim())
+      .filter(Boolean)
     const qaLocalCommands = [qaRepo, qaLocal].flatMap((script) =>
       script
         .split(/\s*&&\s*/)
@@ -101,14 +104,14 @@ describe('predeploy check wiring', () => {
     )
 
     expect(packageJson.scripts?.['predeploy:check:test']).toBe('bun test scripts/predeploy-check.test.ts')
-    expect(qaLocal).toContain('bun run qa:repo')
-    expect(qaLocal).toContain('bun run smoke:doctor')
-    expect(qaLocal).toContain('bun run smoke:local')
-    expect(qaLocal).toContain('bun run api:smoke')
-    expect(qaLocalCoverage).toContain('bun run predeploy:check:test')
-    expect(qaLocalCoverage).toContain('bun run docs:commands')
-    expect(qaLocalCoverage).toContain('bun run docs:commands:test')
-    expect(qaLocalCoverage).toContain('bun run deploy:doctor:self-test')
+    expect(qaLocalOnlyCommands).toContain('bun run qa:repo')
+    expect(qaLocalOnlyCommands).toContain('bun run smoke:doctor')
+    expect(qaLocalOnlyCommands).toContain('bun run smoke:local')
+    expect(qaLocalOnlyCommands).toContain('bun run api:smoke')
+    expect(qaLocalCommands).toContain('bun run predeploy:check:test')
+    expect(qaLocalCommands).toContain('bun run docs:commands')
+    expect(qaLocalCommands).toContain('bun run docs:commands:test')
+    expect(qaLocalCommands).toContain('bun run deploy:doctor:self-test')
     expect(qaLocalCommands).toContain('bun run security:audit')
     expect(qaLocalCommands).toContain('bun run security:audit:test')
     expect(qaLocalCommands).toContain('bun run import-cycle:audit')
