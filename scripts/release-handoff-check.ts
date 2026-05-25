@@ -25,6 +25,16 @@ const forbiddenPatterns = [
 
 const forbiddenCopySnippets = ['ผู้ให้บริการ avatar storage', 'รูปแบบการเข้าถึง avatar storage']
 
+const requiredFieldSnippets = [
+  '- Environment:',
+  '- Frontend URL:',
+  '- Backend URL:',
+  '- Health URL:',
+  '- Ready URL:',
+  '- CORS origins:',
+  '- Go / no-go:',
+]
+
 const requiredQaGateSnippets = [
   '`bun run qa:local`',
   '`bun run e2e:smoke`',
@@ -178,6 +188,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
 
   for (const snippet of forbiddenCopySnippets) {
     if (content.includes(snippet)) findings.push(`พบข้อความส่งมอบที่ยังใช้คำเก่า: ${snippet}`)
+  }
+
+  for (const snippet of requiredFieldSnippets) {
+    if (!content.includes(snippet)) findings.push(`ยังไม่มี field ใน release handoff: ${snippet.slice(2, -1)}`)
   }
 
   for (const snippet of requiredQaGateSnippets) {
