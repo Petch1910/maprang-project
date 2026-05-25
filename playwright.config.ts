@@ -1,7 +1,51 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const frontendUrl = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:5173'
-const backendUrl = process.env.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'
+export type PlaywrightSmokeEnv = Record<string, string | undefined>
+
+export function playwrightSmokeTargetUrls(env: PlaywrightSmokeEnv = process.env) {
+  return {
+    frontendUrl: env.E2E_BASE_URL ?? 'http://127.0.0.1:5173',
+    backendUrl: env.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000',
+  }
+}
+
+export function isLocalE2eUrl(value: string) {
+  try {
+    const host = new URL(value).hostname.toLowerCase()
+    return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(host)
+  } catch {
+    return false
+  }
+}
+
+export function buildPlaywrightWebServers(env: PlaywrightSmokeEnv = process.env) {
+  const { frontendUrl, backendUrl } = playwrightSmokeTargetUrls(env)
+  const backendOrigin = backendUrl.replace(/\/+$/, '')
+  const webServers: Array<{ command: string; url: string; reuseExistingServer: boolean; timeout: number }> = []
+
+  if (isLocalE2eUrl(backendUrl)) {
+    webServers.push({
+      command: 'cd apps/backend && bun run dev',
+      url: `${backendOrigin}/health`,
+      reuseExistingServer: true,
+      timeout: 120_000,
+    })
+  }
+
+  if (isLocalE2eUrl(frontendUrl)) {
+    webServers.push({
+      command: 'cd apps/frontend && bun run dev -- --host 127.0.0.1',
+      url: frontendUrl,
+      reuseExistingServer: true,
+      timeout: 120_000,
+    })
+  }
+
+  return webServers
+}
+
+const { frontendUrl } = playwrightSmokeTargetUrls()
+const webServers = buildPlaywrightWebServers()
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -20,20 +64,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  webServer: [
-    {
-      command: 'cd apps/backend && bun run dev',
-      url: `${backendUrl}/health`,
-      reuseExistingServer: true,
-      timeout: 120_000,
-    },
-    {
-      command: 'cd apps/frontend && bun run dev -- --host 127.0.0.1',
-      url: frontendUrl,
-      reuseExistingServer: true,
-      timeout: 120_000,
-    },
-  ],
+  ...(webServers.length > 0 ? { webServer: webServers } : {}),
   projects: [
     {
       name: 'chromium-desktop',

@@ -83,6 +83,7 @@ const requiredFiles = [
   'scripts/local-smoke.test.ts',
   'scripts/e2e-smoke.ts',
   'scripts/e2e-smoke.test.ts',
+  'scripts/playwright-config.test.ts',
   'scripts/check-secrets.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
@@ -617,6 +618,8 @@ const checks: Check[] = [
       const importCycleAuditTest = await readRepoFile('scripts/import-cycle-audit.test.ts')
       const e2eSmoke = await readRepoFile('scripts/e2e-smoke.ts')
       const e2eSmokeTest = await readRepoFile('scripts/e2e-smoke.test.ts')
+      const playwrightConfig = await readRepoFile('playwright.config.ts')
+      const playwrightConfigTest = await readRepoFile('scripts/playwright-config.test.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const readme = await readRepoFile('README.md')
       const qaSeed = await readRepoFile('apps/backend/prisma/qa-seed.ts')
@@ -673,6 +676,7 @@ const checks: Check[] = [
           '"qa:seed"',
           '"e2e:smoke"',
           '"qa:repo"',
+          'scripts/playwright-config.test.ts',
           '"qa:full"',
           '"staging:check"',
           '"staging:verify"',
@@ -719,6 +723,8 @@ const checks: Check[] = [
           'E2E_API_BASE_URL',
           'credential/userinfo',
           'path/query/hash',
+          'deployed HTTPS origins',
+          'ไม่ start local dev server',
         ],
         'DEPLOYMENT_QA.md',
       )
@@ -760,6 +766,25 @@ const checks: Check[] = [
           'redacts secret-shaped values from e2e smoke errors',
         ],
         'scripts/e2e-smoke.test.ts',
+      )
+      requireIncludes(
+        playwrightConfig,
+        [
+          'playwrightSmokeTargetUrls',
+          'isLocalE2eUrl',
+          'buildPlaywrightWebServers',
+          'webServers.length > 0',
+        ],
+        'playwright.config.ts',
+      )
+      requireIncludes(
+        playwrightConfigTest,
+        [
+          'does not start local dev servers for deployed staging targets',
+          'supports mixed local and deployed targets for focused debugging',
+          'http://[::1]:5173',
+        ],
+        'scripts/playwright-config.test.ts',
       )
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
@@ -1975,6 +2000,8 @@ const checks: Check[] = [
           'E2E_API_BASE_URL',
           'credential/userinfo',
           'path/query/hash',
+          'deployed HTTPS origins',
+          'ไม่ start local dev server',
           '/ready',
           'bun run staging:verify',
           'https://',

@@ -105,6 +105,7 @@ bun run e2e:smoke
 `/admin/health`, `/admin/prompt-inspector`, `/admin/evals`, และ seeded chat ทั้งเดสก์ท็อป/มือถือ. มันยังตรวจ Character Lobby relationship contract, chat three-dot menu, report dialog, prompt inspector snapshot flow, local eval run flow เมื่อมี admin key,
 route rendering, ข้อผิดพลาดในคอนโซล/หน้าเบราว์เซอร์, และการล้นแนวนอน. มันไม่ส่งข้อความแชทจริง จึงไม่ใช้เครดิตผู้ให้บริการตอน UI smoke testing.
 ถ้ารันกับ staging ให้ตั้ง `E2E_BASE_URL` และ `E2E_API_BASE_URL` เป็น origin จริงเท่านั้น: staging/production ต้องเป็น `https`, ไม่มี credential/userinfo และไม่มี path/query/hash; local dev ใช้ `http://127.0.0.1` ได้.
+เมื่อสองค่านี้เป็น deployed HTTPS origins แล้ว Playwright จะไม่ start local dev server; ถ้าเป็น loopback/local จึงค่อย start backend/frontend dev server ให้เอง.
 
 สำหรับ full local predeploy gate พร้อมการตรวจเบราว์เซอร์:
 
