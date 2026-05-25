@@ -56,6 +56,7 @@ describe('frontend route audit', () => {
               <a href="/characters/mika">Lobby</a>
               <a href="https://example.com">External</a>
               <button onClick={() => navigate('/missing')}>Missing</button>
+              <button onClick={() => navigate({ pathname: '/ghost-object' })}>Missing object</button>
               <NavLink to="/ghost">Ghost</NavLink>
             </>
           )
@@ -67,6 +68,7 @@ describe('frontend route audit', () => {
 
     expect(findings.map((finding) => finding.message)).toEqual([
       'คำสั่ง navigate ชี้ไปที่ /missing แต่ App.tsx ไม่มี Route ที่ตรงกัน',
+      'คำสั่ง navigate ชี้ไปที่ /ghost-object แต่ App.tsx ไม่มี Route ที่ตรงกัน',
       'ค่า to ชี้ไปที่ /ghost แต่ App.tsx ไม่มี Route ที่ตรงกัน',
     ])
   })

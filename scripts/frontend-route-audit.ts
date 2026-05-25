@@ -60,6 +60,19 @@ function expressionStringValue(expression: ts.Expression) {
   return null
 }
 
+function objectLiteralStringProperty(expression: ts.Expression, propertyName: string) {
+  if (!ts.isObjectLiteralExpression(expression)) return null
+  const property = expression.properties.find(
+    (item): item is ts.PropertyAssignment =>
+      ts.isPropertyAssignment(item) && propertyNameText(item.name) === propertyName,
+  )
+  return property ? expressionStringValue(property.initializer) : null
+}
+
+function navigatePathValue(expression: ts.Expression) {
+  return expressionStringValue(expression) ?? objectLiteralStringProperty(expression, 'pathname')
+}
+
 export function normalizeStaticPath(value: string) {
   if (!value.startsWith('/')) return null
   if (value.startsWith('//')) return null
@@ -207,7 +220,7 @@ export function auditFile(content: string, file: string, declaredRoutes: string[
       node.expression.text === 'navigate' &&
       node.arguments[0]
     ) {
-      const value = expressionStringValue(node.arguments[0])
+      const value = navigatePathValue(node.arguments[0])
       if (value) checkPath(value, node.arguments[0], 'คำสั่ง navigate')
     }
 

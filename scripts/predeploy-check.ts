@@ -1548,6 +1548,9 @@ const checks: Check[] = [
         [
           'propertyNameText',
           'expressionStringValue',
+          'objectLiteralStringProperty',
+          'navigatePathValue',
+          'pathname',
           'ค่า ${name} ใน object',
           'ts.isPropertyAssignment',
         ],
