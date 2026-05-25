@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: My Chats refresh now has a loading guard. `/chats` disables the refresh button while chat summaries are loading, exposes `aria-disabled`, and shows the Thai title `กำลังโหลดรายการแชท`; Browser QA confirmed the disabled reason renders with no disabled controls missing a reason and no console errors.
 - 2026-05-25: Full deterministic repo QA passed after Route/Menu guard and decision-memory refresh. `bun run qa:repo` is green across secrets, memory/knowledge, docs commands, eval, security/import/API audits, route/menu doc checks, smoke helper/provider/deploy tests, backend checks, and frontend build/bundle; backend DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25: Decision log now records Route/Menu disabled reasons as a UI contract in `memory/decisions/0015-route-menu-disabled-reasons-contract.md`, so future agents treat disabled/guard copy as product behavior rather than optional documentation.
 - 2026-05-25: Route/Menu Audit now documents concrete My Chats disabled reasons. `/chats` handoff names select-all empty/filter loading titles, bulk archive/restore/delete selection or pending-action titles, busy per-chat menus, and rename/delete dialog titles instead of the older generic "disabled while saving" note.

@@ -45,6 +45,7 @@ export function MyChatsPage() {
   const sourceChats = filter === 'archived' ? archivedChats : chats
   const isListLoading = filter === 'archived' ? isArchivedLoading : isLoading
   const hasListError = Boolean(error) || actionNote.includes('โหลดแชทที่จัดเก็บไว้ไม่สำเร็จ')
+  const refreshDisabledReason = isListLoading ? 'กำลังโหลดรายการแชท' : undefined
 
   const visibleChats = useMemo(() => {
     const pinOrder = new Map(pinnedChatIds.map((id, index) => [id, index]))
@@ -326,8 +327,12 @@ export function MyChatsPage() {
             {isSelectionMode ? 'ยกเลิกเลือก' : 'เลือกหลายแชท'}
           </button>
           <button type="button"
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
+            aria-disabled={Boolean(refreshDisabledReason)}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-55"
+            data-testid="my-chats-refresh"
+            disabled={Boolean(refreshDisabledReason)}
             onClick={refreshChats}
+            title={refreshDisabledReason ?? 'รีเฟรชรายการแชท'}
           >
             <RefreshCw size={16} />
             รีเฟรช
