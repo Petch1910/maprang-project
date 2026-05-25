@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: `agent.md` now says decision-file predeploy locking runs through `0017-route-menu-future-surface-contract.md`, and `predeploy:check` locks that agent-guide snippet. Checks passed: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run memory:audit`.
 - 2026-05-25: Decision `0017-route-menu-future-surface-contract.md` records the Route/Menu future-surface contract: `future` rows must not use real `/path` routes before route/preload/navigation QA exists; decision index and predeploy required files now include it.
 - 2026-05-25: Full deterministic `bun run qa:repo` passed after the Route/Menu future route-path guard and documentation updates. Result highlights: docs command audit 325 references, backend 177 tests / 609 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 292 import edges, local eval 3 scenarios, frontend build and bundle budget green; DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25: `ROUTE_MENU_AUDIT.md` now documents the future-route rule directly: `future` rows are future-only and must not point to `/path` until route/preload/navigation QA exists; `route-menu:audit` and `predeploy:check` lock the note. Checks passed: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.

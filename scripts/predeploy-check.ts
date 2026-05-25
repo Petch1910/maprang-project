@@ -269,6 +269,7 @@ const checks: Check[] = [
           'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
           'combined `api:smoke:live` JSON summary must omit `handoffEvidence`',
           'positive token/elapsed values',
+          '0017-route-menu-future-surface-contract.md',
         ],
         'agent.md',
       )
