@@ -3,6 +3,8 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem, type SafeStorageLike } from '../apps/frontend/src/lib/safeStorage'
 import { loadPinnedChatIdsFromRaw, serializePinnedChatIds, togglePinnedChatId } from '../apps/frontend/src/lib/pinnedChats'
+import contentReducer, { hydrateContent } from '../apps/frontend/src/store/slices/contentSlice'
+import draftsReducer, { hydrateDrafts } from '../apps/frontend/src/store/slices/draftsSlice'
 
 function mapStorage(): SafeStorageLike & { values: Map<string, string> } {
   const values = new Map<string, string>()
@@ -66,6 +68,36 @@ describe('frontend storage helpers', () => {
     expect(serializePinnedChatIds(['b', 'a'])).toBe('["b","a"]')
     expect(togglePinnedChatId(['b'], 'a')).toEqual(['a', 'b'])
     expect(togglePinnedChatId(['a', 'b'], 'a')).toEqual(['b'])
+  })
+
+  test('drops stale redux fields from persisted local state', () => {
+    const legacyContent = {
+      isAdult: true,
+      ageGateAnswered: true,
+      maxRating: 'restricted_18' as const,
+      showMature: true,
+    }
+    const legacyDrafts = {
+      composerByKey: { 'chat:1': 'ยังพิมพ์ค้างไว้' },
+      personaDraft: 'ผู้เล่นชอบเล่าเรื่องช้า ๆ',
+      personaUpdatedAt: '2026-05-25T00:00:00.000Z',
+      creatorDraftUpdatedAt: '2026-05-25T00:00:00.000Z',
+    }
+    const content = contentReducer(undefined, hydrateContent(legacyContent))
+    const drafts = draftsReducer(undefined, hydrateDrafts(legacyDrafts))
+
+    expect(content).toEqual({
+      isAdult: true,
+      ageGateAnswered: true,
+      maxRating: 'restricted_18',
+    })
+    expect('showMature' in content).toBe(false)
+    expect(drafts).toEqual({
+      composerByKey: { 'chat:1': 'ยังพิมพ์ค้างไว้' },
+      personaDraft: 'ผู้เล่นชอบเล่าเรื่องช้า ๆ',
+      personaUpdatedAt: '2026-05-25T00:00:00.000Z',
+    })
+    expect('creatorDraftUpdatedAt' in drafts).toBe(false)
   })
 
   test('keeps frontend source on safe storage wrappers', () => {
