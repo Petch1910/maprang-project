@@ -180,7 +180,16 @@ function validateProductionQaResults(content: string, findings: string[]) {
   const environment = releaseEnvironment(content)
   if (environment !== 'production') return
 
-  for (const label of ['`bun run qa:local`', '`bun run e2e:smoke`', '`bun run staging:verify`', '`bun run production:check`', 'GitHub Production Smoke run']) {
+  for (const label of [
+    '`bun run qa:local`',
+    '`bun run e2e:smoke`',
+    '`bun run frontend:env:test`',
+    '`bun run frontend:storage:test`',
+    '`bun run frontend:clipboard:test`',
+    '`bun run staging:verify`',
+    '`bun run production:check`',
+    'GitHub Production Smoke run',
+  ]) {
     const value = fieldValue(content, label)
     if (value && !isPassed(value)) findings.push(`production release handoff ต้องมีผล QA ผ่าน: ${label}`)
   }
@@ -190,7 +199,14 @@ function validateStagingQaResults(content: string, findings: string[]) {
   const environment = releaseEnvironment(content)
   if (environment !== 'staging') return
 
-  for (const label of ['`bun run qa:local`', '`bun run e2e:smoke`', '`bun run staging:verify`']) {
+  for (const label of [
+    '`bun run qa:local`',
+    '`bun run e2e:smoke`',
+    '`bun run frontend:env:test`',
+    '`bun run frontend:storage:test`',
+    '`bun run frontend:clipboard:test`',
+    '`bun run staging:verify`',
+  ]) {
     const value = fieldValue(content, label)
     if (value && !isPassed(value)) findings.push(`staging release handoff ต้องมีผล QA ผ่าน: ${label}`)
   }

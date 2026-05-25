@@ -238,6 +238,29 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires frontend QA gates to pass for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- `bun run frontend:env:test`: pass', '- `bun run frontend:env:test`: fail')
+      .replace('- `bun run frontend:storage:test`: pass', '- `bun run frontend:storage:test`: fail')
+      .replace('- `bun run frontend:clipboard:test`: pass', '- `bun run frontend:clipboard:test`: fail')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมีผล QA ผ่าน: `bun run frontend:env:test`',
+        'production release handoff ต้องมีผล QA ผ่าน: `bun run frontend:storage:test`',
+        'production release handoff ต้องมีผล QA ผ่าน: `bun run frontend:clipboard:test`',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมีผล QA ผ่าน: `bun run frontend:env:test`',
+        'staging release handoff ต้องมีผล QA ผ่าน: `bun run frontend:storage:test`',
+        'staging release handoff ต้องมีผล QA ผ่าน: `bun run frontend:clipboard:test`',
+      ]),
+    )
+  })
+
   test('reports missing core production QA gate rows', () => {
     const stale = filledHandoff
       .replace('- `bun run qa:local`: pass\n', '')

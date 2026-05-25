@@ -76,3 +76,4 @@ guard ใน repo:
 - Release handoff guard addendum 2026-05-25: production live-provider verification flags must be real handoff field rows set to `1`, not notes that merely mention `CHAT_PROVIDER_LIVE_VERIFIED` or `IMAGE_GENERATION_LIVE_VERIFIED`.
 - Release handoff guard addendum 2026-05-25: critical fields such as `Environment`, deployed URLs, `CORS origins`, and `Go / no-go` must remain actual `- label:` rows in the handoff.
 - Release handoff guard addendum 2026-05-25: filled handoffs must use exact `Environment: staging` or `Environment: production`, and final release evidence must record `Go / no-go: go`; ambiguous environment text or no-go decisions remain blocked.
+- Release handoff guard addendum 2026-05-25: filled staging/production handoffs must also record frontend state QA gates (`frontend:env:test`, `frontend:storage:test`, `frontend:clipboard:test`) as pass/ผ่าน, not fail or warning text.
