@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Creator Studio disabled controls now explain next steps. `/create` AI draft, image-only draft, upload, relationship preset apply, preview simulator, and create-draft controls expose Thai titles and `aria-disabled` for generating, uploading, simulating, missing preset, missing required fields, tag conflicts, or saving states; Browser QA confirmed no disabled control lacks a reason.
 - 2026-05-21: Report flow disabled states now explain themselves. Chat character reports, message report buttons, and the shared report dialog expose Thai titles and `aria-disabled` for report-in-flight states; Browser QA confirmed the chat report dialog opens from `/chat`, the form controls have clear titles, and no disabled control lacks a reason.
 - 2026-05-21: ChatPanel scene/world/favorite controls now explain locked states. Scene action buttons, world-state fields/save button, and the favorite button expose Thai titles and `aria-disabled` for streaming, no-chat-yet, save-in-progress, and favorite-update states; Browser QA confirmed the world-state panel no longer has disabled controls without reasons.
 - 2026-05-21: Chat Composer disabled reasons are now complete. The composer textarea, tool tray button, suggestion buttons, and submit button expose Thai titles for busy/empty-message/token-blocked states; submit now says `พิมพ์ข้อความก่อนส่ง` when the message is blank instead of implying it can send.

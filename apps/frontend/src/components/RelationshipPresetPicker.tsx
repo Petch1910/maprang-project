@@ -21,6 +21,7 @@ export function RelationshipPresetPicker({
   }, [])
 
   const selected = presets.find((preset) => preset.id === selectedId)
+  const applyDisabledReason = selected ? '' : 'เลือกพรีเซ็ตความสัมพันธ์ก่อนใช้งาน'
   const applyPreset = () => {
     if (!selected) return
 
@@ -34,8 +35,10 @@ export function RelationshipPresetPicker({
         <strong className="text-slate-900">พรีเซ็ตความสัมพันธ์</strong>
         <button type="button"
           className="min-h-8 rounded-full border border-blue-600/20 bg-blue-600/10 px-3 font-bold text-blue-700 transition hover:bg-blue-600/15 disabled:opacity-60"
+          aria-disabled={Boolean(applyDisabledReason)}
           disabled={!selected}
           onClick={applyPreset}
+          title={applyDisabledReason || 'ใช้พรีเซ็ตนี้กับแท็กตัวละคร'}
         >
           ใช้พรีเซ็ต
         </button>

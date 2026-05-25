@@ -16,6 +16,7 @@ export function RelationshipPreviewPanel({
   const [script, setScript] = useState(
     'สวัสดี ฉันอยากรู้จักเธอให้มากขึ้น\nขอบคุณที่เล่าให้ฟังนะ ฉันไว้ใจเธอ\nถ้าเธอยังไม่พร้อมก็ไม่เป็นไร',
   )
+  const previewDisabledReason = isLoading ? 'กำลังจำลองบทสนทนา รอให้เสร็จก่อน' : ''
 
   const runPreview = async () => {
     setIsLoading(true)
@@ -42,8 +43,10 @@ export function RelationshipPreviewPanel({
         <strong className="text-slate-900">พรีวิวสำหรับครีเอเตอร์</strong>
         <button type="button"
           className="min-h-8 rounded-full border border-slate-900/10 bg-slate-50 px-3 font-bold text-slate-700 transition hover:bg-white disabled:opacity-60"
+          aria-disabled={isLoading}
           disabled={isLoading}
           onClick={runPreview}
+          title={previewDisabledReason || 'ทดสอบความสัมพันธ์ 5 เทิร์น'}
         >
           {isLoading ? 'กำลังจำลอง...' : 'ทดสอบ 5 เทิร์น'}
         </button>

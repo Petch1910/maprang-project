@@ -240,6 +240,17 @@ export function CharacterCreateForm({
     [form, hasDangerConflict, tagAnalysis],
   )
   const canSubmit = !isSaving && !hasDangerConflict && Boolean(form.name.trim()) && Boolean(form.systemPrompt.trim())
+  const aiDraftDisabledReason = isGeneratingDraft ? 'AI กำลังสร้างร่างอยู่ รอให้เสร็จก่อน' : ''
+  const uploadDisabledReason = isUploading ? 'กำลังอัปโหลดรูป รอให้เสร็จก่อน' : ''
+  const submitDisabledReason = isSaving
+    ? 'กำลังสร้างดราฟต์ รอให้เสร็จก่อน'
+    : hasDangerConflict
+      ? 'แก้แท็กที่ขัดแย้งก่อนสร้างดราฟต์'
+      : !form.name.trim()
+        ? 'กรอกชื่อตัวละครก่อนสร้างดราฟต์'
+        : !form.systemPrompt.trim()
+          ? 'กรอกพรอมป์ระบบหรือบุคลิกก่อนสร้างดราฟต์'
+          : ''
 
   const status = useMemo<CreatorDraftStatus>(
     () => ({
@@ -557,33 +568,46 @@ export function CharacterCreateForm({
               <div className="grid w-full max-w-xl gap-3">
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-orange-500 px-3 text-xs font-black text-white transition hover:bg-orange-600"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-orange-500 px-3 text-xs font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-disabled={isGeneratingDraft}
                     data-testid="creator-ai-draft"
                     disabled={isGeneratingDraft}
                     onClick={() => void generateImageDraft(false)}
+                    title={aiDraftDisabledReason || 'ให้ AI สร้างรูปและเนื้อหาตัวละคร'}
                     type="button"
                   >
                     <WandSparkles size={15} />
                     {isGeneratingDraft ? 'ร่าง...' : 'รูป+ข้อความ'}
                   </button>
                   <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-800 px-3 text-xs font-black text-white transition hover:bg-slate-900"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-800 px-3 text-xs font-black text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-disabled={isGeneratingDraft}
                     data-testid="creator-ai-image-only"
                     disabled={isGeneratingDraft}
                     onClick={() => void generateImageDraft(true)}
+                    title={aiDraftDisabledReason || 'ให้ AI สร้างเฉพาะรูปตัวละคร'}
                     type="button"
                   >
                     <ImageIcon size={15} />
                     {isGeneratingDraft ? 'สร้าง...' : 'สร้างเฉพาะรูป'}
                   </button>
-                  <label className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50">
+                  <label
+                    aria-disabled={isUploading}
+                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50 ${
+                      isUploading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                    }`}
+                    title={uploadDisabledReason || 'อัปโหลดรูปตัวละครจากเครื่อง'}
+                  >
                     <Upload size={15} />
                     {isUploading ? 'โหลด...' : 'อัปโหลด'}
                     <input
+                      aria-disabled={isUploading}
+                      aria-label="อัปโหลดรูปตัวละคร"
                       accept="image/png,image/jpeg,image/webp,image/gif"
                       className="sr-only"
                       disabled={isUploading}
                       onChange={(event) => void handleAvatarFile(event.target.files?.[0] ?? null)}
+                      title={uploadDisabledReason || 'อัปโหลดรูปตัวละครจากเครื่อง'}
                       type="file"
                     />
                   </label>
@@ -917,9 +941,11 @@ export function CharacterCreateForm({
               </button>
               <button type="button"
                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+                aria-disabled={Boolean(submitDisabledReason)}
                 data-testid="creator-submit"
                 disabled={!canSubmit}
                 onClick={submit}
+                title={submitDisabledReason || 'สร้างดราฟต์ตัวละคร'}
               >
                 {isSaving ? 'กำลังสร้าง...' : hasDangerConflict ? 'แก้แท็กที่ขัดแย้งก่อน' : 'สร้างดราฟต์'}
               </button>
