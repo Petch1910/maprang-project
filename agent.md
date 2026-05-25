@@ -228,3 +228,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: Route/Menu Audit rows with `needs-staging` must point to `STAGING_RUNBOOK.md` and `/admin/health`, and `future` rows must clearly say they are future work rather than clickable-ready menus.
 - Current addendum 2026-05-25: `predeploy:check` now locks the Route/Menu Audit `needs-staging`/`future` status-evidence guard, so removing the checker snippets or regression fixture should fail before handoff.
 - Current addendum 2026-05-25: `memory:audit` now requires the Route/Menu Audit status-evidence notes to stay in working context, deploy blockers, and QA status, with `predeploy:check` also locking the memory-audit snippets.
+- Current addendum 2026-05-25: API route coverage is now quality-guarded: admin routes require `admin-smoke`, live-provider routes (`POST /chat`, `POST /creator/ai-draft`) require `live-smoke`, `manual-production` cannot stand alone, and coverage notes cannot be blank.

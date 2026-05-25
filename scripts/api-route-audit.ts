@@ -281,6 +281,26 @@ export function summarizeRoutesByOwner(discoveredRoutes: DiscoveredRoute[], cove
   return byOwner
 }
 
+const liveProviderRouteKeys = new Set<RouteKey>(['POST /chat', 'POST /creator/ai-draft'])
+
+function isAdminCoverageRoute(route: DiscoveredRoute, entry: RouteCoverage) {
+  return /\s\/admin(?:\/|$)/.test(route.key) || entry.owner === 'admin' || entry.owner.endsWith('/admin')
+}
+
+function isLiveProviderCoverageRoute(route: DiscoveredRoute) {
+  return liveProviderRouteKeys.has(route.key)
+}
+
+function isWeakCoverageEntry(route: DiscoveredRoute, entry: RouteCoverage) {
+  const levels = entry.coverage
+  if (levels.length === 0) return true
+  if (entry.note.trim().length === 0) return true
+  if (levels.length === 1 && levels[0] === 'manual-production') return true
+  if (isAdminCoverageRoute(route, entry) && !levels.includes('admin-smoke')) return true
+  if (isLiveProviderCoverageRoute(route) && !levels.includes('live-smoke')) return true
+  return false
+}
+
 export function auditRouteCoverage(discoveredRoutes: DiscoveredRoute[], coverage = routeCoverage) {
   const discoveredKeys = new Set(discoveredRoutes.map((route) => route.key))
   const coveredKeys = new Set(Object.keys(coverage) as RouteKey[])
@@ -289,8 +309,7 @@ export function auditRouteCoverage(discoveredRoutes: DiscoveredRoute[], coverage
   const weakCoverage = discoveredRoutes.filter((route) => {
     const entry = coverage[route.key]
     if (!entry) return false
-    const levels = entry.coverage
-    return levels.length === 0
+    return isWeakCoverageEntry(route, entry)
   })
 
   return {
@@ -618,7 +637,7 @@ export async function runApiRouteAudit(
   }
 
   if (weakCoverage.length > 0) {
-    writeError('ตรวจ API route ไม่ผ่าน: มี route ที่ยังไม่ระบุระดับ coverage')
+    writeError('ตรวจ API route ไม่ผ่าน: มี route ที่ coverage ยังอ่อนหรือขาด smoke เฉพาะทาง')
     for (const route of weakCoverage) writeError(`- ${route.key}`)
   }
 

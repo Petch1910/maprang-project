@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 API route coverage quality guard pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after API route audit started rejecting weak coverage quality, including admin routes without `admin-smoke`, live-provider routes without `live-smoke`, manual-production-only routes, and blank coverage notes.
 - 2026-05-25 memory route/menu status evidence guard pass: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after memory audit and predeploy started requiring Route/Menu Audit `needs-staging`/`future` status-evidence notes to remain in memory.
 - 2026-05-25 predeploy route/menu status evidence wiring pass: `bun run predeploy:check:test` and `bun run predeploy:check` passed after predeploy started requiring the Route/Menu Audit `needs-staging`/`future` status-evidence checker snippets and regression fixture.
 - 2026-05-25 route/menu status evidence guard pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after route/menu documentation started requiring `needs-staging` rows to point to `STAGING_RUNBOOK.md` plus `/admin/health`, and `future` rows to say they are future work.

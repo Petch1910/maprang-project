@@ -95,6 +95,40 @@ describe('api route audit', () => {
     expect(result.byOwner.get('unknown')).toBe(1)
   })
 
+  test('flags coverage quality for admin, live, manual-only, and empty-note routes', () => {
+    const discoveredRoutes: DiscoveredRoute[] = [
+      { key: 'GET /health', file: 'fixture.routes.ts' },
+      { key: 'GET /ready', file: 'fixture.routes.ts' },
+      { key: 'POST /chat', file: 'fixture.routes.ts' },
+      { key: 'POST /creator/ai-draft', file: 'fixture.routes.ts' },
+      { key: 'GET /admin/reports', file: 'fixture.routes.ts' },
+      { key: 'PATCH /characters/:id', file: 'fixture.routes.ts' },
+      { key: 'GET /empty-note', file: 'fixture.routes.ts' },
+    ]
+    const coverage: Record<RouteKey, RouteCoverage> = {
+      'GET /health': { owner: 'platform', coverage: ['smoke'], note: 'covered' },
+      'GET /ready': { owner: 'platform', coverage: ['manual-production'], note: 'manual only is too weak' },
+      'POST /chat': { owner: 'chat', coverage: ['smoke'], note: 'missing live smoke' },
+      'POST /creator/ai-draft': { owner: 'creator', coverage: ['smoke'], note: 'missing live smoke' },
+      'GET /admin/reports': { owner: 'moderation', coverage: ['backend-test'], note: 'missing admin smoke' },
+      'PATCH /characters/:id': { owner: 'characters', coverage: [], note: 'no coverage level' },
+      'GET /empty-note': { owner: 'platform', coverage: ['smoke'], note: '   ' },
+    }
+
+    const result = auditRouteCoverage(discoveredRoutes, coverage)
+
+    expect(result.missingCoverage).toEqual([])
+    expect(result.staleCoverage).toEqual([])
+    expect(result.weakCoverage.map((route) => route.key)).toEqual([
+      'GET /ready',
+      'POST /chat',
+      'POST /creator/ai-draft',
+      'GET /admin/reports',
+      'PATCH /characters/:id',
+      'GET /empty-note',
+    ])
+  })
+
   test('collects frontend API helper calls with methods and dynamic ids', () => {
     const calls = collectFrontendApiCallsFromSource(
       'apps/frontend/src/lib/api.ts',

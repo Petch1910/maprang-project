@@ -67,6 +67,7 @@ guard ใน repo:
 - Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง API/deploy status/smoke target URL guards, readiness smoke URL redaction, release/deploy credential URL guards, production/staging CORS origin credential/path/query/hash guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
 - backend test suite ฝั่ง local ผ่านแล้ว: 177 pass, 0 fail, 609 expect calls.
 - Local API smoke ผ่านแล้ว
+- API route audit now rejects weak coverage quality before deploy: admin routes need `admin-smoke`, live-provider routes need `live-smoke`, manual-production-only coverage is too weak, and coverage notes must be filled.
 - Frontend build และ bundle budget ผ่านแล้ว
 - Desktop/mobile e2e smoke ผ่านแล้ว
 - Supabase signed URL สำหรับพื้นที่เก็บรูปตัวละคร implement แล้ว และถูกตรวจโดย production gate

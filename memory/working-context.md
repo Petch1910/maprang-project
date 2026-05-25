@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: API route audit now checks coverage quality, not only route presence: admin routes must keep `admin-smoke`, live-provider routes (`POST /chat`, `POST /creator/ai-draft`) must keep `live-smoke`, `manual-production` cannot be the only coverage level, and coverage notes cannot be blank. Focused checks passed: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
 - 2026-05-25: Memory audit now requires the Route/Menu Audit `needs-staging`/`future` status-evidence notes to stay present in `working-context`, `deploy-blockers`, and `qa-status`, and predeploy locks those memory-audit snippets. Focused checks passed: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
 - 2026-05-25: Predeploy wiring now locks the Route/Menu Audit status-evidence guard by requiring the `needs-staging`/`future` regression fixture and checker snippets in `scripts/predeploy-check.ts`. Focused checks passed: `bun run predeploy:check:test` and `bun run predeploy:check`.
 - 2026-05-25: Route/Menu Audit now guards status evidence for unfinished surfaces: any `needs-staging` row must point operators to both `STAGING_RUNBOOK.md` and `/admin/health`, and any `future` row must clearly say it is future work rather than a clickable-ready menu. Focused checks passed: `bun run route-menu:audit:test` (10 pass / 17 expects), `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
