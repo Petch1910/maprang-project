@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 API audit output clarity pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after the API audit started printing `ตรวจ frontend API helper: พบ 34 รายการ` and the combined success line for backend routes plus frontend helpers.
 - 2026-05-25 full deterministic repo QA pass after guard series: `bun run qa:repo` passed after adding unmounted page, stale route preload, and frontend API contract guards. Backend stayed at 173 tests / 601 expects, API route audit covered 48 routes plus frontend helper calls, route/menu audit covered 14 surfaces, import-cycle audit stayed at 122 source files / 290 import edges, local eval covered 3 scenarios, and frontend bundle budget stayed under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25 Frontend API contract audit guard pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after the API route audit started checking frontend `requestJson`/`fetch(API_BASE_URL...)` calls against discovered backend routes.
 - 2026-05-25 Route preload audit guard pass: `bun run frontend:route:audit:test`, direct `frontend-route-audit.ts`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after adding `auditRoutePreloads` to catch `routePreloads` entries that point to undeclared routes.

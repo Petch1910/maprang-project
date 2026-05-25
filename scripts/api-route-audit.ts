@@ -475,6 +475,7 @@ export async function runApiRouteAudit(
   const missingFrontendRoutes = auditFrontendApiCalls(frontendCalls, discoveredRoutes)
 
   writeLine(`ตรวจ API route: พบ ${discoveredRoutes.length} รายการ`)
+  writeLine(`ตรวจ frontend API helper: พบ ${frontendCalls.length} รายการ`)
   for (const [owner, count] of [...byOwner.entries()].sort(([a], [b]) => a.localeCompare(b))) {
     writeLine(`- ${owner}: ${count}`)
   }
@@ -503,7 +504,7 @@ export async function runApiRouteAudit(
     return 1
   }
 
-  writeLine('ผ่าน - ตรวจ backend API route ผ่านแล้ว')
+  writeLine('ผ่าน - ตรวจ backend API route และ frontend API helper ผ่านแล้ว')
   return 0
 }
 
