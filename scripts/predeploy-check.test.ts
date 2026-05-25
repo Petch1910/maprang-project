@@ -118,6 +118,9 @@ describe('predeploy check wiring', () => {
     expect(qaLocalCommands).toContain('bun run import-cycle:audit:test')
     expect(qaLocalCommands).toContain('bun run api:audit')
     expect(qaLocalCommands).toContain('bun run api:audit:test')
+    expect(qaLocalCommands).toContain('bun run frontend:env:test')
+    expect(qaLocalCommands).toContain('bun run frontend:storage:test')
+    expect(qaLocalCommands).toContain('bun run frontend:clipboard:test')
     expect(qaLocalCommands).toContain('bun run frontend:static:audit')
     expect(qaLocalCommands).toContain('bun run frontend:static:audit:test')
     expect(qaLocalCommands).toContain('bun run frontend:route:audit')
@@ -131,17 +134,26 @@ describe('predeploy check wiring', () => {
     expect(ciWorkflow).toContain('bun run docs:commands')
     expect(ciWorkflow).toContain('bun run docs:commands:test')
     expect(ciWorkflow).toContain('bun run deploy:doctor:self-test')
+    expect(ciWorkflow).toContain('bun run frontend:env:test')
+    expect(ciWorkflow).toContain('bun run frontend:storage:test')
+    expect(ciWorkflow).toContain('bun run frontend:clipboard:test')
     expect(ciWorkflow).toContain('bun run frontend:static:audit')
     expect(ciWorkflow).toContain('bun run frontend:route:audit')
     expect(productionSmoke).toContain('bun run predeploy:check:test')
     expect(productionSmoke).toContain('bun run docs:commands')
     expect(productionSmoke).toContain('bun run docs:commands:test')
+    expect(productionSmoke).toContain('bun run frontend:env:test')
+    expect(productionSmoke).toContain('bun run frontend:storage:test')
+    expect(productionSmoke).toContain('bun run frontend:clipboard:test')
     expect(productionSmoke).toContain('bun run frontend:static:audit')
     expect(productionSmoke).toContain('bun run frontend:route:audit')
     for (const command of [
       'bun run security:audit',
       'bun run import-cycle:audit',
       'bun run api:audit',
+      'bun run frontend:env:test',
+      'bun run frontend:storage:test',
+      'bun run frontend:clipboard:test',
       'bun run frontend:static:audit',
       'bun run frontend:route:audit',
       'bun run route-menu:audit',
