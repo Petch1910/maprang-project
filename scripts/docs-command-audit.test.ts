@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   collectBunRunReferences,
+  collectDefaultAuditedCommandFiles,
   collectDocsCommandAuditResult,
   runDocsCommandAudit,
 } from './docs-command-audit'
@@ -107,5 +108,12 @@ describe('docs command audit', () => {
     expect(lines[0]).toContain('จุดอ้างอิง')
     expect(lines[0]).not.toContain('references')
     expect(errors).toEqual([])
+  })
+
+  test('includes decision files in the default command audit set', async () => {
+    const files = await collectDefaultAuditedCommandFiles()
+
+    expect(files).toContain('memory/decisions/index.md')
+    expect(files).toContain('memory/decisions/0018-add-test-coverage-audit-contract.md')
   })
 })

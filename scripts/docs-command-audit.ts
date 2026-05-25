@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const root = join(import.meta.dir, '..')
@@ -46,6 +46,16 @@ export type CommandAuditResult = {
 
 async function readRepoFile(path: string) {
   return readFile(join(root, path), 'utf8')
+}
+
+export async function collectDefaultAuditedCommandFiles() {
+  const decisionEntries = await readdir(join(root, 'memory/decisions'), { withFileTypes: true })
+  const decisionFiles = decisionEntries
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+    .map((entry) => `memory/decisions/${entry.name}`)
+    .sort()
+
+  return [...auditedCommandFiles, ...decisionFiles]
 }
 
 function defaultContextForFile(file: string): PackageContext {
@@ -141,11 +151,12 @@ async function loadPackageScripts() {
 }
 
 export async function collectDocsCommandAuditResult(
-  files = auditedCommandFiles,
+  files?: string[],
 ): Promise<CommandAuditResult> {
   const packageScripts = await loadPackageScripts()
+  const auditFiles = files ?? (await collectDefaultAuditedCommandFiles())
   const references = (
-    await Promise.all(files.map(async (file) => collectBunRunReferences(file, await readRepoFile(file))))
+    await Promise.all(auditFiles.map(async (file) => collectBunRunReferences(file, await readRepoFile(file))))
   ).flat()
 
   const findings = references
