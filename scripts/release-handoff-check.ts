@@ -61,6 +61,18 @@ const requiredAuthStorageFieldLabels = [
 ]
 const requiredAuthStorageFieldSnippets = requiredAuthStorageFieldLabels
 
+const requiredAiProviderFieldLabels = [
+  'โมเดลแชท',
+  'คำสั่ง live smoke แชท',
+  'ผล live smoke แชท',
+  'ค่า `CHAT_PROVIDER_LIVE_VERIFIED`',
+  'โมเดลสร้างรูป',
+  'คำสั่ง live smoke รูป',
+  'ผล live smoke รูป',
+  'ค่า `IMAGE_GENERATION_LIVE_VERIFIED`',
+]
+const requiredAiProviderFieldSnippets = requiredAiProviderFieldLabels
+
 const requiredRiskFieldLabels = [
   'ตัวกั้นที่ยังเปิดอยู่',
   'ความเสี่ยงโควตาผู้ให้บริการ',
@@ -351,6 +363,44 @@ function isProductionDatabaseHostProvider(value: string) {
   return true
 }
 
+function isConcreteProviderValue(value: string) {
+  const normalized = value.trim()
+  if (!normalized || isPlaceholderLike(normalized) || isNoneLike(normalized)) return false
+  return !/\b(pending|skip|skipped|fallback|sample|example|not configured|mock)\b/i.test(normalized)
+}
+
+function includesAnyCommand(value: string, commands: string[]) {
+  return commands.some((command) => value.includes(command))
+}
+
+function validateDeployedAiProviderResults(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  const chatModel = fieldValue(content, 'โมเดลแชท')
+  if (chatModel && !isConcreteProviderValue(chatModel)) findings.push(`${environment} release handoff ต้องระบุโมเดลแชทจริง`)
+
+  const chatCommand = fieldValue(content, 'คำสั่ง live smoke แชท')
+  if (chatCommand && !includesAnyCommand(chatCommand, ['bun run smoke:chat', 'bun run api:smoke:live'])) {
+    findings.push(`${environment} release handoff ต้องใช้คำสั่ง live smoke แชทเป็น bun run smoke:chat หรือ bun run api:smoke:live`)
+  }
+
+  const imageModel = fieldValue(content, 'โมเดลสร้างรูป')
+  if (imageModel && !isConcreteProviderValue(imageModel)) findings.push(`${environment} release handoff ต้องระบุโมเดลสร้างรูปจริง`)
+
+  const imageCommand = fieldValue(content, 'คำสั่ง live smoke รูป')
+  if (imageCommand && !includesAnyCommand(imageCommand, ['bun run smoke:image:live', 'bun run api:smoke:live'])) {
+    findings.push(`${environment} release handoff ต้องใช้คำสั่ง live smoke รูปเป็น bun run smoke:image:live หรือ bun run api:smoke:live`)
+  }
+
+  if (environment === 'staging') {
+    for (const label of ['ผล live smoke แชท', 'ผล live smoke รูป']) {
+      const value = fieldValue(content, label)
+      if (value && !isPassed(value)) findings.push(`staging release handoff ต้องมีผล live smoke ผ่าน: ${label}`)
+    }
+  }
+}
+
 function validateFilledRiskRows(content: string, findings: string[]) {
   const environment = deployedEvidenceEnvironment(content)
   if (!environment) return
@@ -435,6 +485,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี auth/storage field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredAiProviderFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี AI provider field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredRiskFieldLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี release risk field ใน release handoff: ${label}`)
   }
@@ -462,6 +516,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateStagingQaResults(content, findings)
     validateDeployedMigrationResults(content, findings)
     validateDeployedAuthStorageResults(content, findings)
+    validateDeployedAiProviderResults(content, findings)
     validateFilledRiskRows(content, findings)
     validateDeployedAdminResults(content, findings)
     validateDeployedE2eTargets(content, findings)

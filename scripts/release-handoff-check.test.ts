@@ -250,6 +250,37 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires deployed AI provider evidence to be actionable', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- โมเดลแชท: google/gemini-2.0-flash-001', '- โมเดลแชท: fallback sample')
+      .replace('- คำสั่ง live smoke แชท: bun run smoke:chat', '- คำสั่ง live smoke แชท: bun run api:smoke')
+      .replace('- โมเดลสร้างรูป: gpt-image-1.5', '- โมเดลสร้างรูป: not configured')
+      .replace('- คำสั่ง live smoke รูป: bun run smoke:image:live', '- คำสั่ง live smoke รูป: bun run smoke:image')
+    const stagingUnsafe = productionUnsafe
+      .replace('- Environment: production', '- Environment: staging')
+      .replace('- ผล live smoke แชท: pass', '- ผล live smoke แชท: fail')
+      .replace('- ผล live smoke รูป: pass', '- ผล live smoke รูป: warning')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องระบุโมเดลแชทจริง',
+        'production release handoff ต้องใช้คำสั่ง live smoke แชทเป็น bun run smoke:chat หรือ bun run api:smoke:live',
+        'production release handoff ต้องระบุโมเดลสร้างรูปจริง',
+        'production release handoff ต้องใช้คำสั่ง live smoke รูปเป็น bun run smoke:image:live หรือ bun run api:smoke:live',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องระบุโมเดลแชทจริง',
+        'staging release handoff ต้องใช้คำสั่ง live smoke แชทเป็น bun run smoke:chat หรือ bun run api:smoke:live',
+        'staging release handoff ต้องระบุโมเดลสร้างรูปจริง',
+        'staging release handoff ต้องใช้คำสั่ง live smoke รูปเป็น bun run smoke:image:live หรือ bun run api:smoke:live',
+        'staging release handoff ต้องมีผล live smoke ผ่าน: ผล live smoke แชท',
+        'staging release handoff ต้องมีผล live smoke ผ่าน: ผล live smoke รูป',
+      ]),
+    )
+  })
+
   test('requires production QA gates to pass for production handoff', () => {
     const unsafe = filledHandoff
       .replace('- `bun run qa:local`: pass', '- `bun run qa:local`: fail')
@@ -524,6 +555,31 @@ describe('release handoff check', () => {
     const stale = filledHandoff.replace('- `bun run qa:local`: pass\n', '- QA note: rerun `bun run qa:local` before release\n')
 
     expect(checkReleaseHandoffContent(stale)).toContain('ยังไม่มี QA gate: `bun run qa:local`')
+  })
+
+  test('requires AI provider evidence rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- โมเดลแชท: google/gemini-2.0-flash-001\n', '- Provider note: โมเดลแชท: google/gemini-2.0-flash-001\n')
+      .replace('- คำสั่ง live smoke แชท: bun run smoke:chat\n', '')
+      .replace('- ผล live smoke แชท: pass\n', '')
+      .replace('- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 1\n', '')
+      .replace('- โมเดลสร้างรูป: gpt-image-1.5\n', '')
+      .replace('- คำสั่ง live smoke รูป: bun run smoke:image:live\n', '')
+      .replace('- ผล live smoke รูป: pass\n', '')
+      .replace('- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`: 1\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี AI provider field ใน release handoff: โมเดลแชท',
+        'ยังไม่มี AI provider field ใน release handoff: คำสั่ง live smoke แชท',
+        'ยังไม่มี AI provider field ใน release handoff: ผล live smoke แชท',
+        'ยังไม่มี AI provider field ใน release handoff: ค่า `CHAT_PROVIDER_LIVE_VERIFIED`',
+        'ยังไม่มี AI provider field ใน release handoff: โมเดลสร้างรูป',
+        'ยังไม่มี AI provider field ใน release handoff: คำสั่ง live smoke รูป',
+        'ยังไม่มี AI provider field ใน release handoff: ผล live smoke รูป',
+        'ยังไม่มี AI provider field ใน release handoff: ค่า `IMAGE_GENERATION_LIVE_VERIFIED`',
+      ]),
+    )
   })
 
   test('requires production e2e smoke targets to match deployed origins', () => {
