@@ -1544,6 +1544,7 @@ const checks: Check[] = [
           'collects declared React Router paths',
           'collects declared React Router paths from route constants',
           'collects route preload paths from App routePreloads',
+          '[routePaths.events]: loadEvents',
           'satisfies Record<string, unknown>',
           'reports static links and navigate calls',
           'reports route constants that point to undeclared routes',
@@ -1647,6 +1648,7 @@ const checks: Check[] = [
         [
           'passes when documented rows, routes, navigation, and preloads align',
           'collects route preloads from typed object literals',
+          '[routePaths.events]: () => import',
           'collects declared routes from JSX with multiline attributes',
           'collects static navigation paths from object literals and JSX attributes',
           'routePaths.chat',

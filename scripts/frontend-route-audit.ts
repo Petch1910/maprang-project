@@ -183,6 +183,7 @@ export function collectRoutesFromApp(content: string) {
 export function collectRoutePreloadPaths(content: string) {
   const sourceFile = ts.createSourceFile(appFile, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const preloads: Array<{ path: string; index: number }> = []
+  const stringConstants = collectTopLevelStringConstants(sourceFile)
 
   function unwrapObjectLiteral(expression: ts.Expression): ts.Expression {
     let current = expression
@@ -199,6 +200,7 @@ export function collectRoutePreloadPaths(content: string) {
 
   function propertyNameText(name: ts.PropertyName) {
     if (ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) return name.text
+    if (ts.isComputedPropertyName(name)) return expressionStringValue(name.expression, stringConstants)
     return null
   }
 

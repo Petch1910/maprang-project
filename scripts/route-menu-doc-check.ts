@@ -235,6 +235,7 @@ export function collectStaticNavigationPaths(appContent: string) {
 export function collectRoutePreloadPaths(appContent: string) {
   const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const paths: string[] = []
+  const stringConstants = collectTopLevelStringConstants(sourceFile)
 
   function unwrapObjectLiteral(expression: ts.Expression): ts.Expression {
     let current = expression
@@ -255,7 +256,9 @@ export function collectRoutePreloadPaths(appContent: string) {
       if (ts.isObjectLiteralExpression(initializer)) {
         for (const property of initializer.properties) {
           if (!ts.isPropertyAssignment(property)) continue
-          const rawPath = propertyNameText(property.name)
+          const rawPath = ts.isComputedPropertyName(property.name)
+            ? expressionStringValue(property.name.expression, stringConstants)
+            : propertyNameText(property.name)
           const path = rawPath ? normalizeStaticPath(rawPath) : null
           if (path) paths.push(path)
         }

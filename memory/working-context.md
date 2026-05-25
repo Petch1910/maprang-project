@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Frontend route preload audits now resolve computed keys from route constants. `routePreloads` entries such as `[routePaths.events]: loadEvents` are included in both frontend route audit and route/menu doc-check coverage.
 - 2026-05-25: Full deterministic repo QA passed after frontend route constant hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Frontend route and route/menu audits now resolve top-level route constants and object-literal route maps. Declared React Router paths, JSX `to`/`href`, object navigation configs, `navigate(routePaths.x)`, and `navigate({ pathname: routePaths.x })` now share static path coverage instead of only accepting inline string literals.
 - 2026-05-25: API route audit now resolves backend Elysia route path constants. Backend route discovery uses the same static string constant map as the frontend helper audit, covering `healthPath`, `routePaths.chat`, and `routePaths['character']` before comparing discovered routes to coverage notes.

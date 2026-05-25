@@ -46,13 +46,17 @@ describe('frontend route audit', () => {
   test('collects route preload paths from App routePreloads', () => {
     expect(
       collectRoutePreloadPaths(`
+        const routePaths = {
+          events: '/events',
+        } as const
         const routePreloads = ({
           '/': loadHome,
           '/admin/health': loadAdminHealth,
+          [routePaths.events]: loadEvents,
           '/chat': loadChat,
         } satisfies Record<string, unknown>)
       `).map((entry) => entry.path),
-    ).toEqual(['/', '/admin/health', '/chat'])
+    ).toEqual(['/', '/admin/health', '/events', '/chat'])
   })
 
   test('normalizes static paths without accepting external or protocol-relative URLs', () => {

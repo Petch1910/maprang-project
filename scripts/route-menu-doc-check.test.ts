@@ -73,13 +73,17 @@ describe('route menu doc check', () => {
   test('collects route preloads from typed object literals', () => {
     expect(
       collectRoutePreloadPaths(`
+        const routePaths = {
+          events: '/events',
+        } as const
         const routePreloads = ({
           '/': () => import('./Home'),
           '/chat': () => import('./Chat'),
+          [routePaths.events]: () => import('./Events'),
           '/admin/health': () => import('./AdminHealth'),
         } satisfies Record<string, unknown>)
       `),
-    ).toEqual(['/', '/admin/health', '/chat'])
+    ).toEqual(['/', '/admin/health', '/chat', '/events'])
   })
 
   test('collects declared routes from JSX with multiline attributes', () => {
