@@ -38,17 +38,34 @@ function fieldValue(content: string, label: string) {
   return content.match(new RegExp(`^- ${escaped}:\\s*(.+)$`, 'm'))?.[1]?.trim() ?? ''
 }
 
+function isLoopbackHost(hostname: string) {
+  return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(hostname.toLowerCase())
+}
+
+function deployedHttpsUrl(value: string) {
+  const normalized = value.trim()
+  if (normalized.includes('<') || normalized.includes('>') || normalized.includes('*')) return null
+  try {
+    const url = new URL(normalized)
+    if (url.protocol !== 'https:') return null
+    if (isLoopbackHost(url.hostname)) return null
+    return url
+  } catch {
+    return null
+  }
+}
+
 function looksLikeDeployedHttpsUrl(value: string) {
-  const normalized = value.toLowerCase()
-  return (
-    normalized.startsWith('https://') &&
-    !normalized.includes('localhost') &&
-    !normalized.includes('127.0.0.1') &&
-    !normalized.includes('0.0.0.0') &&
-    !normalized.includes('[::1]') &&
-    !normalized.includes('<') &&
-    !normalized.includes('>')
-  )
+  return deployedHttpsUrl(value) !== null
+}
+
+function looksLikeFrontendCorsOrigin(value: string, backendOrigin = '') {
+  const url = deployedHttpsUrl(value)
+  if (!url) return false
+  const normalized = value.trim().replace(/\/$/, '')
+  if (`${url.protocol}//${url.host}` !== normalized) return false
+  if (backendOrigin && url.origin === backendOrigin) return false
+  return true
 }
 
 function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
@@ -57,8 +74,13 @@ function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
     if (value && !looksLikeDeployedHttpsUrl(value)) findings.push(`URL ใน release handoff ต้องเป็น https deployed URL: ${label}`)
   }
 
-  const corsOrigins = fieldValue(content, 'CORS origins').toLowerCase()
-  if (corsOrigins && (!corsOrigins.includes('https://') || corsOrigins.includes('http://') || corsOrigins.includes('localhost') || corsOrigins.includes('127.0.0.1') || corsOrigins.includes('0.0.0.0') || corsOrigins.includes('[::1]') || corsOrigins.includes('*'))) {
+  const backendOrigin = deployedHttpsUrl(fieldValue(content, 'Backend URL'))?.origin ?? ''
+  const corsOrigins = fieldValue(content, 'CORS origins')
+  const origins = corsOrigins
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+  if (corsOrigins && (origins.length === 0 || origins.some((origin) => !looksLikeFrontendCorsOrigin(origin, backendOrigin)))) {
     findings.push('CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น')
   }
 }

@@ -76,6 +76,12 @@ describe('release handoff check', () => {
     expect(checkReleaseHandoffContent(filledHandoff, { requireFilled: true })).toEqual([])
   })
 
+  test('accepts multiple frontend CORS origins', () => {
+    const multiOrigin = filledHandoff.replace('CORS origins: https://app.maprang.example', 'CORS origins: https://app.maprang.example, https://www.maprang.example')
+
+    expect(checkReleaseHandoffContent(multiOrigin, { requireFilled: true })).toEqual([])
+  })
+
   test('allows the empty template unless filled mode is required', () => {
     const template = filledHandoff.replace('2026-05-19', '').replace('abc1234', '')
 
@@ -117,6 +123,21 @@ describe('release handoff check', () => {
         'CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น',
       ]),
     )
+  })
+
+  test('rejects malformed release URLs and backend CORS origins', () => {
+    const unsafe = filledHandoff
+      .replace('Frontend URL: https://app.maprang.example', 'Frontend URL: https://app maprang.example')
+      .replace('CORS origins: https://app.maprang.example', 'CORS origins: https://app.maprang.example/path, https://api.maprang.example, not-a-url')
+    const commaOnlyCors = filledHandoff.replace('CORS origins: https://app.maprang.example', 'CORS origins: ,')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'URL ใน release handoff ต้องเป็น https deployed URL: Frontend URL',
+        'CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(commaOnlyCors, { requireFilled: true })).toContain('CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น')
   })
 
   test('requires live provider verification flags for production handoff', () => {
