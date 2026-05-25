@@ -130,6 +130,8 @@ const defaultRequiredSnippets = [
   'frontend-route-audit.ts',
   'ยังโหลดรายการแชทไม่ได้',
   'รีเฟรชรายการ',
+  'skeleton ในรางตัวละคร/เล่นต่อ',
+  'ตัวตนผู้เล่นบันทึกอัตโนมัติและไม่ล็อกการพิมพ์',
 ]
 
 const defaultForbiddenSnippets = [
