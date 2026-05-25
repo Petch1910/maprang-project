@@ -61,6 +61,14 @@ const requiredAuthStorageFieldLabels = [
 ]
 const requiredAuthStorageFieldSnippets = requiredAuthStorageFieldLabels
 
+const requiredRiskFieldLabels = [
+  'ตัวกั้นที่ยังเปิดอยู่',
+  'ความเสี่ยงโควตาผู้ให้บริการ',
+  'งาน follow-up ที่ต้องทำมือ',
+  'เงื่อนไข rollback',
+]
+const requiredRiskFieldSnippets = requiredRiskFieldLabels
+
 const requiredQaGateLabels = [
   '`bun run qa:local`',
   '`bun run e2e:smoke`',
@@ -322,6 +330,33 @@ function validateDeployedAuthStorageResults(content: string, findings: string[])
   }
 }
 
+function isNoneLike(value: string) {
+  return /^(none|ไม่มี|no blockers?|no follow-?ups?)$/i.test(value.trim())
+}
+
+function isPlaceholderLike(value: string) {
+  return value.includes('<') || value.includes('>') || /\b(placeholder|unknown|todo|tbd|n\/a)\b/i.test(value)
+}
+
+function validateFilledRiskRows(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  const openBlockers = fieldValue(content, 'ตัวกั้นที่ยังเปิดอยู่')
+  if (openBlockers && !isNoneLike(openBlockers)) findings.push(`${environment} release handoff ต้องไม่มีตัวกั้นเปิดอยู่ก่อน go`)
+
+  const quotaRisk = fieldValue(content, 'ความเสี่ยงโควตาผู้ให้บริการ')
+  if (quotaRisk && isPlaceholderLike(quotaRisk)) findings.push(`${environment} release handoff ต้องระบุความเสี่ยงโควตาผู้ให้บริการที่ชัดเจน`)
+
+  const manualFollowUp = fieldValue(content, 'งาน follow-up ที่ต้องทำมือ')
+  if (manualFollowUp && !isNoneLike(manualFollowUp)) findings.push(`${environment} release handoff ต้องไม่มีงาน follow-up ที่ต้องทำมือก่อน go`)
+
+  const rollback = fieldValue(content, 'เงื่อนไข rollback')
+  if (rollback && (isNoneLike(rollback) || isPlaceholderLike(rollback))) {
+    findings.push(`${environment} release handoff ต้องมีเงื่อนไข rollback ที่ใช้งานได้จริง`)
+  }
+}
+
 function validateDeployedAdminResults(content: string, findings: string[]) {
   const environment = deployedEvidenceEnvironment(content)
   if (!environment) return
@@ -387,6 +422,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี auth/storage field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredRiskFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี release risk field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredQaGateLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี QA gate: ${label}`)
   }
@@ -410,6 +449,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateStagingQaResults(content, findings)
     validateDeployedMigrationResults(content, findings)
     validateDeployedAuthStorageResults(content, findings)
+    validateFilledRiskRows(content, findings)
     validateDeployedAdminResults(content, findings)
     validateDeployedE2eTargets(content, findings)
   }

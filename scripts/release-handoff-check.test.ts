@@ -444,6 +444,49 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires release blockers and rollback evidence to be actionable', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- ตัวกั้นที่ยังเปิดอยู่: none', '- ตัวกั้นที่ยังเปิดอยู่: image provider still failing')
+      .replace('- ความเสี่ยงโควตาผู้ให้บริการ: monitored', '- ความเสี่ยงโควตาผู้ให้บริการ: unknown')
+      .replace('- งาน follow-up ที่ต้องทำมือ: none', '- งาน follow-up ที่ต้องทำมือ: rotate keys after launch')
+      .replace('- เงื่อนไข rollback: provider outage', '- เงื่อนไข rollback: none')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องไม่มีตัวกั้นเปิดอยู่ก่อน go',
+        'production release handoff ต้องระบุความเสี่ยงโควตาผู้ให้บริการที่ชัดเจน',
+        'production release handoff ต้องไม่มีงาน follow-up ที่ต้องทำมือก่อน go',
+        'production release handoff ต้องมีเงื่อนไข rollback ที่ใช้งานได้จริง',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องไม่มีตัวกั้นเปิดอยู่ก่อน go',
+        'staging release handoff ต้องระบุความเสี่ยงโควตาผู้ให้บริการที่ชัดเจน',
+        'staging release handoff ต้องไม่มีงาน follow-up ที่ต้องทำมือก่อน go',
+        'staging release handoff ต้องมีเงื่อนไข rollback ที่ใช้งานได้จริง',
+      ]),
+    )
+  })
+
+  test('requires release risk rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- ตัวกั้นที่ยังเปิดอยู่: none\n', '- Risk note: ตัวกั้นที่ยังเปิดอยู่: none\n')
+      .replace('- ความเสี่ยงโควตาผู้ให้บริการ: monitored\n', '')
+      .replace('- งาน follow-up ที่ต้องทำมือ: none\n', '')
+      .replace('- เงื่อนไข rollback: provider outage\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี release risk field ใน release handoff: ตัวกั้นที่ยังเปิดอยู่',
+        'ยังไม่มี release risk field ใน release handoff: ความเสี่ยงโควตาผู้ให้บริการ',
+        'ยังไม่มี release risk field ใน release handoff: งาน follow-up ที่ต้องทำมือ',
+        'ยังไม่มี release risk field ใน release handoff: เงื่อนไข rollback',
+      ]),
+    )
+  })
+
   test('reports missing core production QA gate rows', () => {
     const stale = filledHandoff
       .replace('- `bun run qa:local`: pass\n', '')
