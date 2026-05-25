@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Full deterministic repo QA passed after the disabled-control static guard. `bun run qa:repo` remains green across secrets, memory/knowledge, eval, security/import/API audits, route/menu, smoke helper/provider/deploy tests, backend checks, and frontend build/bundle; backend DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-21: Frontend static audit now guards disabled controls. `auditDisabledControlsWithAst` fails `button/input/textarea/select` elements that use `disabled` without a user-facing `title` or `aria-label`, so future UI work cannot silently reintroduce controls that are locked without explanation.
 - 2026-05-21: Legacy creator/admin components now keep disabled reasons if they are re-mounted later. `LoreManager`, `CharacterList`, `CharacterManager`, and `AuthPanel` expose Thai titles and `aria-disabled` for loading, saving, uploading, missing form fields, tag conflicts, filtering, and auth-busy states; frontend build confirmed these older components still typecheck.
 - 2026-05-21: Creator Studio disabled controls now explain next steps. `/create` AI draft, image-only draft, upload, relationship preset apply, preview simulator, and create-draft controls expose Thai titles and `aria-disabled` for generating, uploading, simulating, missing preset, missing required fields, tag conflicts, or saving states; Browser QA confirmed no disabled control lacks a reason.
