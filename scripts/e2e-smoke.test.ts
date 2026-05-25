@@ -61,6 +61,33 @@ describe('e2e smoke command plan', () => {
     expect(errors.join('\n')).not.toContain('smoke-pass')
   })
 
+  test('passes the validated E2E target env to every runner step', async () => {
+    const env = {
+      E2E_BASE_URL: 'https://app.example.com',
+      E2E_API_BASE_URL: 'https://api.example.com',
+      EXTRA_E2E_FLAG: '1',
+    }
+    const seen: Array<{ label: string; env: Record<string, string | undefined> }> = []
+
+    const exitCode = await runE2eSmoke(
+      async (step: E2eSmokeStep, stepEnv) => {
+        seen.push({ label: step.label, env: stepEnv })
+        return 0
+      },
+      quietLogger,
+      e2eSmokeSteps(),
+      env,
+    )
+
+    expect(exitCode).toBe(0)
+    expect(seen.map(({ label }) => label)).toEqual(e2eSmokeSteps().map(({ label }) => label))
+    for (const entry of seen) {
+      expect(entry.env.E2E_BASE_URL).toBe('https://app.example.com')
+      expect(entry.env.E2E_API_BASE_URL).toBe('https://api.example.com')
+      expect(entry.env.EXTRA_E2E_FLAG).toBe('1')
+    }
+  })
+
   test('restores demo seed data after Playwright failure', async () => {
     const calls: string[] = []
 

@@ -6,9 +6,9 @@ export type E2eSmokeStep = {
   alwaysRun?: boolean
 }
 
-export type E2eSmokeRunner = (step: E2eSmokeStep) => Promise<number>
 export type E2eSmokeLogger = Pick<typeof console, 'log' | 'error'>
 export type E2eSmokeEnv = Record<string, string | undefined>
+export type E2eSmokeRunner = (step: E2eSmokeStep, env: E2eSmokeEnv) => Promise<number>
 
 function e2eUrlIssues(name: string, value: string) {
   const issues: string[] = []
@@ -55,17 +55,17 @@ export function e2eSmokeSteps(): E2eSmokeStep[] {
   ]
 }
 
-async function spawnStep(step: E2eSmokeStep) {
+async function spawnStep(step: E2eSmokeStep, env: E2eSmokeEnv = process.env) {
   const proc = Bun.spawn(step.command, {
-    env: process.env,
+    env: { ...process.env, ...env },
     stdio: ['inherit', 'inherit', 'inherit'],
   })
   return proc.exited
 }
 
-async function runStep(step: E2eSmokeStep, runner: E2eSmokeRunner, logger: E2eSmokeLogger) {
+async function runStep(step: E2eSmokeStep, runner: E2eSmokeRunner, logger: E2eSmokeLogger, env: E2eSmokeEnv) {
   logger.log(`\n${step.label}`)
-  const exitCode = await runner(step)
+  const exitCode = await runner(step, env)
   if (exitCode !== 0) {
     throw new Error(`${step.label} ไม่ผ่านด้วย exit code ${exitCode}`)
   }
@@ -92,16 +92,16 @@ export async function runE2eSmoke(
 
   let exitCode = 0
 
-  await runStep(reset, runner, logger)
+  await runStep(reset, runner, logger, env)
 
   try {
-    await runStep(browserSmoke, runner, logger)
+    await runStep(browserSmoke, runner, logger, env)
   } catch (error) {
     exitCode = 1
     logger.error(formatE2eSmokeError(error))
   } finally {
     try {
-      await runStep(restore, runner, logger)
+      await runStep(restore, runner, logger, env)
     } catch (error) {
       exitCode = 1
       logger.error(formatE2eSmokeError(error))

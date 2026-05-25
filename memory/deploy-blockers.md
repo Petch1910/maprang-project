@@ -28,6 +28,7 @@ guard ใน repo:
 - `api:smoke` แบบเรียกตรงจะใช้ smoke target guard เดียวกันก่อน network/provider work และคืน summary ที่ redact credential/userinfo แล้ว
 - `e2e:smoke` validates `E2E_BASE_URL` และ `E2E_API_BASE_URL` ก่อน Playwright เริ่มทำงาน: local dev ใช้ loopback `http://127.0.0.1` ได้ แต่ staging/production ต้องเป็น HTTPS origin และห้ามมี credential/userinfo หรือ path/query/hash
 - Playwright e2e config จะ start backend/frontend dev server เฉพาะ target ที่เป็น local loopback เท่านั้น; ถ้า `E2E_BASE_URL`/`E2E_API_BASE_URL` เป็น deployed HTTPS origins จะใช้ staging ที่ deploy แล้วโดยตรง
+- `runE2eSmoke` ส่ง env ชุดเดียวกับที่ validate แล้วเข้า seed/Playwright/restore runner steps เพื่อให้ automation ที่ import runner ไม่ตรวจ URL ชุดหนึ่งแต่รันอีกชุดหนึ่ง
 
 ### การยืนยัน live chat provider
 

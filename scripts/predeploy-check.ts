@@ -751,6 +751,8 @@ const checks: Check[] = [
           'smokeTargetIsLocal',
           'E2eSmokeEnv',
           'e2eSmokeTargetIssues',
+          'env: { ...process.env, ...env }',
+          'runner(step, env)',
           'runE2eSmoke',
           'if (import.meta.main)',
         ],
@@ -760,6 +762,7 @@ const checks: Check[] = [
         e2eSmokeTest,
         [
           'validates staging E2E target URLs before Playwright starts',
+          'passes the validated E2E target env to every runner step',
           'credential/userinfo',
           'path/query/hash',
           'formats object-shaped e2e smoke errors without stringifying raw objects',
