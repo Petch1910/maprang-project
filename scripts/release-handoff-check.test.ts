@@ -42,6 +42,12 @@ const filledHandoff = [
   '- คำสั่ง live smoke แชท: bun run smoke:chat',
   '- ผล live smoke แชท: pass',
   '- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 1',
+  '- Chat smoke normal chatId: chat-smoke-normal-001',
+  '- Chat smoke normal tokens: 512',
+  '- Chat smoke normal walletTransactionId: wallet-chat-normal-001',
+  '- Chat smoke stream chatId: chat-smoke-stream-001',
+  '- Chat smoke stream tokens: 144',
+  '- Chat smoke stream walletTransactionId: wallet-chat-stream-001',
   '- โมเดลสร้างรูป: gpt-image-1.5',
   '- คำสั่ง live smoke รูป: bun run smoke:image:live',
   '- ผล live smoke รูป: pass',
@@ -671,6 +677,55 @@ describe('release handoff check', () => {
         'ยังไม่มี AI provider field ใน release handoff: คำสั่ง live smoke รูป',
         'ยังไม่มี AI provider field ใน release handoff: ผล live smoke รูป',
         'ยังไม่มี AI provider field ใน release handoff: ค่า `IMAGE_GENERATION_LIVE_VERIFIED`',
+      ]),
+    )
+  })
+
+  test('requires live chat billing evidence rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- Chat smoke normal chatId: chat-smoke-normal-001\n', '- Provider note: Chat smoke normal chatId: chat-smoke-normal-001\n')
+      .replace('- Chat smoke normal tokens: 512\n', '')
+      .replace('- Chat smoke normal walletTransactionId: wallet-chat-normal-001\n', '')
+      .replace('- Chat smoke stream chatId: chat-smoke-stream-001\n', '')
+      .replace('- Chat smoke stream tokens: 144\n', '')
+      .replace('- Chat smoke stream walletTransactionId: wallet-chat-stream-001\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี live chat evidence field ใน release handoff: Chat smoke normal chatId',
+        'ยังไม่มี live chat evidence field ใน release handoff: Chat smoke normal tokens',
+        'ยังไม่มี live chat evidence field ใน release handoff: Chat smoke normal walletTransactionId',
+        'ยังไม่มี live chat evidence field ใน release handoff: Chat smoke stream chatId',
+        'ยังไม่มี live chat evidence field ใน release handoff: Chat smoke stream tokens',
+        'ยังไม่มี live chat evidence field ใน release handoff: Chat smoke stream walletTransactionId',
+      ]),
+    )
+  })
+
+  test('requires concrete live chat billing evidence for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- Chat smoke normal chatId: chat-smoke-normal-001', '- Chat smoke normal chatId: pass')
+      .replace('- Chat smoke normal tokens: 512', '- Chat smoke normal tokens: 0')
+      .replace('- Chat smoke normal walletTransactionId: wallet-chat-normal-001', '- Chat smoke normal walletTransactionId: pending')
+      .replace('- Chat smoke stream chatId: chat-smoke-stream-001', '- Chat smoke stream chatId: <chat-id>')
+      .replace('- Chat smoke stream tokens: 144', '- Chat smoke stream tokens: many')
+      .replace('- Chat smoke stream walletTransactionId: wallet-chat-stream-001', '- Chat smoke stream walletTransactionId: example-wallet')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมี Chat smoke normal chatId จาก live smoke จริง',
+        'production release handoff ต้องมี Chat smoke normal tokens เป็นจำนวนโทเคนมากกว่า 0',
+        'production release handoff ต้องมี Chat smoke normal walletTransactionId จาก wallet CHAT_USAGE จริง',
+        'production release handoff ต้องมี Chat smoke stream chatId จาก live smoke จริง',
+        'production release handoff ต้องมี Chat smoke stream tokens เป็นจำนวนโทเคนมากกว่า 0',
+        'production release handoff ต้องมี Chat smoke stream walletTransactionId จาก wallet CHAT_USAGE จริง',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมี Chat smoke normal chatId จาก live smoke จริง',
+        'staging release handoff ต้องมี Chat smoke stream walletTransactionId จาก wallet CHAT_USAGE จริง',
       ]),
     )
   })

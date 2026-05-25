@@ -83,6 +83,16 @@ const requiredAiProviderFieldLabels = [
 ]
 const requiredAiProviderFieldSnippets = requiredAiProviderFieldLabels
 
+const requiredLiveChatEvidenceFieldLabels = [
+  'Chat smoke normal chatId',
+  'Chat smoke normal tokens',
+  'Chat smoke normal walletTransactionId',
+  'Chat smoke stream chatId',
+  'Chat smoke stream tokens',
+  'Chat smoke stream walletTransactionId',
+]
+const requiredLiveChatEvidenceFieldSnippets = requiredLiveChatEvidenceFieldLabels
+
 const requiredRiskFieldLabels = [
   'ตัวกั้นที่ยังเปิดอยู่',
   'ความเสี่ยงโควตาผู้ให้บริการ',
@@ -429,6 +439,18 @@ function isConcreteProviderValue(value: string) {
   return !/\b(pending|skip|skipped|fallback|sample|example|not configured|mock)\b/i.test(normalized)
 }
 
+function isPositiveIntegerEvidence(value: string) {
+  return /^[1-9]\d*$/.test(value.trim())
+}
+
+function isConcreteSmokeEvidenceId(value: string) {
+  const normalized = value.trim()
+  if (!normalized || isPlaceholderLike(normalized) || isNoneLike(normalized)) return false
+  if (/^(pass|ผ่าน|ok|done|success)$/i.test(normalized)) return false
+  if (/\b(pending|skip|skipped|fallback|sample|example|mock|manual|later|todo)\b/i.test(normalized)) return false
+  return /^[a-z0-9][a-z0-9._:-]{5,}$/i.test(normalized)
+}
+
 function includesAnyCommand(value: string, commands: string[]) {
   return commands.some((command) => value.includes(command))
 }
@@ -458,6 +480,26 @@ function validateDeployedAiProviderResults(content: string, findings: string[]) 
       const value = fieldValue(content, label)
       if (value && !isPassed(value)) findings.push(`staging release handoff ต้องมีผล live smoke ผ่าน: ${label}`)
     }
+  }
+}
+
+function validateDeployedLiveChatEvidence(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  for (const label of ['Chat smoke normal chatId', 'Chat smoke stream chatId']) {
+    const value = fieldValue(content, label)
+    if (value && !isConcreteSmokeEvidenceId(value)) findings.push(`${environment} release handoff ต้องมี ${label} จาก live smoke จริง`)
+  }
+
+  for (const label of ['Chat smoke normal tokens', 'Chat smoke stream tokens']) {
+    const value = fieldValue(content, label)
+    if (value && !isPositiveIntegerEvidence(value)) findings.push(`${environment} release handoff ต้องมี ${label} เป็นจำนวนโทเคนมากกว่า 0`)
+  }
+
+  for (const label of ['Chat smoke normal walletTransactionId', 'Chat smoke stream walletTransactionId']) {
+    const value = fieldValue(content, label)
+    if (value && !isConcreteSmokeEvidenceId(value)) findings.push(`${environment} release handoff ต้องมี ${label} จาก wallet CHAT_USAGE จริง`)
   }
 }
 
@@ -562,6 +604,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี AI provider field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredLiveChatEvidenceFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี live chat evidence field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredRiskFieldLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี release risk field ใน release handoff: ${label}`)
   }
@@ -592,6 +638,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateDeployedMigrationResults(content, findings)
     validateDeployedAuthStorageResults(content, findings)
     validateDeployedAiProviderResults(content, findings)
+    validateDeployedLiveChatEvidence(content, findings)
     validateFilledRiskRows(content, findings)
     validateDeployedAdminResults(content, findings)
     validateDeployedE2eTargets(content, findings)

@@ -69,6 +69,12 @@ bun run release:handoff:check -- --filled
 - คำสั่ง live smoke แชท:
 - ผล live smoke แชท:
 - ค่า `CHAT_PROVIDER_LIVE_VERIFIED`:
+- Chat smoke normal chatId:
+- Chat smoke normal tokens:
+- Chat smoke normal walletTransactionId:
+- Chat smoke stream chatId:
+- Chat smoke stream tokens:
+- Chat smoke stream walletTransactionId:
 - โมเดลสร้างรูป:
 - คำสั่ง live smoke รูป:
 - ผล live smoke รูป:

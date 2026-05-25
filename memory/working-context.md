@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Release handoff now requires live chat billing evidence rows for both normal chat and stream chat: chatId, token count, and wallet transaction id. Filled staging/production handoffs reject placeholder/pass-only ids and non-positive token counts before the provider verification can be trusted. Focused checks passed: `bun run release:handoff:test`, `bun run release:handoff:check`, `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands`.
 - 2026-05-25: `api:smoke:live` stream validation now reuses `validateLiveChatSmokeStream`, keeping stream provider-failure handling aligned with `smoke:chat`. Focused checks passed: `bun run api:smoke:test`, `bun run predeploy:check:test`, and `bun run memory:audit`.
 - 2026-05-25: `api:smoke:live` now continues the normal live chat through `POST /chat/stream` and requires distinct `CHAT_USAGE` wallet debits for both provider paths before live chat verification can be trusted. Focused checks passed: `bun run api:smoke:test`, `bun run predeploy:check:test`, and `bun run docs:commands`.
 - 2026-05-25: `smoke:chat` now requires distinct wallet `CHAT_USAGE` debits for normal live chat and live stream chat before `CHAT_PROVIDER_LIVE_VERIFIED=1` can be trusted. Focused checks passed: `bun run smoke:chat:test`, `bun run predeploy:check:test`, and `bun run docs:commands`.
