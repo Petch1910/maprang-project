@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 route/menu concrete disabled-reason pass: `bun run route-menu:audit` and `bun run route-menu:audit:test` passed after replacing generic Chat Sidebar/Admin Health disabled-state wording with concrete selection-toolbar, rename-dialog, and Admin Health refresh/link behavior, and after adding required snippets for those handoff details.
 - 2026-05-25 direction memory refresh pass: `bun run memory:audit` passed after refreshing `memory/project-maprang.md`, `memory/api-backend/current-direction.md`, and `memory/ui-ux/current-direction.md` to the 2026-05-25 guard baseline for signed avatar storage wording, route/menu disabled-state guards, Profile/Explore/Events loading behavior, and abuse QA handoff coverage.
 - 2026-05-25 abuse QA guard pass: `bun run predeploy:check:test` passed 3 tests / 95 expects after `predeploy:check` started requiring `Lore/persona injection` and `New-tab links` in `ABUSE_QA_CHECKLIST.md`, keeping manual prompt-control and frontend link-safety checks from drifting out of the production handoff.
 - 2026-05-25 full deterministic repo QA pass after Profile/Explore hardening: `bun run qa:repo` passed with backend 173 tests / 601 expects, API route audit 48 routes, route/menu audit 14 surfaces, import-cycle audit 128 source files / 307 import edges, local eval 3 scenarios, frontend static/route audit, TypeScript, Vite build, and bundle budget still under limits (main 269.1KB/350KB, chat 231.0KB/260KB). DB persistence suites still skip only because local Postgres is not running.
