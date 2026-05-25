@@ -889,10 +889,6 @@ export async function fetchChatMessages(chatId: string) {
   return requestJson<{ chat?: SavedChat }>(`/chats/${chatId}/messages`)
 }
 
-export async function fetchChatWorldState(chatId: string) {
-  return requestJson<{ chatId: string; worldState: WorldState }>(`/chats/${chatId}/world-state`)
-}
-
 export async function updateChatWorldState(chatId: string, input: WorldStateInput) {
   return requestJson<{ chatId: string; worldState: WorldState }>(`/chats/${chatId}/world-state`, {
     method: 'PATCH',
