@@ -41,7 +41,10 @@ describe('api route audit', () => {
       'fixture.routes.ts',
       `
         export const routes = new Elysia()
-          .get('/health', () => ({}))
+          .get(
+            '/health',
+            () => ({})
+          )
           .post('/chat', () => ({}))
           .patch('/characters/:id', () => ({}))
           .get('relative-path', () => ({}))

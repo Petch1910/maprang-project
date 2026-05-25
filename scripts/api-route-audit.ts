@@ -302,17 +302,31 @@ export function auditRouteCoverage(discoveredRoutes: DiscoveredRoute[], coverage
 }
 
 export function discoverRoutesFromSource(file: string, content: string) {
-  const routes: DiscoveredRoute[] = []
-  const routePattern = /\.(get|post|patch|put|delete)\(\s*(['"`])([^'"`]+)\2/g
+  const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+  const routes: Array<DiscoveredRoute & { index: number }> = []
 
-  for (const match of content.matchAll(routePattern)) {
-    const method = match[1].toUpperCase() as HttpMethod
-    const path = match[3]
-    if (!path.startsWith('/')) continue
-    routes.push({ key: `${method} ${path}`, file })
+  function visit(node: ts.Node) {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const methodName = node.expression.name.text.toLowerCase()
+      if (['get', 'post', 'patch', 'put', 'delete'].includes(methodName)) {
+        const pathArg = node.arguments[0]
+        const path =
+          pathArg && (ts.isStringLiteral(pathArg) || ts.isNoSubstitutionTemplateLiteral(pathArg)) ? pathArg.text : null
+        if (path?.startsWith('/')) {
+          routes.push({
+            key: `${methodName.toUpperCase() as HttpMethod} ${path}`,
+            file,
+            index: node.expression.name.getStart(sourceFile),
+          })
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit)
   }
 
-  return routes
+  visit(sourceFile)
+  return routes.sort((a, b) => a.index - b.index).map(({ index: _index, ...route }) => route)
 }
 
 function lineFor(content: string, index: number) {

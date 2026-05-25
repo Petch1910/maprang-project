@@ -1373,6 +1373,8 @@ const checks: Check[] = [
         await readRepoFile('scripts/api-route-audit.ts'),
         [
           'collectRouteFiles',
+          'ts.isCallExpression',
+          'ts.isPropertyAccessExpression',
           'collectFrontendApiCallsFromSource',
           'auditFrontendApiCalls',
           'ตรวจ frontend API helper: พบ',
