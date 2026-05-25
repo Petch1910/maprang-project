@@ -131,6 +131,14 @@ describe('live chat smoke helpers', () => {
       streamWalletTransactionId: 'stream-debit',
       balanceAfter: 1112,
       streamBalanceAfter: 1068,
+      handoffEvidence: {
+        'Chat smoke normal chatId': 'chat-1',
+        'Chat smoke normal tokens': 88,
+        'Chat smoke normal walletTransactionId': 'debit',
+        'Chat smoke stream chatId': 'chat-1',
+        'Chat smoke stream tokens': 44,
+        'Chat smoke stream walletTransactionId': 'stream-debit',
+      },
       replyChars: 440,
       minRoleplayReplyChars: 420,
       nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน environment เป้าหมายนี้ แล้วรัน production:check ใหม่',
@@ -231,6 +239,8 @@ describe('live chat smoke helpers', () => {
     expect(payload.apiBaseUrl).toBe('https://api.maprang.example')
     expect(payload.walletTransactionId).toBe('debit')
     expect(payload.streamWalletTransactionId).toBe('stream-debit')
+    expect(payload.handoffEvidence['Chat smoke normal walletTransactionId']).toBe('debit')
+    expect(payload.handoffEvidence['Chat smoke stream walletTransactionId']).toBe('stream-debit')
     expect(payload.streamTotalTokens).toBe(44)
     expect(payload.streamReplyChars).toBe(120)
     expect(errors).toEqual([])

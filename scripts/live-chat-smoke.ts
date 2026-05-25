@@ -221,6 +221,15 @@ export function buildLiveChatSmokePayload({
   streamTotalTokens: number
   streamReplyChars: number
 }) {
+  const handoffEvidence = {
+    'Chat smoke normal chatId': chatId,
+    'Chat smoke normal tokens': totalTokens,
+    'Chat smoke normal walletTransactionId': chatDebit.id,
+    'Chat smoke stream chatId': streamChatId,
+    'Chat smoke stream tokens': streamTotalTokens,
+    'Chat smoke stream walletTransactionId': streamDebit.id,
+  }
+
   return {
     ok: true,
     apiBaseUrl: baseUrl,
@@ -235,6 +244,7 @@ export function buildLiveChatSmokePayload({
     streamWalletTransactionId: streamDebit.id,
     balanceAfter: chatDebit.balanceAfter,
     streamBalanceAfter: streamDebit.balanceAfter,
+    handoffEvidence,
     replyChars: reply.length,
     minRoleplayReplyChars,
     nextStep: 'ตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 ใน environment เป้าหมายนี้ แล้วรัน production:check ใหม่',

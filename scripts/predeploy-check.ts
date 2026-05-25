@@ -2025,6 +2025,9 @@ const checks: Check[] = [
         [
           'validates smoke token balance',
           'matches wallet debit',
+          'handoffEvidence',
+          'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
           'uses a Thai-first prompt for live roleplay quality smoke',
           'liveChatSmokePrompt',
           'formats object-shaped live chat smoke errors without stringifying raw objects',
@@ -2037,7 +2040,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/live-chat-smoke.ts'),
-        ['LiveChatSmokeRunnerOptions', 'liveChatSmokePrompt', 'liveChatStreamSmokePrompt', 'validateLiveChatSmokeStream', 'readLiveChatSmokeStreamEvents', 'findMatchingChatDebits', 'streamWalletTransactionId', 'ฉากโรลเพลย์ภาษาไทย', 'formatUnknownDiagnosticText', 'validateBackendRootIdentity', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
+        ['LiveChatSmokeRunnerOptions', 'liveChatSmokePrompt', 'liveChatStreamSmokePrompt', 'validateLiveChatSmokeStream', 'readLiveChatSmokeStreamEvents', 'findMatchingChatDebits', 'streamWalletTransactionId', 'handoffEvidence', 'Chat smoke normal walletTransactionId', 'Chat smoke stream walletTransactionId', 'ฉากโรลเพลย์ภาษาไทย', 'formatUnknownDiagnosticText', 'validateBackendRootIdentity', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
         'scripts/live-chat-smoke.ts',
       )
       forbidIncludes(
