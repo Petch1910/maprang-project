@@ -80,6 +80,8 @@ SMOKE_API_BASE_URL=https://<backend-staging-domain> bun run production:check
 E2E_BASE_URL=https://<frontend-staging-domain> E2E_API_BASE_URL=https://<backend-staging-domain> bun run e2e:smoke
 ```
 
+`E2E_BASE_URL` และ `E2E_API_BASE_URL` ต้องเป็น origin จริงเท่านั้น: local dev ใช้ `http://127.0.0.1` ได้ แต่ staging/production ต้องเป็น `https`, ไม่มี credential/userinfo และไม่มี path/query/hash.
+
 ถ้าต้องให้ CI/dashboard อ่านผลโดยไม่ parse stderr ให้รัน `bun scripts/deploy-status.ts --json`. เมื่อ root identity หรือ `/health` อ่านไม่ได้ ผลลัพธ์ JSON จะยังคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อบอกสาเหตุและขั้นถัดไปอย่างเป็นโครงสร้าง.
 
 ก่อนถึง live provider gate สามารถรัน pre-production dry run จากเครื่อง dev/CI ที่มี Supabase storage env และ admin smoke key:

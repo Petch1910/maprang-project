@@ -715,6 +715,10 @@ const checks: Check[] = [
           'bun run frontend:env:test',
           'bun run frontend:storage:test',
           'bun run frontend:clipboard:test',
+          'E2E_BASE_URL',
+          'E2E_API_BASE_URL',
+          'credential/userinfo',
+          'path/query/hash',
         ],
         'DEPLOYMENT_QA.md',
       )
@@ -735,12 +739,26 @@ const checks: Check[] = [
       )
       requireIncludes(
         e2eSmoke,
-        ['formatE2eSmokeError', 'formatUnknownDiagnosticText', 'runE2eSmoke', 'if (import.meta.main)'],
+        [
+          'formatE2eSmokeError',
+          'formatUnknownDiagnosticText',
+          'smokeTargetIsLocal',
+          'E2eSmokeEnv',
+          'e2eSmokeTargetIssues',
+          'runE2eSmoke',
+          'if (import.meta.main)',
+        ],
         'scripts/e2e-smoke.ts',
       )
       requireIncludes(
         e2eSmokeTest,
-        ['formats object-shaped e2e smoke errors without stringifying raw objects', 'redacts secret-shaped values from e2e smoke errors'],
+        [
+          'validates staging E2E target URLs before Playwright starts',
+          'credential/userinfo',
+          'path/query/hash',
+          'formats object-shaped e2e smoke errors without stringifying raw objects',
+          'redacts secret-shaped values from e2e smoke errors',
+        ],
         'scripts/e2e-smoke.test.ts',
       )
       const smokeLive = packageJson.scripts?.['smoke:live'] ?? ''
@@ -1954,6 +1972,9 @@ const checks: Check[] = [
           'bun run frontend:route:audit',
           'bun run route-menu:audit',
           'E2E_BASE_URL',
+          'E2E_API_BASE_URL',
+          'credential/userinfo',
+          'path/query/hash',
           '/ready',
           'bun run staging:verify',
           'https://',

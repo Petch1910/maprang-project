@@ -1,4 +1,4 @@
-import { formatUnknownDiagnosticText } from './smoke-helpers'
+import { formatUnknownDiagnosticText, smokeTargetIsLocal } from './smoke-helpers'
 
 export type E2eSmokeStep = {
   label: string
@@ -8,6 +8,34 @@ export type E2eSmokeStep = {
 
 export type E2eSmokeRunner = (step: E2eSmokeStep) => Promise<number>
 export type E2eSmokeLogger = Pick<typeof console, 'log' | 'error'>
+export type E2eSmokeEnv = Record<string, string | undefined>
+
+function e2eUrlIssues(name: string, value: string) {
+  const issues: string[] = []
+  let url: URL
+
+  try {
+    url = new URL(value)
+  } catch {
+    return [`${name} ต้องเป็น URL ที่ถูกต้อง`]
+  }
+
+  const localTarget = smokeTargetIsLocal(value)
+  if (!localTarget && url.protocol !== 'https:') issues.push(`${name} ต้องใช้ https เมื่อไม่ใช่ local`)
+  if (url.username || url.password) issues.push(`${name} ห้ามมี credential/userinfo`)
+  if (url.pathname !== '/' || url.search || url.hash) issues.push(`${name} ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash`)
+
+  return issues
+}
+
+export function e2eSmokeTargetIssues(env: E2eSmokeEnv = process.env) {
+  const targets = [
+    ['E2E_BASE_URL', env.E2E_BASE_URL ?? 'http://127.0.0.1:5173'],
+    ['E2E_API_BASE_URL', env.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'],
+  ] as const
+
+  return targets.flatMap(([name, value]) => e2eUrlIssues(name, value))
+}
 
 export function e2eSmokeSteps(): E2eSmokeStep[] {
   return [
@@ -52,9 +80,15 @@ export async function runE2eSmoke(
   runner: E2eSmokeRunner = spawnStep,
   logger: E2eSmokeLogger = console,
   steps: E2eSmokeStep[] = e2eSmokeSteps(),
+  env: E2eSmokeEnv = process.env,
 ) {
   const [reset, browserSmoke, restore] = steps
   if (!reset || !browserSmoke || !restore) throw new Error('e2e smoke ต้องมีขั้น reset, ตรวจเบราว์เซอร์, และ restore')
+  const targetIssues = e2eSmokeTargetIssues(env)
+  if (targetIssues.length > 0) {
+    logger.error(`ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: ${targetIssues.join('; ')}`)
+    return 1
+  }
 
   let exitCode = 0
 

@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { e2eSmokeSteps, formatE2eSmokeError, runE2eSmoke, type E2eSmokeLogger, type E2eSmokeStep } from './e2e-smoke'
+import {
+  e2eSmokeSteps,
+  e2eSmokeTargetIssues,
+  formatE2eSmokeError,
+  runE2eSmoke,
+  type E2eSmokeLogger,
+  type E2eSmokeStep,
+} from './e2e-smoke'
 
 const quietLogger: E2eSmokeLogger = {
   log: () => undefined,
@@ -23,6 +30,35 @@ describe('e2e smoke command plan', () => {
         alwaysRun: true,
       },
     ])
+  })
+
+  test('validates staging E2E target URLs before Playwright starts', async () => {
+    expect(e2eSmokeTargetIssues({})).toEqual([])
+    expect(e2eSmokeTargetIssues({ E2E_BASE_URL: 'https://app.example.com', E2E_API_BASE_URL: 'https://api.example.com' })).toEqual([])
+    expect(e2eSmokeTargetIssues({ E2E_BASE_URL: 'http://app.example.com' }).join('\n')).toContain('https')
+    expect(e2eSmokeTargetIssues({ E2E_API_BASE_URL: 'https://smoke-user:smoke-pass@api.example.com' }).join('\n')).toContain(
+      'credential/userinfo',
+    )
+    expect(e2eSmokeTargetIssues({ E2E_BASE_URL: 'https://app.example.com/app?x=1#debug' }).join('\n')).toContain(
+      'path/query/hash',
+    )
+
+    const calls: string[] = []
+    const errors: string[] = []
+    const exitCode = await runE2eSmoke(
+      async (step: E2eSmokeStep) => {
+        calls.push(step.label)
+        return 0
+      },
+      { log: () => undefined, error: (error) => errors.push(error) },
+      e2eSmokeSteps(),
+      { E2E_API_BASE_URL: 'https://smoke-user:smoke-pass@api.example.com' },
+    )
+
+    expect(exitCode).toBe(1)
+    expect(calls).toEqual([])
+    expect(errors.join('\n')).toContain('credential/userinfo')
+    expect(errors.join('\n')).not.toContain('smoke-pass')
   })
 
   test('restores demo seed data after Playwright failure', async () => {

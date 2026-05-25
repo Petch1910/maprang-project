@@ -26,6 +26,7 @@ guard ใน repo:
 - `deploy:status` จะหยุดก่อน root identity preflight เมื่อ `SMOKE_API_BASE_URL` ที่ไม่ใช่ local มีรูปแบบไม่ปลอดภัย และจะ redact credential/userinfo ใน failure JSON
 - `smoke:ready` redacts credential/userinfo ใน diagnostics ของ `/ready` และ root identity fetch failures เพื่อไม่ให้ URL ที่ตั้งผิดรั่วใน log
 - `api:smoke` แบบเรียกตรงจะใช้ smoke target guard เดียวกันก่อน network/provider work และคืน summary ที่ redact credential/userinfo แล้ว
+- `e2e:smoke` validates `E2E_BASE_URL` และ `E2E_API_BASE_URL` ก่อน Playwright เริ่มทำงาน: local dev ใช้ loopback `http://127.0.0.1` ได้ แต่ staging/production ต้องเป็น HTTPS origin และห้ามมี credential/userinfo หรือ path/query/hash
 
 ### การยืนยัน live chat provider
 
