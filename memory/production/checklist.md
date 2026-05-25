@@ -19,7 +19,7 @@
 - รัน smoke ผู้ให้บริการจริงตามลำดับ.
 - ตั้งค่า live verification flags ของผู้ให้บริการหลัง smoke ผ่านจริงเท่านั้น.
 - รัน `bun run production:check`.
-- กรอก `RELEASE_HANDOFF.md` หลัง `production:check` ผ่าน โดยไม่ใส่ secrets หรือ private database URLs และต้องใส่ `Frontend build artifact`/`Backend deploy artifact` ที่ trace ได้จริง.
+- กรอก `RELEASE_HANDOFF.md` หลัง `production:check` ผ่าน โดยไม่ใส่ secrets หรือ private database URLs และต้องใส่ `Frontend build artifact`/`Backend deploy artifact` ที่ trace ได้จริง พร้อม `Health check result`/`Ready check result` ที่ผ่านจริง.
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 - ใช้ `/admin/health` ไล่ทำ next action ของแต่ละ blocker ก่อนรัน final gate ซ้ำ.
 - ยืนยัน repo-owned gate ล่าสุดด้วย `bun run qa:repo` ก่อนเริ่ม staging/live-provider รอบถัดไป; รอบล่าสุดวันที่ 2026-05-25 ผ่านหลัง release/deploy credential URL guards, production/staging CORS origin credential/path/query/hash guards, frontend env/Admin Health URL guard และ diagnostic wording hardening.

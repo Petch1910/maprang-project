@@ -20,6 +20,8 @@ const filledHandoff = [
   '- Backend URL: https://api.maprang.example',
   '- Health URL: https://api.maprang.example/health',
   '- Ready URL: https://api.maprang.example/ready',
+  '- Health check result: pass',
+  '- Ready check result: pass',
   '',
   '## ฐานข้อมูลและ migrations',
   '- Database host/provider: managed postgres',
@@ -249,6 +251,26 @@ describe('release handoff check', () => {
         'URL ใน release handoff ต้องเป็น deployed origin ไม่มี path/query/hash: Backend URL',
         'Health URL ใน release handoff ต้องชี้ backend origin เดียวกับ Backend URL และใช้ path /health โดยไม่มี query/hash',
         'Ready URL ใน release handoff ต้องชี้ backend origin เดียวกับ Backend URL และใช้ path /ready โดยไม่มี query/hash',
+      ]),
+    )
+  })
+
+  test('requires backend health and ready results to pass for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- Health check result: pass', '- Health check result: fail')
+      .replace('- Ready check result: pass', '- Ready check result: warning')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมีผลตรวจ backend ผ่าน: Health check result',
+        'production release handoff ต้องมีผลตรวจ backend ผ่าน: Ready check result',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมีผลตรวจ backend ผ่าน: Health check result',
+        'staging release handoff ต้องมีผลตรวจ backend ผ่าน: Ready check result',
       ]),
     )
   })
@@ -691,6 +713,8 @@ describe('release handoff check', () => {
       .replace('- Environment: production\n', '')
       .replace('- Frontend URL: https://app.maprang.example\n', '')
       .replace('- Backend URL: https://api.maprang.example\n', '')
+      .replace('- Health check result: pass\n', '')
+      .replace('- Ready check result: pass\n', '')
       .replace('- CORS origins: https://app.maprang.example\n', '')
       .replace('- Go / no-go: go\n', '')
       .replace('- ผู้อนุมัติ: release lead\n', '')
@@ -701,6 +725,8 @@ describe('release handoff check', () => {
         'ยังไม่มี field ใน release handoff: Environment',
         'ยังไม่มี field ใน release handoff: Frontend URL',
         'ยังไม่มี field ใน release handoff: Backend URL',
+        'ยังไม่มี field ใน release handoff: Health check result',
+        'ยังไม่มี field ใน release handoff: Ready check result',
         'ยังไม่มี field ใน release handoff: CORS origins',
         'ยังไม่มี field ใน release handoff: Go / no-go',
         'ยังไม่มี release decision field ใน release handoff: ผู้อนุมัติ',

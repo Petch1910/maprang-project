@@ -40,6 +40,8 @@ bun run release:handoff:check -- --filled
 - Backend URL:
 - Health URL:
 - Ready URL:
+- Health check result:
+- Ready check result:
 
 ## ฐานข้อมูลและ migrations
 

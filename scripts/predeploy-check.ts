@@ -546,6 +546,8 @@ const checks: Check[] = [
           'ลิงก์ที่ deploy แล้ว (Deployed URLs)',
           'deployed origin ล้วน',
           '`/health` และ `/ready`',
+          'Health check result',
+          'Ready check result',
           'ฐานข้อมูลและ migrations',
           'ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
           'การยืนยันผู้ให้บริการ AI',
@@ -619,6 +621,7 @@ const checks: Check[] = [
           'validateFilledReleaseIdentity',
           'validateDeployedArtifactEvidence',
           'isConcreteArtifactValue',
+          'validateDeployedHealthReadyResults',
           'validateProductionVerificationFlags',
           'validateProductionLiveSmokeResults',
           'validateProductionQaResults',
@@ -637,7 +640,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'requires release identity rows as field rows', 'requires concrete release identity values in filled handoff', 'requires release artifact rows as field rows', 'requires concrete artifact evidence for deployed handoffs', 'requires a concrete release environment in filled handoff', 'requires go release decision in filled handoff', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'requires release URL origins and exact backend health paths', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires live provider verification flags as field rows', 'requires production live smoke result rows to pass', 'requires production QA gates to pass for production handoff', 'requires staging QA gates to pass for staging handoff', 'requires frontend QA gates to pass for deployed handoffs', 'requires admin verification rows to pass for deployed handoffs', 'requires admin verification rows as field rows', 'requires migration evidence to pass for deployed handoffs', 'requires migration evidence rows as field rows', 'requires production-safe auth and storage evidence for deployed handoffs', 'requires auth and storage evidence rows as field rows', 'requires release blockers and rollback evidence to be actionable', 'requires release risk rows as field rows', 'reports missing core production QA gate rows', 'requires QA gates as release handoff field rows', 'reports missing critical release handoff fields', 'requires critical release handoff fields as field rows', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'requires release identity rows as field rows', 'requires concrete release identity values in filled handoff', 'requires release artifact rows as field rows', 'requires concrete artifact evidence for deployed handoffs', 'requires a concrete release environment in filled handoff', 'requires go release decision in filled handoff', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'requires release URL origins and exact backend health paths', 'requires backend health and ready results to pass for deployed handoffs', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires live provider verification flags as field rows', 'requires production live smoke result rows to pass', 'requires production QA gates to pass for production handoff', 'requires staging QA gates to pass for staging handoff', 'requires frontend QA gates to pass for deployed handoffs', 'requires admin verification rows to pass for deployed handoffs', 'requires admin verification rows as field rows', 'requires migration evidence to pass for deployed handoffs', 'requires migration evidence rows as field rows', 'requires production-safe auth and storage evidence for deployed handoffs', 'requires auth and storage evidence rows as field rows', 'requires release blockers and rollback evidence to be actionable', 'requires release risk rows as field rows', 'reports missing core production QA gate rows', 'requires QA gates as release handoff field rows', 'reports missing critical release handoff fields', 'requires critical release handoff fields as field rows', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(test, ['requires production e2e smoke targets to match deployed origins', 'requires staging e2e smoke targets to match deployed origins', 'E2E_BASE_URL', 'E2E_API_BASE_URL'], 'scripts/release-handoff-check.test.ts')

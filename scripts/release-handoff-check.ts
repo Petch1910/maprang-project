@@ -32,6 +32,8 @@ const requiredFieldLabels = [
   'Backend URL',
   'Health URL',
   'Ready URL',
+  'Health check result',
+  'Ready check result',
   'CORS origins',
   'Go / no-go',
 ]
@@ -209,6 +211,16 @@ function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
     .filter(Boolean)
   if (corsOrigins && (origins.length === 0 || origins.some((origin) => !looksLikeFrontendCorsOrigin(origin, backendOrigin)))) {
     findings.push('CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น')
+  }
+}
+
+function validateDeployedHealthReadyResults(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  for (const label of ['Health check result', 'Ready check result']) {
+    const value = fieldValue(content, label)
+    if (value && !isPassed(value)) findings.push(`${environment} release handoff ต้องมีผลตรวจ backend ผ่าน: ${label}`)
   }
 }
 
@@ -564,6 +576,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateFilledReleaseIdentity(content, findings)
     validateDeployedArtifactEvidence(content, findings)
     validateFilledReleaseHandoffUrls(content, findings)
+    validateDeployedHealthReadyResults(content, findings)
     validateFilledReleaseDecision(content, findings)
     validateProductionVerificationFlags(content, findings)
     validateProductionLiveSmokeResults(content, findings)
