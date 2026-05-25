@@ -1256,6 +1256,8 @@ const checks: Check[] = [
           'object-shaped error',
           'Production Must-Pass',
           'สิ่งที่ต้องผ่านก่อน production',
+          '`CORS_ORIGINS` ต้องเป็น frontend HTTPS origin จริงเท่านั้น',
+          'ไม่ใช่ localhost/loopback, `http://`, wildcard, path/query, หรือ backend URL',
           'ABUSE_QA_CHECKLIST.md',
         ],
         'SECURITY_CHECKLIST.md',
