@@ -570,6 +570,7 @@ const checks: Check[] = [
       const e2eSmoke = await readRepoFile('scripts/e2e-smoke.ts')
       const e2eSmokeTest = await readRepoFile('scripts/e2e-smoke.test.ts')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+      const readme = await readRepoFile('README.md')
       const qaSeed = await readRepoFile('apps/backend/prisma/qa-seed.ts')
       const packageJson = JSON.parse(content) as { scripts?: Record<string, string> }
       requireIncludes(
@@ -652,6 +653,16 @@ const checks: Check[] = [
       )
       forbidIncludes(qaSeed, ['ตอบสั้นแต่มีชั้นเชิง'], 'apps/backend/prisma/qa-seed.ts')
       requireIncludes(deploymentQa, ['TypeScript import-equals `require()`', 'CommonJS `require()`', 'import-cycle:audit'], 'DEPLOYMENT_QA.md')
+      requireIncludes(
+        deploymentQa,
+        ['frontend API helper contract', 'apps/frontend/src/lib/api.ts', 'requestJson', 'fetch(API_BASE_URL...)'],
+        'DEPLOYMENT_QA.md',
+      )
+      requireIncludes(
+        readme,
+        ['frontend API helper contract', 'apps/frontend/src/lib/api.ts', 'requestJson', 'fetch(API_BASE_URL...)'],
+        'README.md',
+      )
       requireIncludes(
         e2eSmoke,
         ['formatE2eSmokeError', 'formatUnknownDiagnosticText', 'runE2eSmoke', 'if (import.meta.main)'],

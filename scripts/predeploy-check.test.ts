@@ -56,6 +56,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('assertThaiFirstMarkdownHeadings')
     expect(predeploy).toContain('memory/decisions/0014-add-chat-provider-failure-classification.md')
     expect(predeploy).toContain('apps/backend/src/world-state.service.ts')
+    expect(predeploy).toContain('frontend API helper contract')
+    expect(predeploy).toContain('apps/frontend/src/lib/api.ts')
     expect(predeploy).toContain('สถานะโลกปัจจุบัน')
     expect(predeploy).toContain('Treat this as the current world state')
     expect(predeploy).toContain('uses a Thai-first prompt for live roleplay quality smoke')

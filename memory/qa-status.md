@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 API audit docs guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands` passed after predeploy began guarding README/Deployment QA wording for the frontend API helper contract.
 - 2026-05-25 API audit docs sync pass: `bun run docs:commands`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after README and Deployment QA were updated to describe backend route coverage plus frontend API helper contract checks.
 - 2026-05-25 API audit output clarity pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after the API audit started printing `ตรวจ frontend API helper: พบ 34 รายการ` and the combined success line for backend routes plus frontend helpers.
 - 2026-05-25 full deterministic repo QA pass after guard series: `bun run qa:repo` passed after adding unmounted page, stale route preload, and frontend API contract guards. Backend stayed at 173 tests / 601 expects, API route audit covered 48 routes plus frontend helper calls, route/menu audit covered 14 surfaces, import-cycle audit stayed at 122 source files / 290 import edges, local eval covered 3 scenarios, and frontend bundle budget stayed under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
