@@ -1,6 +1,5 @@
 {
   "name": "maprang-project",
-  "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {

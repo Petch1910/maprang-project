@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 Root starter cleanup pass: `bun run docs:commands`, `bun run predeploy:check`, and `bun run secrets:check` passed after removing the unused root `index.ts` starter file and root package `"module": "index.ts"` entry. Backend `apps/backend/index.ts` and its `start` script remain unchanged.
 - 2026-05-25 Frontend API client cleanup pass: `bun run frontend:api:test` and `bun run frontend:check` passed after removing unused frontend-only character edit/delete/duplicate/reset helpers plus lore CRUD helpers/types from `apps/frontend/src/lib/api.ts`. A source search confirmed no current frontend consumer remains for those removed names.
 - 2026-05-25 full deterministic repo QA pass after legacy frontend cleanup: `bun run qa:repo` passed after removing unmounted frontend components and stale `/chat` editor/admin summary wiring. Backend stayed at 173 tests / 601 expects, API route audit covered 48 routes, route/menu audit covered 14 surfaces, import-cycle audit dropped to 124 source files / 295 import edges, local eval covered 3 scenarios, and frontend build/bundle passed with ChatRoom at 226.6KB / 260KB.
 - 2026-05-25 Legacy component removal pass: `bun run frontend:check` passed after deleting unmounted `CharacterList`, `CharacterManager`, and `LoreManager` source files. `AuthPanel` was intentionally kept because `predeploy:check` still guards its safe auth fallback wiring.
