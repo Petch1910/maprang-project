@@ -2144,7 +2144,10 @@ const checks: Check[] = [
       const readme = await readRepoFile('README.md')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const productionSetup = await readRepoFile('PRODUCTION_SETUP.md')
+      const deployRender = await readRepoFile('DEPLOY_RENDER.md')
       const e2eSmoke = await readRepoFile('tests/e2e/maprang-smoke.spec.ts')
+      requireIncludes(productionSetup, ['handoffEvidence', 'RELEASE_HANDOFF.md'], 'PRODUCTION_SETUP.md')
+      requireIncludes(deployRender, ['handoffEvidence', 'bun run api:smoke:live'], 'DEPLOY_RENDER.md')
       requireIncludes(
         audit,
         [
@@ -2179,6 +2182,9 @@ const checks: Check[] = [
           '/ready',
           'bun run staging:verify',
           'https://',
+          'handoffEvidence',
+          'Chat smoke normal walletTransactionId',
+          'Image smoke elapsedMs',
         ],
         'STAGING_RUNBOOK.md',
       )

@@ -30,6 +30,7 @@
 - ตั้ง `IMAGE_GENERATION_API_KEY` หรือผู้ให้บริการจริง ถ้าต้องการให้ Creator Studio สร้างรูปจริง
 - รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging ให้ผ่านก่อน แล้วค่อยตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`
 - รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging ให้ผ่านก่อน แล้วค่อยตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`
+- หลัง live smoke ผ่าน ให้คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` โดยเก็บอย่างน้อย `Chat smoke normal walletTransactionId`, `Chat smoke stream walletTransactionId`, และ `Image smoke elapsedMs`
 - ตั้ง `ADMIN_API_KEY` เป็นค่าสุ่มยาวใหม่สำหรับ staging
 - ตั้ง `CORS_ORIGINS=https://<frontend-staging-domain>`
 - `CORS_ORIGINS` ต้องเป็น frontend HTTPS origin จริงเท่านั้น และต้องไม่ใช้ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, `http://`, wildcard, credential/userinfo, path/query/hash, หรือ backend URL

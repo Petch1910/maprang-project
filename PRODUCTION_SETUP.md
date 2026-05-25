@@ -204,7 +204,7 @@ Workflow นี้ยังต้องมี `SMOKE_ADMIN_API_KEY` เพื่
 
 สำหรับ production ให้ใช้ `SMOKE_ACCESS_TOKEN` จริงสำหรับ user flows และตั้ง `SMOKE_ADMIN_API_KEY` เสมอสำหรับ admin smoke checks. ถ้าใช้ `SMOKE_USER_ID` แทน access token ต้องตั้ง `SMOKE_ADMIN_API_KEY` ด้วย เพื่อให้ backend มอง header-based user id เป็น admin-only smoke path ไม่ใช่ public authentication.
 
-สำหรับ hard production gate ให้รัน `bun run production:check` โดยตั้ง `SMOKE_API_BASE_URL`, smoke auth, Supabase storage, และ admin smoke variables ชุดเดียวกัน. ใช้ `smoke:live`, `smoke:chat`, หรือ `smoke:image:live` เฉพาะตอน retry provider path ที่ fail แบบแคบลง. ในการ verify staging รอบแรก ให้รัน `api:smoke:live` หรือ live smoke command ที่แคบกว่า, ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` หลัง live chat สำเร็จ, ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image สำเร็จ, แล้วค่อย rerun `production:check`.
+สำหรับ hard production gate ให้รัน `bun run production:check` โดยตั้ง `SMOKE_API_BASE_URL`, smoke auth, Supabase storage, และ admin smoke variables ชุดเดียวกัน. ใช้ `smoke:live`, `smoke:chat`, หรือ `smoke:image:live` เฉพาะตอน retry provider path ที่ fail แบบแคบลง. ในการ verify staging รอบแรก ให้รัน `api:smoke:live` หรือ live smoke command ที่แคบกว่า, ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` หลัง live chat สำเร็จ, ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image สำเร็จ, คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md`, แล้วค่อย rerun `production:check`.
 
 ห้ามชี้ `backend:check`, `qa:local`, หรือ `qa:live` ไปที่ production data เว้นแต่ตั้งใจให้ automated persistence tests สร้างและ archive test records ที่นั่นจริง ๆ ให้ใช้ gates เหล่านี้กับ local หรือ staging databases.
 
