@@ -16,7 +16,7 @@ import {
   validateLiveChatSmokeStream,
   validateLiveChatSmokeResponse,
 } from './live-chat-smoke'
-import { liveImageDraftFailure, type CreatorDraftPayload } from './image-smoke'
+import { imageSmokeUrlKind, liveImageDraftFailure, type CreatorDraftPayload } from './image-smoke'
 import {
   apiBaseUrl as defaultApiBaseUrl,
   formatSmokeTargetDiagnosticText,
@@ -130,11 +130,6 @@ export function buildApiSmokeSummary(
     skip: results.filter((result) => result.status === 'skip').length,
     fail: results.filter((result) => result.status === 'fail').length,
   }
-}
-
-function imageSmokeUrlKind(url?: string) {
-  if (!url) return 'missing-url'
-  return url.startsWith('data:') ? 'data-url' : 'remote-or-upload-url'
 }
 
 function formatApiImageSmokeEvidence(payload: CreatorDraftPayload, elapsedMs: number) {

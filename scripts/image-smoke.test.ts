@@ -3,6 +3,7 @@ import {
   buildLiveImageSmokePayload,
   buildSkippedImageSmokePayload,
   formatImageSmokeCaughtError,
+  imageSmokeUrlKind,
   imageGenerationIsConfigured,
   liveImageDraftFailure,
   runImageSmoke,
@@ -72,6 +73,10 @@ describe('image smoke helpers', () => {
   })
 
   test('formats successful live-image payload and classifies generated URL kind', () => {
+    expect(imageSmokeUrlKind()).toBe('missing-url')
+    expect(imageSmokeUrlKind('data:image/png;base64,abc')).toBe('data-url')
+    expect(imageSmokeUrlKind('https://cdn.example/avatar.png')).toBe('remote-or-upload-url')
+
     expect(
       buildLiveImageSmokePayload(
         {
@@ -96,6 +101,17 @@ describe('image smoke helpers', () => {
       elapsedMs: 1200,
       warnings: ['minor warning'],
     })
+
+    expect(
+      buildLiveImageSmokePayload(
+        {
+          source: 'ai',
+          image: { provider: 'configured' },
+        },
+        health(),
+        { baseUrl: 'https://api.maprang.example', elapsedMs: 1 },
+      ).imageUrlKind,
+    ).toBe('missing-url')
   })
 
   test('runs skipped image smoke through an importable runner', async () => {

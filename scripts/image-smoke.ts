@@ -107,6 +107,11 @@ export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   return null
 }
 
+export function imageSmokeUrlKind(url?: string) {
+  if (!url) return 'missing-url'
+  return url.startsWith('data:') ? 'data-url' : 'remote-or-upload-url'
+}
+
 export function buildLiveImageSmokePayload(
   draft: CreatorDraftPayload,
   health: ImageSmokeHealthPayload,
@@ -124,7 +129,7 @@ export function buildLiveImageSmokePayload(
     imageModel: health.model?.imageGeneration?.model ?? null,
     imageStatus: health.model?.imageGeneration?.status ?? null,
     imageProvider: draft.image?.provider,
-    imageUrlKind: draft.image?.url?.startsWith('data:') ? 'data-url' : 'remote-or-upload-url',
+    imageUrlKind: imageSmokeUrlKind(draft.image?.url),
     elapsedMs: options.elapsedMs,
     warnings: draft.warnings ?? [],
   }
