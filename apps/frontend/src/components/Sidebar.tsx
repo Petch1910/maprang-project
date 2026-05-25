@@ -22,12 +22,8 @@ import {
 } from 'lucide-react'
 import type {
   Character,
-  CharacterInput,
-  CharacterListFilters,
   ChatSummary,
   ChatRuntimeState,
-  LoreEntry,
-  LoreInput,
 } from '../lib/api'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { formatTime } from '../lib/chat'
@@ -41,31 +37,16 @@ type SidebarProps = {
   runtimeState: ChatRuntimeState | null
   connectionNote: string
   isHistoryLoading: boolean
-  isLoreLoading: boolean
   isMobileOpen: boolean
-  isSavingCharacter: boolean
-  isSavingLore: boolean
-  loreEntries: LoreEntry[]
   onArchiveChat: (chatId: string) => void
   onAuthChanged: () => Promise<void>
   onCloseMobile: () => void
-  onCreateCharacter: (input: CharacterInput) => Promise<void>
-  onCreateLore: (input: LoreInput) => Promise<void>
-  onDeleteCharacter: () => Promise<void>
   onDeleteChat: (chatId: string) => void
-  onDeleteLore: (loreId: string) => void
-  onDuplicateCharacter: () => Promise<void>
-  onFilterCharacters: (filters?: CharacterListFilters) => Promise<Character[]>
-  onFavoriteCharacter: (characterId: string, favorite: boolean) => Promise<void>
   onLoadChatHistory: () => void
-  onLoadLore: () => Promise<void>
   onOpenChat: (chatId: string) => void
-  onResetCharacterPrompt: () => Promise<void>
-  onSaveCharacter: (input: CharacterInput) => Promise<void>
   onRenameChat: (chatId: string, title: string) => Promise<void>
   onSelectCharacter: (character: Character) => void
   onStartNewChat: () => void
-  onUpdateLore: (loreId: string, input: Partial<LoreInput>) => Promise<void>
 }
 
 export function Sidebar(props: SidebarProps) {

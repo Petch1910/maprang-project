@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Chat route no longer carries legacy character/lore editor handlers. `WorkspacePage` stopped passing unused character CRUD, lore CRUD, lore loading state, and editor saving state into `Sidebar`; `/chat` now leaves character creation/editing to `/create` and no longer fetches character lore for an editor that is not mounted. Browser QA confirmed no `/lore` or `/admin/summary` requests are made while the chat route renders.
 - 2026-05-25: Chat route no longer carries the legacy admin summary surface. `/chat` stopped importing/calling `fetchAdminSummary`, the unused `AdminSummary` component was removed, and `Sidebar` no longer accepts unused admin/health props; Browser QA confirmed the chat page renders without `/admin/summary` requests, disabled controls missing reasons, or console errors.
 - 2026-05-25: Admin Health System Status refresh now shares the loading guard. `/admin/health` disables both the top refresh and the System Status card refresh while health is loading, with `aria-disabled` and the Thai title `กำลังโหลดสถานะระบบ`; Browser QA confirmed both controls lock together with no missing disabled reasons or console errors.
 - 2026-05-25: Chat Sidebar refresh now has a loading guard. `/chat` disables the sidebar refresh while chat history is loading, exposes `aria-disabled`, and shows the Thai title `กำลังโหลดรายการแชทในแถบข้าง`; Browser QA confirmed the click path flips to the disabled state with no missing disabled reasons or console errors.

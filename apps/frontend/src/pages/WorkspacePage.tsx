@@ -5,39 +5,27 @@ import { ReportDialog, type ReportDialogSubmit, type ReportDialogTarget } from '
 import { Sidebar } from '../components/Sidebar'
 import {
   archiveChat as archiveSavedChat,
-  createCharacter,
   createReport,
-  createLoreEntry,
-  deleteCharacter,
   deleteChat as deleteSavedChat,
-  deleteLoreEntry,
-  duplicateCharacter,
   fetchCharacters,
   fetchChatMessages,
   fetchChats,
   fetchHealthStatus,
-  fetchLoreEntries,
   fetchUsageSummary,
   logUnexpectedError,
-  resetCharacterPrompt,
   sendChatMessage,
   setCharacterFavorite,
   streamChatMessage,
   trackCharacterView,
-  updateCharacter,
   updateChatWorldState as updateSavedChatWorldState,
   updateChatTitle as updateSavedChatTitle,
-  updateLoreEntry,
   ApiError,
   type Character,
-  type CharacterInput,
   type CharacterListFilters,
   type ChatMessage,
   type ChatResponse,
   type ChatRuntimeState,
   type ChatSummary,
-  type LoreEntry,
-  type LoreInput,
   type WorldStateInput,
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
@@ -155,16 +143,12 @@ export function WorkspacePage() {
   const [chatId, setChatId] = useState<string | null>(null)
   const [chatLog, setChatLog] = useState<ChatMessage[]>([createGreeting(fallbackCharacter)])
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>([])
-  const [loreEntries, setLoreEntries] = useState<LoreEntry[]>([])
   const [lastUsage, setLastUsage] = useState<ChatUsage | null>(null)
   const [runtimeState, setRuntimeState] = useState<ChatRuntimeState | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
-  const [isLoreLoading, setIsLoreLoading] = useState(false)
   const [isWorldStateSaving, setIsWorldStateSaving] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isSavingCharacter, setIsSavingCharacter] = useState(false)
-  const [isSavingLore, setIsSavingLore] = useState(false)
   const [reportTarget, setReportTarget] = useState<WorkspaceReportTarget | null>(null)
   const [isReporting, setIsReporting] = useState(false)
   const [connectionNote, setConnectionNote] = useState('กำลังโหลดตัวละครจากฐานข้อมูล...')
@@ -240,23 +224,6 @@ export function WorkspacePage() {
     return loadedCharacters
   }, [])
 
-  const loadLoreEntries = useCallback(async (characterId: string) => {
-    setIsLoreLoading(true)
-    try {
-      const data = await fetchLoreEntries(characterId)
-      setLoreEntries(data.loreEntries ?? [])
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 404) {
-        setLoreEntries([])
-        return
-      }
-      logUnexpectedWorkspaceError('โหลดคลังความรู้ไม่สำเร็จ:', error)
-      setLoreEntries([])
-    } finally {
-      setIsLoreLoading(false)
-    }
-  }, [])
-
   const refreshWorkspaceAuth = useCallback(async () => {
     try {
       await getAuthState()
@@ -277,7 +244,6 @@ export function WorkspacePage() {
     setChatId(null)
     setRuntimeState(null)
     setChatLog([createGreeting(nextCharacter)])
-    await loadLoreEntries(nextCharacter.id)
     await loadChatHistory()
     await loadUsageSummary()
   }
@@ -327,7 +293,6 @@ export function WorkspacePage() {
     } catch (error) {
       logUnexpectedWorkspaceError('บันทึกยอดเข้าชมตัวละครไม่สำเร็จ:', error)
     }
-    await loadLoreEntries(nextCharacter.id)
   }
 
   const openChat = useCallback(async (id: string) => {
@@ -346,14 +311,13 @@ export function WorkspacePage() {
       })
       setCharacter(data.chat.character)
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
-      await loadLoreEntries(data.chat.character.id)
     } catch (error) {
       logUnexpectedWorkspaceError('เปิดแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsLoading(false)
     }
-  }, [loadLoreEntries])
+  }, [])
 
   useEffect(() => {
     async function boot() {
@@ -381,7 +345,6 @@ export function WorkspacePage() {
                 ]
               : []),
           ])
-          await loadLoreEntries(firstCharacter.id)
         }
       } catch (error) {
         logUnexpectedWorkspaceError('โหลดตัวละครไม่สำเร็จ:', error)
@@ -398,7 +361,6 @@ export function WorkspacePage() {
     loadCharacters,
     loadChatHistory,
     loadHealthStatus,
-    loadLoreEntries,
     loadUsageSummary,
     openChat,
     refreshWorkspaceAuth,
@@ -451,143 +413,6 @@ export function WorkspacePage() {
     } catch (error) {
       logUnexpectedWorkspaceError('อัปเดตรายการโปรดไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    }
-  }
-
-  const saveCharacter = async (input: CharacterInput) => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await updateCharacter(character.id, input)
-      setCharacter(data.character)
-      setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
-      setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
-      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('บันทึกตัวละครไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const createNewCharacter = async (input: CharacterInput) => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await createCharacter(input)
-      setCharacter(data.character)
-      setCharacters((prev) => [data.character, ...prev.filter((item) => item.id !== data.character.id)])
-      setChatId(null)
-      lastUsageChatIdRef.current = null
-      setLastUsage(null)
-      setLoreEntries([])
-      setChatLog([createGreeting(data.character)])
-      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('สร้างตัวละครไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const duplicateSelectedCharacter = async () => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await duplicateCharacter(character.id)
-      setCharacter(data.character)
-      setCharacters((prev) => [data.character, ...prev.filter((item) => item.id !== data.character.id)])
-      setChatId(null)
-      lastUsageChatIdRef.current = null
-      setLastUsage(null)
-      setLoreEntries([])
-      setChatLog([createGreeting(data.character)])
-      setConnectionNote(`อัปเดต ${character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('คัดลอกตัวละครไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const resetSelectedCharacterPrompt = async () => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await resetCharacterPrompt(character.id)
-      setCharacter(data.character)
-      setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
-      setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
-      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('รีเซ็ตพรอมป์ไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'รีเซ็ตพรอมป์ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const deleteSelectedCharacter = async () => {
-    setIsSavingCharacter(true)
-    try {
-      await deleteCharacter(character.id)
-      const remaining = characters.filter((item) => item.id !== character.id)
-      const nextCharacter = remaining[0] ?? fallbackCharacter
-      setCharacters(remaining.length > 0 ? remaining : [fallbackCharacter])
-      setCharacter(nextCharacter)
-      setChatId(null)
-      lastUsageChatIdRef.current = null
-      setLastUsage(null)
-      setLoreEntries([])
-      setChatLog([createGreeting(nextCharacter)])
-      setConnectionNote(`อัปเดต ${character.name} แล้ว`)
-      await loadLoreEntries(nextCharacter.id)
-    } catch (error) {
-      logUnexpectedWorkspaceError('ลบตัวละครไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const createNewLore = async (input: LoreInput) => {
-    setIsSavingLore(true)
-    try {
-      const data = await createLoreEntry(character.id, input)
-      setLoreEntries((prev) => [data.loreEntry, ...prev])
-      setConnectionNote(`บันทึกคลังความรู้ "${data.loreEntry.keyword}" แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('สร้างคลังความรู้ไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดตคลังความรู้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingLore(false)
-    }
-  }
-
-  const saveLore = async (loreId: string, input: Partial<LoreInput>) => {
-    setIsSavingLore(true)
-    try {
-      const data = await updateLoreEntry(loreId, input)
-      setLoreEntries((prev) => prev.map((entry) => (entry.id === loreId ? data.loreEntry : entry)))
-      setConnectionNote(`บันทึกคลังความรู้ "${data.loreEntry.keyword}" แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('แก้ไขคลังความรู้ไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดตคลังความรู้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingLore(false)
-    }
-  }
-
-  const removeLore = async (loreId: string) => {
-    setIsSavingLore(true)
-    try {
-      await deleteLoreEntry(loreId)
-      setLoreEntries((prev) => prev.filter((entry) => entry.id !== loreId))
-      setConnectionNote('อัปเดตคลังความรู้แล้ว')
-    } catch (error) {
-      logUnexpectedWorkspaceError('ลบคลังความรู้ไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดตคลังความรู้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingLore(false)
     }
   }
 
@@ -864,31 +689,16 @@ export function WorkspacePage() {
         runtimeState={runtimeState}
         connectionNote={connectionNote}
         isHistoryLoading={isHistoryLoading}
-        isLoreLoading={isLoreLoading}
         isMobileOpen={isMobileMenuOpen}
-        isSavingCharacter={isSavingCharacter}
-        isSavingLore={isSavingLore}
-        loreEntries={loreEntries}
         onArchiveChat={archiveChat}
         onAuthChanged={reloadWorkspaceAfterAuthChange}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
-        onCreateCharacter={createNewCharacter}
-        onCreateLore={createNewLore}
-        onDeleteCharacter={deleteSelectedCharacter}
         onDeleteChat={removeChat}
-        onDeleteLore={removeLore}
-        onDuplicateCharacter={duplicateSelectedCharacter}
-        onFilterCharacters={loadCharacters}
-        onFavoriteCharacter={toggleFavorite}
         onLoadChatHistory={loadChatHistory}
-        onLoadLore={() => loadLoreEntries(character.id)}
         onOpenChat={openChat}
-        onResetCharacterPrompt={resetSelectedCharacterPrompt}
-        onSaveCharacter={saveCharacter}
         onRenameChat={renameChat}
         onSelectCharacter={selectCharacter}
         onStartNewChat={startNewChat}
-        onUpdateLore={saveLore}
       />
 
       <ChatPanel
