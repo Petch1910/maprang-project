@@ -9,7 +9,12 @@ import {
   parseApiSmokeStreamEvents,
   tryParseJson,
 } from './api-smoke-helpers'
-import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
+import {
+  assertSmokeUserHasTokenBalance,
+  findMatchingChatDebits,
+  parseMinSmokeTokenBalance,
+  validateLiveChatSmokeResponse,
+} from './live-chat-smoke'
 import {
   apiBaseUrl as defaultApiBaseUrl,
   formatSmokeTargetDiagnosticText,
@@ -87,6 +92,13 @@ type HealthSmokePayload = {
     promptBudgetTokens?: number
     promptHistoryMaxMessages?: number
   }
+}
+
+type ApiSmokeWalletTransaction = {
+  id: string
+  type: string
+  amount: number
+  balanceAfter: number
 }
 
 export type ApiSmokeRunnerOptions = {
@@ -517,6 +529,9 @@ await check('POST /chat validation', async () => {
   return 'ปฏิเสธรหัสตัวละครไม่ถูกต้องก่อนเรียกผู้ให้บริการ'
 })
 
+let liveChatId: string | null = null
+let liveChatTotalTokens: number | null = null
+
 if (live) {
   await check('POST /chat', async () => {
     const minSmokeTokenBalance = parseMinSmokeTokenBalance()
@@ -544,14 +559,21 @@ if (live) {
     })
     const minRoleplayReplyChars = Math.max(420, healthStatus?.model?.minRoleplayReplyChars ?? 420)
     const chatResult = validateLiveChatSmokeResponse(payload, minRoleplayReplyChars)
+    liveChatId = chatResult.chatId
+    liveChatTotalTokens = chatResult.totalTokens
     return `chatId=${chatResult.chatId}, โทเคน=${chatResult.totalTokens}, ยอดขั้นต่ำ=${minSmokeTokenBalance}, ความยาวคำตอบ=${chatResult.replyChars}, ขั้นต่ำคำตอบโรลเพลย์=${minRoleplayReplyChars}`
   })
 
   await check('POST /chat/stream live', async () => {
+    if (!liveChatId || !liveChatTotalTokens) {
+      throw new Error('ยังไม่มีผลแชทจริงให้ใช้ต่อในสตรีมและจับคู่รายการ wallet')
+    }
+
     const events = await readStreamEvents('/chat/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify({
+        chatId: liveChatId,
         characterId: primaryCharacter.id,
         relationshipSeed: 'stranger',
         maxRating: 'restricted_18',
@@ -578,7 +600,16 @@ if (live) {
     if ((done.usage?.totalTokens ?? 0) <= 0) throw new Error('สตรีมแชทจริงไม่คืนโทเคนที่ใช้')
     if (reply.length < 80) throw new Error(`สตรีมแชทจริงคืนคำตอบสั้นเกินไป: ${reply}`)
 
-    return `chatId=${done.chatId}, โทเคน=${done.usage?.totalTokens}, deltaChars=${reply.length}`
+    const streamTotalTokens = done.usage?.totalTokens ?? 0
+    const walletAfter = await readJson<{ wallet?: { transactions?: ApiSmokeWalletTransaction[] } }>('/me/usage', {
+      headers: authHeaders,
+    })
+    const chatDebits = findMatchingChatDebits(walletAfter.wallet?.transactions, [liveChatTotalTokens, streamTotalTokens])
+    if (!chatDebits) {
+      throw new Error('แชทจริงและสตรีมแชทจริงคืนโทเคนแล้ว แต่ไม่พบรายการ wallet แบบ CHAT_USAGE ครบทั้งสองเส้นทาง')
+    }
+
+    return `chatId=${done.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${reply.length}, walletDebits=${chatDebits.length}`
   })
 } else {
   record('POST /chat', 'skip', 'ข้ามการเรียกโมเดลจริง; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
