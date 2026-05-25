@@ -416,6 +416,7 @@ function SidebarContent({
 
   const selectionActionDisabledReason =
     selectedChatIds.length === 0 ? 'เลือกแชทอย่างน้อย 1 รายการก่อนจัดการ' : undefined
+  const refreshDisabledReason = isHistoryLoading ? 'กำลังโหลดรายการแชทในแถบข้าง' : undefined
   const renameConfirmDisabledReason = renameTarget
     ? renameValue.trim().length === 0
       ? 'กรอกชื่อแชทก่อนบันทึก'
@@ -504,9 +505,12 @@ function SidebarContent({
           />
         </label>
         <button type="button"
-          className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white"
+          aria-disabled={Boolean(refreshDisabledReason)}
+          className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+          data-testid="chat-sidebar-refresh"
+          disabled={Boolean(refreshDisabledReason)}
           onClick={onLoadChatHistory}
-          title="โหลดรายการแชทใหม่"
+          title={refreshDisabledReason || 'โหลดรายการแชทใหม่'}
         >
           <RefreshCw size={16} />
         </button>
