@@ -11,6 +11,10 @@ const filledHandoff = [
   '- ผู้รับผิดชอบ: release lead',
   '- Environment: production',
   '',
+  '## หลักฐาน build/deploy artifact',
+  '- Frontend build artifact: vercel:dpl_frontend_202605250001',
+  '- Backend deploy artifact: render:dpl_backend_202605250001',
+  '',
   '## ลิงก์ที่ deploy แล้ว (Deployed URLs)',
   '- Frontend URL: https://app.maprang.example',
   '- Backend URL: https://api.maprang.example',
@@ -124,6 +128,39 @@ describe('release handoff check', () => {
         'Git commit ใน release handoff ต้องเป็น commit hash 7-40 ตัวอักษร',
         'Branch ใน release handoff ต้องเป็นชื่อ branch จริง',
         'ผู้รับผิดชอบ ใน release handoff ต้องเป็นชื่อผู้รับผิดชอบจริง',
+      ]),
+    )
+  })
+
+  test('requires release artifact rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- Frontend build artifact: vercel:dpl_frontend_202605250001\n', '- Artifact note: Frontend build artifact: vercel:dpl_frontend_202605250001\n')
+      .replace('- Backend deploy artifact: render:dpl_backend_202605250001\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี artifact field ใน release handoff: Frontend build artifact',
+        'ยังไม่มี artifact field ใน release handoff: Backend deploy artifact',
+      ]),
+    )
+  })
+
+  test('requires concrete artifact evidence for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- Frontend build artifact: vercel:dpl_frontend_202605250001', '- Frontend build artifact: latest')
+      .replace('- Backend deploy artifact: render:dpl_backend_202605250001', '- Backend deploy artifact: local build')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมี Frontend build artifact ที่ trace ได้จริง ไม่ใช่ placeholder/latest/local build',
+        'production release handoff ต้องมี Backend deploy artifact ที่ trace ได้จริง ไม่ใช่ placeholder/latest/local build',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมี Frontend build artifact ที่ trace ได้จริง ไม่ใช่ placeholder/latest/local build',
+        'staging release handoff ต้องมี Backend deploy artifact ที่ trace ได้จริง ไม่ใช่ placeholder/latest/local build',
       ]),
     )
   })

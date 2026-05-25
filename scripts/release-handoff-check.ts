@@ -8,6 +8,7 @@ const file = join(root, 'RELEASE_HANDOFF.md')
 const requiredSections = [
   'แม่แบบส่งมอบ release',
   'ตัวตนของ release',
+  'หลักฐาน build/deploy artifact',
   'ลิงก์ที่ deploy แล้ว (Deployed URLs)',
   'ฐานข้อมูลและ migrations',
   'ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
@@ -46,6 +47,9 @@ const requiredReleaseIdentityFieldLabels = [
   'ผู้รับผิดชอบ',
 ]
 const requiredReleaseIdentityFieldSnippets = requiredReleaseIdentityFieldLabels
+
+const requiredArtifactFieldLabels = ['Frontend build artifact', 'Backend deploy artifact']
+const requiredArtifactFieldSnippets = requiredArtifactFieldLabels
 
 const requiredMigrationFieldLabels = [
   'Database host/provider',
@@ -280,6 +284,25 @@ function validateFilledReleaseIdentity(content: string, findings: string[]) {
   }
 }
 
+function isConcreteArtifactValue(value: string) {
+  const normalized = value.trim()
+  if (!normalized || isPlaceholderLike(normalized) || isNoneLike(normalized)) return false
+  if (/\b(localhost|local build|dev build|test build|mock|example|sample|pending|latest|current|manual|draft)\b/i.test(normalized)) return false
+  return /[a-z0-9][a-z0-9._:/#-]{5,}/i.test(normalized)
+}
+
+function validateDeployedArtifactEvidence(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  for (const label of requiredArtifactFieldLabels) {
+    const value = fieldValue(content, label)
+    if (value && !isConcreteArtifactValue(value)) {
+      findings.push(`${environment} release handoff ต้องมี ${label} ที่ trace ได้จริง ไม่ใช่ placeholder/latest/local build`)
+    }
+  }
+}
+
 function validateProductionQaResults(content: string, findings: string[]) {
   const environment = releaseEnvironment(content)
   if (environment !== 'production') return
@@ -504,6 +527,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี release identity field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredArtifactFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี artifact field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredMigrationFieldLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี migration field ใน release handoff: ${label}`)
   }
@@ -535,6 +562,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
       .filter(({ line }) => line.startsWith('- ') && /:\s*$/.test(line))
     for (const field of blankFields) findings.push(`บรรทัด ${field.index} ยังว่างอยู่: ${field.line}`)
     validateFilledReleaseIdentity(content, findings)
+    validateDeployedArtifactEvidence(content, findings)
     validateFilledReleaseHandoffUrls(content, findings)
     validateFilledReleaseDecision(content, findings)
     validateProductionVerificationFlags(content, findings)

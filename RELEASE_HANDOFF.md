@@ -25,6 +25,13 @@ bun run release:handoff:check -- --filled
 
 หมายเหตุ: เมื่อกรอก release จริง `Environment` ต้องเป็น `staging` หรือ `production` ตรง ๆ เท่านั้น เพื่อให้ gate ฝั่ง staging/production ทำงานครบ
 
+## หลักฐาน build/deploy artifact
+
+หมายเหตุ: ให้ใส่ค่า artifact หรือ deploy id ที่ trace ได้จริงจาก hosting/build system เช่น Vercel deployment id, Render deploy id, Docker image digest, หรือ GitHub Actions artifact/run id ห้ามใช้ `latest`, `local build`, `manual`, placeholder, หรือค่าที่ไล่ย้อนกลับไม่ได้.
+
+- Frontend build artifact:
+- Backend deploy artifact:
+
 ## ลิงก์ที่ deploy แล้ว (Deployed URLs)
 
 หมายเหตุ: `Frontend URL` และ `Backend URL` ต้องเป็น deployed origin ล้วน เช่น `https://app.example.com` และ `https://api.example.com`; `Health URL` กับ `Ready URL` ต้องชี้ backend origin เดียวกันพร้อม path `/health` และ `/ready` โดยไม่มี query/hash.
