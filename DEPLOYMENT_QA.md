@@ -281,7 +281,7 @@ CI ยังรัน seeded local backend smoke test และ build Docker ima
 
 สำหรับ deployed environments ให้ใช้ manual GitHub Actions workflow `Production Smoke`.
 ตั้ง repository secrets `SMOKE_API_BASE_URL`, `SMOKE_ADMIN_API_KEY`, และเลือกอย่างใดอย่างหนึ่งระหว่าง `SMOKE_ACCESS_TOKEN` หรือ `SMOKE_USER_ID`.
-Workflow จะปฏิเสธ backend URL ที่เป็น local หรือไม่ใช่ https และต้องมี signed Supabase storage smoke secrets ก่อนถึงขั้นที่ใช้เครดิต provider.
+Workflow จะปฏิเสธ backend URL ที่เป็น local, ไม่ใช่ https, มี credential/userinfo, หรือมี path/query/hash และต้องมี signed Supabase storage smoke secrets ก่อนถึงขั้นที่ใช้เครดิต provider.
 มันยังรัน `bun run predeploy:check`, `bun run predeploy:check:test`, secrets/secret-pattern/memory/knowledge/eval/security/API/menu audits พร้อม audit regression tests, `bun run release:handoff:check`, และ `bun run release:handoff:test` ก่อนตรวจ smoke configuration เพื่อจับ repository drift ก่อน storage/provider checks.
 Workflow พิมพ์ `bun run deploy:status` ก่อน strict production doctor เพื่อให้ log มี blocker details และ next steps อยู่ในที่เดียว.
 ทุก workflow run จะตรวจ admin summary, non-mutating wallet token validation, moderation report creation validation, moderation reports, non-mutating admin report validation, และ audit logs ผ่าน `SMOKE_ADMIN_API_KEY`. input เสริม `run_chat` จะตรวจ live AI provider path และใช้เครดิตผู้ให้บริการด้วย. input `min_token_balance_for_chat` map ไปที่ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` และค่าเริ่มต้นคือ `1000`.

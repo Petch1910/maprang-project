@@ -246,6 +246,35 @@ describe('smoke doctor report', () => {
     expect(errors.join('\n')).toContain('วิธีแก้ในเครื่อง:')
   })
 
+  test('strict deploy gates reject unsafe smoke target before network checks', async () => {
+    const lines: string[] = []
+    const warnings: string[] = []
+    const errors: string[] = []
+    let rootRead = false
+
+    const exitCode = await runSmokeDoctor({
+      argv: ['bun', 'scripts/smoke-doctor.ts', '--strict-production'],
+      apiBaseUrl: 'https://smoke-user:smoke-pass@api.maprang.example/v1',
+      isLocalSmokeTarget: false,
+      rootIdentityReader: async () => {
+        rootRead = true
+        return { ok: true, service: 'maprang-backend' }
+      },
+      healthReader: async () => healthyPayload(),
+      writeLine: (line) => lines.push(line),
+      writeWarning: (line) => warnings.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    expect(exitCode).toBe(1)
+    expect(rootRead).toBe(false)
+    expect(lines).toEqual([])
+    expect(warnings).toEqual([])
+    expect(errors.join('\n')).toContain('credential/userinfo')
+    expect(errors.join('\n')).toContain('path/query/hash')
+    expect(errors.join('\n')).toContain('SMOKE_API_BASE_URL')
+  })
+
   test('runs smoke doctor through an importable runner', async () => {
     const lines: string[] = []
     const warnings: string[] = []

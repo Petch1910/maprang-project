@@ -93,12 +93,7 @@ jobs:
             echo "ตั้ง workflow input api_base_url หรือ repository secret SMOKE_API_BASE_URL ก่อนรัน smoke"
             exit 1
           fi
-          case "$SMOKE_API_BASE_URL" in
-            https://localhost*|https://127.0.0.1*|http://*)
-              echo "SMOKE_API_BASE_URL ต้องเป็น backend URL ที่ deploy แล้วแบบ https ไม่ใช่ localhost หรือ http"
-              exit 1
-              ;;
-          esac
+          bun --eval 'import { deployedSmokeTargetIssues } from "./scripts/smoke-helpers"; const issues = deployedSmokeTargetIssues(process.env.SMOKE_API_BASE_URL ?? ""); if (issues.length > 0) { console.error(`SMOKE_API_BASE_URL ต้องเป็น backend URL ที่ deploy แล้วแบบ https ไม่มี credential/userinfo, path/query/hash, หรือ localhost/loopback: ${issues.join("; ")}`); process.exit(1); }'
           if [ -z "$SMOKE_ACCESS_TOKEN" ] && [ -z "$SMOKE_USER_ID" ]; then
             echo "ตั้ง repository secret SMOKE_ACCESS_TOKEN หรือ SMOKE_USER_ID สำหรับ smoke ฝั่งผู้ใช้"
             exit 1

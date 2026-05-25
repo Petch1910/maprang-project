@@ -22,6 +22,7 @@
 
 guard ใน repo:
 - `DEPLOY_RENDER.md` ระบุ placeholder ของ Render backend/frontend แบบ HTTPS-only และห้ามใช้ localhost/loopback, `http://`, wildcard origins, credential/userinfo, path/query/hash, หรือ backend URL ใน `CORS_ORIGINS`; `bun run predeploy:check` คุม wording ชุดนี้ไว้แล้ว
+- GitHub Production Smoke และ `smoke-doctor --strict-*` ใช้ guard เดียวกันให้ `SMOKE_API_BASE_URL` ต้องเป็น backend origin ที่ deploy แล้วแบบ `https` เท่านั้น และปฏิเสธ localhost/loopback, credential/userinfo, path/query/hash ก่อนถึง provider-credit smoke
 
 ### การยืนยัน live chat provider
 
@@ -53,7 +54,7 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง release/deploy credential URL guards, production/staging CORS origin credential/path/query/hash guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
+- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง smoke target URL guard, release/deploy credential URL guards, production/staging CORS origin credential/path/query/hash guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
 - backend test suite ฝั่ง local ผ่านแล้ว: 177 pass, 0 fail, 609 expect calls.
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว

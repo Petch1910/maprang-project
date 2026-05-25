@@ -1,5 +1,6 @@
 import {
   apiBaseUrl,
+  deployedSmokeTargetIssues,
   formatUnknownDiagnosticText,
   isLocalSmokeTarget,
   readJson,
@@ -166,6 +167,15 @@ export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunner
   const writeLine = options.writeLine ?? ((line: string) => console.log(line))
   const writeWarning = options.writeWarning ?? ((line: string) => console.warn(line))
   const writeError = options.writeError ?? ((line: string) => console.error(line))
+
+  if (strictProductionGate || strictStagingGate) {
+    const targetIssues = deployedSmokeTargetIssues(currentApiBaseUrl)
+    if (targetIssues.length > 0) {
+      writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${targetIssues.join('; ')}`)
+      writeError('วิธีแก้ตอน deploy: ตั้ง SMOKE_API_BASE_URL เป็น backend origin ที่ deploy แล้วแบบ https ไม่มี credential/userinfo, path/query/hash, หรือ localhost/loopback')
+      return 1
+    }
+  }
 
   try {
     validateBackendRootIdentity(await rootIdentityReader())

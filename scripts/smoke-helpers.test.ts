@@ -1,8 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 import {
   buildSmokeAuthHeaders,
+  deployedSmokeTargetIssues,
   formatDiagnosticText,
   formatFetchErrorReason,
+  formatSmokeTargetDiagnosticText,
   formatUnknownDiagnosticText,
   formatPayload,
   smokeApiBaseUrl,
@@ -25,6 +27,21 @@ describe('smoke helpers', () => {
     const env = { SMOKE_API_BASE_URL: 'https://api.example.com' }
     expect(smokeTargetIsLocal(env.SMOKE_API_BASE_URL)).toBe(false)
     expect(buildSmokeAuthHeaders(env)).toEqual({})
+  })
+
+  test('validates deployed smoke targets before strict smoke gates', () => {
+    expect(deployedSmokeTargetIssues('https://api.example.com')).toEqual([])
+    expect(deployedSmokeTargetIssues('http://api.example.com').join('\n')).toContain('https')
+    expect(deployedSmokeTargetIssues('https://localhost:3000').join('\n')).toContain('localhost/loopback')
+    expect(deployedSmokeTargetIssues('https://0.0.0.0:3000').join('\n')).toContain('0.0.0.0')
+    expect(deployedSmokeTargetIssues('https://[::1]:3000').join('\n')).toContain('::1')
+    expect(deployedSmokeTargetIssues('https://smoke-user:smoke-pass@api.example.com').join('\n')).toContain(
+      'credential/userinfo',
+    )
+    expect(deployedSmokeTargetIssues('https://api.example.com/v1?x=1#debug').join('\n')).toContain(
+      'path/query/hash',
+    )
+    expect(deployedSmokeTargetIssues('not-a-url').join('\n')).toContain('URL')
   })
 
   test('prefers explicit smoke auth values and keeps admin key separate', () => {
@@ -55,6 +72,9 @@ describe('smoke helpers', () => {
     expect(formatPayload({ detail: fakeDatabaseUrl }, 'fallback')).toContain('postgresql://[REDACTED_SECRET]')
     expect(formatPayload(null, `DATABASE_URL=${fakeDatabaseUrl}`)).toContain('[REDACTED_SECRET]')
     expect(formatFetchErrorReason(new Error(`connection failed ${fakeDatabaseUrl}`))).toContain('postgresql://[REDACTED_SECRET]')
+    expect(formatSmokeTargetDiagnosticText('https://smoke-user:smoke-pass@api.example.com', 500)).toBe(
+      'https://[REDACTED_USERINFO]@api.example.com/',
+    )
   })
 
   test('formats unknown smoke diagnostics without stringifying raw objects', () => {

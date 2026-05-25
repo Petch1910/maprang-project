@@ -212,7 +212,7 @@ Workflow นี้ยังต้องมี `SMOKE_ADMIN_API_KEY` เพื่
 
 หลังแต่ละ deploy สามารถรัน manual GitHub Actions workflow `Production Smoke` ได้ด้วย.
 ตั้ง repository secrets `SMOKE_API_BASE_URL`, `SMOKE_ADMIN_API_KEY`, และเลือกอย่างใดอย่างหนึ่งระหว่าง `SMOKE_ACCESS_TOKEN` หรือ `SMOKE_USER_ID`.
-`SMOKE_API_BASE_URL` ต้องเป็น backend URL ที่ deploy แล้วแบบ `https://`. Workflow จะปฏิเสธ `http://`, localhost/loopback เช่น `127.0.0.1`, `0.0.0.0`, `::1`, และ signed-storage secrets ที่ขาด ก่อนมีโอกาสใช้เครดิตผู้ให้บริการ.
+`SMOKE_API_BASE_URL` ต้องเป็น backend URL ที่ deploy แล้วแบบ `https://` และเป็น backend origin เท่านั้น. Workflow จะปฏิเสธ `http://`, localhost/loopback เช่น `127.0.0.1`, `0.0.0.0`, `::1`, credential/userinfo, path/query/hash, และ signed-storage secrets ที่ขาด ก่อนมีโอกาสใช้เครดิตผู้ให้บริการ.
 Workflow จะตรวจ admin summary, moderation reports, และ audit logs ผ่าน `SMOKE_ADMIN_API_KEY` ทุกครั้งโดยไม่ใช้เครดิตผู้ให้บริการ.
 เปิด `run_chat` เฉพาะตอนต้องการใช้ provider credit เล็กน้อยเพื่อยืนยัน live AI path. คง `min_token_balance_for_chat` ไว้ที่ `1000` เว้นแต่ smoke model หรือ prompt ต้องการ buffer มากกว่าเดิม.
 เปิดทั้ง `run_chat` และ `run_image` เมื่อต้องการให้ workflow รัน provider gate รวม `api:smoke:live` หลัง strict production readiness checks.

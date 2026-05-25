@@ -1079,6 +1079,7 @@ const checks: Check[] = [
           'buildNextDeploySteps',
           'healthFailures',
           'validateBackendRootIdentity',
+          'deployedSmokeTargetIssues',
           'SmokeDoctorRunnerOptions',
           'formatUnknownDiagnosticText',
           'ขั้นตอนถัดไป:',
@@ -1090,6 +1091,7 @@ const checks: Check[] = [
         [
           'buildSmokeDoctorReport',
           'validates backend root identity before health checks',
+          'strict deploy gates reject unsafe smoke target before network checks',
           'runs smoke doctor through an importable runner',
           'strict staging gate fails',
           'backend health failures',
@@ -1769,12 +1771,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.test.ts'),
-        ['defaults to local backend', 'http://0.0.0.0:3000', 'http://[::1]:3000/health', 'does not impersonate a user by default against deployed targets', 'formats unknown smoke diagnostics without stringifying raw objects', 'validates backend root identity payloads'],
+        ['defaults to local backend', 'http://0.0.0.0:3000', 'http://[::1]:3000/health', 'does not impersonate a user by default against deployed targets', 'validates deployed smoke targets before strict smoke gates', 'https://smoke-user:smoke-pass@api.example.com', 'path/query/hash', 'formats unknown smoke diagnostics without stringifying raw objects', 'validates backend root identity payloads'],
         'scripts/smoke-helpers.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.ts'),
-        ['validateBackendRootIdentity', 'formatUnknownDiagnosticText', 'maprang-backend', '0.0.0.0', '[::1]'],
+        ['validateBackendRootIdentity', 'deployedSmokeTargetIssues', 'formatSmokeTargetDiagnosticText', 'formatUnknownDiagnosticText', 'maprang-backend', '0.0.0.0', '[::1]', 'credential/userinfo', 'path/query/hash'],
         'scripts/smoke-helpers.ts',
       )
       requireIncludes(
@@ -1999,6 +2001,10 @@ const checks: Check[] = [
           'SUPABASE_SERVICE_ROLE_KEY',
           'ตั้ง workflow input api_base_url หรือ repository secret SMOKE_API_BASE_URL ก่อนรัน smoke',
           'SMOKE_API_BASE_URL ต้องเป็น backend URL ที่ deploy แล้วแบบ https',
+          'deployedSmokeTargetIssues',
+          'credential/userinfo',
+          'path/query/hash',
+          'localhost/loopback',
           'ตั้ง repository secret SMOKE_ADMIN_API_KEY เพื่อให้ production smoke ตรวจรายงานและ audit log ฝั่งผู้ดูแล',
           '--require-admin',
           'bun install --frozen-lockfile',

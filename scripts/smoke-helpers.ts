@@ -25,6 +25,28 @@ export function smokeTargetIsLocal(baseUrl: string) {
   }
 }
 
+export function deployedSmokeTargetIssues(baseUrl: string) {
+  const issues: string[] = []
+  let url: URL
+
+  try {
+    url = new URL(baseUrl)
+  } catch {
+    return ['SMOKE_API_BASE_URL ต้องเป็น URL ที่ถูกต้อง']
+  }
+
+  if (url.protocol !== 'https:') issues.push('SMOKE_API_BASE_URL ต้องใช้ https')
+  if (smokeTargetIsLocal(baseUrl)) {
+    issues.push('SMOKE_API_BASE_URL ห้ามเป็น localhost/loopback (localhost/127.0.0.1/0.0.0.0/::1)')
+  }
+  if (url.username || url.password) issues.push('SMOKE_API_BASE_URL ห้ามมี credential/userinfo')
+  if (url.pathname !== '/' || url.search || url.hash) {
+    issues.push('SMOKE_API_BASE_URL ต้องเป็น backend origin เท่านั้น ห้ามมี path/query/hash')
+  }
+
+  return issues
+}
+
 export const apiBaseUrl = smokeApiBaseUrl()
 export const isLocalSmokeTarget = smokeTargetIsLocal(apiBaseUrl)
 
@@ -54,6 +76,19 @@ export function formatDiagnosticText(value: string, maxLength: number) {
   return redactSensitiveText(value).text.slice(0, maxLength)
 }
 
+export function formatSmokeTargetDiagnosticText(baseUrl: string, maxLength: number) {
+  try {
+    const url = new URL(baseUrl)
+    if (url.username || url.password) {
+      const path = `${url.pathname}${url.search}${url.hash}`
+      return formatDiagnosticText(`${url.protocol}//[REDACTED_USERINFO]@${url.host}${path}`, maxLength)
+    }
+  } catch {
+    // Fall through to the normal redactor so malformed values are still clipped consistently.
+  }
+  return formatDiagnosticText(baseUrl, maxLength)
+}
+
 export function formatUnknownDiagnosticText(error: unknown, maxLength: number) {
   if (error instanceof Error) return formatDiagnosticText(error.message, maxLength)
   if (error && typeof error === 'object') {
@@ -74,7 +109,7 @@ export async function readJson<T>(path: string, init?: RequestInit): Promise<T> 
     response = await fetch(url, init)
   } catch (error) {
     const reason = formatFetchErrorReason(error)
-    throw new Error(`ติดต่อระบบหลังบ้านที่ ${apiBaseUrl} ไม่สำเร็จ ให้เริ่มระบบหลังบ้าน ตรวจ SMOKE_API_BASE_URL แล้วลองใหม่ (${reason})`)
+    throw new Error(`ติดต่อระบบหลังบ้านที่ ${formatSmokeTargetDiagnosticText(apiBaseUrl, 300)} ไม่สำเร็จ ให้เริ่มระบบหลังบ้าน ตรวจ SMOKE_API_BASE_URL แล้วลองใหม่ (${reason})`)
   }
 
   const raw = await response.text()
