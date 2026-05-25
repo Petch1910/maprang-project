@@ -446,7 +446,20 @@ const checks: Check[] = [
       const backend = await readRepoFile('apps/backend/Dockerfile')
       const frontend = await readRepoFile('apps/frontend/Dockerfile')
       requireIncludes(backend, ['COPY knowledge ./knowledge', 'RUN bunx prisma generate', 'EXPOSE 3000', 'CMD ["bun", "run", "start"]'], 'apps/backend/Dockerfile')
-      requireIncludes(frontend, ['bun run build', 'FROM nginx', 'EXPOSE 80'], 'apps/frontend/Dockerfile')
+      requireIncludes(
+        frontend,
+        [
+          'ARG VITE_API_BASE_URL=http://localhost:3000',
+          'ARG VITE_SUPABASE_URL=',
+          'ARG VITE_SUPABASE_ANON_PUBLIC=',
+          'ENV VITE_API_BASE_URL=$VITE_API_BASE_URL',
+          'ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL',
+          'VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_PUBLIC bun run build',
+          'FROM nginx',
+          'EXPOSE 80',
+        ],
+        'apps/frontend/Dockerfile',
+      )
     },
   },
   {
@@ -2120,6 +2133,7 @@ const checks: Check[] = [
           'bun run deploy:readiness:test',
           'bun run deploy:status:test',
           'bun run deploy:doctor:test',
+          '--build-arg VITE_SUPABASE_ANON_PUBLIC=ci-anon-public-key',
         ],
         '.github/workflows/ci.yml',
       )

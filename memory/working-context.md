@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Predeploy now locks frontend Docker build-arg wiring for Supabase anon keys. `apps/frontend/Dockerfile` must keep `VITE_SUPABASE_ANON_PUBLIC` as the Docker build arg and map it to `VITE_SUPABASE_ANON_KEY` only during `bun run build`, and CI must pass `--build-arg VITE_SUPABASE_ANON_PUBLIC=ci-anon-public-key`.
 - 2026-05-25: Production release handoff validation now also requires core QA rows to pass. When `Environment: production`, `release:handoff:check -- --filled` fails if `qa:local`, `e2e:smoke`, `staging:verify`, `production:check`, or GitHub Production Smoke are recorded as anything other than pass/ผ่าน.
 - 2026-05-25: Production release handoff validation now requires live provider verification flags. When `Environment: production`, `release:handoff:check -- --filled` fails unless `CHAT_PROVIDER_LIVE_VERIFIED` and `IMAGE_GENERATION_LIVE_VERIFIED` are both recorded as `1`.
 - 2026-05-25: Filled release handoff validation now rejects local or insecure release URLs. `release:handoff:check -- --filled` checks Frontend/Backend/Health/Ready URL fields for deployed HTTPS URLs and rejects CORS origins that include `http://`, localhost, `127.0.0.1`, or wildcard origins.

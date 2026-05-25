@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 frontend Docker build-arg guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after locking `VITE_SUPABASE_ANON_PUBLIC` to `VITE_SUPABASE_ANON_KEY` mapping in the frontend Dockerfile and CI docker build command.
 - 2026-05-25 release handoff production QA result guard pass: `bun run release:handoff:test`, `bun run release:handoff:check`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after requiring production filled handoffs to record pass/ผ่าน for `qa:local`, `e2e:smoke`, `staging:verify`, `production:check`, and GitHub Production Smoke.
 - 2026-05-25 release handoff provider verification guard pass: `bun run release:handoff:test`, `bun run release:handoff:check`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after requiring production filled handoffs to record `CHAT_PROVIDER_LIVE_VERIFIED=1` and `IMAGE_GENERATION_LIVE_VERIFIED=1`.
 - 2026-05-25 release handoff URL/CORS guard pass: `bun run release:handoff:test`, `bun run release:handoff:check`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after making filled release handoffs reject localhost/http/wildcard CORS deployment values.
