@@ -93,6 +93,12 @@ describe('predeploy check wiring', () => {
     const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
     const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
     const qaLocalCoverage = `${qaRepo} ${qaLocal}`
+    const qaLocalCommands = [qaRepo, qaLocal].flatMap((script) =>
+      script
+        .split(/\s*&&\s*/)
+        .map((command) => command.trim())
+        .filter(Boolean),
+    )
 
     expect(packageJson.scripts?.['predeploy:check:test']).toBe('bun test scripts/predeploy-check.test.ts')
     expect(qaLocal).toContain('bun run qa:repo')
@@ -103,8 +109,10 @@ describe('predeploy check wiring', () => {
     expect(qaLocalCoverage).toContain('bun run docs:commands')
     expect(qaLocalCoverage).toContain('bun run docs:commands:test')
     expect(qaLocalCoverage).toContain('bun run deploy:doctor:self-test')
-    expect(qaLocalCoverage).toContain('bun run frontend:static:audit')
-    expect(qaLocalCoverage).toContain('bun run frontend:route:audit')
+    expect(qaLocalCommands).toContain('bun run frontend:static:audit')
+    expect(qaLocalCommands).toContain('bun run frontend:static:audit:test')
+    expect(qaLocalCommands).toContain('bun run frontend:route:audit')
+    expect(qaLocalCommands).toContain('bun run frontend:route:audit:test')
     expect(ciWorkflow.match(/name: ติดตั้ง dependencies ระดับ repo[\s\S]*?run: bun install --frozen-lockfile/g)?.length ?? 0).toBeGreaterThanOrEqual(2)
     expect(ciWorkflow).toContain('รัน local smoke จาก seed')
     expect(ciWorkflow).not.toContain('Install root dependencies')

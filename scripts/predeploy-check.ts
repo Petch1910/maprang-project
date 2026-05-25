@@ -157,6 +157,15 @@ function forbidIncludes(content: string, values: string[], file: string) {
   }
 }
 
+function splitPackageScriptCommands(...scripts: string[]) {
+  return scripts.flatMap((script) =>
+    script
+      .split(/\s*&&\s*/)
+      .map((command) => command.trim())
+      .filter(Boolean),
+  )
+}
+
 function assertThaiFirstMarkdownHeadings(content: string, file: string) {
   const allowedTechnicalHeadings = [/^#{1,6}\s+API\b/, /^#{1,6}\s+URL\b/, /^#\s+\d{4}\s+-\s+/]
   const offenders = content
@@ -680,6 +689,7 @@ const checks: Check[] = [
       const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
       const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
       const qaLocalCoverage = `${qaRepo} ${qaLocal}`
+      const qaLocalCommands = splitPackageScriptCommands(qaRepo, qaLocal)
       const stagingCheck = packageJson.scripts?.['staging:check'] ?? ''
       const stagingVerify = packageJson.scripts?.['staging:verify'] ?? ''
       const productionCheck = packageJson.scripts?.['production:check'] ?? ''
@@ -740,13 +750,13 @@ const checks: Check[] = [
       if (!qaLocalCoverage.includes('frontend:static:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:static:audit:test เพื่อจับ regression ของ frontend static audit')
       }
-      if (!qaLocalCoverage.includes('frontend:static:audit')) {
+      if (!qaLocalCommands.includes('bun run frontend:static:audit')) {
         throw new Error('package.json qa:local ต้องรัน frontend:static:audit เพื่อยืนยัน alias ของ frontend static audit')
       }
       if (!qaLocalCoverage.includes('frontend:route:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:route:audit:test เพื่อจับ regression ของ frontend route audit')
       }
-      if (!qaLocalCoverage.includes('frontend:route:audit')) {
+      if (!qaLocalCommands.includes('bun run frontend:route:audit')) {
         throw new Error('package.json qa:local ต้องรัน frontend:route:audit เพื่อยืนยัน alias ของ frontend route audit')
       }
       if (!qaLocalCoverage.includes('route-menu:audit:test')) {
