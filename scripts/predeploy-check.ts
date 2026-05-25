@@ -585,12 +585,28 @@ const checks: Check[] = [
       requireIncludes(deploymentQa, ['bun run secrets:patterns:test', 'secrets/secret-pattern/memory', 'Real `.env`'], 'DEPLOYMENT_QA.md')
       requireIncludes(
         readme,
-        ['handoffEvidence', 'Chat smoke normal walletTransactionId', 'Image smoke elapsedMs'],
+        [
+          'handoffEvidence',
+          'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
+          'Image smoke provider',
+          'Image smoke source',
+          'Image smoke urlKind',
+          'Image smoke elapsedMs',
+        ],
         'README.md',
       )
       requireIncludes(
         deploymentQa,
-        ['handoffEvidence', 'Chat smoke normal walletTransactionId', 'Image smoke elapsedMs'],
+        [
+          'handoffEvidence',
+          'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
+          'Image smoke provider',
+          'Image smoke source',
+          'Image smoke urlKind',
+          'Image smoke elapsedMs',
+        ],
         'DEPLOYMENT_QA.md',
       )
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
@@ -1060,6 +1076,9 @@ const checks: Check[] = [
           'handoffEvidence',
           'Chat smoke normal walletTransactionId',
           'Chat smoke stream walletTransactionId',
+          'Image smoke provider',
+          'Image smoke source',
+          'Image smoke urlKind',
           'Image smoke elapsedMs',
         ],
         'memory/deploy-blockers.md',
@@ -1074,6 +1093,9 @@ const checks: Check[] = [
           'RELEASE_HANDOFF.md',
           'Chat smoke normal walletTransactionId',
           'Chat smoke stream walletTransactionId',
+          'Image smoke provider',
+          'Image smoke source',
+          'Image smoke urlKind',
           'Image smoke elapsedMs',
           'อย่าชี้ `qa:local`',
         ],
@@ -2199,6 +2221,10 @@ const checks: Check[] = [
           'https://',
           'handoffEvidence',
           'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
+          'Image smoke provider',
+          'Image smoke source',
+          'Image smoke urlKind',
           'Image smoke elapsedMs',
         ],
         'STAGING_RUNBOOK.md',
