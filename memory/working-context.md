@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-21
 
+- 2026-05-21: Frontend static audit now guards disabled controls. `auditDisabledControlsWithAst` fails `button/input/textarea/select` elements that use `disabled` without a user-facing `title` or `aria-label`, so future UI work cannot silently reintroduce controls that are locked without explanation.
 - 2026-05-21: Legacy creator/admin components now keep disabled reasons if they are re-mounted later. `LoreManager`, `CharacterList`, `CharacterManager`, and `AuthPanel` expose Thai titles and `aria-disabled` for loading, saving, uploading, missing form fields, tag conflicts, filtering, and auth-busy states; frontend build confirmed these older components still typecheck.
 - 2026-05-21: Creator Studio disabled controls now explain next steps. `/create` AI draft, image-only draft, upload, relationship preset apply, preview simulator, and create-draft controls expose Thai titles and `aria-disabled` for generating, uploading, simulating, missing preset, missing required fields, tag conflicts, or saving states; Browser QA confirmed no disabled control lacks a reason.
 - 2026-05-21: Report flow disabled states now explain themselves. Chat character reports, message report buttons, and the shared report dialog expose Thai titles and `aria-disabled` for report-in-flight states; Browser QA confirmed the chat report dialog opens from `/chat`, the form controls have clear titles, and no disabled control lacks a reason.

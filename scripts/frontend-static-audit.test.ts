@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   auditButtonsWithAst,
+  auditDisabledControlsWithAst,
   auditFrontendSourceFile,
   auditLinksWithAst,
   auditRawFrontendFetchUsage,
@@ -40,6 +41,30 @@ describe('frontend static audit', () => {
     expect(findings.map((finding) => finding.message)).toEqual([
       expect.stringContaining('ปุ่มไม่มี type ชัดเจน'),
       expect.stringContaining('ปุ่มไอคอนล้วนไม่มี aria-label หรือ title'),
+    ])
+  })
+
+  test('reports disabled controls without a user-facing reason', () => {
+    const findings = auditDisabledControlsWithAst(
+      `
+        export function Fixture() {
+          return (
+            <>
+              <button type="button" disabled={isSaving}>Save</button>
+              <input disabled />
+              <button type="button" disabled={isSaving} title={saveReason || 'บันทึก'}>Safe</button>
+              <input disabled={isLoading} aria-label="โหลดข้อมูลก่อนแก้ไข" />
+              <textarea disabled={false} />
+            </>
+          )
+        }
+      `,
+      'DisabledFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      expect.stringContaining('control ที่ disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
+      expect.stringContaining('control ที่ disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
     ])
   })
 

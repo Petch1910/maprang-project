@@ -84,6 +84,17 @@ export function jsxAttributeValue(attribute: ts.JsxAttribute) {
   return ''
 }
 
+function jsxAttributeExpression(attribute: ts.JsxAttribute) {
+  const initializer = attribute.initializer
+  if (!initializer || !ts.isJsxExpression(initializer)) return null
+  return initializer.expression ?? null
+}
+
+function jsxAttributeIsFalse(attribute: ts.JsxAttribute) {
+  const expression = jsxAttributeExpression(attribute)
+  return expression?.kind === ts.SyntaxKind.FalseKeyword
+}
+
 export function getJsxAttribute(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement, sourceFile: ts.SourceFile, name: string) {
   return node.attributes.properties.find(
     (attribute): attribute is ts.JsxAttribute =>
@@ -154,6 +165,37 @@ export function auditButtonsWithAst(content: string, file: string) {
               message: `ปุ่มไอคอนล้วนไม่มี aria-label หรือ title: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
             })
           }
+        }
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return findings
+}
+
+export function auditDisabledControlsWithAst(content: string, file: string) {
+  const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const findings: Finding[] = []
+  const disabledControlTags = new Set(['button', 'input', 'textarea', 'select'])
+
+  function visit(node: ts.Node) {
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const tagName = node.tagName.getText(sourceFile)
+      const disabled = getJsxAttribute(node, sourceFile, 'disabled')
+      if (disabledControlTags.has(tagName) && disabled && !jsxAttributeIsFalse(disabled)) {
+        const title = getJsxAttribute(node, sourceFile, 'title')
+        const ariaLabel = getJsxAttribute(node, sourceFile, 'aria-label')
+        const hasDisabledReason = Boolean(
+          (title && jsxAttributeValue(title)) || (ariaLabel && jsxAttributeValue(ariaLabel)),
+        )
+        if (!hasDisabledReason) {
+          findings.push({
+            file,
+            line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
+            message: `control ที่ disabled ต้องมี title หรือ aria-label บอกเหตุผล: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
+          })
         }
       }
     }
@@ -372,6 +414,7 @@ export function auditRawFrontendFetchUsage(content: string, file: string) {
 export function auditFrontendSourceFile(content: string, file: string) {
   return [
     ...auditButtonsWithAst(content, file),
+    ...auditDisabledControlsWithAst(content, file),
     ...auditLinksWithAst(content, file),
     ...auditSuspiciousPatterns(content, file),
     ...auditRawFrontendFetchUsage(content, file),
