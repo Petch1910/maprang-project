@@ -232,6 +232,12 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires QA gates as release handoff field rows', () => {
+    const stale = filledHandoff.replace('- `bun run qa:local`: pass\n', '- QA note: rerun `bun run qa:local` before release\n')
+
+    expect(checkReleaseHandoffContent(stale)).toContain('ยังไม่มี QA gate: `bun run qa:local`')
+  })
+
   test('requires production e2e smoke targets to match deployed origins', () => {
     const unsafe = filledHandoff
       .replace('- E2E_BASE_URL: https://app.maprang.example', '- E2E_BASE_URL: http://127.0.0.1:5173')

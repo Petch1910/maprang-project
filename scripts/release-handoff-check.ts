@@ -35,7 +35,7 @@ const requiredFieldSnippets = [
   '- Go / no-go:',
 ]
 
-const requiredQaGateSnippets = [
+const requiredQaGateLabels = [
   '`bun run qa:local`',
   '`bun run e2e:smoke`',
   'E2E_BASE_URL',
@@ -47,6 +47,7 @@ const requiredQaGateSnippets = [
   '`bun run production:check`',
   'GitHub Production Smoke run',
 ]
+const requiredQaGateSnippets = requiredQaGateLabels
 
 export type ReleaseHandoffCheckResult = {
   ok: boolean
@@ -57,6 +58,11 @@ export type ReleaseHandoffCheckResult = {
 function fieldValue(content: string, label: string) {
   const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return content.match(new RegExp(`^- ${escaped}:\\s*(.+)$`, 'm'))?.[1]?.trim() ?? ''
+}
+
+function hasField(content: string, label: string) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`^- ${escaped}:`, 'm').test(content)
 }
 
 function isLoopbackHost(hostname: string) {
@@ -211,8 +217,8 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!content.includes(snippet)) findings.push(`ยังไม่มี field ใน release handoff: ${snippet.slice(2, -1)}`)
   }
 
-  for (const snippet of requiredQaGateSnippets) {
-    if (!content.includes(snippet)) findings.push(`ยังไม่มี QA gate: ${snippet}`)
+  for (const label of requiredQaGateLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี QA gate: ${label}`)
   }
 
   if (options.requireFilled) {
