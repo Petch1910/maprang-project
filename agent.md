@@ -233,3 +233,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: `memory:audit` now requires API route coverage quality and weak-coverage reason notes to stay in memory, with `predeploy:check` also locking those memory-audit snippets.
 - Current addendum 2026-05-25: README and Deployment QA must describe the API route coverage quality guard and weak coverage reason output.
 - Current addendum 2026-05-25: decision `0016-api-route-coverage-quality-contract.md` records API route coverage as a quality contract for future agents.
+- Current addendum 2026-05-25: `memory:audit` now checks numbered decision files are linked from `memory/decisions/index.md`, and `predeploy:check` locks decision files through `0016-api-route-coverage-quality-contract.md`.

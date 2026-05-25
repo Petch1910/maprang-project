@@ -134,6 +134,8 @@ const markdownHeadingFiles = [
   'memory/decisions/0012-add-usage-cost-intelligence.md',
   'memory/decisions/0013-add-prompt-budgeting.md',
   'memory/decisions/0014-add-chat-provider-failure-classification.md',
+  'memory/decisions/0015-route-menu-disabled-reasons-contract.md',
+  'memory/decisions/0016-api-route-coverage-quality-contract.md',
 ]
 
 async function assertFile(path: string) {
@@ -1036,13 +1038,14 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/markdown-audit-helpers.test.ts'),
-        ['collects only local markdown links', 'checks whether a resolved path stays inside a vault', 'runs the memory audit through an importable runner', 'runs the knowledge audit through an importable runner'],
+        ['collects only local markdown links', 'checks whether a resolved path stays inside a vault', 'reports decision files missing from the decision index', 'runs the memory audit through an importable runner', 'runs the knowledge audit through an importable runner'],
         'scripts/markdown-audit-helpers.test.ts',
       )
       requireIncludes(
         memoryAudit,
         [
           'collectMemoryAuditResult',
+          'missingDecisionIndexEntries',
           'runMemoryAudit',
           'MemoryAuditResult',
           'Route/Menu Audit guard',

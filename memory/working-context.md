@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Memory audit now checks that every numbered decision file under `memory/decisions/` is linked from `memory/decisions/index.md`, and predeploy now locks decision files through `0016-api-route-coverage-quality-contract.md`. Focused checks passed: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
 - 2026-05-25: Decision log now records API route coverage as a quality contract in `memory/decisions/0016-api-route-coverage-quality-contract.md`, including admin smoke, live-provider smoke, manual-production-only, and weak coverage reason expectations.
 - 2026-05-25: README and Deployment QA now document the API route coverage quality guard, including `admin-smoke`, `live-smoke`, `manual-production`, blank notes, and weak coverage reason output. Focused checks passed: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands`.
 - 2026-05-25: Memory audit now requires API route coverage quality notes to stay present in working context, deploy blockers, and QA status, including `admin-smoke`, `live-smoke`, `manual-production`, and weak-coverage reason diagnostics. Focused checks passed: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.

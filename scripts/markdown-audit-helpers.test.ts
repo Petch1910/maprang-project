@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { join, resolve } from 'node:path'
 import { collectKnowledgeAuditResult, runKnowledgeAudit } from './knowledge-audit'
 import { collectLocalMarkdownLinks, missingIncludes, pathIsInside } from './markdown-audit-helpers'
-import { collectMemoryAuditResult, runMemoryAudit } from './memory-audit'
+import { collectMemoryAuditResult, missingDecisionIndexEntries, runMemoryAudit } from './memory-audit'
 
 describe('markdown audit helpers', () => {
   test('reports missing required snippets without throwing', () => {
@@ -28,6 +28,18 @@ describe('markdown audit helpers', () => {
     expect(pathIsInside(parent, parent)).toBe(true)
     expect(pathIsInside(parent, join(parent, 'working-context.md'))).toBe(true)
     expect(pathIsInside(parent, resolve('README.md'))).toBe(false)
+  })
+
+  test('reports decision files missing from the decision index', () => {
+    const decisionFiles = [
+      'memory/decisions/index.md',
+      'memory/decisions/0001-first-decision.md',
+      'memory/decisions/0002-second-decision.md',
+    ]
+
+    expect(missingDecisionIndexEntries(decisionFiles, '- [0001](./0001-first-decision.md)')).toEqual([
+      '0002-second-decision.md',
+    ])
   })
 
   test('runs the memory audit through an importable runner', async () => {

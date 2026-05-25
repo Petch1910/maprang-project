@@ -53,6 +53,20 @@ function requireIncludes(content: string, values: string[], file: string) {
   }
 }
 
+function normalizePath(path: string) {
+  return path.replace(/\\/g, '/')
+}
+
+export function missingDecisionIndexEntries(decisionFilePaths: string[], indexContent: string) {
+  return decisionFilePaths
+    .map(normalizePath)
+    .filter((path) => path.startsWith('memory/decisions/'))
+    .filter((path) => path !== 'memory/decisions/index.md')
+    .filter((path) => /\/\d{4}-.+\.md$/.test(path))
+    .map((path) => path.slice(path.lastIndexOf('/') + 1))
+    .filter((filename) => !indexContent.includes(`./${filename}`))
+}
+
 export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
   const findings: string[] = []
 
@@ -122,6 +136,12 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
   )
 
   const files = await walkMarkdown(memoryRoot)
+  const relativeMemoryFiles = files.map((file) => normalizePath(relative(root, file)))
+  const decisionIndex = await readRepoFile('memory/decisions/index.md')
+  for (const filename of missingDecisionIndexEntries(relativeMemoryFiles, decisionIndex)) {
+    findings.push(`memory/decisions/index.md: decision file ยังไม่ถูกลิงก์: ${filename}`)
+  }
+
   for (const file of files) {
     const relativePath = relative(root, file)
     const content = await readFile(file, 'utf8')
