@@ -130,15 +130,22 @@ describe('predeploy check wiring', () => {
     expect(ciWorkflow).toContain('bun run deploy:doctor:self-test')
     expect(ciWorkflow).toContain('bun run frontend:static:audit')
     expect(ciWorkflow).toContain('bun run frontend:route:audit')
-    expect(ciWorkflow).toMatch(/-\s+run:\s+bun run frontend:static:audit\r?\n/)
-    expect(ciWorkflow).toMatch(/-\s+run:\s+bun run frontend:route:audit\r?\n/)
     expect(productionSmoke).toContain('bun run predeploy:check:test')
     expect(productionSmoke).toContain('bun run docs:commands')
     expect(productionSmoke).toContain('bun run docs:commands:test')
     expect(productionSmoke).toContain('bun run frontend:static:audit')
     expect(productionSmoke).toContain('bun run frontend:route:audit')
-    expect(productionSmoke).toMatch(/-\s+run:\s+bun run frontend:static:audit\r?\n/)
-    expect(productionSmoke).toMatch(/-\s+run:\s+bun run frontend:route:audit\r?\n/)
+    for (const command of [
+      'bun run security:audit',
+      'bun run import-cycle:audit',
+      'bun run api:audit',
+      'bun run frontend:static:audit',
+      'bun run frontend:route:audit',
+      'bun run route-menu:audit',
+    ]) {
+      expect(ciWorkflow).toMatch(new RegExp(`-\\s+run:\\s+${command.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\r?\\n`))
+      expect(productionSmoke).toMatch(new RegExp(`-\\s+run:\\s+${command.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\r?\\n`))
+    }
     expect(productionSmoke).toContain('Backend URL ที่ต้องการทดสอบ')
     expect(productionSmoke).toContain('ตรวจ config ก่อนรัน smoke')
     expect(productionSmoke).toContain('รันทดสอบแชทจริงกับ AI คำสั่งนี้ใช้เครดิตผู้ให้บริการจริง')

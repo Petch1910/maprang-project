@@ -1990,7 +1990,14 @@ const checks: Check[] = [
       )
       requireWorkflowRunCommands(
         workflow,
-        ['bun run frontend:static:audit', 'bun run frontend:route:audit'],
+        [
+          'bun run security:audit',
+          'bun run import-cycle:audit',
+          'bun run api:audit',
+          'bun run frontend:static:audit',
+          'bun run frontend:route:audit',
+          'bun run route-menu:audit',
+        ],
         '.github/workflows/production-smoke.yml',
       )
       forbidIncludes(
@@ -2068,7 +2075,14 @@ const checks: Check[] = [
       )
       requireWorkflowRunCommands(
         ciWorkflow,
-        ['bun run frontend:static:audit', 'bun run frontend:route:audit'],
+        [
+          'bun run security:audit',
+          'bun run import-cycle:audit',
+          'bun run api:audit',
+          'bun run frontend:static:audit',
+          'bun run frontend:route:audit',
+          'bun run route-menu:audit',
+        ],
         '.github/workflows/ci.yml',
       )
       const ciRootInstallCount = ciWorkflow.match(/name: ติดตั้ง dependencies ระดับ repo[\s\S]*?run: bun install --frozen-lockfile/g)?.length ?? 0
