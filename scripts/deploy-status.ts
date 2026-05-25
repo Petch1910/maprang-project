@@ -1,5 +1,7 @@
 import {
   apiBaseUrl,
+  deployedSmokeTargetIssues,
+  formatSmokeTargetDiagnosticText,
   formatUnknownDiagnosticText,
   isLocalSmokeTarget,
   readJson,
@@ -160,6 +162,17 @@ export function formatDeployStatusCaughtError(error: unknown) {
   return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
+export function deployStatusTargetIssues(baseUrl: string, localTarget: boolean) {
+  const issues = deployedSmokeTargetIssues(baseUrl)
+  if (!localTarget) return issues
+  return issues.filter(
+    (issue) =>
+      issue.includes('ต้องเป็น URL ที่ถูกต้อง') ||
+      issue.includes('credential/userinfo') ||
+      issue.includes('path/query/hash'),
+  )
+}
+
 function buildDeployStatusFailurePayload({
   apiBaseUrl,
   error,
@@ -194,8 +207,34 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
   const readRootIdentity = normalized.readRootIdentity ?? (() => readJson<RootIdentityPayload>('/'))
   const readHealth = normalized.readHealth ?? (() => readJson<HealthPayload>('/health'))
   const jsonMode = argv.includes('--json')
+  const targetIssues = deployStatusTargetIssues(currentApiBaseUrl, currentIsLocalSmokeTarget)
   let rootIdentity: RootIdentityPayload
   let health: HealthPayload
+
+  if (targetIssues.length > 0) {
+    const message = targetIssues.join('; ')
+    const safeApiBaseUrl = formatSmokeTargetDiagnosticText(currentApiBaseUrl, 300)
+    if (jsonMode) {
+      writeLine(
+        JSON.stringify(
+          buildDeployStatusFailurePayload({
+            apiBaseUrl: safeApiBaseUrl,
+            error: message,
+            nextSteps: [
+              'ตั้ง SMOKE_API_BASE_URL เป็น backend origin ที่ deploy แล้วแบบ https',
+              'ห้ามใส่ localhost/loopback, credential/userinfo, หรือ path/query/hash ใน SMOKE_API_BASE_URL',
+            ],
+          }),
+          null,
+          2,
+        ),
+      )
+    } else {
+      writeError(`ตรวจสถานะ deploy ไม่ผ่าน: ${message}`)
+      writeError('วิธีแก้สเตจจิง: ตั้ง SMOKE_API_BASE_URL เป็น backend origin ที่ deploy แล้วแบบ https ไม่มี credential/userinfo, path/query/hash, หรือ localhost/loopback')
+    }
+    return 1
+  }
 
   try {
     rootIdentity = await readRootIdentity()
@@ -206,7 +245,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
       writeLine(
         JSON.stringify(
           buildDeployStatusFailurePayload({
-            apiBaseUrl: currentApiBaseUrl,
+            apiBaseUrl: formatSmokeTargetDiagnosticText(currentApiBaseUrl, 300),
             error: message,
             nextSteps: [
               'เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend',
@@ -233,7 +272,7 @@ export async function runDeployStatus(options: DeployStatusRunnerOptions | strin
       writeLine(
         JSON.stringify(
           buildDeployStatusFailurePayload({
-            apiBaseUrl: currentApiBaseUrl,
+            apiBaseUrl: formatSmokeTargetDiagnosticText(currentApiBaseUrl, 300),
             error: message,
             rootIdentity,
             nextSteps: [

@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { buildDeployStatusPayload, formatDeployStatusCaughtError, formatDeployStatusText, runDeployStatus } from './deploy-status'
+import {
+  buildDeployStatusPayload,
+  deployStatusTargetIssues,
+  formatDeployStatusCaughtError,
+  formatDeployStatusText,
+  runDeployStatus,
+} from './deploy-status'
 import type { HealthPayload } from './deploy-readiness'
 
 function baseHealth(overrides: Partial<HealthPayload> = {}): HealthPayload {
@@ -165,6 +171,43 @@ describe('deploy status formatting', () => {
     expect(payload.rootIdentity.service).toBe('maprang-backend')
     expect(payload.productionReady).toBe(true)
     expect(errors).toEqual([])
+  })
+
+  test('rejects unsafe deployed target before root identity preflight', async () => {
+    const lines: string[] = []
+    const errors: string[] = []
+    let rootRead = false
+    const exitCode = await runDeployStatus({
+      argv: ['bun', 'deploy-status.ts', '--json'],
+      currentApiBaseUrl: 'https://smoke-user:smoke-pass@api.example.com/v1',
+      currentIsLocalSmokeTarget: false,
+      readRootIdentity: async () => {
+        rootRead = true
+        return { ok: true, service: 'maprang-backend' }
+      },
+      readHealth: async () => baseHealth(),
+      writeLine: (line) => lines.push(line),
+      writeError: (line) => errors.push(line),
+    })
+
+    const payload = JSON.parse(lines.join('\n'))
+    expect(exitCode).toBe(1)
+    expect(rootRead).toBe(false)
+    expect(payload.ok).toBe(false)
+    expect(payload.apiBaseUrl).toBe('https://[REDACTED_USERINFO]@api.example.com/v1')
+    expect(payload.error).toContain('credential/userinfo')
+    expect(payload.error).toContain('path/query/hash')
+    expect(JSON.stringify(payload)).not.toContain('smoke-pass')
+    expect(errors).toEqual([])
+  })
+
+  test('keeps local deploy status usable while rejecting local userinfo or paths', () => {
+    expect(deployStatusTargetIssues('http://127.0.0.1:3000', true)).toEqual([])
+    expect(deployStatusTargetIssues('http://127.0.0.1:3000/api', true).join('\n')).toContain('path/query/hash')
+    expect(deployStatusTargetIssues('http://smoke-user:smoke-pass@127.0.0.1:3000', true).join('\n')).toContain(
+      'credential/userinfo',
+    )
+    expect(deployStatusTargetIssues('http://api.example.com', false).join('\n')).toContain('https')
   })
 
   test('validates backend root identity before health status', async () => {
