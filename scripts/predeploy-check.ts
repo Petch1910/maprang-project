@@ -1636,6 +1636,7 @@ const checks: Check[] = [
           'admin-smoke',
           'live-smoke',
           "'POST /chat'",
+          "'POST /chat/stream'",
           "'POST /creator/ai-draft'",
           'collectFrontendApiCallsFromSource',
           'auditFrontendApiCalls',

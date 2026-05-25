@@ -100,6 +100,7 @@ describe('api route audit', () => {
       { key: 'GET /health', file: 'fixture.routes.ts' },
       { key: 'GET /ready', file: 'fixture.routes.ts' },
       { key: 'POST /chat', file: 'fixture.routes.ts' },
+      { key: 'POST /chat/stream', file: 'fixture.routes.ts' },
       { key: 'POST /creator/ai-draft', file: 'fixture.routes.ts' },
       { key: 'GET /admin/reports', file: 'fixture.routes.ts' },
       { key: 'PATCH /characters/:id', file: 'fixture.routes.ts' },
@@ -109,6 +110,7 @@ describe('api route audit', () => {
       'GET /health': { owner: 'platform', coverage: ['smoke'], note: 'covered' },
       'GET /ready': { owner: 'platform', coverage: ['manual-production'], note: 'manual only is too weak' },
       'POST /chat': { owner: 'chat', coverage: ['smoke'], note: 'missing live smoke' },
+      'POST /chat/stream': { owner: 'chat', coverage: ['smoke'], note: 'missing stream live smoke' },
       'POST /creator/ai-draft': { owner: 'creator', coverage: ['smoke'], note: 'missing live smoke' },
       'GET /admin/reports': { owner: 'moderation', coverage: ['backend-test'], note: 'missing admin smoke' },
       'PATCH /characters/:id': { owner: 'characters', coverage: [], note: 'no coverage level' },
@@ -122,6 +124,7 @@ describe('api route audit', () => {
     expect(result.weakCoverage.map((route) => route.key)).toEqual([
       'GET /ready',
       'POST /chat',
+      'POST /chat/stream',
       'POST /creator/ai-draft',
       'GET /admin/reports',
       'PATCH /characters/:id',
@@ -130,6 +133,7 @@ describe('api route audit', () => {
     expect(result.weakCoverageIssues.map((issue) => [issue.route.key, issue.reasons])).toEqual([
       ['GET /ready', ['มีแค่ manual-production']],
       ['POST /chat', ['live-provider route ขาด live-smoke']],
+      ['POST /chat/stream', ['live-provider route ขาด live-smoke']],
       ['POST /creator/ai-draft', ['live-provider route ขาด live-smoke']],
       ['GET /admin/reports', ['admin route ขาด admin-smoke']],
       ['PATCH /characters/:id', ['ไม่มีระดับ coverage']],

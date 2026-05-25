@@ -166,7 +166,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   },
   'POST /chat/stream': {
     owner: 'chat',
-    coverage: ['smoke', 'backend-test', 'manual-production'],
+    coverage: ['smoke', 'live-smoke', 'backend-test', 'manual-production'],
     note: 'api-smoke ตรวจรูปแบบ SSE บนเส้นทาง validation โดยไม่ใช้โทเคนผู้ให้บริการ; backend runtime test ตรวจ guard เดียวกัน; staging QA ตรวจ UX สตรีมจริงก่อนปล่อย',
   },
   'GET /chats/:id/messages': {
@@ -286,7 +286,7 @@ export function summarizeRoutesByOwner(discoveredRoutes: DiscoveredRoute[], cove
   return byOwner
 }
 
-const liveProviderRouteKeys = new Set<RouteKey>(['POST /chat', 'POST /creator/ai-draft'])
+const liveProviderRouteKeys = new Set<RouteKey>(['POST /chat', 'POST /chat/stream', 'POST /creator/ai-draft'])
 
 function isAdminCoverageRoute(route: DiscoveredRoute, entry: RouteCoverage) {
   return /\s\/admin(?:\/|$)/.test(route.key) || entry.owner === 'admin' || entry.owner.endsWith('/admin')
