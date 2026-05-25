@@ -206,6 +206,15 @@ bun run api:audit
 bun run import-cycle:audit
 ```
 
+ถ้าต้องการตรวจ frontend static/control และ route wiring แบบเร็ว ให้ใช้ alias ตรงจาก root:
+
+```bash
+bun run frontend:static:audit
+bun run frontend:route:audit
+```
+
+สองคำสั่งนี้เป็นส่วนหนึ่งของ `qa:repo`, CI, และ Production Smoke แล้ว จึงใช้เช็คเฉพาะหน้าบ้านได้โดยไม่ต้องจำ path ของสคริปต์ใน `scripts/`.
+
 คำสั่งนี้ยืนยันว่า backend, frontend, scripts, seed data, Playwright config, และ e2e smoke files ไม่มี circular relative imports.
 
 ถ้าต้องการตรวจว่าเอกสารหลักและ GitHub Actions อ้างคำสั่ง `bun run ...` ตรงกับ package context จริง:
