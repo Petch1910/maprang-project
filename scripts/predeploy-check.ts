@@ -1538,6 +1538,7 @@ const checks: Check[] = [
         [
           'reports buttons without explicit type',
           'reports unsafe new-tab links without opener protection',
+          'reports unsafe React Router new-tab links without opener protection',
           'reports placeholder links',
           'reports raw auth error classifier regressions',
           'reports risky frontend DOM and code execution patterns',

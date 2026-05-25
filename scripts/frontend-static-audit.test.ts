@@ -92,6 +92,26 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports unsafe React Router new-tab links without opener protection', () => {
+    const findings = auditLinksWithAst(
+      `
+        export function Fixture() {
+          return (
+            <>
+              <Link to="/profile" target="_blank">Unsafe router link</Link>
+              <NavLink to="/profile" target="_blank" rel="noopener noreferrer">Safe router link</NavLink>
+            </>
+          )
+        }
+      `,
+      'RouterLinkFixture.tsx',
+    )
+
+    expect(findings).toHaveLength(1)
+    expect(findings[0]?.message).toContain('target="_blank"')
+    expect(findings[0]?.message).toContain('rel="noopener noreferrer"')
+  })
+
   test('reports placeholder links, empty handlers, and not implemented errors', () => {
     const findings = auditSuspiciousPatterns(
       `

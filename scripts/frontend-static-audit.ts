@@ -231,11 +231,12 @@ export function auditDisabledControlsWithAst(content: string, file: string) {
 export function auditLinksWithAst(content: string, file: string) {
   const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const findings: Finding[] = []
+  const linkLikeTags = new Set(['a', 'Link', 'NavLink'])
 
   function visit(node: ts.Node) {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tagName = node.tagName.getText(sourceFile)
-      if (tagName === 'a') {
+      if (linkLikeTags.has(tagName)) {
         const target = getJsxAttribute(node, sourceFile, 'target')
         const rel = getJsxAttribute(node, sourceFile, 'rel')
         const targetValue = target ? jsxAttributeValue(target) : ''
