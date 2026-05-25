@@ -1011,8 +1011,8 @@ const checks: Check[] = [
       requireIncludes(packageJson, ['"vault:audit:test"', 'bun test scripts/markdown-audit-helpers.test.ts'], 'package.json')
       requireIncludes(readme, ['memory/README.md', 'ความจำโปรเจกต์ (Project Memory)'], 'README.md')
       requireIncludes(memoryReadme, ['ห้ามเก็บ secrets', 'ขั้นตอนอัปเดต', 'บริบทงานปัจจุบัน', 'ตัวกั้นก่อน deploy'], 'memory/README.md')
-      requireIncludes(workingContext, ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน'], 'memory/working-context.md')
-      requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'path/query/hash'], 'memory/deploy-blockers.md')
+      requireIncludes(workingContext, ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน', 'Route/Menu Audit', 'needs-staging', 'future'], 'memory/working-context.md')
+      requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'path/query/hash', 'Route/Menu Audit guard', 'STAGING_RUNBOOK.md', '/admin/health'], 'memory/deploy-blockers.md')
       requireIncludes(
         productionChecklist,
         ['bun run deploy:doctor', 'bun run deploy:status', 'bun run api:smoke:live', 'อย่าชี้ `qa:local`'],
@@ -1025,7 +1025,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         memoryAudit,
-        ['collectMemoryAuditResult', 'runMemoryAudit', 'MemoryAuditResult', 'if (import.meta.main) process.exit(await runMemoryAudit())'],
+        ['collectMemoryAuditResult', 'runMemoryAudit', 'MemoryAuditResult', 'Route/Menu Audit guard', 'route/menu status evidence', 'if (import.meta.main) process.exit(await runMemoryAudit())'],
         'scripts/memory-audit.ts',
       )
     },

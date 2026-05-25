@@ -68,13 +68,25 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
   )
 
   const workingContext = await readRepoFile('memory/working-context.md')
-  requireIncludes(workingContext, ['Last updated:', 'เป้าหมายปัจจุบัน', 'สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน'], 'memory/working-context.md')
+  requireIncludes(
+    workingContext,
+    ['Last updated:', 'เป้าหมายปัจจุบัน', 'สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน', 'Route/Menu Audit', 'needs-staging', 'future'],
+    'memory/working-context.md',
+  )
 
   const deployBlockers = await readRepoFile('memory/deploy-blockers.md')
-  requireIncludes(deployBlockers, ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'smoke:chat', 'smoke:image:live'], 'memory/deploy-blockers.md')
+  requireIncludes(
+    deployBlockers,
+    ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'smoke:chat', 'smoke:image:live', 'Route/Menu Audit guard', 'STAGING_RUNBOOK.md', '/admin/health'],
+    'memory/deploy-blockers.md',
+  )
 
   const qaStatus = await readRepoFile('memory/qa-status.md')
-  requireIncludes(qaStatus, ['bun run qa:local', 'Backend tests:', 'API smoke:', 'Gate production'], 'memory/qa-status.md')
+  requireIncludes(
+    qaStatus,
+    ['bun run qa:local', 'Backend tests:', 'API smoke:', 'Gate production', 'route/menu status evidence', 'predeploy route/menu status evidence'],
+    'memory/qa-status.md',
+  )
 
   const files = await walkMarkdown(memoryRoot)
   for (const file of files) {

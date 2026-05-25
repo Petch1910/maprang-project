@@ -227,3 +227,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: filled staging/production release handoffs now reject failed frontend state QA evidence for `frontend:env:test`, `frontend:storage:test`, and `frontend:clipboard:test`.
 - Current addendum 2026-05-25: Route/Menu Audit rows with `needs-staging` must point to `STAGING_RUNBOOK.md` and `/admin/health`, and `future` rows must clearly say they are future work rather than clickable-ready menus.
 - Current addendum 2026-05-25: `predeploy:check` now locks the Route/Menu Audit `needs-staging`/`future` status-evidence guard, so removing the checker snippets or regression fixture should fail before handoff.
+- Current addendum 2026-05-25: `memory:audit` now requires the Route/Menu Audit status-evidence notes to stay in working context, deploy blockers, and QA status, with `predeploy:check` also locking the memory-audit snippets.
