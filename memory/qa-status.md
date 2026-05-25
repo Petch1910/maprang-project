@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 My Chats route/menu handoff pass: `bun run route-menu:audit` and `bun run route-menu:audit:test` passed after `/chats` Route/Menu Audit started naming concrete disabled reasons for select-all, bulk archive/restore/delete, busy per-chat menus, and rename/delete dialogs.
 - 2026-05-25 route/menu concrete disabled-reason pass: `bun run route-menu:audit` and `bun run route-menu:audit:test` passed after replacing generic Chat Sidebar/Admin Health disabled-state wording with concrete selection-toolbar, rename-dialog, and Admin Health refresh/link behavior, and after adding required snippets for those handoff details.
 - 2026-05-25 direction memory refresh pass: `bun run memory:audit` passed after refreshing `memory/project-maprang.md`, `memory/api-backend/current-direction.md`, and `memory/ui-ux/current-direction.md` to the 2026-05-25 guard baseline for signed avatar storage wording, route/menu disabled-state guards, Profile/Explore/Events loading behavior, and abuse QA handoff coverage.
 - 2026-05-25 abuse QA guard pass: `bun run predeploy:check:test` passed 3 tests / 95 expects after `predeploy:check` started requiring `Lore/persona injection` and `New-tab links` in `ABUSE_QA_CHECKLIST.md`, keeping manual prompt-control and frontend link-safety checks from drifting out of the production handoff.
