@@ -102,6 +102,7 @@ bun run release:handoff:check -- --filled
 - ความเสี่ยงโควตาผู้ให้บริการ:
 - งาน follow-up ที่ต้องทำมือ:
 - เงื่อนไข rollback:
+- Rollback action:
 
 ## การตัดสินใจปล่อย
 

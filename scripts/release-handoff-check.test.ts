@@ -72,6 +72,7 @@ const filledHandoff = [
   '- ความเสี่ยงโควตาผู้ให้บริการ: monitored',
   '- งาน follow-up ที่ต้องทำมือ: none',
   '- เงื่อนไข rollback: provider outage',
+  '- Rollback action: redeploy previous Render/Vercel deployment and restore previous env version',
   '',
   '## การตัดสินใจปล่อย',
   '- Go / no-go: go',
@@ -580,6 +581,7 @@ describe('release handoff check', () => {
       .replace('- ความเสี่ยงโควตาผู้ให้บริการ: monitored', '- ความเสี่ยงโควตาผู้ให้บริการ: unknown')
       .replace('- งาน follow-up ที่ต้องทำมือ: none', '- งาน follow-up ที่ต้องทำมือ: rotate keys after launch')
       .replace('- เงื่อนไข rollback: provider outage', '- เงื่อนไข rollback: none')
+      .replace('- Rollback action: redeploy previous Render/Vercel deployment and restore previous env version', '- Rollback action: decide later')
     const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
 
     expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
@@ -588,6 +590,7 @@ describe('release handoff check', () => {
         'production release handoff ต้องระบุความเสี่ยงโควตาผู้ให้บริการที่ชัดเจน',
         'production release handoff ต้องไม่มีงาน follow-up ที่ต้องทำมือก่อน go',
         'production release handoff ต้องมีเงื่อนไข rollback ที่ใช้งานได้จริง',
+        'production release handoff ต้องมี Rollback action ที่ทำตามได้จริง',
       ]),
     )
     expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
@@ -596,6 +599,7 @@ describe('release handoff check', () => {
         'staging release handoff ต้องระบุความเสี่ยงโควตาผู้ให้บริการที่ชัดเจน',
         'staging release handoff ต้องไม่มีงาน follow-up ที่ต้องทำมือก่อน go',
         'staging release handoff ต้องมีเงื่อนไข rollback ที่ใช้งานได้จริง',
+        'staging release handoff ต้องมี Rollback action ที่ทำตามได้จริง',
       ]),
     )
   })
@@ -606,6 +610,7 @@ describe('release handoff check', () => {
       .replace('- ความเสี่ยงโควตาผู้ให้บริการ: monitored\n', '')
       .replace('- งาน follow-up ที่ต้องทำมือ: none\n', '')
       .replace('- เงื่อนไข rollback: provider outage\n', '')
+      .replace('- Rollback action: redeploy previous Render/Vercel deployment and restore previous env version\n', '')
 
     expect(checkReleaseHandoffContent(stale)).toEqual(
       expect.arrayContaining([
@@ -613,6 +618,7 @@ describe('release handoff check', () => {
         'ยังไม่มี release risk field ใน release handoff: ความเสี่ยงโควตาผู้ให้บริการ',
         'ยังไม่มี release risk field ใน release handoff: งาน follow-up ที่ต้องทำมือ',
         'ยังไม่มี release risk field ใน release handoff: เงื่อนไข rollback',
+        'ยังไม่มี release risk field ใน release handoff: Rollback action',
       ]),
     )
   })

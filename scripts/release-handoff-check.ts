@@ -87,6 +87,7 @@ const requiredRiskFieldLabels = [
   'ความเสี่ยงโควตาผู้ให้บริการ',
   'งาน follow-up ที่ต้องทำมือ',
   'เงื่อนไข rollback',
+  'Rollback action',
 ]
 const requiredRiskFieldSnippets = requiredRiskFieldLabels
 
@@ -475,6 +476,11 @@ function validateFilledRiskRows(content: string, findings: string[]) {
   const rollback = fieldValue(content, 'เงื่อนไข rollback')
   if (rollback && (isNoneLike(rollback) || isPlaceholderLike(rollback))) {
     findings.push(`${environment} release handoff ต้องมีเงื่อนไข rollback ที่ใช้งานได้จริง`)
+  }
+
+  const rollbackAction = fieldValue(content, 'Rollback action')
+  if (rollbackAction && (isNoneLike(rollbackAction) || isPlaceholderLike(rollbackAction) || /\b(pending|manual later|decide later|latest)\b/i.test(rollbackAction))) {
+    findings.push(`${environment} release handoff ต้องมี Rollback action ที่ทำตามได้จริง`)
   }
 }
 
