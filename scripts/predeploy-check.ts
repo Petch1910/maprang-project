@@ -1864,7 +1864,16 @@ const checks: Check[] = [
       const e2eSmoke = await readRepoFile('tests/e2e/maprang-smoke.spec.ts')
       requireIncludes(
         audit,
-        ['/admin/health', 'Route/Menu Audit', 'bun run route-menu:audit', 'bun run e2e:smoke', 'Creator Studio', 'Moderation'],
+        [
+          '/admin/health',
+          'Route/Menu Audit',
+          'bun run frontend:static:audit',
+          'bun run frontend:route:audit',
+          'bun run route-menu:audit',
+          'bun run e2e:smoke',
+          'Creator Studio',
+          'Moderation',
+        ],
         'ROUTE_MENU_AUDIT.md',
       )
       requireIncludes(

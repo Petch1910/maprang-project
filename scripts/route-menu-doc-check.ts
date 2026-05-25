@@ -287,6 +287,8 @@ export function uniqueKeys(values: string[]) {
 const defaultRequiredSnippets = [
   'Route/Menu Audit',
   '/admin/health',
+  'bun run frontend:static:audit',
+  'bun run frontend:route:audit',
   'bun run route-menu:audit',
   'bun run e2e:smoke',
   'bun run qa:full',
