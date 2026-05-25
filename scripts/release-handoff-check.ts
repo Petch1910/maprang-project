@@ -36,6 +36,14 @@ const requiredFieldLabels = [
 ]
 const requiredFieldSnippets = requiredFieldLabels.map((label) => `- ${label}:`)
 
+const requiredReleaseIdentityFieldLabels = [
+  'วันที่ release',
+  'Git commit',
+  'Branch',
+  'ผู้รับผิดชอบ',
+]
+const requiredReleaseIdentityFieldSnippets = requiredReleaseIdentityFieldLabels
+
 const requiredMigrationFieldLabels = [
   'Database host/provider',
   'คำสั่ง migration',
@@ -212,6 +220,28 @@ function validateFilledReleaseDecision(content: string, findings: string[]) {
   }
 }
 
+function validateFilledReleaseIdentity(content: string, findings: string[]) {
+  const releaseDate = fieldValue(content, 'วันที่ release')
+  if (releaseDate && !/^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) {
+    findings.push('วันที่ release ใน handoff ต้องเป็นรูปแบบ YYYY-MM-DD')
+  }
+
+  const commit = fieldValue(content, 'Git commit')
+  if (commit && !/^[a-f0-9]{7,40}$/i.test(commit)) {
+    findings.push('Git commit ใน release handoff ต้องเป็น commit hash 7-40 ตัวอักษร')
+  }
+
+  const branch = fieldValue(content, 'Branch')
+  if (branch && (branch.includes('<') || branch.includes('>') || /\bplaceholder\b/i.test(branch))) {
+    findings.push('Branch ใน release handoff ต้องเป็นชื่อ branch จริง')
+  }
+
+  const owner = fieldValue(content, 'ผู้รับผิดชอบ')
+  if (owner && (owner.includes('<') || owner.includes('>') || /\bplaceholder\b/i.test(owner))) {
+    findings.push('ผู้รับผิดชอบ ใน release handoff ต้องเป็นชื่อผู้รับผิดชอบจริง')
+  }
+}
+
 function validateProductionQaResults(content: string, findings: string[]) {
   const environment = releaseEnvironment(content)
   if (environment !== 'production') return
@@ -345,6 +375,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredReleaseIdentityFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี release identity field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredMigrationFieldLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี migration field ใน release handoff: ${label}`)
   }
@@ -367,6 +401,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
       .map((line, index) => ({ line: line.trim(), index: index + 1 }))
       .filter(({ line }) => line.startsWith('- ') && /:\s*$/.test(line))
     for (const field of blankFields) findings.push(`บรรทัด ${field.index} ยังว่างอยู่: ${field.line}`)
+    validateFilledReleaseIdentity(content, findings)
     validateFilledReleaseHandoffUrls(content, findings)
     validateFilledReleaseDecision(content, findings)
     validateProductionVerificationFlags(content, findings)

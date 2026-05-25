@@ -93,6 +93,40 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires release identity rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- วันที่ release: 2026-05-19\n', '- Release note: วันที่ release: 2026-05-19\n')
+      .replace('- Git commit: abc1234\n', '')
+      .replace('- Branch: main\n', '')
+      .replace('- ผู้รับผิดชอบ: release lead\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี release identity field ใน release handoff: วันที่ release',
+        'ยังไม่มี release identity field ใน release handoff: Git commit',
+        'ยังไม่มี release identity field ใน release handoff: Branch',
+        'ยังไม่มี release identity field ใน release handoff: ผู้รับผิดชอบ',
+      ]),
+    )
+  })
+
+  test('requires concrete release identity values in filled handoff', () => {
+    const unsafe = filledHandoff
+      .replace('- วันที่ release: 2026-05-19', '- วันที่ release: May 19')
+      .replace('- Git commit: abc1234', '- Git commit: release-candidate')
+      .replace('- Branch: main', '- Branch: <branch>')
+      .replace('- ผู้รับผิดชอบ: release lead', '- ผู้รับผิดชอบ: placeholder')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'วันที่ release ใน handoff ต้องเป็นรูปแบบ YYYY-MM-DD',
+        'Git commit ใน release handoff ต้องเป็น commit hash 7-40 ตัวอักษร',
+        'Branch ใน release handoff ต้องเป็นชื่อ branch จริง',
+        'ผู้รับผิดชอบ ใน release handoff ต้องเป็นชื่อผู้รับผิดชอบจริง',
+      ]),
+    )
+  })
+
   test('requires a concrete release environment in filled handoff', () => {
     const unsafe = filledHandoff.replace('- Environment: production', '- Environment: prod')
 
