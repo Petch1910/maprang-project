@@ -1,5 +1,5 @@
 import { access, readFile, readdir } from 'node:fs/promises'
-import { join, relative } from 'node:path'
+import { basename, join } from 'node:path'
 import ts from 'typescript'
 
 const root = join(import.meta.dir, '..')
@@ -43,6 +43,23 @@ const rawFrontendFetchMessage =
   'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.'
 const allowedFrontendResponseJsonReaders = ['readApiJson', 'readErrorPayload']
 const allowedFrontendFetchFiles = new Set(['apps/frontend/src/lib/api.ts'])
+const allowedUnmountedFrontendComponents = new Map([
+  [
+    'apps/frontend/src/components/AuthPanel.tsx',
+    'AuthPanel ถูกเก็บไว้เป็น safety surface สำหรับ auth-error ระหว่างที่ UI บัญชีหลักถูกรวมไว้หน้าอื่น',
+  ],
+])
+
+function frontendRelativePath(file: string) {
+  const normalizedRoot = root.replaceAll('\\', '/')
+  const normalizedFile = file.replaceAll('\\', '/')
+  if (normalizedFile.startsWith(`${normalizedRoot}/`)) return normalizedFile.slice(normalizedRoot.length + 1)
+  return normalizedFile
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
 function findMatchingBrace(content: string, openingBraceIndex: number) {
   let depth = 0
@@ -423,13 +440,51 @@ export function auditFrontendSourceFile(content: string, file: string) {
   ]
 }
 
+export async function auditUnmountedFrontendComponents(
+  sourceFiles?: string[],
+  readText: (file: string) => Promise<string> = (file) => readFile(file, 'utf8'),
+) {
+  const findings: Finding[] = []
+  const resolvedSourceFiles = sourceFiles ?? (await collectSourceFiles(frontendSrc))
+  const frontendFiles = await Promise.all(
+    resolvedSourceFiles.map(async (file) => ({
+      file,
+      relativeFile: frontendRelativePath(file),
+      content: await readText(file),
+    })),
+  )
+  const componentFiles = frontendFiles.filter(
+    (entry) => /^apps\/frontend\/src\/components\/[^/]+\.tsx$/.test(entry.relativeFile),
+  )
+
+  for (const component of componentFiles) {
+    if (allowedUnmountedFrontendComponents.has(component.relativeFile)) continue
+    const componentName = basename(component.relativeFile, '.tsx')
+    const componentUsage = new RegExp(`\\b${escapeRegExp(componentName)}\\b`)
+    const isMounted = frontendFiles.some(
+      (entry) => entry.relativeFile !== component.relativeFile && componentUsage.test(entry.content),
+    )
+    if (!isMounted) {
+      findings.push({
+        file: component.relativeFile,
+        line: 1,
+        message:
+          'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล',
+      })
+    }
+  }
+
+  return findings
+}
+
 export async function collectFrontendStaticFindings() {
   const sourceFiles = await collectSourceFiles(frontendSrc)
   const findings: Finding[] = await auditStaleTemplateFiles()
+  findings.push(...(await auditUnmountedFrontendComponents(sourceFiles)))
 
   for (const file of sourceFiles) {
     const content = await readFile(file, 'utf8')
-    const relativeFile = relative(root, file).replaceAll('\\', '/')
+    const relativeFile = frontendRelativePath(file)
     findings.push(...auditFrontendSourceFile(content, relativeFile))
   }
 

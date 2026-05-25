@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { join } from 'node:path'
 import {
   auditButtonsWithAst,
   auditDisabledControlsWithAst,
@@ -7,6 +8,7 @@ import {
   auditRawFrontendFetchUsage,
   auditRawResponseTextParsing,
   auditSuspiciousPatterns,
+  auditUnmountedFrontendComponents,
   collectFrontendStaticFindings,
   lineFor,
   runFrontendStaticAudit,
@@ -244,6 +246,33 @@ describe('frontend static audit', () => {
         'apps/frontend/src/lib/api.ts',
       ),
     ).toEqual([])
+  })
+
+  test('reports unmounted frontend components except explicit allowlist entries', async () => {
+    const fixtureRoot = join(process.cwd(), 'apps/frontend/src')
+    const files = [
+      join(fixtureRoot, 'components/DeadPanel.tsx'),
+      join(fixtureRoot, 'components/LivePanel.tsx'),
+      join(fixtureRoot, 'components/AuthPanel.tsx'),
+      join(fixtureRoot, 'pages/LivePage.tsx'),
+    ]
+    const contents = new Map([
+      [files[0], 'export function DeadPanel() { return <section /> }'],
+      [files[1], 'export function LivePanel() { return <section /> }'],
+      [files[2], 'export function AuthPanel() { return <section /> }'],
+      [files[3], "import { LivePanel } from '../components/LivePanel'\nexport function LivePage() { return <LivePanel /> }"],
+    ])
+
+    const findings = await auditUnmountedFrontendComponents(files, async (file) => contents.get(file) ?? '')
+
+    expect(findings).toEqual([
+      {
+        file: 'apps/frontend/src/components/DeadPanel.tsx',
+        line: 1,
+        message:
+          'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล',
+      },
+    ])
   })
 
   test('reports Thai placeholder and mojibake text regressions', () => {

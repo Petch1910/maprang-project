@@ -1453,6 +1453,7 @@ const checks: Check[] = [
           'reports placeholder links',
           'reports raw auth error classifier regressions',
           'reports risky frontend DOM and code execution patterns',
+          'reports unmounted frontend components except explicit allowlist entries',
           'reports Thai placeholder and mojibake text regressions',
           'reports English UI label regressions for Thai-first surfaces',
           'reports mixed English debug copy regressions for Thai-first surfaces',
@@ -1499,6 +1500,8 @@ const checks: Check[] = [
         [
           'collectFrontendStaticFindings',
           'auditLinksWithAst',
+          'auditUnmountedFrontendComponents',
+          'allowedUnmountedFrontendComponents',
           'dangerouslySetInnerHTML',
           '\\.innerHTML\\s*=',
           '\\beval\\s*\\(',
