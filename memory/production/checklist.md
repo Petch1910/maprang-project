@@ -61,6 +61,8 @@ bun run smoke:chat
 bun run smoke:image:live
 ```
 
+หลัง live smoke ผ่าน ให้คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` โดยเก็บอย่างน้อย `Chat smoke normal walletTransactionId`, `Chat smoke stream walletTransactionId`, และ `Image smoke elapsedMs`.
+
 ## ห้ามทำ
 
 - ห้ามตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จาก local smoke ที่ถูก skip.

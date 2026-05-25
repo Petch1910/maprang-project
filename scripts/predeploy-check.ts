@@ -1061,7 +1061,16 @@ const checks: Check[] = [
       )
       requireIncludes(
         productionChecklist,
-        ['bun run deploy:doctor', 'bun run deploy:status', 'bun run api:smoke:live', 'อย่าชี้ `qa:local`'],
+        [
+          'bun run deploy:doctor',
+          'bun run deploy:status',
+          'bun run api:smoke:live',
+          'handoffEvidence',
+          'RELEASE_HANDOFF.md',
+          'Chat smoke normal walletTransactionId',
+          'Image smoke elapsedMs',
+          'อย่าชี้ `qa:local`',
+        ],
         'memory/production/checklist.md',
       )
       requireIncludes(

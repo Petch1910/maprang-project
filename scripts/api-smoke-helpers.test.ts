@@ -231,6 +231,16 @@ describe('api smoke helpers', () => {
         live: true,
         requireLiveImage: true,
         requireAdmin: true,
+        handoffEvidence: {},
+      }),
+    ).not.toHaveProperty('handoffEvidence')
+
+    expect(
+      buildApiSmokeSummary(results, {
+        apiBaseUrl: 'https://api.maprang.example',
+        live: true,
+        requireLiveImage: true,
+        requireAdmin: true,
         handoffEvidence: {
           'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
           'Image smoke elapsedMs': 250,
