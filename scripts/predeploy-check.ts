@@ -166,6 +166,21 @@ function splitPackageScriptCommands(...scripts: string[]) {
   )
 }
 
+function collectSimpleWorkflowRunCommands(content: string) {
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.trim().match(/^(?:-\s*)?run:\s*(.+)$/)?.[1]?.trim())
+    .filter((command): command is string => Boolean(command) && command !== '|' && command !== '>')
+}
+
+function requireWorkflowRunCommands(content: string, commands: string[], file: string) {
+  const actual = new Set(collectSimpleWorkflowRunCommands(content))
+  const missing = commands.filter((command) => !actual.has(command))
+  if (missing.length > 0) {
+    throw new Error(`${file} ต้องมี workflow run command แบบ exact: ${missing.join(', ')}`)
+  }
+}
+
 function assertThaiFirstMarkdownHeadings(content: string, file: string) {
   const allowedTechnicalHeadings = [/^#{1,6}\s+API\b/, /^#{1,6}\s+URL\b/, /^#\s+\d{4}\s+-\s+/]
   const offenders = content
@@ -1973,6 +1988,11 @@ const checks: Check[] = [
         ],
         '.github/workflows/production-smoke.yml',
       )
+      requireWorkflowRunCommands(
+        workflow,
+        ['bun run frontend:static:audit', 'bun run frontend:route:audit'],
+        '.github/workflows/production-smoke.yml',
+      )
       forbidIncludes(
         workflow,
         [
@@ -2044,6 +2064,11 @@ const checks: Check[] = [
           'bun run deploy:status:test',
           'bun run deploy:doctor:test',
         ],
+        '.github/workflows/ci.yml',
+      )
+      requireWorkflowRunCommands(
+        ciWorkflow,
+        ['bun run frontend:static:audit', 'bun run frontend:route:audit'],
         '.github/workflows/ci.yml',
       )
       const ciRootInstallCount = ciWorkflow.match(/name: ติดตั้ง dependencies ระดับ repo[\s\S]*?run: bun install --frozen-lockfile/g)?.length ?? 0
