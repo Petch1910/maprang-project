@@ -49,6 +49,11 @@ const allowedUnmountedFrontendComponents = new Map([
     'AuthPanel ถูกเก็บไว้เป็น safety surface สำหรับ auth-error ระหว่างที่ UI บัญชีหลักถูกรวมไว้หน้าอื่น',
   ],
 ])
+const allowedUnmountedFrontendPages = new Map<string, string>()
+const unmountedComponentMessage =
+  'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล'
+const unmountedPageMessage =
+  'page หน้าบ้านไม่ได้ถูก import หรือ mount จาก App/page อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล'
 
 function frontendRelativePath(file: string) {
   const normalizedRoot = root.replaceAll('\\', '/')
@@ -444,7 +449,6 @@ export async function auditUnmountedFrontendComponents(
   sourceFiles?: string[],
   readText: (file: string) => Promise<string> = (file) => readFile(file, 'utf8'),
 ) {
-  const findings: Finding[] = []
   const resolvedSourceFiles = sourceFiles ?? (await collectSourceFiles(frontendSrc))
   const frontendFiles = await Promise.all(
     resolvedSourceFiles.map(async (file) => ({
@@ -453,23 +457,57 @@ export async function auditUnmountedFrontendComponents(
       content: await readText(file),
     })),
   )
-  const componentFiles = frontendFiles.filter(
-    (entry) => /^apps\/frontend\/src\/components\/[^/]+\.tsx$/.test(entry.relativeFile),
+
+  return auditReferencedFrontendModules(
+    frontendFiles,
+    /^apps\/frontend\/src\/components\/[^/]+\.tsx$/,
+    allowedUnmountedFrontendComponents,
+    unmountedComponentMessage,
+  )
+}
+
+export async function auditUnmountedFrontendPages(
+  sourceFiles?: string[],
+  readText: (file: string) => Promise<string> = (file) => readFile(file, 'utf8'),
+) {
+  const resolvedSourceFiles = sourceFiles ?? (await collectSourceFiles(frontendSrc))
+  const frontendFiles = await Promise.all(
+    resolvedSourceFiles.map(async (file) => ({
+      file,
+      relativeFile: frontendRelativePath(file),
+      content: await readText(file),
+    })),
   )
 
-  for (const component of componentFiles) {
-    if (allowedUnmountedFrontendComponents.has(component.relativeFile)) continue
-    const componentName = basename(component.relativeFile, '.tsx')
-    const componentUsage = new RegExp(`\\b${escapeRegExp(componentName)}\\b`)
+  return auditReferencedFrontendModules(
+    frontendFiles,
+    /^apps\/frontend\/src\/pages\/[^/]+\.tsx$/,
+    allowedUnmountedFrontendPages,
+    unmountedPageMessage,
+  )
+}
+
+function auditReferencedFrontendModules(
+  frontendFiles: Array<{ file: string; relativeFile: string; content: string }>,
+  targetPattern: RegExp,
+  allowlist: Map<string, string>,
+  message: string,
+) {
+  const findings: Finding[] = []
+  const targetFiles = frontendFiles.filter((entry) => targetPattern.test(entry.relativeFile))
+
+  for (const target of targetFiles) {
+    if (allowlist.has(target.relativeFile)) continue
+    const moduleName = basename(target.relativeFile, '.tsx')
+    const moduleUsage = new RegExp(`\\b${escapeRegExp(moduleName)}\\b`)
     const isMounted = frontendFiles.some(
-      (entry) => entry.relativeFile !== component.relativeFile && componentUsage.test(entry.content),
+      (entry) => entry.relativeFile !== target.relativeFile && moduleUsage.test(entry.content),
     )
     if (!isMounted) {
       findings.push({
-        file: component.relativeFile,
+        file: target.relativeFile,
         line: 1,
-        message:
-          'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล',
+        message,
       })
     }
   }
@@ -481,6 +519,7 @@ export async function collectFrontendStaticFindings() {
   const sourceFiles = await collectSourceFiles(frontendSrc)
   const findings: Finding[] = await auditStaleTemplateFiles()
   findings.push(...(await auditUnmountedFrontendComponents(sourceFiles)))
+  findings.push(...(await auditUnmountedFrontendPages(sourceFiles)))
 
   for (const file of sourceFiles) {
     const content = await readFile(file, 'utf8')

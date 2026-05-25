@@ -9,6 +9,7 @@ import {
   auditRawResponseTextParsing,
   auditSuspiciousPatterns,
   auditUnmountedFrontendComponents,
+  auditUnmountedFrontendPages,
   collectFrontendStaticFindings,
   lineFor,
   runFrontendStaticAudit,
@@ -271,6 +272,33 @@ describe('frontend static audit', () => {
         line: 1,
         message:
           'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล',
+      },
+    ])
+  })
+
+  test('reports unmounted frontend pages that are not wired into routes', async () => {
+    const fixtureRoot = join(process.cwd(), 'apps/frontend/src')
+    const files = [
+      join(fixtureRoot, 'pages/DeadPage.tsx'),
+      join(fixtureRoot, 'pages/LivePage.tsx'),
+      join(fixtureRoot, 'App.tsx'),
+    ]
+    const contents = new Map([
+      [files[0], 'export function DeadPage() { return <main /> }'],
+      [files[1], 'export function LivePage() { return <main /> }'],
+      [
+        files[2],
+        "const loadLivePage = () => import('./pages/LivePage').then((module) => ({ default: module.LivePage }))\n<Route element={<LivePage />} path=\"/live\" />",
+      ],
+    ])
+
+    const findings = await auditUnmountedFrontendPages(files, async (file) => contents.get(file) ?? '')
+
+    expect(findings).toEqual([
+      {
+        file: 'apps/frontend/src/pages/DeadPage.tsx',
+        line: 1,
+        message: 'page หน้าบ้านไม่ได้ถูก import หรือ mount จาก App/page อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล',
       },
     ])
   })
