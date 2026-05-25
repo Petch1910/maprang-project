@@ -322,6 +322,46 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires migration evidence to pass for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- คำสั่ง migration: bunx prisma migrate deploy', '- คำสั่ง migration: prisma db push')
+      .replace('- ผล migration: pass', '- ผล migration: fail')
+      .replace('- Prisma migration version: 20260513103000_add_lore_parent_index', '- Prisma migration version: latest')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องใช้คำสั่ง migration: bunx prisma migrate deploy',
+        'production release handoff ต้องมีผล migration ผ่าน',
+        'production release handoff ต้องมี Prisma migration version เป็นชื่อ migration จริง',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องใช้คำสั่ง migration: bunx prisma migrate deploy',
+        'staging release handoff ต้องมีผล migration ผ่าน',
+        'staging release handoff ต้องมี Prisma migration version เป็นชื่อ migration จริง',
+      ]),
+    )
+  })
+
+  test('requires migration evidence rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- Database host/provider: managed postgres\n', '- DB note: Database host/provider: managed postgres\n')
+      .replace('- คำสั่ง migration: bunx prisma migrate deploy\n', '')
+      .replace('- ผล migration: pass\n', '')
+      .replace('- Prisma migration version: 20260513103000_add_lore_parent_index\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี migration field ใน release handoff: Database host/provider',
+        'ยังไม่มี migration field ใน release handoff: คำสั่ง migration',
+        'ยังไม่มี migration field ใน release handoff: ผล migration',
+        'ยังไม่มี migration field ใน release handoff: Prisma migration version',
+      ]),
+    )
+  })
+
   test('reports missing core production QA gate rows', () => {
     const stale = filledHandoff
       .replace('- `bun run qa:local`: pass\n', '')

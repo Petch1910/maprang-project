@@ -36,6 +36,14 @@ const requiredFieldLabels = [
 ]
 const requiredFieldSnippets = requiredFieldLabels.map((label) => `- ${label}:`)
 
+const requiredMigrationFieldLabels = [
+  'Database host/provider',
+  'คำสั่ง migration',
+  'ผล migration',
+  'Prisma migration version',
+]
+const requiredMigrationFieldSnippets = requiredMigrationFieldLabels
+
 const requiredQaGateLabels = [
   '`bun run qa:local`',
   '`bun run e2e:smoke`',
@@ -231,6 +239,24 @@ function validateStagingQaResults(content: string, findings: string[]) {
   }
 }
 
+function validateDeployedMigrationResults(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  const command = fieldValue(content, 'คำสั่ง migration')
+  if (command && !/\bbunx prisma migrate deploy\b/.test(command)) {
+    findings.push(`${environment} release handoff ต้องใช้คำสั่ง migration: bunx prisma migrate deploy`)
+  }
+
+  const result = fieldValue(content, 'ผล migration')
+  if (result && !isPassed(result)) findings.push(`${environment} release handoff ต้องมีผล migration ผ่าน`)
+
+  const version = fieldValue(content, 'Prisma migration version')
+  if (version && !/^\d{14}_[a-z0-9_]+$/.test(version)) {
+    findings.push(`${environment} release handoff ต้องมี Prisma migration version เป็นชื่อ migration จริง`)
+  }
+}
+
 function validateDeployedAdminResults(content: string, findings: string[]) {
   const environment = deployedEvidenceEnvironment(content)
   if (!environment) return
@@ -284,6 +310,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredMigrationFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี migration field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredQaGateLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี QA gate: ${label}`)
   }
@@ -304,6 +334,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateProductionLiveSmokeResults(content, findings)
     validateProductionQaResults(content, findings)
     validateStagingQaResults(content, findings)
+    validateDeployedMigrationResults(content, findings)
     validateDeployedAdminResults(content, findings)
     validateDeployedE2eTargets(content, findings)
   }
