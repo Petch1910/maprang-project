@@ -251,7 +251,7 @@ bun run deploy:doctor -- --backend-env apps/backend/.env --frontend-env apps/fro
 bun run qa:live
 ```
 
-`qa:live` และ `api:smoke:live` เรียกผู้ให้บริการจริง จึงอาจ fail ได้แม้ key มีอยู่แล้ว ถ้า billing, quota, สิทธิ์โมเดล, ข้อจำกัดอัตราการเรียกของผู้ให้บริการ, หรือการเชื่อมต่อออกนอกระบบยังไม่พร้อม กรณี chat จะรายงานเป็น `usage.providerFailure` เพื่อชี้ failure class ที่ถูกต้อง ให้ถือว่าเป็น staging blocker ก่อน production. `api:smoke:live` ตรวจ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ก่อนเรียกแชทจริง และครอบคลุมแชทจริงหนึ่งครั้งพร้อมสร้างรูปจริงหนึ่งครั้ง ดังนั้นใช้ `smoke:chat` หรือ `smoke:image:live` เฉพาะตอนต้อง retry เส้นทางผู้ให้บริการที่ fail เพียงจุดเดียว อย่ารัน live smoke หลายคำสั่งพร้อมกันบนบัญชีที่ quota จำกัด ให้ใช้ `api:smoke:live` เป็นรอบตรวจตามลำดับครั้งเดียว หลังยืนยันแชทจริงสำเร็จครั้งแรกให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`; หลังยืนยันรูปจริงสำเร็จครั้งแรกให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`; แล้ว rerun production gate สุดท้าย.
+`qa:live` และ `api:smoke:live` เรียกผู้ให้บริการจริง จึงอาจ fail ได้แม้ key มีอยู่แล้ว ถ้า billing, quota, สิทธิ์โมเดล, ข้อจำกัดอัตราการเรียกของผู้ให้บริการ, หรือการเชื่อมต่อออกนอกระบบยังไม่พร้อม กรณี chat จะรายงานเป็น `usage.providerFailure` เพื่อชี้ failure class ที่ถูกต้อง ให้ถือว่าเป็น staging blocker ก่อน production. `api:smoke:live` ตรวจ `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ก่อนเรียกแชทจริง และครอบคลุมแชทจริงหนึ่งครั้ง, สตรีมแชทจริงหนึ่งครั้ง, พร้อมสร้างรูปจริงหนึ่งครั้ง ดังนั้นใช้ `smoke:chat` หรือ `smoke:image:live` เฉพาะตอนต้อง retry เส้นทางผู้ให้บริการที่ fail เพียงจุดเดียว อย่ารัน live smoke หลายคำสั่งพร้อมกันบนบัญชีที่ quota จำกัด ให้ใช้ `api:smoke:live` เป็นรอบตรวจตามลำดับครั้งเดียว หลังยืนยันแชทจริงสำเร็จครั้งแรกให้ตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1`; หลังยืนยันรูปจริงสำเร็จครั้งแรกให้ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1`; แล้ว rerun production gate สุดท้าย.
 
 สำหรับ backend ที่ deploy แล้ว ให้ใช้ smoke-only live gate พร้อม `SMOKE_API_BASE_URL` และ smoke auth variables เมื่อต้องการ retry provider connectivity โดยไม่รัน persistence tests กับ production data:
 
@@ -265,7 +265,7 @@ bun run smoke:live
 bun run production:check
 ```
 
-คำสั่งนี้จะรัน production health gate แบบเข้ม, smoke ของพื้นที่เก็บรูปตัวละครแบบ Supabase signed URL, และ live API smoke รวมถึงการตรวจแชทจริงกับการสร้างรูปจริง ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็นภาพตัวอย่างเพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะล้ม.
+คำสั่งนี้จะรัน production health gate แบบเข้ม, smoke ของพื้นที่เก็บรูปตัวละครแบบ Supabase signed URL, และ live API smoke รวมถึงการตรวจแชทจริง, สตรีมแชทจริง, กับการสร้างรูปจริง ถ้า bucket `avatars` ออก signed URL ไม่ได้ หรือ image generation ถอยกลับเป็นภาพตัวอย่างเพราะ billing หรือ quota ของผู้ให้บริการยังไม่พร้อม คำสั่งจะล้ม.
 script จะพิมพ์ `bun run deploy:status` ก่อน เพื่อให้สรุป blocker และ next steps แสดงก่อน gate เข้ม fail.
 
 ถ้าต้องการตรวจพื้นที่ที่ repo ดูแลทั้งหมดก่อนด่านสุดท้ายของโดเมนและผู้ให้บริการจริง ให้รัน:

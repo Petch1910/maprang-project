@@ -68,6 +68,7 @@ guard ใน repo:
 - backend test suite ฝั่ง local ผ่านแล้ว: 177 pass, 0 fail, 609 expect calls.
 - Local API smoke ผ่านแล้ว
 - API route audit now rejects weak coverage quality before deploy: admin routes need `admin-smoke`, live-provider routes including `POST /chat/stream` need `live-smoke`, manual-production-only coverage is too weak, and coverage notes must be filled.
+- `api:smoke:live` now includes normal live chat, live stream chat, and live image generation, so the remaining live-provider blocker requires one clean staging run before setting verification flags.
 - API route audit weak coverage output now includes exact reasons per route so deploy operators can fix the missing smoke or note without rereading the coverage table.
 - README and Deployment QA now explain the API route coverage quality guard, so operators know weak coverage means missing smoke, manual-production-only coverage, or an empty note before deploy.
 - Frontend build และ bundle budget ผ่านแล้ว

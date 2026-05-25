@@ -167,7 +167,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'POST /chat/stream': {
     owner: 'chat',
     coverage: ['smoke', 'live-smoke', 'backend-test', 'manual-production'],
-    note: 'api-smoke ตรวจรูปแบบ SSE บนเส้นทาง validation โดยไม่ใช้โทเคนผู้ให้บริการ; backend runtime test ตรวจ guard เดียวกัน; staging QA ตรวจ UX สตรีมจริงก่อนปล่อย',
+    note: 'api-smoke ตรวจรูปแบบ SSE บนเส้นทาง validation โดยไม่ใช้โทเคนผู้ให้บริการ; api:smoke:live ตรวจสตรีมจริงกับผู้ให้บริการ; backend runtime test ตรวจ guard เดียวกัน; staging QA ตรวจ UX สตรีมจริงก่อนปล่อย',
   },
   'GET /chats/:id/messages': {
     owner: 'chat',

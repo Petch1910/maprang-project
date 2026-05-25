@@ -235,3 +235,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: decision `0016-api-route-coverage-quality-contract.md` records API route coverage as a quality contract for future agents.
 - Current addendum 2026-05-25: `memory:audit` now checks numbered decision files are linked from `memory/decisions/index.md`, and `predeploy:check` locks decision files through `0016-api-route-coverage-quality-contract.md`.
 - Current addendum 2026-05-25: `POST /chat/stream` is a live-provider route in `api:audit` and must keep `live-smoke` coverage before deploy.
+- Current addendum 2026-05-25: `api:smoke:live` now runs a real `POST /chat/stream` provider stream so stream-chat live-smoke coverage has runtime evidence.

@@ -1672,6 +1672,8 @@ const checks: Check[] = [
           'validateBackendRootIdentity',
           'assertMachineReadableErrorCode(payload',
           'parseApiSmokeStreamEvents<StreamSmokeEvent>(raw, path)',
+          'POST /chat/stream live',
+          'deltaChars=',
           'ApiSmokeRunnerOptions',
           'smokeTargetIssuesForDeployedGate',
           'formatSmokeTargetDiagnosticText',
