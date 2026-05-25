@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: `smoke:chat` now verifies both normal live chat and live stream chat, matching the release handoff command that can be used for `CHAT_PROVIDER_LIVE_VERIFIED=1`. Focused checks passed: `bun run smoke:chat:test`, `bun run predeploy:check:test`, `bun run docs:commands`, and `bun run predeploy:check`.
 - 2026-05-25: `api:smoke:live` now exercises `POST /chat/stream` with a real provider stream in addition to normal live chat and image generation, so the `live-smoke` coverage requirement for stream chat has matching runtime evidence. Focused checks passed: `bun run api:smoke:test`, `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands`, `bun run memory:audit`, and `bun run secrets:check`.
 - 2026-05-25: API route coverage quality guard now treats `POST /chat/stream` as a live-provider route requiring `live-smoke`, aligned with `POST /chat` and `POST /creator/ai-draft`. Focused checks passed: `bun run api:audit:test`, `bun run api:audit`, and `bun run predeploy:check:test`.
 - 2026-05-25: Memory audit now checks that every numbered decision file under `memory/decisions/` is linked from `memory/decisions/index.md`, and predeploy now locks decision files through `0016-api-route-coverage-quality-contract.md`. Focused checks passed: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.

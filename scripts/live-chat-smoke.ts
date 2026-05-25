@@ -7,6 +7,7 @@ import {
   validateBackendRootIdentity,
   type RootIdentityPayload,
 } from './smoke-helpers'
+import { parseApiSmokeStreamEvents } from './api-smoke-helpers'
 
 type ProviderFailure = { code?: string; retryable?: boolean; userMessage?: string }
 
@@ -31,6 +32,18 @@ export type LiveChatSmokeResponse = {
   }
 }
 
+export type LiveChatSmokeStreamEvent =
+  | { type: 'delta'; content?: string }
+  | {
+      type: 'done'
+      chatId?: string | null
+      usage?: {
+        totalTokens?: number
+        providerFailure?: ProviderFailure
+      }
+    }
+  | { type: 'error'; message?: string; chatId?: string | null }
+
 export type LiveChatWalletTransaction = {
   id: string
   type: string
@@ -39,11 +52,13 @@ export type LiveChatWalletTransaction = {
 }
 
 export type LiveChatSmokeJsonReader = <T>(path: string, init?: RequestInit) => Promise<T>
+export type LiveChatSmokeStreamReader = (path: string, init: RequestInit) => Promise<LiveChatSmokeStreamEvent[]>
 
 export type LiveChatSmokeRunnerOptions = {
   env?: Record<string, string | undefined>
   apiBaseUrl?: string
   readJson?: LiveChatSmokeJsonReader
+  readStreamEvents?: LiveChatSmokeStreamReader
   readRootIdentity?: () => Promise<RootIdentityPayload>
   authHeaders?: () => Record<string, string>
   writeLine?: (line: string) => void
@@ -52,6 +67,9 @@ export type LiveChatSmokeRunnerOptions = {
 
 export const liveChatSmokePrompt =
   'ฉันนั่งลงตรงข้ามเธอ วางแก้วชาไว้ใกล้มือ แล้วถามเบาๆ ว่าวันนี้มีอะไรหนักใจหรือเปล่า ช่วยตอบเป็นฉากโรลเพลย์ภาษาไทยที่มีบรรยากาศ ความรู้สึก จังหวะการกระทำ และเหลือพื้นที่ให้ฉันตอบต่อ'
+
+export const liveChatStreamSmokePrompt =
+  'ต่อฉากเดิมผ่านระบบสตรีมให้เห็นบรรยากาศและจังหวะการตอบแบบเรียลไทม์ ใช้ภาษาไทยและเหลือพื้นที่ให้ฉันตอบต่อ'
 
 export function parseMinSmokeTokenBalance(rawValue = process.env.SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT ?? '1000') {
   const value = Number(rawValue)
@@ -116,6 +134,39 @@ export function validateLiveChatSmokeResponse(chat: LiveChatSmokeResponse, minRo
   }
 }
 
+export function validateLiveChatSmokeStream(events: LiveChatSmokeStreamEvent[], minReplyChars = 80) {
+  const reply = events
+    .filter((event): event is Extract<LiveChatSmokeStreamEvent, { type: 'delta' }> => event.type === 'delta')
+    .map((event) => event.content ?? '')
+    .join('')
+    .trim()
+  const error = events.find((event): event is Extract<LiveChatSmokeStreamEvent, { type: 'error' }> => event.type === 'error')
+  const done = events.find((event): event is Extract<LiveChatSmokeStreamEvent, { type: 'done' }> => event.type === 'done')
+
+  if (error?.message) throw new Error(`สตรีมแชทจริงคืน error: ${error.message}`)
+  if (!done) throw new Error('สตรีมแชทจริงไม่คืน event ปิดท้าย')
+  if (done.usage?.providerFailure) throw new Error(providerFailureIssue(done.usage.providerFailure))
+  if (!done.chatId) throw new Error('สตรีมแชทจริงไม่คืน chat id')
+  if (!done.usage?.totalTokens) throw new Error('สตรีมแชทจริงไม่คืนข้อมูลโทเคนที่ใช้')
+  if (reply.length < minReplyChars) throw new Error(`สตรีมแชทจริงคืนคำตอบสั้นเกินไป: ${reply}`)
+
+  return {
+    chatId: done.chatId,
+    reply,
+    replyChars: reply.length,
+    totalTokens: done.usage.totalTokens,
+  }
+}
+
+export async function readLiveChatSmokeStreamEvents(baseUrl: string, path: string, init: RequestInit) {
+  const response = await fetch(`${baseUrl}${path}`, init)
+  const raw = await response.text()
+  if (!response.ok) throw new Error(`${path} ไม่ผ่านด้วยสถานะ ${response.status}: ${formatDiagnosticText(raw, 500)}`)
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('text/event-stream')) throw new Error(`${path} ไม่คืน event stream: ${contentType}`)
+  return parseApiSmokeStreamEvents<LiveChatSmokeStreamEvent>(raw, path)
+}
+
 export function findMatchingChatDebit(transactions: LiveChatWalletTransaction[] | undefined, totalTokens: number) {
   return transactions?.find((transaction) => transaction.type === 'CHAT_USAGE' && transaction.amount === -totalTokens) ?? null
 }
@@ -129,6 +180,9 @@ export function buildLiveChatSmokePayload({
   chatDebit,
   reply,
   minRoleplayReplyChars,
+  streamChatId,
+  streamTotalTokens,
+  streamReplyChars,
 }: {
   baseUrl?: string
   characterName: string
@@ -138,6 +192,9 @@ export function buildLiveChatSmokePayload({
   chatDebit: LiveChatWalletTransaction
   reply: string
   minRoleplayReplyChars: number
+  streamChatId: string
+  streamTotalTokens: number
+  streamReplyChars: number
 }) {
   return {
     ok: true,
@@ -146,6 +203,9 @@ export function buildLiveChatSmokePayload({
     chatId,
     model,
     totalTokens,
+    streamChatId,
+    streamTotalTokens,
+    streamReplyChars,
     walletTransactionId: chatDebit.id,
     balanceAfter: chatDebit.balanceAfter,
     replyChars: reply.length,
@@ -159,6 +219,9 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
   const env = options.env ?? process.env
   const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
   const jsonReader = options.readJson ?? readJson
+  const streamReader =
+    options.readStreamEvents ??
+    ((path: string, init: RequestInit) => readLiveChatSmokeStreamEvents(currentApiBaseUrl, path, init))
   const authHeaders = options.authHeaders ?? smokeAuthHeaders
   const writeLine = options.writeLine ?? ((line: string) => console.log(line))
   const writeError = options.writeError ?? ((line: string) => console.error(line))
@@ -211,6 +274,22 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
       }),
     })
     const chatResult = validateLiveChatSmokeResponse(chat, minRoleplayReplyChars)
+    const streamEvents = await streamReader('/chat/stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({
+        chatId: chatResult.chatId,
+        characterId: smokeCharacter.id,
+        relationshipSeed: 'stranger',
+        maxRating: 'restricted_18',
+        history: [],
+        message: liveChatStreamSmokePrompt,
+      }),
+    })
+    const streamResult = validateLiveChatSmokeStream(streamEvents)
 
     const walletAfter = await jsonReader<{
       wallet?: {
@@ -237,6 +316,9 @@ export async function runLiveChatSmoke(options: LiveChatSmokeRunnerOptions = {})
           chatDebit,
           reply: chatResult.reply,
           minRoleplayReplyChars,
+          streamChatId: streamResult.chatId,
+          streamTotalTokens: streamResult.totalTokens,
+          streamReplyChars: streamResult.replyChars,
         }),
         null,
         2,

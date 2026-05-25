@@ -217,7 +217,7 @@ bun run smoke:local
 bun run smoke:chat
 ```
 
-`smoke:chat` และ `api:smoke:live` จะเช็ก `/me/usage` ก่อนเรียกผู้ให้บริการ AI จริง ผู้ใช้ smoke ต้องมี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` เพื่อให้การทดสอบหยุดก่อนใช้เครดิตผู้ให้บริการถ้าบัญชียังเติมไม่พอ `smoke:chat` เหมาะสำหรับ retry/debug เฉพาะทาง ส่วน gate สุดท้ายให้ใช้ `production:check`
+`smoke:chat` และ `api:smoke:live` จะเช็ก `/me/usage` ก่อนเรียกผู้ให้บริการ AI จริง ผู้ใช้ smoke ต้องมี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` เพื่อให้การทดสอบหยุดก่อนใช้เครดิตผู้ให้บริการถ้าบัญชียังเติมไม่พอ `smoke:chat` เหมาะสำหรับ retry/debug เฉพาะทางของแชทปกติและสตรีมแชท ส่วน gate สุดท้ายให้ใช้ `production:check`
 
 ถ้า `smoke:chat` รายงาน `usage.providerFailure` แปลว่าแอป ฐานข้อมูล และเส้นทางแชทติดต่อได้แล้ว แต่ backend ยังเรียกผู้ให้บริการภายนอกไม่สำเร็จ ให้ตรวจการเชื่อมต่อออกไป `https://openrouter.ai`, `OPENROUTER_API_KEY`, เครดิตกับโควตา, สิทธิ์โมเดลที่เลือก, และ log ระบบหลังบ้าน.
 อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่าการทดสอบแชทจริงจะได้คำตอบจริงจากโมเดล, `chatId`, ข้อมูลโทเคนที่ใช้, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน.

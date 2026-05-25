@@ -4,10 +4,12 @@ import {
   buildLiveChatSmokePayload,
   findMatchingChatDebit,
   formatLiveChatSmokeCaughtError,
+  liveChatStreamSmokePrompt,
   liveChatSmokePrompt,
   providerFailureIssue,
   runLiveChatSmoke,
   selectLiveChatSmokeCharacter,
+  validateLiveChatSmokeStream,
   validateLiveChatSmokeResponse,
   type LiveChatSmokeJsonReader,
 } from './live-chat-smoke'
@@ -101,6 +103,9 @@ describe('live chat smoke helpers', () => {
         chatDebit: debit!,
         reply: chat.reply,
         minRoleplayReplyChars: 420,
+        streamChatId: 'chat-1',
+        streamTotalTokens: 44,
+        streamReplyChars: 160,
       }),
     ).toEqual({
       ok: true,
@@ -109,6 +114,9 @@ describe('live chat smoke helpers', () => {
       chatId: 'chat-1',
       model: 'openrouter/test-model',
       totalTokens: 88,
+      streamChatId: 'chat-1',
+      streamTotalTokens: 44,
+      streamReplyChars: 160,
       walletTransactionId: 'debit',
       balanceAfter: 1112,
       replyChars: 440,
@@ -159,6 +167,17 @@ describe('live chat smoke helpers', () => {
       env: { SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT: '1000' },
       apiBaseUrl: 'https://api.maprang.example',
       readJson: reader,
+      readStreamEvents: async (path, init) => {
+        calls.push(path)
+        const body = JSON.parse(String(init.body ?? '{}')) as { chatId?: string; message?: string }
+        expect(path).toBe('/chat/stream')
+        expect(body.chatId).toBe('chat-1')
+        expect(body.message).toBe(liveChatStreamSmokePrompt)
+        return [
+          { type: 'delta', content: 'ข'.repeat(120) },
+          { type: 'done', chatId: 'chat-1', usage: { totalTokens: 44 } },
+        ]
+      },
       readRootIdentity: async () => ({ ok: true, service: 'maprang-backend' }),
       authHeaders: () => ({ Authorization: 'Bearer smoke' }),
       writeLine: (line) => lines.push(line),
@@ -167,10 +186,33 @@ describe('live chat smoke helpers', () => {
 
     const payload = JSON.parse(lines.join('\n'))
     expect(exitCode).toBe(0)
-    expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/me/usage', '/chat', '/me/usage'])
+    expect(calls).toEqual(['/health', '/characters?view=admin&limit=10', '/me/usage', '/chat', '/chat/stream', '/me/usage'])
     expect(payload.apiBaseUrl).toBe('https://api.maprang.example')
     expect(payload.walletTransactionId).toBe('debit')
+    expect(payload.streamTotalTokens).toBe(44)
+    expect(payload.streamReplyChars).toBe(120)
     expect(errors).toEqual([])
+  })
+
+  test('validates live stream chat smoke events', () => {
+    expect(
+      validateLiveChatSmokeStream([
+        { type: 'delta', content: 'ส'.repeat(90) },
+        { type: 'done', chatId: 'chat-1', usage: { totalTokens: 33 } },
+      ]),
+    ).toMatchObject({ chatId: 'chat-1', totalTokens: 33, replyChars: 90 })
+    expect(() => validateLiveChatSmokeStream([{ type: 'done', chatId: 'chat-1', usage: { totalTokens: 33 } }])).toThrow(
+      'สตรีมแชทจริงคืนคำตอบสั้นเกินไป',
+    )
+    expect(() =>
+      validateLiveChatSmokeStream([
+        {
+          type: 'done',
+          chatId: 'chat-1',
+          usage: { totalTokens: 33, providerFailure: { code: 'insufficient_quota' } },
+        },
+      ]),
+    ).toThrow('CHAT_PROVIDER_LIVE_VERIFIED=1')
   })
 
   test('uses a Thai-first prompt for live roleplay quality smoke', () => {

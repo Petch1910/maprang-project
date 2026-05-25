@@ -1997,12 +1997,13 @@ const checks: Check[] = [
           'formats object-shaped live chat smoke errors without stringifying raw objects',
           'validates backend root identity before spending chat tokens',
           'runs live chat smoke through an importable runner',
+          'validates live stream chat smoke events',
         ],
         'scripts/live-chat-smoke.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/live-chat-smoke.ts'),
-        ['LiveChatSmokeRunnerOptions', 'liveChatSmokePrompt', 'ฉากโรลเพลย์ภาษาไทย', 'formatUnknownDiagnosticText', 'validateBackendRootIdentity', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
+        ['LiveChatSmokeRunnerOptions', 'liveChatSmokePrompt', 'liveChatStreamSmokePrompt', 'validateLiveChatSmokeStream', 'readLiveChatSmokeStreamEvents', 'ฉากโรลเพลย์ภาษาไทย', 'formatUnknownDiagnosticText', 'validateBackendRootIdentity', 'runLiveChatSmoke', 'if (import.meta.main) process.exit(await runLiveChatSmoke())'],
         'scripts/live-chat-smoke.ts',
       )
       forbidIncludes(
