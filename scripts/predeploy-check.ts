@@ -2009,6 +2009,9 @@ const checks: Check[] = [
           'reports placeholder, missing URL, and SVG placeholder failures',
           "imageSmokeUrlKind('data:image/png;base64,abc')",
           "toBe('missing-url')",
+          'handoffEvidence',
+          'Image smoke provider',
+          'Image smoke elapsedMs',
           'formats object-shaped image smoke errors without stringifying raw objects',
           'validates backend root identity before image provider checks',
           'runs skipped image smoke through an importable runner',
@@ -2017,7 +2020,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/image-smoke.ts'),
-        ['ImageSmokeRunnerOptions', 'formatUnknownDiagnosticText', 'validateBackendRootIdentity', 'imageSmokeUrlKind', 'runImageSmoke', 'if (import.meta.main) process.exit(await runImageSmoke())'],
+        ['ImageSmokeRunnerOptions', 'formatUnknownDiagnosticText', 'validateBackendRootIdentity', 'imageSmokeUrlKind', 'handoffEvidence', 'Image smoke provider', 'Image smoke elapsedMs', 'runImageSmoke', 'if (import.meta.main) process.exit(await runImageSmoke())'],
         'scripts/image-smoke.ts',
       )
       requireIncludes(

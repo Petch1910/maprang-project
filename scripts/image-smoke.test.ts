@@ -99,6 +99,12 @@ describe('image smoke helpers', () => {
       imageProvider: 'configured',
       imageUrlKind: 'remote-or-upload-url',
       elapsedMs: 1200,
+      handoffEvidence: {
+        'Image smoke provider': 'configured',
+        'Image smoke source': 'ai',
+        'Image smoke urlKind': 'remote-or-upload-url',
+        'Image smoke elapsedMs': 1200,
+      },
       warnings: ['minor warning'],
     })
 
@@ -189,6 +195,10 @@ describe('image smoke helpers', () => {
     expect(payload.live).toBe(true)
     expect(payload.imageUrlKind).toBe('remote-or-upload-url')
     expect(payload.elapsedMs).toBe(250)
+    expect(payload.handoffEvidence['Image smoke provider']).toBe('configured')
+    expect(payload.handoffEvidence['Image smoke source']).toBe('ai')
+    expect(payload.handoffEvidence['Image smoke urlKind']).toBe('remote-or-upload-url')
+    expect(payload.handoffEvidence['Image smoke elapsedMs']).toBe(250)
     expect(errors).toEqual([])
   })
 

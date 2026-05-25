@@ -120,6 +120,14 @@ export function buildLiveImageSmokePayload(
     elapsedMs: number
   },
 ) {
+  const imageUrlKind = imageSmokeUrlKind(draft.image?.url)
+  const handoffEvidence = {
+    'Image smoke provider': draft.image?.provider,
+    'Image smoke source': draft.source ?? null,
+    'Image smoke urlKind': imageUrlKind,
+    'Image smoke elapsedMs': options.elapsedMs,
+  }
+
   return {
     ok: true,
     apiBaseUrl: options.baseUrl ?? apiBaseUrl,
@@ -129,8 +137,9 @@ export function buildLiveImageSmokePayload(
     imageModel: health.model?.imageGeneration?.model ?? null,
     imageStatus: health.model?.imageGeneration?.status ?? null,
     imageProvider: draft.image?.provider,
-    imageUrlKind: imageSmokeUrlKind(draft.image?.url),
+    imageUrlKind,
     elapsedMs: options.elapsedMs,
+    handoffEvidence,
     warnings: draft.warnings ?? [],
   }
 }
