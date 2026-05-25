@@ -598,28 +598,6 @@ export type LocalEvalRun = {
   results: EvalScenarioResult[]
 }
 
-export type LoreEntry = {
-  id: string
-  characterId: string
-  keyword: string
-  aliases: string[]
-  content: string
-  priority: number
-  hierarchyLevel: number
-  parentLoreId: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export type LoreInput = {
-  keyword: string
-  aliases: string[]
-  content: string
-  priority: number
-  hierarchyLevel: number
-  parentLoreId: string | null
-}
-
 export function apiRequestTimeoutMs(path: string, init?: RequestInit) {
   const method = (init?.method ?? 'GET').toUpperCase()
   if (path === '/chat' || path === '/creator/ai-draft') return 60_000
@@ -857,31 +835,6 @@ export async function createCharacter(input: CharacterInput) {
   })
 }
 
-export async function updateCharacter(characterId: string, input: Partial<CharacterInput>) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(input),
-  })
-}
-
-export async function deleteCharacter(characterId: string) {
-  return requestJson<{ ok: boolean }>(`/characters/${characterId}`, {
-    method: 'DELETE',
-  })
-}
-
-export async function duplicateCharacter(characterId: string) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}/duplicate`, {
-    method: 'POST',
-  })
-}
-
-export async function resetCharacterPrompt(characterId: string) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}/reset-prompt`, {
-    method: 'POST',
-  })
-}
-
 export async function uploadAvatar(file: File, timeoutMs = apiUploadTimeoutMs()) {
   const form = new FormData()
   form.append('file', file)
@@ -922,30 +875,6 @@ export async function setCharacterFavorite(characterId: string, favorite: boolea
 export async function trackCharacterView(characterId: string) {
   return requestJson<{ character: Character }>(`/characters/${characterId}/view`, {
     method: 'POST',
-  })
-}
-
-export async function fetchLoreEntries(characterId: string) {
-  return requestJson<{ loreEntries?: LoreEntry[] }>(`/characters/${characterId}/lore`)
-}
-
-export async function createLoreEntry(characterId: string, input: LoreInput) {
-  return requestJson<{ loreEntry: LoreEntry }>(`/characters/${characterId}/lore`, {
-    method: 'POST',
-    body: JSON.stringify(input),
-  })
-}
-
-export async function updateLoreEntry(loreId: string, input: Partial<LoreInput>) {
-  return requestJson<{ loreEntry: LoreEntry }>(`/lore/${loreId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(input),
-  })
-}
-
-export async function deleteLoreEntry(loreId: string) {
-  return requestJson<{ ok: boolean }>(`/lore/${loreId}`, {
-    method: 'DELETE',
   })
 }
 
