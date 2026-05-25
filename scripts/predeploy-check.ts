@@ -740,8 +740,14 @@ const checks: Check[] = [
       if (!qaLocalCoverage.includes('frontend:static:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:static:audit:test เพื่อจับ regression ของ frontend static audit')
       }
+      if (!qaLocalCoverage.includes('frontend:static:audit')) {
+        throw new Error('package.json qa:local ต้องรัน frontend:static:audit เพื่อยืนยัน alias ของ frontend static audit')
+      }
       if (!qaLocalCoverage.includes('frontend:route:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน frontend:route:audit:test เพื่อจับ regression ของ frontend route audit')
+      }
+      if (!qaLocalCoverage.includes('frontend:route:audit')) {
+        throw new Error('package.json qa:local ต้องรัน frontend:route:audit เพื่อยืนยัน alias ของ frontend route audit')
       }
       if (!qaLocalCoverage.includes('route-menu:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน route-menu:audit:test เพื่อจับ regression ของเอกสาร route/menu')
