@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after frontend object/navigation route guard hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Frontend route audit now also checks `navigate({ pathname: '/...' })` calls, so React Router object navigation gets the same dead-route protection as string `navigate('/...')`.
 - 2026-05-25: Frontend route audit now checks static `to`/`href` values stored in object literals, so menu/card configs mapped into `<Link to={item.to}>` cannot point at dead routes silently.
 - 2026-05-25: Full deterministic repo QA passed after backend security route-call AST hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
