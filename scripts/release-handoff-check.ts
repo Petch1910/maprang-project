@@ -25,7 +25,18 @@ const forbiddenPatterns = [
 
 const forbiddenCopySnippets = ['ผู้ให้บริการ avatar storage', 'รูปแบบการเข้าถึง avatar storage']
 
-const requiredQaGateSnippets = ['`bun run frontend:env:test`', '`bun run frontend:storage:test`', '`bun run frontend:clipboard:test`', 'E2E_BASE_URL', 'E2E_API_BASE_URL']
+const requiredQaGateSnippets = [
+  '`bun run qa:local`',
+  '`bun run e2e:smoke`',
+  'E2E_BASE_URL',
+  'E2E_API_BASE_URL',
+  '`bun run frontend:env:test`',
+  '`bun run frontend:storage:test`',
+  '`bun run frontend:clipboard:test`',
+  '`bun run staging:verify`',
+  '`bun run production:check`',
+  'GitHub Production Smoke run',
+]
 
 export type ReleaseHandoffCheckResult = {
   ok: boolean
@@ -170,7 +181,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
   }
 
   for (const snippet of requiredQaGateSnippets) {
-    if (!content.includes(snippet)) findings.push(`เธขเธฑเธเนเธกเนเธกเธต QA gate: ${snippet}`)
+    if (!content.includes(snippet)) findings.push(`ยังไม่มี QA gate: ${snippet}`)
   }
 
   if (options.requireFilled) {

@@ -547,11 +547,16 @@ const checks: Check[] = [
           'ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
           'การยืนยันผู้ให้บริการ AI',
           'เกต QA (QA gates)',
+          '`bun run qa:local`',
+          '`bun run e2e:smoke`',
           '`bun run frontend:env:test`',
           '`bun run frontend:storage:test`',
           '`bun run frontend:clipboard:test`',
           'E2E_BASE_URL',
           'E2E_API_BASE_URL',
+          '`bun run staging:verify`',
+          '`bun run production:check`',
+          'GitHub Production Smoke run',
           'การตรวจฝั่งผู้ดูแล',
           'ข้อจำกัดที่ยังรู้ก่อนปล่อย',
           'การตัดสินใจปล่อย',
@@ -577,6 +582,7 @@ const checks: Check[] = [
           'forbiddenPatterns',
           'forbiddenCopySnippets',
           'requiredQaGateSnippets',
+          'GitHub Production Smoke run',
           'deployedHttpsUrl',
           'looksLikeFrontendCorsOrigin',
           'isDeployedOrigin',
@@ -591,7 +597,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'requires release URL origins and exact backend health paths', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'requires release URL origins and exact backend health paths', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'reports missing core production QA gate rows', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(test, ['requires production e2e smoke targets to match deployed origins', 'E2E_BASE_URL', 'E2E_API_BASE_URL'], 'scripts/release-handoff-check.test.ts')

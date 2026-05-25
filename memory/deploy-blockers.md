@@ -31,6 +31,7 @@ guard ใน repo:
 - `runE2eSmoke` ส่ง env ชุดเดียวกับที่ validate แล้วเข้า seed/Playwright/restore runner steps เพื่อให้ automation ที่ import runner ไม่ตรวจ URL ชุดหนึ่งแต่รันอีกชุดหนึ่ง
 - `RELEASE_HANDOFF.md` ต้องบันทึก `E2E_BASE_URL`/`E2E_API_BASE_URL` ที่ใช้รัน browser smoke; production filled handoff จะ fail ถ้าค่าเหล่านี้ไม่ใช่ deployed origins เดียวกับ Frontend/Backend URL
 - `RELEASE_HANDOFF.md` filled mode จะ fail ถ้า `Frontend URL`/`Backend URL` ไม่ใช่ deployed origins ล้วน หรือถ้า `Health URL`/`Ready URL` ไม่ชี้ backend origin เดียวกันที่ `/health` และ `/ready` โดยไม่มี query/hash
+- `RELEASE_HANDOFF.md` ต้องเก็บแถวหลักของ QA evidence ไว้ครบ: `qa:local`, `e2e:smoke`, `staging:verify`, `production:check`, และ GitHub Production Smoke run
 
 ### การยืนยัน live chat provider
 

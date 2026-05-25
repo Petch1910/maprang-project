@@ -197,6 +197,25 @@ describe('release handoff check', () => {
     )
   })
 
+  test('reports missing core production QA gate rows', () => {
+    const stale = filledHandoff
+      .replace('- `bun run qa:local`: pass\n', '')
+      .replace('- `bun run e2e:smoke`: pass\n', '')
+      .replace('- `bun run staging:verify`: pass\n', '')
+      .replace('- `bun run production:check`: pass\n', '')
+      .replace('- GitHub Production Smoke run: pass\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี QA gate: `bun run qa:local`',
+        'ยังไม่มี QA gate: `bun run e2e:smoke`',
+        'ยังไม่มี QA gate: `bun run staging:verify`',
+        'ยังไม่มี QA gate: `bun run production:check`',
+        'ยังไม่มี QA gate: GitHub Production Smoke run',
+      ]),
+    )
+  })
+
   test('requires production e2e smoke targets to match deployed origins', () => {
     const unsafe = filledHandoff
       .replace('- E2E_BASE_URL: https://app.maprang.example', '- E2E_BASE_URL: http://127.0.0.1:5173')
@@ -245,9 +264,9 @@ describe('release handoff check', () => {
 
     expect(checkReleaseHandoffContent(stale)).toEqual(
       expect.arrayContaining([
-        'เธขเธฑเธเนเธกเนเธกเธต QA gate: `bun run frontend:env:test`',
-        'เธขเธฑเธเนเธกเนเธกเธต QA gate: `bun run frontend:storage:test`',
-        'เธขเธฑเธเนเธกเนเธกเธต QA gate: `bun run frontend:clipboard:test`',
+        'ยังไม่มี QA gate: `bun run frontend:env:test`',
+        'ยังไม่มี QA gate: `bun run frontend:storage:test`',
+        'ยังไม่มี QA gate: `bun run frontend:clipboard:test`',
       ]),
     )
   })
