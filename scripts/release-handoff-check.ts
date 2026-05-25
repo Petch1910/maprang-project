@@ -50,6 +50,15 @@ const requiredQaGateLabels = [
 ]
 const requiredQaGateSnippets = requiredQaGateLabels
 
+const requiredAdminCheckLabels = [
+  '`/admin/health`',
+  '`/admin/prompt-inspector`',
+  '`/admin/evals`',
+  'รายงาน moderation',
+  'audit logs ของผู้ดูแล',
+]
+const requiredAdminCheckSnippets = requiredAdminCheckLabels
+
 export type ReleaseHandoffCheckResult = {
   ok: boolean
   requireFilled: boolean
@@ -222,6 +231,16 @@ function validateStagingQaResults(content: string, findings: string[]) {
   }
 }
 
+function validateDeployedAdminResults(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  for (const label of requiredAdminCheckLabels) {
+    const value = fieldValue(content, label)
+    if (value && !isPassed(value)) findings.push(`${environment} release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: ${label}`)
+  }
+}
+
 function deployedEvidenceEnvironment(content: string) {
   const environment = releaseEnvironment(content)
   if (environment === 'production') return 'production'
@@ -269,6 +288,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี QA gate: ${label}`)
   }
 
+  for (const label of requiredAdminCheckLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี admin verification ใน release handoff: ${label}`)
+  }
+
   if (options.requireFilled) {
     const blankFields = content
       .split(/\r?\n/)
@@ -281,6 +304,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateProductionLiveSmokeResults(content, findings)
     validateProductionQaResults(content, findings)
     validateStagingQaResults(content, findings)
+    validateDeployedAdminResults(content, findings)
     validateDeployedE2eTargets(content, findings)
   }
 

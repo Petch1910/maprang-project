@@ -274,6 +274,54 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires admin verification rows to pass for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- `/admin/health`: pass', '- `/admin/health`: fail')
+      .replace('- `/admin/prompt-inspector`: pass', '- `/admin/prompt-inspector`: warning')
+      .replace('- `/admin/evals`: pass', '- `/admin/evals`: fail')
+      .replace('- รายงาน moderation: pass', '- รายงาน moderation: warning')
+      .replace('- audit logs ของผู้ดูแล: pass', '- audit logs ของผู้ดูแล: fail')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: `/admin/health`',
+        'production release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: `/admin/prompt-inspector`',
+        'production release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: `/admin/evals`',
+        'production release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: รายงาน moderation',
+        'production release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: audit logs ของผู้ดูแล',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: `/admin/health`',
+        'staging release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: `/admin/prompt-inspector`',
+        'staging release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: `/admin/evals`',
+        'staging release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: รายงาน moderation',
+        'staging release handoff ต้องมีผลตรวจผู้ดูแลผ่าน: audit logs ของผู้ดูแล',
+      ]),
+    )
+  })
+
+  test('requires admin verification rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- `/admin/health`: pass\n', '- Admin note: `/admin/health`: pass\n')
+      .replace('- `/admin/prompt-inspector`: pass\n', '')
+      .replace('- `/admin/evals`: pass\n', '')
+      .replace('- รายงาน moderation: pass\n', '')
+      .replace('- audit logs ของผู้ดูแล: pass\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี admin verification ใน release handoff: `/admin/health`',
+        'ยังไม่มี admin verification ใน release handoff: `/admin/prompt-inspector`',
+        'ยังไม่มี admin verification ใน release handoff: `/admin/evals`',
+        'ยังไม่มี admin verification ใน release handoff: รายงาน moderation',
+        'ยังไม่มี admin verification ใน release handoff: audit logs ของผู้ดูแล',
+      ]),
+    )
+  })
+
   test('reports missing core production QA gate rows', () => {
     const stale = filledHandoff
       .replace('- `bun run qa:local`: pass\n', '')

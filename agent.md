@@ -211,4 +211,5 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: critical release handoff fields such as `Environment`, URL fields, `CORS origins`, and `Go / no-go` must be actual `- label:` rows.
 - Current addendum 2026-05-25: filled release handoff validation now requires exact `Environment: staging` or `Environment: production`, and requires `Go / no-go: go` before the handoff can be used as release evidence.
 - Current addendum 2026-05-25: filled production release handoffs now reject failed or warning `ผล live smoke แชท` and `ผล live smoke รูป` rows; live-provider verification flags alone are not enough.
+- Current addendum 2026-05-25: filled staging/production release handoffs now require admin verification rows for Admin Health, Prompt Inspector, local evals, moderation reports, and admin audit logs to be real rows with pass/ผ่าน results.
 - Current addendum 2026-05-25: filled staging/production release handoffs now reject failed frontend state QA evidence for `frontend:env:test`, `frontend:storage:test`, and `frontend:clipboard:test`.
