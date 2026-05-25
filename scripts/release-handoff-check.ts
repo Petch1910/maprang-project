@@ -44,6 +44,15 @@ const requiredMigrationFieldLabels = [
 ]
 const requiredMigrationFieldSnippets = requiredMigrationFieldLabels
 
+const requiredAuthStorageFieldLabels = [
+  'โหมด auth',
+  'Supabase project ref',
+  'ผู้ให้บริการพื้นที่เก็บรูปตัวละคร',
+  'รูปแบบการเข้าถึงรูปตัวละคร',
+  'อายุ signed URL',
+]
+const requiredAuthStorageFieldSnippets = requiredAuthStorageFieldLabels
+
 const requiredQaGateLabels = [
   '`bun run qa:local`',
   '`bun run e2e:smoke`',
@@ -257,6 +266,32 @@ function validateDeployedMigrationResults(content: string, findings: string[]) {
   }
 }
 
+function validateDeployedAuthStorageResults(content: string, findings: string[]) {
+  const environment = deployedEvidenceEnvironment(content)
+  if (!environment) return
+
+  if (fieldValue(content, 'โหมด auth').toLowerCase() !== 'supabase-jwt') {
+    findings.push(`${environment} release handoff ต้องใช้โหมด auth เป็น supabase-jwt`)
+  }
+
+  const projectRef = fieldValue(content, 'Supabase project ref')
+  if (!/^[a-z0-9]{8,}$/.test(projectRef) || projectRef.includes('example') || projectRef.includes('placeholder')) {
+    findings.push(`${environment} release handoff ต้องมี Supabase project ref จริง ไม่ใช่ URL หรือ placeholder`)
+  }
+
+  if (fieldValue(content, 'ผู้ให้บริการพื้นที่เก็บรูปตัวละคร').toLowerCase() !== 'supabase') {
+    findings.push(`${environment} release handoff ต้องใช้พื้นที่เก็บรูปตัวละครเป็น supabase`)
+  }
+
+  if (fieldValue(content, 'รูปแบบการเข้าถึงรูปตัวละคร').toLowerCase() !== 'signed') {
+    findings.push(`${environment} release handoff ต้องใช้รูปตัวละครแบบ signed URL`)
+  }
+
+  if (fieldValue(content, 'อายุ signed URL') !== '3600') {
+    findings.push(`${environment} release handoff ต้องตั้งอายุ signed URL เป็น 3600`)
+  }
+}
+
 function validateDeployedAdminResults(content: string, findings: string[]) {
   const environment = deployedEvidenceEnvironment(content)
   if (!environment) return
@@ -314,6 +349,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     if (!hasField(content, label)) findings.push(`ยังไม่มี migration field ใน release handoff: ${label}`)
   }
 
+  for (const label of requiredAuthStorageFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี auth/storage field ใน release handoff: ${label}`)
+  }
+
   for (const label of requiredQaGateLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี QA gate: ${label}`)
   }
@@ -335,6 +374,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateProductionQaResults(content, findings)
     validateStagingQaResults(content, findings)
     validateDeployedMigrationResults(content, findings)
+    validateDeployedAuthStorageResults(content, findings)
     validateDeployedAdminResults(content, findings)
     validateDeployedE2eTargets(content, findings)
   }

@@ -25,7 +25,7 @@ const filledHandoff = [
   '',
   '## ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
   '- โหมด auth: supabase-jwt',
-  '- Supabase project ref: project-ref-only',
+  '- Supabase project ref: maprangqa12345678',
   '- ผู้ให้บริการพื้นที่เก็บรูปตัวละคร: supabase',
   '- รูปแบบการเข้าถึงรูปตัวละคร: signed',
   '- อายุ signed URL: 3600',
@@ -362,6 +362,54 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires production-safe auth and storage evidence for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff
+      .replace('- โหมด auth: supabase-jwt', '- โหมด auth: local-dev')
+      .replace('- Supabase project ref: maprangqa12345678', '- Supabase project ref: https://supabase.com/dashboard/project/maprangqa12345678')
+      .replace('- ผู้ให้บริการพื้นที่เก็บรูปตัวละคร: supabase', '- ผู้ให้บริการพื้นที่เก็บรูปตัวละคร: local')
+      .replace('- รูปแบบการเข้าถึงรูปตัวละคร: signed', '- รูปแบบการเข้าถึงรูปตัวละคร: public')
+      .replace('- อายุ signed URL: 3600', '- อายุ signed URL: 86400')
+    const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องใช้โหมด auth เป็น supabase-jwt',
+        'production release handoff ต้องมี Supabase project ref จริง ไม่ใช่ URL หรือ placeholder',
+        'production release handoff ต้องใช้พื้นที่เก็บรูปตัวละครเป็น supabase',
+        'production release handoff ต้องใช้รูปตัวละครแบบ signed URL',
+        'production release handoff ต้องตั้งอายุ signed URL เป็น 3600',
+      ]),
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'staging release handoff ต้องใช้โหมด auth เป็น supabase-jwt',
+        'staging release handoff ต้องมี Supabase project ref จริง ไม่ใช่ URL หรือ placeholder',
+        'staging release handoff ต้องใช้พื้นที่เก็บรูปตัวละครเป็น supabase',
+        'staging release handoff ต้องใช้รูปตัวละครแบบ signed URL',
+        'staging release handoff ต้องตั้งอายุ signed URL เป็น 3600',
+      ]),
+    )
+  })
+
+  test('requires auth and storage evidence rows as field rows', () => {
+    const stale = filledHandoff
+      .replace('- โหมด auth: supabase-jwt\n', '- Auth note: โหมด auth: supabase-jwt\n')
+      .replace('- Supabase project ref: maprangqa12345678\n', '')
+      .replace('- ผู้ให้บริการพื้นที่เก็บรูปตัวละคร: supabase\n', '')
+      .replace('- รูปแบบการเข้าถึงรูปตัวละคร: signed\n', '')
+      .replace('- อายุ signed URL: 3600\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'ยังไม่มี auth/storage field ใน release handoff: โหมด auth',
+        'ยังไม่มี auth/storage field ใน release handoff: Supabase project ref',
+        'ยังไม่มี auth/storage field ใน release handoff: ผู้ให้บริการพื้นที่เก็บรูปตัวละคร',
+        'ยังไม่มี auth/storage field ใน release handoff: รูปแบบการเข้าถึงรูปตัวละคร',
+        'ยังไม่มี auth/storage field ใน release handoff: อายุ signed URL',
+      ]),
+    )
+  })
+
   test('reports missing core production QA gate rows', () => {
     const stale = filledHandoff
       .replace('- `bun run qa:local`: pass\n', '')
@@ -419,7 +467,7 @@ describe('release handoff check', () => {
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`
     const unsafe = filledHandoff
       .replace('## การตัดสินใจปล่อย', '## Decision')
-      .replace('project-ref-only', `${fakeOpenRouterKey}\n- Debug token: ${fakeGithubToken}`)
+      .replace('maprangqa12345678', `${fakeOpenRouterKey}\n- Debug token: ${fakeGithubToken}`)
 
     expect(checkReleaseHandoffContent(unsafe)).toEqual(
       expect.arrayContaining(['ยังไม่มี section: การตัดสินใจปล่อย', 'พบ OpenRouter key', 'พบ GitHub token']),
