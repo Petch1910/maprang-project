@@ -91,8 +91,11 @@ export function EventsInboxPage() {
           <p className="mt-2 text-sm font-bold text-white/58">รวมฉากสำคัญจากแชทที่กำลังเล่น เพื่อให้กลับไปต่อได้เร็ว</p>
         </div>
         <button
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white"
+          aria-disabled={isLoading}
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+          disabled={isLoading}
           onClick={() => dispatch(loadChatSummaries())}
+          title={isLoading ? 'กำลังโหลดกล่องอีเวนต์ รอให้เสร็จก่อนรีเฟรช' : 'รีเฟรชกล่องอีเวนต์'}
           type="button"
         >
           <RefreshCw size={16} />
