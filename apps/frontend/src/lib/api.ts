@@ -509,33 +509,6 @@ export type UserPersona = {
   maxChars: number
 }
 
-export type AdminSummary = {
-  totals: {
-    users: number
-    characters: number
-    publishedCharacters: number
-    reviewCharacters: number
-    chats: number
-    messages: number
-    loreEntries: number
-    favorites: number
-    usageRequests: number
-    tokens: number
-    cost: string
-    pendingReports?: number
-  }
-  topCharacters: Array<{
-    id: string
-    name: string
-    status: Character['status']
-    visibility: Character['visibility']
-    qualityScore: number
-    chatCount: number
-    viewCount: number
-    favoriteCount: number
-  }>
-}
-
 export type PromptInspectorSection = {
   index: number
   title: string
@@ -746,10 +719,6 @@ export async function updateUserPersona(persona: string) {
     method: 'PATCH',
     body: JSON.stringify({ persona }),
   })
-}
-
-export async function fetchAdminSummary() {
-  return requestJson<AdminSummary>('/admin/summary')
 }
 
 export async function inspectAdminPrompt(input: {

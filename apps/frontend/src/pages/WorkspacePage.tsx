@@ -12,7 +12,6 @@ import {
   deleteChat as deleteSavedChat,
   deleteLoreEntry,
   duplicateCharacter,
-  fetchAdminSummary,
   fetchCharacters,
   fetchChatMessages,
   fetchChats,
@@ -31,21 +30,18 @@ import {
   updateLoreEntry,
   ApiError,
   type Character,
-  type AdminSummary,
   type CharacterInput,
   type CharacterListFilters,
   type ChatMessage,
   type ChatResponse,
   type ChatRuntimeState,
   type ChatSummary,
-  type HealthStatus,
   type LoreEntry,
   type LoreInput,
   type WorldStateInput,
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
-import { safeGetStorageItem } from '../lib/safeStorage'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { isPlayableChatSummary } from '../store/slices/chatsSlice'
 import { selectContentSettings } from '../store/slices/contentSlice'
@@ -75,10 +71,6 @@ function isExpectedUserApiError(error: unknown) {
 
 function logUnexpectedWorkspaceError(label: string, error: unknown) {
   logUnexpectedError(label, error)
-}
-
-function hasStoredAdminKey() {
-  return typeof window !== 'undefined' && Boolean(safeGetStorageItem(window.localStorage, 'maprang:adminKey')?.trim())
 }
 
 function shouldUseNonStreamingFallback(error: unknown) {
@@ -163,8 +155,6 @@ export function WorkspacePage() {
   const [chatId, setChatId] = useState<string | null>(null)
   const [chatLog, setChatLog] = useState<ChatMessage[]>([createGreeting(fallbackCharacter)])
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>([])
-  const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null)
-  const [adminSummary, setAdminSummary] = useState<AdminSummary | null>(null)
   const [loreEntries, setLoreEntries] = useState<LoreEntry[]>([])
   const [lastUsage, setLastUsage] = useState<ChatUsage | null>(null)
   const [runtimeState, setRuntimeState] = useState<ChatRuntimeState | null>(null)
@@ -202,7 +192,6 @@ export function WorkspacePage() {
   const loadHealthStatus = useCallback(async () => {
     try {
       const health = await fetchHealthStatus()
-      setHealthStatus(health)
       if (!health.checks.databaseConnected) {
         setConnectionNote('บริการแชททำงานแล้ว แต่ฐานข้อมูลยังไม่พร้อม')
         return
@@ -218,7 +207,6 @@ export function WorkspacePage() {
       setConnectionNote('ฐานข้อมูลและบริการ AI เชื่อมต่อแล้ว')
     } catch (error) {
       logUnexpectedWorkspaceError('โหลดสถานะระบบไม่สำเร็จ:', error)
-      setHealthStatus(null)
       setConnectionNote('เชื่อมต่อบริการแชทไม่ได้')
     }
   }, [])
@@ -231,25 +219,6 @@ export function WorkspacePage() {
       logUnexpectedWorkspaceError('โหลดสรุปการใช้โทเคนไม่สำเร็จ:', error)
     }
   }, [reduxDispatch])
-
-  const loadAdminSummary = useCallback(async () => {
-    if (!hasStoredAdminKey()) {
-      setAdminSummary(null)
-      return
-    }
-
-    try {
-      const data = await fetchAdminSummary()
-      setAdminSummary(data)
-    } catch (error) {
-      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-        setAdminSummary(null)
-        return
-      }
-      logUnexpectedWorkspaceError('โหลดสรุปผู้ดูแลไม่สำเร็จ:', error)
-      setAdminSummary(null)
-    }
-  }, [])
 
   const loadChatHistory = useCallback(async () => {
     setIsHistoryLoading(true)
@@ -311,7 +280,6 @@ export function WorkspacePage() {
     await loadLoreEntries(nextCharacter.id)
     await loadChatHistory()
     await loadUsageSummary()
-    await loadAdminSummary()
   }
 
   useEffect(() => {
@@ -422,13 +390,11 @@ export function WorkspacePage() {
 
       await loadChatHistory()
       await loadUsageSummary()
-      await loadAdminSummary()
       if (routeChatId) await openChat(routeChatId)
     }
 
     void boot()
   }, [
-    loadAdminSummary,
     loadCharacters,
     loadChatHistory,
     loadHealthStatus,
@@ -446,7 +412,6 @@ export function WorkspacePage() {
       await archiveSavedChat(id)
       if (chatId === id) startNewChat()
       await loadChatHistory()
-      await loadAdminSummary()
       setConnectionNote('จัดเก็บแชทแล้ว')
     } catch (error) {
       logUnexpectedWorkspaceError('จัดเก็บแชทไม่สำเร็จ:', error)
@@ -470,7 +435,6 @@ export function WorkspacePage() {
       await deleteSavedChat(id)
       if (chatId === id) startNewChat()
       await loadChatHistory()
-      await loadAdminSummary()
       setConnectionNote('ลบแชทแล้ว')
     } catch (error) {
       logUnexpectedWorkspaceError('ลบแชทไม่สำเร็จ:', error)
@@ -701,7 +665,6 @@ export function WorkspacePage() {
       )
       if (completedChatId) await syncOpenChatMessages(completedChatId)
       await loadChatHistory()
-      await loadAdminSummary()
     } catch (error) {
       if (!isExpectedUserApiError(error)) logUnexpectedWorkspaceError('ส่งแชทไม่สำเร็จ:', error)
       const streamMessage = apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่')
@@ -883,7 +846,6 @@ export function WorkspacePage() {
       }
       setConnectionNote(reportTarget.targetType === 'CHARACTER' ? 'ส่งรายงานตัวละครให้ผู้ดูแลตรวจแล้ว' : 'ส่งรายงานข้อความให้ผู้ดูแลตรวจแล้ว')
       setReportTarget(null)
-      await loadAdminSummary()
     } catch (error) {
       logUnexpectedWorkspaceError('ส่งรายงานไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ส่งรายงานไม่ได้ กรุณาลองใหม่หลังแชทซิงก์เสร็จ'))
@@ -896,13 +858,11 @@ export function WorkspacePage() {
     <main className="grid h-svh grid-cols-1 overflow-hidden bg-[#111113] text-white md:grid-cols-[246px_minmax(0,1fr)]">
       <Sidebar
         character={character}
-        adminSummary={adminSummary}
         characters={characters}
         chatHistory={chatHistory}
         chatId={chatId}
         runtimeState={runtimeState}
         connectionNote={connectionNote}
-        healthStatus={healthStatus}
         isHistoryLoading={isHistoryLoading}
         isLoreLoading={isLoreLoading}
         isMobileOpen={isMobileMenuOpen}
@@ -921,8 +881,6 @@ export function WorkspacePage() {
         onFilterCharacters={loadCharacters}
         onFavoriteCharacter={toggleFavorite}
         onLoadChatHistory={loadChatHistory}
-        onLoadHealth={loadHealthStatus}
-        onLoadAdminSummary={loadAdminSummary}
         onLoadLore={() => loadLoreEntries(character.id)}
         onOpenChat={openChat}
         onResetCharacterPrompt={resetSelectedCharacterPrompt}

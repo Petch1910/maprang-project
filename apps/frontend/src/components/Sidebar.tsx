@@ -21,13 +21,11 @@ import {
   X,
 } from 'lucide-react'
 import type {
-  AdminSummary as AdminSummaryData,
   Character,
   CharacterInput,
   CharacterListFilters,
   ChatSummary,
   ChatRuntimeState,
-  HealthStatus,
   LoreEntry,
   LoreInput,
 } from '../lib/api'
@@ -37,13 +35,11 @@ import { loadPinnedChatIds, savePinnedChatIds, togglePinnedChatId } from '../lib
 
 type SidebarProps = {
   character: Character
-  adminSummary: AdminSummaryData | null
   characters: Character[]
   chatHistory: ChatSummary[]
   chatId: string | null
   runtimeState: ChatRuntimeState | null
   connectionNote: string
-  healthStatus: HealthStatus | null
   isHistoryLoading: boolean
   isLoreLoading: boolean
   isMobileOpen: boolean
@@ -62,8 +58,6 @@ type SidebarProps = {
   onFilterCharacters: (filters?: CharacterListFilters) => Promise<Character[]>
   onFavoriteCharacter: (characterId: string, favorite: boolean) => Promise<void>
   onLoadChatHistory: () => void
-  onLoadHealth: () => Promise<void>
-  onLoadAdminSummary: () => Promise<void>
   onLoadLore: () => Promise<void>
   onOpenChat: (chatId: string) => void
   onResetCharacterPrompt: () => Promise<void>
