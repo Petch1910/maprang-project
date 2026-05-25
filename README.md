@@ -200,7 +200,7 @@ bun run qa:local
 bun run api:audit
 ```
 
-คำสั่งนี้ยืนยันว่า route ทุกตัวใน `apps/backend/index.ts` และ `apps/backend/src/*.routes.ts` ถูกนับใน smoke, การตรวจเบราว์เซอร์แบบ e2e, backend tests, live-provider smoke, admin smoke, หรือ manual production gate แล้ว และตรวจว่า frontend helper ใน `apps/frontend/src/lib/api.ts` ที่เรียก `requestJson` หรือ `fetch(API_BASE_URL...)` ชี้ไปยัง method/path ที่ backend ประกาศไว้จริง.
+คำสั่งนี้ยืนยันว่า route ทุกตัวใน `apps/backend/index.ts` และ `apps/backend/src/*.routes.ts` ถูกนับใน smoke, การตรวจเบราว์เซอร์แบบ e2e, backend tests, live-provider smoke, admin smoke, หรือ manual production gate แล้ว และตรวจว่า frontend helper ใน `apps/frontend/src/lib/api.ts` ที่เรียก `requestJson` หรือ `fetch(API_BASE_URL...)` ชี้ไปยัง method/path ที่ backend ประกาศไว้จริง. นอกจากนี้ audit จะ fail ถ้า admin route ขาด `admin-smoke`, live-provider routes เช่น `POST /chat` และ `POST /creator/ai-draft` ขาด `live-smoke`, coverage มีแค่ `manual-production`, หรือ coverage note ว่าง โดย output จะแสดง weak coverage reason ต่อ route ให้แก้ตรงจุด.
 
 ถ้าต้องการตรวจ import cycles ใน app และ QA source:
 

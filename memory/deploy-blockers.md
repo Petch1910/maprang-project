@@ -69,6 +69,7 @@ guard ใน repo:
 - Local API smoke ผ่านแล้ว
 - API route audit now rejects weak coverage quality before deploy: admin routes need `admin-smoke`, live-provider routes need `live-smoke`, manual-production-only coverage is too weak, and coverage notes must be filled.
 - API route audit weak coverage output now includes exact reasons per route so deploy operators can fix the missing smoke or note without rereading the coverage table.
+- README and Deployment QA now explain the API route coverage quality guard, so operators know weak coverage means missing smoke, manual-production-only coverage, or an empty note before deploy.
 - Frontend build และ bundle budget ผ่านแล้ว
 - Desktop/mobile e2e smoke ผ่านแล้ว
 - Supabase signed URL สำหรับพื้นที่เก็บรูปตัวละคร implement แล้ว และถูกตรวจโดย production gate

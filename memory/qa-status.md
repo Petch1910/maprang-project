@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 API route coverage docs sync pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands`, `bun run secrets:check`, and `git diff --check` passed after README and Deployment QA started documenting the API route coverage quality guard and weak coverage reason output.
 - 2026-05-25 memory API route coverage quality guard pass: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after memory audit started requiring API route coverage quality and weak-coverage reason notes to remain in working context, deploy blockers, and QA status.
 - 2026-05-25 API route weak-coverage reason diagnostics pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after API route audit started printing per-route weak coverage reasons and predeploy locked those reason snippets.
 - 2026-05-25 API route coverage quality guard pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after API route audit started rejecting weak coverage quality, including admin routes without `admin-smoke`, live-provider routes without `live-smoke`, manual-production-only routes, and blank coverage notes.

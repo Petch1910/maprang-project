@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: README and Deployment QA now document the API route coverage quality guard, including `admin-smoke`, `live-smoke`, `manual-production`, blank notes, and weak coverage reason output. Focused checks passed: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands`.
 - 2026-05-25: Memory audit now requires API route coverage quality notes to stay present in working context, deploy blockers, and QA status, including `admin-smoke`, `live-smoke`, `manual-production`, and weak-coverage reason diagnostics. Focused checks passed: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
 - 2026-05-25: API route audit weak-coverage diagnostics now include actionable reasons per route, such as missing `admin-smoke`, missing `live-smoke`, blank coverage notes, and manual-production-only coverage. Focused checks passed: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
 - 2026-05-25: API route audit now checks coverage quality, not only route presence: admin routes must keep `admin-smoke`, live-provider routes (`POST /chat`, `POST /creator/ai-draft`) must keep `live-smoke`, `manual-production` cannot be the only coverage level, and coverage notes cannot be blank. Focused checks passed: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
