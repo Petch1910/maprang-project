@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 full deterministic repo QA pass after API route constant-resolution hardening: `bun run qa:repo` passed with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25 API route constant audit pass: `bun run api:audit:test`, `bun run api:audit`, and `bun run predeploy:check:test` passed after frontend API helper route discovery started resolving top-level string route constants.
 - 2026-05-25 route/menu navigate audit pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, and `bun run predeploy:check:test` passed after route-menu doc-check started collecting static `navigate` paths from `App.tsx`.
 - 2026-05-25 route/menu object href audit pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, and `bun run predeploy:check:test` passed after route-menu doc-check started collecting object-literal `href` paths alongside `to` paths.
