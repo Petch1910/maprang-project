@@ -1538,12 +1538,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('apps/frontend/src/lib/env.ts'),
-        ['supabaseJwtRole', 'decodeBase64Url', "padEnd(Math.ceil(normalized.length / 4) * 4, '=')"],
+        ['supabaseJwtRole', 'decodeBase64Url', 'isLocalOrPlaceholderUrl', '0.0.0.0', '[::1]', "padEnd(Math.ceil(normalized.length / 4) * 4, '=')"],
         'apps/frontend/src/lib/env.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-env.test.ts'),
-        ['decodes Supabase JWT roles from unpadded base64url payloads', 'service_role', 'ignores invalid Supabase JWT role payloads without throwing'],
+        ['detects local and placeholder frontend URLs', 'http://0.0.0.0:3000', 'http://[::1]:3000/health', 'decodes Supabase JWT roles from unpadded base64url payloads', 'service_role', 'ignores invalid Supabase JWT role payloads without throwing'],
         'scripts/frontend-env.test.ts',
       )
       requireIncludes(

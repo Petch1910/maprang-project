@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 frontend local URL helper pass: `bun run frontend:env:test`, `bun run frontend:static:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run frontend:check` passed after exporting `isLocalOrPlaceholderUrl`, covering `0.0.0.0`/IPv6 loopback in frontend env tests, and wiring Admin Health to the same helper.
 - 2026-05-25 local URL guard hardening pass: `bun run smoke:helpers:test`, `bun run deploy:readiness:test`, `cd apps/backend && bun test src/env.test.ts`, `bun run deploy:doctor:test`, `bun run release:handoff:test`, and `bun run predeploy:check:test` passed after adding `0.0.0.0` and IPv6 loopback detection to smoke/deploy/release/backend production guards.
 - 2026-05-25 frontend Docker build-arg guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after locking `VITE_SUPABASE_ANON_PUBLIC` to `VITE_SUPABASE_ANON_KEY` mapping in the frontend Dockerfile and CI docker build command.
 - 2026-05-25 release handoff production QA result guard pass: `bun run release:handoff:test`, `bun run release:handoff:check`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after requiring production filled handoffs to record pass/ผ่าน for `qa:local`, `e2e:smoke`, `staging:verify`, `production:check`, and GitHub Production Smoke.

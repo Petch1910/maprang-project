@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { supabaseJwtRole } from '../apps/frontend/src/lib/env'
+import { isLocalOrPlaceholderUrl, supabaseJwtRole } from '../apps/frontend/src/lib/env'
 
 function jwtWithRole(role: string) {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')
@@ -8,6 +8,17 @@ function jwtWithRole(role: string) {
 }
 
 describe('frontend env helpers', () => {
+  test('detects local and placeholder frontend URLs', () => {
+    expect(isLocalOrPlaceholderUrl('http://localhost:3000')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('http://127.0.0.1:3000')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('http://0.0.0.0:3000')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('http://[::1]:3000/health')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('https://api.example.com')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('https://<backend-domain>')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('not-a-url')).toBe(true)
+    expect(isLocalOrPlaceholderUrl('https://api.maprang.ai')).toBe(false)
+  })
+
   test('decodes Supabase JWT roles from unpadded base64url payloads', () => {
     expect(supabaseJwtRole(jwtWithRole('anon'))).toBe('anon')
     expect(supabaseJwtRole(jwtWithRole('service_role'))).toBe('service_role')

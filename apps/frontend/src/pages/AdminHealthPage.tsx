@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Activity, CheckCircle2, CircleAlert, RefreshCw, ShieldCheck } from 'lucide-react'
 import { SystemStatus } from '../components/SystemStatus'
 import { fetchHealthStatus, type HealthStatus } from '../lib/api'
-import { API_BASE_URL, frontendEnvWarnings, hasRealEnvValue, RAW_API_BASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from '../lib/env'
+import { API_BASE_URL, frontendEnvWarnings, hasRealEnvValue, isLocalOrPlaceholderUrl, RAW_API_BASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from '../lib/env'
 import { routeMenuAuditRows, routeMenuAuditStatusLabel, type RouteMenuAuditStatus } from '../lib/routeMenuAudit'
 
 type DeployCheck = {
@@ -46,19 +46,10 @@ function checkScopeClass(scope: DeployCheck['scope']) {
   return 'bg-amber-50 text-amber-900'
 }
 
-function isLocalUrl(value: string) {
-  try {
-    const url = new URL(value)
-    return ['localhost', '127.0.0.1', '::1'].includes(url.hostname)
-  } catch {
-    return true
-  }
-}
-
 function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const frontendWarnings = frontendEnvWarnings()
   const hasFrontendSupabase = hasRealEnvValue(SUPABASE_URL) && hasRealEnvValue(SUPABASE_ANON_KEY)
-  const hasBackendUrl = hasRealEnvValue(RAW_API_BASE_URL) && !isLocalUrl(API_BASE_URL)
+  const hasBackendUrl = hasRealEnvValue(RAW_API_BASE_URL) && !isLocalOrPlaceholderUrl(API_BASE_URL)
   const checks = healthStatus?.checks
   const security = healthStatus?.security
   const model = healthStatus?.model
@@ -197,15 +188,15 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
     },
     {
       label: 'CORS ใช้งานจริง',
-      ok: Boolean(security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))),
+      ok: Boolean(security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalOrPlaceholderUrl(origin))),
       detail:
-        security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))
+        security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalOrPlaceholderUrl(origin))
           ? security.corsOrigins.join(', ')
           : 'สเตจจิง/โปรดักชันต้องเปลี่ยน CORS_ORIGINS เป็นโดเมนจริง',
       action:
-        security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalUrl(origin))
+        security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalOrPlaceholderUrl(origin))
           ? 'คง CORS ให้เหลือเฉพาะโดเมนหน้าบ้านจริง'
-          : 'ตั้ง CORS_ORIGINS=https://<frontend-domain> และเอา localhost ออกจากโปรดักชัน',
+          : 'ตั้ง CORS_ORIGINS=https://<frontend-domain> และเอา localhost/loopback ออกจากโปรดักชัน',
       scope: 'production',
     },
     {

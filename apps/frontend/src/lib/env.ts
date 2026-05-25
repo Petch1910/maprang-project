@@ -34,12 +34,12 @@ export function supabaseJwtRole(value: string | undefined) {
   }
 }
 
-function isLocalOrPlaceholderUrl(value: string) {
+export function isLocalOrPlaceholderUrl(value: string) {
   const normalized = value.toLowerCase()
   if (normalized.includes('example.com') || normalized.includes('<') || normalized.includes('>')) return true
   try {
     const url = new URL(value)
-    return ['localhost', '127.0.0.1', '::1'].includes(url.hostname)
+    return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname.toLowerCase())
   } catch {
     return true
   }
