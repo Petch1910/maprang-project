@@ -47,6 +47,17 @@ export function deployedSmokeTargetIssues(baseUrl: string) {
   return issues
 }
 
+export function smokeTargetIssuesForDeployedGate(baseUrl: string, localTarget: boolean) {
+  const issues = deployedSmokeTargetIssues(baseUrl)
+  if (!localTarget) return issues
+  return issues.filter(
+    (issue) =>
+      issue.includes('ต้องเป็น URL ที่ถูกต้อง') ||
+      issue.includes('credential/userinfo') ||
+      issue.includes('path/query/hash'),
+  )
+}
+
 export const apiBaseUrl = smokeApiBaseUrl()
 export const isLocalSmokeTarget = smokeTargetIsLocal(apiBaseUrl)
 

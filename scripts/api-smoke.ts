@@ -10,7 +10,16 @@ import {
   tryParseJson,
 } from './api-smoke-helpers'
 import { assertSmokeUserHasTokenBalance, parseMinSmokeTokenBalance, validateLiveChatSmokeResponse } from './live-chat-smoke'
-import { apiBaseUrl, readJson, smokeAuthHeaders, validateBackendRootIdentity, type RootIdentityPayload } from './smoke-helpers'
+import {
+  apiBaseUrl as defaultApiBaseUrl,
+  formatSmokeTargetDiagnosticText,
+  readJson,
+  smokeAuthHeaders,
+  smokeTargetIssuesForDeployedGate,
+  smokeTargetIsLocal,
+  validateBackendRootIdentity,
+  type RootIdentityPayload,
+} from './smoke-helpers'
 
 export type ApiSmokeStatus = 'pass' | 'warn' | 'fail' | 'skip'
 
@@ -82,6 +91,7 @@ type HealthSmokePayload = {
 
 export type ApiSmokeRunnerOptions = {
   argv?: string[]
+  apiBaseUrl?: string
   writeLine?: (line: string) => void
   writeWarn?: (line: string) => void
 }
@@ -112,10 +122,31 @@ export async function runApiSmoke(options: ApiSmokeRunnerOptions = {}) {
 const argv = options.argv ?? process.argv
 const writeLine = options.writeLine ?? ((line: string) => console.log(line))
 const writeWarn = options.writeWarn ?? ((line: string) => console.warn(line))
+const apiBaseUrl = options.apiBaseUrl ?? defaultApiBaseUrl
 const live = argv.includes('--live')
 const requireLiveImage = argv.includes('--require-live-image')
 const requireAdmin = argv.includes('--require-admin')
 const results: ApiSmokeResult[] = []
+
+const targetIssues = smokeTargetIssuesForDeployedGate(apiBaseUrl, smokeTargetIsLocal(apiBaseUrl))
+if (targetIssues.length > 0) {
+  const detail = targetIssues.join('; ')
+  results.push({ name: 'SMOKE_API_BASE_URL', status: 'fail', detail })
+  writeLine(`${formatApiSmokeStatus('fail')} - SMOKE_API_BASE_URL: ${detail}`)
+  writeLine(
+    JSON.stringify(
+      buildApiSmokeSummary(results, {
+        apiBaseUrl: formatSmokeTargetDiagnosticText(apiBaseUrl, 300),
+        live,
+        requireLiveImage,
+        requireAdmin,
+      }),
+      null,
+      2,
+    ),
+  )
+  return 1
+}
 
 const authHeaders = smokeAuthHeaders()
 const adminKey = await loadAdminKey()

@@ -1,10 +1,10 @@
 import {
   apiBaseUrl,
-  deployedSmokeTargetIssues,
   formatSmokeTargetDiagnosticText,
   formatUnknownDiagnosticText,
   isLocalSmokeTarget,
   readJson,
+  smokeTargetIssuesForDeployedGate,
   validateBackendRootIdentity,
   type RootIdentityPayload,
 } from './smoke-helpers'
@@ -163,14 +163,7 @@ export function formatDeployStatusCaughtError(error: unknown) {
 }
 
 export function deployStatusTargetIssues(baseUrl: string, localTarget: boolean) {
-  const issues = deployedSmokeTargetIssues(baseUrl)
-  if (!localTarget) return issues
-  return issues.filter(
-    (issue) =>
-      issue.includes('ต้องเป็น URL ที่ถูกต้อง') ||
-      issue.includes('credential/userinfo') ||
-      issue.includes('path/query/hash'),
-  )
+  return smokeTargetIssuesForDeployedGate(baseUrl, localTarget)
 }
 
 function buildDeployStatusFailurePayload({

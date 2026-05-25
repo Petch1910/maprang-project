@@ -9,6 +9,7 @@ import {
   formatUnknownDiagnosticText,
   formatPayload,
   smokeApiBaseUrl,
+  smokeTargetIssuesForDeployedGate,
   smokeTargetIsLocal,
   tryParseJson,
   validateBackendRootIdentity,
@@ -43,6 +44,17 @@ describe('smoke helpers', () => {
       'path/query/hash',
     )
     expect(deployedSmokeTargetIssues('not-a-url').join('\n')).toContain('URL')
+  })
+
+  test('keeps local smoke targets usable while rejecting local userinfo or paths', () => {
+    expect(smokeTargetIssuesForDeployedGate('http://127.0.0.1:3000', true)).toEqual([])
+    expect(smokeTargetIssuesForDeployedGate('http://127.0.0.1:3000/api', true).join('\n')).toContain(
+      'path/query/hash',
+    )
+    expect(smokeTargetIssuesForDeployedGate('http://smoke-user:smoke-pass@127.0.0.1:3000', true).join('\n')).toContain(
+      'credential/userinfo',
+    )
+    expect(smokeTargetIssuesForDeployedGate('http://api.example.com', false).join('\n')).toContain('https')
   })
 
   test('prefers explicit smoke auth values and keeps admin key separate', () => {

@@ -173,6 +173,27 @@ describe('api smoke helpers', () => {
     expect(typeof runApiSmoke).toBe('function')
   })
 
+  test('API smoke rejects unsafe target URLs before network work', async () => {
+    const lines: string[] = []
+    const warnings: string[] = []
+    const exitCode = await runApiSmoke({
+      argv: ['bun', 'scripts/api-smoke.ts', '--require-admin'],
+      apiBaseUrl: 'https://smoke-user:smoke-pass@api.example.com/v1',
+      writeLine: (line) => lines.push(line),
+      writeWarn: (line) => warnings.push(line),
+    })
+
+    const output = lines.join('\n')
+    const summary = JSON.parse(lines.at(-1) ?? '{}')
+    expect(exitCode).toBe(1)
+    expect(output).toContain('credential/userinfo')
+    expect(output).toContain('path/query/hash')
+    expect(output).not.toContain('smoke-pass')
+    expect(summary.apiBaseUrl).toBe('https://[REDACTED_USERINFO]@api.example.com/v1')
+    expect(summary.fail).toBe(1)
+    expect(warnings).toEqual([])
+  })
+
   test('builds API smoke summary counts for automation', () => {
     const results: ApiSmokeResult[] = [
       { name: 'health', status: 'pass', detail: 'ok' },

@@ -1113,7 +1113,7 @@ const checks: Check[] = [
           'DeployStatusRunnerOptions',
           'validateBackendRootIdentity',
           'deployStatusTargetIssues',
-          'deployedSmokeTargetIssues',
+          'smokeTargetIssuesForDeployedGate',
           'formatSmokeTargetDiagnosticText',
           'formatUnknownDiagnosticText',
           'readRootIdentity',
@@ -1511,6 +1511,7 @@ const checks: Check[] = [
           'formats object-shaped API smoke errors without stringifying raw objects',
           'parses API smoke stream events with Thai diagnostics',
           'imports the API smoke runner without executing the smoke flow',
+          'API smoke rejects unsafe target URLs before network work',
           'builds API smoke summary counts for automation',
         ],
         'scripts/api-smoke-helpers.test.ts',
@@ -1523,6 +1524,8 @@ const checks: Check[] = [
           'assertMachineReadableErrorCode(payload',
           'parseApiSmokeStreamEvents<StreamSmokeEvent>(raw, path)',
           'ApiSmokeRunnerOptions',
+          'smokeTargetIssuesForDeployedGate',
+          'formatSmokeTargetDiagnosticText',
           'buildApiSmokeSummary',
           'runApiSmoke',
           'if (import.meta.main) process.exit(await runApiSmoke())',
@@ -1776,12 +1779,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.test.ts'),
-        ['defaults to local backend', 'http://0.0.0.0:3000', 'http://[::1]:3000/health', 'does not impersonate a user by default against deployed targets', 'validates deployed smoke targets before strict smoke gates', 'https://smoke-user:smoke-pass@api.example.com', 'path/query/hash', 'formats unknown smoke diagnostics without stringifying raw objects', 'validates backend root identity payloads'],
+        ['defaults to local backend', 'http://0.0.0.0:3000', 'http://[::1]:3000/health', 'does not impersonate a user by default against deployed targets', 'validates deployed smoke targets before strict smoke gates', 'keeps local smoke targets usable while rejecting local userinfo or paths', 'https://smoke-user:smoke-pass@api.example.com', 'path/query/hash', 'formats unknown smoke diagnostics without stringifying raw objects', 'validates backend root identity payloads'],
         'scripts/smoke-helpers.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.ts'),
-        ['validateBackendRootIdentity', 'deployedSmokeTargetIssues', 'formatSmokeTargetDiagnosticText', 'formatSmokeTargetPathDiagnosticText', 'formatUnknownDiagnosticText', 'maprang-backend', '0.0.0.0', '[::1]', 'credential/userinfo', 'path/query/hash'],
+        ['validateBackendRootIdentity', 'deployedSmokeTargetIssues', 'smokeTargetIssuesForDeployedGate', 'formatSmokeTargetDiagnosticText', 'formatSmokeTargetPathDiagnosticText', 'formatUnknownDiagnosticText', 'maprang-backend', '0.0.0.0', '[::1]', 'credential/userinfo', 'path/query/hash'],
         'scripts/smoke-helpers.ts',
       )
       requireIncludes(
