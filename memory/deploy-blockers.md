@@ -53,8 +53,8 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง local/loopback deploy guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
-- backend test suite ฝั่ง local ผ่านแล้ว: 173 pass, 0 fail, 601 expect calls.
+- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง release handoff URL guards, production/staging CORS origin path/query/hash guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
+- backend test suite ฝั่ง local ผ่านแล้ว: 175 pass, 0 fail, 606 expect calls.
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว
 - Desktop/mobile e2e smoke ผ่านแล้ว
