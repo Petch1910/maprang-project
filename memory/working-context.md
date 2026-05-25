@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after the direct frontend audit alias wiring. `bun run qa:repo` is green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Root package scripts now include direct `frontend:static:audit` and `frontend:route:audit` aliases in addition to their test aliases. Predeploy locks both aliases so agents can run frontend static and route audits without remembering direct script paths.
 - 2026-05-25: Full deterministic repo QA passed after route preload computed-key and API fetch concatenation hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: API route audit now recognizes direct `fetch(API_BASE_URL + path)` string concatenation. Literal paths, route-map paths, and dynamic `/:id` concatenations are checked against backend routes while the internal generic `fetch(API_BASE_URL + path)` helper remains ignored.
