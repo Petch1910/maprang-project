@@ -147,6 +147,39 @@ describe('api route audit', () => {
     expect(calls.map((call) => call.key)).toEqual(['PATCH /me/content-settings', 'POST /chat/stream'])
   })
 
+  test('collects frontend API helper route and method maps', () => {
+    const calls = collectFrontendApiCallsFromSource(
+      'apps/frontend/src/lib/api.ts',
+      `
+        const apiRoutes = {
+          usage: '/me/usage',
+          contentSettings: '/me/content-settings',
+          chatStream: '/chat/stream',
+        } as const
+        const apiMethods = {
+          patch: 'PATCH',
+          post: 'POST',
+        } as const
+
+        export function loadUsage() {
+          return requestJson(apiRoutes.usage)
+        }
+        export function saveContent() {
+          return requestJson(apiRoutes['contentSettings'], { method: apiMethods.patch, body: '{}' })
+        }
+        export function streamChat() {
+          return fetch(\`\${API_BASE_URL}\${apiRoutes.chatStream}\`, { method: apiMethods.post })
+        }
+      `,
+    )
+
+    expect(calls.map((call) => call.key)).toEqual([
+      'GET /me/usage',
+      'PATCH /me/content-settings',
+      'POST /chat/stream',
+    ])
+  })
+
   test('reports frontend API helper calls that do not match backend routes', () => {
     const calls = collectFrontendApiCallsFromSource(
       'apps/frontend/src/lib/api.ts',

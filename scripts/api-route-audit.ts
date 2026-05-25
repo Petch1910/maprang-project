@@ -368,6 +368,18 @@ function literalStringValue(expression: ts.Expression, stringConstants = new Map
   const unwrapped = unwrapExpression(expression)
   if (ts.isStringLiteral(unwrapped) || ts.isNoSubstitutionTemplateLiteral(unwrapped)) return unwrapped.text
   if (ts.isIdentifier(unwrapped)) return stringConstants.get(unwrapped.text) ?? null
+  if (ts.isPropertyAccessExpression(unwrapped)) return stringConstants.get(unwrapped.getText()) ?? null
+  if (
+    ts.isElementAccessExpression(unwrapped) &&
+    (ts.isStringLiteral(unwrapped.argumentExpression) || ts.isNoSubstitutionTemplateLiteral(unwrapped.argumentExpression))
+  ) {
+    return stringConstants.get(`${unwrapped.expression.getText()}.${unwrapped.argumentExpression.text}`) ?? null
+  }
+  return null
+}
+
+function propertyNameText(name: ts.PropertyName) {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) return name.text
   return null
 }
 
@@ -379,6 +391,15 @@ function collectTopLevelStringConstants(sourceFile: ts.SourceFile) {
       if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue
       const value = literalStringValue(declaration.initializer, constants)
       if (value) constants.set(declaration.name.text, value)
+      const initializer = unwrapExpression(declaration.initializer)
+      if (!ts.isObjectLiteralExpression(initializer)) continue
+      for (const property of initializer.properties) {
+        if (!ts.isPropertyAssignment(property)) continue
+        const propertyName = propertyNameText(property.name)
+        if (!propertyName) continue
+        const propertyValue = literalStringValue(property.initializer, constants)
+        if (propertyValue) constants.set(`${declaration.name.text}.${propertyName}`, propertyValue)
+      }
     }
   }
   return constants
