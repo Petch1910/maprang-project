@@ -21,7 +21,7 @@
 - หลังมี staging domains แล้ว ให้รัน `bun run staging:verify` พร้อม `SMOKE_API_BASE_URL` และ `SMOKE_ADMIN_API_KEY`.
 
 guard ใน repo:
-- `DEPLOY_RENDER.md` ระบุ placeholder ของ Render backend/frontend แบบ HTTPS-only และห้ามใช้ localhost, `http://`, wildcard origins, หรือ backend URL ใน `CORS_ORIGINS`; `bun run predeploy:check` คุม wording ชุดนี้ไว้แล้ว
+- `DEPLOY_RENDER.md` ระบุ placeholder ของ Render backend/frontend แบบ HTTPS-only และห้ามใช้ localhost/loopback, `http://`, wildcard origins, หรือ backend URL ใน `CORS_ORIGINS`; `bun run predeploy:check` คุม wording ชุดนี้ไว้แล้ว
 
 ### การยืนยัน live chat provider
 

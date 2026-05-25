@@ -334,7 +334,7 @@ export function jwtRole(value: string | undefined) {
 }
 
 function isLocalHost(hostname: string) {
-  return ['localhost', '127.0.0.1', '::1'].includes(hostname)
+  return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(hostname)
 }
 
 function auditDatabaseUrl(value: string | undefined) {
@@ -411,7 +411,7 @@ function auditCorsOrigins(value: string | undefined) {
         reportedNonHttps = true
       }
       if (isLocalHost(url.hostname) && !reportedLocal) {
-        fail('backend', 'CORS_ORIGINS', 'ห้ามใส่ localhost/127.0.0.1 ใน production')
+        fail('backend', 'CORS_ORIGINS', 'ห้ามใส่ localhost/127.0.0.1/0.0.0.0/::1 ใน production')
         failed = true
         reportedLocal = true
       }
@@ -461,7 +461,7 @@ function auditHttpsNonLocalUrl(value: string | undefined, area: Area, check: str
   try {
     const url = new URL(value!.trim())
     if (url.protocol !== 'https:') fail(area, check, 'production URL ต้องใช้ https')
-    else if (isLocalHost(url.hostname)) fail(area, check, 'production URL ห้ามเป็น localhost')
+    else if (isLocalHost(url.hostname)) fail(area, check, 'production URL ห้ามเป็น localhost/127.0.0.1/0.0.0.0/::1')
     else pass(area, check, 'เป็น https URL จริง')
   } catch {
     fail(area, check, 'ไม่ใช่ URL ที่ถูกต้อง')

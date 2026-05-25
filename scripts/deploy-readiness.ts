@@ -77,7 +77,7 @@ const liveVerificationBlockers = new Set([
 export function isLocalOrigin(origin: string) {
   try {
     const url = new URL(origin)
-    return ['localhost', '127.0.0.1', '::1'].includes(url.hostname)
+    return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname)
   } catch {
     return true
   }
@@ -86,7 +86,7 @@ export function isLocalOrigin(origin: string) {
 export function isUnsafeCorsOrigin(origin: string) {
   try {
     const url = new URL(origin)
-    return url.protocol !== 'https:' || ['localhost', '127.0.0.1', '::1'].includes(url.hostname)
+    return url.protocol !== 'https:' || ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname)
   } catch {
     return true
   }

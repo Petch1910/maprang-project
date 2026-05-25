@@ -512,7 +512,7 @@ const checks: Check[] = [
           'IMAGE_GENERATION_API_KEY',
           'imageGenerationConfigured=true',
           'CORS_ORIGINS=https://<frontend-domain>',
-          'ห้ามใส่ localhost, origin แบบ `http://`, wildcard origins, หรือ backend URL',
+          'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, หรือ backend URL',
           'VITE_API_BASE_URL=https://<backend-domain>',
         ],
         'DEPLOY_RENDER.md',
@@ -579,7 +579,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'rejects local or insecure filled release URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(
@@ -1142,6 +1142,7 @@ const checks: Check[] = [
           'findings: [...findings]',
           'auditIntegerRangeWithRecommendedMin',
           'auditPreferredIntegerMin',
+          'localhost/127.0.0.1/0.0.0.0/::1',
           'formatUnknownDiagnosticText',
           'คำตอบ roleplay ใน production',
         ],
@@ -1154,6 +1155,7 @@ const checks: Check[] = [
           'importable function without exiting',
           'Supabase URL match',
           'formats object-shaped env doctor errors without stringifying raw objects',
+          'fails production env when database or cors uses loopback hosts',
           'fails production env when roleplay reply budget is below baseline',
           'warns when production env uses baseline roleplay reply budget below richer recommendation',
           'ควรตั้งอย่างน้อย 1200 สำหรับคำตอบ roleplay ใน production',
@@ -1756,12 +1758,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.test.ts'),
-        ['defaults to local backend', 'does not impersonate a user by default against deployed targets', 'formats unknown smoke diagnostics without stringifying raw objects', 'validates backend root identity payloads'],
+        ['defaults to local backend', 'http://0.0.0.0:3000', 'http://[::1]:3000/health', 'does not impersonate a user by default against deployed targets', 'formats unknown smoke diagnostics without stringifying raw objects', 'validates backend root identity payloads'],
         'scripts/smoke-helpers.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/smoke-helpers.ts'),
-        ['validateBackendRootIdentity', 'formatUnknownDiagnosticText', 'maprang-backend'],
+        ['validateBackendRootIdentity', 'formatUnknownDiagnosticText', 'maprang-backend', '0.0.0.0', '[::1]'],
         'scripts/smoke-helpers.ts',
       )
       requireIncludes(
@@ -1945,7 +1947,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('DEPLOY_RENDER.md'),
-        ['CORS_ORIGINS=https://<frontend-domain>', 'ห้ามใส่ localhost, origin แบบ `http://`, wildcard origins, หรือ backend URL'],
+        ['CORS_ORIGINS=https://<frontend-domain>', 'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, หรือ backend URL'],
         'DEPLOY_RENDER.md',
       )
       requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin'], 'STAGING_RUNBOOK.md')

@@ -51,7 +51,7 @@ bun -e "const b=new Uint8Array(32);crypto.getRandomValues(b);console.log([...b].
 - `IMAGE_GENERATION_OUTPUT_COMPRESSION`
 - `IMAGE_GENERATION_LIVE_VERIFIED=1` ตั้งเฉพาะหลังการทดสอบสร้างรูปจริงผ่าน
 
-`DATABASE_URL` ต้องเป็น production Postgres URL จริงพร้อม `sslmode=require` ห้ามทิ้งค่าตัวอย่าง `USER:PASSWORD@HOST/DATABASE` ไว้ เพราะ `env:check` จะปฏิเสธค่า credential ตัวอย่าง, database แบบ localhost, และ URL production ที่ไม่มี `sslmode=require`.
+`DATABASE_URL` ต้องเป็น production Postgres URL จริงพร้อม `sslmode=require` ห้ามทิ้งค่าตัวอย่าง `USER:PASSWORD@HOST/DATABASE` ไว้ เพราะ `env:check` จะปฏิเสธค่า credential ตัวอย่าง, database แบบ localhost/loopback, และ URL production ที่ไม่มี `sslmode=require`.
 
 `OPENROUTER_API_KEY` ใช้สำหรับร่างข้อความใน Creator Studio และตอบแชท ต้องเป็น key ของ OpenRouter ที่ขึ้นต้นด้วย `sk-or-` ไม่ใช่ OpenAI key แบบ `sk-proj-`. แค่ key หน้าตาถูกต้องยังไม่พอสำหรับ production readiness: ให้รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับ staging ก่อน แล้วตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` เฉพาะหลัง backend คืนคำตอบจริงจากโมเดลพร้อมบัญชีการใช้โทเคน. การสร้าง avatar จริงเป็นคนละเส้นทางกับ image provider; ถ้าไม่ได้ตั้ง `IMAGE_GENERATION_API_KEY`, Creator Studio ยังร่างเนื้อหาตัวละครภาษาไทยได้ แต่จะระบุว่ารูปเป็นภาพตัวอย่างชั่วคราวของระบบ.
 
@@ -212,7 +212,7 @@ Workflow นี้ยังต้องมี `SMOKE_ADMIN_API_KEY` เพื่
 
 หลังแต่ละ deploy สามารถรัน manual GitHub Actions workflow `Production Smoke` ได้ด้วย.
 ตั้ง repository secrets `SMOKE_API_BASE_URL`, `SMOKE_ADMIN_API_KEY`, และเลือกอย่างใดอย่างหนึ่งระหว่าง `SMOKE_ACCESS_TOKEN` หรือ `SMOKE_USER_ID`.
-`SMOKE_API_BASE_URL` ต้องเป็น backend URL ที่ deploy แล้วแบบ `https://`. Workflow จะปฏิเสธ `http://`, localhost, และ signed-storage secrets ที่ขาด ก่อนมีโอกาสใช้เครดิตผู้ให้บริการ.
+`SMOKE_API_BASE_URL` ต้องเป็น backend URL ที่ deploy แล้วแบบ `https://`. Workflow จะปฏิเสธ `http://`, localhost/loopback เช่น `127.0.0.1`, `0.0.0.0`, `::1`, และ signed-storage secrets ที่ขาด ก่อนมีโอกาสใช้เครดิตผู้ให้บริการ.
 Workflow จะตรวจ admin summary, moderation reports, และ audit logs ผ่าน `SMOKE_ADMIN_API_KEY` ทุกครั้งโดยไม่ใช้เครดิตผู้ให้บริการ.
 เปิด `run_chat` เฉพาะตอนต้องการใช้ provider credit เล็กน้อยเพื่อยืนยัน live AI path. คง `min_token_balance_for_chat` ไว้ที่ `1000` เว้นแต่ smoke model หรือ prompt ต้องการ buffer มากกว่าเดิม.
 เปิดทั้ง `run_chat` และ `run_image` เมื่อต้องการให้ workflow รัน provider gate รวม `api:smoke:live` หลัง strict production readiness checks.

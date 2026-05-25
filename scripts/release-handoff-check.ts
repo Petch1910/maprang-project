@@ -44,6 +44,8 @@ function looksLikeDeployedHttpsUrl(value: string) {
     normalized.startsWith('https://') &&
     !normalized.includes('localhost') &&
     !normalized.includes('127.0.0.1') &&
+    !normalized.includes('0.0.0.0') &&
+    !normalized.includes('[::1]') &&
     !normalized.includes('<') &&
     !normalized.includes('>')
   )
@@ -56,7 +58,7 @@ function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
   }
 
   const corsOrigins = fieldValue(content, 'CORS origins').toLowerCase()
-  if (corsOrigins && (!corsOrigins.includes('https://') || corsOrigins.includes('http://') || corsOrigins.includes('localhost') || corsOrigins.includes('127.0.0.1') || corsOrigins.includes('*'))) {
+  if (corsOrigins && (!corsOrigins.includes('https://') || corsOrigins.includes('http://') || corsOrigins.includes('localhost') || corsOrigins.includes('127.0.0.1') || corsOrigins.includes('0.0.0.0') || corsOrigins.includes('[::1]') || corsOrigins.includes('*'))) {
     findings.push('CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น')
   }
 }

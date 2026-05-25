@@ -85,8 +85,8 @@ function invalidProductionValues() {
         invalid.push('CORS_ORIGINS ต้องเป็น https origin ใน production')
         break
       }
-      if (['localhost', '127.0.0.1', '::1'].includes(url.hostname)) {
-        invalid.push('CORS_ORIGINS ห้ามใส่ localhost/127.0.0.1/::1 ใน production')
+      if (['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname)) {
+        invalid.push('CORS_ORIGINS ห้ามใส่ localhost/127.0.0.1/0.0.0.0/::1 ใน production')
         break
       }
     } catch {
@@ -129,7 +129,7 @@ function invalidProductionValues() {
       if (!['postgres:', 'postgresql:'].includes(databaseUrl.protocol)) {
         invalid.push('DATABASE_URL ต้องเป็น Postgres connection string')
       }
-      if (['localhost', '127.0.0.1', '::1'].includes(databaseUrl.hostname)) {
+      if (['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(databaseUrl.hostname)) {
         invalid.push('DATABASE_URL ห้ามชี้ไป localhost ใน production')
       }
       const user = decodeURIComponent(databaseUrl.username).toLowerCase()

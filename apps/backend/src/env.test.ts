@@ -96,6 +96,18 @@ describe('runtime env validation', () => {
     expect(() => validateRuntimeEnv()).toThrow('ADMIN_API_KEY ต้องยาวอย่างน้อย 32 ตัวอักษร')
   })
 
+  test('rejects production loopback cors origins beyond localhost', () => {
+    setCompleteProductionEnv()
+    process.env.CORS_ORIGINS = 'https://0.0.0.0:5173'
+
+    expect(() => validateRuntimeEnv()).toThrow('0.0.0.0')
+
+    setCompleteProductionEnv()
+    process.env.CORS_ORIGINS = 'https://[::1]:5173'
+
+    expect(() => validateRuntimeEnv()).toThrow('::1')
+  })
+
   test('rejects mismatched Supabase issuer and anon storage key', () => {
     setCompleteProductionEnv()
     process.env.SUPABASE_JWT_ISSUER = 'https://other-project.supabase.co/auth/v1'
@@ -163,6 +175,16 @@ describe('runtime env validation', () => {
     process.env.DATABASE_URL = 'postgresql://maprang:secret@localhost:5432/maprang?sslmode=require'
 
     expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL ห้ามชี้ไป localhost ใน production')
+
+    setCompleteProductionEnv()
+    process.env.DATABASE_URL = 'postgresql://maprang:secret@0.0.0.0:5432/maprang?sslmode=require'
+
+    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL')
+
+    setCompleteProductionEnv()
+    process.env.DATABASE_URL = 'postgresql://maprang:secret@[::1]:5432/maprang?sslmode=require'
+
+    expect(() => validateRuntimeEnv()).toThrow('DATABASE_URL')
 
     setCompleteProductionEnv()
     process.env.DATABASE_URL = 'postgresql://maprang:secret@db.example.net:5432/maprang'

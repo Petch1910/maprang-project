@@ -17,7 +17,12 @@ export function smokeApiBaseUrl(env: SmokeEnv = process.env) {
 }
 
 export function smokeTargetIsLocal(baseUrl: string) {
-  return /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/?$/i.test(baseUrl)
+  try {
+    const host = new URL(baseUrl).hostname.toLowerCase()
+    return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(host)
+  } catch {
+    return false
+  }
 }
 
 export const apiBaseUrl = smokeApiBaseUrl()

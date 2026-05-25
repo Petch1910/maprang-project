@@ -16,6 +16,8 @@ describe('smoke helpers', () => {
     const env = {}
     expect(smokeApiBaseUrl(env)).toBe('http://127.0.0.1:3000')
     expect(smokeTargetIsLocal(smokeApiBaseUrl(env))).toBe(true)
+    expect(smokeTargetIsLocal('http://0.0.0.0:3000')).toBe(true)
+    expect(smokeTargetIsLocal('http://[::1]:3000/health')).toBe(true)
     expect(buildSmokeAuthHeaders(env)).toEqual({ 'x-user-id': 'dev-user' })
   })
 

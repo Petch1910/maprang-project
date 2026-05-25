@@ -102,6 +102,23 @@ describe('release handoff check', () => {
     )
   })
 
+  test('rejects loopback deployed URLs even when they use https', () => {
+    const unsafe = filledHandoff
+      .replace('https://app.maprang.example', 'https://0.0.0.0:5173')
+      .replaceAll('https://api.maprang.example', 'https://[::1]:3000')
+      .replace('CORS origins: https://app.maprang.example', 'CORS origins: https://0.0.0.0:5173')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'URL ใน release handoff ต้องเป็น https deployed URL: Frontend URL',
+        'URL ใน release handoff ต้องเป็น https deployed URL: Backend URL',
+        'URL ใน release handoff ต้องเป็น https deployed URL: Health URL',
+        'URL ใน release handoff ต้องเป็น https deployed URL: Ready URL',
+        'CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น',
+      ]),
+    )
+  })
+
   test('requires live provider verification flags for production handoff', () => {
     const unsafe = filledHandoff
       .replace('- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 1', '- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 0')
