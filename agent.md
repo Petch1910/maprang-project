@@ -213,6 +213,7 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: filled production release handoffs now reject failed or warning `ผล live smoke แชท` and `ผล live smoke รูป` rows; live-provider verification flags alone are not enough.
 - Current addendum 2026-05-25: filled staging/production release handoffs now require admin verification rows for Admin Health, Prompt Inspector, local evals, moderation reports, and admin audit logs to be real rows with pass/ผ่าน results.
 - Current addendum 2026-05-25: filled staging/production release handoffs now require database/migration rows to be real rows and pass, including `bunx prisma migrate deploy` and a concrete Prisma migration folder name.
+- Current addendum 2026-05-25: filled staging/production release handoffs now reject local/sqlite/dev/test database wording and raw `DATABASE_URL`/`postgresql://` values in `Database host/provider`; handoff evidence must describe a deployed managed Postgres provider or host summary.
 - Current addendum 2026-05-25: filled staging/production release handoffs now require production-safe auth/storage evidence: Supabase JWT auth, a Supabase project ref value, Supabase signed avatar storage, and signed URL age `3600`.
 - Current addendum 2026-05-25: release handoff identity rows now must stay real and filled with concrete date, Git commit hash, branch, and responsible owner values.
 - Current addendum 2026-05-25: filled staging/production release handoffs now reject open blockers/manual follow-ups before `go`, placeholder quota-risk text, or missing rollback conditions.

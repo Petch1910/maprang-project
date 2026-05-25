@@ -290,6 +290,11 @@ function validateDeployedMigrationResults(content: string, findings: string[]) {
   const environment = deployedEvidenceEnvironment(content)
   if (!environment) return
 
+  const databaseHostProvider = fieldValue(content, 'Database host/provider')
+  if (databaseHostProvider && !isProductionDatabaseHostProvider(databaseHostProvider)) {
+    findings.push(`${environment} release handoff ต้องระบุ Database host/provider เป็น Postgres ที่ deploy แล้ว โดยไม่ใช้ local DB หรือ raw DATABASE_URL`)
+  }
+
   const command = fieldValue(content, 'คำสั่ง migration')
   if (command && !/\bbunx prisma migrate deploy\b/.test(command)) {
     findings.push(`${environment} release handoff ต้องใช้คำสั่ง migration: bunx prisma migrate deploy`)
@@ -336,6 +341,14 @@ function isNoneLike(value: string) {
 
 function isPlaceholderLike(value: string) {
   return value.includes('<') || value.includes('>') || /\b(placeholder|unknown|todo|tbd|n\/a)\b/i.test(value)
+}
+
+function isProductionDatabaseHostProvider(value: string) {
+  const normalized = value.trim()
+  if (!normalized || isPlaceholderLike(normalized)) return false
+  if (/postgres(?:ql)?:\/\//i.test(normalized)) return false
+  if (/\b(localhost|127\.0\.0\.1|0\.0\.0\.0|::1|local|sqlite|file:|docker|dev database|test database)\b/i.test(normalized)) return false
+  return true
 }
 
 function validateFilledRiskRows(content: string, findings: string[]) {

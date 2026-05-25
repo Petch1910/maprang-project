@@ -36,6 +36,8 @@ bun run release:handoff:check -- --filled
 
 ## ฐานข้อมูลและ migrations
 
+หมายเหตุ: `Database host/provider` ให้ใส่ชื่อ provider หรือ host สรุป เช่น Supabase Postgres, Neon, Render Postgres หรือ managed Postgres เท่านั้น ห้ามวาง raw `DATABASE_URL`, localhost, SQLite, Docker/dev/test database ลงใน handoff.
+
 - Database host/provider:
 - คำสั่ง migration:
 - ผล migration:

@@ -379,6 +379,20 @@ describe('release handoff check', () => {
     )
   })
 
+  test('rejects local or raw database evidence for deployed handoffs', () => {
+    const productionUnsafe = filledHandoff.replace('- Database host/provider: managed postgres', '- Database host/provider: postgresql://db.example.com/app')
+    const stagingUnsafe = filledHandoff
+      .replace('- Environment: production', '- Environment: staging')
+      .replace('- Database host/provider: managed postgres', '- Database host/provider: localhost sqlite dev database')
+
+    expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toContain(
+      'production release handoff ต้องระบุ Database host/provider เป็น Postgres ที่ deploy แล้ว โดยไม่ใช้ local DB หรือ raw DATABASE_URL',
+    )
+    expect(checkReleaseHandoffContent(stagingUnsafe, { requireFilled: true })).toContain(
+      'staging release handoff ต้องระบุ Database host/provider เป็น Postgres ที่ deploy แล้ว โดยไม่ใช้ local DB หรือ raw DATABASE_URL',
+    )
+  })
+
   test('requires migration evidence rows as field rows', () => {
     const stale = filledHandoff
       .replace('- Database host/provider: managed postgres\n', '- DB note: Database host/provider: managed postgres\n')

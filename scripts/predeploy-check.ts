@@ -610,6 +610,7 @@ const checks: Check[] = [
           'validateProductionLiveSmokeResults',
           'validateProductionQaResults',
           'validateStagingQaResults',
+          'isProductionDatabaseHostProvider',
           'validateDeployedMigrationResults',
           'validateDeployedAuthStorageResults',
           'validateFilledRiskRows',
