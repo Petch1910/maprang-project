@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after API route helper constant-map hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: API route audit now resolves frontend API helper route and method maps. Object-literal constants such as `apiRoutes.usage`, `apiRoutes['contentSettings']`, and `apiMethods.patch` are folded into the same static route contract check as literal paths and top-level constants.
 - 2026-05-25: API route audit now resolves frontend API helper HTTP method constants. `requestJson('/path', { method: patchMethod })` and direct `fetch(..., { method: postMethod })` share the same top-level string constant resolver as route paths, so method drift cannot fall back to `GET` silently during static route contract checks.
 - 2026-05-25: Full deterministic repo QA passed after API route constant-resolution hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
