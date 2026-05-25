@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import ts from 'typescript'
 import {
   routeMenuAuditRows,
   routeMenuAuditStatusLabel,
@@ -102,11 +103,45 @@ export function collectStaticNavigationPaths(appContent: string) {
 }
 
 export function collectRoutePreloadPaths(appContent: string) {
-  const block = appContent.match(/const routePreloads[\s\S]*?\n\s*}\n/)?.[0] ?? ''
-  return [...block.matchAll(/(["'])(\/[^"']*)\1\s*:/g)]
-    .map((match) => normalizeStaticPath(match[2]))
-    .filter((path): path is string => Boolean(path))
-    .sort()
+  const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const paths: string[] = []
+
+  function unwrapObjectLiteral(expression: ts.Expression): ts.Expression {
+    let current = expression
+    while (
+      ts.isParenthesizedExpression(current) ||
+      ts.isAsExpression(current) ||
+      ts.isTypeAssertionExpression(current) ||
+      current.kind === ts.SyntaxKind.SatisfiesExpression
+    ) {
+      current = (current as { expression: ts.Expression }).expression
+    }
+    return current
+  }
+
+  function propertyNameText(name: ts.PropertyName) {
+    if (ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) return name.text
+    return null
+  }
+
+  function visit(node: ts.Node) {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'routePreloads' && node.initializer) {
+      const initializer = unwrapObjectLiteral(node.initializer)
+      if (ts.isObjectLiteralExpression(initializer)) {
+        for (const property of initializer.properties) {
+          if (!ts.isPropertyAssignment(property)) continue
+          const rawPath = propertyNameText(property.name)
+          const path = rawPath ? normalizeStaticPath(rawPath) : null
+          if (path) paths.push(path)
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return [...new Set(paths)].sort()
 }
 
 export function findDocumentedRow(rows: MarkdownTableRow[], area: string) {

@@ -4,6 +4,7 @@ import {
   auditRouteMenuDocumentation,
   collectAuditRows,
   collectRouteMenuDocCheckResult,
+  collectRoutePreloadPaths,
   runRouteMenuDocCheck,
 } from './route-menu-doc-check'
 
@@ -65,6 +66,18 @@ describe('route menu doc check', () => {
     })
 
     expect(findings).toEqual([])
+  })
+
+  test('collects route preloads from typed object literals', () => {
+    expect(
+      collectRoutePreloadPaths(`
+        const routePreloads = ({
+          '/': () => import('./Home'),
+          '/chat': () => import('./Chat'),
+          '/admin/health': () => import('./AdminHealth'),
+        } satisfies Record<string, unknown>)
+      `),
+    ).toEqual(['/', '/admin/health', '/chat'])
   })
 
   test('reports missing navigation coverage, empty fields, and weak status labels', () => {

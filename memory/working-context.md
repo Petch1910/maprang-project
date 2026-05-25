@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Route preload parsing is now AST-based in both `frontend-route-audit` and `route-menu:audit`. The guards now handle typed or `satisfies` routePreloads object literals instead of depending on a newline-sensitive regex.
 - 2026-05-25: Predeploy now locks the API audit documentation drift guard. `predeploy:check` requires README and Deployment QA to mention the frontend API helper contract, `apps/frontend/src/lib/api.ts`, `requestJson`, and `fetch(API_BASE_URL...)` alongside backend route coverage.
 - 2026-05-25: README and Deployment QA now document that `bun run api:audit` checks both backend route coverage and the frontend API helper contract in `apps/frontend/src/lib/api.ts`, including `requestJson` and direct `fetch(API_BASE_URL...)` calls.
 - 2026-05-25: API route audit output now reports the frontend helper contract count explicitly. `bun run api:audit` prints both backend route count and frontend API helper count, then finishes with a combined backend/frontend success line.

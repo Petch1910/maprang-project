@@ -1528,6 +1528,7 @@ const checks: Check[] = [
         [
           'collects declared React Router paths',
           'collects route preload paths from App routePreloads',
+          'satisfies Record<string, unknown>',
           'reports static links and navigate calls',
           'reports route preload paths that point to undeclared routes',
           'runs the committed frontend route audit through an importable runner',
@@ -1603,6 +1604,7 @@ const checks: Check[] = [
           'collectFrontendRouteAuditResult',
           'collectRoutePreloadPaths',
           'auditRoutePreloads',
+          'ts.SyntaxKind.SatisfiesExpression',
           'runFrontendRouteAudit',
           'if (import.meta.main) process.exit(await runFrontendRouteAudit())',
         ],
@@ -1612,6 +1614,7 @@ const checks: Check[] = [
         await readRepoFile('scripts/route-menu-doc-check.test.ts'),
         [
           'passes when documented rows, routes, navigation, and preloads align',
+          'collects route preloads from typed object literals',
           'reports missing navigation coverage',
           'reports stale mixed-language copy in route menu documentation',
           'Automated route smoke',
@@ -1623,6 +1626,11 @@ const checks: Check[] = [
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
         ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
+        'scripts/route-menu-doc-check.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/route-menu-doc-check.ts'),
+        ['collectRoutePreloadPaths', 'ts.SyntaxKind.SatisfiesExpression'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(

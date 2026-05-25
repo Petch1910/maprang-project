@@ -101,13 +101,45 @@ export function collectRoutesFromApp(content: string) {
 }
 
 export function collectRoutePreloadPaths(content: string) {
-  const block = content.match(/const routePreloads[\s\S]*?\n\s*}\n/)?.[0] ?? ''
-  return [...block.matchAll(/(["'])(\/[^"']*)\1\s*:/g)]
-    .map((match) => ({
-      path: normalizeStaticPath(match[2]),
-      index: match.index ?? 0,
-    }))
-    .filter((entry): entry is { path: string; index: number } => Boolean(entry.path))
+  const sourceFile = ts.createSourceFile(appFile, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const preloads: Array<{ path: string; index: number }> = []
+
+  function unwrapObjectLiteral(expression: ts.Expression): ts.Expression {
+    let current = expression
+    while (
+      ts.isParenthesizedExpression(current) ||
+      ts.isAsExpression(current) ||
+      ts.isTypeAssertionExpression(current) ||
+      current.kind === ts.SyntaxKind.SatisfiesExpression
+    ) {
+      current = (current as { expression: ts.Expression }).expression
+    }
+    return current
+  }
+
+  function propertyNameText(name: ts.PropertyName) {
+    if (ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) return name.text
+    return null
+  }
+
+  function visit(node: ts.Node) {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'routePreloads' && node.initializer) {
+      const initializer = unwrapObjectLiteral(node.initializer)
+      if (ts.isObjectLiteralExpression(initializer)) {
+        for (const property of initializer.properties) {
+          if (!ts.isPropertyAssignment(property)) continue
+          const rawPath = propertyNameText(property.name)
+          const path = rawPath ? normalizeStaticPath(rawPath) : null
+          if (path) preloads.push({ path, index: property.name.getStart(sourceFile) })
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return preloads
 }
 
 export function auditRoutePreloads(appContent: string, file: string, declaredRoutes: string[]) {

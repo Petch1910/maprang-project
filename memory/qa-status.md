@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 route preload AST audit pass: `bun run frontend:route:audit:test`, `bun run route-menu:audit:test`, direct `bun scripts/frontend-route-audit.ts`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after replacing regex routePreloads parsing with TypeScript AST parsing.
 - 2026-05-25 API audit docs guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands` passed after predeploy began guarding README/Deployment QA wording for the frontend API helper contract.
 - 2026-05-25 API audit docs sync pass: `bun run docs:commands`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after README and Deployment QA were updated to describe backend route coverage plus frontend API helper contract checks.
 - 2026-05-25 API audit output clarity pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after the API audit started printing `ตรวจ frontend API helper: พบ 34 รายการ` and the combined success line for backend routes plus frontend helpers.

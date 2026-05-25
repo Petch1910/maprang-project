@@ -30,11 +30,11 @@ describe('frontend route audit', () => {
   test('collects route preload paths from App routePreloads', () => {
     expect(
       collectRoutePreloadPaths(`
-        const routePreloads = {
+        const routePreloads = ({
           '/': loadHome,
           '/admin/health': loadAdminHealth,
           '/chat': loadChat,
-        }
+        } satisfies Record<string, unknown>)
       `).map((entry) => entry.path),
     ).toEqual(['/', '/admin/health', '/chat'])
   })
@@ -77,7 +77,7 @@ describe('frontend route audit', () => {
         const routePreloads = {
           '/': loadHome,
           '/ghost': loadGhost,
-        }
+        };
         <Routes>
           <Route path="/" element={<Home />} />
         </Routes>
