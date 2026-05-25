@@ -192,13 +192,13 @@ bun run qa:local
 มันยัง audit project memory vault และ runtime knowledge packs เพื่อไม่ให้ long-running context เสีย required files หรือมี secret-shaped values หลุดเข้าไปเงียบ ๆ.
 ด่านตรวจ secrets จะละเว้น untracked local env files สำหรับ development ปกติ แต่จะ reject tracked `.env` หรือ `.env.*` files ก่อน commit/CI.
 
-ถ้าต้องการตรวจเฉพาะ backend API route coverage:
+ถ้าต้องการตรวจเฉพาะ backend API route coverage และ frontend API helper contract:
 
 ```bash
 bun run api:audit
 ```
 
-คำสั่งนี้ยืนยันว่า route ทุกตัวใน `apps/backend/src/*.routes.ts` ถูกนับใน smoke, การตรวจเบราว์เซอร์แบบ e2e, backend tests, live-provider smoke, admin smoke, หรือ manual production gate แล้ว.
+คำสั่งนี้ยืนยันว่า route ทุกตัวใน `apps/backend/index.ts` และ `apps/backend/src/*.routes.ts` ถูกนับใน smoke, การตรวจเบราว์เซอร์แบบ e2e, backend tests, live-provider smoke, admin smoke, หรือ manual production gate แล้ว และตรวจว่า frontend helper ใน `apps/frontend/src/lib/api.ts` ที่เรียก `requestJson` หรือ `fetch(API_BASE_URL...)` ชี้ไปยัง method/path ที่ backend ประกาศไว้จริง.
 
 ถ้าต้องการตรวจ import cycles ใน app และ QA source:
 

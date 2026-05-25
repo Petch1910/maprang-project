@@ -23,13 +23,13 @@ bun run qa:local
 Gate นี้ไม่เรียก live AI provider. มันตรวจ secrets ที่ commit แล้ว, regression ของเส้นทาง secret scan, coverage mapping ของ API route, architecture import cycles, helper tests ของ API smoke, memory/knowledge vault, output ของ local eval, error message ฝั่ง frontend API, bundle/static/route และ route/menu audits, smoke auth, provider guards, smoke doctor blockers, readiness summary, image fallback, validation ของการทดสอบแชทจริง, helper ของ local smoke, command plan ของ e2e smoke ฝั่งเบราว์เซอร์, predeploy wiring, DB-required backend check planning, Supabase signed-storage helpers, deploy status formatting, deploy env doctor helpers, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, runtime flows ของ character/lore ชั่วคราว, และ avatar upload. Local API smoke ยังส่ง `skipImageProvider=true` สำหรับ creator draft checks จึงตรวจ endpoint shape ได้โดยไม่ใช้เครดิตสร้างรูป; การสร้างรูปจริงอยู่ใน `api:smoke:live`, `smoke:image:live`, และ `production:check`.
 Real `.env` และ `.env.*` files ต้องไม่ถูก track. `secrets:check` จะ ignore local untracked env files เพื่อความสะดวกของ developer แต่จะ fail ถ้าไฟล์นั้นถูก commit หรือ tracked.
 
-ถ้าต้องการตรวจ backend API coverage โดยไม่รัน full suite:
+ถ้าต้องการตรวจ backend API coverage และ frontend API helper contract โดยไม่รัน full suite:
 
 ```bash
 bun run api:audit
 ```
 
-`api:audit` อ่าน backend route files และจะ fail ถ้ามี route ที่ยังไม่มี documented automated/manual coverage path. มันตั้งใจแยกจาก `api:smoke`: audit ตอบคำถามว่า “ทุก endpoint ถูกนับใน coverage แล้วหรือยัง?” ส่วน smoke ตอบว่า “runtime paths สำคัญยังทำงานตอนนี้ไหม?”
+`api:audit` อ่าน backend route files และ `apps/frontend/src/lib/api.ts` แล้วจะ fail ถ้ามี backend route ที่ยังไม่มี documented automated/manual coverage path หรือมี frontend helper ที่เรียก `requestJson`/`fetch(API_BASE_URL...)` ไปยัง method/path ที่ backend ไม่ได้ประกาศไว้. มันตั้งใจแยกจาก `api:smoke`: audit ตอบคำถามว่า “ทุก endpoint ถูกนับใน coverage และ frontend เรียก route ที่มีอยู่จริงแล้วหรือยัง?” ส่วน smoke ตอบว่า “runtime paths สำคัญยังทำงานตอนนี้ไหม?”
 
 ถ้าต้องการตรวจ imports ของ app, QA script, seed, และ e2e source ว่ามี circular dependencies หรือไม่:
 

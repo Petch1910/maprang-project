@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: README and Deployment QA now document that `bun run api:audit` checks both backend route coverage and the frontend API helper contract in `apps/frontend/src/lib/api.ts`, including `requestJson` and direct `fetch(API_BASE_URL...)` calls.
 - 2026-05-25: API route audit output now reports the frontend helper contract count explicitly. `bun run api:audit` prints both backend route count and frontend API helper count, then finishes with a combined backend/frontend success line.
 - 2026-05-25: Full deterministic repo QA passed after the page/preload/API contract guard series. `bun run qa:repo` is green with backend 173 tests / 601 expects, API route audit still covering 48 routes, import-cycle audit at 122 files / 290 import edges, local eval at 3 scenarios, route/menu audit at 14 surfaces, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: API route audit now also checks the frontend API helper contract. `collectFrontendApiCallsFromSource` extracts `requestJson` and direct `fetch(API_BASE_URL...)` calls from `apps/frontend/src/lib/api.ts`, and `auditFrontendApiCalls` fails if a frontend helper calls a method/path that no backend route declares.
