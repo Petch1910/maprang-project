@@ -559,13 +559,14 @@ const checks: Check[] = [
           'requiredQaGateSnippets',
           'validateFilledReleaseHandoffUrls',
           'validateProductionVerificationFlags',
+          'validateProductionQaResults',
           'ตรวจเอกสารส่งมอบ release ไม่ผ่าน',
         ],
         'scripts/release-handoff-check.ts',
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'rejects local or insecure filled release URLs', 'requires live provider verification flags for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'rejects local or insecure filled release URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(

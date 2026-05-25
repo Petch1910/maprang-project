@@ -115,6 +115,25 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires production QA gates to pass for production handoff', () => {
+    const unsafe = filledHandoff
+      .replace('- `bun run qa:local`: pass', '- `bun run qa:local`: fail')
+      .replace('- `bun run e2e:smoke`: pass', '- `bun run e2e:smoke`: fail')
+      .replace('- `bun run staging:verify`: pass', '- `bun run staging:verify`: fail')
+      .replace('- `bun run production:check`: pass', '- `bun run production:check`: fail')
+      .replace('- GitHub Production Smoke run: pass', '- GitHub Production Smoke run: fail')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมีผล QA ผ่าน: `bun run qa:local`',
+        'production release handoff ต้องมีผล QA ผ่าน: `bun run e2e:smoke`',
+        'production release handoff ต้องมีผล QA ผ่าน: `bun run staging:verify`',
+        'production release handoff ต้องมีผล QA ผ่าน: `bun run production:check`',
+        'production release handoff ต้องมีผล QA ผ่าน: GitHub Production Smoke run',
+      ]),
+    )
+  })
+
   test('reports missing sections and secret-shaped values', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef'].join('-')
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`

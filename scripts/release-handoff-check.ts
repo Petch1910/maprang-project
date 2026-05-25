@@ -73,6 +73,20 @@ function validateProductionVerificationFlags(content: string, findings: string[]
   }
 }
 
+function isPassed(value: string) {
+  return /^(pass|ผ่าน)\b/i.test(value.trim())
+}
+
+function validateProductionQaResults(content: string, findings: string[]) {
+  const environment = fieldValue(content, 'Environment').toLowerCase()
+  if (!environment.includes('production')) return
+
+  for (const label of ['`bun run qa:local`', '`bun run e2e:smoke`', '`bun run staging:verify`', '`bun run production:check`', 'GitHub Production Smoke run']) {
+    const value = fieldValue(content, label)
+    if (value && !isPassed(value)) findings.push(`production release handoff ต้องมีผล QA ผ่าน: ${label}`)
+  }
+}
+
 export function checkReleaseHandoffContent(content: string, options: { requireFilled?: boolean } = {}) {
   const findings: string[] = []
 
@@ -100,6 +114,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     for (const field of blankFields) findings.push(`บรรทัด ${field.index} ยังว่างอยู่: ${field.line}`)
     validateFilledReleaseHandoffUrls(content, findings)
     validateProductionVerificationFlags(content, findings)
+    validateProductionQaResults(content, findings)
   }
 
   return findings
