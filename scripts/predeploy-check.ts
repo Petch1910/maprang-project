@@ -266,6 +266,8 @@ const checks: Check[] = [
           'ไม่ใช่ localhost/loopback หรือ `http://`',
           '`CORS_ORIGINS` เป็น frontend HTTPS origin จริง',
           'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
+          'combined `api:smoke:live` JSON summary must omit `handoffEvidence`',
+          'positive token/elapsed values',
         ],
         'agent.md',
       )
