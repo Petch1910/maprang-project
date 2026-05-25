@@ -62,7 +62,9 @@ jobs:
       - run: bun run api:smoke:test
       - run: bun run frontend:api:test
       - run: bun run frontend:bundle:test
+      - run: bun run frontend:static:audit
       - run: bun run frontend:static:audit:test
+      - run: bun run frontend:route:audit
       - run: bun run frontend:route:audit:test
       - run: bun run route-menu:audit
       - run: bun run route-menu:audit:test
