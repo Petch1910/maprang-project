@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 import {
   auditFile,
+  auditRoutePreloads,
   collectFrontendRouteAuditResult,
+  collectRoutePreloadPaths,
   collectRoutesFromApp,
   isCoveredByRoute,
   normalizeStaticPath,
@@ -23,6 +25,18 @@ describe('frontend route audit', () => {
     expect(isCoveredByRoute('/chat/abc', routes)).toBe(true)
     expect(isCoveredByRoute('/characters/abc', routes)).toBe(true)
     expect(isCoveredByRoute('/wallet', routes)).toBe(false)
+  })
+
+  test('collects route preload paths from App routePreloads', () => {
+    expect(
+      collectRoutePreloadPaths(`
+        const routePreloads = {
+          '/': loadHome,
+          '/admin/health': loadAdminHealth,
+          '/chat': loadChat,
+        }
+      `).map((entry) => entry.path),
+    ).toEqual(['/', '/admin/health', '/chat'])
   })
 
   test('normalizes static paths without accepting external or protocol-relative URLs', () => {
@@ -54,6 +68,30 @@ describe('frontend route audit', () => {
     expect(findings.map((finding) => finding.message)).toEqual([
       'คำสั่ง navigate ชี้ไปที่ /missing แต่ App.tsx ไม่มี Route ที่ตรงกัน',
       'ค่า to ชี้ไปที่ /ghost แต่ App.tsx ไม่มี Route ที่ตรงกัน',
+    ])
+  })
+
+  test('reports route preload paths that point to undeclared routes', () => {
+    const findings = auditRoutePreloads(
+      `
+        const routePreloads = {
+          '/': loadHome,
+          '/ghost': loadGhost,
+        }
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      `,
+      'apps/frontend/src/App.tsx',
+      ['/'],
+    )
+
+    expect(findings).toEqual([
+      {
+        file: 'apps/frontend/src/App.tsx',
+        line: 4,
+        message: 'routePreloads ชี้ไปที่ /ghost แต่ App.tsx ไม่มี Route ที่ตรงกัน',
+      },
     ])
   })
 

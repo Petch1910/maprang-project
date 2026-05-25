@@ -1493,7 +1493,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-route-audit.test.ts'),
-        ['collects declared React Router paths', 'reports static links and navigate calls', 'runs the committed frontend route audit through an importable runner'],
+        [
+          'collects declared React Router paths',
+          'collects route preload paths from App routePreloads',
+          'reports static links and navigate calls',
+          'reports route preload paths that point to undeclared routes',
+          'runs the committed frontend route audit through an importable runner',
+        ],
         'scripts/frontend-route-audit.test.ts',
       )
       requireIncludes(
@@ -1561,7 +1567,13 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-route-audit.ts'),
-        ['collectFrontendRouteAuditResult', 'runFrontendRouteAudit', 'if (import.meta.main) process.exit(await runFrontendRouteAudit())'],
+        [
+          'collectFrontendRouteAuditResult',
+          'collectRoutePreloadPaths',
+          'auditRoutePreloads',
+          'runFrontendRouteAudit',
+          'if (import.meta.main) process.exit(await runFrontendRouteAudit())',
+        ],
         'scripts/frontend-route-audit.ts',
       )
       requireIncludes(

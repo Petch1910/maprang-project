@@ -36,6 +36,10 @@ export function sourcePosition(sourceFile: ts.SourceFile, node: ts.Node) {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1
 }
 
+export function lineFor(content: string, index: number) {
+  return content.slice(0, index).split(/\r?\n/).length
+}
+
 export function attributeStringValue(attribute: ts.JsxAttribute, sourceFile: ts.SourceFile) {
   const initializer = attribute.initializer
   if (!initializer) return null
@@ -96,6 +100,30 @@ export function collectRoutesFromApp(content: string) {
   return routes
 }
 
+export function collectRoutePreloadPaths(content: string) {
+  const block = content.match(/const routePreloads[\s\S]*?\n\s*}\n/)?.[0] ?? ''
+  return [...block.matchAll(/(["'])(\/[^"']*)\1\s*:/g)]
+    .map((match) => ({
+      path: normalizeStaticPath(match[2]),
+      index: match.index ?? 0,
+    }))
+    .filter((entry): entry is { path: string; index: number } => Boolean(entry.path))
+}
+
+export function auditRoutePreloads(appContent: string, file: string, declaredRoutes: string[]) {
+  const findings: Finding[] = []
+  for (const preload of collectRoutePreloadPaths(appContent)) {
+    if (!isCoveredByRoute(preload.path, declaredRoutes)) {
+      findings.push({
+        file,
+        line: lineFor(appContent, preload.index),
+        message: `routePreloads ชี้ไปที่ ${preload.path} แต่ App.tsx ไม่มี Route ที่ตรงกัน`,
+      })
+    }
+  }
+  return findings
+}
+
 export function auditFile(content: string, file: string, declaredRoutes: string[]) {
   const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const findings: Finding[] = []
@@ -153,6 +181,7 @@ export async function collectFrontendRouteAuditResult(): Promise<FrontendRouteAu
   }
 
   const sourceFiles = await collectSourceFiles(frontendSrc)
+  const appRelativePath = relative(root, appFile).replaceAll('\\', '/')
   const findings = (
     await Promise.all(
       sourceFiles.map(async (file) => {
@@ -161,6 +190,7 @@ export async function collectFrontendRouteAuditResult(): Promise<FrontendRouteAu
       }),
     )
   ).flat()
+  findings.push(...auditRoutePreloads(appContent, appRelativePath, declaredRoutes))
 
   return {
     ok: findings.length === 0,
