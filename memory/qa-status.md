@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 full deterministic repo QA pass after exact package command guards: `bun run qa:repo` passed with docs command audit at 293 references, backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25 exact package script command guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after switching the main package-script QA coverage checks from substring matching to exact command tokens.
 - 2026-05-25 exact workflow core audit guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after extending exact workflow `run:` command checks to security, import-cycle, API, frontend static/route, and route-menu audits in CI and Production Smoke.
 - 2026-05-25 exact workflow run-command guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after adding exact workflow `run:` command checks for direct frontend audit aliases in CI and Production Smoke.

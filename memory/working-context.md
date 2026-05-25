@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after exact package-script command guard hardening. `bun run qa:repo` is green with docs command audit at 293 references, backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Package-script QA coverage checks now use exact command tokens across the main local gate wiring, including `qa:repo`, `qa:local`, secret/vault/eval/frontend/smoke/deploy regression tests, and core direct audits. The old combined substring coverage variable was removed from predeploy wiring.
 - 2026-05-25: Exact workflow `run:` command guards now cover core direct audits in CI and Production Smoke: `security:audit`, `import-cycle:audit`, `api:audit`, `frontend:static:audit`, `frontend:route:audit`, and `route-menu:audit`. Workflow tests now assert exact run lines for both CI and Production Smoke.
 - 2026-05-25: Predeploy now also checks CI and Production Smoke workflow `run:` commands exactly for direct frontend audit aliases. A workflow that keeps only `frontend:static:audit:test` or `frontend:route:audit:test` can no longer satisfy the direct alias requirement by substring.
