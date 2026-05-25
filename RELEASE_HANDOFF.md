@@ -69,6 +69,7 @@ bun run release:handoff:check -- --filled
 - คำสั่ง live smoke แชท:
 - ผล live smoke แชท:
 - ค่า `CHAT_PROVIDER_LIVE_VERIFIED`:
+- หมายเหตุ combined summary: ถ้าใช้ `bun run api:smoke:live`, JSON `handoffEvidence` จะปรากฏเฉพาะเมื่อหลักฐานแชทปกติ แชทสตรีม และรูปครบทุกช่อง พร้อม token/elapsedMs มากกว่า 0; ถ้าไม่มี object นี้ให้ถือว่ายังห้ามคัดหลักฐานแบบรวมลง release handoff.
 - Chat smoke normal chatId:
 - Chat smoke normal tokens:
 - Chat smoke normal walletTransactionId:

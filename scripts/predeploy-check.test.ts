@@ -44,6 +44,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('hasCompleteApiSmokeHandoffEvidence')
     expect(predeploy).toContain('options.handoffEvidence && hasCompleteApiSmokeHandoffEvidence(options.handoffEvidence)')
     expect(predeploy).toContain("'Chat smoke normal tokens': 0")
+    expect(predeploy).toContain('หมายเหตุ combined summary')
+    expect(predeploy).toContain('token/elapsedMs มากกว่า 0')
     expect(predeploy).toContain('formats object-shaped env doctor errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped Supabase storage setup errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped e2e smoke errors without stringifying raw objects')
