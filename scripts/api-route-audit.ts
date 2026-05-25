@@ -266,6 +266,11 @@ export type DiscoveredRoute = {
   file: string
 }
 
+export type WeakCoverageIssue = {
+  route: DiscoveredRoute
+  reasons: string[]
+}
+
 export type FrontendApiCall = {
   key: RouteKey
   file: string
@@ -291,14 +296,15 @@ function isLiveProviderCoverageRoute(route: DiscoveredRoute) {
   return liveProviderRouteKeys.has(route.key)
 }
 
-function isWeakCoverageEntry(route: DiscoveredRoute, entry: RouteCoverage) {
+function coverageWeaknessReasons(route: DiscoveredRoute, entry: RouteCoverage) {
+  const reasons: string[] = []
   const levels = entry.coverage
-  if (levels.length === 0) return true
-  if (entry.note.trim().length === 0) return true
-  if (levels.length === 1 && levels[0] === 'manual-production') return true
-  if (isAdminCoverageRoute(route, entry) && !levels.includes('admin-smoke')) return true
-  if (isLiveProviderCoverageRoute(route) && !levels.includes('live-smoke')) return true
-  return false
+  if (levels.length === 0) reasons.push('ไม่มีระดับ coverage')
+  if (entry.note.trim().length === 0) reasons.push('coverage note ว่าง')
+  if (levels.length === 1 && levels[0] === 'manual-production') reasons.push('มีแค่ manual-production')
+  if (isAdminCoverageRoute(route, entry) && !levels.includes('admin-smoke')) reasons.push('admin route ขาด admin-smoke')
+  if (isLiveProviderCoverageRoute(route) && !levels.includes('live-smoke')) reasons.push('live-provider route ขาด live-smoke')
+  return reasons
 }
 
 export function auditRouteCoverage(discoveredRoutes: DiscoveredRoute[], coverage = routeCoverage) {
@@ -306,16 +312,19 @@ export function auditRouteCoverage(discoveredRoutes: DiscoveredRoute[], coverage
   const coveredKeys = new Set(Object.keys(coverage) as RouteKey[])
   const missingCoverage = discoveredRoutes.filter((route) => !coveredKeys.has(route.key))
   const staleCoverage = [...coveredKeys].filter((key) => !discoveredKeys.has(key))
-  const weakCoverage = discoveredRoutes.filter((route) => {
+  const weakCoverageIssues: WeakCoverageIssue[] = discoveredRoutes.flatMap((route) => {
     const entry = coverage[route.key]
-    if (!entry) return false
-    return isWeakCoverageEntry(route, entry)
+    if (!entry) return []
+    const reasons = coverageWeaknessReasons(route, entry)
+    return reasons.length > 0 ? [{ route, reasons }] : []
   })
+  const weakCoverage = weakCoverageIssues.map((issue) => issue.route)
 
   return {
     missingCoverage,
     staleCoverage,
     weakCoverage,
+    weakCoverageIssues,
     byOwner: summarizeRoutesByOwner(discoveredRoutes, coverage),
   }
 }
@@ -638,7 +647,7 @@ export async function runApiRouteAudit(
 
   if (weakCoverage.length > 0) {
     writeError('ตรวจ API route ไม่ผ่าน: มี route ที่ coverage ยังอ่อนหรือขาด smoke เฉพาะทาง')
-    for (const route of weakCoverage) writeError(`- ${route.key}`)
+    for (const issue of weakCoverageIssues) writeError(`- ${issue.route.key}: ${issue.reasons.join(', ')}`)
   }
 
   if (missingFrontendRoutes.length > 0) {

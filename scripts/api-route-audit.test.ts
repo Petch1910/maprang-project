@@ -127,6 +127,14 @@ describe('api route audit', () => {
       'PATCH /characters/:id',
       'GET /empty-note',
     ])
+    expect(result.weakCoverageIssues.map((issue) => [issue.route.key, issue.reasons])).toEqual([
+      ['GET /ready', ['มีแค่ manual-production']],
+      ['POST /chat', ['live-provider route ขาด live-smoke']],
+      ['POST /creator/ai-draft', ['live-provider route ขาด live-smoke']],
+      ['GET /admin/reports', ['admin route ขาด admin-smoke']],
+      ['PATCH /characters/:id', ['ไม่มีระดับ coverage']],
+      ['GET /empty-note', ['coverage note ว่าง']],
+    ])
   })
 
   test('collects frontend API helper calls with methods and dynamic ids', () => {
