@@ -27,6 +27,22 @@ describe('frontend route audit', () => {
     expect(isCoveredByRoute('/wallet', routes)).toBe(false)
   })
 
+  test('collects declared React Router paths from route constants', () => {
+    const routes = collectRoutesFromApp(`
+      const routePaths = {
+        home: '/',
+        chat: '/chat/:id',
+      } as const;
+
+      <Routes>
+        <Route path={routePaths.home} element={<Home />} />
+        <Route path={routePaths['chat']} element={<Chat />} />
+      </Routes>
+    `)
+
+    expect(routes).toEqual(['/', '/chat/:id'])
+  })
+
   test('collects route preload paths from App routePreloads', () => {
     expect(
       collectRoutePreloadPaths(`
@@ -71,6 +87,41 @@ describe('frontend route audit', () => {
       'คำสั่ง navigate ชี้ไปที่ /ghost-object แต่ App.tsx ไม่มี Route ที่ตรงกัน',
       'ค่า to ชี้ไปที่ /ghost แต่ App.tsx ไม่มี Route ที่ตรงกัน',
     ])
+  })
+
+  test('reports route constants that point to undeclared routes', () => {
+    const findings = auditFile(
+      `
+        const routePaths = {
+          ghostFromJsx: '/ghost-jsx',
+          ghostFromObject: '/ghost-object-literal',
+          ghostFromNavigate: '/ghost-navigate',
+          ghostFromNavigateObject: '/ghost-navigate-object',
+        } as const
+        const navItems = [{ to: routePaths.ghostFromObject }]
+
+        export function Fixture() {
+          return (
+            <>
+              <NavLink to={routePaths.ghostFromJsx}>Ghost constant</NavLink>
+              <button onClick={() => navigate(routePaths.ghostFromNavigate)}>Missing constant</button>
+              <button onClick={() => navigate({ pathname: routePaths['ghostFromNavigateObject'] })}>Missing object</button>
+            </>
+          )
+        }
+      `,
+      'Fixture.tsx',
+      ['/'],
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('/ghost-object-literal'),
+        expect.stringContaining('/ghost-jsx'),
+        expect.stringContaining('/ghost-navigate'),
+        expect.stringContaining('/ghost-navigate-object'),
+      ]),
+    )
   })
 
   test('reports object literal navigation paths that point to undeclared routes', () => {

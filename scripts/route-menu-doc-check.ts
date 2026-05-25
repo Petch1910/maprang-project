@@ -78,12 +78,16 @@ export function isCoveredByRoute(path: string, routes: string[]) {
   return routes.some((route) => routePatternToRegex(route).test(path))
 }
 
-function jsxAttributeStringValue(attribute: ts.JsxAttribute, sourceFile: ts.SourceFile) {
+function jsxAttributeStringValue(
+  attribute: ts.JsxAttribute,
+  sourceFile: ts.SourceFile,
+  stringConstants = new Map<string, string>(),
+) {
   const initializer = attribute.initializer
   if (!initializer) return null
   if (ts.isStringLiteral(initializer)) return initializer.text
-  if (ts.isJsxExpression(initializer) && initializer.expression && ts.isStringLiteral(initializer.expression)) {
-    return initializer.expression.text
+  if (ts.isJsxExpression(initializer) && initializer.expression) {
+    return expressionStringValue(initializer.expression, stringConstants)
   }
   return null
 }
@@ -93,27 +97,80 @@ function propertyNameText(name: ts.PropertyName) {
   return null
 }
 
-function expressionStringValue(expression: ts.Expression) {
-  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) return expression.text
+function unwrapExpression(expression: ts.Expression): ts.Expression {
+  let current = expression
+  while (
+    ts.isParenthesizedExpression(current) ||
+    ts.isAsExpression(current) ||
+    ts.isTypeAssertionExpression(current) ||
+    current.kind === ts.SyntaxKind.SatisfiesExpression
+  ) {
+    current = (current as { expression: ts.Expression }).expression
+  }
+  return current
+}
+
+function expressionStringValue(expression: ts.Expression, stringConstants = new Map<string, string>()) {
+  const unwrapped = unwrapExpression(expression)
+  if (ts.isStringLiteral(unwrapped) || ts.isNoSubstitutionTemplateLiteral(unwrapped)) return unwrapped.text
+  if (ts.isIdentifier(unwrapped)) return stringConstants.get(unwrapped.text) ?? null
+  if (ts.isPropertyAccessExpression(unwrapped)) return stringConstants.get(unwrapped.getText()) ?? null
+  if (
+    ts.isElementAccessExpression(unwrapped) &&
+    (ts.isStringLiteral(unwrapped.argumentExpression) || ts.isNoSubstitutionTemplateLiteral(unwrapped.argumentExpression))
+  ) {
+    return stringConstants.get(`${unwrapped.expression.getText()}.${unwrapped.argumentExpression.text}`) ?? null
+  }
   return null
 }
 
-function objectLiteralStringProperty(expression: ts.Expression, propertyName: string) {
-  if (!ts.isObjectLiteralExpression(expression)) return null
-  const property = expression.properties.find(
+function objectLiteralStringProperty(
+  expression: ts.Expression,
+  propertyName: string,
+  stringConstants = new Map<string, string>(),
+) {
+  const unwrapped = unwrapExpression(expression)
+  if (!ts.isObjectLiteralExpression(unwrapped)) return null
+  const property = unwrapped.properties.find(
     (item): item is ts.PropertyAssignment =>
       ts.isPropertyAssignment(item) && propertyNameText(item.name) === propertyName,
   )
-  return property ? expressionStringValue(property.initializer) : null
+  return property ? expressionStringValue(property.initializer, stringConstants) : null
 }
 
-function navigatePathValue(expression: ts.Expression) {
-  return expressionStringValue(expression) ?? objectLiteralStringProperty(expression, 'pathname')
+function navigatePathValue(expression: ts.Expression, stringConstants = new Map<string, string>()) {
+  return (
+    expressionStringValue(expression, stringConstants) ??
+    objectLiteralStringProperty(expression, 'pathname', stringConstants)
+  )
+}
+
+function collectTopLevelStringConstants(sourceFile: ts.SourceFile) {
+  const constants = new Map<string, string>()
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) continue
+    for (const declaration of statement.declarationList.declarations) {
+      if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue
+      const value = expressionStringValue(declaration.initializer, constants)
+      if (value) constants.set(declaration.name.text, value)
+      const initializer = unwrapExpression(declaration.initializer)
+      if (!ts.isObjectLiteralExpression(initializer)) continue
+      for (const property of initializer.properties) {
+        if (!ts.isPropertyAssignment(property)) continue
+        const propertyName = propertyNameText(property.name)
+        if (!propertyName) continue
+        const propertyValue = expressionStringValue(property.initializer, constants)
+        if (propertyValue) constants.set(`${declaration.name.text}.${propertyName}`, propertyValue)
+      }
+    }
+  }
+  return constants
 }
 
 export function collectDeclaredRoutes(appContent: string) {
   const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const routes: string[] = []
+  const stringConstants = collectTopLevelStringConstants(sourceFile)
 
   function visit(node: ts.Node) {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
@@ -123,7 +180,7 @@ export function collectDeclaredRoutes(appContent: string) {
           (attribute): attribute is ts.JsxAttribute =>
             ts.isJsxAttribute(attribute) && attribute.name.getText(sourceFile) === 'path',
         )
-        const path = pathAttribute ? jsxAttributeStringValue(pathAttribute, sourceFile) : null
+        const path = pathAttribute ? jsxAttributeStringValue(pathAttribute, sourceFile, stringConstants) : null
         if (path) routes.push(path)
       }
     }
@@ -138,6 +195,7 @@ export function collectDeclaredRoutes(appContent: string) {
 export function collectStaticNavigationPaths(appContent: string) {
   const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const paths = new Set<string>()
+  const stringConstants = collectTopLevelStringConstants(sourceFile)
 
   function addPath(value: string | null) {
     const path = value ? normalizeStaticPath(value) : null
@@ -147,14 +205,14 @@ export function collectStaticNavigationPaths(appContent: string) {
   function visit(node: ts.Node) {
     if (ts.isPropertyAssignment(node)) {
       const name = propertyNameText(node.name)
-      if (name === 'to' || name === 'href') addPath(expressionStringValue(node.initializer))
+      if (name === 'to' || name === 'href') addPath(expressionStringValue(node.initializer, stringConstants))
     }
 
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       for (const attribute of node.attributes.properties) {
         if (!ts.isJsxAttribute(attribute)) continue
         const name = attribute.name.getText(sourceFile)
-        if (name === 'to' || name === 'href') addPath(jsxAttributeStringValue(attribute, sourceFile))
+        if (name === 'to' || name === 'href') addPath(jsxAttributeStringValue(attribute, sourceFile, stringConstants))
       }
     }
 
@@ -164,7 +222,7 @@ export function collectStaticNavigationPaths(appContent: string) {
       node.expression.text === 'navigate' &&
       node.arguments[0]
     ) {
-      addPath(navigatePathValue(node.arguments[0]))
+      addPath(navigatePathValue(node.arguments[0], stringConstants))
     }
 
     ts.forEachChild(node, visit)

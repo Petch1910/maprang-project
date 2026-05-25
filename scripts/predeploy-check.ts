@@ -1542,9 +1542,11 @@ const checks: Check[] = [
         await readRepoFile('scripts/frontend-route-audit.test.ts'),
         [
           'collects declared React Router paths',
+          'collects declared React Router paths from route constants',
           'collects route preload paths from App routePreloads',
           'satisfies Record<string, unknown>',
           'reports static links and navigate calls',
+          'reports route constants that point to undeclared routes',
           'reports object literal navigation paths',
           'reports route preload paths that point to undeclared routes',
           'runs the committed frontend route audit through an importable runner',
@@ -1558,6 +1560,7 @@ const checks: Check[] = [
           'expressionStringValue',
           'objectLiteralStringProperty',
           'navigatePathValue',
+          'collectTopLevelStringConstants',
           'pathname',
           'ค่า ${name} ใน object',
           'ts.isPropertyAssignment',
@@ -1646,8 +1649,9 @@ const checks: Check[] = [
           'collects route preloads from typed object literals',
           'collects declared routes from JSX with multiline attributes',
           'collects static navigation paths from object literals and JSX attributes',
-          "href: '/wallet'",
-          "navigate({ pathname: '/admin/health' })",
+          'routePaths.chat',
+          "routePaths['wallet']",
+          'navigate({ pathname: routePaths.health })',
           'reports missing navigation coverage',
           'reports stale mixed-language copy in route menu documentation',
           'Automated route smoke',
@@ -1663,7 +1667,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['collectDeclaredRoutes', 'collectStaticNavigationPaths', 'jsxAttributeStringValue', 'propertyNameText', 'navigatePathValue', 'collectRoutePreloadPaths', 'ts.SyntaxKind.SatisfiesExpression'],
+        ['collectDeclaredRoutes', 'collectStaticNavigationPaths', 'jsxAttributeStringValue', 'propertyNameText', 'navigatePathValue', 'collectTopLevelStringConstants', 'collectRoutePreloadPaths', 'ts.SyntaxKind.SatisfiesExpression'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(

@@ -85,10 +85,13 @@ describe('route menu doc check', () => {
   test('collects declared routes from JSX with multiline attributes', () => {
     expect(
       collectDeclaredRoutes(`
+        const routePaths = {
+          chat: '/chat/:chatId?',
+        } as const;
         <Routes>
           <Route
             element={<Chat />}
-            path="/chat/:chatId?"
+            path={routePaths.chat}
           />
           <Route element={<NotFound />} path="*" />
         </Routes>
@@ -99,10 +102,17 @@ describe('route menu doc check', () => {
   test('collects static navigation paths from object literals and JSX attributes', () => {
     expect(
       collectStaticNavigationPaths(`
-        const navItems = [{ to: '/' }, { to: '/chat' }, { href: '/wallet' }];
-        <NavLink to={'/events'}>Events</NavLink>
+        const routePaths = {
+          home: '/',
+          chat: '/chat',
+          wallet: '/wallet',
+          events: '/events',
+          health: '/admin/health',
+        } as const
+        const navItems = [{ to: routePaths.home }, { to: routePaths.chat }, { href: routePaths['wallet'] }];
+        <NavLink to={routePaths.events}>Events</NavLink>
         <a href="/profile?tab=persona">Profile</a>
-        <button onClick={() => navigate({ pathname: '/admin/health' })}>Health</button>
+        <button onClick={() => navigate({ pathname: routePaths.health })}>Health</button>
       `),
     ).toEqual(['/', '/admin/health', '/chat', '/events', '/profile', '/wallet'])
   })
