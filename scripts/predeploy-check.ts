@@ -1056,7 +1056,12 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployBlockers,
-        ['handoffEvidence', 'Chat smoke normal walletTransactionId', 'Image smoke elapsedMs'],
+        [
+          'handoffEvidence',
+          'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
+          'Image smoke elapsedMs',
+        ],
         'memory/deploy-blockers.md',
       )
       requireIncludes(
@@ -1068,6 +1073,7 @@ const checks: Check[] = [
           'handoffEvidence',
           'RELEASE_HANDOFF.md',
           'Chat smoke normal walletTransactionId',
+          'Chat smoke stream walletTransactionId',
           'Image smoke elapsedMs',
           'อย่าชี้ `qa:local`',
         ],

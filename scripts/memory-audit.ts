@@ -117,6 +117,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'live-smoke',
       'handoffEvidence',
       'Chat smoke normal walletTransactionId',
+      'Chat smoke stream walletTransactionId',
       'Image smoke elapsedMs',
     ],
     'memory/deploy-blockers.md',
