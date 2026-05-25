@@ -21,7 +21,7 @@
 - หลังมี staging domains แล้ว ให้รัน `bun run staging:verify` พร้อม `SMOKE_API_BASE_URL` และ `SMOKE_ADMIN_API_KEY`.
 
 guard ใน repo:
-- `DEPLOY_RENDER.md` ระบุ placeholder ของ Render backend/frontend แบบ HTTPS-only และห้ามใช้ localhost/loopback, `http://`, wildcard origins, path/query/hash, หรือ backend URL ใน `CORS_ORIGINS`; `bun run predeploy:check` คุม wording ชุดนี้ไว้แล้ว
+- `DEPLOY_RENDER.md` ระบุ placeholder ของ Render backend/frontend แบบ HTTPS-only และห้ามใช้ localhost/loopback, `http://`, wildcard origins, credential/userinfo, path/query/hash, หรือ backend URL ใน `CORS_ORIGINS`; `bun run predeploy:check` คุม wording ชุดนี้ไว้แล้ว
 
 ### การยืนยัน live chat provider
 
@@ -53,8 +53,8 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง release/deploy credential URL guards, production/staging CORS origin path/query/hash guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
-- backend test suite ฝั่ง local ผ่านแล้ว: 176 pass, 0 fail, 608 expect calls.
+- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-25 หลัง release/deploy credential URL guards, production/staging CORS origin credential/path/query/hash guards, frontend env/Admin Health URL guard, diagnostic wording hardening, และ full deterministic QA refresh; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
+- backend test suite ฝั่ง local ผ่านแล้ว: 177 pass, 0 fail, 609 expect calls.
 - Local API smoke ผ่านแล้ว
 - Frontend build และ bundle budget ผ่านแล้ว
 - Desktop/mobile e2e smoke ผ่านแล้ว

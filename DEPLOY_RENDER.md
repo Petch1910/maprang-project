@@ -62,7 +62,7 @@ SUPABASE_SIGNED_URL_EXPIRES_IN=3600
 
 อย่าตั้ง `PORT` เอง เว้นแต่ Render ขอให้ตั้ง เพราะ Render inject `PORT` ให้แล้ว.
 
-`CORS_ORIGINS` ต้องเป็น frontend HTTPS origin ที่ deploy แล้วเท่านั้น ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, path/query/hash, หรือ backend URL ใน staging หรือ production.
+`CORS_ORIGINS` ต้องเป็น frontend HTTPS origin ที่ deploy แล้วเท่านั้น ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, credential/userinfo, path/query/hash, หรือ backend URL ใน staging หรือ production.
 
 หลัง backend deploy แล้ว ให้รัน migrations จาก terminal ที่โหลด production env แล้ว หรือจาก Render shell:
 

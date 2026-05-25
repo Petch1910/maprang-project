@@ -27,7 +27,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 สถานะล่าสุดที่ต้องจำ:
 
 - Local QA พร้อมใช้งาน
-- Backend tests ล่าสุดผ่าน 176 tests / 608 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-25 หลัง release/deploy credential URL guards, production/staging CORS origin path/query/hash guards, frontend env/Admin Health URL guard, frontend build, และ bundle budget
+- Backend tests ล่าสุดผ่าน 177 tests / 609 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-25 หลัง release/deploy credential URL guards, production/staging CORS origin credential/path/query/hash guards, frontend env/Admin Health URL guard, frontend build, และ bundle budget
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile
 - โปรดักชันยังถูกกั้น เพราะต้องมีโดเมนสเตจจิง/ระบบหลังบ้าน/หน้าบ้านจริง, CORS จริง, การทดสอบแชทจริง และการทดสอบสร้างรูปจริง
@@ -178,7 +178,7 @@ bun run smoke:image:live
 - `DATABASE_URL` เป็น production/staging Postgres จริง พร้อม `sslmode=require`
 - Backend URL เป็น deployed HTTPS URL จริง ไม่ใช่ localhost/loopback หรือ `http://`
 - Frontend `VITE_API_BASE_URL` ชี้ backend จริง
-- `CORS_ORIGINS` เป็น frontend HTTPS origin จริง ไม่รวม localhost/loopback, `http://`, wildcard, path/query/hash, หรือ backend URL ใน staging/production
+- `CORS_ORIGINS` เป็น frontend HTTPS origin จริง ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash, หรือ backend URL ใน staging/production
 - Supabase project จริงพร้อม bucket `avatars` แบบ private + signed URL
 - `SUPABASE_STORAGE_ACCESS=signed`
 - `CHAT_PROVIDER_LIVE_VERIFIED=1` หลังการทดสอบแชทจริงผ่าน

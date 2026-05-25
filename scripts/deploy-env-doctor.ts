@@ -402,6 +402,7 @@ function auditCorsOrigins(value: string | undefined) {
   let failed = false
   let reportedNonHttps = false
   let reportedLocal = false
+  let reportedCredential = false
   let reportedPath = false
   for (const origin of origins) {
     try {
@@ -415,6 +416,11 @@ function auditCorsOrigins(value: string | undefined) {
         fail('backend', 'CORS_ORIGINS', 'ห้ามใส่ localhost/127.0.0.1/0.0.0.0/::1 ใน production')
         failed = true
         reportedLocal = true
+      }
+      if ((url.username || url.password) && !reportedCredential) {
+        fail('backend', 'CORS_ORIGINS', 'ต้องเป็น origin เท่านั้น ห้ามมี credential/userinfo')
+        failed = true
+        reportedCredential = true
       }
       if ((url.pathname !== '/' || url.search || url.hash) && !reportedPath) {
         fail('backend', 'CORS_ORIGINS', 'ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash')

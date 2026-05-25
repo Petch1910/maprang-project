@@ -22,7 +22,7 @@
 - กรอก `RELEASE_HANDOFF.md` หลัง `production:check` ผ่าน โดยไม่ใส่ secrets หรือ private database URLs.
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 - ใช้ `/admin/health` ไล่ทำ next action ของแต่ละ blocker ก่อนรัน final gate ซ้ำ.
-- ยืนยัน repo-owned gate ล่าสุดด้วย `bun run qa:repo` ก่อนเริ่ม staging/live-provider รอบถัดไป; รอบล่าสุดวันที่ 2026-05-25 ผ่านหลัง release/deploy credential URL guards, production/staging CORS origin path/query/hash guards, frontend env/Admin Health URL guard และ diagnostic wording hardening.
+- ยืนยัน repo-owned gate ล่าสุดด้วย `bun run qa:repo` ก่อนเริ่ม staging/live-provider รอบถัดไป; รอบล่าสุดวันที่ 2026-05-25 ผ่านหลัง release/deploy credential URL guards, production/staging CORS origin credential/path/query/hash guards, frontend env/Admin Health URL guard และ diagnostic wording hardening.
 
 ## คำสั่ง (Commands)
 

@@ -89,6 +89,8 @@ export function isUnsafeCorsOrigin(origin: string) {
     return (
       url.protocol !== 'https:' ||
       ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(url.hostname) ||
+      Boolean(url.username) ||
+      Boolean(url.password) ||
       url.pathname !== '/' ||
       Boolean(url.search) ||
       Boolean(url.hash)
@@ -168,7 +170,7 @@ export function evaluateDeployReadiness(
   if (!health.security?.corsOrigins?.length || health.security.corsOrigins.some(isUnsafeCorsOrigin)) {
     addProductionBlocker(
       'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน',
-      'ตั้ง CORS_ORIGINS เป็น origin หน้าบ้านจริงแบบ https เท่านั้น โดยไม่มี path/query/hash',
+      'ตั้ง CORS_ORIGINS เป็น origin หน้าบ้านจริงแบบ https เท่านั้น โดยไม่มี credential/userinfo หรือ path/query/hash',
     )
   }
   if (!health.knowledge?.structured?.ok) {

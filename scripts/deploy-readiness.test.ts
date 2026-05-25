@@ -273,6 +273,7 @@ describe('deploy readiness evaluation', () => {
     expect(isUnsafeCorsOrigin('https://0.0.0.0:5173')).toBe(true)
     expect(isUnsafeCorsOrigin('https://[::1]:5173')).toBe(true)
     expect(isUnsafeCorsOrigin('*')).toBe(true)
+    expect(isUnsafeCorsOrigin('https://cors-user:cors-pass@app.example.com')).toBe(true)
     expect(isUnsafeCorsOrigin('https://app.example.com/path?from=deploy#top')).toBe(true)
     expect(isUnsafeCorsOrigin('https://app.example.com')).toBe(false)
   })

@@ -280,7 +280,7 @@ bun run staging:check
 SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-key> bun run staging:verify
 ```
 
-`staging:verify` จะพิมพ์ `bun run deploy:status` ก่อน. Deploy status ตรวจ backend root identity ก่อน health จากนั้นปฏิเสธ localhost/loopback backend URLs, local/non-https CORS, CORS origin ที่มี path/query/hash, Supabase signed storage ที่ขาด, `/ready` ที่ไม่ผ่าน, และ admin smoke coverage ที่ขาด. มันตั้งใจปล่อยให้ chat/image live verification flags ยัง pending ได้ เพื่อให้คุณรัน live provider smoke ต่อ แล้วค่อยใช้ `production:check` เป็น go/no-go สุดท้าย.
+`staging:verify` จะพิมพ์ `bun run deploy:status` ก่อน. Deploy status ตรวจ backend root identity ก่อน health จากนั้นปฏิเสธ localhost/loopback backend URLs, local/non-https CORS, CORS origin ที่มี credential/userinfo หรือ path/query/hash, Supabase signed storage ที่ขาด, `/ready` ที่ไม่ผ่าน, และ admin smoke coverage ที่ขาด. มันตั้งใจปล่อยให้ chat/image live verification flags ยัง pending ได้ เพื่อให้คุณรัน live provider smoke ต่อ แล้วค่อยใช้ `production:check` เป็น go/no-go สุดท้าย.
 
 หรือรันแต่ละ check แยกกัน:
 

@@ -89,6 +89,10 @@ function invalidProductionValues() {
         invalid.push('CORS_ORIGINS ห้ามใส่ localhost/127.0.0.1/0.0.0.0/::1 ใน production')
         break
       }
+      if (url.username || url.password) {
+        invalid.push('CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี credential/userinfo ใน production')
+        break
+      }
       if (url.pathname !== '/' || url.search || url.hash) {
         invalid.push('CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash ใน production')
         break

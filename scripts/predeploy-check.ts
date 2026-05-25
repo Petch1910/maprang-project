@@ -262,7 +262,7 @@ const checks: Check[] = [
           'Backend URL เป็น deployed HTTPS URL จริง',
           'ไม่ใช่ localhost/loopback หรือ `http://`',
           '`CORS_ORIGINS` เป็น frontend HTTPS origin จริง',
-          'ไม่รวม localhost/loopback, `http://`, wildcard, path/query/hash',
+          'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
         ],
         'agent.md',
       )
@@ -421,7 +421,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         backendEnv,
-        ['MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production', 'CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash ใน production'],
+        ['MODEL_MAX_OUTPUT_TOKENS ต้องไม่น้อยกว่า 1200 สำหรับคำตอบ roleplay ใน production', 'MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production', 'CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash ใน production', 'CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี credential/userinfo ใน production'],
         'apps/backend/src/env.ts',
       )
       requireIncludes(
@@ -514,7 +514,7 @@ const checks: Check[] = [
           'IMAGE_GENERATION_API_KEY',
           'imageGenerationConfigured=true',
           'CORS_ORIGINS=https://<frontend-domain>',
-          'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, path/query/hash, หรือ backend URL',
+          'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, credential/userinfo, path/query/hash, หรือ backend URL',
           'VITE_API_BASE_URL=https://<backend-domain>',
         ],
         'DEPLOY_RENDER.md',
@@ -1134,7 +1134,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployReadiness,
-        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'url.pathname !== \'/\'', 'Boolean(url.search)', 'Boolean(url.hash)', 'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน', 'โดยไม่มี path/query/hash', 'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน', 'RELEASE_HANDOFF.md'],
+        ['evaluateDeployReadiness', 'buildNextDeploySteps', 'Boolean(url.username)', 'Boolean(url.password)', 'url.pathname !== \'/\'', 'Boolean(url.search)', 'Boolean(url.hash)', 'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน', 'โดยไม่มี credential/userinfo หรือ path/query/hash', 'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน', 'RELEASE_HANDOFF.md'],
         'scripts/deploy-readiness.ts',
       )
       requireIncludes(
@@ -1164,6 +1164,7 @@ const checks: Check[] = [
           'fails production env when database or cors uses loopback hosts or origin paths',
           'fails production env when deployed URLs hide credentials or Supabase paths',
           'ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash',
+          'ต้องเป็น origin เท่านั้น ห้ามมี credential/userinfo',
           'fails production env when roleplay reply budget is below baseline',
           'warns when production env uses baseline roleplay reply budget below richer recommendation',
           'ควรตั้งอย่างน้อย 1200 สำหรับคำตอบ roleplay ใน production',
@@ -1261,7 +1262,7 @@ const checks: Check[] = [
           'Production Must-Pass',
           'สิ่งที่ต้องผ่านก่อน production',
           '`CORS_ORIGINS` ต้องเป็น frontend HTTPS origin จริงเท่านั้น',
-          'ไม่ใช่ localhost/loopback, `http://`, wildcard, path/query, หรือ backend URL',
+          'ไม่ใช่ localhost/loopback, `http://`, wildcard, credential/userinfo, path/query, หรือ backend URL',
           'ABUSE_QA_CHECKLIST.md',
         ],
         'SECURITY_CHECKLIST.md',
@@ -1949,7 +1950,7 @@ const checks: Check[] = [
       )
       requireIncludes(readme, ['local/non-https CORS', 'backend root identity'], 'README.md')
       requireIncludes(deploymentQa, ['local/non-https CORS', 'backend root identity'], 'DEPLOYMENT_QA.md')
-      requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS เป็น local หรือไม่ใช่ HTTPS หรือมี path/query/hash', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
+      requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS เป็น local หรือไม่ใช่ HTTPS หรือมี credential/userinfo หรือ path/query/hash', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
       forbidIncludes(
         await readRepoFile('ROUTE_MENU_AUDIT.md'),
         ['รัน eval', 'prompt-control', 'token budget', 'accordion', ' disabled '],
@@ -1957,10 +1958,10 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('DEPLOY_RENDER.md'),
-        ['CORS_ORIGINS=https://<frontend-domain>', 'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, path/query/hash, หรือ backend URL'],
+        ['CORS_ORIGINS=https://<frontend-domain>', 'ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, credential/userinfo, path/query/hash, หรือ backend URL'],
         'DEPLOY_RENDER.md',
       )
-      requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin', 'path/query/hash, หรือ backend URL'], 'STAGING_RUNBOOK.md')
+      requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin', 'credential/userinfo, path/query/hash, หรือ backend URL'], 'STAGING_RUNBOOK.md')
       requireIncludes(
         e2eSmoke,
         ['ตรวจเส้นทาง/เมนู', 'ตรวจพรอมป์ก่อนยิงโมเดล', 'กฎคุมพรอมป์ของแพลตฟอร์ม', 'ทดสอบคุณภาพพรอมป์และบริบท', 'สรุป blocker production', 'เช็กลิสต์ deploy', 'แถบแชท'],

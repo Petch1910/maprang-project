@@ -115,6 +115,13 @@ describe('runtime env validation', () => {
     expect(() => validateRuntimeEnv()).toThrow('CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี path/query/hash ใน production')
   })
 
+  test('rejects production CORS origins with credentials', () => {
+    setCompleteProductionEnv()
+    process.env.CORS_ORIGINS = 'https://cors-user:cors-pass@app.maprang.example'
+
+    expect(() => validateRuntimeEnv()).toThrow('CORS_ORIGINS ต้องเป็น origin เท่านั้น ห้ามมี credential/userinfo ใน production')
+  })
+
   test('rejects mismatched Supabase issuer and anon storage key', () => {
     setCompleteProductionEnv()
     process.env.SUPABASE_JWT_ISSUER = 'https://other-project.supabase.co/auth/v1'
