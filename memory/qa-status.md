@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 full deterministic repo QA pass after route/menu AST hardening: `bun run qa:repo` passed with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25 route/menu navigation AST pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check`, and `bun run predeploy:check:test` passed after route-menu doc-check started collecting static navigation paths through TypeScript AST.
 - 2026-05-25 route/menu declared-route AST pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after route-menu doc-check started collecting declared React Router paths through TypeScript AST.
 - 2026-05-25 full deterministic repo QA pass after route preload AST hardening: `bun run qa:repo` passed with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
