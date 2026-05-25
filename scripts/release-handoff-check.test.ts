@@ -140,6 +140,16 @@ describe('release handoff check', () => {
     expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toContain('Go / no-go ใน release handoff ต้องเป็น go หลัง QA ผ่านครบก่อนแชร์ handoff')
   })
 
+  test('requires release approval values in filled handoff', () => {
+    const unsafe = filledHandoff
+      .replace('- ผู้อนุมัติ: release lead', '- ผู้อนุมัติ: placeholder')
+      .replace('- หมายเหตุ: ready', '- หมายเหตุ: tbd')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining(['ผู้อนุมัติ ใน release handoff ต้องเป็นชื่อผู้อนุมัติจริง', 'หมายเหตุ ใน release handoff ต้องไม่เป็น placeholder']),
+    )
+  })
+
   test('rejects local or insecure filled release URLs', () => {
     const unsafe = filledHandoff
       .replace('https://app.maprang.example', 'http://localhost:5173')
@@ -646,6 +656,8 @@ describe('release handoff check', () => {
       .replace('- Backend URL: https://api.maprang.example\n', '')
       .replace('- CORS origins: https://app.maprang.example\n', '')
       .replace('- Go / no-go: go\n', '')
+      .replace('- ผู้อนุมัติ: release lead\n', '')
+      .replace('- หมายเหตุ: ready\n', '')
 
     expect(checkReleaseHandoffContent(stale)).toEqual(
       expect.arrayContaining([
@@ -654,6 +666,8 @@ describe('release handoff check', () => {
         'ยังไม่มี field ใน release handoff: Backend URL',
         'ยังไม่มี field ใน release handoff: CORS origins',
         'ยังไม่มี field ใน release handoff: Go / no-go',
+        'ยังไม่มี release decision field ใน release handoff: ผู้อนุมัติ',
+        'ยังไม่มี release decision field ใน release handoff: หมายเหตุ',
       ]),
     )
   })

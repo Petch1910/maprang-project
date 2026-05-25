@@ -36,6 +36,9 @@ const requiredFieldLabels = [
 ]
 const requiredFieldSnippets = requiredFieldLabels.map((label) => `- ${label}:`)
 
+const requiredReleaseDecisionFieldLabels = ['ผู้อนุมัติ', 'หมายเหตุ']
+const requiredReleaseDecisionFieldSnippets = requiredReleaseDecisionFieldLabels
+
 const requiredReleaseIdentityFieldLabels = [
   'วันที่ release',
   'Git commit',
@@ -245,6 +248,14 @@ function validateFilledReleaseDecision(content: string, findings: string[]) {
   if (decision !== 'go') {
     findings.push('Go / no-go ใน release handoff ต้องเป็น go หลัง QA ผ่านครบก่อนแชร์ handoff')
   }
+
+  const approver = fieldValue(content, 'ผู้อนุมัติ')
+  if (approver && (isPlaceholderLike(approver) || isNoneLike(approver))) {
+    findings.push('ผู้อนุมัติ ใน release handoff ต้องเป็นชื่อผู้อนุมัติจริง')
+  }
+
+  const note = fieldValue(content, 'หมายเหตุ')
+  if (note && isPlaceholderLike(note)) findings.push('หมายเหตุ ใน release handoff ต้องไม่เป็น placeholder')
 }
 
 function validateFilledReleaseIdentity(content: string, findings: string[]) {
@@ -483,6 +494,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
 
   for (const label of requiredFieldLabels) {
     if (!hasField(content, label)) findings.push(`ยังไม่มี field ใน release handoff: ${label}`)
+  }
+
+  for (const label of requiredReleaseDecisionFieldLabels) {
+    if (!hasField(content, label)) findings.push(`ยังไม่มี release decision field ใน release handoff: ${label}`)
   }
 
   for (const label of requiredReleaseIdentityFieldLabels) {

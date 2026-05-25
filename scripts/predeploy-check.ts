@@ -584,6 +584,8 @@ const checks: Check[] = [
           'forbiddenCopySnippets',
           'requiredFieldLabels',
           'requiredFieldSnippets',
+          'requiredReleaseDecisionFieldLabels',
+          'requiredReleaseDecisionFieldSnippets',
           'requiredReleaseIdentityFieldLabels',
           'requiredReleaseIdentityFieldSnippets',
           'requiredMigrationFieldLabels',
