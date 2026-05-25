@@ -139,6 +139,24 @@ function formatApiImageSmokeEvidence(payload: CreatorDraftPayload, elapsedMs: nu
   return `Image smoke provider=${provider}, Image smoke source=${source}, Image smoke urlKind=${urlKind}, Image smoke elapsedMs=${elapsedMs}`
 }
 
+function formatApiChatSmokeEvidence({
+  normalChatId,
+  normalTokens,
+  normalDebit,
+  streamChatId,
+  streamTokens,
+  streamDebit,
+}: {
+  normalChatId: string
+  normalTokens: number
+  normalDebit: ApiSmokeWalletTransaction
+  streamChatId: string
+  streamTokens: number
+  streamDebit: ApiSmokeWalletTransaction
+}) {
+  return `Chat smoke normal chatId=${normalChatId}, Chat smoke normal tokens=${normalTokens}, Chat smoke normal walletTransactionId=${normalDebit.id}, Chat smoke stream chatId=${streamChatId}, Chat smoke stream tokens=${streamTokens}, Chat smoke stream walletTransactionId=${streamDebit.id}`
+}
+
 export async function runApiSmoke(options: ApiSmokeRunnerOptions = {}) {
 const argv = options.argv ?? process.argv
 const writeLine = options.writeLine ?? ((line: string) => console.log(line))
@@ -617,7 +635,18 @@ if (live) {
       throw new Error('แชทจริงและสตรีมแชทจริงคืนโทเคนแล้ว แต่ไม่พบรายการ wallet แบบ CHAT_USAGE ครบทั้งสองเส้นทาง')
     }
 
-    return `chatId=${streamResult.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${streamResult.replyChars}, walletDebits=${chatDebits.length}`
+    const [normalDebit, streamDebit] = chatDebits
+    if (!normalDebit || !streamDebit) {
+      throw new Error('พบรายการ wallet แบบ CHAT_USAGE ไม่ครบสำหรับหลักฐาน release handoff')
+    }
+    return `chatId=${streamResult.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${streamResult.replyChars}, walletDebits=${chatDebits.length}, ${formatApiChatSmokeEvidence({
+      normalChatId: liveChatId,
+      normalTokens: liveChatTotalTokens,
+      normalDebit,
+      streamChatId: streamResult.chatId,
+      streamTokens: streamTotalTokens,
+      streamDebit,
+    })}`
   })
 } else {
   record('POST /chat', 'skip', 'ข้ามการเรียกโมเดลจริง; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')

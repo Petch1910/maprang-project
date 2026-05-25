@@ -220,7 +220,7 @@ bun run smoke:chat
 `smoke:chat` และ `api:smoke:live` จะเช็ก `/me/usage` ก่อนเรียกผู้ให้บริการ AI จริง ผู้ใช้ smoke ต้องมี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` เพื่อให้การทดสอบหยุดก่อนใช้เครดิตผู้ให้บริการถ้าบัญชียังเติมไม่พอ `smoke:chat` เหมาะสำหรับ retry/debug เฉพาะทางของแชทปกติและสตรีมแชท และต้องเห็นรายการ wallet แบบ `CHAT_USAGE` แยกครบทั้งสองเส้นทาง ส่วน gate สุดท้ายให้ใช้ `production:check`
 
 ถ้า `smoke:chat` รายงาน `usage.providerFailure` แปลว่าแอป ฐานข้อมูล และเส้นทางแชทติดต่อได้แล้ว แต่ backend ยังเรียกผู้ให้บริการภายนอกไม่สำเร็จ ให้ตรวจการเชื่อมต่อออกไป `https://openrouter.ai`, `OPENROUTER_API_KEY`, เครดิตกับโควตา, สิทธิ์โมเดลที่เลือก, และ log ระบบหลังบ้าน.
-อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่าการทดสอบแชทจริงจะได้คำตอบจริงจากโมเดล, `chatId`, ข้อมูลโทเคนที่ใช้, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน. ใน release handoff ต้องบันทึกหลักฐานทั้ง normal chat และ stream chat ด้วย field `Chat smoke normal chatId`, `Chat smoke normal tokens`, `Chat smoke normal walletTransactionId`, `Chat smoke stream chatId`, `Chat smoke stream tokens`, และ `Chat smoke stream walletTransactionId`.
+อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่าการทดสอบแชทจริงจะได้คำตอบจริงจากโมเดล, `chatId`, ข้อมูลโทเคนที่ใช้, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน. ใน release handoff ต้องบันทึกหลักฐานทั้ง normal chat และ stream chat ด้วย field `Chat smoke normal chatId`, `Chat smoke normal tokens`, `Chat smoke normal walletTransactionId`, `Chat smoke stream chatId`, `Chat smoke stream tokens`, และ `Chat smoke stream walletTransactionId`. เมื่อใช้ `api:smoke:live` ค่าเหล่านี้จะอยู่ในผล `POST /chat/stream live` พร้อมชื่อ field เดียวกับ handoff.
 
 ตรวจว่าตั้งค่าผู้ให้บริการสร้างรูปไว้แล้วโดยยังไม่ใช้เครดิตสร้างรูป:
 
