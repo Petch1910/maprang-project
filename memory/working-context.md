@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Abuse QA checklist guard now locks the full manual security handoff surface. `predeploy:check` requires `Lore/persona injection` and `New-tab links` in `ABUSE_QA_CHECKLIST.md` in addition to SQL-like input, broken access, auth spoofing, prompt control, frontend XSS, admin audit, token/rate limit, and storage/avatar checks.
 - 2026-05-25: Full deterministic repo QA passed after the Profile/Explore route-menu hardening. `bun run qa:repo` is green across secrets, memory/knowledge, docs commands, eval, security/import/API audits, route/menu doc checks, smoke helper/provider/deploy tests, backend checks, and frontend build/bundle; backend DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25: Agent handoff guide now points at the current QA baseline. `agent.md` was refreshed to 2026-05-25 and now names the latest `qa:repo` pass after disabled-control guard plus Profile/Explore/Events route-menu hardening and snippet guards.
 - 2026-05-25: Events Inbox refresh now has a clear loading guard. `/events` disables the refresh button while chat summaries are loading, exposes `aria-disabled`, and shows the Thai title `กำลังโหลดกล่องอีเวนต์ รอให้เสร็จก่อนรีเฟรช`; Route/Menu Audit now documents refresh, search, grouped scene rows, empty-state links back to `/chat` and `/`, and expired/no-chat event behavior.

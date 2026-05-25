@@ -42,6 +42,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('object-shaped error')
     expect(predeploy).toContain('safeErrorTextForClassification')
     expect(predeploy).toContain('frontendErrorSecretPatterns')
+    expect(predeploy).toContain('Lore/persona injection')
+    expect(predeploy).toContain('New-tab links')
     expect(predeploy).toContain('reports raw auth error classifier regressions')
     expect(predeploy).toContain('error\\\\.message\\\\.toLowerCase')
     expect(predeploy).toContain('providerClassificationMessage')
