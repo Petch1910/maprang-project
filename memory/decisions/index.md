@@ -1,6 +1,6 @@
 # บันทึก decision
 
-อัปเดตล่าสุด: 2026-05-21
+อัปเดตล่าสุด: 2026-05-25
 
 - [0001 - ใช้ SocratiCode เป็น local codebase intelligence](./0001-use-socraticode-local-tool.md)
 - [0002 - เพิ่ม Markdown memory vault](./0002-add-markdown-memory-vault.md)
@@ -16,3 +16,4 @@
 - [0012 - เพิ่ม usage และ cost intelligence](./0012-add-usage-cost-intelligence.md)
 - [0013 - เพิ่ม prompt budgeting](./0013-add-prompt-budgeting.md)
 - [0014 - เพิ่ม chat provider failure classification](./0014-add-chat-provider-failure-classification.md)
+- [0015 - ให้ Route/Menu disabled reasons เป็น UI contract](./0015-route-menu-disabled-reasons-contract.md)

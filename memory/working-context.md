@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Decision log now records Route/Menu disabled reasons as a UI contract in `memory/decisions/0015-route-menu-disabled-reasons-contract.md`, so future agents treat disabled/guard copy as product behavior rather than optional documentation.
 - 2026-05-25: Route/Menu Audit now documents concrete My Chats disabled reasons. `/chats` handoff names select-all empty/filter loading titles, bulk archive/restore/delete selection or pending-action titles, busy per-chat menus, and rename/delete dialog titles instead of the older generic "disabled while saving" note.
 - 2026-05-25: Route/Menu Audit now documents concrete disabled reasons for Chat Sidebar and Admin Health. `/chat` sidebar handoff names the selection toolbar title `เลือกแชทอย่างน้อย 1 รายการก่อนจัดการ` and rename save lock, while `/admin/health` names the loading-only refresh lock and keeps Prompt Inspector/Evals links active.
 - 2026-05-25: Project direction memory now matches the latest guard baseline. `memory/project-maprang.md`, `memory/api-backend/current-direction.md`, and `memory/ui-ux/current-direction.md` were refreshed for signed avatar storage wording, route/menu disabled-state guards, Events/Profile/Explore loading behavior, and abuse QA handoff coverage.
