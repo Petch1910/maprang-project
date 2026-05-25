@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 complete API smoke handoff predeploy guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run api:smoke:test`, `bun run memory:audit`, `git diff --check`, and full `bun run qa:repo` passed after `predeploy:check` started locking the complete `handoffEvidence` source/test snippets, including positive token/elapsed checks.
 - 2026-05-25 complete API smoke handoff summary pass: `bun run api:smoke:test`, `bun run predeploy:check`, `bun run memory:audit`, `git diff --check`, and full `bun run qa:repo` passed after `buildApiSmokeSummary` started suppressing partial `handoffEvidence` until all normal chat, stream chat, and image evidence fields are present with positive token/elapsed values.
 - 2026-05-25 API smoke summary complete evidence fixture pass: `bun run api:smoke:test`, `bun run memory:audit`, `bun run predeploy:check`, and full `bun run qa:repo` passed after summary regression started covering normal/stream wallet ids plus image provider/source/urlKind/elapsedMs.
 - 2026-05-25 complete image handoffEvidence guard pass: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands`, and full `bun run qa:repo` passed after staging/production/Render guidance and predeploy/memory guards started requiring image provider/source/urlKind/elapsedMs snippets.
