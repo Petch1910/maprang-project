@@ -142,6 +142,23 @@ describe('release handoff check', () => {
     expect(checkReleaseHandoffContent(commaOnlyCors, { requireFilled: true })).toContain('CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น')
   })
 
+  test('requires release URL origins and exact backend health paths', () => {
+    const unsafe = filledHandoff
+      .replace('Frontend URL: https://app.maprang.example', 'Frontend URL: https://app.maprang.example/app')
+      .replace('Backend URL: https://api.maprang.example', 'Backend URL: https://api.maprang.example?debug=1')
+      .replace('Health URL: https://api.maprang.example/health', 'Health URL: https://api.maprang.example/health?debug=1')
+      .replace('Ready URL: https://api.maprang.example/ready', 'Ready URL: https://other.maprang.example/ready')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'URL ใน release handoff ต้องเป็น deployed origin ไม่มี path/query/hash: Frontend URL',
+        'URL ใน release handoff ต้องเป็น deployed origin ไม่มี path/query/hash: Backend URL',
+        'Health URL ใน release handoff ต้องชี้ backend origin เดียวกับ Backend URL และใช้ path /health โดยไม่มี query/hash',
+        'Ready URL ใน release handoff ต้องชี้ backend origin เดียวกับ Backend URL และใช้ path /ready โดยไม่มี query/hash',
+      ]),
+    )
+  })
+
   test('rejects credential-bearing deployed URLs', () => {
     const unsafe = filledHandoff.replace('Backend URL: https://api.maprang.example', 'Backend URL: https://release-user:release-pass@api.maprang.example')
 

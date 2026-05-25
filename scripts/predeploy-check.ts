@@ -541,6 +541,8 @@ const checks: Check[] = [
           'แม่แบบส่งมอบ release',
           'ห้ามวาง secrets',
           'ลิงก์ที่ deploy แล้ว (Deployed URLs)',
+          'deployed origin ล้วน',
+          '`/health` และ `/ready`',
           'ฐานข้อมูลและ migrations',
           'ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
           'การยืนยันผู้ให้บริการ AI',
@@ -558,7 +560,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         readme,
-        ['RELEASE_HANDOFF.md', 'bun run production:check', 'ก่อนเปิดให้ผู้ใช้จริง', 'regression tests สำหรับ secret-pattern', 'tracked `.env`'],
+        ['RELEASE_HANDOFF.md', 'bun run production:check', 'ก่อนเปิดให้ผู้ใช้จริง', 'Frontend URL` และ `Backend URL` เป็น deployed origin ล้วน', 'Health URL`/`Ready URL` ชี้ backend origin', 'regression tests สำหรับ secret-pattern', 'tracked `.env`'],
         'README.md',
       )
       requireIncludes(deploymentQa, ['bun run secrets:patterns:test', 'secrets/secret-pattern/memory', 'Real `.env`'], 'DEPLOYMENT_QA.md')
@@ -578,6 +580,7 @@ const checks: Check[] = [
           'deployedHttpsUrl',
           'looksLikeFrontendCorsOrigin',
           'isDeployedOrigin',
+          'looksLikeBackendCheckUrl',
           'validateFilledReleaseHandoffUrls',
           'validateProductionVerificationFlags',
           'validateProductionQaResults',
@@ -588,7 +591,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'requires release URL origins and exact backend health paths', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(test, ['requires production e2e smoke targets to match deployed origins', 'E2E_BASE_URL', 'E2E_API_BASE_URL'], 'scripts/release-handoff-check.test.ts')

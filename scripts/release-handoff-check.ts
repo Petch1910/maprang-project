@@ -69,6 +69,18 @@ function looksLikeFrontendCorsOrigin(value: string, backendOrigin = '') {
   return true
 }
 
+function isDeployedOrigin(value: string) {
+  const url = deployedHttpsUrl(value)
+  if (!url) return false
+  return value.trim().replace(/\/$/, '') === url.origin
+}
+
+function looksLikeBackendCheckUrl(value: string, backendOrigin: string, expectedPath: '/health' | '/ready') {
+  const url = deployedHttpsUrl(value)
+  if (!url || !backendOrigin) return false
+  return url.origin === backendOrigin && url.pathname === expectedPath && !url.search && !url.hash
+}
+
 function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
   for (const label of ['Frontend URL', 'Backend URL', 'Health URL', 'Ready URL']) {
     const value = fieldValue(content, label)
@@ -76,6 +88,19 @@ function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
   }
 
   const backendOrigin = deployedHttpsUrl(fieldValue(content, 'Backend URL'))?.origin ?? ''
+  for (const label of ['Frontend URL', 'Backend URL']) {
+    const value = fieldValue(content, label)
+    if (value && !isDeployedOrigin(value)) findings.push(`URL ใน release handoff ต้องเป็น deployed origin ไม่มี path/query/hash: ${label}`)
+  }
+  const healthUrl = fieldValue(content, 'Health URL')
+  if (healthUrl && !looksLikeBackendCheckUrl(healthUrl, backendOrigin, '/health')) {
+    findings.push('Health URL ใน release handoff ต้องชี้ backend origin เดียวกับ Backend URL และใช้ path /health โดยไม่มี query/hash')
+  }
+  const readyUrl = fieldValue(content, 'Ready URL')
+  if (readyUrl && !looksLikeBackendCheckUrl(readyUrl, backendOrigin, '/ready')) {
+    findings.push('Ready URL ใน release handoff ต้องชี้ backend origin เดียวกับ Backend URL และใช้ path /ready โดยไม่มี query/hash')
+  }
+
   const corsOrigins = fieldValue(content, 'CORS origins')
   const origins = corsOrigins
     .split(',')
@@ -110,12 +135,6 @@ function validateProductionQaResults(content: string, findings: string[]) {
     const value = fieldValue(content, label)
     if (value && !isPassed(value)) findings.push(`production release handoff ต้องมีผล QA ผ่าน: ${label}`)
   }
-}
-
-function isDeployedOrigin(value: string) {
-  const url = deployedHttpsUrl(value)
-  if (!url) return false
-  return value.trim().replace(/\/$/, '') === url.origin
 }
 
 function validateProductionE2eTargets(content: string, findings: string[]) {

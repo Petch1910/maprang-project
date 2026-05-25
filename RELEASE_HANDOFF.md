@@ -25,6 +25,8 @@ bun run release:handoff:check -- --filled
 
 ## ลิงก์ที่ deploy แล้ว (Deployed URLs)
 
+หมายเหตุ: `Frontend URL` และ `Backend URL` ต้องเป็น deployed origin ล้วน เช่น `https://app.example.com` และ `https://api.example.com`; `Health URL` กับ `Ready URL` ต้องชี้ backend origin เดียวกันพร้อม path `/health` และ `/ready` โดยไม่มี query/hash.
+
 - Frontend URL:
 - Backend URL:
 - Health URL:
