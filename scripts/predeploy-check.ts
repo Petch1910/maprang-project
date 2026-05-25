@@ -1077,12 +1077,12 @@ const checks: Check[] = [
       requireIncludes(memoryReadme, ['ห้ามเก็บ secrets', 'ขั้นตอนอัปเดต', 'บริบทงานปัจจุบัน', 'ตัวกั้นก่อน deploy'], 'memory/README.md')
       requireIncludes(
         workingContext,
-        ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน', 'Route/Menu Audit', 'needs-staging', 'future', 'API route audit', 'admin-smoke', 'live-smoke', 'manual-production'],
+        ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน', 'Route/Menu Audit', 'needs-staging', 'future', '/path', 'API route audit', 'admin-smoke', 'live-smoke', 'manual-production'],
         'memory/working-context.md',
       )
       requireIncludes(
         deployBlockers,
-        ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'path/query/hash', 'Route/Menu Audit guard', 'STAGING_RUNBOOK.md', '/admin/health', 'API route audit', 'weak coverage', 'admin-smoke', 'live-smoke'],
+        ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'path/query/hash', 'Route/Menu Audit guard', 'STAGING_RUNBOOK.md', '/admin/health', '/path', 'API route audit', 'weak coverage', 'admin-smoke', 'live-smoke'],
         'memory/deploy-blockers.md',
       )
       requireIncludes(
@@ -1140,6 +1140,7 @@ const checks: Check[] = [
           'MemoryAuditResult',
           'Route/Menu Audit guard',
           'route/menu status evidence',
+          '/path',
           'API route coverage quality guard',
           'weak-coverage reason diagnostics',
           'handoffEvidence',

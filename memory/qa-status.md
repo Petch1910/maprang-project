@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 memory future route-path guard pass: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after memory/predeploy guards started requiring the Route/Menu Audit note that `future` rows must not point to `/path` route tokens.
 - 2026-05-25 route/menu future route-path guard pass: `bun run route-menu:audit:test`, `bun run predeploy:check:test`, `bun run route-menu:audit`, and `bun run predeploy:check` passed after Route/Menu Audit started rejecting `future` rows that still point to real `/path` route tokens.
 - 2026-05-25 agent live smoke handoff summary addendum pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run memory:audit`, `bun run secrets:check`, and `git diff --check` passed after `agent.md` and `predeploy:check` started locking the rule that combined `api:smoke:live` omits `handoffEvidence` until all live handoff evidence is complete.
 - 2026-05-25 full live smoke handoff docs sync pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run memory:audit`, `bun run docs:commands`, `bun run release:handoff:check`, `bun run secrets:check`, and `git diff --check` passed after deploy docs, production checklist, deploy blockers, memory/predeploy guards started requiring the full normal-chat, stream-chat, and image handoff field set.
