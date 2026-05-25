@@ -429,7 +429,7 @@ export function AdminHealthPage() {
       </section>
 
       <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <SystemStatus healthStatus={healthStatus} onRefresh={loadHealth} />
+        <SystemStatus healthStatus={healthStatus} isLoading={isLoading} onRefresh={loadHealth} />
 
         <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

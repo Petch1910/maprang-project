@@ -3,6 +3,7 @@ import { frontendEnvWarnings } from '../lib/env'
 
 type SystemStatusProps = {
   healthStatus: HealthStatus | null
+  isLoading?: boolean
   onRefresh: () => Promise<void>
 }
 
@@ -36,7 +37,7 @@ function providerStatusLabel(status?: string) {
   return status ?? 'ยังไม่ทราบ'
 }
 
-export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
+export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: SystemStatusProps) {
   const checks = healthStatus?.checks
   const frontendWarnings = frontendEnvWarnings()
   const chatProvider = healthStatus?.model?.chatProvider
@@ -47,6 +48,7 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
   const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
   const chatStatusLabel = chatProductionReady ? 'ยืนยันแล้ว' : checks?.openRouterConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ยังขาด'
   const imageStatusLabel = imageProductionReady ? 'ยืนยันแล้ว' : imageConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ยังใช้ภาพตัวอย่าง'
+  const refreshDisabledReason = isLoading ? 'กำลังโหลดสถานะระบบ' : ''
 
   return (
     <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
@@ -56,8 +58,12 @@ export function SystemStatus({ healthStatus, onRefresh }: SystemStatusProps) {
           <h2 className="m-0 text-lg font-bold text-slate-900">สถานะ</h2>
         </div>
         <button type="button"
-          className="min-h-8 rounded-full border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700"
+          aria-disabled={isLoading}
+          className="min-h-8 rounded-full border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-55"
+          data-testid="system-status-refresh"
+          disabled={isLoading}
           onClick={onRefresh}
+          title={refreshDisabledReason || 'รีเฟรชสถานะระบบ'}
         >
           รีเฟรช
         </button>
