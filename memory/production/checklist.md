@@ -61,7 +61,7 @@ bun run smoke:chat
 bun run smoke:image:live
 ```
 
-หลัง live smoke ผ่าน ให้คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` โดยเก็บอย่างน้อย `Chat smoke normal walletTransactionId`, `Chat smoke stream walletTransactionId`, `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs`.
+หลัง live smoke ผ่าน ให้คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` โดยเก็บ `Chat smoke normal chatId`, `Chat smoke normal tokens`, `Chat smoke normal walletTransactionId`, `Chat smoke stream chatId`, `Chat smoke stream tokens`, `Chat smoke stream walletTransactionId`, `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs`. ถ้าใช้ `api:smoke:live` แล้ว summary ยังไม่มี `handoffEvidence` ให้ถือว่าหลักฐานรวมยังไม่ครบ.
 
 ## ห้ามทำ
 

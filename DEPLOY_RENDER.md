@@ -111,7 +111,7 @@ SMOKE_API_BASE_URL=https://<backend-domain> SMOKE_ACCESS_TOKEN=<supabase-access-
 SMOKE_API_BASE_URL=https://<backend-domain> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run api:smoke:live
 ```
 
-ก่อน `api:smoke:live` หรือ `smoke:chat` เรียก OpenRouter ระบบจะตรวจว่าผู้ใช้ smoke มี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` ให้เติม token ผู้ใช้นี้ผ่าน admin wallet flow ก่อนรัน live production smoke ถ้าใช้ `SMOKE_USER_ID` แทน Supabase token จริง ต้องตั้ง `SMOKE_ADMIN_API_KEY` ด้วย. หลัง live smoke ผ่าน ให้คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` โดยเก็บ `Chat smoke normal walletTransactionId`, `Chat smoke stream walletTransactionId`, `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs`.
+ก่อน `api:smoke:live` หรือ `smoke:chat` เรียก OpenRouter ระบบจะตรวจว่าผู้ใช้ smoke มี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` ให้เติม token ผู้ใช้นี้ผ่าน admin wallet flow ก่อนรัน live production smoke ถ้าใช้ `SMOKE_USER_ID` แทน Supabase token จริง ต้องตั้ง `SMOKE_ADMIN_API_KEY` ด้วย. หลัง live smoke ผ่าน ให้คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` โดยเก็บ `Chat smoke normal chatId`, `Chat smoke normal tokens`, `Chat smoke normal walletTransactionId`, `Chat smoke stream chatId`, `Chat smoke stream tokens`, `Chat smoke stream walletTransactionId`, `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs`. ถ้าใช้ `api:smoke:live` แล้ว summary ยังไม่มี `handoffEvidence` แปลว่าหลักฐานรวมยังไม่ครบพอสำหรับ handoff.
 
 ผลที่คาดหวัง:
 
