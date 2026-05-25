@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 API smoke summary complete evidence fixture pass: `bun run api:smoke:test`, `bun run memory:audit`, `bun run predeploy:check`, and full `bun run qa:repo` passed after summary regression started covering normal/stream wallet ids plus image provider/source/urlKind/elapsedMs.
 - 2026-05-25 complete image handoffEvidence guard pass: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands`, and full `bun run qa:repo` passed after staging/production/Render guidance and predeploy/memory guards started requiring image provider/source/urlKind/elapsedMs snippets.
 - 2026-05-25 stream handoffEvidence guard pass: `bun run vault:audit:test`, `bun run memory:audit`, `bun run predeploy:check:test`, `bun run predeploy:check`, and full `bun run qa:repo` passed after memory/predeploy guards started requiring `Chat smoke stream walletTransactionId` alongside normal chat and image smoke evidence.
 - 2026-05-25 production checklist handoffEvidence guard pass: `bun run api:smoke:test`, `bun run predeploy:check:test`, `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `git diff --check`, and full `bun run qa:repo` passed after production checklist started telling operators to copy live smoke JSON `handoffEvidence` into `RELEASE_HANDOFF.md` and API smoke summary regression covered empty evidence omission.

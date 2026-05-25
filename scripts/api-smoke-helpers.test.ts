@@ -243,6 +243,10 @@ describe('api smoke helpers', () => {
         requireAdmin: true,
         handoffEvidence: {
           'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+          'Chat smoke stream walletTransactionId': 'wallet-chat-stream-001',
+          'Image smoke provider': 'configured',
+          'Image smoke source': 'ai',
+          'Image smoke urlKind': 'remote-or-upload-url',
           'Image smoke elapsedMs': 250,
         },
       }),
@@ -258,6 +262,10 @@ describe('api smoke helpers', () => {
       fail: 1,
       handoffEvidence: {
         'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+        'Chat smoke stream walletTransactionId': 'wallet-chat-stream-001',
+        'Image smoke provider': 'configured',
+        'Image smoke source': 'ai',
+        'Image smoke urlKind': 'remote-or-upload-url',
         'Image smoke elapsedMs': 250,
       },
     })
