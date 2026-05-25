@@ -73,3 +73,4 @@ guard ใน repo:
 - Relationship contract presets แยกจาก creator presets แล้ว และมี API smoke ครอบไว้
 - Release handoff guard addendum 2026-05-25: filled staging handoffs fail when `qa:local`, `e2e:smoke`, or `staging:verify` are recorded as anything other than pass/ผ่าน, so staging cannot be promoted with failed QA evidence.
 - Release handoff guard addendum 2026-05-25: QA gate evidence must stay as actual `- label:` rows; mentioning command names in notes no longer satisfies the required handoff evidence.
+- Release handoff guard addendum 2026-05-25: production live-provider verification flags must be real handoff field rows set to `1`, not notes that merely mention `CHAT_PROVIDER_LIVE_VERIFIED` or `IMAGE_GENERATION_LIVE_VERIFIED`.

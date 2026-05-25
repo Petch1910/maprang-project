@@ -65,6 +65,11 @@ function hasField(content: string, label: string) {
   return new RegExp(`^- ${escaped}:`, 'm').test(content)
 }
 
+function fieldValueByCodeLabel(content: string, codeLabel: string) {
+  const escaped = codeLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return content.match(new RegExp(`^- [^:\\n]*${escaped}:\\s*(.+)$`, 'm'))?.[1]?.trim() ?? ''
+}
+
 function isLoopbackHost(hostname: string) {
   return ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(hostname.toLowerCase())
 }
@@ -142,10 +147,10 @@ function validateProductionVerificationFlags(content: string, findings: string[]
   const environment = fieldValue(content, 'Environment').toLowerCase()
   if (!environment.includes('production')) return
 
-  if (!/`CHAT_PROVIDER_LIVE_VERIFIED`:\s*1\b/.test(content)) {
+  if (fieldValueByCodeLabel(content, '`CHAT_PROVIDER_LIVE_VERIFIED`') !== '1') {
     findings.push('production release handoff ต้องมี CHAT_PROVIDER_LIVE_VERIFIED=1')
   }
-  if (!/`IMAGE_GENERATION_LIVE_VERIFIED`:\s*1\b/.test(content)) {
+  if (fieldValueByCodeLabel(content, '`IMAGE_GENERATION_LIVE_VERIFIED`') !== '1') {
     findings.push('production release handoff ต้องมี IMAGE_GENERATION_LIVE_VERIFIED=1')
   }
 }

@@ -178,6 +178,19 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires live provider verification flags as field rows', () => {
+    const unsafe = filledHandoff
+      .replace(/^- .*`CHAT_PROVIDER_LIVE_VERIFIED`: 1$/m, '- Provider note: set `CHAT_PROVIDER_LIVE_VERIFIED`: 1 after smoke')
+      .replace(/^- .*`IMAGE_GENERATION_LIVE_VERIFIED`: 1$/m, '- Provider note: set `IMAGE_GENERATION_LIVE_VERIFIED`: 1 after smoke')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมี CHAT_PROVIDER_LIVE_VERIFIED=1',
+        'production release handoff ต้องมี IMAGE_GENERATION_LIVE_VERIFIED=1',
+      ]),
+    )
+  })
+
   test('requires production QA gates to pass for production handoff', () => {
     const unsafe = filledHandoff
       .replace('- `bun run qa:local`: pass', '- `bun run qa:local`: fail')
