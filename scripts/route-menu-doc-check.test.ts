@@ -102,8 +102,9 @@ describe('route menu doc check', () => {
         const navItems = [{ to: '/' }, { to: '/chat' }, { href: '/wallet' }];
         <NavLink to={'/events'}>Events</NavLink>
         <a href="/profile?tab=persona">Profile</a>
+        <button onClick={() => navigate({ pathname: '/admin/health' })}>Health</button>
       `),
-    ).toEqual(['/', '/chat', '/events', '/profile', '/wallet'])
+    ).toEqual(['/', '/admin/health', '/chat', '/events', '/profile', '/wallet'])
   })
 
   test('reports missing navigation coverage, empty fields, and weak status labels', () => {

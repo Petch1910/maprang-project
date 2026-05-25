@@ -98,6 +98,19 @@ function expressionStringValue(expression: ts.Expression) {
   return null
 }
 
+function objectLiteralStringProperty(expression: ts.Expression, propertyName: string) {
+  if (!ts.isObjectLiteralExpression(expression)) return null
+  const property = expression.properties.find(
+    (item): item is ts.PropertyAssignment =>
+      ts.isPropertyAssignment(item) && propertyNameText(item.name) === propertyName,
+  )
+  return property ? expressionStringValue(property.initializer) : null
+}
+
+function navigatePathValue(expression: ts.Expression) {
+  return expressionStringValue(expression) ?? objectLiteralStringProperty(expression, 'pathname')
+}
+
 export function collectDeclaredRoutes(appContent: string) {
   const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const routes: string[] = []
@@ -143,6 +156,15 @@ export function collectStaticNavigationPaths(appContent: string) {
         const name = attribute.name.getText(sourceFile)
         if (name === 'to' || name === 'href') addPath(jsxAttributeStringValue(attribute, sourceFile))
       }
+    }
+
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'navigate' &&
+      node.arguments[0]
+    ) {
+      addPath(navigatePathValue(node.arguments[0]))
     }
 
     ts.forEachChild(node, visit)

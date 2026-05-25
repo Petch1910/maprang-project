@@ -1639,6 +1639,7 @@ const checks: Check[] = [
           'collects declared routes from JSX with multiline attributes',
           'collects static navigation paths from object literals and JSX attributes',
           "href: '/wallet'",
+          "navigate({ pathname: '/admin/health' })",
           'reports missing navigation coverage',
           'reports stale mixed-language copy in route menu documentation',
           'Automated route smoke',
@@ -1654,7 +1655,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['collectDeclaredRoutes', 'collectStaticNavigationPaths', 'jsxAttributeStringValue', 'propertyNameText', 'collectRoutePreloadPaths', 'ts.SyntaxKind.SatisfiesExpression'],
+        ['collectDeclaredRoutes', 'collectStaticNavigationPaths', 'jsxAttributeStringValue', 'propertyNameText', 'navigatePathValue', 'collectRoutePreloadPaths', 'ts.SyntaxKind.SatisfiesExpression'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(

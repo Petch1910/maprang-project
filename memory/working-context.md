@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Route/menu doc-check now reads `navigate('/...')` and `navigate({ pathname: '/...' })` paths in `App.tsx`, so imperative navigation also has route/menu and preload documentation coverage.
 - 2026-05-25: Route/menu doc-check now reads object-literal `href` navigation paths as well as `to`, keeping documentation/preload coverage aligned with config-driven links.
 - 2026-05-25: Full deterministic repo QA passed after frontend object/navigation route guard hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: Frontend route audit now also checks `navigate({ pathname: '/...' })` calls, so React Router object navigation gets the same dead-route protection as string `navigate('/...')`.
