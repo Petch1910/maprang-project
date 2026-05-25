@@ -63,7 +63,7 @@ bun run release:handoff:check -- --filled
 
 ## การยืนยันผู้ให้บริการ AI
 
-หมายเหตุ: ใส่ชื่อโมเดลจริงที่ใช้ใน environment นี้ และใช้คำสั่ง live smoke ที่ยิงผู้ให้บริการจริงเท่านั้น: แชทใช้ `bun run smoke:chat` หรือ `bun run api:smoke:live`; รูปใช้ `bun run smoke:image:live` หรือ `bun run api:smoke:live`. ถ้าใช้ `smoke:chat` หรือ `smoke:image:live` ให้คัดค่าจาก JSON `handoffEvidence`; ถ้าใช้ `api:smoke:live` ให้คัดค่าจาก field หลักฐานที่พิมพ์ในผล smoke.
+หมายเหตุ: ใส่ชื่อโมเดลจริงที่ใช้ใน environment นี้ และใช้คำสั่ง live smoke ที่ยิงผู้ให้บริการจริงเท่านั้น: แชทใช้ `bun run smoke:chat` หรือ `bun run api:smoke:live`; รูปใช้ `bun run smoke:image:live` หรือ `bun run api:smoke:live`. ให้คัดค่าจาก JSON `handoffEvidence` ของ smoke ที่รันจริง; ถ้าใช้ `api:smoke:live` สามารถตรวจทวนจาก field หลักฐานที่พิมพ์ในผล smoke ได้ด้วย.
 
 - โมเดลแชท:
 - คำสั่ง live smoke แชท:

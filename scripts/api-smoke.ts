@@ -36,6 +36,8 @@ export type ApiSmokeResult = {
   detail: string
 }
 
+export type ApiSmokeHandoffEvidence = Record<string, string | number>
+
 export function formatApiSmokeStatus(status: ApiSmokeStatus) {
   const labels: Record<ApiSmokeStatus, string> = {
     pass: 'ผ่าน',
@@ -117,8 +119,11 @@ export function buildApiSmokeSummary(
     live: boolean
     requireLiveImage: boolean
     requireAdmin: boolean
+    handoffEvidence?: ApiSmokeHandoffEvidence
   },
 ) {
+  const handoffEvidence =
+    options.handoffEvidence && Object.keys(options.handoffEvidence).length > 0 ? options.handoffEvidence : undefined
   return {
     ok: results.every((result) => result.status !== 'fail'),
     apiBaseUrl: options.apiBaseUrl,
@@ -129,17 +134,33 @@ export function buildApiSmokeSummary(
     warn: results.filter((result) => result.status === 'warn').length,
     skip: results.filter((result) => result.status === 'skip').length,
     fail: results.filter((result) => result.status === 'fail').length,
+    ...(handoffEvidence ? { handoffEvidence } : {}),
+  }
+}
+
+function formatApiHandoffEvidence(evidence: ApiSmokeHandoffEvidence) {
+  return Object.entries(evidence)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(', ')
+}
+
+function apiImageSmokeEvidence(payload: CreatorDraftPayload, elapsedMs: number): ApiSmokeHandoffEvidence {
+  const provider = payload.image?.provider ?? 'none'
+  const source = payload.source ?? 'unknown'
+  const urlKind = imageSmokeUrlKind(payload.image?.url)
+  return {
+    'Image smoke provider': provider,
+    'Image smoke source': source,
+    'Image smoke urlKind': urlKind,
+    'Image smoke elapsedMs': elapsedMs,
   }
 }
 
 function formatApiImageSmokeEvidence(payload: CreatorDraftPayload, elapsedMs: number) {
-  const provider = payload.image?.provider ?? 'none'
-  const source = payload.source ?? 'unknown'
-  const urlKind = imageSmokeUrlKind(payload.image?.url)
-  return `Image smoke provider=${provider}, Image smoke source=${source}, Image smoke urlKind=${urlKind}, Image smoke elapsedMs=${elapsedMs}`
+  return formatApiHandoffEvidence(apiImageSmokeEvidence(payload, elapsedMs))
 }
 
-function formatApiChatSmokeEvidence({
+function apiChatSmokeEvidence({
   normalChatId,
   normalTokens,
   normalDebit,
@@ -153,8 +174,15 @@ function formatApiChatSmokeEvidence({
   streamChatId: string
   streamTokens: number
   streamDebit: ApiSmokeWalletTransaction
-}) {
-  return `Chat smoke normal chatId=${normalChatId}, Chat smoke normal tokens=${normalTokens}, Chat smoke normal walletTransactionId=${normalDebit.id}, Chat smoke stream chatId=${streamChatId}, Chat smoke stream tokens=${streamTokens}, Chat smoke stream walletTransactionId=${streamDebit.id}`
+}): ApiSmokeHandoffEvidence {
+  return {
+    'Chat smoke normal chatId': normalChatId,
+    'Chat smoke normal tokens': normalTokens,
+    'Chat smoke normal walletTransactionId': normalDebit.id,
+    'Chat smoke stream chatId': streamChatId,
+    'Chat smoke stream tokens': streamTokens,
+    'Chat smoke stream walletTransactionId': streamDebit.id,
+  }
 }
 
 export async function runApiSmoke(options: ApiSmokeRunnerOptions = {}) {
@@ -166,6 +194,7 @@ const live = argv.includes('--live')
 const requireLiveImage = argv.includes('--require-live-image')
 const requireAdmin = argv.includes('--require-admin')
 const results: ApiSmokeResult[] = []
+const handoffEvidence: ApiSmokeHandoffEvidence = {}
 
 const targetIssues = smokeTargetIssuesForDeployedGate(apiBaseUrl, smokeTargetIsLocal(apiBaseUrl))
 if (targetIssues.length > 0) {
@@ -541,6 +570,7 @@ await warnable('POST /creator/ai-draft', async () => {
       detail: `${detail}; ${issue}`,
     }
   }
+  if (live) Object.assign(handoffEvidence, apiImageSmokeEvidence(payload, imageElapsedMs))
   return { ok: true, detail }
 })
 
@@ -639,14 +669,16 @@ if (live) {
     if (!normalDebit || !streamDebit) {
       throw new Error('พบรายการ wallet แบบ CHAT_USAGE ไม่ครบสำหรับหลักฐาน release handoff')
     }
-    return `chatId=${streamResult.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${streamResult.replyChars}, walletDebits=${chatDebits.length}, ${formatApiChatSmokeEvidence({
+    const chatEvidence = apiChatSmokeEvidence({
       normalChatId: liveChatId,
       normalTokens: liveChatTotalTokens,
       normalDebit,
       streamChatId: streamResult.chatId,
       streamTokens: streamTotalTokens,
       streamDebit,
-    })}`
+    })
+    Object.assign(handoffEvidence, chatEvidence)
+    return `chatId=${streamResult.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${streamResult.replyChars}, walletDebits=${chatDebits.length}, ${formatApiHandoffEvidence(chatEvidence)}`
   })
 } else {
   record('POST /chat', 'skip', 'ข้ามการเรียกโมเดลจริง; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
@@ -1008,6 +1040,7 @@ const summary = buildApiSmokeSummary(results, {
   live,
   requireLiveImage,
   requireAdmin,
+  handoffEvidence,
 })
 
 writeLine(

@@ -35,10 +35,12 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).toContain('จะรันทดสอบผู้ให้บริการต่อเพื่อให้ตั้งค่า flag หลังผ่านจริง')
     expect(apiSmoke).toContain('โทเคนคงเหลือ=')
     expect(apiSmoke).toContain('แหล่งร่าง=')
-    expect(apiSmoke).toContain('Image smoke provider=')
-    expect(apiSmoke).toContain('Image smoke source=')
-    expect(apiSmoke).toContain('Image smoke urlKind=')
-    expect(apiSmoke).toContain('Image smoke elapsedMs=')
+    expect(apiSmoke).toContain("'Image smoke provider': provider")
+    expect(apiSmoke).toContain("'Image smoke source': source")
+    expect(apiSmoke).toContain("'Image smoke urlKind': urlKind")
+    expect(apiSmoke).toContain("'Image smoke elapsedMs': elapsedMs")
+    expect(apiSmoke).toContain('handoffEvidence')
+    expect(apiSmoke).toContain('apiImageSmokeEvidence(payload, imageElapsedMs)')
     expect(apiSmoke).toContain('liveImageDraftFailure(payload)')
     expect(apiSmoke).toContain('source ของ live image smoke ต้องเป็น ai')
     expect(apiSmoke).toContain('ข้ามผู้ให้บริการสร้างรูปสำหรับการตรวจในเครื่อง')
@@ -53,12 +55,14 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).toContain('walletDebits=')
     expect(apiSmoke).toContain('CHAT_USAGE')
     expect(apiSmoke).toContain('chatId: liveChatId')
-    expect(apiSmoke).toContain('Chat smoke normal chatId=')
-    expect(apiSmoke).toContain('Chat smoke normal tokens=')
-    expect(apiSmoke).toContain('Chat smoke normal walletTransactionId=')
-    expect(apiSmoke).toContain('Chat smoke stream chatId=')
-    expect(apiSmoke).toContain('Chat smoke stream tokens=')
-    expect(apiSmoke).toContain('Chat smoke stream walletTransactionId=')
+    expect(apiSmoke).toContain('apiChatSmokeEvidence({')
+    expect(apiSmoke).toContain('formatApiHandoffEvidence(chatEvidence)')
+    expect(apiSmoke).toContain("'Chat smoke normal chatId': normalChatId")
+    expect(apiSmoke).toContain("'Chat smoke normal tokens': normalTokens")
+    expect(apiSmoke).toContain("'Chat smoke normal walletTransactionId': normalDebit.id")
+    expect(apiSmoke).toContain("'Chat smoke stream chatId': streamChatId")
+    expect(apiSmoke).toContain("'Chat smoke stream tokens': streamTokens")
+    expect(apiSmoke).toContain("'Chat smoke stream walletTransactionId': streamDebit.id")
     expect(apiSmoke).toContain('deltaChars=')
     expect(apiSmoke).toContain('ข้ามการเรียกโมเดลจริง')
     expect(apiSmoke).toContain('ตรวจ eval ในเครื่องไม่ผ่าน')
@@ -227,6 +231,10 @@ describe('api smoke helpers', () => {
         live: true,
         requireLiveImage: true,
         requireAdmin: true,
+        handoffEvidence: {
+          'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+          'Image smoke elapsedMs': 250,
+        },
       }),
     ).toEqual({
       ok: false,
@@ -238,6 +246,10 @@ describe('api smoke helpers', () => {
       warn: 1,
       skip: 1,
       fail: 1,
+      handoffEvidence: {
+        'Chat smoke normal walletTransactionId': 'wallet-chat-normal-001',
+        'Image smoke elapsedMs': 250,
+      },
     })
   })
 })

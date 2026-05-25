@@ -220,7 +220,7 @@ bun run smoke:chat
 `smoke:chat` และ `api:smoke:live` จะเช็ก `/me/usage` ก่อนเรียกผู้ให้บริการ AI จริง ผู้ใช้ smoke ต้องมี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` เพื่อให้การทดสอบหยุดก่อนใช้เครดิตผู้ให้บริการถ้าบัญชียังเติมไม่พอ `smoke:chat` เหมาะสำหรับ retry/debug เฉพาะทางของแชทปกติและสตรีมแชท และต้องเห็นรายการ wallet แบบ `CHAT_USAGE` แยกครบทั้งสองเส้นทาง ส่วน gate สุดท้ายให้ใช้ `production:check`
 
 ถ้า `smoke:chat` รายงาน `usage.providerFailure` แปลว่าแอป ฐานข้อมูล และเส้นทางแชทติดต่อได้แล้ว แต่ backend ยังเรียกผู้ให้บริการภายนอกไม่สำเร็จ ให้ตรวจการเชื่อมต่อออกไป `https://openrouter.ai`, `OPENROUTER_API_KEY`, เครดิตกับโควตา, สิทธิ์โมเดลที่เลือก, และ log ระบบหลังบ้าน.
-อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่าการทดสอบแชทจริงจะได้คำตอบจริงจากโมเดล, `chatId`, ข้อมูลโทเคนที่ใช้, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน. ใน release handoff ต้องบันทึกหลักฐานทั้ง normal chat และ stream chat ด้วย field `Chat smoke normal chatId`, `Chat smoke normal tokens`, `Chat smoke normal walletTransactionId`, `Chat smoke stream chatId`, `Chat smoke stream tokens`, และ `Chat smoke stream walletTransactionId`. เมื่อใช้ `api:smoke:live` ค่าเหล่านี้จะอยู่ในผล `POST /chat/stream live` พร้อมชื่อ field เดียวกับ handoff; เมื่อใช้ `smoke:chat` ค่าเดียวกันจะอยู่ใน JSON object `handoffEvidence`.
+อย่าตั้ง `CHAT_PROVIDER_LIVE_VERIFIED=1` จนกว่าการทดสอบแชทจริงจะได้คำตอบจริงจากโมเดล, `chatId`, ข้อมูลโทเคนที่ใช้, และรายการ wallet แบบ `CHAT_USAGE` ที่ตรงกัน. ใน release handoff ต้องบันทึกหลักฐานทั้ง normal chat และ stream chat ด้วย field `Chat smoke normal chatId`, `Chat smoke normal tokens`, `Chat smoke normal walletTransactionId`, `Chat smoke stream chatId`, `Chat smoke stream tokens`, และ `Chat smoke stream walletTransactionId`. เมื่อใช้ `api:smoke:live` ค่าเหล่านี้จะอยู่ใน JSON summary `handoffEvidence` และตรวจทวนได้จากผล `POST /chat/stream live`; เมื่อใช้ `smoke:chat` ค่าเดียวกันจะอยู่ใน JSON object `handoffEvidence`.
 
 ตรวจว่าตั้งค่าผู้ให้บริการสร้างรูปไว้แล้วโดยยังไม่ใช้เครดิตสร้างรูป:
 
@@ -234,10 +234,10 @@ bun run smoke:image
 bun run smoke:image:live
 ```
 
-`api:smoke:live` ใช้เป็น combined live smoke ได้เช่นกัน โดยผลของ `POST /creator/ai-draft` จะพิมพ์ `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs` และใช้ validation เดียวกับ `smoke:image:live` สำหรับ fallback/placeholder/missing URL.
+`api:smoke:live` ใช้เป็น combined live smoke ได้เช่นกัน โดย JSON summary `handoffEvidence` และผลของ `POST /creator/ai-draft` จะพิมพ์ `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs` และใช้ validation เดียวกับ `smoke:image:live` สำหรับ fallback/placeholder/missing URL.
 
 ค่าเริ่มต้นของ `smoke:image` จะตรวจแค่ `/health` ถ้าใช้ `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1` ระบบจะเรียก `/creator/ai-draft`, คาดหวัง `image.provider="configured"`, และ fail ถ้า Creator Studio ถอยกลับไปใช้ภาพตัวอย่างในเครื่อง โหมด live นี้อาจใช้ทั้งเครดิตข้อความและเครดิตสร้างรูป.
-ถ้า live run รายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` อย่าเพิ่งตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ให้เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป, rerun `bun run smoke:image:live`, และ mark live verification เฉพาะหลังเส้นทางสร้างรูปจริงคืนค่า `image.provider="configured"`. ใน release handoff ให้บันทึก `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs` จาก payload ของ live smoke เพื่อยืนยันว่าไม่ได้ใช้ fallback/placeholder; เมื่อใช้ `smoke:image:live` ค่าเหล่านี้อยู่ใน JSON object `handoffEvidence`.
+ถ้า live run รายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` อย่าเพิ่งตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ให้เพิ่มหรือรีเซ็ตวงเงิน/โควตาของผู้ให้บริการสร้างรูป, rerun `bun run smoke:image:live`, และ mark live verification เฉพาะหลังเส้นทางสร้างรูปจริงคืนค่า `image.provider="configured"`. ใน release handoff ให้บันทึก `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs` จาก payload ของ live smoke เพื่อยืนยันว่าไม่ได้ใช้ fallback/placeholder; เมื่อใช้ `smoke:image:live` หรือ `api:smoke:live` ค่าเหล่านี้อยู่ใน JSON object `handoffEvidence`.
 
 สำหรับ backend ที่ deploy แล้ว ให้ชี้ smoke tests ไปที่ backend URL จริง และควรใช้ Supabase user token:
 
