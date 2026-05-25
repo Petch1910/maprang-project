@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 Unmounted relationship debug component cleanup pass: `rg RelationshipExplainability apps/frontend/src scripts` returned no remaining usage after deleting the unused component, and `bun run frontend:check` passed.
 - 2026-05-25 Frontend API surface cleanup pass: `rg fetchChatWorldState apps/frontend/src scripts` returned no remaining usage after removing the unused helper, and `bun run frontend:api:test` plus `bun run frontend:check` passed.
 - 2026-05-25 Redux persisted-state regression guard: `bun run frontend:storage:test` now covers legacy localStorage payloads with removed `showMature` and `creatorDraftUpdatedAt` fields, verifying hydrate reducers drop stale keys before state is persisted again.
 - 2026-05-25 Redux unused field cleanup pass: `bun run frontend:storage:test` and `bun run frontend:check` passed after removing unused `showMature`, `creatorDraftUpdatedAt`, `setWalletLoading`, `applyContentSettings`, `setShowMature`, and `markCreatorDraftSaved` paths. Source search confirmed no stale Redux field/action names remain, and the main frontend bundle is 268.7KB / 350KB.

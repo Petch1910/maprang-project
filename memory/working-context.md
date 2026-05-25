@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Removed the unmounted `RelationshipExplainability` frontend component. Relationship state is now surfaced through the active Chat UI, Events/My Chats summaries, and Prompt Inspector instead of an unused debug card.
 - 2026-05-25: Frontend API surface was trimmed after the chat world-state flow settled. The unused `fetchChatWorldState` helper was removed; `/chat` still loads world state through saved chat messages and persists changes through `updateChatWorldState`.
 - 2026-05-25: Redux slices now sanitize away unused persisted fields. Unused `showMature`, `creatorDraftUpdatedAt`, `setWalletLoading`, `applyContentSettings`, `setShowMature`, and `markCreatorDraftSaved` paths were removed; content/drafts hydration now rebuilds only supported fields from localStorage so stale keys cannot re-enter Redux state.
 - 2026-05-25: Redux no longer carries an unused `events` slice. Pending scene counts and Events Inbox state already derive from `chatsSlice`, so the empty `eventsSlice`, `EventsState`, and `PendingEventSummary` types were removed; frontend build now transforms one fewer module and the main bundle is 268.9KB / 350KB.
