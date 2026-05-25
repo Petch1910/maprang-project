@@ -52,6 +52,7 @@ const filledHandoff = [
   '- `bun run staging:verify`: pass',
   '- `bun run production:check`: pass',
   '- GitHub Production Smoke run: pass',
+  '- GitHub Production Smoke URL: https://github.com/Petch1910/maprang-project/actions/runs/123456789',
   '',
   '## การตรวจฝั่งผู้ดูแล',
   '- `/admin/health`: pass',
@@ -300,6 +301,21 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires production smoke workflow URL for production handoff', () => {
+    const unsafe = filledHandoff.replace(
+      '- GitHub Production Smoke URL: https://github.com/Petch1910/maprang-project/actions/runs/123456789',
+      '- GitHub Production Smoke URL: https://github.com/Petch1910/maprang-project/actions?query=smoke',
+    )
+    const stagingHandoff = unsafe.replace('- Environment: production', '- Environment: staging')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toContain(
+      'production release handoff ต้องมี GitHub Production Smoke URL เป็นลิงก์ GitHub Actions run จริง',
+    )
+    expect(checkReleaseHandoffContent(stagingHandoff, { requireFilled: true })).not.toContain(
+      'production release handoff ต้องมี GitHub Production Smoke URL เป็นลิงก์ GitHub Actions run จริง',
+    )
+  })
+
   test('requires staging QA gates to pass for staging handoff', () => {
     const unsafe = filledHandoff
       .replace('- Environment: production', '- Environment: staging')
@@ -539,6 +555,7 @@ describe('release handoff check', () => {
       .replace('- `bun run staging:verify`: pass\n', '')
       .replace('- `bun run production:check`: pass\n', '')
       .replace('- GitHub Production Smoke run: pass\n', '')
+      .replace('- GitHub Production Smoke URL: https://github.com/Petch1910/maprang-project/actions/runs/123456789\n', '')
 
     expect(checkReleaseHandoffContent(stale)).toEqual(
       expect.arrayContaining([
@@ -547,6 +564,7 @@ describe('release handoff check', () => {
         'ยังไม่มี QA gate: `bun run staging:verify`',
         'ยังไม่มี QA gate: `bun run production:check`',
         'ยังไม่มี QA gate: GitHub Production Smoke run',
+        'ยังไม่มี QA gate: GitHub Production Smoke URL',
       ]),
     )
   })

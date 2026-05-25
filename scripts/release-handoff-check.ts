@@ -92,6 +92,7 @@ const requiredQaGateLabels = [
   '`bun run staging:verify`',
   '`bun run production:check`',
   'GitHub Production Smoke run',
+  'GitHub Production Smoke URL',
 ]
 const requiredQaGateSnippets = requiredQaGateLabels
 
@@ -166,6 +167,12 @@ function looksLikeBackendCheckUrl(value: string, backendOrigin: string, expected
   const url = deployedHttpsUrl(value)
   if (!url || !backendOrigin) return false
   return url.origin === backendOrigin && url.pathname === expectedPath && !url.search && !url.hash
+}
+
+function looksLikeGithubActionsRunUrl(value: string) {
+  const url = deployedHttpsUrl(value)
+  if (!url || url.hostname.toLowerCase() !== 'github.com') return false
+  return /^\/[^/]+\/[^/]+\/actions\/runs\/\d+$/.test(url.pathname) && !url.search && !url.hash
 }
 
 function validateFilledReleaseHandoffUrls(content: string, findings: string[]) {
@@ -278,6 +285,11 @@ function validateProductionQaResults(content: string, findings: string[]) {
   ]) {
     const value = fieldValue(content, label)
     if (value && !isPassed(value)) findings.push(`production release handoff ต้องมีผล QA ผ่าน: ${label}`)
+  }
+
+  const productionSmokeUrl = fieldValue(content, 'GitHub Production Smoke URL')
+  if (productionSmokeUrl && !looksLikeGithubActionsRunUrl(productionSmokeUrl)) {
+    findings.push('production release handoff ต้องมี GitHub Production Smoke URL เป็นลิงก์ GitHub Actions run จริง')
   }
 }
 

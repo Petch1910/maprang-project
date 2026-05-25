@@ -31,7 +31,7 @@ guard ใน repo:
 - `runE2eSmoke` ส่ง env ชุดเดียวกับที่ validate แล้วเข้า seed/Playwright/restore runner steps เพื่อให้ automation ที่ import runner ไม่ตรวจ URL ชุดหนึ่งแต่รันอีกชุดหนึ่ง
 - `RELEASE_HANDOFF.md` ต้องบันทึก `E2E_BASE_URL`/`E2E_API_BASE_URL` ที่ใช้รัน browser smoke; staging/production filled handoff จะ fail ถ้าค่าเหล่านี้ไม่ใช่ deployed origins เดียวกับ Frontend/Backend URL
 - `RELEASE_HANDOFF.md` filled mode จะ fail ถ้า `Frontend URL`/`Backend URL` ไม่ใช่ deployed origins ล้วน หรือถ้า `Health URL`/`Ready URL` ไม่ชี้ backend origin เดียวกันที่ `/health` และ `/ready` โดยไม่มี query/hash
-- `RELEASE_HANDOFF.md` ต้องเก็บแถวหลักของ QA evidence ไว้ครบ: `qa:local`, `e2e:smoke`, `staging:verify`, `production:check`, และ GitHub Production Smoke run
+- `RELEASE_HANDOFF.md` ต้องเก็บแถวหลักของ QA evidence ไว้ครบ: `qa:local`, `e2e:smoke`, `staging:verify`, `production:check`, GitHub Production Smoke run, และ GitHub Production Smoke URL
 - `RELEASE_HANDOFF.md` ต้องเก็บ field สำคัญไว้ครบ เช่น `Environment`, deployed URL fields, `CORS origins`, และ `Go / no-go` เพื่อไม่ให้ลบแถวแล้วหลบ validation ได้
 
 ### การยืนยัน live chat provider
@@ -72,6 +72,7 @@ guard ใน repo:
 - Supabase signed URL สำหรับพื้นที่เก็บรูปตัวละคร implement แล้ว และถูกตรวจโดย production gate
 - Relationship contract presets แยกจาก creator presets แล้ว และมี API smoke ครอบไว้
 - Release handoff guard addendum 2026-05-25: filled staging handoffs fail when `qa:local`, `e2e:smoke`, or `staging:verify` are recorded as anything other than pass/ผ่าน, so staging cannot be promoted with failed QA evidence.
+- Release handoff guard addendum 2026-05-25: filled production handoffs require `GitHub Production Smoke URL` to be a concrete GitHub Actions run URL shaped like `https://github.com/<owner>/<repo>/actions/runs/<id>`, so a plain `pass` row is not enough to trace production smoke evidence.
 - Release handoff guard addendum 2026-05-25: QA gate evidence must stay as actual `- label:` rows; mentioning command names in notes no longer satisfies the required handoff evidence.
 - Release handoff guard addendum 2026-05-25: production live-provider verification flags must be real handoff field rows set to `1`, not notes that merely mention `CHAT_PROVIDER_LIVE_VERIFIED` or `IMAGE_GENERATION_LIVE_VERIFIED`.
 - Release handoff guard addendum 2026-05-25: critical fields such as `Environment`, deployed URLs, `CORS origins`, and `Go / no-go` must remain actual `- label:` rows in the handoff.

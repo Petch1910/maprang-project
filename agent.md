@@ -206,6 +206,7 @@ bun run smoke:image:live
 4. เลือกหนึ่ง blocker หรือหนึ่ง UX/API gap ที่ปิดได้จริง
 5. ทำจนผ่าน test แล้วสรุปเป็นภาษาไทยสั้นๆ
 - Current addendum 2026-05-25: staging release handoff QA result guard requires filled `staging` handoffs to record `qa:local`, `e2e:smoke`, and `staging:verify` as pass/ผ่าน before promotion evidence is accepted.
+- Current addendum 2026-05-25: filled production release handoffs now require `GitHub Production Smoke URL` to be a concrete GitHub Actions run URL (`https://github.com/<owner>/<repo>/actions/runs/<id>`) instead of only a `pass` row.
 - Current addendum 2026-05-25: release handoff QA gate presence now requires real `- label:` rows, so command names mentioned in notes cannot replace missing QA evidence rows.
 - Current addendum 2026-05-25: production live-provider verification flags in release handoff must be actual code-label field rows set to `1`; notes mentioning the flag names do not count.
 - Current addendum 2026-05-25: critical release handoff fields such as `Environment`, URL fields, `CORS origins`, and `Go / no-go` must be actual `- label:` rows.

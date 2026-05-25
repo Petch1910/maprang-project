@@ -77,6 +77,7 @@ bun run release:handoff:check -- --filled
 - `bun run staging:verify`:
 - `bun run production:check`:
 - GitHub Production Smoke run:
+- GitHub Production Smoke URL:
 
 ## การตรวจฝั่งผู้ดูแล
 
