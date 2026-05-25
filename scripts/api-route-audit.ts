@@ -350,23 +350,60 @@ function methodFromInit(init: ts.Expression | undefined): HttpMethod {
   return 'GET'
 }
 
+function unwrapExpression(expression: ts.Expression): ts.Expression {
+  let current = expression
+  while (
+    ts.isParenthesizedExpression(current) ||
+    ts.isAsExpression(current) ||
+    ts.isTypeAssertionExpression(current) ||
+    current.kind === ts.SyntaxKind.SatisfiesExpression
+  ) {
+    current = (current as { expression: ts.Expression }).expression
+  }
+  return current
+}
+
+function literalStringValue(expression: ts.Expression, stringConstants = new Map<string, string>()) {
+  const unwrapped = unwrapExpression(expression)
+  if (ts.isStringLiteral(unwrapped) || ts.isNoSubstitutionTemplateLiteral(unwrapped)) return unwrapped.text
+  if (ts.isIdentifier(unwrapped)) return stringConstants.get(unwrapped.text) ?? null
+  return null
+}
+
+function collectTopLevelStringConstants(sourceFile: ts.SourceFile) {
+  const constants = new Map<string, string>()
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) continue
+    for (const declaration of statement.declarationList.declarations) {
+      if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue
+      const value = literalStringValue(declaration.initializer, constants)
+      if (value) constants.set(declaration.name.text, value)
+    }
+  }
+  return constants
+}
+
 function normalizeFrontendApiPath(path: string) {
   const withoutQuery = path.split(/[?#]/, 1)[0]
   const normalized = withoutQuery.replace(/\/+$/, '') || '/'
   return normalized.startsWith('/') ? normalized : null
 }
 
-function pathFromFrontendExpression(expression: ts.Expression): string | null {
-  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) {
-    return normalizeFrontendApiPath(expression.text)
-  }
+function pathFromFrontendExpression(expression: ts.Expression, stringConstants = new Map<string, string>()): string | null {
+  const literalValue = literalStringValue(expression, stringConstants)
+  if (literalValue) return normalizeFrontendApiPath(literalValue)
 
   if (!ts.isTemplateExpression(expression)) return null
 
   let path = expression.head.text
   for (const span of expression.templateSpans) {
+    const constantText = literalStringValue(span.expression, stringConstants)
     const dynamicText = span.expression.getText()
     const literalText = span.literal.text
+    if (constantText !== null) {
+      path += `${constantText}${literalText}`
+      continue
+    }
     if (path.includes('?') || literalText.startsWith('?') || dynamicText.includes('query')) {
       return normalizeFrontendApiPath(path)
     }
@@ -380,24 +417,42 @@ function pathFromFrontendExpression(expression: ts.Expression): string | null {
   return normalizeFrontendApiPath(path)
 }
 
-function pathFromFetchExpression(expression: ts.Expression): string | null {
+function pathFromFetchExpression(expression: ts.Expression, stringConstants = new Map<string, string>()): string | null {
   if (!ts.isTemplateExpression(expression)) return null
   if (expression.head.text !== '') return null
   const [baseSpan, ...pathSpans] = expression.templateSpans
   if (!baseSpan || baseSpan.expression.getText() !== 'API_BASE_URL') return null
-  if (pathSpans.length > 0) return null
-  const path = normalizeFrontendApiPath(baseSpan.literal.text)
+  let rawPath = baseSpan.literal.text
+  for (const span of pathSpans) {
+    const constantText = literalStringValue(span.expression, stringConstants)
+    const dynamicText = span.expression.getText()
+    const literalText = span.literal.text
+    if (constantText !== null) {
+      rawPath += `${constantText}${literalText}`
+      continue
+    }
+    if (rawPath.includes('?') || literalText.startsWith('?') || dynamicText.includes('query')) {
+      return normalizeFrontendApiPath(rawPath)
+    }
+    if (rawPath.endsWith('/') || literalText.startsWith('/')) {
+      rawPath += `:id${literalText}`
+    } else {
+      rawPath += literalText
+    }
+  }
+  const path = normalizeFrontendApiPath(rawPath)
   return path === '' || path === '/' ? null : path
 }
 
 export function collectFrontendApiCallsFromSource(file: string, content: string) {
   const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
   const calls: FrontendApiCall[] = []
+  const stringConstants = collectTopLevelStringConstants(sourceFile)
 
   function visit(node: ts.Node) {
     if (ts.isCallExpression(node)) {
       if (ts.isIdentifier(node.expression) && node.expression.text === 'requestJson') {
-        const path = node.arguments[0] ? pathFromFrontendExpression(node.arguments[0]) : null
+        const path = node.arguments[0] ? pathFromFrontendExpression(node.arguments[0], stringConstants) : null
         if (path) {
           calls.push({
             key: `${methodFromInit(node.arguments[1])} ${path}`,
@@ -408,7 +463,7 @@ export function collectFrontendApiCallsFromSource(file: string, content: string)
       }
 
       if (ts.isIdentifier(node.expression) && node.expression.text === 'fetch') {
-        const path = node.arguments[0] ? pathFromFetchExpression(node.arguments[0]) : null
+        const path = node.arguments[0] ? pathFromFetchExpression(node.arguments[0], stringConstants) : null
         if (path) {
           calls.push({
             key: `${methodFromInit(node.arguments[1])} ${path}`,

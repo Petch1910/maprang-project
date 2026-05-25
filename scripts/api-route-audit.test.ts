@@ -105,6 +105,29 @@ describe('api route audit', () => {
     ])
   })
 
+  test('collects frontend API helper calls from top-level route constants', () => {
+    const calls = collectFrontendApiCallsFromSource(
+      'apps/frontend/src/lib/api.ts',
+      `
+        const usagePath = '/me/usage' as const
+        const characterPath = '/characters' as const
+        const streamPath = '/chat/stream' as const
+
+        export function loadUsage() {
+          return requestJson(usagePath)
+        }
+        export function loadCharacter(characterId: string) {
+          return requestJson(\`\${characterPath}/\${characterId}\`)
+        }
+        export function streamChat() {
+          return fetch(\`\${API_BASE_URL}\${streamPath}\`, { method: 'POST' })
+        }
+      `,
+    )
+
+    expect(calls.map((call) => call.key)).toEqual(['GET /me/usage', 'GET /characters/:id', 'POST /chat/stream'])
+  })
+
   test('reports frontend API helper calls that do not match backend routes', () => {
     const calls = collectFrontendApiCallsFromSource(
       'apps/frontend/src/lib/api.ts',
