@@ -203,6 +203,19 @@ describe('release handoff check', () => {
     )
   })
 
+  test('requires production live smoke result rows to pass', () => {
+    const unsafe = filledHandoff
+      .replace('- ผล live smoke แชท: pass', '- ผล live smoke แชท: fail')
+      .replace('- ผล live smoke รูป: pass', '- ผล live smoke รูป: warning')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toEqual(
+      expect.arrayContaining([
+        'production release handoff ต้องมีผล live smoke ผ่าน: ผล live smoke แชท',
+        'production release handoff ต้องมีผล live smoke ผ่าน: ผล live smoke รูป',
+      ]),
+    )
+  })
+
   test('requires production QA gates to pass for production handoff', () => {
     const unsafe = filledHandoff
       .replace('- `bun run qa:local`: pass', '- `bun run qa:local`: fail')

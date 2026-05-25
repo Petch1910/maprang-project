@@ -156,6 +156,16 @@ function validateProductionVerificationFlags(content: string, findings: string[]
   }
 }
 
+function validateProductionLiveSmokeResults(content: string, findings: string[]) {
+  const environment = releaseEnvironment(content)
+  if (environment !== 'production') return
+
+  for (const label of ['ผล live smoke แชท', 'ผล live smoke รูป']) {
+    const value = fieldValue(content, label)
+    if (value && !isPassed(value)) findings.push(`production release handoff ต้องมีผล live smoke ผ่าน: ${label}`)
+  }
+}
+
 function isPassed(value: string) {
   return /^(pass|ผ่าน)\b/i.test(value.trim())
 }
@@ -268,6 +278,7 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
     validateFilledReleaseHandoffUrls(content, findings)
     validateFilledReleaseDecision(content, findings)
     validateProductionVerificationFlags(content, findings)
+    validateProductionLiveSmokeResults(content, findings)
     validateProductionQaResults(content, findings)
     validateStagingQaResults(content, findings)
     validateDeployedE2eTargets(content, findings)
