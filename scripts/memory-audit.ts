@@ -115,6 +115,9 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'weak coverage',
       'admin-smoke',
       'live-smoke',
+      'handoffEvidence',
+      'Chat smoke normal walletTransactionId',
+      'Image smoke elapsedMs',
     ],
     'memory/deploy-blockers.md',
   )

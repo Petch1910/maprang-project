@@ -582,6 +582,16 @@ const checks: Check[] = [
         'README.md',
       )
       requireIncludes(deploymentQa, ['bun run secrets:patterns:test', 'secrets/secret-pattern/memory', 'Real `.env`'], 'DEPLOYMENT_QA.md')
+      requireIncludes(
+        readme,
+        ['handoffEvidence', 'Chat smoke normal walletTransactionId', 'Image smoke elapsedMs'],
+        'README.md',
+      )
+      requireIncludes(
+        deploymentQa,
+        ['handoffEvidence', 'Chat smoke normal walletTransactionId', 'Image smoke elapsedMs'],
+        'DEPLOYMENT_QA.md',
+      )
       requireIncludes(packageJson, ['"release:handoff:check"', 'bun scripts/release-handoff-check.ts'], 'package.json')
       requireIncludes(packageJson, ['"release:handoff:test"', 'bun test scripts/release-handoff-check.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"secrets:patterns:test"', 'bun test scripts/secret-patterns.test.ts'], 'package.json')
@@ -1044,6 +1054,11 @@ const checks: Check[] = [
         'memory/deploy-blockers.md',
       )
       requireIncludes(
+        deployBlockers,
+        ['handoffEvidence', 'Chat smoke normal walletTransactionId', 'Image smoke elapsedMs'],
+        'memory/deploy-blockers.md',
+      )
+      requireIncludes(
         productionChecklist,
         ['bun run deploy:doctor', 'bun run deploy:status', 'bun run api:smoke:live', 'อย่าชี้ `qa:local`'],
         'memory/production/checklist.md',
@@ -1064,6 +1079,9 @@ const checks: Check[] = [
           'route/menu status evidence',
           'API route coverage quality guard',
           'weak-coverage reason diagnostics',
+          'handoffEvidence',
+          'Chat smoke normal walletTransactionId',
+          'Image smoke elapsedMs',
           'if (import.meta.main) process.exit(await runMemoryAudit())',
         ],
         'scripts/memory-audit.ts',
