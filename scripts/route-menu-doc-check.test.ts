@@ -180,6 +180,49 @@ describe('route menu doc check', () => {
     )
   })
 
+  test('requires staging and future rows to explain their next surface', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Staging | โดเมนสเตจจิงจริง | deploy | verify | needs deploy | later |
+        | Future | external | group chat | later | not ready | later |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [
+        row({
+          area: 'Staging',
+          route: 'โดเมนสเตจจิงจริง',
+          status: 'needs-staging',
+          disabledReason: 'ต้อง deploy ก่อน',
+          emptyState: 'ตรวจภายหลัง',
+        }),
+        row({
+          area: 'Future',
+          route: 'external',
+          status: 'future',
+          result: 'จะทำภายหลัง',
+          disabledReason: 'ยังไม่พร้อม',
+          emptyState: 'รอออกแบบ',
+        }),
+      ],
+      minRows: 2,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'routeMenuAuditRows "Staging" สถานะ needs-staging ต้องชี้งานค้างไปที่ STAGING_RUNBOOK.md และ /admin/health',
+        'routeMenuAuditRows "Future" สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต ไม่ใช่เมนูที่พร้อมกด',
+      ]),
+    )
+  })
+
   test('reports stale mixed-language copy in route menu documentation', () => {
     const findings = auditRouteMenuDocumentation({
       markdown: `

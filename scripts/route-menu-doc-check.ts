@@ -284,6 +284,14 @@ export function uniqueKeys(values: string[]) {
   return new Set(values).size === values.length
 }
 
+function includesEvery(value: string, snippets: string[]) {
+  return snippets.every((snippet) => value.includes(snippet))
+}
+
+function includesSome(value: string, snippets: string[]) {
+  return snippets.some((snippet) => value.includes(snippet))
+}
+
 const defaultRequiredSnippets = [
   'Route/Menu Audit',
   '/admin/health',
@@ -405,6 +413,16 @@ export function auditRouteMenuDocumentation({
       if (!row[field].trim()) {
         findings.push(`routeMenuAuditRows "${row.area}" มี ${field} ว่าง`)
       }
+    }
+
+    const rowEvidenceText = `${row.result} ${row.disabledReason} ${row.emptyState}`
+    if (row.status === 'needs-staging' && !includesEvery(rowEvidenceText, ['STAGING_RUNBOOK.md', '/admin/health'])) {
+      findings.push(
+        `routeMenuAuditRows "${row.area}" สถานะ needs-staging ต้องชี้งานค้างไปที่ STAGING_RUNBOOK.md และ /admin/health`,
+      )
+    }
+    if (row.status === 'future' && !includesSome(rowEvidenceText, ['อนาคต', 'เผื่ออนาคต', 'ยังไม่แสดงเป็นเมนูให้กด'])) {
+      findings.push(`routeMenuAuditRows "${row.area}" สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต ไม่ใช่เมนูที่พร้อมกด`)
     }
   }
 

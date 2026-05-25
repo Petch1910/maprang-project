@@ -91,3 +91,4 @@ guard ใน repo:
 - Release handoff guard addendum 2026-05-25: filled staging/production handoffs must record a concrete `Rollback action` that operators can execute; decide-later/latest/manual-later rollback notes are rejected.
 - Release handoff guard addendum 2026-05-25: release handoff scanning now rejects credential-bearing URLs anywhere in the file, including notes and rollback evidence, before commit/release evidence is accepted.
 - Release handoff guard addendum 2026-05-25: filled staging/production handoffs must also record frontend state QA gates (`frontend:env:test`, `frontend:storage:test`, `frontend:clipboard:test`) as pass/ผ่าน, not fail or warning text.
+- Route/Menu Audit guard addendum 2026-05-25: `needs-staging` rows must point to `STAGING_RUNBOOK.md` and `/admin/health`, while `future` rows must clearly describe future-only work so unfinished staging/future items cannot look like clickable production menus.

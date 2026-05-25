@@ -225,3 +225,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: filled staging/production release handoffs now reject open blockers/manual follow-ups before `go`, placeholder quota-risk text, or missing rollback conditions.
 - Current addendum 2026-05-25: filled staging/production release handoffs now require a concrete `Rollback action` row in addition to rollback conditions; placeholder/decide-later rollback notes are rejected.
 - Current addendum 2026-05-25: filled staging/production release handoffs now reject failed frontend state QA evidence for `frontend:env:test`, `frontend:storage:test`, and `frontend:clipboard:test`.
+- Current addendum 2026-05-25: Route/Menu Audit rows with `needs-staging` must point to `STAGING_RUNBOOK.md` and `/admin/health`, and `future` rows must clearly say they are future work rather than clickable-ready menus.
