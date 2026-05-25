@@ -99,11 +99,11 @@ describe('route menu doc check', () => {
   test('collects static navigation paths from object literals and JSX attributes', () => {
     expect(
       collectStaticNavigationPaths(`
-        const navItems = [{ to: '/' }, { to: '/chat' }];
+        const navItems = [{ to: '/' }, { to: '/chat' }, { href: '/wallet' }];
         <NavLink to={'/events'}>Events</NavLink>
-        <a href="/wallet?tab=usage">Wallet</a>
+        <a href="/profile?tab=persona">Profile</a>
       `),
-    ).toEqual(['/', '/chat', '/events', '/wallet'])
+    ).toEqual(['/', '/chat', '/events', '/profile', '/wallet'])
   })
 
   test('reports missing navigation coverage, empty fields, and weak status labels', () => {

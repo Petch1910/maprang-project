@@ -132,8 +132,9 @@ export function collectStaticNavigationPaths(appContent: string) {
   }
 
   function visit(node: ts.Node) {
-    if (ts.isPropertyAssignment(node) && propertyNameText(node.name) === 'to') {
-      addPath(expressionStringValue(node.initializer))
+    if (ts.isPropertyAssignment(node)) {
+      const name = propertyNameText(node.name)
+      if (name === 'to' || name === 'href') addPath(expressionStringValue(node.initializer))
     }
 
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {

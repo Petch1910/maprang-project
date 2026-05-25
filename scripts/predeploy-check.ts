@@ -1638,6 +1638,7 @@ const checks: Check[] = [
           'collects route preloads from typed object literals',
           'collects declared routes from JSX with multiline attributes',
           'collects static navigation paths from object literals and JSX attributes',
+          "href: '/wallet'",
           'reports missing navigation coverage',
           'reports stale mixed-language copy in route menu documentation',
           'Automated route smoke',
