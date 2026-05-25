@@ -25,6 +25,8 @@ const forbiddenPatterns = [
 
 const forbiddenCopySnippets = ['ผู้ให้บริการ avatar storage', 'รูปแบบการเข้าถึง avatar storage']
 
+const requiredQaGateSnippets = ['`bun run frontend:env:test`', '`bun run frontend:storage:test`', '`bun run frontend:clipboard:test`']
+
 export type ReleaseHandoffCheckResult = {
   ok: boolean
   requireFilled: boolean
@@ -44,6 +46,10 @@ export function checkReleaseHandoffContent(content: string, options: { requireFi
 
   for (const snippet of forbiddenCopySnippets) {
     if (content.includes(snippet)) findings.push(`พบข้อความส่งมอบที่ยังใช้คำเก่า: ${snippet}`)
+  }
+
+  for (const snippet of requiredQaGateSnippets) {
+    if (!content.includes(snippet)) findings.push(`เธขเธฑเธเนเธกเนเธกเธต QA gate: ${snippet}`)
   }
 
   if (options.requireFilled) {

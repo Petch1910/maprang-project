@@ -44,6 +44,9 @@ const filledHandoff = [
   '## เกต QA (QA gates)',
   '- `bun run qa:local`: pass',
   '- `bun run e2e:smoke`: pass',
+  '- `bun run frontend:env:test`: pass',
+  '- `bun run frontend:storage:test`: pass',
+  '- `bun run frontend:clipboard:test`: pass',
   '- `bun run staging:verify`: pass',
   '- `bun run production:check`: pass',
   '- GitHub Production Smoke run: pass',
@@ -103,6 +106,21 @@ describe('release handoff check', () => {
       expect.arrayContaining([
         'พบข้อความส่งมอบที่ยังใช้คำเก่า: ผู้ให้บริการ avatar storage',
         'พบข้อความส่งมอบที่ยังใช้คำเก่า: รูปแบบการเข้าถึง avatar storage',
+      ]),
+    )
+  })
+
+  test('reports missing frontend state QA gates', () => {
+    const stale = filledHandoff
+      .replace('- `bun run frontend:env:test`: pass\n', '')
+      .replace('- `bun run frontend:storage:test`: pass\n', '')
+      .replace('- `bun run frontend:clipboard:test`: pass\n', '')
+
+    expect(checkReleaseHandoffContent(stale)).toEqual(
+      expect.arrayContaining([
+        'เธขเธฑเธเนเธกเนเธกเธต QA gate: `bun run frontend:env:test`',
+        'เธขเธฑเธเนเธกเนเธกเธต QA gate: `bun run frontend:storage:test`',
+        'เธขเธฑเธเนเธกเนเธกเธต QA gate: `bun run frontend:clipboard:test`',
       ]),
     )
   })

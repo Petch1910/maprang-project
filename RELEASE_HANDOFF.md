@@ -61,6 +61,9 @@ bun run release:handoff:check -- --filled
 
 - `bun run qa:local`:
 - `bun run e2e:smoke`:
+- `bun run frontend:env:test`:
+- `bun run frontend:storage:test`:
+- `bun run frontend:clipboard:test`:
 - `bun run staging:verify`:
 - `bun run production:check`:
 - GitHub Production Smoke run:

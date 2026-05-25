@@ -529,6 +529,9 @@ const checks: Check[] = [
           'ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
           'การยืนยันผู้ให้บริการ AI',
           'เกต QA (QA gates)',
+          '`bun run frontend:env:test`',
+          '`bun run frontend:storage:test`',
+          '`bun run frontend:clipboard:test`',
           'การตรวจฝั่งผู้ดูแล',
           'ข้อจำกัดที่ยังรู้ก่อนปล่อย',
           'การตัดสินใจปล่อย',
@@ -553,13 +556,14 @@ const checks: Check[] = [
           '--filled',
           'forbiddenPatterns',
           'forbiddenCopySnippets',
+          'requiredQaGateSnippets',
           'ตรวจเอกสารส่งมอบ release ไม่ผ่าน',
         ],
         'scripts/release-handoff-check.ts',
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(
