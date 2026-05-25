@@ -1,6 +1,6 @@
 # ทิศทาง UI/UX
 
-อัปเดตล่าสุด: 2026-05-21
+อัปเดตล่าสุด: 2026-05-25
 
 ## ทิศทางผลิตภัณฑ์
 
@@ -42,4 +42,6 @@ Maprang ควรรู้สึกคุ้นมือสำหรับผู
 - Route/Menu Audit และ Admin Health ใช้ label แบบ Thai-first และทำให้สถานะ route/menu หลักชัดเจน: พร้อมใช้, guard ด้วยคีย์ผู้ดูแล, หรือรอ staging จริง.
 - My Chats และ Chat sidebar มี flow เมนูสามจุดจริงสำหรับแก้ชื่อ, ปักหมุด/ถอนหมุด, จัดเก็บ/กู้คืน, ลบ, โหมดเลือก, และคำสั่งหลายรายการ พร้อม e2e coverage บนจอเดสก์ท็อป/มือถือ.
 - Wallet แสดงยอดโทเคน, ต้นทุนแยกตามโมเดล, แนวโน้ม 7 วัน, ธุรกรรม, และ guard สำหรับการปรับโทเคนโดยผู้ดูแลด้วยข้อมูลจาก QA seed.
+- Profile, Explore, และ Events Inbox รอบล่าสุดถูกเกลา disabled/loading behavior แล้ว: Explore ให้ primary controls ใช้ได้ระหว่าง skeleton loading, Profile แยก persona autosave จาก content-mode save lock, และ Events refresh มี title ระหว่างโหลด.
+- Static frontend audit และ Route/Menu Audit ตอนนี้ช่วยกันกัน disabled controls ที่ไม่มีเหตุผลผู้ใช้อ่านรู้เรื่อง.
 - Browser e2e smoke ล่าสุดผ่านจอเดสก์ท็อป/มือถือสำหรับ core flows และ primary routes ทั้งหมด โดยไม่มี console errors หรือการล้นแนวนอนที่เกี่ยวข้อง.
