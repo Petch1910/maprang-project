@@ -333,7 +333,7 @@ function lineFor(content: string, index: number) {
   return content.slice(0, index).split(/\r?\n/).length
 }
 
-function methodFromInit(init: ts.Expression | undefined): HttpMethod {
+function methodFromInit(init: ts.Expression | undefined, stringConstants = new Map<string, string>()): HttpMethod {
   if (!init || !ts.isObjectLiteralExpression(init)) return 'GET'
   for (const property of init.properties) {
     if (!ts.isPropertyAssignment(property)) continue
@@ -342,8 +342,9 @@ function methodFromInit(init: ts.Expression | undefined): HttpMethod {
       (ts.isIdentifier(name) && name.text === 'method') || (ts.isStringLiteral(name) && name.text === 'method')
     if (!isMethodProperty) continue
     const initializer = property.initializer
-    if (ts.isStringLiteral(initializer) || ts.isNoSubstitutionTemplateLiteral(initializer)) {
-      const method = initializer.text.toUpperCase()
+    const methodValue = literalStringValue(initializer, stringConstants)
+    if (methodValue) {
+      const method = methodValue.toUpperCase()
       if (['GET', 'POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) return method as HttpMethod
     }
   }
@@ -455,7 +456,7 @@ export function collectFrontendApiCallsFromSource(file: string, content: string)
         const path = node.arguments[0] ? pathFromFrontendExpression(node.arguments[0], stringConstants) : null
         if (path) {
           calls.push({
-            key: `${methodFromInit(node.arguments[1])} ${path}`,
+            key: `${methodFromInit(node.arguments[1], stringConstants)} ${path}`,
             file,
             line: lineFor(content, node.getStart(sourceFile)),
           })
@@ -466,7 +467,7 @@ export function collectFrontendApiCallsFromSource(file: string, content: string)
         const path = node.arguments[0] ? pathFromFetchExpression(node.arguments[0], stringConstants) : null
         if (path) {
           calls.push({
-            key: `${methodFromInit(node.arguments[1])} ${path}`,
+            key: `${methodFromInit(node.arguments[1], stringConstants)} ${path}`,
             file,
             line: lineFor(content, node.getStart(sourceFile)),
           })

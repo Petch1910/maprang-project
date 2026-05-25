@@ -1369,6 +1369,7 @@ const checks: Check[] = [
           'reports missing, stale, and weak coverage entries',
           'collects frontend API helper calls with methods and dynamic ids',
           'collects frontend API helper calls from top-level route constants',
+          'collects frontend API helper method constants',
           'reports frontend API helper calls that do not match backend routes',
           'covers the backend root identity route',
           'runs the committed API route audit through an importable runner',
