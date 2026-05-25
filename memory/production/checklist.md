@@ -67,4 +67,5 @@ bun run smoke:image:live
 - ห้ามตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` ขณะที่ image generation ยังถอยกลับเป็นภาพตัวอย่าง.
 - ห้าม deploy ด้วย CORS ที่เป็น local หรือไม่ใช่ HTTPS.
 - ห้ามวาง secrets ลงในไฟล์ memory.
+- ห้ามวาง URL ที่มี credential/userinfo เช่น `https://user:pass@host` ลงใน release handoff หรือ memory.
 - อย่าชี้ `qa:local` หรือ backend tests ที่ใช้ DB ไปยัง production data ยกเว้นตั้งใจสร้าง test record จริง.

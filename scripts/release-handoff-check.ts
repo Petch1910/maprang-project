@@ -22,6 +22,7 @@ const requiredSections = [
 const forbiddenPatterns = [
   ...secretPatterns,
   { name: 'raw access token', pattern: /\b(access|refresh|service)[_-]?token\s*:\s*\S{16,}/i },
+  { name: 'URL ที่มี credential/userinfo', pattern: /\bhttps?:\/\/[^/\s@]+@/i },
 ]
 
 const forbiddenCopySnippets = ['ผู้ให้บริการ avatar storage', 'รูปแบบการเข้าถึง avatar storage']

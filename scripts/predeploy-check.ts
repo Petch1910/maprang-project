@@ -587,6 +587,7 @@ const checks: Check[] = [
           'runReleaseHandoffCheck',
           '--filled',
           'forbiddenPatterns',
+          'URL ที่มี credential/userinfo',
           'forbiddenCopySnippets',
           'requiredFieldLabels',
           'requiredFieldSnippets',

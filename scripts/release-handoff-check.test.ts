@@ -707,10 +707,10 @@ describe('release handoff check', () => {
     const fakeGithubToken = `ghp_${'a'.repeat(36)}`
     const unsafe = filledHandoff
       .replace('## การตัดสินใจปล่อย', '## Decision')
-      .replace('maprangqa12345678', `${fakeOpenRouterKey}\n- Debug token: ${fakeGithubToken}`)
+      .replace('maprangqa12345678', `${fakeOpenRouterKey}\n- Debug token: ${fakeGithubToken}\n- Rollback doc: https://release-user:release-pass@deploy.example.com/runbook`)
 
     expect(checkReleaseHandoffContent(unsafe)).toEqual(
-      expect.arrayContaining(['ยังไม่มี section: การตัดสินใจปล่อย', 'พบ OpenRouter key', 'พบ GitHub token']),
+      expect.arrayContaining(['ยังไม่มี section: การตัดสินใจปล่อย', 'พบ OpenRouter key', 'พบ GitHub token', 'พบ URL ที่มี credential/userinfo']),
     )
   })
 

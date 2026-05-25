@@ -89,4 +89,5 @@ guard ใน repo:
 - Release handoff guard addendum 2026-05-25: release identity rows (`วันที่ release`, `Git commit`, `Branch`, `ผู้รับผิดชอบ`) must stay as real fields, and filled handoffs must use concrete date/hash/branch/owner values.
 - Release handoff guard addendum 2026-05-25: filled staging/production handoffs must record no open blockers/manual follow-ups before `go`, clear provider quota-risk text, and an actionable rollback condition.
 - Release handoff guard addendum 2026-05-25: filled staging/production handoffs must record a concrete `Rollback action` that operators can execute; decide-later/latest/manual-later rollback notes are rejected.
+- Release handoff guard addendum 2026-05-25: release handoff scanning now rejects credential-bearing URLs anywhere in the file, including notes and rollback evidence, before commit/release evidence is accepted.
 - Release handoff guard addendum 2026-05-25: filled staging/production handoffs must also record frontend state QA gates (`frontend:env:test`, `frontend:storage:test`, `frontend:clipboard:test`) as pass/ผ่าน, not fail or warning text.
