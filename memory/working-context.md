@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Full deterministic repo QA passed after route preload computed-key and API fetch concatenation hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
 - 2026-05-25: API route audit now recognizes direct `fetch(API_BASE_URL + path)` string concatenation. Literal paths, route-map paths, and dynamic `/:id` concatenations are checked against backend routes while the internal generic `fetch(API_BASE_URL + path)` helper remains ignored.
 - 2026-05-25: Frontend route preload audits now resolve computed keys from route constants. `routePreloads` entries such as `[routePaths.events]: loadEvents` are included in both frontend route audit and route/menu doc-check coverage.
 - 2026-05-25: Full deterministic repo QA passed after frontend route constant hardening. `bun run qa:repo` remains green with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget still under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB.
