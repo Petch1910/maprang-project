@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 route/menu declared-route AST pass: `bun run route-menu:audit:test`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after route-menu doc-check started collecting declared React Router paths through TypeScript AST.
 - 2026-05-25 full deterministic repo QA pass after route preload AST hardening: `bun run qa:repo` passed with backend 173 tests / 601 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 290 import edges, local eval 3 scenarios, and frontend bundle budget under limit with main at 268.7KB / 350KB and ChatRoom at 226.6KB / 260KB. DB persistence suites still skip only because local Postgres is not running.
 - 2026-05-25 route preload AST audit pass: `bun run frontend:route:audit:test`, `bun run route-menu:audit:test`, direct `bun scripts/frontend-route-audit.ts`, `bun run route-menu:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after replacing regex routePreloads parsing with TypeScript AST parsing.
 - 2026-05-25 API audit docs guard pass: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run docs:commands` passed after predeploy began guarding README/Deployment QA wording for the frontend API helper contract.

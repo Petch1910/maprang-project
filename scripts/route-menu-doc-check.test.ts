@@ -3,6 +3,7 @@ import type { RouteMenuAuditRow, RouteMenuAuditStatus } from '../apps/frontend/s
 import {
   auditRouteMenuDocumentation,
   collectAuditRows,
+  collectDeclaredRoutes,
   collectRouteMenuDocCheckResult,
   collectRoutePreloadPaths,
   runRouteMenuDocCheck,
@@ -78,6 +79,20 @@ describe('route menu doc check', () => {
         } satisfies Record<string, unknown>)
       `),
     ).toEqual(['/', '/admin/health', '/chat'])
+  })
+
+  test('collects declared routes from JSX with multiline attributes', () => {
+    expect(
+      collectDeclaredRoutes(`
+        <Routes>
+          <Route
+            element={<Chat />}
+            path="/chat/:chatId?"
+          />
+          <Route element={<NotFound />} path="*" />
+        </Routes>
+      `),
+    ).toEqual(['/chat/:chatId?', '*'])
   })
 
   test('reports missing navigation coverage, empty fields, and weak status labels', () => {

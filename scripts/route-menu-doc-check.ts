@@ -78,12 +78,38 @@ export function isCoveredByRoute(path: string, routes: string[]) {
   return routes.some((route) => routePatternToRegex(route).test(path))
 }
 
+function jsxAttributeStringValue(attribute: ts.JsxAttribute, sourceFile: ts.SourceFile) {
+  const initializer = attribute.initializer
+  if (!initializer) return null
+  if (ts.isStringLiteral(initializer)) return initializer.text
+  if (ts.isJsxExpression(initializer) && initializer.expression && ts.isStringLiteral(initializer.expression)) {
+    return initializer.expression.text
+  }
+  return null
+}
+
 export function collectDeclaredRoutes(appContent: string) {
-  return appContent
-    .split(/\r?\n/)
-    .filter((line) => line.includes('<Route'))
-    .map((line) => line.match(/\bpath=(["'])(.*?)\1/)?.[2])
-    .filter((route): route is string => Boolean(route))
+  const sourceFile = ts.createSourceFile('App.tsx', appContent, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const routes: string[] = []
+
+  function visit(node: ts.Node) {
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const tagName = node.tagName.getText(sourceFile)
+      if (tagName === 'Route') {
+        const pathAttribute = node.attributes.properties.find(
+          (attribute): attribute is ts.JsxAttribute =>
+            ts.isJsxAttribute(attribute) && attribute.name.getText(sourceFile) === 'path',
+        )
+        const path = pathAttribute ? jsxAttributeStringValue(pathAttribute, sourceFile) : null
+        if (path) routes.push(path)
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return routes
 }
 
 export function collectStaticNavigationPaths(appContent: string) {
