@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: Predeploy package-script coverage now uses exact command tokens for core direct audit pairs: `security:audit`, `import-cycle:audit`, `api:audit`, `frontend:static:audit`, `frontend:route:audit`, and `route-menu:audit` plus each regression test. This prevents any `:*:test` command from satisfying a direct audit requirement by substring.
 - 2026-05-25: Predeploy now checks frontend audit alias coverage with exact package command tokens instead of substring matching. `frontend:static:audit:test` can no longer satisfy the direct `frontend:static:audit` alias guard, and the same exact-command guard covers `frontend:route:audit`.
 - 2026-05-25: CI and Production Smoke workflows now run the direct `frontend:static:audit` and `frontend:route:audit` aliases alongside their regression tests. Predeploy locks those workflow commands so local `qa:repo`, CI, and deployed smoke guards all exercise the same frontend audit aliases.
 - 2026-05-25: `qa:repo` now runs the direct root `frontend:static:audit` and `frontend:route:audit` aliases before their regression tests, and predeploy locks that coverage so the convenience aliases cannot drift out of the deterministic repo-owned gate.
