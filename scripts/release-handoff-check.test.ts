@@ -140,6 +140,12 @@ describe('release handoff check', () => {
     expect(checkReleaseHandoffContent(commaOnlyCors, { requireFilled: true })).toContain('CORS origins ใน release handoff ต้องเป็น frontend HTTPS origin จริงเท่านั้น')
   })
 
+  test('rejects credential-bearing deployed URLs', () => {
+    const unsafe = filledHandoff.replace('Backend URL: https://api.maprang.example', 'Backend URL: https://release-user:release-pass@api.maprang.example')
+
+    expect(checkReleaseHandoffContent(unsafe, { requireFilled: true })).toContain('URL ใน release handoff ต้องเป็น https deployed URL: Backend URL')
+  })
+
   test('requires live provider verification flags for production handoff', () => {
     const unsafe = filledHandoff
       .replace('- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 1', '- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 0')

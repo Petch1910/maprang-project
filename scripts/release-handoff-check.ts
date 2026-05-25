@@ -49,6 +49,7 @@ function deployedHttpsUrl(value: string) {
     const url = new URL(normalized)
     if (url.protocol !== 'https:') return null
     if (isLoopbackHost(url.hostname)) return null
+    if (url.username || url.password) return null
     return url
   } catch {
     return null

@@ -583,7 +583,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         test,
-        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
+        ['accepts a filled release handoff', 'accepts multiple frontend CORS origins', 'rejects local or insecure filled release URLs', 'rejects loopback deployed URLs even when they use https', 'rejects malformed release URLs and backend CORS origins', 'rejects credential-bearing deployed URLs', 'requires live provider verification flags for production handoff', 'requires production QA gates to pass for production handoff', 'secret-shaped values', 'stale avatar-storage handoff labels', 'reports missing frontend state QA gates', 'พบ GitHub token', 'requireFilled: true', 'importable runner'],
         'scripts/release-handoff-check.test.ts',
       )
       requireIncludes(
