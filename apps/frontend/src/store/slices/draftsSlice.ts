@@ -6,7 +6,6 @@ const initialState: DraftsState = {
   composerByKey: {},
   personaDraft: '',
   personaUpdatedAt: null,
-  creatorDraftUpdatedAt: null,
 }
 
 const localPersonaMaxChars = 2000
@@ -32,16 +31,17 @@ const draftsSlice = createSlice({
   initialState,
   reducers: {
     hydrateDrafts(_state, action: PayloadAction<Partial<DraftsState>>) {
-      return { ...initialState, ...action.payload }
+      return {
+        composerByKey: action.payload.composerByKey ?? initialState.composerByKey,
+        personaDraft: action.payload.personaDraft ?? initialState.personaDraft,
+        personaUpdatedAt: action.payload.personaUpdatedAt ?? initialState.personaUpdatedAt,
+      }
     },
     saveComposerDraft(state, action: PayloadAction<{ key: string; value: string }>) {
       state.composerByKey[action.payload.key] = action.payload.value
     },
     savePersonaDraft(state, action: PayloadAction<string>) {
       state.personaDraft = action.payload
-    },
-    markCreatorDraftSaved(state, action: PayloadAction<string>) {
-      state.creatorDraftUpdatedAt = action.payload
     },
   },
   extraReducers: (builder) => {
@@ -63,9 +63,8 @@ const draftsSlice = createSlice({
   },
 })
 
-export const { hydrateDrafts, markCreatorDraftSaved, saveComposerDraft, savePersonaDraft } = draftsSlice.actions
+export const { hydrateDrafts, saveComposerDraft, savePersonaDraft } = draftsSlice.actions
 export const selectComposerDraft = (key: string) => (state: RootState) => state.drafts.composerByKey[key] ?? ''
 export const selectPersonaDraft = (state: RootState) => state.drafts.personaDraft
 export const selectPersonaUpdatedAt = (state: RootState) => state.drafts.personaUpdatedAt
-export const selectCreatorDraftUpdatedAt = (state: RootState) => state.drafts.creatorDraftUpdatedAt
 export default draftsSlice.reducer

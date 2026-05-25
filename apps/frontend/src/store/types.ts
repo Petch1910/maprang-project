@@ -17,7 +17,6 @@ export type ChatsState = {
 export type ContentState = {
   isAdult: boolean
   ageGateAnswered: boolean
-  showMature: boolean
   maxRating: ContentRating
 }
 
@@ -25,7 +24,6 @@ export type DraftsState = {
   composerByKey: Record<string, string>
   personaDraft: string
   personaUpdatedAt: string | null
-  creatorDraftUpdatedAt: string | null
 }
 
 export type WalletState = {

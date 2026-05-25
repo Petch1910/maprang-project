@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 Redux unused field cleanup pass: `bun run frontend:storage:test` and `bun run frontend:check` passed after removing unused `showMature`, `creatorDraftUpdatedAt`, `setWalletLoading`, `applyContentSettings`, `setShowMature`, and `markCreatorDraftSaved` paths. Source search confirmed no stale Redux field/action names remain, and the main frontend bundle is 268.7KB / 350KB.
 - 2026-05-25 Unused Redux events slice cleanup pass: `bun run frontend:check` passed after removing the unused `eventsSlice`, `EventsState`, and `PendingEventSummary` type path. A source search confirmed no `state.events`/events-slice selectors remain; pending scene UI continues to derive from `chatsSlice`.
 - 2026-05-25 Chat starter prompt cleanup pass: `bun run frontend:check` passed after removing the unused generic `starterPrompts` export from `apps/frontend/src/lib/chat.ts`. A source search confirmed the only remaining `starterPrompts` definition is the roleplay quick-start set in `ChatPanel`.
 - 2026-05-25 Root starter cleanup pass: `bun run docs:commands`, `bun run predeploy:check`, and `bun run secrets:check` passed after removing the unused root `index.ts` starter file and root package `"module": "index.ts"` entry. Backend `apps/backend/index.ts` and its `start` script remain unchanged.
