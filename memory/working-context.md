@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25: API route audit now also checks the frontend API helper contract. `collectFrontendApiCallsFromSource` extracts `requestJson` and direct `fetch(API_BASE_URL...)` calls from `apps/frontend/src/lib/api.ts`, and `auditFrontendApiCalls` fails if a frontend helper calls a method/path that no backend route declares.
 - 2026-05-25: Frontend route audit now guards stale `routePreloads`. `auditRoutePreloads` fails when `App.tsx` preloads a static path that no declared React Router route covers, so menu hover/focus preload wiring cannot drift to dead routes silently.
 - 2026-05-25: Frontend static audit now also guards unmounted page drift. `auditUnmountedFrontendPages` fails for `apps/frontend/src/pages/*.tsx` files that are not referenced from `App.tsx` or another page/module, so stale route pages cannot sit in the repo without an explicit allowlist reason.
 - 2026-05-25: Frontend static audit now guards unmounted component drift. `auditUnmountedFrontendComponents` fails for `apps/frontend/src/components/*.tsx` files that are not referenced from another frontend source file; `AuthPanel` is the only allowlisted unmounted component because predeploy still uses it as an explicit auth-error safety surface.

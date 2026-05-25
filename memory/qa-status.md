@@ -2,6 +2,7 @@
 
 Last updated: 2026-05-25
 
+- 2026-05-25 Frontend API contract audit guard pass: `bun run api:audit:test`, `bun run api:audit`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after the API route audit started checking frontend `requestJson`/`fetch(API_BASE_URL...)` calls against discovered backend routes.
 - 2026-05-25 Route preload audit guard pass: `bun run frontend:route:audit:test`, direct `frontend-route-audit.ts`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after adding `auditRoutePreloads` to catch `routePreloads` entries that point to undeclared routes.
 - 2026-05-25 Unmounted page static audit guard pass: `bun run frontend:static:audit:test`, direct `frontend-static-audit.ts`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run memory:audit`, and `bun run secrets:check` passed after adding `auditUnmountedFrontendPages` and wiring it into predeploy.
 - 2026-05-25 Unmounted component static audit guard pass: `bun run frontend:static:audit:test`, direct `frontend-static-audit.ts`, `bun run predeploy:check:test`, and `bun run predeploy:check` passed after adding `auditUnmountedFrontendComponents` plus an explicit `AuthPanel` allowlist.

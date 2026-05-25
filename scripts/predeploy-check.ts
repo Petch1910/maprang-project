@@ -1347,12 +1347,31 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/api-route-audit.test.ts'),
-        ['collects backend index and route files automatically', 'discovers Elysia routes from source', 'reports missing, stale, and weak coverage entries', 'covers the backend root identity route', 'runs the committed API route audit through an importable runner'],
+        [
+          'collects backend index and route files automatically',
+          'discovers Elysia routes from source',
+          'reports missing, stale, and weak coverage entries',
+          'collects frontend API helper calls with methods and dynamic ids',
+          'reports frontend API helper calls that do not match backend routes',
+          'covers the backend root identity route',
+          'runs the committed API route audit through an importable runner',
+        ],
         'scripts/api-route-audit.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/api-route-audit.ts'),
-        ['collectRouteFiles', 'apps/backend/index.ts', "'GET /'", 'runApiRouteAudit', 'writeLine', 'writeError', 'if (import.meta.main) process.exit(await runApiRouteAudit())'],
+        [
+          'collectRouteFiles',
+          'collectFrontendApiCallsFromSource',
+          'auditFrontendApiCalls',
+          'frontend API helper เรียก route ที่ backend ไม่มี',
+          'apps/backend/index.ts',
+          "'GET /'",
+          'runApiRouteAudit',
+          'writeLine',
+          'writeError',
+          'if (import.meta.main) process.exit(await runApiRouteAudit())',
+        ],
         'scripts/api-route-audit.ts',
       )
       requireIncludes(

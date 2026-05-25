@@ -1,7 +1,9 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
+import ts from 'typescript'
 
 const root = join(import.meta.dir, '..')
+const frontendApiClientFile = 'apps/frontend/src/lib/api.ts'
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
 export type CoverageLevel = 'smoke' | 'e2e' | 'backend-test' | 'live-smoke' | 'admin-smoke' | 'manual-production'
@@ -264,6 +266,12 @@ export type DiscoveredRoute = {
   file: string
 }
 
+export type FrontendApiCall = {
+  key: RouteKey
+  file: string
+  line: number
+}
+
 export function summarizeRoutesByOwner(discoveredRoutes: DiscoveredRoute[], coverage = routeCoverage) {
   const byOwner = new Map<string, number>()
   for (const route of discoveredRoutes) {
@@ -305,6 +313,113 @@ export function discoverRoutesFromSource(file: string, content: string) {
   }
 
   return routes
+}
+
+function lineFor(content: string, index: number) {
+  return content.slice(0, index).split(/\r?\n/).length
+}
+
+function methodFromInit(init: ts.Expression | undefined): HttpMethod {
+  if (!init || !ts.isObjectLiteralExpression(init)) return 'GET'
+  for (const property of init.properties) {
+    if (!ts.isPropertyAssignment(property)) continue
+    const name = property.name
+    const isMethodProperty =
+      (ts.isIdentifier(name) && name.text === 'method') || (ts.isStringLiteral(name) && name.text === 'method')
+    if (!isMethodProperty) continue
+    const initializer = property.initializer
+    if (ts.isStringLiteral(initializer) || ts.isNoSubstitutionTemplateLiteral(initializer)) {
+      const method = initializer.text.toUpperCase()
+      if (['GET', 'POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) return method as HttpMethod
+    }
+  }
+  return 'GET'
+}
+
+function normalizeFrontendApiPath(path: string) {
+  const withoutQuery = path.split(/[?#]/, 1)[0]
+  const normalized = withoutQuery.replace(/\/+$/, '') || '/'
+  return normalized.startsWith('/') ? normalized : null
+}
+
+function pathFromFrontendExpression(expression: ts.Expression): string | null {
+  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) {
+    return normalizeFrontendApiPath(expression.text)
+  }
+
+  if (!ts.isTemplateExpression(expression)) return null
+
+  let path = expression.head.text
+  for (const span of expression.templateSpans) {
+    const dynamicText = span.expression.getText()
+    const literalText = span.literal.text
+    if (path.includes('?') || literalText.startsWith('?') || dynamicText.includes('query')) {
+      return normalizeFrontendApiPath(path)
+    }
+    if (path.endsWith('/') || literalText.startsWith('/')) {
+      path += `:id${literalText}`
+    } else {
+      path += literalText
+    }
+  }
+
+  return normalizeFrontendApiPath(path)
+}
+
+function pathFromFetchExpression(expression: ts.Expression): string | null {
+  if (!ts.isTemplateExpression(expression)) return null
+  if (expression.head.text !== '') return null
+  const [baseSpan, ...pathSpans] = expression.templateSpans
+  if (!baseSpan || baseSpan.expression.getText() !== 'API_BASE_URL') return null
+  if (pathSpans.length > 0) return null
+  const path = normalizeFrontendApiPath(baseSpan.literal.text)
+  return path === '' || path === '/' ? null : path
+}
+
+export function collectFrontendApiCallsFromSource(file: string, content: string) {
+  const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+  const calls: FrontendApiCall[] = []
+
+  function visit(node: ts.Node) {
+    if (ts.isCallExpression(node)) {
+      if (ts.isIdentifier(node.expression) && node.expression.text === 'requestJson') {
+        const path = node.arguments[0] ? pathFromFrontendExpression(node.arguments[0]) : null
+        if (path) {
+          calls.push({
+            key: `${methodFromInit(node.arguments[1])} ${path}`,
+            file,
+            line: lineFor(content, node.getStart(sourceFile)),
+          })
+        }
+      }
+
+      if (ts.isIdentifier(node.expression) && node.expression.text === 'fetch') {
+        const path = node.arguments[0] ? pathFromFetchExpression(node.arguments[0]) : null
+        if (path) {
+          calls.push({
+            key: `${methodFromInit(node.arguments[1])} ${path}`,
+            file,
+            line: lineFor(content, node.getStart(sourceFile)),
+          })
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return calls
+}
+
+export async function collectFrontendApiCalls(file = frontendApiClientFile, rootDir = root) {
+  const content = await readFile(join(rootDir, file), 'utf8')
+  return collectFrontendApiCallsFromSource(file, content)
+}
+
+export function auditFrontendApiCalls(frontendCalls: FrontendApiCall[], discoveredRoutes: DiscoveredRoute[]) {
+  const discoveredKeys = new Set(discoveredRoutes.map((route) => route.key))
+  return frontendCalls.filter((call) => !discoveredKeys.has(call.key))
 }
 
 function normalizeRepoPath(value: string) {
@@ -355,7 +470,9 @@ export async function runApiRouteAudit(
   writeError: (line: string) => void = (line) => console.error(line),
 ) {
   const discoveredRoutes = await discoverRoutes()
+  const frontendCalls = await collectFrontendApiCalls()
   const { missingCoverage, staleCoverage, weakCoverage, byOwner } = auditRouteCoverage(discoveredRoutes)
+  const missingFrontendRoutes = auditFrontendApiCalls(frontendCalls, discoveredRoutes)
 
   writeLine(`ตรวจ API route: พบ ${discoveredRoutes.length} รายการ`)
   for (const [owner, count] of [...byOwner.entries()].sort(([a], [b]) => a.localeCompare(b))) {
@@ -377,7 +494,12 @@ export async function runApiRouteAudit(
     for (const route of weakCoverage) writeError(`- ${route.key}`)
   }
 
-  if (missingCoverage.length > 0 || staleCoverage.length > 0 || weakCoverage.length > 0) {
+  if (missingFrontendRoutes.length > 0) {
+    writeError('ตรวจ API route ไม่ผ่าน: frontend API helper เรียก route ที่ backend ไม่มี')
+    for (const call of missingFrontendRoutes) writeError(`- ${call.key} (${call.file}:${call.line})`)
+  }
+
+  if (missingCoverage.length > 0 || staleCoverage.length > 0 || weakCoverage.length > 0 || missingFrontendRoutes.length > 0) {
     return 1
   }
 

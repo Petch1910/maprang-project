@@ -3,7 +3,9 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
+  auditFrontendApiCalls,
   auditRouteCoverage,
+  collectFrontendApiCallsFromSource,
   collectRouteFiles,
   discoverRoutes,
   discoverRoutesFromSource,
@@ -68,6 +70,60 @@ describe('api route audit', () => {
     expect(result.weakCoverage.map((route) => route.key)).toEqual(['PATCH /characters/:id'])
     expect(result.byOwner.get('platform')).toBe(1)
     expect(result.byOwner.get('unknown')).toBe(1)
+  })
+
+  test('collects frontend API helper calls with methods and dynamic ids', () => {
+    const calls = collectFrontendApiCallsFromSource(
+      'apps/frontend/src/lib/api.ts',
+      `
+        export function loadCharacter(characterId: string) {
+          return requestJson<{ character: Character }>(\`/characters/\${characterId}\`)
+        }
+        export function saveContent() {
+          return requestJson('/me/content-settings', { method: 'PATCH', body: '{}' })
+        }
+        export function listCharacters(params: URLSearchParams) {
+          return requestJson(\`/characters?\${params.toString()}\`)
+        }
+        export function upload(formData: FormData) {
+          return fetch(\`\${API_BASE_URL}/uploads/avatar\`, { method: 'POST', body: formData })
+        }
+        async function requestJson(path: string) {
+          return fetch(\`\${API_BASE_URL}\${path}\`)
+        }
+      `,
+    )
+
+    expect(calls.map((call) => call.key)).toEqual([
+      'GET /characters/:id',
+      'PATCH /me/content-settings',
+      'GET /characters',
+      'POST /uploads/avatar',
+    ])
+  })
+
+  test('reports frontend API helper calls that do not match backend routes', () => {
+    const calls = collectFrontendApiCallsFromSource(
+      'apps/frontend/src/lib/api.ts',
+      `
+        export function loadHealth() {
+          return requestJson('/health')
+        }
+        export function loadGhost() {
+          return requestJson('/ghost')
+        }
+      `,
+    )
+
+    const missing = auditFrontendApiCalls(calls, [{ key: 'GET /health', file: 'apps/backend/src/health.routes.ts' }])
+
+    expect(missing).toEqual([
+      {
+        key: 'GET /ghost',
+        file: 'apps/frontend/src/lib/api.ts',
+        line: 6,
+      },
+    ])
   })
 
   test('covers the backend root identity route', () => {
