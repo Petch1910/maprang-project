@@ -22,7 +22,7 @@
 - กรอก `RELEASE_HANDOFF.md` หลัง `production:check` ผ่าน โดยไม่ใส่ secrets หรือ private database URLs และต้องใส่ `Frontend build artifact`/`Backend deploy artifact` ที่ trace ได้จริง พร้อม `Health check result`/`Ready check result` ที่ผ่านจริง และ `Rollback action` ที่ทำตามได้จริง.
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 - ใช้ `/admin/health` ไล่ทำ next action ของแต่ละ blocker ก่อนรัน final gate ซ้ำ.
-- ยืนยัน repo-owned gate ล่าสุดด้วย `bun run qa:repo` ก่อนเริ่ม staging/live-provider รอบถัดไป; รอบล่าสุดวันที่ 2026-05-26 ผ่านหลัง decision `0021` agent baseline contract พร้อม memory audit 31 Markdown files, docs command audit 334 refs, backend tests 177 pass / 609 expects, API audit 48 backend routes + 34 frontend helper calls, frontend build และ bundle budget.
+- ยืนยัน repo-owned gate ล่าสุดด้วย `bun run qa:repo` ก่อนเริ่ม staging/live-provider รอบถัดไป; รอบล่าสุดวันที่ 2026-05-26 ผ่านหลัง decision `0022` frontend allowlist contract พร้อม memory audit 32 Markdown files, docs command audit 334 refs, backend tests 177 pass / 609 expects, API audit 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard, frontend build และ bundle budget.
 
 ## คำสั่ง (Commands)
 
