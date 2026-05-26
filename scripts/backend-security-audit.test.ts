@@ -366,7 +366,7 @@ describe('backend security audit', () => {
             try {
               return streamChat()
             } catch (error) {
-              throw error
+              throw (error)
             }
           })
       `, 'chat.routes.ts'),

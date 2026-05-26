@@ -40,7 +40,7 @@ function lineFor(content: string, index: number) {
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g
-const rawRouteErrorThrowPattern = /throw\s+error\b/g
+const rawRouteErrorThrowPattern = /throw\s*(?:\(\s*)?error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
