@@ -1209,6 +1209,8 @@ const checks: Check[] = [
           'memory audit 32 Markdown files',
           'frontend static audit allowlist guard',
           'aria-disabled reason guard',
+          'placeholder-link guard',
+          'no-op handler guard',
           'memory/production/checklist.md',
           'handoffEvidence',
           'Chat smoke normal chatId',

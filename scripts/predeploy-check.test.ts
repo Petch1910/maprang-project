@@ -44,6 +44,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('docs command audit ครอบ 334 refs')
     expect(predeploy).toContain('frontend static audit allowlist guard')
     expect(predeploy).toContain('aria-disabled reason guard')
+    expect(predeploy).toContain('placeholder-link guard')
+    expect(predeploy).toContain('no-op handler guard')
     expect(predeploy).toContain('interactive `aria-disabled` controls/links')
     expect(predeploy).toContain('decision 0022 deploy-memory/predeploy sync')
     expect(predeploy).toContain('formats object-shaped smoke doctor errors without stringifying raw objects')

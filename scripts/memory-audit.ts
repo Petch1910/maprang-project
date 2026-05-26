@@ -105,6 +105,8 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'memory audit 32 Markdown files',
       'frontend static audit allowlist guard',
       'aria-disabled reason guard',
+      'placeholder-link guard',
+      'no-op handler guard',
     ],
     'memory/working-context.md',
   )
@@ -132,6 +134,8 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'memory audit ครอบ 32 Markdown files',
       'frontend static audit allowlist guard',
       'aria-disabled reason guard',
+      'placeholder-link guard',
+      'no-op handler guard',
       'handoffEvidence',
       'Chat smoke normal chatId',
       'Chat smoke normal tokens',
@@ -168,6 +172,8 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'memory audit 32 Markdown files',
       'frontend static audit allowlist guard',
       'aria-disabled reason guard',
+      'placeholder-link guard',
+      'no-op handler guard',
     ],
     'memory/qa-status.md',
   )
@@ -181,6 +187,8 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'docs command audit 334 refs',
       'frontend static audit allowlist guard',
       'aria-disabled reason guard',
+      'placeholder-link guard',
+      'no-op handler guard',
     ],
     'memory/production/checklist.md',
   )
