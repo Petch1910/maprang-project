@@ -1108,7 +1108,7 @@ const checks: Check[] = [
       requireIncludes(memoryReadme, ['ห้ามเก็บ secrets', 'ขั้นตอนอัปเดต', 'บริบทงานปัจจุบัน', 'ตัวกั้นก่อน deploy'], 'memory/README.md')
       requireIncludes(
         workingContext,
-        ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน', 'Route/Menu Audit', 'needs-staging', 'future', '/path', 'API route audit', 'admin-smoke', 'live-smoke', 'manual-production'],
+        ['สถานะ local ปัจจุบัน', 'สถานะ production ปัจจุบัน', 'Route/Menu Audit', 'needs-staging', 'future', '/path', 'stale documented rows', 'routeMenuAuditRows', 'API route audit', 'admin-smoke', 'live-smoke', 'manual-production'],
         'memory/working-context.md',
       )
       requireIncludes(
@@ -1129,6 +1129,8 @@ const checks: Check[] = [
           'memory audit ครอบ 32 Markdown files',
           'docs command audit ครอบ 334 refs',
           'frontend static audit allowlist guard',
+          'stale documented rows',
+          'routeMenuAuditRows',
         ],
         'memory/deploy-blockers.md',
       )
@@ -1194,6 +1196,8 @@ const checks: Check[] = [
           '/path',
           'API route coverage quality guard',
           'weak-coverage reason diagnostics',
+          'stale documented-row guard',
+          'routeMenuAuditRows',
           'decision 0022 deploy-memory/predeploy sync',
           'memory audit 32 Markdown files',
           'frontend static audit allowlist guard',
