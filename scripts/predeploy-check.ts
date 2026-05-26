@@ -1994,7 +1994,14 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/frontend-clipboard.test.ts'),
-        ['wraps clipboard writes without throwing', 'keeps frontend source on safe clipboard wrappers'],
+        [
+          'wraps clipboard writes without throwing',
+          'detects direct browser clipboard access variants',
+          'window . navigator . clipboard',
+          'globalThis . navigator . clipboard',
+          'clipboard . writeText',
+          'keeps frontend source on safe clipboard wrappers',
+        ],
         'scripts/frontend-clipboard.test.ts',
       )
       requireIncludes(

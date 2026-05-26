@@ -17,6 +17,14 @@ function collectSourceFiles(root: string) {
   return files
 }
 
+function directClipboardAccessPattern() {
+  return /\b(?:(?:(?:window|globalThis)\s*\.\s*)?navigator\s*\.\s*clipboard\b|clipboard\s*\.\s*writeText\s*\()/g
+}
+
+function collectDirectClipboardAccess(content: string) {
+  return [...content.matchAll(directClipboardAccessPattern())].map((match) => match[0])
+}
+
 describe('frontend clipboard helpers', () => {
   test('wraps clipboard writes without throwing', async () => {
     const writes: string[] = []
@@ -38,15 +46,36 @@ describe('frontend clipboard helpers', () => {
     await expect(safeWriteClipboardText({}, 'hello')).resolves.toBe(false)
   })
 
+  test('detects direct browser clipboard access variants', () => {
+    expect(
+      collectDirectClipboardAccess(`
+        navigator.clipboard
+        navigator . clipboard
+        window.navigator.clipboard
+        window . navigator . clipboard
+        globalThis . navigator . clipboard
+        clipboard.writeText('hello')
+        clipboard . writeText('hello')
+      `),
+    ).toEqual([
+      'navigator.clipboard',
+      'navigator . clipboard',
+      'window.navigator.clipboard',
+      'window . navigator . clipboard',
+      'globalThis . navigator . clipboard',
+      'clipboard.writeText(',
+      'clipboard . writeText(',
+    ])
+  })
+
   test('keeps frontend source on safe clipboard wrappers', () => {
     const sourceRoot = join(process.cwd(), 'apps', 'frontend', 'src')
-    const directClipboardPattern = /\bnavigator\.clipboard\b|\bclipboard\.writeText\s*\(/g
     const allowedFiles = new Set(['apps/frontend/src/lib/safeClipboard.ts'])
     const offenders = collectSourceFiles(sourceRoot).flatMap((filePath) => {
       const relativePath = relative(process.cwd(), filePath).replace(/\\/g, '/')
       if (allowedFiles.has(relativePath)) return []
       const content = readFileSync(filePath, 'utf8')
-      return [...content.matchAll(directClipboardPattern)].map((match) => `${relativePath}:${match.index ?? 0}`)
+      return [...content.matchAll(directClipboardAccessPattern())].map((match) => `${relativePath}:${match.index ?? 0}`)
     })
 
     expect(offenders).toEqual([])
