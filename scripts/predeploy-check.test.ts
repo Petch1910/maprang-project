@@ -41,7 +41,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('memory/production/checklist.md')
     expect(predeploy).toContain('decision `0022` frontend allowlist contract')
     expect(predeploy).toContain('memory audit ครอบ 32 Markdown files')
-    expect(predeploy).toContain('docs command audit ครอบ 334 refs')
+    expect(predeploy).toContain('docs command audit ครอบ 335 refs')
     expect(predeploy).toContain('frontend static audit allowlist guard')
     expect(predeploy).toContain('aria-disabled reason guard')
     expect(predeploy).toContain('placeholder-link guard')

@@ -187,7 +187,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
     [
       'decision `0022` frontend allowlist contract',
       'memory audit 32 Markdown files',
-      'docs command audit 334 refs',
+      'docs command audit 335 refs',
       'frontend static audit allowlist guard',
       'aria-disabled reason guard',
       'placeholder-link guard',
