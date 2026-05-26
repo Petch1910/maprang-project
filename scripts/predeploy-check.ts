@@ -286,6 +286,7 @@ const checks: Check[] = [
           'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
           'combined `api:smoke:live` JSON summary must omit `handoffEvidence`',
           'positive token/elapsed values',
+          'live-provider routes (`POST /chat`, `POST /chat/stream`, `POST /creator/ai-draft`) require `live-smoke`',
           '`qa:repo` ล่าสุดผ่านวันที่ 2026-05-26',
           'memory audit ครอบ 32 Markdown files',
           'docs command audit ครอบ 334 refs',
