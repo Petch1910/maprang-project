@@ -115,5 +115,6 @@ describe('docs command audit', () => {
 
     expect(files).toContain('memory/decisions/index.md')
     expect(files).toContain('memory/decisions/0018-add-test-coverage-audit-contract.md')
+    expect(files).toContain('memory/decisions/0019-audit-decision-command-references.md')
   })
 })

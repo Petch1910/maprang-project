@@ -20,3 +20,4 @@
 - [0016 - ให้ API route coverage เป็น quality contract](./0016-api-route-coverage-quality-contract.md)
 - [0017 - ให้ future surface ไม่อ้าง route จริงก่อนพร้อมตรวจ](./0017-route-menu-future-surface-contract.md)
 - [0018 - ให้ test coverage audit เป็น QA contract](./0018-add-test-coverage-audit-contract.md)
+- [0019 - ตรวจคำสั่งใน decision log ด้วย docs command audit](./0019-audit-decision-command-references.md)

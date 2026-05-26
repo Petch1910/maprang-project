@@ -563,6 +563,7 @@ Verified:
 - Latest full `qa:repo` pass after test-coverage audit wiring: docs command audit 330 refs, test coverage audit 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 177 pass / 609 expects, frontend route audit 13 routes, frontend build, and bundle budget pass.
 - Docs command audit now includes `memory/decisions/*.md` by default, so command references inside decision records are checked against package scripts; focused pass: `docs:commands:test`, `docs:commands` with 334 refs, and `predeploy:check`.
 - `predeploy:check` now locks the decision-file command audit wiring by requiring `collectDefaultAuditedCommandFiles`, the `memory/decisions` scan, and the regression fixture.
+- Decision `0019-audit-decision-command-references.md` now records decision-file command auditing as a quality contract. `memory/decisions/index.md`, docs command audit regression, predeploy decision-file list, and `agent.md` are updated so future decision files stay inside `docs:commands`. Focused checks passed: `bun run docs:commands:test`, `bun run docs:commands`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run memory:audit`, `bun run secrets:check`, and `git diff --check`.
 
 ## สถานะ production ปัจจุบัน
 

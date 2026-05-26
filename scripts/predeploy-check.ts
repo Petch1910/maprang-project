@@ -141,6 +141,7 @@ const markdownHeadingFiles = [
   'memory/decisions/0016-api-route-coverage-quality-contract.md',
   'memory/decisions/0017-route-menu-future-surface-contract.md',
   'memory/decisions/0018-add-test-coverage-audit-contract.md',
+  'memory/decisions/0019-audit-decision-command-references.md',
 ]
 
 async function assertFile(path: string) {
@@ -234,7 +235,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/docs-command-audit.test.ts'),
-        ['includes decision files in the default command audit set', '0018-add-test-coverage-audit-contract.md'],
+        ['includes decision files in the default command audit set', '0019-audit-decision-command-references.md'],
         'scripts/docs-command-audit.test.ts',
       )
     },
@@ -292,7 +293,7 @@ const checks: Check[] = [
           'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
           'combined `api:smoke:live` JSON summary must omit `handoffEvidence`',
           'positive token/elapsed values',
-          '0018-add-test-coverage-audit-contract.md',
+          '0019-audit-decision-command-references.md',
         ],
         'agent.md',
       )
