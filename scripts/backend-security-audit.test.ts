@@ -87,15 +87,17 @@ describe('backend security audit', () => {
   })
 
   test('catches direct raw error object logging', () => {
-    expect(
-      messagesFor(`
+    const rawLogMessage = 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.'
+    const messages = messagesFor(`
         try {
           await seed()
         } catch (error) {
-          console.error(error)
+          console.error ( error )
+          console.warn(error)
         }
-      `, 'prisma/seed.ts'),
-    ).toContain('ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.')
+      `, 'prisma/seed.ts')
+
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(2)
 
     expect(
       messagesFor(`
