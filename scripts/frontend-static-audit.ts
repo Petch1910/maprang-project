@@ -206,7 +206,7 @@ export function auditDisabledControlsWithAst(content: string, file: string) {
   const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const findings: Finding[] = []
   const disabledControlTags = new Set(['button', 'input', 'textarea', 'select'])
-  const ariaDisabledControlTags = new Set(['button', 'a', 'Link', 'NavLink'])
+  const ariaDisabledControlTags = new Set(['button', 'a', 'Link', 'NavLink', 'input', 'textarea', 'select', 'label'])
 
   function hasDisabledReason(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement) {
     const title = getJsxAttribute(node, sourceFile, 'title')

@@ -81,7 +81,11 @@ describe('frontend static audit', () => {
               <button type="button" aria-disabled={isSaving}>Save</button>
               <a href="/wallet" aria-disabled={isLoading}>Wallet</a>
               <Link to="/chat" aria-disabled>Chat</Link>
+              <input aria-disabled={isLocked} />
+              <label aria-disabled={isUploading}>Upload</label>
+              <textarea aria-disabled={isLocked} title={lockReason || 'กำลังล็อกช่องนี้'} />
               <NavLink to="/events" aria-disabled="false">Events</NavLink>
+              <select aria-disabled="false"><option>Open</option></select>
               <button type="button" aria-disabled={false}>Open</button>
               <a href="/safe" aria-disabled={isLoading} title={loadReason || 'โหลดข้อมูลก่อน'}>Safe</a>
               <button type="button" disabled={isSaving} aria-disabled={isSaving}>Native disabled already covered</button>
@@ -93,6 +97,8 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual([
+      expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
+      expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
       expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
       expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
       expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
