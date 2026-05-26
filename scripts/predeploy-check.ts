@@ -2129,6 +2129,8 @@ const checks: Check[] = [
           "routePaths['wallet']",
           'navigate({ pathname: routePaths.health })',
           'reports missing navigation coverage',
+          'reports stale documented rows and route tokens that drift from source rows',
+          'ที่ไม่มีใน routeMenuAuditRows',
           'requires staging and future rows to explain their next surface',
           'rejects future rows that point to real route paths',
           'สถานะ needs-staging ต้องชี้งานค้างไปที่ STAGING_RUNBOOK.md และ /admin/health',
@@ -2143,7 +2145,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'includesEvery', 'includesSome', 'hasRoutePathToken', 'STAGING_RUNBOOK.md', '/admin/health', 'ห้ามอ้าง route แบบ `/path`', 'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต', 'สถานะ future ต้องไม่อ้าง route แบบ /path', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
+        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'includesEvery', 'includesSome', 'findSourceAuditRow', 'hasRoutePathToken', 'STAGING_RUNBOOK.md', '/admin/health', 'ห้ามอ้าง route แบบ `/path`', 'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต', 'สถานะ future ต้องไม่อ้าง route แบบ /path', 'ที่ไม่มีใน routeMenuAuditRows', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(

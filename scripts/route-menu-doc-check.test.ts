@@ -7,6 +7,7 @@ import {
   collectRouteMenuDocCheckResult,
   collectRoutePreloadPaths,
   collectStaticNavigationPaths,
+  findSourceAuditRow,
   runRouteMenuDocCheck,
 } from './route-menu-doc-check'
 
@@ -150,6 +151,34 @@ describe('route menu doc check', () => {
         'navigation path /ghost ยังไม่มีใน routePreloads',
         'routeMenuAuditRows "Home" มี control ว่าง',
         'routeMenuAuditStatusLabel("ready") ยังไม่มี label ที่ผู้ใช้อ่านรู้เรื่อง',
+      ]),
+    )
+  })
+
+  test('reports stale documented rows and route tokens that drift from source rows', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | /, /old-home | open | renders | none | helpful |
+        | Ghost | /ghost | stale menu | stale result | stale guard | stale empty |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [row()],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findSourceAuditRow([row()], 'Home')).toEqual(row())
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'ROUTE_MENU_AUDIT.md แถว "Home" มี route token "/old-home" ที่ไม่มีใน routeMenuAuditRows',
+        'ROUTE_MENU_AUDIT.md มีแถว "Ghost" ที่ไม่มีใน routeMenuAuditRows',
       ]),
     )
   })

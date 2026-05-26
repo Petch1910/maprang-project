@@ -280,6 +280,14 @@ export function findDocumentedRow(rows: MarkdownTableRow[], area: string) {
   })
 }
 
+export function findSourceAuditRow(rows: RouteMenuAuditRow[], area: string) {
+  const documented = area.toLowerCase()
+  return rows.find((row) => {
+    const source = row.area.toLowerCase()
+    return documented === source || documented.includes(source) || source.includes(documented)
+  })
+}
+
 export function uniqueKeys(values: string[]) {
   return new Set(values).size === values.length
 }
@@ -386,6 +394,21 @@ export function auditRouteMenuDocumentation({
   }
 
   const auditedRouteTokens = rows.flatMap((row) => expectedRouteTokens(row.route)).filter((token) => token.startsWith('/'))
+  for (const documented of documentedRows) {
+    const source = findSourceAuditRow(rows, documented.area)
+    if (!source) {
+      findings.push(`ROUTE_MENU_AUDIT.md มีแถว "${documented.area}" ที่ไม่มีใน routeMenuAuditRows`)
+      continue
+    }
+
+    const sourceRouteTokens = expectedRouteTokens(source.route)
+    for (const token of expectedRouteTokens(documented.route)) {
+      if (!sourceRouteTokens.includes(token)) {
+        findings.push(`ROUTE_MENU_AUDIT.md แถว "${documented.area}" มี route token "${token}" ที่ไม่มีใน routeMenuAuditRows`)
+      }
+    }
+  }
+
   for (const path of navigationPaths) {
     if (!isCoveredByRoute(path, declaredRoutes)) {
       findings.push(`navigation path ${path} ไม่มี Route ที่ตรงกันใน App.tsx`)
