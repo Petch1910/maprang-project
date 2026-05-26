@@ -71,6 +71,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('positive token/elapsed values')
     expect(predeploy).toContain('combined `api:smoke:live` JSON summary must omit `handoffEvidence`')
     expect(predeploy).toContain('live-provider routes (`POST /chat`, `POST /chat/stream`, `POST /creator/ai-draft`) require `live-smoke`')
+    expect(predeploy).toContain('href={"#"}')
     expect(predeploy).toContain('formats object-shaped env doctor errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped Supabase storage setup errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped e2e smoke errors without stringifying raw objects')
