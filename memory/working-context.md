@@ -564,6 +564,7 @@ Verified:
 - Docs command audit now includes `memory/decisions/*.md` by default, so command references inside decision records are checked against package scripts; focused pass: `docs:commands:test`, `docs:commands` with 334 refs, and `predeploy:check`.
 - `predeploy:check` now locks the decision-file command audit wiring by requiring `collectDefaultAuditedCommandFiles`, the `memory/decisions` scan, and the regression fixture.
 - Decision `0019-audit-decision-command-references.md` now records decision-file command auditing as a quality contract. `memory/decisions/index.md`, docs command audit regression, predeploy decision-file list, and `agent.md` are updated so future decision files stay inside `docs:commands`. Focused checks passed: `bun run docs:commands:test`, `bun run docs:commands`, `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run memory:audit`, `bun run secrets:check`, and `git diff --check`.
+- Decision `0020-discover-decision-markdown-heading-files.md` now records dynamic decision-file discovery for the predeploy Markdown heading audit. `predeploy:check` uses `collectMarkdownHeadingFiles` / `collectDecisionMarkdownFiles` instead of hardcoding every decision file name. Focused checks passed: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands:test`, `bun run docs:commands`, `bun run memory:audit`, and `bun run secrets:check`.
 
 ## สถานะ production ปัจจุบัน
 

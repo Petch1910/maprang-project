@@ -233,7 +233,7 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: `memory:audit` now requires API route coverage quality and weak-coverage reason notes to stay in memory, with `predeploy:check` also locking those memory-audit snippets.
 - Current addendum 2026-05-25: README and Deployment QA must describe the API route coverage quality guard and weak coverage reason output.
 - Current addendum 2026-05-25: decision `0016-api-route-coverage-quality-contract.md` records API route coverage as a quality contract for future agents.
-- Current addendum 2026-05-25: `memory:audit` now checks numbered decision files are linked from `memory/decisions/index.md`, and `predeploy:check` locks decision files through `0019-audit-decision-command-references.md`.
+- Current addendum 2026-05-25: `memory:audit` now checks numbered decision files are linked from `memory/decisions/index.md`, and `predeploy:check` locks decision files through `0020-discover-decision-markdown-heading-files.md`.
 - Current addendum 2026-05-25: `POST /chat/stream` is a live-provider route in `api:audit` and must keep `live-smoke` coverage before deploy.
 - Current addendum 2026-05-25: `api:smoke:live` now runs a real `POST /chat/stream` provider stream so stream-chat live-smoke coverage has runtime evidence.
 - Current addendum 2026-05-25: `smoke:chat` also verifies live stream chat, so narrow chat live-smoke retry covers both `/chat` and `/chat/stream`.
@@ -246,3 +246,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: `api:smoke:live` must print copy-ready live chat billing evidence rows for normal chat and stream chat (`chatId`, token count, and wallet transaction id) from the `POST /chat/stream live` result before combined live smoke evidence can support chat-provider release handoff.
 - Current addendum 2026-05-25: combined `api:smoke:live` JSON summary must omit `handoffEvidence` until chat normal, chat stream, and image evidence are all complete with positive token/elapsed values; if the summary has no `handoffEvidence`, operators must rerun the missing live smoke path or copy only proven narrow smoke evidence.
 - Current addendum 2026-05-25: docs command audit must include `memory/decisions/*.md` by default, and decision `0019-audit-decision-command-references.md` records this as a quality contract so command references in long-term decisions cannot drift from `package.json`.
+- Current addendum 2026-05-25: predeploy Markdown heading audit must discover `memory/decisions/*.md` dynamically, and decision `0020-discover-decision-markdown-heading-files.md` records this so future decision files do not need manual predeploy list updates.

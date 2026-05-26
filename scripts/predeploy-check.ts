@@ -94,7 +94,7 @@ const requiredFiles = [
   'scripts/supabase-storage-setup.test.ts',
 ]
 
-const markdownHeadingFiles = [
+const markdownHeadingBaseFiles = [
   'README.md',
   'AGENTS.md',
   'agent.md',
@@ -123,25 +123,6 @@ const markdownHeadingFiles = [
   'memory/qa-status.md',
   'memory/ui-ux/current-direction.md',
   'memory/working-context.md',
-  'memory/decisions/0001-use-socraticode-local-tool.md',
-  'memory/decisions/0002-add-markdown-memory-vault.md',
-  'memory/decisions/0003-separate-live-provider-verification.md',
-  'memory/decisions/0004-adult-mode-conflict-policy.md',
-  'memory/decisions/0005-audit-memory-in-local-qa.md',
-  'memory/decisions/0006-add-runtime-knowledge-layer.md',
-  'memory/decisions/0007-add-deterministic-roleplay-evals.md',
-  'memory/decisions/0008-stage-background-observability-tooling.md',
-  'memory/decisions/0009-add-admin-prompt-inspector.md',
-  'memory/decisions/0010-add-admin-automated-evals.md',
-  'memory/decisions/0011-add-chat-world-state-controller.md',
-  'memory/decisions/0012-add-usage-cost-intelligence.md',
-  'memory/decisions/0013-add-prompt-budgeting.md',
-  'memory/decisions/0014-add-chat-provider-failure-classification.md',
-  'memory/decisions/0015-route-menu-disabled-reasons-contract.md',
-  'memory/decisions/0016-api-route-coverage-quality-contract.md',
-  'memory/decisions/0017-route-menu-future-surface-contract.md',
-  'memory/decisions/0018-add-test-coverage-audit-contract.md',
-  'memory/decisions/0019-audit-decision-command-references.md',
 ]
 
 async function assertFile(path: string) {
@@ -150,6 +131,18 @@ async function assertFile(path: string) {
 
 async function readRepoFile(path: string) {
   return readFile(join(root, path), 'utf8')
+}
+
+async function collectDecisionMarkdownFiles() {
+  const decisionEntries = await readdir(join(root, 'memory/decisions'), { withFileTypes: true })
+  return decisionEntries
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+    .map((entry) => `memory/decisions/${entry.name}`)
+    .sort()
+}
+
+async function collectMarkdownHeadingFiles() {
+  return [...markdownHeadingBaseFiles, ...(await collectDecisionMarkdownFiles())]
 }
 
 function requireIncludes(content: string, values: string[], file: string) {
@@ -216,7 +209,7 @@ const checks: Check[] = [
   {
     name: 'หัวข้อ Markdown สำคัญต้องเป็น Thai-first',
     run: async () => {
-      for (const file of markdownHeadingFiles) {
+      for (const file of await collectMarkdownHeadingFiles()) {
         assertThaiFirstMarkdownHeadings(await readRepoFile(file), file)
       }
     },
@@ -235,7 +228,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/docs-command-audit.test.ts'),
-        ['includes decision files in the default command audit set', '0019-audit-decision-command-references.md'],
+        ['includes decision files in the default command audit set', 'startsWith(\'memory/decisions/\')'],
         'scripts/docs-command-audit.test.ts',
       )
     },
@@ -293,7 +286,7 @@ const checks: Check[] = [
           'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
           'combined `api:smoke:live` JSON summary must omit `handoffEvidence`',
           'positive token/elapsed values',
-          '0019-audit-decision-command-references.md',
+          '0020-discover-decision-markdown-heading-files.md',
         ],
         'agent.md',
       )

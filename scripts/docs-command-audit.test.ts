@@ -112,9 +112,10 @@ describe('docs command audit', () => {
 
   test('includes decision files in the default command audit set', async () => {
     const files = await collectDefaultAuditedCommandFiles()
+    const decisionFiles = files.filter((file) => file.startsWith('memory/decisions/'))
 
     expect(files).toContain('memory/decisions/index.md')
-    expect(files).toContain('memory/decisions/0018-add-test-coverage-audit-contract.md')
-    expect(files).toContain('memory/decisions/0019-audit-decision-command-references.md')
+    expect(decisionFiles.length).toBeGreaterThan(1)
+    expect(decisionFiles).toContain('memory/decisions/0019-audit-decision-command-references.md')
   })
 })
