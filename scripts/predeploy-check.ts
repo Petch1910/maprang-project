@@ -1110,7 +1110,22 @@ const checks: Check[] = [
       )
       requireIncludes(
         deployBlockers,
-        ['CHAT_PROVIDER_LIVE_VERIFIED', 'IMAGE_GENERATION_LIVE_VERIFIED', 'path/query/hash', 'Route/Menu Audit guard', 'STAGING_RUNBOOK.md', '/admin/health', '/path', 'API route audit', 'weak coverage', 'admin-smoke', 'live-smoke'],
+        [
+          'CHAT_PROVIDER_LIVE_VERIFIED',
+          'IMAGE_GENERATION_LIVE_VERIFIED',
+          'path/query/hash',
+          'Route/Menu Audit guard',
+          'STAGING_RUNBOOK.md',
+          '/admin/health',
+          '/path',
+          'API route audit',
+          'weak coverage',
+          'admin-smoke',
+          'live-smoke',
+          'decision `0021` agent baseline contract',
+          'memory audit ครอบ 31 Markdown files',
+          'docs command audit ครอบ 334 refs',
+        ],
         'memory/deploy-blockers.md',
       )
       requireIncludes(
@@ -1151,6 +1166,9 @@ const checks: Check[] = [
           'Image smoke elapsedMs',
           'summary ยังไม่มี `handoffEvidence`',
           'อย่าชี้ `qa:local`',
+          'decision `0021` agent baseline contract',
+          'memory audit 31 Markdown files',
+          'docs command audit 334 refs',
         ],
         'memory/production/checklist.md',
       )
