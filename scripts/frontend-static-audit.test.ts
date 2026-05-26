@@ -152,7 +152,9 @@ describe('frontend static audit', () => {
       `
         <a href="#">Placeholder</a>
         <a href={"#"}>Expression placeholder</a>
+        <a href={\`#\`}>Template placeholder</a>
         <NavLink to={"#"}>Placeholder</NavLink>
+        <NavLink to={\`#\`}>Template Router placeholder</NavLink>
         <button type="button" onClick={() => {}}>No-op</button>
         throw new Error('not implemented')
         setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
@@ -172,6 +174,8 @@ describe('frontend static audit', () => {
     expect(findings.map((finding) => finding.message)).toEqual([
       'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
+      'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
+      'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ปุ่มหรือลิงก์มี onClick ว่างเปล่า',
       'frontend source ยังโยน not implemented',

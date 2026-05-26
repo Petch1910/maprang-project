@@ -281,9 +281,9 @@ export const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/s
 
 export const suspiciousPatterns = [
   { pattern: /href=(["'])#\1/g, message: 'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
-  { pattern: /href=\{\s*(["'])#\1\s*\}/g, message: 'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /href=\{\s*(["'`])#\1\s*\}/g, message: 'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
   { pattern: /to=(["'])#\1/g, message: 'ลิงก์ Router ใช้ to="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
-  { pattern: /to=\{\s*(["'])#\1\s*\}/g, message: 'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /to=\{\s*(["'`])#\1\s*\}/g, message: 'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
   { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick ว่างเปล่า' },
   { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'frontend source ยังโยน not implemented' },
   { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบข้อความรอทำ' },
