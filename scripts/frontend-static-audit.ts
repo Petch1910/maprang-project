@@ -330,11 +330,11 @@ export const suspiciousPatterns = [
     message: 'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
   },
   {
-    pattern: /\berror\.message\.toLowerCase\(\)|\bString\(error\)\.toLowerCase\(\)/g,
+    pattern: /\berror\s*\.\s*message\s*\.\s*toLowerCase\s*\(\s*\)|\bString\s*\(\s*error\s*\)\s*\.\s*toLowerCase\s*\(\s*\)/g,
     message: 'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
   },
   {
-    pattern: /\/[^/\n]+\/[gimsuyd]*\.test\(\s*error\.message\s*\)|error\.message\.match\s*\(/g,
+    pattern: /\/[^/\n]+\/[gimsuyd]*\.test\(\s*error\s*\.\s*message\s*\)|error\s*\.\s*message\s*\.\s*match\s*\(/g,
     message: 'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
   },
   {

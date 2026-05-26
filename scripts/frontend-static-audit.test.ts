@@ -207,15 +207,23 @@ describe('frontend static audit', () => {
       auditSuspiciousPatterns(
         `
           const rawAuthMessage = error.message.toLowerCase()
+          const rawAuthMessageSpaced = error . message . toLowerCase()
           const rawStringMessage = String(error).toLowerCase()
+          const rawStringMessageSpaced = String ( error ) . toLowerCase()
           const rawRegexMessage = /admin_unauthorized|forbidden/i.test(error.message)
+          const rawRegexMessageSpaced = /admin_unauthorized|forbidden/i.test(error . message)
           const rawMatchMessage = error.message.match(/forbidden/i)
+          const rawMatchMessageSpaced = error . message . match(/forbidden/i)
         `,
         'AuthFixture.tsx',
       ).map((finding) => finding.message),
     ).toEqual([
       'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
       'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
       'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
       'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
     ])
