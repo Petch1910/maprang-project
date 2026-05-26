@@ -38,10 +38,14 @@ describe('backend security audit', () => {
   test('catches unsafe raw SQL helpers', () => {
     const messages = messagesFor(`
       await prisma.$queryRawUnsafe('select * from "User" where id = ' + userId)
+      await prisma . $queryRawUnsafe('select * from "User" where id = ' + userId)
       await prisma.$executeRawUnsafe('delete from "Chat"')
+      await prisma . $executeRawUnsafe('delete from "Chat"')
       await prisma.$queryRaw('select * from "Chat" where id = ' + chatId)
+      await prisma . $queryRaw('select * from "Chat" where id = ' + chatId)
       await prisma.$executeRaw('delete from "Chat" where id = ' + chatId)
-      Prisma.raw(userInput)
+      await prisma . $executeRaw('delete from "Chat" where id = ' + chatId)
+      Prisma . raw(userInput)
     `)
 
     expect(messages).toEqual(

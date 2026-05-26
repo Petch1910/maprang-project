@@ -71,23 +71,23 @@ type BackendRouteCall = {
 
 const patterns = [
   {
-    pattern: /\.\$queryRawUnsafe\s*\(/g,
+    pattern: /\.\s*\$queryRawUnsafe\s*\(/g,
     message: 'ห้ามใช้ Prisma $queryRawUnsafe; ให้ใช้ Prisma query builders หรือ tagged $queryRaw พร้อม parameters.',
   },
   {
-    pattern: /\.\$executeRawUnsafe\s*\(/g,
+    pattern: /\.\s*\$executeRawUnsafe\s*\(/g,
     message: 'ห้ามใช้ Prisma $executeRawUnsafe; ให้ใช้ Prisma query builders หรือ tagged $executeRaw พร้อม parameters.',
   },
   {
-    pattern: /\bPrisma\.raw\s*\(/g,
+    pattern: /\bPrisma\s*\.\s*raw\s*\(/g,
     message: 'ห้ามใช้ Prisma.raw เพราะอาจข้าม parameterization.',
   },
   {
-    pattern: /\.\$queryRaw(?:<[^>]+>)?\s*\(/g,
+    pattern: /\.\s*\$queryRaw(?:<[^>]+>)?\s*\(/g,
     message: 'ห้ามใช้ Prisma $queryRaw แบบ function call; ให้ใช้ tagged template parameterization.',
   },
   {
-    pattern: /\.\$executeRaw(?:<[^>]+>)?\s*\(/g,
+    pattern: /\.\s*\$executeRaw(?:<[^>]+>)?\s*\(/g,
     message: 'ห้ามใช้ Prisma $executeRaw แบบ function call; ให้ใช้ tagged template parameterization.',
   },
   {
