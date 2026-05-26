@@ -293,6 +293,7 @@ const checks: Check[] = [
           'Decision/predeploy handoff lock ล่าสุดอยู่ถึง',
           '0022-validate-frontend-unmounted-allowlists.md',
           '0020-discover-decision-markdown-heading-files.md',
+          'predeploy:check` audits decision Markdown dynamically',
           'decision markdown files ถูก audit แบบ dynamic',
           'Markdown Thai-first headings',
         ],
