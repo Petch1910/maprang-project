@@ -27,8 +27,8 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 สถานะล่าสุดที่ต้องจำ:
 
 - Local QA พร้อมใช้งาน
-- Backend tests ล่าสุดผ่าน 177 tests / 609 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-26 หลัง frontend placeholder/no-op/dangerous link protocol guards; memory audit ครอบ 32 Markdown files, docs command audit ครอบ 335 refs, test coverage audit ครอบ 60 files / 33 root test scripts, API audit ครอบ 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard, aria-disabled reason guard, placeholder-link guard, no-op handler guard, dangerous link protocol guard, frontend build, และ bundle budget
-- Decision/predeploy handoff lock ล่าสุดอยู่ถึง `0022-validate-frontend-unmounted-allowlists.md`; decision markdown files ถูก audit แบบ dynamic ทั้ง docs command references และ Markdown Thai-first headings
+- Backend tests ล่าสุดผ่าน 177 tests / 609 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-26 หลัง frontend placeholder/no-op/dangerous link protocol guards; memory audit ครอบ 33 Markdown files, docs command audit ครอบ 335 refs, test coverage audit ครอบ 60 files / 33 root test scripts, API audit ครอบ 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard, aria-disabled reason guard, placeholder-link guard, no-op handler guard, dangerous link protocol guard, frontend build, และ bundle budget
+- Decision/predeploy handoff lock ล่าสุดอยู่ถึง `0023-guard-dangerous-frontend-link-protocols.md`; decision markdown files ถูก audit แบบ dynamic ทั้ง docs command references และ Markdown Thai-first headings
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile; command/config regression tests ผ่าน 13 tests, Playwright จะ start dev server เฉพาะ local loopback targets, และ `runE2eSmoke` ส่ง env ที่ validate แล้วเข้า runner steps
 - โปรดักชันยังถูกกั้น เพราะต้องมีโดเมนสเตจจิง/ระบบหลังบ้าน/หน้าบ้านจริง, CORS จริง, การทดสอบแชทจริง และการทดสอบสร้างรูปจริง
@@ -234,7 +234,7 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: `memory:audit` now requires API route coverage quality and weak-coverage reason notes to stay in memory, with `predeploy:check` also locking those memory-audit snippets.
 - Current addendum 2026-05-25: README and Deployment QA must describe the API route coverage quality guard and weak coverage reason output.
 - Current addendum 2026-05-25: decision `0016-api-route-coverage-quality-contract.md` records API route coverage as a quality contract for future agents.
-- Current addendum 2026-05-26: `memory:audit` now checks numbered decision files are linked from `memory/decisions/index.md`, `predeploy:check` audits decision Markdown dynamically, and the current handoff baseline runs through `0022-validate-frontend-unmounted-allowlists.md`.
+- Current addendum 2026-05-26: `memory:audit` now checks numbered decision files are linked from `memory/decisions/index.md`, `predeploy:check` audits decision Markdown dynamically, and the current handoff baseline runs through `0023-guard-dangerous-frontend-link-protocols.md`.
 - Current addendum 2026-05-25: `POST /chat/stream` is a live-provider route in `api:audit` and must keep `live-smoke` coverage before deploy.
 - Current addendum 2026-05-25: `api:smoke:live` now runs a real `POST /chat/stream` provider stream so stream-chat live-smoke coverage has runtime evidence.
 - Current addendum 2026-05-25: `smoke:chat` also verifies live stream chat, so narrow chat live-smoke retry covers both `/chat` and `/chat/stream`.
@@ -250,6 +250,7 @@ bun run smoke:image:live
 - Current addendum 2026-05-26: predeploy Markdown heading audit must discover `memory/decisions/*.md` dynamically, and decision `0020-discover-decision-markdown-heading-files.md` records this so future decision files do not need manual predeploy list updates.
 - Current addendum 2026-05-26: decision `0021-lock-agent-handoff-baseline.md` records the agent handoff baseline contract, and `predeploy:check` locks the current `agent.md` QA baseline plus dynamic decision audit wording so the entry guide cannot drift back to stale status.
 - Current addendum 2026-05-26: decision `0022-validate-frontend-unmounted-allowlists.md` records that frontend static audit allowlists must point at existing matching files and include clear reasons.
+- Current addendum 2026-05-26: decision `0023-guard-dangerous-frontend-link-protocols.md` records that frontend links must not use code-executing protocols such as `javascript:`, `vbscript:`, or `data:text/html`.
 - Current addendum 2026-05-26: frontend static audit now rejects interactive `aria-disabled` controls/links without a user-facing `title` or `aria-label` reason, treats `aria-disabled="false"` as inactive, and `predeploy:check` locks the checker/test snippets.
 - Current addendum 2026-05-26: frontend static audit now protects placeholder-link guard, no-op handler guard, and dangerous link protocol guard paths; `memory:audit` and `predeploy:check` must keep `javascript:`, `vbscript:`, and `data:text/html` coverage visible in handoff memory before staging.
 - Current addendum 2026-05-26: full deterministic `bun run qa:repo` passed after dangerous link protocol guard landed, with backend tests 177 pass / 609 expects, frontend static audit/build/bundle budget, API audit, route/menu audit, and docs/memory/knowledge gates all green.

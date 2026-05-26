@@ -24,3 +24,4 @@
 - [0020 - ให้ predeploy ค้น decision markdown สำหรับ heading audit เอง](./0020-discover-decision-markdown-heading-files.md)
 - [0021 - ล็อก baseline handoff ของ agent guide](./0021-lock-agent-handoff-baseline.md)
 - [0022 - ตรวจ allowlist ของ frontend static audit](./0022-validate-frontend-unmounted-allowlists.md)
+- [0023 - ปิด protocol link อันตรายใน frontend static audit](./0023-guard-dangerous-frontend-link-protocols.md)
