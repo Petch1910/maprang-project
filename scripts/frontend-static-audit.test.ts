@@ -326,10 +326,20 @@ describe('frontend static audit', () => {
           async function loadCharacters() {
             return fetch('/characters')
           }
+          async function loadWithWindowFetch() {
+            return window . fetch('/characters')
+          }
+          async function loadWithGlobalFetch() {
+            return globalThis.fetch('/characters')
+          }
         `,
         'apps/frontend/src/pages/ExplorePage.tsx',
       ).map((finding) => finding.message),
-    ).toContain('ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.')
+    ).toEqual([
+      'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.',
+      'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.',
+      'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.',
+    ])
 
     expect(
       auditRawFrontendFetchUsage(

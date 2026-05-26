@@ -2071,6 +2071,8 @@ const checks: Check[] = [
           'target="_blank"',
           'response . clone () . json()',
           'response . text()',
+          'window . fetch',
+          'globalThis.fetch',
         ],
         'scripts/frontend-static-audit.test.ts',
       )
@@ -2119,6 +2121,8 @@ const checks: Check[] = [
           '\\s*\\.\\s*clone\\s*\\(\\s*\\)',
           '\\s*\\.\\s*json\\s*\\(',
           '\\s*\\.\\s*text\\s*\\(',
+          'window\\s*\\.\\s*fetch',
+          'globalThis\\s*\\.\\s*fetch',
           'throw\\s+new\\s+Error\\s*\\(',
           '\\beval\\s*\\(',
           '\\bnew\\s+Function\\s*\\(',
