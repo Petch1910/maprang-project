@@ -22,3 +22,4 @@
 - [0018 - ให้ test coverage audit เป็น QA contract](./0018-add-test-coverage-audit-contract.md)
 - [0019 - ตรวจคำสั่งใน decision log ด้วย docs command audit](./0019-audit-decision-command-references.md)
 - [0020 - ให้ predeploy ค้น decision markdown สำหรับ heading audit เอง](./0020-discover-decision-markdown-heading-files.md)
+- [0021 - ล็อก baseline handoff ของ agent guide](./0021-lock-agent-handoff-baseline.md)

@@ -289,6 +289,7 @@ const checks: Check[] = [
           '`qa:repo` ล่าสุดผ่านวันที่ 2026-05-26',
           'docs command audit ครอบ 334 refs',
           'Decision/predeploy handoff lock ล่าสุดอยู่ถึง',
+          '0021-lock-agent-handoff-baseline.md',
           '0020-discover-decision-markdown-heading-files.md',
           'decision markdown files ถูก audit แบบ dynamic',
           'Markdown Thai-first headings',

@@ -89,6 +89,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('0020-discover-decision-markdown-heading-files.md')
     expect(predeploy).toContain('`qa:repo` ล่าสุดผ่านวันที่ 2026-05-26')
     expect(predeploy).toContain('Decision/predeploy handoff lock ล่าสุดอยู่ถึง')
+    expect(predeploy).toContain('0021-lock-agent-handoff-baseline.md')
     expect(predeploy).toContain('decision markdown files ถูก audit แบบ dynamic')
     expect(predeploy).toContain('missingDecisionIndexEntries')
     expect(predeploy).toContain('apps/backend/src/world-state.service.ts')

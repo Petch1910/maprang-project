@@ -28,7 +28,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 
 - Local QA พร้อมใช้งาน
 - Backend tests ล่าสุดผ่าน 177 tests / 609 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-26 หลัง decision command audit และ predeploy Markdown heading audit hardening; docs command audit ครอบ 334 refs, test coverage audit ครอบ 60 files / 33 root test scripts, API audit ครอบ 48 backend routes + 34 frontend helper calls, frontend build, และ bundle budget
-- Decision/predeploy handoff lock ล่าสุดอยู่ถึง `0020-discover-decision-markdown-heading-files.md`; decision markdown files ถูก audit แบบ dynamic ทั้ง docs command references และ Markdown Thai-first headings
+- Decision/predeploy handoff lock ล่าสุดอยู่ถึง `0021-lock-agent-handoff-baseline.md`; decision markdown files ถูก audit แบบ dynamic ทั้ง docs command references และ Markdown Thai-first headings
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile; command/config regression tests ผ่าน 13 tests, Playwright จะ start dev server เฉพาะ local loopback targets, และ `runE2eSmoke` ส่ง env ที่ validate แล้วเข้า runner steps
 - โปรดักชันยังถูกกั้น เพราะต้องมีโดเมนสเตจจิง/ระบบหลังบ้าน/หน้าบ้านจริง, CORS จริง, การทดสอบแชทจริง และการทดสอบสร้างรูปจริง
@@ -248,3 +248,4 @@ bun run smoke:image:live
 - Current addendum 2026-05-25: combined `api:smoke:live` JSON summary must omit `handoffEvidence` until chat normal, chat stream, and image evidence are all complete with positive token/elapsed values; if the summary has no `handoffEvidence`, operators must rerun the missing live smoke path or copy only proven narrow smoke evidence.
 - Current addendum 2026-05-26: docs command audit must include `memory/decisions/*.md` by default, and decision `0019-audit-decision-command-references.md` records this as a quality contract so command references in long-term decisions cannot drift from `package.json`.
 - Current addendum 2026-05-26: predeploy Markdown heading audit must discover `memory/decisions/*.md` dynamically, and decision `0020-discover-decision-markdown-heading-files.md` records this so future decision files do not need manual predeploy list updates.
+- Current addendum 2026-05-26: decision `0021-lock-agent-handoff-baseline.md` records the agent handoff baseline contract, and `predeploy:check` locks the current `agent.md` QA baseline plus dynamic decision audit wording so the entry guide cannot drift back to stale status.
