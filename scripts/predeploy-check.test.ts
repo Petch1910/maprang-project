@@ -43,6 +43,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('memory audit ครอบ 32 Markdown files')
     expect(predeploy).toContain('docs command audit ครอบ 334 refs')
     expect(predeploy).toContain('frontend static audit allowlist guard')
+    expect(predeploy).toContain('decision 0022 deploy-memory/predeploy sync')
     expect(predeploy).toContain('formats object-shaped smoke doctor errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped local smoke errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped readiness errors without stringifying raw objects')

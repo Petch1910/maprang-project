@@ -97,6 +97,9 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'admin-smoke',
       'live-smoke',
       'manual-production',
+      '0022-validate-frontend-unmounted-allowlists.md',
+      'memory audit 32 Markdown files',
+      'frontend static audit allowlist guard',
     ],
     'memory/working-context.md',
   )
@@ -117,6 +120,9 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'weak coverage',
       'admin-smoke',
       'live-smoke',
+      'decision `0022` frontend allowlist contract',
+      'memory audit ครอบ 32 Markdown files',
+      'frontend static audit allowlist guard',
       'handoffEvidence',
       'Chat smoke normal chatId',
       'Chat smoke normal tokens',
@@ -145,8 +151,23 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'predeploy route/menu status evidence',
       'API route coverage quality guard',
       'weak-coverage reason diagnostics',
+      'decision 0022 deploy-memory/predeploy sync',
+      'memory audit 32 Markdown files',
+      'frontend static audit allowlist guard',
     ],
     'memory/qa-status.md',
+  )
+
+  const productionChecklist = await readRepoFile('memory/production/checklist.md')
+  requireIncludes(
+    productionChecklist,
+    [
+      'decision `0022` frontend allowlist contract',
+      'memory audit 32 Markdown files',
+      'docs command audit 334 refs',
+      'frontend static audit allowlist guard',
+    ],
+    'memory/production/checklist.md',
   )
 
   const files = await walkMarkdown(memoryRoot)
