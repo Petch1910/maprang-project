@@ -6,6 +6,7 @@ import {
   auditFrontendSourceFile,
   auditLinksWithAst,
   auditRawFrontendFetchUsage,
+  auditReferencedFrontendModules,
   auditRawResponseTextParsing,
   auditSuspiciousPatterns,
   auditUnmountedFrontendComponents,
@@ -292,6 +293,45 @@ describe('frontend static audit', () => {
         line: 1,
         message:
           'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล',
+      },
+    ])
+  })
+
+  test('reports stale or unexplained frontend allowlist entries', () => {
+    const files = [
+      {
+        file: join(process.cwd(), 'apps/frontend/src/components/AllowedBlank.tsx'),
+        relativeFile: 'apps/frontend/src/components/AllowedBlank.tsx',
+        content: 'export function AllowedBlank() { return <section /> }',
+      },
+      {
+        file: join(process.cwd(), 'apps/frontend/src/pages/LivePage.tsx'),
+        relativeFile: 'apps/frontend/src/pages/LivePage.tsx',
+        content: "import { AllowedBlank } from '../components/AllowedBlank'\nexport function LivePage() { return <AllowedBlank /> }",
+      },
+    ]
+    const allowlist = new Map([
+      ['apps/frontend/src/components/AllowedBlank.tsx', '  '],
+      ['apps/frontend/src/components/MissingPanel.tsx', 'เก็บไว้สำหรับทดสอบข้อยกเว้นที่ไฟล์หาย'],
+    ])
+
+    const findings = auditReferencedFrontendModules(
+      files,
+      /^apps\/frontend\/src\/components\/[^/]+\.tsx$/,
+      allowlist,
+      'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล',
+    )
+
+    expect(findings).toEqual([
+      {
+        file: 'apps/frontend/src/components/AllowedBlank.tsx',
+        line: 1,
+        message: 'allowlist ของ frontend static audit ต้องมีเหตุผลชัดเจน',
+      },
+      {
+        file: 'apps/frontend/src/components/MissingPanel.tsx',
+        line: 1,
+        message: 'allowlist ของ frontend static audit ชี้ไฟล์ที่ไม่มีอยู่จริงหรือไม่ตรงชนิดที่ตรวจ',
       },
     ])
   })

@@ -54,6 +54,10 @@ const unmountedComponentMessage =
   'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล'
 const unmountedPageMessage =
   'page หน้าบ้านไม่ได้ถูก import หรือ mount จาก App/page อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล'
+const unmountedAllowlistMissingMessage =
+  'allowlist ของ frontend static audit ชี้ไฟล์ที่ไม่มีอยู่จริงหรือไม่ตรงชนิดที่ตรวจ'
+const unmountedAllowlistReasonMessage =
+  'allowlist ของ frontend static audit ต้องมีเหตุผลชัดเจน'
 
 function frontendRelativePath(file: string) {
   const normalizedRoot = root.replaceAll('\\', '/')
@@ -488,7 +492,7 @@ export async function auditUnmountedFrontendPages(
   )
 }
 
-function auditReferencedFrontendModules(
+export function auditReferencedFrontendModules(
   frontendFiles: Array<{ file: string; relativeFile: string; content: string }>,
   targetPattern: RegExp,
   allowlist: Map<string, string>,
@@ -496,9 +500,34 @@ function auditReferencedFrontendModules(
 ) {
   const findings: Finding[] = []
   const targetFiles = frontendFiles.filter((entry) => targetPattern.test(entry.relativeFile))
+  const targetFileSet = new Set(targetFiles.map((entry) => entry.relativeFile))
+  const validAllowlistEntries = new Set<string>()
+
+  for (const [relativeFile, reason] of allowlist) {
+    const hasMatchingTarget = targetPattern.test(relativeFile) && targetFileSet.has(relativeFile)
+    const hasReason = compact(reason).length >= 12
+
+    if (!hasMatchingTarget) {
+      findings.push({
+        file: relativeFile,
+        line: 1,
+        message: unmountedAllowlistMissingMessage,
+      })
+    }
+
+    if (!hasReason) {
+      findings.push({
+        file: relativeFile,
+        line: 1,
+        message: unmountedAllowlistReasonMessage,
+      })
+    }
+
+    if (hasMatchingTarget && hasReason) validAllowlistEntries.add(relativeFile)
+  }
 
   for (const target of targetFiles) {
-    if (allowlist.has(target.relativeFile)) continue
+    if (validAllowlistEntries.has(target.relativeFile)) continue
     const moduleName = basename(target.relativeFile, '.tsx')
     const moduleUsage = new RegExp(`\\b${escapeRegExp(moduleName)}\\b`)
     const isMounted = frontendFiles.some(

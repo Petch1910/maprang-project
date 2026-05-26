@@ -1964,6 +1964,8 @@ const checks: Check[] = [
           'reports raw auth error classifier regressions',
           'reports risky frontend DOM and code execution patterns',
           'reports unmounted frontend components except explicit allowlist entries',
+          'reports stale or unexplained frontend allowlist entries',
+          'allowlist ของ frontend static audit ต้องมีเหตุผลชัดเจน',
           'reports unmounted frontend pages that are not wired into routes',
           'reports Thai placeholder and mojibake text regressions',
           'reports English UI label regressions for Thai-first surfaces',
