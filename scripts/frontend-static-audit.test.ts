@@ -166,7 +166,9 @@ describe('frontend static audit', () => {
         throw new Error('not implemented')
         throw new Error (\`not implemented\`)
         setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
+        setNote ( error instanceof Error ? error . message : 'เข้าสู่ระบบไม่สำเร็จ' )
         state.error = action.error.message
+        state . error = action . error . message
         const message =
           payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
             ? payload.error
@@ -196,6 +198,8 @@ describe('frontend static audit', () => {
       'frontend source ยังโยน not implemented',
       'frontend source ยังโยน not implemented',
       'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
+      'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
+      'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',
       'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',
       'ApiError ต้องใช้ payload.message ก่อน payload.error',
       'ApiError ห้ามแสดง payload.error เป็น fallback ให้ผู้ใช้',

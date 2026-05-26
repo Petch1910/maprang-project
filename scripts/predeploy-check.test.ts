@@ -120,6 +120,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('String\\\\s*\\\\(\\\\s*error\\\\s*\\\\)\\\\s*\\\\.\\\\s*toLowerCase')
     expect(predeploy).toContain('\\\\.test\\\\(\\\\s*error\\\\s*\\\\.\\\\s*message')
     expect(predeploy).toContain('error\\\\s*\\\\.\\\\s*message\\\\s*\\\\.\\\\s*match')
+    expect(predeploy).toContain('setNote\\\\s*\\\\(\\\\s*error\\\\s+instanceof\\\\s+Error\\\\s*\\\\?\\\\s*error\\\\s*\\\\.\\\\s*message')
+    expect(predeploy).toContain('state\\\\s*\\\\.\\\\s*error\\\\s*=\\\\s*action\\\\s*\\\\.\\\\s*error\\\\s*\\\\.\\\\s*message')
     expect(predeploy).toContain('providerClassificationMessage')
     expect(predeploy).toContain('rawRouteErrorLogPattern')
     expect(predeploy).toContain('providerFailure[\\\\s\\\\S]*?,\\\\s*error\\\\b')

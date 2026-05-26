@@ -342,11 +342,11 @@ export const suspiciousPatterns = [
     message: 'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
   },
   {
-    pattern: /setNote\(\s*error\s+instanceof\s+Error\s*\?\s*error\.message/g,
+    pattern: /setNote\s*\(\s*error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message/g,
     message: 'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
   },
   {
-    pattern: /state\.error\s*=\s*action\.error\.message/g,
+    pattern: /state\s*\.\s*error\s*=\s*action\s*\.\s*error\s*\.\s*message/g,
     message: 'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',
   },
   {
