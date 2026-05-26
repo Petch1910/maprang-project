@@ -101,6 +101,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('0022-validate-frontend-unmounted-allowlists.md')
     expect(predeploy).toContain('predeploy:check` audits decision Markdown dynamically')
     expect(predeploy).toContain('decision markdown files ถูก audit แบบ dynamic')
+    expect(predeploy).toContain('stream live-provider handoff wording pass')
     expect(predeploy).toContain('missingDecisionIndexEntries')
     expect(predeploy).toContain('apps/backend/src/world-state.service.ts')
     expect(predeploy).toContain('frontend API helper contract')

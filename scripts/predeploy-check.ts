@@ -1200,6 +1200,8 @@ const checks: Check[] = [
           'route/menu status evidence',
           '/path',
           'API route coverage quality guard',
+          'stream live-provider handoff wording pass',
+          'POST /chat/stream',
           'weak-coverage reason diagnostics',
           'stale documented-row guard',
           'routeMenuAuditRows',
