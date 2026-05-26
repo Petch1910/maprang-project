@@ -1,6 +1,6 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ## สรุปล่าสุดสำหรับรอบถัดไป
 
@@ -574,6 +574,7 @@ Verified:
 - Decision `0020-discover-decision-markdown-heading-files.md` now records dynamic decision-file discovery for the predeploy Markdown heading audit. `predeploy:check` uses `collectMarkdownHeadingFiles` / `collectDecisionMarkdownFiles` instead of hardcoding every decision file name. Focused checks passed: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands:test`, `bun run docs:commands`, `bun run memory:audit`, and `bun run secrets:check`.
 - Latest full `qa:repo` pass after decision command/heading audit hardening: docs command audit 334 refs, test coverage audit 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 177 pass / 609 expects, frontend route audit 13 routes, frontend build, and bundle budget pass. DB persistence suites still skip only because local Postgres is not running.
 - Decision `0019-audit-decision-command-references.md` wording now points future decision additions to the dynamic predeploy heading audit contract in decision `0020-discover-decision-markdown-heading-files.md` instead of mentioning a hardcoded predeploy list. Focused checks passed: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
+- Metadata date sync for the 0019/0020 decision handoff uses the real current date 2026-05-26. Focused checks passed: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 
 ## สถานะ production ปัจจุบัน
 

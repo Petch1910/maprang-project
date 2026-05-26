@@ -1,6 +1,6 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ## สรุปล่าสุดสำหรับรอบถัดไป
 
@@ -735,3 +735,4 @@ Last updated: 2026-05-25
 - Decision markdown heading discovery pass: `bun run predeploy:check:test`, `bun run predeploy:check`, `bun run docs:commands:test`, `bun run docs:commands`, `bun run memory:audit`, and `bun run secrets:check` passed after decision `0020-discover-decision-markdown-heading-files.md` recorded that `predeploy:check` must discover `memory/decisions/*.md` for Markdown heading audit instead of hardcoding every decision file name.
 - Full deterministic repo QA pass after decision command/heading audit hardening: `bun run qa:repo` passed with docs command audit 334 refs, test coverage audit 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 177 pass / 609 expects, frontend route audit 13 routes, frontend build, and bundle budget pass. DB persistence suites still skip only because local Postgres is not running.
 - Decision wording sync pass: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after decision `0019-audit-decision-command-references.md` started referencing decision `0020-discover-decision-markdown-heading-files.md` for dynamic predeploy Markdown heading audit behavior instead of saying future agents may need to update a hardcoded list.
+- Metadata date sync pass: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check` passed after the 0019/0020 decision handoff metadata was corrected to the real current date 2026-05-26.

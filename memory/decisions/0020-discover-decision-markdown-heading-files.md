@@ -1,6 +1,6 @@
 # 0020 - ให้ predeploy ค้น decision markdown สำหรับ heading audit เอง
 
-วันที่: 2026-05-25
+วันที่: 2026-05-26
 
 ## การตัดสินใจ (Decision)
 

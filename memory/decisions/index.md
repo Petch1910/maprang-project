@@ -1,6 +1,6 @@
 # บันทึก decision
 
-อัปเดตล่าสุด: 2026-05-25
+อัปเดตล่าสุด: 2026-05-26
 
 - [0001 - ใช้ SocratiCode เป็น local codebase intelligence](./0001-use-socraticode-local-tool.md)
 - [0002 - เพิ่ม Markdown memory vault](./0002-add-markdown-memory-vault.md)
