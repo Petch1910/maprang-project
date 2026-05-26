@@ -234,6 +234,10 @@ describe('frontend static audit', () => {
         <Link to={'data:text/html,<h1>x</h1>'}>Bad protocol</Link>
         <Link to = {\`javascript:alert(1)\`}>Bad spaced protocol</Link>
         console.error('โหลดข้อมูลไม่สำเร็จ:', error)
+        console.error(
+          'โหลดข้อมูลไม่สำเร็จ:',
+          error,
+        )
       `,
       'RiskyFrontendFixture.tsx',
     )
@@ -248,6 +252,7 @@ describe('frontend static audit', () => {
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
     ])
   })

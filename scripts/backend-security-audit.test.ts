@@ -70,7 +70,11 @@ describe('backend security audit', () => {
     expect(
       messagesFor(`
         const providerFailure = classifyChatProviderError(error)
-        console.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error)
+        console.error(
+          'สตรีมแชทไม่สำเร็จ:',
+          providerFailure,
+          error,
+        )
       `),
     ).toContain('ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.')
 
@@ -329,7 +333,10 @@ describe('backend security audit', () => {
             try {
               return await uploadAvatarFile()
             } catch (error) {
-              console.error('อัปโหลดรูปตัวละครไม่สำเร็จ:', error)
+              console.error(
+                'อัปโหลดรูปตัวละครไม่สำเร็จ:',
+                error,
+              )
               return { error: 'avatar_storage_unavailable', message: 'พื้นที่เก็บรูปตัวละครยังไม่พร้อมใช้งาน' }
             }
           })

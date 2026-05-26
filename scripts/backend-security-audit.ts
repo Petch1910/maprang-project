@@ -39,7 +39,7 @@ function lineFor(content: string, index: number) {
 
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
-const rawRouteErrorLogPattern = /console\.(?:error|warn)\([^)\n]*,\s*error\b/g
+const rawRouteErrorLogPattern = /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g
 const rawRouteErrorThrowPattern = /throw\s+error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
@@ -91,7 +91,7 @@ const patterns = [
     message: 'ห้ามใช้ Prisma $executeRaw แบบ function call; ให้ใช้ tagged template parameterization.',
   },
   {
-    pattern: /console\.(?:error|warn)\([^)\n]*providerFailure[^)\n]*,\s*error\b/g,
+    pattern: /console\.(?:error|warn)\s*\([\s\S]*?providerFailure[\s\S]*?,\s*error\b[\s\S]*?\)/g,
     message: 'ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.',
   },
   {
