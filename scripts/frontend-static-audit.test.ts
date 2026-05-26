@@ -158,8 +158,11 @@ describe('frontend static audit', () => {
         <NavLink to = {'#'}>Spaced Router placeholder</NavLink>
         <NavLink to={\`#\`}>Template Router placeholder</NavLink>
         <button type="button" onClick={() => {}}>No-op</button>
+        <button type="button" onClick = {() => {}}>Spaced no-op</button>
         <button type="button" onClick={async () => {}}>Async no-op</button>
+        <button type="button" onClick = {async () => {}}>Spaced async no-op</button>
         <button type="button" onClick={() => undefined}>Undefined no-op</button>
+        <button type="button" onClick = {() => undefined}>Spaced undefined no-op</button>
         throw new Error('not implemented')
         setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
         state.error = action.error.message
@@ -184,7 +187,10 @@ describe('frontend static audit', () => {
       'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ปุ่มหรือลิงก์มี onClick ว่างเปล่า',
+      'ปุ่มหรือลิงก์มี onClick ว่างเปล่า',
       'ปุ่มหรือลิงก์มี onClick async ว่างเปล่า',
+      'ปุ่มหรือลิงก์มี onClick async ว่างเปล่า',
+      'ปุ่มหรือลิงก์มี onClick คืน undefined',
       'ปุ่มหรือลิงก์มี onClick คืน undefined',
       'frontend source ยังโยน not implemented',
       'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
