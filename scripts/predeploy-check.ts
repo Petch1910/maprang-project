@@ -1979,6 +1979,10 @@ const checks: Check[] = [
         [
           'wraps localStorage reads, writes, and removals without throwing',
           'parses pinned chat ids defensively',
+          'detects direct browser storage access variants',
+          'sessionStorage',
+          'window . sessionStorage . getItem',
+          'globalThis . localStorage . setItem',
           'keeps frontend source on safe storage wrappers',
         ],
         'scripts/frontend-storage.test.ts',

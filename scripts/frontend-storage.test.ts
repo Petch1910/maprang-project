@@ -46,6 +46,14 @@ function collectSourceFiles(root: string) {
   return files
 }
 
+function directStorageAccessPattern() {
+  return /\b(?:(?:window|globalThis)\s*\.\s*)?(?:localStorage|sessionStorage)\s*\.\s*(?:getItem|setItem|removeItem)\s*\(/g
+}
+
+function collectDirectStorageAccess(content: string) {
+  return [...content.matchAll(directStorageAccessPattern())].map((match) => match[0])
+}
+
 describe('frontend storage helpers', () => {
   test('wraps localStorage reads, writes, and removals without throwing', () => {
     const storage = mapStorage()
@@ -100,12 +108,29 @@ describe('frontend storage helpers', () => {
     expect('creatorDraftUpdatedAt' in drafts).toBe(false)
   })
 
+  test('detects direct browser storage access variants', () => {
+    expect(
+      collectDirectStorageAccess(`
+        localStorage.getItem('a')
+        localStorage . setItem('a', 'b')
+        window.localStorage.removeItem('a')
+        window . sessionStorage . getItem('a')
+        globalThis . localStorage . setItem('a', 'b')
+      `),
+    ).toEqual([
+      'localStorage.getItem(',
+      'localStorage . setItem(',
+      'window.localStorage.removeItem(',
+      'window . sessionStorage . getItem(',
+      'globalThis . localStorage . setItem(',
+    ])
+  })
+
   test('keeps frontend source on safe storage wrappers', () => {
     const sourceRoot = join(process.cwd(), 'apps', 'frontend', 'src')
-    const directStoragePattern = /\blocalStorage\.(?:getItem|setItem|removeItem)\s*\(/g
     const offenders = collectSourceFiles(sourceRoot).flatMap((filePath) => {
       const content = readFileSync(filePath, 'utf8')
-      return [...content.matchAll(directStoragePattern)].map((match) => `${relative(process.cwd(), filePath)}:${match.index ?? 0}`)
+      return [...content.matchAll(directStorageAccessPattern())].map((match) => `${relative(process.cwd(), filePath)}:${match.index ?? 0}`)
     })
 
     expect(offenders).toEqual([])
