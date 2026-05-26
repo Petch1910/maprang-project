@@ -1211,6 +1211,7 @@ const checks: Check[] = [
           'aria-disabled reason guard',
           'placeholder-link guard',
           'no-op handler guard',
+          'dangerous link protocol guard',
           'memory/production/checklist.md',
           'handoffEvidence',
           'Chat smoke normal chatId',

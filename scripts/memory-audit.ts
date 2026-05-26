@@ -107,6 +107,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'aria-disabled reason guard',
       'placeholder-link guard',
       'no-op handler guard',
+      'dangerous link protocol guard',
     ],
     'memory/working-context.md',
   )
@@ -136,6 +137,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'aria-disabled reason guard',
       'placeholder-link guard',
       'no-op handler guard',
+      'dangerous link protocol guard',
       'handoffEvidence',
       'Chat smoke normal chatId',
       'Chat smoke normal tokens',
@@ -174,6 +176,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'aria-disabled reason guard',
       'placeholder-link guard',
       'no-op handler guard',
+      'dangerous link protocol guard',
     ],
     'memory/qa-status.md',
   )
@@ -189,6 +192,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'aria-disabled reason guard',
       'placeholder-link guard',
       'no-op handler guard',
+      'dangerous link protocol guard',
     ],
     'memory/production/checklist.md',
   )

@@ -23,6 +23,7 @@
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 - ใช้ `/admin/health` ไล่ทำ next action ของแต่ละ blocker ก่อนรัน final gate ซ้ำ.
 - ยืนยัน repo-owned gate ล่าสุดด้วย `bun run qa:repo` ก่อนเริ่ม staging/live-provider รอบถัดไป; รอบล่าสุดวันที่ 2026-05-26 ผ่านหลัง decision `0022` frontend allowlist contract, frontend aria-disabled reason guard, placeholder-link guard, และ no-op handler guard พร้อม memory audit 32 Markdown files, docs command audit 334 refs, backend tests 177 pass / 609 expects, API audit 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard, aria-disabled reason guard, placeholder-link guard, no-op handler guard, frontend build และ bundle budget.
+- ยืนยัน focused frontend dangerous link protocol guard ล่าสุดด้วย `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run predeploy:check:test`, และ `bun run predeploy:check`; guard นี้ต้องยังปิด `javascript:`, `vbscript:`, และ `data:text/html` ใน `href`/`to`.
 
 ## คำสั่ง (Commands)
 
