@@ -32,8 +32,8 @@ export function compact(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
 
-const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\.clone\(\))?\.json\s*\(\s*\)/g
-const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\.clone\(\))?\.text\s*\(\s*\)/g
+const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*json\s*\(\s*\)/g
+const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const rawFrontendFetchPattern = /\bfetch\s*\(/g
 const rawFrontendResponseJsonMessage =
   'ห้าม parse response.json() ตรงใน frontend source; ให้ใช้ readApiJson/readErrorPayload เพื่อห่อ JSON พังเป็นข้อความไทยก่อน.'

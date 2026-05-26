@@ -46,8 +46,8 @@ const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
 const rawErrorCodePropertyPattern =
   /\berror\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
-const rawResponseJsonPattern = /\b[A-Za-z_$][\w$]*\.json\s*\(\s*\)/g
-const rawResponseTextPattern = /\b[A-Za-z_$][\w$]*\.text\s*\(\s*\)/g
+const rawResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*json\s*\(\s*\)/g
+const rawResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
 const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g

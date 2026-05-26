@@ -267,7 +267,7 @@ describe('frontend static audit', () => {
         `
           async function loadCharacters() {
             const response = await fetch('/characters')
-            return response.json()
+            return response . clone () . json()
           }
         `,
         'ApiLeak.ts',
@@ -299,7 +299,7 @@ describe('frontend static audit', () => {
       auditRawResponseTextParsing(
         `
           async function loadPlainError(response: Response) {
-            const raw = await response.text()
+            const raw = await response . text()
             setToast(raw)
           }
         `,

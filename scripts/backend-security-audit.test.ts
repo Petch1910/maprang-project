@@ -112,7 +112,7 @@ describe('backend security audit', () => {
     expect(
       messagesFor(`
         async function loadProviderResponse(response: Response) {
-          return (await response.json()) as { ok?: boolean }
+          return (await response . clone () . json()) as { ok?: boolean }
         }
       `, 'apps/backend/src/provider.service.ts'),
     ).toContain('ห้าม parse response.json() ตรงใน runtime backend; ให้แยกเป็น read...Payload helper ที่ห่อ JSON พังเป็นข้อความไทยก่อน.')
@@ -134,7 +134,7 @@ describe('backend security audit', () => {
     expect(
       messagesFor(`
         async function loadProviderFailure(response: Response) {
-          const detail = await response.text()
+          const detail = await response . text()
           throw new Error(detail)
         }
       `, 'apps/backend/src/provider.service.ts'),
