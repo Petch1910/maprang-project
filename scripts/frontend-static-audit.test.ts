@@ -240,6 +240,7 @@ describe('frontend static audit', () => {
           'โหลดข้อมูลไม่สำเร็จ:',
           error,
         )
+        console.warn('โหลดข้อมูลช้า:', error)
       `,
       'RiskyFrontendFixture.tsx',
     )
@@ -256,6 +257,7 @@ describe('frontend static audit', () => {
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
     ])

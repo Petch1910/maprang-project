@@ -318,7 +318,7 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
   },
   {
-    pattern: /console\.error\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g,
+    pattern: /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g,
     message: 'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
   },
   {

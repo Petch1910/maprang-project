@@ -94,7 +94,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('throw\\\\s+new\\\\s+Error\\\\s*\\\\(')
     expect(predeploy).toContain(`console.error(
           'โหลดข้อมูลไม่สำเร็จ:',`)
-    expect(predeploy).toContain('console\\\\.error\\\\s*\\\\(')
+    expect(predeploy).toContain('console\\\\.(?:error|warn)\\\\s*\\\\(')
     expect(predeploy).toContain('[\\\\s\\\\S]*?,\\\\s*error\\\\b[\\\\s\\\\S]*?\\\\)')
     expect(predeploy).toContain('javascript:')
     expect(predeploy).toContain('vbscript:')
