@@ -286,7 +286,12 @@ const checks: Check[] = [
           'ไม่รวม localhost/loopback, `http://`, wildcard, credential/userinfo, path/query/hash',
           'combined `api:smoke:live` JSON summary must omit `handoffEvidence`',
           'positive token/elapsed values',
+          '`qa:repo` ล่าสุดผ่านวันที่ 2026-05-26',
+          'docs command audit ครอบ 334 refs',
+          'Decision/predeploy handoff lock ล่าสุดอยู่ถึง',
           '0020-discover-decision-markdown-heading-files.md',
+          'decision markdown files ถูก audit แบบ dynamic',
+          'Markdown Thai-first headings',
         ],
         'agent.md',
       )
