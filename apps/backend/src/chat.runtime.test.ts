@@ -364,6 +364,6 @@ describe('chat provider retry guard', () => {
     const source = readFileSync(new URL('./chat.service.ts', import.meta.url), 'utf8')
 
     expect(source).toContain("console.error('สตรีมแชทไม่สำเร็จ:', providerFailure)")
-    expect(source).not.toContain("console.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error)")
+    expect(source).not.toMatch(/console\.error\s*\([\s\S]*?providerFailure[\s\S]*?,\s*error\b[\s\S]*?\)/)
   })
 })

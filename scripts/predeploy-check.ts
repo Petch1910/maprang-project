@@ -2337,6 +2337,8 @@ const checks: Check[] = [
         [
           'redacts secret-shaped provider details before classification output',
           'classifies object-shaped provider failures without stringifying raw objects',
+          'does not log raw stream provider errors after classification',
+          'providerFailure[\\s\\S]*?,\\s*error\\b',
           'not.toContain(fakeDatabaseUrl)',
           'not.toContain(fakeOpenRouterKey)',
         ],
