@@ -27,7 +27,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 สถานะล่าสุดที่ต้องจำ:
 
 - Local QA พร้อมใช้งาน
-- Backend tests ล่าสุดผ่าน 177 tests / 609 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-26 หลัง frontend placeholder/no-op/dangerous link protocol guards; memory audit ครอบ 33 Markdown files, docs command audit ครอบ 335 refs, test coverage audit ครอบ 60 files / 33 root test scripts, API audit ครอบ 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard, aria-disabled reason guard, placeholder-link guard, no-op handler guard, dangerous link protocol guard, frontend build, และ bundle budget
+- Backend tests ล่าสุดผ่าน 177 tests / 609 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-26 หลัง frontend placeholder/no-op/dangerous link protocol guards และ spaced assignment hardening; memory audit ครอบ 33 Markdown files, docs command audit ครอบ 335 refs, test coverage audit ครอบ 60 files / 33 root test scripts, API audit ครอบ 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard, aria-disabled reason guard, placeholder-link guard, no-op handler guard, dangerous link protocol guard, frontend build, และ bundle budget
 - Decision/predeploy handoff lock ล่าสุดอยู่ถึง `0023-guard-dangerous-frontend-link-protocols.md`; decision markdown files ถูก audit แบบ dynamic ทั้ง docs command references และ Markdown Thai-first headings
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile; command/config regression tests ผ่าน 13 tests, Playwright จะ start dev server เฉพาะ local loopback targets, และ `runE2eSmoke` ส่ง env ที่ validate แล้วเข้า runner steps
