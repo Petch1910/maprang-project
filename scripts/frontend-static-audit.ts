@@ -298,6 +298,10 @@ export const suspiciousPatterns = [
     message: 'ห้ามเขียน innerHTML โดยตรงใน frontend source',
   },
   {
+    pattern: /\bdocument\s*\.\s*cookie\b/g,
+    message: 'ห้ามอ่านหรือเขียน document.cookie ตรงใน frontend source; ให้ใช้ auth/storage helper ที่ควบคุมได้',
+  },
+  {
     pattern: /\beval\s*\(/g,
     message: 'ห้ามใช้ eval() ใน frontend source',
   },

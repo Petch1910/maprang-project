@@ -2048,6 +2048,7 @@ const checks: Check[] = [
           'Bad padded protocol',
           'Bad padded expression protocol',
           'data:text/html,<h1>x</h1>',
+          'document . cookie = token',
           'reports raw auth error classifier regressions',
           'reports risky frontend DOM and code execution patterns',
           `console.error(
@@ -2143,6 +2144,7 @@ const checks: Check[] = [
           'allowedUnmountedFrontendComponents',
           'dangerouslySetInnerHTML',
           '\\.\\s*innerHTML\\s*=',
+          'document\\s*\\.\\s*cookie',
           'href\\s*=\\s*',
           'to\\s*=\\s*',
           '\\s*\\.\\s*clone\\s*\\(\\s*\\)',

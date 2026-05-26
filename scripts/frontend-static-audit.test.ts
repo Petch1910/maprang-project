@@ -227,6 +227,7 @@ describe('frontend static audit', () => {
         <section dangerouslySetInnerHTML={{ __html: html }} />
         element.innerHTML = html
         element . innerHTML = html
+        document . cookie = token
         eval(userInput)
         const fn = new Function(userInput)
         window.open(url, '_blank')
@@ -252,6 +253,7 @@ describe('frontend static audit', () => {
       'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
       'ห้ามเขียน innerHTML โดยตรงใน frontend source',
       'ห้ามเขียน innerHTML โดยตรงใน frontend source',
+      'ห้ามอ่านหรือเขียน document.cookie ตรงใน frontend source; ให้ใช้ auth/storage helper ที่ควบคุมได้',
       'ห้ามใช้ eval() ใน frontend source',
       'ห้ามใช้ new Function() ใน frontend source',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
