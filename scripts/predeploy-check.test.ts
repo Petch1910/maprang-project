@@ -74,6 +74,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('href={"#"}')
     expect(predeploy).toContain('href={\\\\`#\\\\`}')
     expect(predeploy).toContain('to={\\\\`#\\\\`}')
+    expect(predeploy).toContain('Async no-op')
+    expect(predeploy).toContain('Undefined no-op')
     expect(predeploy).toContain('formats object-shaped env doctor errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped Supabase storage setup errors without stringifying raw objects')
     expect(predeploy).toContain('formats object-shaped e2e smoke errors without stringifying raw objects')
