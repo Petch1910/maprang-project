@@ -72,6 +72,34 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports aria-disabled controls without a user-facing reason', () => {
+    const findings = auditDisabledControlsWithAst(
+      `
+        export function Fixture() {
+          return (
+            <>
+              <button type="button" aria-disabled={isSaving}>Save</button>
+              <a href="/wallet" aria-disabled={isLoading}>Wallet</a>
+              <Link to="/chat" aria-disabled>Chat</Link>
+              <NavLink to="/events" aria-disabled="false">Events</NavLink>
+              <button type="button" aria-disabled={false}>Open</button>
+              <a href="/safe" aria-disabled={isLoading} title={loadReason || 'โหลดข้อมูลก่อน'}>Safe</a>
+              <button type="button" disabled={isSaving} aria-disabled={isSaving}>Native disabled already covered</button>
+            </>
+          )
+        }
+      `,
+      'AriaDisabledFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
+      expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
+      expect.stringContaining('control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
+      expect.stringContaining('control ที่ disabled ต้องมี title หรือ aria-label บอกเหตุผล'),
+    ])
+  })
+
   test('reports unsafe new-tab links without opener protection', () => {
     const findings = auditLinksWithAst(
       `

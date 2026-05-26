@@ -118,7 +118,8 @@ function jsxAttributeExpression(attribute: ts.JsxAttribute) {
 
 function jsxAttributeIsFalse(attribute: ts.JsxAttribute) {
   const expression = jsxAttributeExpression(attribute)
-  return expression?.kind === ts.SyntaxKind.FalseKeyword
+  const value = jsxAttributeValue(attribute).toLowerCase()
+  return expression?.kind === ts.SyntaxKind.FalseKeyword || value === 'false'
 }
 
 export function getJsxAttribute(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement, sourceFile: ts.SourceFile, name: string) {
@@ -205,24 +206,38 @@ export function auditDisabledControlsWithAst(content: string, file: string) {
   const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const findings: Finding[] = []
   const disabledControlTags = new Set(['button', 'input', 'textarea', 'select'])
+  const ariaDisabledControlTags = new Set(['button', 'a', 'Link', 'NavLink'])
+
+  function hasDisabledReason(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement) {
+    const title = getJsxAttribute(node, sourceFile, 'title')
+    const ariaLabel = getJsxAttribute(node, sourceFile, 'aria-label')
+    return Boolean((title && jsxAttributeValue(title)) || (ariaLabel && jsxAttributeValue(ariaLabel)))
+  }
 
   function visit(node: ts.Node) {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tagName = node.tagName.getText(sourceFile)
       const disabled = getJsxAttribute(node, sourceFile, 'disabled')
-      if (disabledControlTags.has(tagName) && disabled && !jsxAttributeIsFalse(disabled)) {
-        const title = getJsxAttribute(node, sourceFile, 'title')
-        const ariaLabel = getJsxAttribute(node, sourceFile, 'aria-label')
-        const hasDisabledReason = Boolean(
-          (title && jsxAttributeValue(title)) || (ariaLabel && jsxAttributeValue(ariaLabel)),
-        )
-        if (!hasDisabledReason) {
+      const isNativeDisabledControl = disabledControlTags.has(tagName) && disabled && !jsxAttributeIsFalse(disabled)
+      if (isNativeDisabledControl) {
+        if (!hasDisabledReason(node)) {
           findings.push({
             file,
             line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
             message: `control ที่ disabled ต้องมี title หรือ aria-label บอกเหตุผล: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
           })
         }
+      }
+
+      const ariaDisabled = getJsxAttribute(node, sourceFile, 'aria-disabled')
+      const isAriaDisabledControl =
+        ariaDisabledControlTags.has(tagName) && ariaDisabled && !jsxAttributeIsFalse(ariaDisabled)
+      if (isAriaDisabledControl && !isNativeDisabledControl && !hasDisabledReason(node)) {
+        findings.push({
+          file,
+          line: sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1,
+          message: `control ที่ aria-disabled ต้องมี title หรือ aria-label บอกเหตุผล: ${compact(node.getText(sourceFile)).slice(0, 140)}`,
+        })
       }
     }
     ts.forEachChild(node, visit)
