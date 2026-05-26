@@ -151,9 +151,11 @@ describe('frontend static audit', () => {
     const findings = auditSuspiciousPatterns(
       `
         <a href="#">Placeholder</a>
+        <a href = "#">Spaced placeholder</a>
         <a href={"#"}>Expression placeholder</a>
         <a href={\`#\`}>Template placeholder</a>
         <NavLink to={"#"}>Placeholder</NavLink>
+        <NavLink to = {'#'}>Spaced Router placeholder</NavLink>
         <NavLink to={\`#\`}>Template Router placeholder</NavLink>
         <button type="button" onClick={() => {}}>No-op</button>
         <button type="button" onClick={async () => {}}>Async no-op</button>
@@ -175,8 +177,10 @@ describe('frontend static audit', () => {
 
     expect(findings.map((finding) => finding.message)).toEqual([
       'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน',
+      'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
+      'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน',
       'ปุ่มหรือลิงก์มี onClick ว่างเปล่า',
@@ -218,7 +222,9 @@ describe('frontend static audit', () => {
         const fn = new Function(userInput)
         window.open(url, '_blank')
         <a href="javascript:alert(1)">Bad protocol</a>
+        <a href = "vbscript:alert(1)">Bad spaced protocol</a>
         <Link to={'data:text/html,<h1>x</h1>'}>Bad protocol</Link>
+        <Link to = {\`javascript:alert(1)\`}>Bad spaced protocol</Link>
         console.error('โหลดข้อมูลไม่สำเร็จ:', error)
       `,
       'RiskyFrontendFixture.tsx',
@@ -230,6 +236,8 @@ describe('frontend static audit', () => {
       'ห้ามใช้ eval() ใน frontend source',
       'ห้ามใช้ new Function() ใน frontend source',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
+      'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
+      'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',

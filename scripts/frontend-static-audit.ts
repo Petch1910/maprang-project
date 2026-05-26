@@ -280,10 +280,10 @@ export function auditLinksWithAst(content: string, file: string) {
 export const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
 
 export const suspiciousPatterns = [
-  { pattern: /href=(["'])#\1/g, message: 'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
-  { pattern: /href=\{\s*(["'`])#\1\s*\}/g, message: 'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
-  { pattern: /to=(["'])#\1/g, message: 'ลิงก์ Router ใช้ to="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
-  { pattern: /to=\{\s*(["'`])#\1\s*\}/g, message: 'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /href\s*=\s*(["'])#\1/g, message: 'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /href\s*=\s*\{\s*(["'`])#\1\s*\}/g, message: 'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /to\s*=\s*(["'])#\1/g, message: 'ลิงก์ Router ใช้ to="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
+  { pattern: /to\s*=\s*\{\s*(["'`])#\1\s*\}/g, message: 'ลิงก์ Router ใช้ to={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
   { pattern: /onClick=\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick ว่างเปล่า' },
   { pattern: /onClick=\{\s*async\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick async ว่างเปล่า' },
   { pattern: /onClick=\{\s*\(\)\s*=>\s*undefined\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick คืน undefined' },
@@ -310,11 +310,11 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {
-    pattern: /\b(?:href|to)=(["'])(?:javascript:|vbscript:|data:text\/html)[^"']*\1/gi,
+    pattern: /\b(?:href|to)\s*=\s*(["'])(?:javascript:|vbscript:|data:text\/html)[^"']*\1/gi,
     message: 'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
   },
   {
-    pattern: /\b(?:href|to)=\{\s*(["'`])(?:javascript:|vbscript:|data:text\/html)[\s\S]*?\1\s*\}/gi,
+    pattern: /\b(?:href|to)\s*=\s*\{\s*(["'`])(?:javascript:|vbscript:|data:text\/html)[\s\S]*?\1\s*\}/gi,
     message: 'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
   },
   {
