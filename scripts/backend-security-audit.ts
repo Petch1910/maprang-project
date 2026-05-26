@@ -43,9 +43,9 @@ const rawRouteErrorLogPattern = /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b
 const rawRouteErrorThrowPattern = /throw\s*(?:\(\s*)?error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
-  /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
+  /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
 const rawErrorCodePropertyPattern =
-  /\berror\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\.message\s*:\s*String\(\s*error\s*\)|error\.message\b|String\(\s*error\s*\))/g
+  /\berror\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
 const rawResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*json\s*\(\s*\)/g
 const rawResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
@@ -99,11 +99,11 @@ const patterns = [
     message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
   },
   {
-    pattern: /\bdetail\s*:\s*error\s+instanceof\s+Error\s*\?\s*error\.message\b/g,
+    pattern: /\bdetail\s*:\s*error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\b/g,
     message: 'route response ห้ามส่ง raw error.message ใน detail; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
   },
   {
-    pattern: /\bdetail\s*:\s*(?:error\.message|String\(\s*error\s*\))/g,
+    pattern: /\bdetail\s*:\s*(?:error\s*\.\s*message|String\s*\(\s*error\s*\))/g,
     message: 'route response ห้ามส่ง raw error detail ตรงๆ; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
   },
 ]
@@ -201,7 +201,7 @@ function hasUuidIdParam(path: string) {
 }
 
 function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number, messageSource: string) {
-  if (!/\bmessage\s*:\s*error\.message\b/.test(messageSource)) return false
+  if (!/\bmessage\s*:\s*error\s*\.\s*message\b/.test(messageSource)) return false
 
   const beforeMessage = catchBlock.slice(0, messageIndex)
   const authCheckIndex = beforeMessage.lastIndexOf('error instanceof AuthError')

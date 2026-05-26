@@ -178,7 +178,7 @@ describe('backend security audit', () => {
               return {
                 error: 'local_eval_unavailable',
                 message: 'รันชุดทดสอบไม่สำเร็จ',
-                detail: error instanceof Error ? error.message : String(error),
+                detail: error instanceof Error ? error . message : String ( error ),
               }
             }
           })
@@ -198,7 +198,7 @@ describe('backend security audit', () => {
               try {
                 return await runLocalEvalSuite()
               } catch (error) {
-                return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: String(error) }
+                return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: String ( error ) }
               }
             })
         `,
@@ -214,7 +214,7 @@ describe('backend security audit', () => {
               try {
                 return await runLocalEvalSuite()
               } catch (error) {
-                return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: error.message }
+                return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: error . message }
               }
             })
         `,
@@ -403,7 +403,7 @@ describe('backend security audit', () => {
               try {
                 return await sendChat()
               } catch (error) {
-                return { error: 'chat_failed', message: error.message }
+                return { error: 'chat_failed', message: error . message }
               }
             })
         `,
@@ -421,7 +421,7 @@ describe('backend security audit', () => {
               try {
                 return await sendChat()
               } catch (error) {
-                return { error: 'chat_failed', message: String(error) }
+                return { error: 'chat_failed', message: String ( error ) }
               }
             })
         `,
@@ -439,7 +439,7 @@ describe('backend security audit', () => {
               } catch (error) {
                 return {
                   error: 'chat_failed',
-                  message: error instanceof Error ? error.message : String(error),
+                  message: error instanceof Error ? error . message : String ( error ),
                 }
               }
             })
@@ -458,7 +458,7 @@ describe('backend security audit', () => {
               try {
                 return await sendChat()
               } catch (error) {
-                return { error: error.message, message: 'แชทไม่สำเร็จ' }
+                return { error: error . message, message: 'แชทไม่สำเร็จ' }
               }
             })
         `,
@@ -474,7 +474,7 @@ describe('backend security audit', () => {
               try {
                 return await sendChat()
               } catch (error) {
-                return { error: String(error), message: 'แชทไม่สำเร็จ' }
+                return { error: String ( error ), message: 'แชทไม่สำเร็จ' }
               }
             })
         `,
@@ -496,7 +496,7 @@ describe('backend security audit', () => {
                   return { error: error.code, message: error.message }
                 }
 
-                return { error: 'chat_failed', message: error.message }
+                return { error: 'chat_failed', message: error . message }
               }
             })
         `,
