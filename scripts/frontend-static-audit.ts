@@ -310,11 +310,11 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {
-    pattern: /\b(?:href|to)\s*=\s*(["'])(?:javascript:|vbscript:|data:text\/html)[^"']*\1/gi,
+    pattern: /\b(?:href|to)\s*=\s*(["'])\s*(?:javascript:|vbscript:|data:text\/html)[^"']*\1/gi,
     message: 'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
   },
   {
-    pattern: /\b(?:href|to)\s*=\s*\{\s*(["'`])(?:javascript:|vbscript:|data:text\/html)[\s\S]*?\1\s*\}/gi,
+    pattern: /\b(?:href|to)\s*=\s*\{\s*(["'`])\s*(?:javascript:|vbscript:|data:text\/html)[\s\S]*?\1\s*\}/gi,
     message: 'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
   },
   {

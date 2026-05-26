@@ -231,8 +231,10 @@ describe('frontend static audit', () => {
         window.open(url, '_blank')
         <a href="javascript:alert(1)">Bad protocol</a>
         <a href = "vbscript:alert(1)">Bad spaced protocol</a>
+        <a href=" JAVASCRIPT:alert(1)">Bad padded protocol</a>
         <Link to={'data:text/html,<h1>x</h1>'}>Bad protocol</Link>
         <Link to = {\`javascript:alert(1)\`}>Bad spaced protocol</Link>
+        <Link to = {' data:text/html,<h1>x</h1>'}>Bad padded expression protocol</Link>
         console.error('โหลดข้อมูลไม่สำเร็จ:', error)
         console.error(
           'โหลดข้อมูลไม่สำเร็จ:',
@@ -248,6 +250,8 @@ describe('frontend static audit', () => {
       'ห้ามใช้ eval() ใน frontend source',
       'ห้ามใช้ new Function() ใน frontend source',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
+      'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
+      'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
