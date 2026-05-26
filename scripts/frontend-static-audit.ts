@@ -298,6 +298,10 @@ export const suspiciousPatterns = [
     message: 'ห้ามเขียน innerHTML โดยตรงใน frontend source',
   },
   {
+    pattern: /\bsrcDoc\s*=|\bsrcdoc\s*=/g,
+    message: 'ห้ามฝัง HTML ผ่าน iframe srcDoc/srcdoc ใน frontend source ก่อนมี sanitizer และ sandbox policy ชัดเจน',
+  },
+  {
     pattern: /\bdocument\s*\.\s*cookie\b/g,
     message: 'ห้ามอ่านหรือเขียน document.cookie ตรงใน frontend source; ให้ใช้ auth/storage helper ที่ควบคุมได้',
   },

@@ -235,6 +235,8 @@ describe('frontend static audit', () => {
         <section dangerouslySetInnerHTML={{ __html: html }} />
         element.innerHTML = html
         element . innerHTML = html
+        <iframe srcDoc={html} />
+        <iframe srcdoc="<script>alert(1)</script>" />
         document . cookie = token
         window . location . href = url
         location . assign(url)
@@ -264,6 +266,8 @@ describe('frontend static audit', () => {
       'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
       'ห้ามเขียน innerHTML โดยตรงใน frontend source',
       'ห้ามเขียน innerHTML โดยตรงใน frontend source',
+      'ห้ามฝัง HTML ผ่าน iframe srcDoc/srcdoc ใน frontend source ก่อนมี sanitizer และ sandbox policy ชัดเจน',
+      'ห้ามฝัง HTML ผ่าน iframe srcDoc/srcdoc ใน frontend source ก่อนมี sanitizer และ sandbox policy ชัดเจน',
       'ห้ามอ่านหรือเขียน document.cookie ตรงใน frontend source; ให้ใช้ auth/storage helper ที่ควบคุมได้',
       'ห้าม redirect ด้วย location.href/assign/replace ตรงใน frontend source; ให้ใช้ router หรือลิงก์ที่ตรวจสอบได้',
       'ห้าม redirect ด้วย location.href/assign/replace ตรงใน frontend source; ให้ใช้ router หรือลิงก์ที่ตรวจสอบได้',
