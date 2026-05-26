@@ -2049,6 +2049,8 @@ const checks: Check[] = [
           'Bad padded expression protocol',
           'data:text/html,<h1>x</h1>',
           'document . cookie = token',
+          'window . location . href = url',
+          'globalThis . location . replace(url)',
           'reports raw auth error classifier regressions',
           'reports risky frontend DOM and code execution patterns',
           `console.error(
@@ -2145,6 +2147,7 @@ const checks: Check[] = [
           'dangerouslySetInnerHTML',
           '\\.\\s*innerHTML\\s*=',
           'document\\s*\\.\\s*cookie',
+          'location\\s*\\.\\s*(?:href|assign|replace)\\s*(?:=|\\()',
           'href\\s*=\\s*',
           'to\\s*=\\s*',
           '\\s*\\.\\s*clone\\s*\\(\\s*\\)',

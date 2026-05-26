@@ -302,6 +302,10 @@ export const suspiciousPatterns = [
     message: 'ห้ามอ่านหรือเขียน document.cookie ตรงใน frontend source; ให้ใช้ auth/storage helper ที่ควบคุมได้',
   },
   {
+    pattern: /\b(?:(?:window|globalThis)\s*\.\s*)?location\s*\.\s*(?:href|assign|replace)\s*(?:=|\()/g,
+    message: 'ห้าม redirect ด้วย location.href/assign/replace ตรงใน frontend source; ให้ใช้ router หรือลิงก์ที่ตรวจสอบได้',
+  },
+  {
     pattern: /\beval\s*\(/g,
     message: 'ห้ามใช้ eval() ใน frontend source',
   },
