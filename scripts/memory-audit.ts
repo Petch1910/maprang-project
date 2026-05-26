@@ -102,6 +102,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       '0022-validate-frontend-unmounted-allowlists.md',
       'memory audit 32 Markdown files',
       'frontend static audit allowlist guard',
+      'aria-disabled reason guard',
     ],
     'memory/working-context.md',
   )
@@ -127,6 +128,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'decision `0022` frontend allowlist contract',
       'memory audit ครอบ 32 Markdown files',
       'frontend static audit allowlist guard',
+      'aria-disabled reason guard',
       'handoffEvidence',
       'Chat smoke normal chatId',
       'Chat smoke normal tokens',
@@ -160,6 +162,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'decision 0022 deploy-memory/predeploy sync',
       'memory audit 32 Markdown files',
       'frontend static audit allowlist guard',
+      'aria-disabled reason guard',
     ],
     'memory/qa-status.md',
   )
@@ -172,6 +175,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'memory audit 32 Markdown files',
       'docs command audit 334 refs',
       'frontend static audit allowlist guard',
+      'aria-disabled reason guard',
     ],
     'memory/production/checklist.md',
   )

@@ -64,7 +64,7 @@ guard ใน repo:
 
 ## สิ่งที่ไม่ใช่ตัวกั้นตอนนี้
 
-- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-26 หลัง decision `0022` frontend allowlist contract; memory audit ครอบ 32 Markdown files, docs command audit ครอบ 334 refs, backend tests 177 pass / 609 expects, API audit ครอบ 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard, frontend build และ bundle budget ผ่าน; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
+- Repo-owned static/unit/build gate ล่าสุดผ่าน `bun run qa:repo` วันที่ 2026-05-26 หลัง decision `0022` frontend allowlist contract และ frontend aria-disabled reason guard; memory audit ครอบ 32 Markdown files, docs command audit ครอบ 334 refs, backend tests 177 pass / 609 expects, API audit ครอบ 48 backend routes + 34 frontend helper calls, frontend static audit allowlist guard and aria-disabled reason guard, frontend build และ bundle budget ผ่าน; blocker ที่เหลือยังเป็น environment/staging/live-provider จริง.
 - backend test suite ฝั่ง local ผ่านแล้ว: 177 pass, 0 fail, 609 expect calls.
 - Local API smoke ผ่านแล้ว
 - API route audit now rejects weak coverage quality before deploy: admin routes need `admin-smoke`, live-provider routes including `POST /chat/stream` need `live-smoke`, manual-production-only coverage is too weak, and coverage notes must be filled.
