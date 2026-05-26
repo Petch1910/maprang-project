@@ -226,9 +226,12 @@ describe('frontend static audit', () => {
       `
         <section dangerouslySetInnerHTML={{ __html: html }} />
         element.innerHTML = html
+        element . innerHTML = html
         eval(userInput)
         const fn = new Function(userInput)
         window.open(url, '_blank')
+        window . open(url, '_blank')
+        globalThis . open(url, '_blank')
         <a href="javascript:alert(1)">Bad protocol</a>
         <a href = "vbscript:alert(1)">Bad spaced protocol</a>
         <a href=" JAVASCRIPT:alert(1)">Bad padded protocol</a>
@@ -248,8 +251,11 @@ describe('frontend static audit', () => {
     expect(findings.map((finding) => finding.message)).toEqual([
       'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
       'ห้ามเขียน innerHTML โดยตรงใน frontend source',
+      'ห้ามเขียน innerHTML โดยตรงใน frontend source',
       'ห้ามใช้ eval() ใน frontend source',
       'ห้ามใช้ new Function() ใน frontend source',
+      'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
+      'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',

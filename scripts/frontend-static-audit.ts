@@ -294,7 +294,7 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
   },
   {
-    pattern: /\.innerHTML\s*=/g,
+    pattern: /\.\s*innerHTML\s*=/g,
     message: 'ห้ามเขียน innerHTML โดยตรงใน frontend source',
   },
   {
@@ -306,7 +306,7 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ new Function() ใน frontend source',
   },
   {
-    pattern: /\bwindow\.open\s*\(/g,
+    pattern: /\b(?:window|globalThis)\s*\.\s*open\s*\(/g,
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {
