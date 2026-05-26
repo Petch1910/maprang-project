@@ -164,6 +164,7 @@ describe('frontend static audit', () => {
         <button type="button" onClick={() => undefined}>Undefined no-op</button>
         <button type="button" onClick = {() => undefined}>Spaced undefined no-op</button>
         throw new Error('not implemented')
+        throw new Error (\`not implemented\`)
         setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
         state.error = action.error.message
         const message =
@@ -192,6 +193,7 @@ describe('frontend static audit', () => {
       'ปุ่มหรือลิงก์มี onClick async ว่างเปล่า',
       'ปุ่มหรือลิงก์มี onClick คืน undefined',
       'ปุ่มหรือลิงก์มี onClick คืน undefined',
+      'frontend source ยังโยน not implemented',
       'frontend source ยังโยน not implemented',
       'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
       'พบข้อความ error ดิบจาก Redux async ที่อาจแสดงให้ผู้ใช้เห็น',

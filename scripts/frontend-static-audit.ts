@@ -287,7 +287,7 @@ export const suspiciousPatterns = [
   { pattern: /onClick\s*=\s*\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick ว่างเปล่า' },
   { pattern: /onClick\s*=\s*\{\s*async\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick async ว่างเปล่า' },
   { pattern: /onClick\s*=\s*\{\s*\(\)\s*=>\s*undefined\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick คืน undefined' },
-  { pattern: /throw new Error\((["'`])not implemented\1\)/gi, message: 'frontend source ยังโยน not implemented' },
+  { pattern: /throw\s+new\s+Error\s*\(\s*(["'`])not implemented\1\s*\)/gi, message: 'frontend source ยังโยน not implemented' },
   { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบข้อความรอทำ' },
   {
     pattern: /dangerouslySetInnerHTML\s*=/g,
