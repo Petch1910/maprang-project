@@ -95,7 +95,7 @@ const patterns = [
     message: 'ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.',
   },
   {
-    pattern: /console\.(?:error|warn)\s*\(\s*error\s*\)/g,
+    pattern: /console\.(?:error|warn)\s*\(\s*error\b\s*(?:,|\))/g,
     message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
   },
   {

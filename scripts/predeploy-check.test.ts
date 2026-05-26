@@ -124,6 +124,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('state\\\\s*\\\\.\\\\s*error\\\\s*=\\\\s*action\\\\s*\\\\.\\\\s*error\\\\s*\\\\.\\\\s*message')
     expect(predeploy).toContain('providerClassificationMessage')
     expect(predeploy).toContain('rawRouteErrorLogPattern')
+    expect(predeploy).toContain('console\\\\.(?:error|warn)\\\\s*\\\\(\\\\s*error\\\\b\\\\s*(?:,|\\\\))')
     expect(predeploy).toContain('providerFailure[\\\\s\\\\S]*?,\\\\s*error\\\\b')
     expect(predeploy).toContain('catches raw provider error logging after classification')
     expect(predeploy).toContain('catches route raw error logging')

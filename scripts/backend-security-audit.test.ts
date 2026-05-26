@@ -98,10 +98,12 @@ describe('backend security audit', () => {
         } catch (error) {
           console.error ( error )
           console.warn(error)
+          console.error(error, 'seed failed')
+          console.warn ( error , 'seed slow' )
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(2)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(4)
 
     expect(
       messagesFor(`
