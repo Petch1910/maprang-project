@@ -2,6 +2,13 @@
 
 Last updated: 2026-05-25
 
+## สรุปล่าสุดสำหรับรอบถัดไป
+
+- Branch `codex/context-engine-qa-foundation` is the active handoff branch and should be kept clean/pushed after each coherent task.
+- Latest full `bun run qa:repo` passed after decision command/heading audit hardening: docs command audit 334 refs, test coverage audit 60 files / 33 root test scripts, backend tests 177 pass / 609 expects, API audit 48 backend routes + 34 frontend helper calls, frontend build, and bundle budget passed.
+- Current decision/predeploy handoff lock runs through `0020-discover-decision-markdown-heading-files.md`; decision markdown files are audited dynamically for docs commands and Markdown Thai-first headings.
+- Remaining blockers are external environment work: deployed staging/production backend and frontend URLs, HTTPS-only CORS, real Supabase signed avatar storage verification, live chat provider smoke, live image provider smoke, and production database/migration smoke.
+
 - 2026-05-25: `agent.md` now says decision-file predeploy locking runs through `0017-route-menu-future-surface-contract.md`, and `predeploy:check` locks that agent-guide snippet. Checks passed: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run memory:audit`.
 - 2026-05-25: Decision `0017-route-menu-future-surface-contract.md` records the Route/Menu future-surface contract: `future` rows must not use real `/path` routes before route/preload/navigation QA exists; decision index and predeploy required files now include it.
 - 2026-05-25: Full deterministic `bun run qa:repo` passed after the Route/Menu future route-path guard and documentation updates. Result highlights: docs command audit 325 references, backend 177 tests / 609 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 292 import edges, local eval 3 scenarios, frontend build and bundle budget green; DB persistence suites still skip only because local Postgres is not running.

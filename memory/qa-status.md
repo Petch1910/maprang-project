@@ -2,6 +2,12 @@
 
 Last updated: 2026-05-25
 
+## สรุปล่าสุดสำหรับรอบถัดไป
+
+- Latest full `bun run qa:repo` passed after decision command/heading audit hardening with docs command audit 334 refs, test coverage audit 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 177 pass / 609 expects, frontend route audit 13 routes, frontend build, and bundle budget pass.
+- Focused post-QA memory sync also passed `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
+- DB persistence suites still skip only because local Postgres is not running; production/staging readiness remains blocked by real deployed URLs, HTTPS CORS, Supabase signed storage verification, and live provider smoke evidence.
+
 - 2026-05-25 agent decision-lock addendum pass: `bun run predeploy:check:test`, `bun run predeploy:check`, and `bun run memory:audit` passed after `agent.md` was updated from decision-lock `0016` wording to `0017-route-menu-future-surface-contract.md`, with predeploy now locking the agent-guide snippet.
 - 2026-05-25 route/menu future-surface decision memory pass: decision `0017-route-menu-future-surface-contract.md` was added and linked from `memory/decisions/index.md`; `predeploy:check` required files now include the decision file.
 - 2026-05-25 full deterministic repo QA pass after route/menu future route guard: `bun run qa:repo` passed with docs command audit at 325 references, backend 177 tests / 609 expects, API audit 48 backend routes plus 34 frontend helper calls, route/menu audit 14 surfaces, import-cycle audit 122 files / 292 import edges, local eval 3 scenarios, frontend build, and frontend bundle budget. DB persistence suites still skip only because local Postgres is not running.
