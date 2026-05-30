@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { chatRoutes } from './chat.routes'
 import {
   AuthError,
+  authErrorResponse,
   authErrorMessages,
   buildRateLimitErrorResponse,
   rateLimitBucket,
@@ -131,6 +132,17 @@ describe('security helpers', () => {
     await expect(readSupabaseUserPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
       authErrorMessages.userMalformed,
     )
+  })
+
+  test('builds controlled public auth error responses', () => {
+    expect(authErrorResponse(new AuthError('auth_required', 'raw custom auth detail'))).toEqual({
+      error: 'auth_required',
+      message: authErrorMessages.authRequired,
+    })
+    expect(authErrorResponse(new AuthError('invalid_auth_token', 'raw token parser detail'))).toEqual({
+      error: 'invalid_auth_token',
+      message: authErrorMessages.invalidAuthToken,
+    })
   })
 
   test('request user resolution keeps local dev fallback when Supabase issuer is not configured', async () => {

@@ -79,6 +79,13 @@ export const authErrorMessages = {
   userMalformed: 'Supabase auth user ตอบกลับ JSON ไม่ถูกต้อง',
 }
 
+export function authErrorResponse(error: AuthError) {
+  return {
+    error: error.code,
+    message: error.code === 'invalid_auth_token' ? authErrorMessages.invalidAuthToken : authErrorMessages.authRequired,
+  }
+}
+
 export const rateLimitReplyMessage = 'ส่งคำขอถี่เกินไป กรุณารอสักครู่แล้วลองใหม่'
 
 export function buildRateLimitErrorResponse() {

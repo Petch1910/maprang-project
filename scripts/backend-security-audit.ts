@@ -46,6 +46,8 @@ const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
 const rawErrorCodePropertyPattern =
   /\berror\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
+const rawAuthErrorResponseBypassPattern =
+  /\berror\s*:\s*error\s*\.\s*code\s*,\s*message\s*:\s*error\s*\.\s*message\b|\bmessage\s*:\s*error\s*\.\s*message\s*,\s*error\s*:\s*error\s*\.\s*code\b/g
 const rawResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*json\s*\(\s*\)/g
 const rawResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const routeErrorMessagesBlockPattern = /routeErrorMessages:\s*Record<string,\s*string>\s*=\s*\{([\s\S]*?)\n\s*\}/m
@@ -97,6 +99,10 @@ const patterns = [
   {
     pattern: /console\.(?:error|warn)\s*\(\s*error\b\s*(?:,|\))/g,
     message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
+  },
+  {
+    pattern: rawAuthErrorResponseBypassPattern,
+    message: 'ห้ามประกอบ AuthError response จาก error.code/error.message ตรงๆ; ใช้ authErrorResponse(error) เพื่อคุมข้อความ public.',
   },
   {
     pattern: /\bdetail\s*:\s*error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\b/g,

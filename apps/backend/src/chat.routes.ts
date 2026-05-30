@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
 import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, sendChat, streamChat, updateChatTitle } from './chat.service'
-import { AuthError, isUuid, resolveRequestUserId } from './security'
+import { AuthError, authErrorResponse, isUuid, resolveRequestUserId } from './security'
 import { rejectInvalidUuid, routeErrorResponse, safeRouteErrorSummary } from './route-guards'
 import { loadChatWorldState, updateChatWorldState } from './world-state.service'
 
@@ -65,8 +65,7 @@ export const chatRoutes = new Elysia()
         if (error instanceof AuthError) {
           set.status = 401
           return {
-            error: error.code,
-            message: error.message,
+            ...authErrorResponse(error),
             chatId: responseChatId(body.chatId),
           }
         }
@@ -97,8 +96,7 @@ export const chatRoutes = new Elysia()
         if (error instanceof AuthError) {
           set.status = 401
           return {
-            error: error.code,
-            message: error.message,
+            ...authErrorResponse(error),
             chatId: responseChatId(body.chatId),
           }
         }

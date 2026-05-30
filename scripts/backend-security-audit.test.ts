@@ -116,6 +116,34 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches AuthError responses that bypass the public response helper', () => {
+    const message = 'ห้ามประกอบ AuthError response จาก error.code/error.message ตรงๆ; ใช้ authErrorResponse(error) เพื่อคุมข้อความ public.'
+
+    expect(
+      messagesFor(`
+        export const app = new Elysia()
+          .onError(({ error, set }) => {
+            if (error instanceof AuthError) {
+              set.status = 401
+              return { error: error.code, message: error.message }
+            }
+          })
+      `, 'apps/backend/index.ts'),
+    ).toContain(message)
+
+    expect(
+      messagesFor(`
+        export const app = new Elysia()
+          .onError(({ error, set }) => {
+            if (error instanceof AuthError) {
+              set.status = 401
+              return authErrorResponse(error)
+            }
+          })
+      `, 'apps/backend/index.ts'),
+    ).toEqual([])
+  })
+
   test('catches raw response JSON parsing outside safe payload helpers', () => {
     expect(
       messagesFor(`
@@ -517,7 +545,7 @@ describe('backend security audit', () => {
                 return await sendChat()
               } catch (error) {
                 if (error instanceof AuthError) {
-                  return { error: error.code, message: error.message }
+                  return authErrorResponse(error)
                 }
                 return routeErrorResponse('unknown_error')
               }
