@@ -455,6 +455,21 @@ describe('frontend static audit', () => {
         `
           try {
             await save()
+          } catch (error) {
+            return new Promise(function (_resolve, reject) {
+              reject(error)
+            })
+          }
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      ),
+    ).toHaveLength(1)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
           } catch (problem) {
             return Promise.reject(problem)
           }
@@ -486,6 +501,21 @@ describe('frontend static audit', () => {
             await save()
           } catch (problem) {
             return new Promise((_resolve, reject) => {
+              reject(problem as Error)
+            })
+          }
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ),
+    ).toHaveLength(1)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
+          } catch (problem) {
+            return new Promise(function rejectLater(_resolve, reject) {
               reject(problem as Error)
             })
           }

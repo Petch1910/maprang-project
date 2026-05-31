@@ -152,10 +152,22 @@ function rawFrontendErrorExpressionPatternFor(variableName: string) {
 }
 
 function rawPromiseExecutorRejectPatternFor(variableName: string) {
-  return new RegExp(
-    String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*([A-Za-z_$][\w$]*)\s*\)\s*=>[\s\S]{0,240}?\b\1\s*\(\s*(?:\(\s*)?${rawFrontendErrorExpressionPatternFor(variableName)}`,
-    'g',
-  )
+  return rawPromiseExecutorRejectPatternsFor(variableName)[0]
+}
+
+function rawPromiseExecutorRejectPatternsFor(variableName: string) {
+  const rejectParameterPattern = String.raw`([A-Za-z_$][\w$]*)(?:\s*[:?]\s*[^,)]+)?`
+  const rawExpression = rawFrontendErrorExpressionPatternFor(variableName)
+  return [
+    new RegExp(
+      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*${rejectParameterPattern}\s*\)\s*=>[\s\S]{0,240}?\b\1\s*\(\s*(?:\(\s*)?${rawExpression}`,
+      'g',
+    ),
+    new RegExp(
+      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*function(?:\s+[A-Za-z_$][\w$]*)?\s*\([^)]*,\s*${rejectParameterPattern}\s*\)[\s\S]{0,240}?\b\1\s*\(\s*(?:\(\s*)?${rawExpression}`,
+      'g',
+    ),
+  ]
 }
 
 function rawFrontendErrorArrayElementPatternFor(variableName: string) {
@@ -702,12 +714,14 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       message: promiseRejectAliasMessage,
     })
   }
-  for (const match of content.matchAll(rawPromiseExecutorRejectPatternFor('error'))) {
-    findings.push({
-      file,
-      line: lineFor(content, match.index ?? 0),
-      message: rawUiErrorThrowMessage,
-    })
+  for (const pattern of rawPromiseExecutorRejectPatternsFor('error')) {
+    for (const match of content.matchAll(pattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: rawUiErrorThrowMessage,
+      })
+    }
   }
 
   for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
@@ -731,12 +745,14 @@ export function auditRawUiErrorThrows(content: string, file: string) {
         message: rawUiErrorThrowMessage,
       })
     }
-    for (const rejectMatch of catchBlock.matchAll(rawPromiseExecutorRejectPatternFor(variableName))) {
-      findings.push({
-        file,
-        line: lineFor(content, openingBraceIndex + 1 + (rejectMatch.index ?? 0)),
-        message: rawUiErrorThrowMessage,
-      })
+    for (const pattern of rawPromiseExecutorRejectPatternsFor(variableName)) {
+      for (const rejectMatch of catchBlock.matchAll(pattern)) {
+        findings.push({
+          file,
+          line: lineFor(content, openingBraceIndex + 1 + (rejectMatch.index ?? 0)),
+          message: rawUiErrorThrowMessage,
+        })
+      }
     }
   }
 
