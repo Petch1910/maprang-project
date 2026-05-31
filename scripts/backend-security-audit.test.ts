@@ -85,6 +85,13 @@ describe('backend security audit', () => {
     expect(
       messagesFor(`
         const providerFailure = classifyChatProviderError(error)
+        console.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error as Error)
+      `),
+    ).toContain('ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.')
+
+    expect(
+      messagesFor(`
+        const providerFailure = classifyChatProviderError(error)
         console.error('สตรีมแชทไม่สำเร็จ:', providerFailure)
       `),
     ).toEqual([])
@@ -100,10 +107,12 @@ describe('backend security audit', () => {
           console.warn(error)
           console.error(error, 'seed failed')
           console.warn ( error , 'seed slow' )
+          console.error(error as Error)
+          console.warn((error as Error), 'seed slow')
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(4)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(6)
 
     expect(
       messagesFor(`

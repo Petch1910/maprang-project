@@ -167,11 +167,17 @@ const patterns = [
     message: 'ห้ามใช้ Prisma $executeRaw แบบ function call; ให้ใช้ tagged template parameterization.',
   },
   {
-    pattern: /console\.(?:error|warn)\s*\([\s\S]*?providerFailure[\s\S]*?,\s*error\b[\s\S]*?\)/g,
+    pattern: new RegExp(
+      `console\\.(?:error|warn)\\s*\\([\\s\\S]*?providerFailure[\\s\\S]*?,\\s*${rawErrorExpressionPatternFor('error')}[\\s\\S]*?\\)`,
+      'g',
+    ),
     message: 'ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.',
   },
   {
-    pattern: /console\.(?:error|warn)\s*\(\s*error\b\s*(?:,|\))/g,
+    pattern: new RegExp(
+      `console\\.(?:error|warn)\\s*\\(\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}\\s*(?:,|\\))`,
+      'g',
+    ),
     message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
   },
   {
