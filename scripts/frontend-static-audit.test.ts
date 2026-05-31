@@ -357,6 +357,32 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports alternate catch-variable raw frontend error classifiers and visible messages', () => {
+    expect(
+      auditSuspiciousPatterns(
+        `
+          try {
+            await signIn()
+          } catch (problem) {
+            const rawAuthMessage = problem.message.toLowerCase()
+            const rawStringMessage = String(problem).toLowerCase()
+            const rawRegexMessage = /admin_unauthorized|forbidden/i.test(problem.message)
+            const rawMatchMessage = problem.message.match(/forbidden/i)
+            setNotice(problem instanceof Error ? problem.message : 'เข้าสู่ระบบไม่สำเร็จ')
+            setNotice(safeBrowserErrorSummary(problem))
+          }
+        `,
+        'apps/frontend/src/pages/AuthFixturePage.tsx',
+      ).map((finding) => finding.message),
+    ).toEqual([
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
+    ])
+  })
+
   test('reports raw UI error throws in components and pages', () => {
     expect(
       auditRawUiErrorThrows(

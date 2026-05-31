@@ -50,6 +50,12 @@ const rawUiErrorThrowMessage =
   'หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
 const rawFrontendErrorLogMessage =
   'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย'
+const rawFrontendErrorClassifierMessage =
+  'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน'
+const rawFrontendErrorRegexMessage =
+  'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน'
+const rawFrontendUserVisibleErrorMessage =
+  'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น'
 const browserEventListenerCleanupMessage =
   'frontend source ที่เพิ่ม browser event listener ต้องมี removeEventListener คู่กันในไฟล์เดียวกัน เพื่อกันเมนู/drawer/sidebar ค้าง listener หลัง unmount.'
 const directLocationOriginMessage =
@@ -96,6 +102,30 @@ function rawFrontendErrorLogPatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
   return new RegExp(
     `\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\(\\s*(?:\\(\\s*)?${escaped}\\b\\s*(?:,|\\))|\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\([\\s\\S]*?,\\s*(?:\\(\\s*)?${escaped}\\b\\s*(?:,|\\))`,
+    'g',
+  )
+}
+
+function rawFrontendErrorClassifierPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(
+    `\\b${escaped}\\s*\\.\\s*message\\s*\\.\\s*toLowerCase\\s*\\(\\s*\\)|\\bString\\s*\\(\\s*${escaped}\\s*\\)\\s*\\.\\s*toLowerCase\\s*\\(\\s*\\)`,
+    'g',
+  )
+}
+
+function rawFrontendErrorRegexPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(
+    `\\/[^/\\n]+\\/[gimsuyd]*\\.test\\(\\s*${escaped}\\s*\\.\\s*message\\s*\\)|\\b${escaped}\\s*\\.\\s*message\\s*\\.\\s*match\\s*\\(`,
+    'g',
+  )
+}
+
+function rawFrontendUserVisibleErrorPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(
+    `\\bset[A-Za-z_$][\\w$]*\\s*\\(\\s*${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${escaped}\\s*\\.\\s*message`,
     'g',
   )
 }
@@ -411,15 +441,15 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
   },
   {
     pattern: /\berror\s*\.\s*message\s*\.\s*toLowerCase\s*\(\s*\)|\bString\s*\(\s*error\s*\)\s*\.\s*toLowerCase\s*\(\s*\)/g,
-    message: 'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+    message: rawFrontendErrorClassifierMessage,
   },
   {
     pattern: /\/[^/\n]+\/[gimsuyd]*\.test\(\s*error\s*\.\s*message\s*\)|error\s*\.\s*message\s*\.\s*match\s*\(/g,
-    message: 'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+    message: rawFrontendErrorRegexMessage,
   },
   {
     pattern: /setNote\s*\(\s*error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message/g,
-    message: 'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
+    message: rawFrontendUserVisibleErrorMessage,
   },
   {
     pattern: /state\s*\.\s*error\s*=\s*action\s*\.\s*error\s*\.\s*message/g,
@@ -520,12 +550,20 @@ export function auditSuspiciousPatterns(content: string, file: string) {
     if (openingBraceIndex < 0) continue
     const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
     const catchBlock = content.slice(openingBraceIndex + 1, closingBraceIndex)
-    for (const logMatch of catchBlock.matchAll(rawFrontendErrorLogPatternFor(variableName))) {
-      findings.push({
-        file,
-        line: lineFor(content, openingBraceIndex + 1 + (logMatch.index ?? 0)),
-        message: rawFrontendErrorLogMessage,
-      })
+    const catchBlockPatterns = [
+      { pattern: rawFrontendErrorLogPatternFor(variableName), message: rawFrontendErrorLogMessage },
+      { pattern: rawFrontendErrorClassifierPatternFor(variableName), message: rawFrontendErrorClassifierMessage },
+      { pattern: rawFrontendErrorRegexPatternFor(variableName), message: rawFrontendErrorRegexMessage },
+      { pattern: rawFrontendUserVisibleErrorPatternFor(variableName), message: rawFrontendUserVisibleErrorMessage },
+    ]
+    for (const item of catchBlockPatterns) {
+      for (const match of catchBlock.matchAll(item.pattern)) {
+        findings.push({
+          file,
+          line: lineFor(content, openingBraceIndex + 1 + (match.index ?? 0)),
+          message: item.message,
+        })
+      }
     }
   }
 
