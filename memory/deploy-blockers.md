@@ -78,6 +78,7 @@ guard ใน repo:
 - Frontend/backend raw error log guards now also cover bracket-notation console error/warn property calls, including optional-chained computed calls; this is repo-owned hardening, not an external deploy blocker.
 - Frontend/backend raw error log guards now also cover console call/apply/bind/Reflect.apply/global-console method-forwarding syntax, including apply-array raw error arguments, bind-invoked calls, Reflect.apply arrays, and globalThis/window console wrappers; this is repo-owned hardening, not an external deploy blocker.
 - Frontend/backend raw error log guards now also reject console method aliases such as `const logError = console.error`, `const { error } = console`, and `logError = console['error']`; this is repo-owned hardening, not an external deploy blocker.
+- Frontend/backend raw error log guards now also reject console object aliases such as `const logger = console` and `logger = window.console`; this is repo-owned hardening, not an external deploy blocker.
 - Focused frontend dangerous link protocol guard ล่าสุดผ่าน `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run predeploy:check:test`, และ `bun run predeploy:check`; guard นี้ปิด `javascript:`, `vbscript:`, และ `data:text/html` ใน `href`/`to` โดยไม่เปลี่ยน production blocker ภายนอก.
 - backend test suite ฝั่ง local ผ่านแล้ว: 178 pass, 0 fail, 611 expect calls.
 - Local API smoke ผ่านแล้ว

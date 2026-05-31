@@ -46,6 +46,11 @@ const consoleObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?console
 const consoleErrorWarnAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
 const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const reflectConsoleErrorWarnApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${consoleErrorWarnAccessor}\s*,[\s\S]*?\[\s*`
+const consoleObjectAliasValue = String.raw`${consoleObjectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const consoleObjectAliasPattern = new RegExp(
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
+  'g',
+)
 const consoleErrorWarnAliasValue = String.raw`${consoleErrorWarnAccessor}(?=\s*(?:[;,\n)]|$|(?:\?\.|\.)\s*bind|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}\s*=\s*${consoleObjectAccessor}\b`,
@@ -171,6 +176,11 @@ type BackendRouteCall = {
 }
 
 const patterns = [
+  {
+    pattern: consoleObjectAliasPattern,
+    message:
+      'backend source ห้าม alias console object; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
   {
     pattern: consoleErrorWarnAliasPattern,
     message:
