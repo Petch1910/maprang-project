@@ -63,12 +63,12 @@ const reflectConsoleErrorWarnApplyTarget = String.raw`(?:${consoleErrorWarnAcces
 const reflectConsoleErrorWarnApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${reflectConsoleErrorWarnApplyTarget}\s*,[\s\S]*?\[\s*`
 const consoleObjectAliasValue = String.raw`${consoleObjectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const consoleObjectAliasPattern = new RegExp(
-  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
 const consoleErrorWarnAliasValue = String.raw`(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})(?=\s*(?:[;,\n)]|$|(?:\?\.|\.)\s*bind|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
-  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}\s*=\s*${consoleObjectAccessor}\b`,
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}\s*=\s*${consoleObjectAccessor}\b`,
   'g',
 )
 const browserEventListenerPattern =

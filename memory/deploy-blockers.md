@@ -84,8 +84,8 @@ guard ใน repo:
 - Frontend/backend raw error log guards now also cover `Object.getOwnPropertyDescriptor(..., 'error'|'warn')?.value(...)` descriptor forwarding forms, including direct value calls, `.call`, `.apply`, and `.bind(...)(...)`; this is repo-owned hardening, not an external deploy blocker.
 - Frontend/backend console method alias guards now also reject reflected aliases from `Reflect.get(..., 'error'|'warn')`; this is repo-owned hardening, not an external deploy blocker.
 - Frontend/backend console method alias guards now also reject descriptor value aliases from `Object.getOwnPropertyDescriptor(..., 'error'|'warn')?.value`; this is repo-owned hardening, not an external deploy blocker.
-- Frontend/backend raw error log guards now also reject console method aliases such as `const logError = console.error`, `const { error } = console`, and `logError = console['error']`; this is repo-owned hardening, not an external deploy blocker.
-- Frontend/backend raw error log guards now also reject console object aliases such as `const logger = console` and `logger = window.console`; this is repo-owned hardening, not an external deploy blocker.
+- Frontend/backend raw error log guards now also reject console method aliases such as `const logError = console.error`, typed method aliases, `const { error } = console`, and `logError = console['error']`; this is repo-owned hardening, not an external deploy blocker.
+- Frontend/backend raw error log guards now also reject console object aliases such as `const logger = console`, typed console object aliases, and `logger = window.console`; this is repo-owned hardening, not an external deploy blocker.
 - Focused frontend dangerous link protocol guard ล่าสุดผ่าน `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run predeploy:check:test`, และ `bun run predeploy:check`; guard นี้ปิด `javascript:`, `vbscript:`, และ `data:text/html` ใน `href`/`to` โดยไม่เปลี่ยน production blocker ภายนอก.
 - backend test suite ฝั่ง local ผ่านแล้ว: 178 pass, 0 fail, 611 expect calls.
 - Local API smoke ผ่านแล้ว

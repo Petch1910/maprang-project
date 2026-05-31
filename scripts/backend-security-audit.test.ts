@@ -221,6 +221,7 @@ describe('backend security audit', () => {
   test('catches backend console method aliases', () => {
     const messages = messagesFor(`
         const logError = console.error
+        const typedLogError: typeof console.error = console.error
         let logWarn = globalThis.console.warn.bind(console)
         logError = console['error']
         const assertedError = console.error as typeof console.error
@@ -232,7 +233,7 @@ describe('backend security audit', () => {
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(9)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(10)
   })
 
   test('catches Reflect.apply console retrieval targets', () => {
@@ -255,12 +256,13 @@ describe('backend security audit', () => {
   test('catches backend console object aliases', () => {
     const messages = messagesFor(`
         const logger = console
+        const typedLogger: Console = console
         let globalLogger = globalThis.console as Console
         logger = console
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(3)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(4)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {

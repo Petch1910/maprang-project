@@ -807,6 +807,7 @@ describe('frontend static audit', () => {
     const messages = auditSuspiciousPatterns(
       `
         const logError = console.error
+        const typedLogError: typeof console.error = console.error
         let logWarn = window.console.warn.bind(console)
         logError = globalThis.console['error']
         const assertedError = console.error as typeof console.error
@@ -820,7 +821,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(9)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(10)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -846,6 +847,7 @@ describe('frontend static audit', () => {
     const messages = auditSuspiciousPatterns(
       `
         const logger = console
+        const typedLogger: Console = console
         let globalLogger = globalThis.console as Console
         logger = window.console
         console.error('safe summary:', safeBrowserErrorSummary(error))
@@ -853,7 +855,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(3)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(4)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {
