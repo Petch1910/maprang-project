@@ -43,7 +43,10 @@ function escapeRegExp(value: string) {
 
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
-const rawRouteErrorLogPattern = /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g
+const rawRouteErrorLogPattern = new RegExp(
+  `console\\.(?:error|warn)\\s*\\([\\s\\S]*?,\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}\\s*(?=,|\\))[\\s\\S]*?\\)`,
+  'g',
+)
 const rawRouteErrorThrowPattern = /throw\s*(?:\(\s*)?error\b/g
 const rawRouteErrorReturnPattern = /\breturn\s*(?:\(\s*)?error\s*(?:\)\s*)?(?:;|$)/gm
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{/g

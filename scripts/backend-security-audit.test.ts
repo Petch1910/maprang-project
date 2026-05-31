@@ -390,6 +390,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        function logRouteFailure(error: unknown) {
+          console.warn('stream failed', error as Error)
+        }
+      `, 'chat.routes.ts'),
+    ).toContain('route log raw error object ตรงๆ ไม่ได้; ใช้ safeRouteErrorSummary เพื่อกันข้อมูลลับหลุด log.')
+
+    expect(
+      messagesFor(`
         export const uploadRoutes = new Elysia()
           .post('/uploads/avatar', async () => {
             try {
