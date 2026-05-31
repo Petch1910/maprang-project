@@ -42,7 +42,8 @@ function escapeRegExp(value: string) {
 }
 
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
-const consoleErrorWarnCallPrefix = String.raw`console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(`
+const consoleErrorWarnAccessor = String.raw`console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
+const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
   `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`,
