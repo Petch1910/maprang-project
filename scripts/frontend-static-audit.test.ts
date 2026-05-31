@@ -465,6 +465,11 @@ describe('frontend static audit', () => {
       'return window.Promise.reject.call(window.Promise, error)',
       'return Reflect.apply(Promise.reject, Promise, [error])',
       'return Reflect.apply(window.Promise.reject, window.Promise, [error])',
+      'return Reflect.get(Promise, "reject")(error)',
+      'return Reflect.get(window.Promise, "reject").call(window.Promise, error)',
+      'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value(error)',
+      'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value.apply(Promise, [error])',
+      'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [error])',
     ]) {
       expect(
         auditRawUiErrorThrows(
@@ -573,6 +578,9 @@ describe('frontend static audit', () => {
       'return Promise.reject.apply(Promise, [problem])',
       'return Promise.reject.bind(Promise)(problem)',
       'return Reflect.apply(Promise.reject, Promise, [problem])',
+      'return Reflect.get(Promise, "reject")(problem)',
+      'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value(problem)',
+      'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [problem])',
     ]) {
       expect(
         auditRawUiErrorThrows(
@@ -647,6 +655,16 @@ describe('frontend static audit', () => {
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
     ])
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          const reflectedReject = Reflect.get(Promise, 'reject')
+          const descriptorReject = Object.getOwnPropertyDescriptor(Promise, 'reject')?.value
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
 
     expect(
       auditRawUiErrorThrows(

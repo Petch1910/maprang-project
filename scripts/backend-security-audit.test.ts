@@ -794,6 +794,11 @@ describe('backend security audit', () => {
       'return globalThis.Promise.reject.call(globalThis.Promise, error)',
       'return Reflect.apply(Promise.reject, Promise, [error])',
       'return Reflect.apply(globalThis.Promise.reject, globalThis.Promise, [error])',
+      'return Reflect.get(Promise, "reject")(error)',
+      'return Reflect.get(globalThis.Promise, "reject").call(globalThis.Promise, error)',
+      'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value(error)',
+      'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value.apply(Promise, [error])',
+      'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [error])',
       'return new Promise((_resolve, reject) => reject(error as Error))',
       'return new Promise((_resolve, reject) => reject?.(error as Error))',
       'return new Promise((_resolve, reject) => reject.call(undefined, error as Error))',
@@ -883,6 +888,13 @@ describe('backend security audit', () => {
         const { reject: typedReject }: PromiseConstructor = Promise
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
     ).toHaveLength(1)
+
+    expect(
+      messagesFor(`
+        const reflectedReject = Reflect.get(Promise, 'reject')
+        const descriptorReject = Object.getOwnPropertyDescriptor(Promise, 'reject')?.value
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
 
     expect(
       messagesFor(`

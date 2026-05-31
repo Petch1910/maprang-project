@@ -65,11 +65,15 @@ const consoleErrorWarnAliasPattern = new RegExp(
 )
 const promiseObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Promise`
 const promiseRejectAccessor = String.raw`${promiseObjectAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
+const reflectGetPromiseRejectValue = String.raw`Reflect\s*(?:\?\.|\.)\s*get\s*\(\s*${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)`
+const descriptorPromiseRejectValue = String.raw`Object\s*(?:\?\.|\.)\s*getOwnPropertyDescriptor\s*\(\s*${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)\s*(?:\?\.|\.)\s*value`
+const retrievedPromiseRejectValue = String.raw`(?:${reflectGetPromiseRejectValue}|${descriptorPromiseRejectValue})`
 const reflectPromiseRejectApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
+const reflectRetrievedPromiseRejectApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${retrievedPromiseRejectValue}\s*,[\s\S]*?\[\s*`
 const reflectObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Reflect\b`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
-const promiseRejectAliasValue = String.raw`${promiseRejectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectAccessor}\b`,
   'g',
@@ -167,7 +171,7 @@ function rawRouteErrorRejectPatternSourceFor(variableName: string) {
   const rawExpression = rawErrorExpressionPatternFor(variableName)
   const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
   const rawArrayElement = rawErrorArrayElementPatternFor(variableName)
-  return String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:return\s+)?${reflectPromiseRejectApplyPrefix}[\s\S]{0,120}?${rawArrayElement}`
+  return String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:return\s+)?${reflectPromiseRejectApplyPrefix}[\s\S]{0,120}?${rawArrayElement}|\b(?:return\s+)?${retrievedPromiseRejectValue}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${retrievedPromiseRejectValue}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b(?:return\s+)?${retrievedPromiseRejectValue}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${retrievedPromiseRejectValue}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:return\s+)?${reflectRetrievedPromiseRejectApplyPrefix}[\s\S]{0,120}?${rawArrayElement}`
 }
 
 function rawPromiseExecutorRejectPatternFor(variableName: string) {
