@@ -458,6 +458,26 @@ describe('frontend static audit', () => {
       ),
     ).toHaveLength(6)
 
+    for (const rejectedExpression of [
+      'return Promise.reject.call(Promise, error)',
+      'return Promise.reject.apply(Promise, [error])',
+      'return Promise.reject.bind(Promise)(error)',
+      'return window.Promise.reject.call(window.Promise, error)',
+    ]) {
+      expect(
+        auditRawUiErrorThrows(
+          `
+            try {
+              await save()
+            } catch (error) {
+              ${rejectedExpression}
+            }
+          `,
+          'apps/frontend/src/pages/FixturePage.tsx',
+        ),
+      ).toHaveLength(1)
+    }
+
     expect(
       auditRawUiErrorThrows(
         `
@@ -545,6 +565,25 @@ describe('frontend static audit', () => {
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
     ).toHaveLength(6)
+
+    for (const rejectedExpression of [
+      'return Promise.reject.call(Promise, problem)',
+      'return Promise.reject.apply(Promise, [problem])',
+      'return Promise.reject.bind(Promise)(problem)',
+    ]) {
+      expect(
+        auditRawUiErrorThrows(
+          `
+            try {
+              await save()
+            } catch (problem) {
+              ${rejectedExpression}
+            }
+          `,
+          'apps/frontend/src/components/FixturePanel.tsx',
+        ),
+      ).toHaveLength(1)
+    }
 
     expect(
       auditRawUiErrorThrows(

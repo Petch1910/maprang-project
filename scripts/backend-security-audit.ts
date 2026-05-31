@@ -84,7 +84,7 @@ const rawRouteErrorReturnPattern = new RegExp(
   'gm',
 )
 const rawRouteErrorRejectPattern = new RegExp(
-  String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawErrorExpressionPatternFor('error')}`,
+  rawRouteErrorRejectPatternSourceFor('error'),
   'g',
 )
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
@@ -159,10 +159,14 @@ function rawRouteErrorThrowPatternFor(variableName: string) {
 }
 
 function rawRouteErrorRejectPatternFor(variableName: string) {
-  return new RegExp(
-    String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawErrorExpressionPatternFor(variableName)}`,
-    'g',
-  )
+  return new RegExp(rawRouteErrorRejectPatternSourceFor(variableName), 'g')
+}
+
+function rawRouteErrorRejectPatternSourceFor(variableName: string) {
+  const rawExpression = rawErrorExpressionPatternFor(variableName)
+  const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
+  const rawArrayElement = rawErrorArrayElementPatternFor(variableName)
+  return String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`
 }
 
 function rawPromiseExecutorRejectPatternFor(variableName: string) {

@@ -42,10 +42,7 @@ const reflectObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const variableTypeAnnotation = String.raw`(?:\s*:\s*[^=;,\n]+)?`
-const rawUiErrorRejectPattern = new RegExp(
-  String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?error\b`,
-  'g',
-)
+const rawUiErrorRejectPattern = rawPromiseRejectPatternFor('error')
 const promiseRejectAliasValue = String.raw`${promiseRejectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectAccessor}\b`,
@@ -137,8 +134,17 @@ function rawUiErrorThrowPatternFor(variableName: string) {
 
 function rawUiErrorRejectPatternFor(variableName: string) {
   if (variableName === 'error') return rawUiErrorRejectPattern
-  const escaped = escapeRegExp(variableName)
-  return new RegExp(String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${escaped}\b`, 'g')
+  return rawPromiseRejectPatternFor(variableName)
+}
+
+function rawPromiseRejectPatternFor(variableName: string) {
+  const rawExpression = rawFrontendErrorExpressionPatternFor(variableName)
+  const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
+  const rawArrayElement = rawFrontendErrorArrayElementPatternFor(variableName)
+  return new RegExp(
+    String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`,
+    'g',
+  )
 }
 
 function rawFrontendErrorLogPatternFor(variableName: string) {
