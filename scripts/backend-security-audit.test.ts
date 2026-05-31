@@ -424,6 +424,47 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches route catch raw error returns', () => {
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (error) {
+              return error
+            }
+          })
+      `, 'chat.routes.ts'),
+    ).toContain('route catch ห้าม return raw error object ตรงๆ; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.')
+
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (error) {
+              return (error)
+            }
+          })
+      `, 'chat.routes.ts'),
+    ).toContain('route catch ห้าม return raw error object ตรงๆ; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.')
+
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (error) {
+              return routeErrorResponse('unknown_error')
+            }
+          })
+      `, 'chat.routes.ts'),
+    ).toEqual([])
+  })
+
   test('catches route catch responses that expose raw error messages', () => {
     expect(
       messagesFor(

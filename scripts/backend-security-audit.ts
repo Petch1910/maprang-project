@@ -41,6 +41,7 @@ const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g
 const rawRouteErrorThrowPattern = /throw\s*(?:\(\s*)?error\b/g
+const rawRouteErrorReturnPattern = /\breturn\s*(?:\(\s*)?error\s*(?:\)\s*)?(?:;|$)/gm
 const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
@@ -55,6 +56,7 @@ const routeErrorMessageKeyPattern = /^\s*([a-z0-9_]+):/gm
 const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_]+)\1\s*\)/g
 const rawRouteCatchMessage = 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.'
 const rawRouteCatchErrorCode = 'route catch ห้ามคืน raw error ใน field error; ใช้ machine-readable code ที่ควบคุมได้.'
+const rawRouteCatchReturn = 'route catch ห้าม return raw error object ตรงๆ; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.'
 const rawResponseJsonMessage = 'ห้าม parse response.json() ตรงใน runtime backend; ให้แยกเป็น read...Payload helper ที่ห่อ JSON พังเป็นข้อความไทยก่อน.'
 const rawResponseTextMessage = 'ห้ามอ่าน response.text() จาก provider/Supabase แล้วใช้ตรงใน runtime backend; ต้องผ่าน redactSensitiveText ก่อนนำไป log หรือคืนเป็น diagnostic.'
 const allowedRawResponseJsonReaders = [
@@ -269,6 +271,15 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
         file,
         line: lineFor(content, openingBraceIndex + 1 + blockErrorIndex),
         message: rawRouteCatchErrorCode,
+      })
+    }
+
+    for (const returnMatch of catchBlock.matchAll(rawRouteErrorReturnPattern)) {
+      const blockReturnIndex = returnMatch.index ?? 0
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + blockReturnIndex),
+        message: rawRouteCatchReturn,
       })
     }
   }
