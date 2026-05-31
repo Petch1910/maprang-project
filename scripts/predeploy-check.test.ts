@@ -174,6 +174,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('rawRouteErrorReturnPatternFor')
     expect(predeploy).toContain('rawRouteErrorThrowPatternFor')
     expect(predeploy).toContain('rawRouteErrorLogPatternsFor')
+    expect(predeploy).toContain('rawErrorDetailMessagePatternFor')
+    expect(predeploy).toContain('rawAuthErrorResponseBypassPatternFor')
     expect(predeploy).toContain('catches alternate route catch variable names')
     expect(predeploy).toContain('rawAuthErrorResponseBypassPattern')
     expect(predeploy).toContain('ห้ามประกอบ AuthError response จาก error.code/error.message ตรงๆ')

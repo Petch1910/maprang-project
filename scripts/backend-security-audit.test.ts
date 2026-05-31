@@ -651,6 +651,29 @@ describe('backend security audit', () => {
             }
           })
       `, 'chat.routes.ts'),
+      ...messagesFor(`
+        export const adminRoutes = new Elysia()
+          .get('/admin/evals/local', async () => {
+            try {
+              return await runLocalEvalSuite()
+            } catch (reason) {
+              return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: reason instanceof Error ? reason . message : String ( reason ) }
+            }
+          })
+      `, 'admin.routes.ts'),
+      ...messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (err) {
+              if (err instanceof AuthError) {
+                return { error: err.code, message: err.message }
+              }
+              return routeErrorResponse('unknown_error')
+            }
+          })
+      `, 'chat.routes.ts'),
     ]
 
     expect(messages.some((message) => message.includes('route throw raw error object'))).toBe(true)
@@ -658,6 +681,8 @@ describe('backend security audit', () => {
     expect(messages.some((message) => message.includes('return raw error object'))).toBe(true)
     expect(messages.some((message) => message.includes('error.message') && message.includes('message'))).toBe(true)
     expect(messages.some((message) => message.includes('field error'))).toBe(true)
+    expect(messages.some((message) => message.includes('raw error.message') && message.includes('detail'))).toBe(true)
+    expect(messages.some((message) => message.includes('AuthError response'))).toBe(true)
   })
 
   test('extracts route error message keys and helper calls for explicit-copy checks', () => {

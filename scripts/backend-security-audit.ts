@@ -106,6 +106,25 @@ function rawRouteErrorLogPatternsFor(variableName: string) {
   ]
 }
 
+function rawErrorDetailMessagePatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(`\\bdetail\\s*:\\s*${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${escaped}\\s*\\.\\s*message\\b`, 'g')
+}
+
+function rawErrorDetailDirectPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(`\\bdetail\\s*:\\s*(?:${escaped}\\s*\\.\\s*message|String\\s*\\(\\s*${escaped}\\s*\\))`, 'g')
+}
+
+function rawAuthErrorResponseBypassPatternFor(variableName: string) {
+  if (variableName === 'error') return rawAuthErrorResponseBypassPattern
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(
+    `\\berror\\s*:\\s*${escaped}\\s*\\.\\s*code\\s*,\\s*message\\s*:\\s*${escaped}\\s*\\.\\s*message\\b|\\bmessage\\s*:\\s*${escaped}\\s*\\.\\s*message\\s*,\\s*error\\s*:\\s*${escaped}\\s*\\.\\s*code\\b`,
+    'g',
+  )
+}
+
 type BackendRouteCall = {
   path: string
   handlerText: string
@@ -334,6 +353,33 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
     }
 
     if (variableName !== 'error') {
+      for (const detailMatch of catchBlock.matchAll(rawErrorDetailMessagePatternFor(variableName))) {
+        const blockDetailIndex = detailMatch.index ?? 0
+        findings.push({
+          file,
+          line: lineFor(content, openingBraceIndex + 1 + blockDetailIndex),
+          message: 'route response เธซเนเธฒเธกเธชเนเธ raw error.message เนเธ detail; เนเธเน safeRouteErrorSummary เธซเธฃเธทเธญเธเนเธญเธเธงเธฒเธกเธ—เธตเนเธเธงเธเธเธธเธกเนเธ”เน.',
+        })
+      }
+
+      for (const detailMatch of catchBlock.matchAll(rawErrorDetailDirectPatternFor(variableName))) {
+        const blockDetailIndex = detailMatch.index ?? 0
+        findings.push({
+          file,
+          line: lineFor(content, openingBraceIndex + 1 + blockDetailIndex),
+          message: 'route response เธซเนเธฒเธกเธชเนเธ raw error detail เธ•เธฃเธเน; เนเธเน safeRouteErrorSummary เธซเธฃเธทเธญเธเนเธญเธเธงเธฒเธกเธ—เธตเนเธเธงเธเธเธธเธกเนเธ”เน.',
+        })
+      }
+
+      for (const authMatch of catchBlock.matchAll(rawAuthErrorResponseBypassPatternFor(variableName))) {
+        const blockAuthIndex = authMatch.index ?? 0
+        findings.push({
+          file,
+          line: lineFor(content, openingBraceIndex + 1 + blockAuthIndex),
+          message: 'เธซเนเธฒเธกเธเธฃเธฐเธเธญเธ AuthError response เธเธฒเธ error.code/error.message เธ•เธฃเธเน; เนเธเน authErrorResponse(error) เน€เธเธทเนเธญเธเธธเธกเธเนเธญเธเธงเธฒเธก public.',
+        })
+      }
+
       for (const logPattern of rawRouteErrorLogPatternsFor(variableName)) {
         for (const logMatch of catchBlock.matchAll(logPattern)) {
           const blockLogIndex = logMatch.index ?? 0
