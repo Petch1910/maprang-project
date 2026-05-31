@@ -419,6 +419,9 @@ describe('frontend static audit', () => {
         window.alert('ใช้ toast แทน')
         window . confirm('ใช้ modal แทน')
         globalThis . prompt('ใช้ form แทน')
+        alert('ใช้ toast แทน')
+        confirm('ใช้ modal แทน')
+        prompt('ใช้ form แทน')
         window.postMessage(payload, '*')
         window.postMessage(payload, 'https://app.example.com')
         globalThis.addEventListener('message', handler)
@@ -453,6 +456,9 @@ describe('frontend static audit', () => {
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
+      'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
+      'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
+      'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',

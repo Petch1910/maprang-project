@@ -13,6 +13,7 @@ Last updated: 2026-05-31
 - 2026-05-31 backend raw route return guard pass: backend security audit now rejects route `catch (error)` blocks that return the raw error object directly; focused security/predeploy checks passed.
 - 2026-05-31 frontend no-op submit guard pass: frontend static audit now rejects empty `onSubmit` handlers, async-empty submit handlers, and submit handlers that return `undefined`, including spaced variants.
 - 2026-05-31 frontend native dialog guard pass: frontend static audit now rejects `window.alert`, `window.confirm`, and `globalThis.prompt` style browser dialogs before they can bypass the app modal/toast language.
+- 2026-05-31 frontend bare native dialog guard pass: frontend static audit now rejects bare `alert(...)`, `confirm(...)`, and `prompt(...)` in addition to `window`/`globalThis` calls.
 - 2026-05-31 frontend event listener cleanup guard pass: frontend static audit now rejects browser event listeners that add `window`/`globalThis`/`document` listeners without matching `removeEventListener` cleanup in the same file.
 - 2026-05-31 frontend share URL origin guard pass: character share links now use `characterShareUrl`, and frontend static audit rejects direct `window.location.origin`/`globalThis.location.origin` outside `apps/frontend/src/lib/shareUrl.ts`.
 - 2026-05-31 frontend bare location origin guard pass: frontend static audit now rejects bare `location.origin` outside the shared `shareUrl` helper so components cannot bypass the share-link origin contract without `window` or `globalThis`.

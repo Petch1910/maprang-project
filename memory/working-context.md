@@ -15,6 +15,7 @@ Last updated: 2026-05-31
 - 2026-05-31: Backend security audit now rejects route `catch (error)` blocks that `return error` or `return (error)` directly, so route handlers cannot accidentally send raw error objects as public responses. Focused security/predeploy checks passed.
 - 2026-05-31: Frontend static audit now rejects empty form submit handlers (`onSubmit={() => {}}`, `onSubmit={async () => {}}`, and `onSubmit={() => undefined}` with spaced variants), so form/composer surfaces cannot look wired while doing nothing.
 - 2026-05-31: Frontend static audit now rejects native browser dialogs through `window.alert`, `window.confirm`, and `globalThis.prompt`; use in-app modal/toast/form flows instead.
+- 2026-05-31: Frontend static audit now also rejects bare `alert(...)`, `confirm(...)`, and `prompt(...)`, so native browser dialogs cannot bypass the app modal/toast flow by omitting `window` or `globalThis`.
 - 2026-05-31: Frontend static audit now rejects browser event listeners that add `window`/`globalThis`/`document` listeners without matching `removeEventListener` cleanup in the same file, so drawer/sidebar/menu listeners cannot leak after unmount.
 - 2026-05-31: Character share links now use `characterShareUrl` from `apps/frontend/src/lib/shareUrl.ts`, and frontend static audit rejects direct `window.location.origin`/`globalThis.location.origin` outside that helper.
 - 2026-05-31: Frontend static audit now also rejects bare `location.origin` outside `shareUrl`, closing a share-link origin bypass that did not need the `window` or `globalThis` prefix.

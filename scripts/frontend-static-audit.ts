@@ -363,7 +363,7 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {
-    pattern: /\b(?:window|globalThis)\s*\.\s*(?:alert|confirm|prompt)\s*\(/g,
+    pattern: /(?<![\w:>])(?:(?:window|globalThis)\s*\.\s*)?(?:alert|confirm|prompt)\s*\(/g,
     message: 'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
   },
   {
