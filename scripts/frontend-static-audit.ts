@@ -326,6 +326,14 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {
+    pattern: /\bpostMessage\s*\([^\r\n]{0,300},\s*(["'])\*\1/g,
+    message: 'ห้ามใช้ postMessage ด้วย targetOrigin "*" ใน frontend source; ต้องกำหนด origin ปลายทางที่เชื่อถือได้',
+  },
+  {
+    pattern: /\b(?:(?:window|globalThis)\s*\.\s*)?addEventListener\s*\(\s*(["'])message\1/g,
+    message: 'ห้ามรับ message event ตรงใน frontend source ก่อนมี origin guard ที่ตรวจ event.origin ชัดเจน',
+  },
+  {
     pattern: /\b(?:href|to)\s*=\s*(["'])\s*(?:javascript:|vbscript:|data:text\/html)[^"']*\1/gi,
     message: 'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
   },

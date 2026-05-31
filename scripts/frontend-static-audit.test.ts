@@ -293,6 +293,8 @@ describe('frontend static audit', () => {
         window.open(url, '_blank')
         window . open(url, '_blank')
         globalThis . open(url, '_blank')
+        window.postMessage(payload, '*')
+        globalThis.addEventListener('message', handler)
         <a href="javascript:alert(1)">Bad protocol</a>
         <a href = "vbscript:alert(1)">Bad spaced protocol</a>
         <a href=" JAVASCRIPT:alert(1)">Bad padded protocol</a>
@@ -324,6 +326,8 @@ describe('frontend static audit', () => {
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
+      'ห้ามใช้ postMessage ด้วย targetOrigin "*" ใน frontend source; ต้องกำหนด origin ปลายทางที่เชื่อถือได้',
+      'ห้ามรับ message event ตรงใน frontend source ก่อนมี origin guard ที่ตรวจ event.origin ชัดเจน',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
