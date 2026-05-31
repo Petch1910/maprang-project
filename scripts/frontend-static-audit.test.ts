@@ -397,6 +397,15 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const { reject: typedReject }: PromiseConstructor = Promise
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ),
+    ).toHaveLength(1)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           try {
             await save()
           } catch (error) {
@@ -822,6 +831,17 @@ describe('frontend static audit', () => {
     ).map((finding) => finding.message)
 
     expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(10)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const { error: typedAliasedError, warn: typedWarn }: Console = console
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(1)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {

@@ -234,6 +234,12 @@ describe('backend security audit', () => {
       `, 'prisma/seed.ts')
 
     expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(10)
+
+    expect(
+      messagesFor(`
+        const { error: typedAliasedError, warn: typedWarn }: Console = console
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(1)
   })
 
   test('catches Reflect.apply console retrieval targets', () => {
@@ -861,6 +867,12 @@ describe('backend security audit', () => {
         const { reject } = Promise
       `, 'chat.routes.ts').filter((message) => message === 'route ห้าม alias Promise.reject; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.'),
     ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
+        const { reject: typedReject }: PromiseConstructor = Promise
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(1)
 
     expect(
       messagesFor(`

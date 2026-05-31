@@ -47,7 +47,7 @@ const rawUiErrorRejectPattern = new RegExp(
 )
 const promiseRejectAliasValue = String.raw`${promiseRejectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(
-  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}\s*=\s*Promise\b`,
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*Promise\b`,
   'g',
 )
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
@@ -68,7 +68,7 @@ const consoleObjectAliasPattern = new RegExp(
 )
 const consoleErrorWarnAliasValue = String.raw`(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})(?=\s*(?:[;,\n)]|$|(?:\?\.|\.)\s*bind|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
-  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}\s*=\s*${consoleObjectAccessor}\b`,
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAccessor}\b`,
   'g',
 )
 const browserEventListenerPattern =
