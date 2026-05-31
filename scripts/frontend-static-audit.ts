@@ -36,6 +36,8 @@ const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
+const browserEventListenerPattern =
+  /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
 const rawFrontendResponseJsonMessage =
   'ห้าม parse response.json() ตรงใน frontend source; ให้ใช้ readApiJson/readErrorPayload เพื่อห่อ JSON พังเป็นข้อความไทยก่อน.'
 const rawFrontendResponseTextMessage =
@@ -44,6 +46,8 @@ const rawFrontendFetchMessage =
   'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.'
 const rawUiErrorThrowMessage =
   'หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
+const browserEventListenerCleanupMessage =
+  'frontend source ที่เพิ่ม browser event listener ต้องมี removeEventListener คู่กันในไฟล์เดียวกัน เพื่อกันเมนู/drawer/sidebar ค้าง listener หลัง unmount.'
 const allowedFrontendResponseJsonReaders = ['readApiJson', 'readErrorPayload']
 const allowedFrontendFetchFiles = new Set(['apps/frontend/src/lib/api.ts'])
 const frontendUiSurfacePattern = /^apps\/frontend\/src\/(?:components|pages)\//
@@ -72,6 +76,13 @@ function frontendRelativePath(file: string) {
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function browserEventListenerRemovalPattern(target: string | undefined, eventName: string, handlerName: string) {
+  const targetPattern = target ? `${escapeRegExp(target)}\\s*\\.\\s*` : '(?:(?:window|globalThis|document)\\s*\\.\\s*)?'
+  return new RegExp(
+    `(?<![.\\w$])${targetPattern}removeEventListener\\s*\\(\\s*(["'])${escapeRegExp(eventName)}\\1\\s*,\\s*${escapeRegExp(handlerName)}\\b`,
+  )
 }
 
 function findMatchingBrace(content: string, openingBraceIndex: number) {
@@ -278,6 +289,24 @@ export function auditLinksWithAst(content: string, file: string) {
   }
 
   visit(sourceFile)
+  return findings
+}
+
+export function auditBrowserEventListenerCleanup(content: string, file: string) {
+  const findings: Finding[] = []
+  for (const match of content.matchAll(browserEventListenerPattern)) {
+    const target = match[1]
+    const eventName = match[3] ?? ''
+    const handlerName = match[4] ?? ''
+    if (!eventName || !handlerName) continue
+    if (browserEventListenerRemovalPattern(target, eventName, handlerName).test(content)) continue
+
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: `${browserEventListenerCleanupMessage} (${eventName}, ${handlerName})`,
+    })
+  }
   return findings
 }
 
@@ -513,6 +542,7 @@ export function auditFrontendSourceFile(content: string, file: string) {
     ...auditButtonsWithAst(content, file),
     ...auditDisabledControlsWithAst(content, file),
     ...auditLinksWithAst(content, file),
+    ...auditBrowserEventListenerCleanup(content, file),
     ...auditSuspiciousPatterns(content, file),
     ...auditRawFrontendFetchUsage(content, file),
     ...auditRawUiErrorThrows(content, file),

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
 import {
+  auditBrowserEventListenerCleanup,
   auditButtonsWithAst,
   auditDisabledControlsWithAst,
   auditFrontendSourceFile,
@@ -146,6 +147,34 @@ describe('frontend static audit', () => {
     expect(findings).toHaveLength(1)
     expect(findings[0]?.message).toContain('target="_blank"')
     expect(findings[0]?.message).toContain('rel="noopener noreferrer"')
+  })
+
+  test('reports browser event listeners without cleanup', () => {
+    const findings = auditBrowserEventListenerCleanup(
+      `
+        export function Fixture() {
+          useEffect(() => {
+            window.addEventListener('resize', closeOnResize)
+            document . addEventListener("keydown", closeOnEscape)
+            globalThis.addEventListener('click', closeOnClick)
+            window . addEventListener('scroll', closeOnScroll)
+
+            return () => {
+              window.removeEventListener('resize', closeOnResize)
+              document . removeEventListener("keydown", closeOnEscape)
+              globalThis.removeEventListener('click', closeOnClick)
+            }
+          }, [])
+        }
+      `,
+      'ListenerFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      expect.stringContaining('frontend source ที่เพิ่ม browser event listener ต้องมี removeEventListener คู่กันในไฟล์เดียวกัน'),
+    ])
+    expect(findings[0]?.message).toContain('scroll')
+    expect(findings[0]?.message).toContain('closeOnScroll')
   })
 
   test('reports placeholder links, empty handlers, and not implemented errors', () => {
