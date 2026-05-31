@@ -65,6 +65,7 @@ const consoleErrorWarnAliasPattern = new RegExp(
 )
 const promiseObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Promise`
 const promiseRejectAccessor = String.raw`${promiseObjectAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
+const reflectPromiseRejectApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
 const reflectObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Reflect\b`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
@@ -166,7 +167,7 @@ function rawRouteErrorRejectPatternSourceFor(variableName: string) {
   const rawExpression = rawErrorExpressionPatternFor(variableName)
   const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
   const rawArrayElement = rawErrorArrayElementPatternFor(variableName)
-  return String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`
+  return String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:return\s+)?${reflectPromiseRejectApplyPrefix}[\s\S]{0,120}?${rawArrayElement}`
 }
 
 function rawPromiseExecutorRejectPatternFor(variableName: string) {

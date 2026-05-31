@@ -463,6 +463,8 @@ describe('frontend static audit', () => {
       'return Promise.reject.apply(Promise, [error])',
       'return Promise.reject.bind(Promise)(error)',
       'return window.Promise.reject.call(window.Promise, error)',
+      'return Reflect.apply(Promise.reject, Promise, [error])',
+      'return Reflect.apply(window.Promise.reject, window.Promise, [error])',
     ]) {
       expect(
         auditRawUiErrorThrows(
@@ -570,6 +572,7 @@ describe('frontend static audit', () => {
       'return Promise.reject.call(Promise, problem)',
       'return Promise.reject.apply(Promise, [problem])',
       'return Promise.reject.bind(Promise)(problem)',
+      'return Reflect.apply(Promise.reject, Promise, [problem])',
     ]) {
       expect(
         auditRawUiErrorThrows(

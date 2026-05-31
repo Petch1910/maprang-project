@@ -38,6 +38,7 @@ const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const promiseObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Promise`
 const promiseRejectAccessor = String.raw`${promiseObjectAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
+const reflectPromiseRejectApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
 const reflectObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Reflect\b`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
@@ -142,7 +143,7 @@ function rawPromiseRejectPatternFor(variableName: string) {
   const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
   const rawArrayElement = rawFrontendErrorArrayElementPatternFor(variableName)
   return new RegExp(
-    String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`,
+    String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*(?:call|bind)\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([\s\S]{0,120}?\)\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b${promiseRejectAccessor}\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b${reflectPromiseRejectApplyPrefix}[\s\S]{0,120}?${rawArrayElement}`,
     'g',
   )
 }
