@@ -367,8 +367,9 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
     message: 'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
   },
   {
-    pattern: /\bpostMessage\s*\([^\r\n]{0,300},\s*(["'])\*\1/g,
-    message: 'ห้ามใช้ postMessage ด้วย targetOrigin "*" ใน frontend source; ต้องกำหนด origin ปลายทางที่เชื่อถือได้',
+    pattern: /\bpostMessage\s*\(/g,
+    message: 'ห้ามเรียก postMessage ตรงใน frontend source; ให้ใช้ crossWindowMessaging helper เพื่อคุม target origin และ schema ของ event',
+    allowedFiles: allowedFrontendMessageOriginFiles,
   },
   {
     pattern: /\b(?:(?:window|globalThis)\s*\.\s*)?addEventListener\s*\(\s*(["'])message\1/g,

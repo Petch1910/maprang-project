@@ -420,6 +420,7 @@ describe('frontend static audit', () => {
         window . confirm('ใช้ modal แทน')
         globalThis . prompt('ใช้ form แทน')
         window.postMessage(payload, '*')
+        window.postMessage(payload, 'https://app.example.com')
         globalThis.addEventListener('message', handler)
         <a href="javascript:alert(1)">Bad protocol</a>
         <a href = "vbscript:alert(1)">Bad spaced protocol</a>
@@ -455,7 +456,8 @@ describe('frontend static audit', () => {
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
-      'ห้ามใช้ postMessage ด้วย targetOrigin "*" ใน frontend source; ต้องกำหนด origin ปลายทางที่เชื่อถือได้',
+      'ห้ามเรียก postMessage ตรงใน frontend source; ให้ใช้ crossWindowMessaging helper เพื่อคุม target origin และ schema ของ event',
+      'ห้ามเรียก postMessage ตรงใน frontend source; ให้ใช้ crossWindowMessaging helper เพื่อคุม target origin และ schema ของ event',
       'ห้ามรับ message event ตรงใน frontend source; ให้ใช้ crossWindowMessaging helper ที่ตรวจ event.origin ชัดเจน',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
