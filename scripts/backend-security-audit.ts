@@ -73,54 +73,68 @@ const allowedRawResponseJsonReaders = [
 
 function rawErrorValueExpression(variableName: string) {
   const escaped = escapeRegExp(variableName)
-  return `(?:${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${escaped}\\s*\\.\\s*message\\s*:\\s*String\\s*\\(\\s*${escaped}\\s*\\)|${escaped}\\s*\\.\\s*message\\b|String\\s*\\(\\s*${escaped}\\s*\\))`
+  const rawExpression = rawErrorExpressionPatternFor(variableName)
+  const rawMessageAccess = rawErrorMessageAccessPatternFor(variableName)
+  return `(?:${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${rawMessageAccess}\\s*:\\s*String\\s*\\(\\s*${rawExpression}\\s*\\)|${rawMessageAccess}|String\\s*\\(\\s*${rawExpression}\\s*\\))`
+}
+
+function rawErrorExpressionPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return `(?:${escaped}\\b(?:\\s+(?:as|satisfies)\\s+[^,)]+)?|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))`
+}
+
+function rawErrorMessageAccessPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return `(?:${escaped}\\b|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))\\s*\\.\\s*message\\b`
+}
+
+function rawErrorCodeAccessPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return `(?:${escaped}\\b|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))\\s*\\.\\s*code\\b`
 }
 
 function rawErrorMessagePropertyPatternFor(variableName: string) {
-  if (variableName === 'error') return rawErrorMessagePropertyPattern
   return new RegExp(`\\bmessage\\s*:\\s*${rawErrorValueExpression(variableName)}`, 'g')
 }
 
 function rawErrorCodePropertyPatternFor(variableName: string) {
-  if (variableName === 'error') return rawErrorCodePropertyPattern
   return new RegExp(`\\berror\\s*:\\s*${rawErrorValueExpression(variableName)}`, 'g')
 }
 
 function rawRouteErrorReturnPatternFor(variableName: string) {
-  if (variableName === 'error') return rawRouteErrorReturnPattern
-  const escaped = escapeRegExp(variableName)
-  return new RegExp(`\\breturn\\s*(?:\\(\\s*)?${escaped}\\s*(?:\\)\\s*)?(?:;|$)`, 'gm')
+  return new RegExp(`\\breturn\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}\\s*(?:\\)\\s*)?(?:;|$)`, 'gm')
 }
 
 function rawRouteErrorThrowPatternFor(variableName: string) {
-  if (variableName === 'error') return rawRouteErrorThrowPattern
-  const escaped = escapeRegExp(variableName)
-  return new RegExp(`throw\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
+  return new RegExp(`throw\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}`, 'g')
 }
 
 function rawRouteErrorLogPatternsFor(variableName: string) {
-  const escaped = escapeRegExp(variableName)
+  const rawArgument = `(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}\\s*(?:,|\\))`
   return [
-    new RegExp(`console\\.(?:error|warn)\\s*\\(\\s*${escaped}\\b\\s*(?:,|\\))`, 'g'),
-    new RegExp(`console\\.(?:error|warn)\\s*\\([\\s\\S]*?,\\s*${escaped}\\b[\\s\\S]*?\\)`, 'g'),
+    new RegExp(`console\\.(?:error|warn)\\s*\\(\\s*${rawArgument}`, 'g'),
+    new RegExp(`console\\.(?:error|warn)\\s*\\([\\s\\S]*?,\\s*${rawArgument}`, 'g'),
   ]
 }
 
 function rawErrorDetailMessagePatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
-  return new RegExp(`\\bdetail\\s*:\\s*${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${escaped}\\s*\\.\\s*message\\b`, 'g')
+  return new RegExp(
+    `\\bdetail\\s*:\\s*${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${rawErrorMessageAccessPatternFor(variableName)}`,
+    'g',
+  )
 }
 
 function rawErrorDetailDirectPatternFor(variableName: string) {
-  const escaped = escapeRegExp(variableName)
-  return new RegExp(`\\bdetail\\s*:\\s*(?:${escaped}\\s*\\.\\s*message|String\\s*\\(\\s*${escaped}\\s*\\))`, 'g')
+  return new RegExp(
+    `\\bdetail\\s*:\\s*(?:${rawErrorMessageAccessPatternFor(variableName)}|String\\s*\\(\\s*${rawErrorExpressionPatternFor(variableName)}\\s*\\))`,
+    'g',
+  )
 }
 
 function rawAuthErrorResponseBypassPatternFor(variableName: string) {
-  if (variableName === 'error') return rawAuthErrorResponseBypassPattern
-  const escaped = escapeRegExp(variableName)
   return new RegExp(
-    `\\berror\\s*:\\s*${escaped}\\s*\\.\\s*code\\s*,\\s*message\\s*:\\s*${escaped}\\s*\\.\\s*message\\b|\\bmessage\\s*:\\s*${escaped}\\s*\\.\\s*message\\s*,\\s*error\\s*:\\s*${escaped}\\s*\\.\\s*code\\b`,
+    `\\berror\\s*:\\s*${rawErrorCodeAccessPatternFor(variableName)}\\s*,\\s*message\\s*:\\s*${rawErrorMessageAccessPatternFor(variableName)}|\\bmessage\\s*:\\s*${rawErrorMessageAccessPatternFor(variableName)}\\s*,\\s*error\\s*:\\s*${rawErrorCodeAccessPatternFor(variableName)}`,
     'g',
   )
 }
