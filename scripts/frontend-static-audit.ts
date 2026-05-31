@@ -54,6 +54,7 @@ const directLocationOriginMessage =
 const allowedFrontendResponseJsonReaders = ['readApiJson', 'readErrorPayload']
 const allowedFrontendFetchFiles = new Set(['apps/frontend/src/lib/api.ts'])
 const allowedFrontendLocationOriginFiles = new Set(['apps/frontend/src/lib/shareUrl.ts'])
+const allowedFrontendMessageOriginFiles = new Set(['apps/frontend/src/lib/crossWindowMessaging.ts'])
 const frontendUiSurfacePattern = /^apps\/frontend\/src\/(?:components|pages)\//
 const allowedUnmountedFrontendComponents = new Map([
   [
@@ -316,7 +317,7 @@ export function auditBrowserEventListenerCleanup(content: string, file: string) 
 
 export const staleTemplateFiles = ['apps/frontend/src/App.css', 'apps/frontend/src/assets/react.svg', 'apps/frontend/src/assets/vite.svg']
 
-export const suspiciousPatterns = [
+export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allowedFiles?: Set<string> }> = [
   { pattern: /href\s*=\s*(["'])#\1/g, message: 'ลิงก์ใช้ href="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
   { pattern: /href\s*=\s*\{\s*(["'`])#\1\s*\}/g, message: 'ลิงก์ใช้ href={"#"} เป็นค่าตัวอย่างที่กดแล้วตัน' },
   { pattern: /to\s*=\s*(["'])#\1/g, message: 'ลิงก์ Router ใช้ to="#" เป็นค่าตัวอย่างที่กดแล้วตัน' },
@@ -371,7 +372,8 @@ export const suspiciousPatterns = [
   },
   {
     pattern: /\b(?:(?:window|globalThis)\s*\.\s*)?addEventListener\s*\(\s*(["'])message\1/g,
-    message: 'ห้ามรับ message event ตรงใน frontend source ก่อนมี origin guard ที่ตรวจ event.origin ชัดเจน',
+    message: 'ห้ามรับ message event ตรงใน frontend source; ให้ใช้ crossWindowMessaging helper ที่ตรวจ event.origin ชัดเจน',
+    allowedFiles: allowedFrontendMessageOriginFiles,
   },
   {
     pattern: /\b(?:href|to)\s*=\s*(["'])\s*(?:javascript:|vbscript:|data:text\/html)[^"']*\1/gi,
@@ -479,6 +481,7 @@ export async function auditStaleTemplateFiles(paths = staleTemplateFiles) {
 export function auditSuspiciousPatterns(content: string, file: string) {
   const findings: Finding[] = []
   for (const item of suspiciousPatterns) {
+    if (item.allowedFiles?.has(file)) continue
     for (const match of content.matchAll(item.pattern)) {
       findings.push({
         file,

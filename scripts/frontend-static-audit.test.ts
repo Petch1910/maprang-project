@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
+import {
+  isTrustedMessageOrigin,
+  normalizeTrustedMessageOrigin,
+  postMessageToTrustedOrigin,
+} from '../apps/frontend/src/lib/crossWindowMessaging'
 import { characterShareUrl } from '../apps/frontend/src/lib/shareUrl'
 import {
   auditBrowserEventListenerCleanup,
@@ -205,6 +210,53 @@ describe('frontend static audit', () => {
     ).toEqual([])
   })
 
+  test('routes cross-window messages through trusted origin helpers', () => {
+    expect(normalizeTrustedMessageOrigin('https://app.example.com')).toBe('https://app.example.com')
+    expect(normalizeTrustedMessageOrigin('https://app.example.com/')).toBe('https://app.example.com')
+    expect(normalizeTrustedMessageOrigin('http://app.example.com')).toBeNull()
+    expect(normalizeTrustedMessageOrigin('https://user:pass@app.example.com')).toBeNull()
+    expect(normalizeTrustedMessageOrigin('https://app.example.com/path')).toBeNull()
+    expect(isTrustedMessageOrigin('https://app.example.com', ['https://app.example.com/'])).toBe(true)
+    expect(isTrustedMessageOrigin('https://evil.example.com', ['https://app.example.com'])).toBe(false)
+
+    const calls: Array<{ message: unknown; origin: string }> = []
+    const targetWindow = {
+      postMessage(message: unknown, origin: string) {
+        calls.push({ message, origin })
+      },
+    }
+
+    expect(postMessageToTrustedOrigin(targetWindow, { type: 'ping' }, 'https://app.example.com/')).toBe(true)
+    expect(postMessageToTrustedOrigin(targetWindow, { type: 'bad' }, '*')).toBe(false)
+    expect(calls).toEqual([{ message: { type: 'ping' }, origin: 'https://app.example.com' }])
+  })
+
+  test('allows message event listeners only inside cross-window messaging helper', () => {
+    expect(
+      auditFrontendSourceFile(
+        `
+          function install(handler) {
+            window.addEventListener('message', handler)
+            return () => window.removeEventListener('message', handler)
+          }
+        `,
+        'apps/frontend/src/lib/crossWindowMessaging.ts',
+      ),
+    ).toEqual([])
+
+    expect(
+      auditFrontendSourceFile(
+        `
+          function install(handler) {
+            window.addEventListener('message', handler)
+            return () => window.removeEventListener('message', handler)
+          }
+        `,
+        'apps/frontend/src/components/MessageFixture.tsx',
+      ).map((finding) => finding.message),
+    ).toContain('ห้ามรับ message event ตรงใน frontend source; ให้ใช้ crossWindowMessaging helper ที่ตรวจ event.origin ชัดเจน')
+  })
+
   test('reports placeholder links, empty handlers, and not implemented errors', () => {
     const findings = auditSuspiciousPatterns(
       `
@@ -402,7 +454,7 @@ describe('frontend static audit', () => {
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
       'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
       'ห้ามใช้ postMessage ด้วย targetOrigin "*" ใน frontend source; ต้องกำหนด origin ปลายทางที่เชื่อถือได้',
-      'ห้ามรับ message event ตรงใน frontend source ก่อนมี origin guard ที่ตรวจ event.origin ชัดเจน',
+      'ห้ามรับ message event ตรงใน frontend source; ให้ใช้ crossWindowMessaging helper ที่ตรวจ event.origin ชัดเจน',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
       'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
