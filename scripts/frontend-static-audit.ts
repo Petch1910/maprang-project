@@ -36,6 +36,7 @@ const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
+const rawUiErrorRejectPattern = /\bPromise\s*\.\s*reject\s*\(\s*(?:\(\s*)?error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const consoleObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console`
 const consoleErrorWarnAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
@@ -116,6 +117,12 @@ function rawUiErrorThrowPatternFor(variableName: string) {
   if (variableName === 'error') return rawUiErrorThrowPattern
   const escaped = escapeRegExp(variableName)
   return new RegExp(`\\bthrow\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
+}
+
+function rawUiErrorRejectPatternFor(variableName: string) {
+  if (variableName === 'error') return rawUiErrorRejectPattern
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(`\\bPromise\\s*\\.\\s*reject\\s*\\(\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
 }
 
 function rawFrontendErrorLogPatternFor(variableName: string) {
@@ -663,6 +670,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       message: rawUiErrorThrowMessage,
     })
   }
+  for (const match of content.matchAll(rawUiErrorRejectPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: rawUiErrorThrowMessage,
+    })
+  }
 
   for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
     const variableName = catchMatch[1] ?? 'error'
@@ -675,6 +689,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       findings.push({
         file,
         line: lineFor(content, openingBraceIndex + 1 + (throwMatch.index ?? 0)),
+        message: rawUiErrorThrowMessage,
+      })
+    }
+    for (const rejectMatch of catchBlock.matchAll(rawUiErrorRejectPatternFor(variableName))) {
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + (rejectMatch.index ?? 0)),
         message: rawUiErrorThrowMessage,
       })
     }

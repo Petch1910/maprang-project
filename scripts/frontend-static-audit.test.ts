@@ -426,6 +426,45 @@ describe('frontend static audit', () => {
         `
           try {
             await save()
+          } catch (error) {
+            return Promise.reject(error)
+          }
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      ),
+    ).toHaveLength(1)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
+          } catch (problem) {
+            return Promise.reject(problem)
+          }
+        `,
+        'apps/frontend/src/lib/api.ts',
+      ),
+    ).toEqual([])
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
+          } catch (problem) {
+            return Promise.reject(problem)
+          }
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ),
+    ).toHaveLength(1)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
           } catch (problem) {
             throw problem
           }
