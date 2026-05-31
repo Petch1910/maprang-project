@@ -329,6 +329,10 @@ export const suspiciousPatterns = [
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {
+    pattern: /\b(?:window|globalThis)\s*\.\s*(?:alert|confirm|prompt)\s*\(/g,
+    message: 'ห้ามใช้ browser dialog แบบ alert/confirm/prompt ตรงใน frontend source; ใช้ modal หรือ toast ของแอปแทน',
+  },
+  {
     pattern: /\bpostMessage\s*\([^\r\n]{0,300},\s*(["'])\*\1/g,
     message: 'ห้ามใช้ postMessage ด้วย targetOrigin "*" ใน frontend source; ต้องกำหนด origin ปลายทางที่เชื่อถือได้',
   },
