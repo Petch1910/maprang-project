@@ -366,9 +366,14 @@ describe('frontend static audit', () => {
           } catch (problem) {
             const rawAuthMessage = problem.message.toLowerCase()
             const rawStringMessage = String(problem).toLowerCase()
+            const rawAssertedAuthMessage = (problem as Error).message.toLowerCase()
+            const rawAssertedStringMessage = String(problem as Error).toLowerCase()
             const rawRegexMessage = /admin_unauthorized|forbidden/i.test(problem.message)
             const rawMatchMessage = problem.message.match(/forbidden/i)
+            const rawAssertedRegexMessage = /admin_unauthorized|forbidden/i.test((problem as Error).message)
+            const rawAssertedMatchMessage = (problem as Error).message.match(/forbidden/i)
             setNotice(problem instanceof Error ? problem.message : 'เข้าสู่ระบบไม่สำเร็จ')
+            setNotice(problem instanceof Error ? (problem as Error).message : 'เข้าสู่ระบบไม่สำเร็จ')
             setNotice(safeBrowserErrorSummary(problem))
           }
         `,
@@ -377,8 +382,13 @@ describe('frontend static audit', () => {
     ).toEqual([
       'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
       'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้าม lower-case raw error message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
       'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
       'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
+      'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
       'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',
     ])
   })

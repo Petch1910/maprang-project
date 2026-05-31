@@ -107,26 +107,38 @@ function rawFrontendErrorLogPatternFor(variableName: string) {
   )
 }
 
-function rawFrontendErrorClassifierPatternFor(variableName: string) {
+function rawFrontendErrorExpressionPatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
+  return `(?:${escaped}\\b(?:\\s+(?:as|satisfies)\\s+[^,)]+)?|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))`
+}
+
+function rawFrontendErrorMessageAccessPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return `(?:${escaped}\\b|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))\\s*\\.\\s*message`
+}
+
+function rawFrontendErrorClassifierPatternFor(variableName: string) {
+  const rawExpression = rawFrontendErrorExpressionPatternFor(variableName)
+  const rawMessageAccess = rawFrontendErrorMessageAccessPatternFor(variableName)
   return new RegExp(
-    `\\b${escaped}\\s*\\.\\s*message\\s*\\.\\s*toLowerCase\\s*\\(\\s*\\)|\\bString\\s*\\(\\s*${escaped}\\s*\\)\\s*\\.\\s*toLowerCase\\s*\\(\\s*\\)`,
+    `${rawMessageAccess}\\s*\\.\\s*toLowerCase\\s*\\(\\s*\\)|\\bString\\s*\\(\\s*${rawExpression}\\s*\\)\\s*\\.\\s*toLowerCase\\s*\\(\\s*\\)`,
     'g',
   )
 }
 
 function rawFrontendErrorRegexPatternFor(variableName: string) {
-  const escaped = escapeRegExp(variableName)
+  const rawMessageAccess = rawFrontendErrorMessageAccessPatternFor(variableName)
   return new RegExp(
-    `\\/[^/\\n]+\\/[gimsuyd]*\\.test\\(\\s*${escaped}\\s*\\.\\s*message\\s*\\)|\\b${escaped}\\s*\\.\\s*message\\s*\\.\\s*match\\s*\\(`,
+    `\\/[^/\\n]+\\/[gimsuyd]*\\.test\\(\\s*${rawMessageAccess}\\s*\\)|${rawMessageAccess}\\s*\\.\\s*match\\s*\\(`,
     'g',
   )
 }
 
 function rawFrontendUserVisibleErrorPatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
+  const rawMessageAccess = rawFrontendErrorMessageAccessPatternFor(variableName)
   return new RegExp(
-    `\\bset[A-Za-z_$][\\w$]*\\s*\\(\\s*${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${escaped}\\s*\\.\\s*message`,
+    `\\bset[A-Za-z_$][\\w$]*\\s*\\(\\s*${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${rawMessageAccess}`,
     'g',
   )
 }
