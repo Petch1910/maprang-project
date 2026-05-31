@@ -597,6 +597,56 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches alternate route catch variable names', () => {
+    const messages = [
+      ...messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat/stream', async () => {
+            try {
+              return streamChat()
+            } catch (err) {
+              throw err
+            }
+          })
+      `, 'chat.routes.ts'),
+      ...messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (cause) {
+              return (cause)
+            }
+          })
+      `, 'chat.routes.ts'),
+      ...messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (err) {
+              return { error: 'chat_failed', message: err . message }
+            }
+          })
+      `, 'chat.routes.ts'),
+      ...messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (err) {
+              return { error: String ( err ), message: 'เนเธเธ—เนเธกเนเธชเธณเน€เธฃเนเธ' }
+            }
+          })
+      `, 'chat.routes.ts'),
+    ]
+
+    expect(messages.some((message) => message.includes('route throw raw error object'))).toBe(true)
+    expect(messages.some((message) => message.includes('return raw error object'))).toBe(true)
+    expect(messages.some((message) => message.includes('error.message') && message.includes('message'))).toBe(true)
+    expect(messages.some((message) => message.includes('field error'))).toBe(true)
+  })
+
   test('extracts route error message keys and helper calls for explicit-copy checks', () => {
     const known = collectKnownRouteErrorMessages(`
       export const routeErrorMessages: Record<string, string> = {

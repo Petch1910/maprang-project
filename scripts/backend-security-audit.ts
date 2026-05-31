@@ -37,12 +37,16 @@ function lineFor(content: string, index: number) {
   return content.slice(0, index).split(/\r?\n/).length
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g
 const rawRouteErrorThrowPattern = /throw\s*(?:\(\s*)?error\b/g
 const rawRouteErrorReturnPattern = /\breturn\s*(?:\(\s*)?error\s*(?:\)\s*)?(?:;|$)/gm
-const catchErrorStartPattern = /catch\s*\(\s*error\s*\)\s*\{/g
+const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
 const rawErrorCodePropertyPattern =
@@ -66,6 +70,33 @@ const allowedRawResponseJsonReaders = [
   'readSupabaseUserPayload',
   'readStorageJson',
 ]
+
+function rawErrorValueExpression(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return `(?:${escaped}\\s+instanceof\\s+Error\\s*\\?\\s*${escaped}\\s*\\.\\s*message\\s*:\\s*String\\s*\\(\\s*${escaped}\\s*\\)|${escaped}\\s*\\.\\s*message\\b|String\\s*\\(\\s*${escaped}\\s*\\))`
+}
+
+function rawErrorMessagePropertyPatternFor(variableName: string) {
+  if (variableName === 'error') return rawErrorMessagePropertyPattern
+  return new RegExp(`\\bmessage\\s*:\\s*${rawErrorValueExpression(variableName)}`, 'g')
+}
+
+function rawErrorCodePropertyPatternFor(variableName: string) {
+  if (variableName === 'error') return rawErrorCodePropertyPattern
+  return new RegExp(`\\berror\\s*:\\s*${rawErrorValueExpression(variableName)}`, 'g')
+}
+
+function rawRouteErrorReturnPatternFor(variableName: string) {
+  if (variableName === 'error') return rawRouteErrorReturnPattern
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(`\\breturn\\s*(?:\\(\\s*)?${escaped}\\s*(?:\\)\\s*)?(?:;|$)`, 'gm')
+}
+
+function rawRouteErrorThrowPatternFor(variableName: string) {
+  if (variableName === 'error') return rawRouteErrorThrowPattern
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(`throw\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
+}
 
 type BackendRouteCall = {
   path: string
@@ -208,11 +239,21 @@ function hasUuidIdParam(path: string) {
   return /(?:^|\/):id(?:\/|$)/.test(path)
 }
 
-function isControlledAuthErrorMessage(catchBlock: string, messageIndex: number, messageSource: string) {
-  if (!/\bmessage\s*:\s*error\s*\.\s*message\b/.test(messageSource)) return false
+function isControlledAuthErrorMessage(
+  catchBlock: string,
+  messageIndex: number,
+  messageSource: string,
+  variableName: string,
+) {
+  const escaped = escapeRegExp(variableName)
+  if (!new RegExp(`\\bmessage\\s*:\\s*${escaped}\\s*\\.\\s*message\\b`).test(messageSource)) return false
 
   const beforeMessage = catchBlock.slice(0, messageIndex)
-  const authCheckIndex = beforeMessage.lastIndexOf('error instanceof AuthError')
+  const authCheckPattern = new RegExp(`${escaped}\\s+instanceof\\s+AuthError`, 'g')
+  let authCheckIndex = -1
+  for (const authMatch of beforeMessage.matchAll(authCheckPattern)) {
+    authCheckIndex = authMatch.index ?? -1
+  }
   if (authCheckIndex < 0) return false
 
   const authBlockStart = catchBlock.indexOf('{', authCheckIndex)
@@ -249,14 +290,15 @@ function isInsideRedactedTextCall(content: string, index: number) {
 function collectRawRouteCatchMessageFindings(file: string, content: string) {
   const findings: BackendSecurityFinding[] = []
   for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
+    const variableName = catchMatch[1] ?? 'error'
     const openingBraceIndex = content.indexOf('{', catchMatch.index ?? 0)
     if (openingBraceIndex < 0) continue
 
     const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
     const catchBlock = content.slice(openingBraceIndex + 1, closingBraceIndex)
-    for (const messageMatch of catchBlock.matchAll(rawErrorMessagePropertyPattern)) {
+    for (const messageMatch of catchBlock.matchAll(rawErrorMessagePropertyPatternFor(variableName))) {
       const blockMessageIndex = messageMatch.index ?? 0
-      if (isControlledAuthErrorMessage(catchBlock, blockMessageIndex, messageMatch[0] ?? '')) continue
+      if (isControlledAuthErrorMessage(catchBlock, blockMessageIndex, messageMatch[0] ?? '', variableName)) continue
 
       findings.push({
         file,
@@ -265,7 +307,7 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
       })
     }
 
-    for (const errorMatch of catchBlock.matchAll(rawErrorCodePropertyPattern)) {
+    for (const errorMatch of catchBlock.matchAll(rawErrorCodePropertyPatternFor(variableName))) {
       const blockErrorIndex = errorMatch.index ?? 0
       findings.push({
         file,
@@ -274,13 +316,24 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
       })
     }
 
-    for (const returnMatch of catchBlock.matchAll(rawRouteErrorReturnPattern)) {
+    for (const returnMatch of catchBlock.matchAll(rawRouteErrorReturnPatternFor(variableName))) {
       const blockReturnIndex = returnMatch.index ?? 0
       findings.push({
         file,
         line: lineFor(content, openingBraceIndex + 1 + blockReturnIndex),
         message: rawRouteCatchReturn,
       })
+    }
+
+    if (variableName !== 'error') {
+      for (const throwMatch of catchBlock.matchAll(rawRouteErrorThrowPatternFor(variableName))) {
+        const blockThrowIndex = throwMatch.index ?? 0
+        findings.push({
+          file,
+          line: lineFor(content, openingBraceIndex + 1 + blockThrowIndex),
+          message: 'route throw raw error object เธ•เธฃเธเน เนเธกเนเนเธ”เน; เธเธทเธ routeErrorResponse เธซเธฃเธทเธญ response เธ—เธตเนเธเธงเธเธเธธเธกเธเนเธญเธเธงเธฒเธกเนเธ”เน.',
+        })
+      }
     }
   }
   return findings

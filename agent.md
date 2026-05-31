@@ -261,6 +261,7 @@ bun run smoke:image:live
 - Current addendum 2026-05-31: frontend static audit now rejects unsafe cross-window messaging (`postMessage` with targetOrigin `"*"` and direct `message` event listeners) until a shared origin-guard helper exists.
 - Current addendum 2026-05-31: frontend static audit now rejects every direct `postMessage(...)` outside `crossWindowMessaging`, including concrete target origins, so future cross-window UI must use the trusted-origin helper.
 - Current addendum 2026-05-31: backend security audit now rejects route catch blocks that `return error` or `return (error)` directly, so raw Error objects cannot become public route responses.
+- Current addendum 2026-05-31: backend security audit now resolves route catch variable names dynamically, so `catch (err)` / `catch (cause)` cannot bypass raw route throw, return, `message`, or `error` field guards.
 - Current addendum 2026-05-31: frontend static audit now rejects empty `onSubmit` handlers, async-empty submit handlers, and submit handlers that return `undefined`, including spaced variants, so forms cannot look wired while doing nothing.
 - Current addendum 2026-05-31: frontend static audit now rejects `window.alert`, `window.confirm`, and `globalThis.prompt` style native browser dialogs; use app modal/toast/form flows instead.
 - Current addendum 2026-05-31: frontend static audit now also rejects bare `alert(...)`, `confirm(...)`, and `prompt(...)`, so native dialogs cannot bypass the app modal/toast flow by omitting the global object.
