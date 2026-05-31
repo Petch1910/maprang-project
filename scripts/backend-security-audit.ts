@@ -63,7 +63,7 @@ const consoleErrorWarnAliasPattern = new RegExp(
   'g',
 )
 const promiseRejectAccessor = String.raw`Promise\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
-const reflectApplyAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Reflect\s*(?:\?\.|\.)\s*apply`
+const reflectApplyAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Reflect\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const promiseRejectAliasValue = String.raw`${promiseRejectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}\s*=\s*Promise\b`,
