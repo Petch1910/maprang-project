@@ -146,6 +146,18 @@ describe('backend security audit', () => {
           .onError(({ error, set }) => {
             if (error instanceof AuthError) {
               set.status = 401
+              return { error: (error as AuthError).code, message: (error as AuthError).message }
+            }
+          })
+      `, 'apps/backend/index.ts'),
+    ).toContain(message)
+
+    expect(
+      messagesFor(`
+        export const app = new Elysia()
+          .onError(({ error, set }) => {
+            if (error instanceof AuthError) {
+              set.status = 401
               return authErrorResponse(error)
             }
           })
