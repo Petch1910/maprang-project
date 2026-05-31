@@ -72,6 +72,10 @@ const rawRouteErrorReturnPattern = new RegExp(
   `\\breturn\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}[ \\t]*(?:\\)[ \\t]*)?(?:;|$)`,
   'gm',
 )
+const rawRouteErrorRejectPattern = new RegExp(
+  `\\b(?:return\\s+)?Promise\\s*\\.\\s*reject\\s*\\(\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}`,
+  'g',
+)
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
@@ -140,6 +144,13 @@ function rawRouteErrorReturnPatternFor(variableName: string) {
 
 function rawRouteErrorThrowPatternFor(variableName: string) {
   return new RegExp(`throw\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}`, 'g')
+}
+
+function rawRouteErrorRejectPatternFor(variableName: string) {
+  return new RegExp(
+    `\\b(?:return\\s+)?Promise\\s*\\.\\s*reject\\s*\\(\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}`,
+    'g',
+  )
 }
 
 function rawRouteErrorLogPatternsFor(variableName: string) {
@@ -484,6 +495,15 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
       })
     }
 
+    for (const rejectMatch of catchBlock.matchAll(rawRouteErrorRejectPatternFor(variableName))) {
+      const blockRejectIndex = rejectMatch.index ?? 0
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + blockRejectIndex),
+        message: rawRouteCatchReturn,
+      })
+    }
+
     if (variableName !== 'error') {
       for (const detailMatch of catchBlock.matchAll(rawErrorDetailMessagePatternFor(variableName))) {
         const blockDetailIndex = detailMatch.index ?? 0
@@ -607,6 +627,14 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     }
 
     for (const match of content.matchAll(rawRouteErrorReturnPattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: rawRouteCatchReturn,
+      })
+    }
+
+    for (const match of content.matchAll(rawRouteErrorRejectPattern)) {
       findings.push({
         file,
         line: lineFor(content, match.index ?? 0),

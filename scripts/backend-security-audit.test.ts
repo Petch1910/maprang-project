@@ -763,6 +763,40 @@ describe('backend security audit', () => {
             try {
               return await sendChat()
             } catch (error) {
+              return Promise.reject(error)
+            }
+          })
+      `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
+    ).toBe(true)
+
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (cause) {
+              return Promise.reject(cause)
+            }
+          })
+      `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
+    ).toBe(true)
+
+    expect(
+      messagesFor(`
+        function rejectRouteFailure(error: unknown) {
+          return Promise.reject(error as Error)
+        }
+      `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
+    ).toBe(true)
+
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (error) {
               return error
             }
           })

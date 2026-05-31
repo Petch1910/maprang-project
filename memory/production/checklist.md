@@ -22,6 +22,7 @@
 - กรอก `RELEASE_HANDOFF.md` หลัง `production:check` ผ่าน โดยไม่ใส่ secrets หรือ private database URLs และต้องใส่ `Frontend build artifact`/`Backend deploy artifact` ที่ trace ได้จริง พร้อม `Health check result`/`Ready check result` ที่ผ่านจริง และ `Rollback action` ที่ทำตามได้จริง.
 - รัน `bun run release:handoff:check -- --filled` ก่อนแชร์ handoff.
 - ใช้ `/admin/health` ไล่ทำ next action ของแต่ละ blocker ก่อนรัน final gate ซ้ำ.
+- ยืนยัน focused backend route guard ล่าสุดด้วย `bun run security:audit:test` และ `bun run security:audit`; รอบ 2026-05-31 ปิด `Promise.reject(error)` / `Promise.reject(cause)` / `Promise.reject(error as Error)` ใน route files แล้ว.
 - ยืนยัน focused frontend UI guard ล่าสุดด้วย `bun run frontend:static:audit:test` และ `bun run predeploy:check:test`; รอบ 2026-05-31 ปิด `Promise.reject(error)` / `Promise.reject(problem)` ใน component/page surfaces แล้ว.
 - ยืนยัน focused static/security guard ล่าสุดด้วย `bun run frontend:static:audit:test` และ `bun run security:audit:test`; รอบ 2026-05-31 ปิด `Reflect.apply(Reflect.get(...), ..., [error])` และ `Reflect.apply(Object.getOwnPropertyDescriptor(...).value, ..., [error])` แล้ว.
 - ยืนยัน focused alias guard ล่าสุดด้วย `bun run frontend:static:audit:test`, `bun run security:audit:test`, `bun run frontend:static:audit`, `bun run security:audit`, `bun run predeploy:check:test`, และ `bun run predeploy:check`; รอบ 2026-05-31 ปิด alias จาก `Reflect.get(..., 'error'|'warn')` แล้ว.
