@@ -165,6 +165,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('setNote\\\\s*\\\\(\\\\s*error\\\\s+instanceof\\\\s+Error\\\\s*\\\\?\\\\s*error\\\\s*\\\\.\\\\s*message')
     expect(predeploy).toContain('state\\\\s*\\\\.\\\\s*error\\\\s*=\\\\s*action\\\\s*\\\\.\\\\s*error\\\\s*\\\\.\\\\s*message')
     expect(predeploy).toContain('rawUiErrorThrowPattern')
+    expect(predeploy).toContain('rawUiErrorThrowPatternFor')
+    expect(predeploy).toContain('catch (problem)')
     expect(predeploy).toContain('auditRawUiErrorThrows')
     expect(predeploy).toContain('หน้า UI ห้าม throw raw error object จาก component/page')
     expect(predeploy).toContain('providerClassificationMessage')

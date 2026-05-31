@@ -36,6 +36,7 @@ const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
+const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{/g
 const browserEventListenerPattern =
   /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
 const directLocationOriginPattern = /\b(?:(?:window|globalThis)\s*\.\s*)?location\s*\.\s*origin\b/g
@@ -81,6 +82,12 @@ function frontendRelativePath(file: string) {
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function rawUiErrorThrowPatternFor(variableName: string) {
+  if (variableName === 'error') return rawUiErrorThrowPattern
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(`\\bthrow\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
 }
 
 function browserEventListenerRemovalPattern(target: string | undefined, eventName: string, handlerName: string) {
@@ -546,6 +553,23 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       message: rawUiErrorThrowMessage,
     })
   }
+
+  for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
+    const variableName = catchMatch[1] ?? 'error'
+    if (variableName === 'error') continue
+    const openingBraceIndex = content.indexOf('{', catchMatch.index ?? 0)
+    if (openingBraceIndex < 0) continue
+    const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
+    const catchBlock = content.slice(openingBraceIndex + 1, closingBraceIndex)
+    for (const throwMatch of catchBlock.matchAll(rawUiErrorThrowPatternFor(variableName))) {
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + (throwMatch.index ?? 0)),
+        message: rawUiErrorThrowMessage,
+      })
+    }
+  }
+
   return findings
 }
 

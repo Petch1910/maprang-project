@@ -23,7 +23,7 @@ import { RelationshipPresetPicker } from './RelationshipPresetPicker'
 type CharacterCreateFormProps = {
   defaultOpen?: boolean
   isSaving: boolean
-  onCreate: (input: CharacterInput) => Promise<void>
+  onCreate: (input: CharacterInput) => Promise<boolean>
   onDraftStatusChange?: (status: CreatorDraftStatus) => void
 }
 
@@ -465,7 +465,7 @@ export function CharacterCreateForm({
     if (!canSubmit) return
     setNote('')
     try {
-      await onCreate({
+      const created = await onCreate({
         name: form.name.trim(),
         avatarUrl: form.avatarUrl.trim() || null,
         tagline: form.tagline.trim() || null,
@@ -484,6 +484,10 @@ export function CharacterCreateForm({
         visibility: 'PRIVATE',
         status: 'DRAFT',
       })
+      if (!created) {
+        setNote('สร้างดราฟต์ไม่สำเร็จ กรุณาเช็กข้อความแจ้งเตือนแล้วลองใหม่')
+        return
+      }
       setForm(emptyCharacter)
       setCreatorBrief('')
       setStoredAvatarSource('none')

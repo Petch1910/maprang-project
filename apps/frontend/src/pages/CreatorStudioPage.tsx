@@ -99,13 +99,15 @@ export function CreatorStudioPage() {
   const handleCreate = async (input: CharacterInput) => {
     setIsSaving(true)
     setError('')
+    setCreatedCharacter(null)
     try {
       const data = await createCharacter(input)
       setCreatedCharacter(data.character)
+      return true
     } catch (createError) {
       const message = createErrorMessage(createError)
       setError(message)
-      throw createError
+      return false
     } finally {
       setIsSaving(false)
     }

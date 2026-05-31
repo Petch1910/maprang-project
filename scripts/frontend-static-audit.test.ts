@@ -390,6 +390,19 @@ describe('frontend static audit', () => {
         `
           try {
             await save()
+          } catch (problem) {
+            throw problem
+          }
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      ),
+    ).toHaveLength(1)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
           } catch (error) {
             throw error
           }
