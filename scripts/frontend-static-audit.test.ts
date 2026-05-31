@@ -596,6 +596,22 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports frontend console method aliases', () => {
+    const messages = auditSuspiciousPatterns(
+      `
+        const logError = console.error
+        let logWarn = window.console.warn.bind(console)
+        logError = globalThis.console['error']
+        const assertedError = console.error as typeof console.error
+        const { error: aliasedError, warn } = console
+        console.error('safe summary:', safeBrowserErrorSummary(error))
+      `,
+      'apps/frontend/src/pages/FixturePage.tsx',
+    ).map((finding) => finding.message)
+
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(5)
+  })
+
   test('reports typed catch-variable raw frontend errors', () => {
     expect(
       auditSuspiciousPatterns(

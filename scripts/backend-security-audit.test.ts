@@ -188,6 +188,19 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches backend console method aliases', () => {
+    const messages = messagesFor(`
+        const logError = console.error
+        let logWarn = globalThis.console.warn.bind(console)
+        logError = console['error']
+        const assertedError = console.error as typeof console.error
+        const { error: aliasedError, warn } = console
+        console.error(summarizeSeedError(error))
+      `, 'prisma/seed.ts')
+
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(5)
+  })
+
   test('catches AuthError responses that bypass the public response helper', () => {
     const message = 'ห้ามประกอบ AuthError response จาก error.code/error.message ตรงๆ; ใช้ authErrorResponse(error) เพื่อคุมข้อความ public.'
 
