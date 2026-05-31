@@ -359,7 +359,7 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
     message: 'ห้ามใช้ new Function() ใน frontend source',
   },
   {
-    pattern: /\b(?:window|globalThis)\s*\.\s*open\s*\(/g,
+    pattern: /(?<![\w.])(?:(?:window|globalThis)\s*\.\s*)?open\s*\(/g,
     message: 'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
   },
   {

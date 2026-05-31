@@ -416,6 +416,7 @@ describe('frontend static audit', () => {
         window.open(url, '_blank')
         window . open(url, '_blank')
         globalThis . open(url, '_blank')
+        open(url, '_blank')
         window.alert('ใช้ toast แทน')
         window . confirm('ใช้ modal แทน')
         globalThis . prompt('ใช้ form แทน')
@@ -453,6 +454,7 @@ describe('frontend static audit', () => {
       'ห้าม redirect ด้วย location.href/assign/replace ตรงใน frontend source; ให้ใช้ router หรือลิงก์ที่ตรวจสอบได้',
       'ห้ามใช้ eval() ใน frontend source',
       'ห้ามใช้ new Function() ใน frontend source',
+      'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',
       'ห้ามใช้ window.open() ใน frontend source; ใช้ลิงก์พร้อม rel="noopener noreferrer" แทน',

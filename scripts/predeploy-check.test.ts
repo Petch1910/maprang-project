@@ -102,6 +102,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('Bad protocol')
     expect(predeploy).toContain('Bad spaced protocol')
     expect(predeploy).toContain('data:text/html,<h1>x</h1>')
+    expect(predeploy).toContain("open(url, '_blank')")
     expect(predeploy).toContain("alert('ใช้ toast แทน')")
     expect(predeploy).toContain("confirm('ใช้ modal แทน')")
     expect(predeploy).toContain("prompt('ใช้ form แทน')")
@@ -128,6 +129,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('href\\\\s*=\\\\s*')
     expect(predeploy).toContain('to\\\\s*=\\\\s*')
     expect(predeploy).toContain('onClick\\\\s*=\\\\s*')
+    expect(predeploy).toContain('(?<![\\\\w.])(?:(?:window|globalThis)\\\\s*\\\\.\\\\s*)?open\\\\s*\\\\(')
     expect(predeploy).toContain('throw\\\\s+new\\\\s+Error\\\\s*\\\\(')
     expect(predeploy).toContain(`console.error(
           'โหลดข้อมูลไม่สำเร็จ:',`)
