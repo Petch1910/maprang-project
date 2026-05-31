@@ -44,9 +44,10 @@ function escapeRegExp(value: string) {
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const consoleErrorWarnAccessor = String.raw`console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
 const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
+const reflectConsoleErrorWarnApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${consoleErrorWarnAccessor}\s*,[\s\S]*?\[\s*`
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
-  `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`,
+  `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawErrorArrayElementPatternFor('error')}`,
   'g',
 )
 const rawRouteErrorThrowPattern = new RegExp(`throw\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}`, 'g')
@@ -94,6 +95,10 @@ function rawErrorArgumentPatternFor(variableName: string) {
   return `(?:\\[\\s*)?(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}\\s*(?:\\)\\s*)?(?:\\]\\s*)?(?:,|\\))`
 }
 
+function rawErrorArrayElementPatternFor(variableName: string) {
+  return `(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}\\s*(?:\\)\\s*)?(?:,|\\])`
+}
+
 function rawErrorMessageAccessPatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
   return `(?:${escaped}\\b|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))\\s*\\.\\s*message\\b`
@@ -122,9 +127,11 @@ function rawRouteErrorThrowPatternFor(variableName: string) {
 
 function rawRouteErrorLogPatternsFor(variableName: string) {
   const rawArgument = rawErrorArgumentPatternFor(variableName)
+  const rawArrayElement = rawErrorArrayElementPatternFor(variableName)
   return [
     new RegExp(`${consoleErrorWarnCallPrefix}\\s*${rawArgument}`, 'g'),
     new RegExp(`${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}`, 'g'),
+    new RegExp(`${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawArrayElement}`, 'g'),
   ]
 }
 
@@ -187,6 +194,13 @@ const patterns = [
   },
   {
     pattern: new RegExp(
+      `${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?providerFailure[\\s\\S]*?,\\s*${rawErrorArrayElementPatternFor('error')}`,
+      'g',
+    ),
+    message: 'ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.',
+  },
+  {
+    pattern: new RegExp(
       `${consoleErrorWarnCallPrefix}\\s*${rawErrorArgumentPatternFor('error')}`,
       'g',
     ),
@@ -194,6 +208,10 @@ const patterns = [
   },
   {
     pattern: new RegExp(`${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`, 'g'),
+    message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
+  },
+  {
+    pattern: new RegExp(`${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawErrorArrayElementPatternFor('error')}`, 'g'),
     message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
   },
   {

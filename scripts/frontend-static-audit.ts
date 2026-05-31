@@ -39,6 +39,7 @@ const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const consoleErrorWarnAccessor = String.raw`console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
 const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
+const reflectConsoleErrorWarnApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${consoleErrorWarnAccessor}\s*,[\s\S]*?\[\s*`
 const browserEventListenerPattern =
   /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
 const directLocationOriginPattern = /\b(?:(?:window|globalThis)\s*\.\s*)?location\s*\.\s*origin\b/g
@@ -103,8 +104,9 @@ function rawUiErrorThrowPatternFor(variableName: string) {
 function rawFrontendErrorLogPatternFor(variableName: string) {
   const rawExpression = rawFrontendErrorExpressionPatternFor(variableName)
   const rawArgument = `(?:\\[\\s*)?(?:\\(\\s*)?${rawExpression}\\s*(?:\\)\\s*)?(?:\\]\\s*)?(?:,|\\))`
+  const rawArrayElement = rawFrontendErrorArrayElementPatternFor(variableName)
   return new RegExp(
-    `\\b${consoleErrorWarnCallPrefix}\\s*${rawArgument}|\\b${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}`,
+    `\\b${consoleErrorWarnCallPrefix}\\s*${rawArgument}|\\b${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}|\\b${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawArrayElement}`,
     'g',
   )
 }
@@ -112,6 +114,11 @@ function rawFrontendErrorLogPatternFor(variableName: string) {
 function rawFrontendErrorExpressionPatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
   return `(?:${escaped}\\b(?:\\s+(?:as|satisfies)\\s+[^,)]+)?|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))`
+}
+
+function rawFrontendErrorArrayElementPatternFor(variableName: string) {
+  const rawExpression = rawFrontendErrorExpressionPatternFor(variableName)
+  return `(?:\\(\\s*)?${rawExpression}\\s*(?:\\)\\s*)?(?:,|\\])`
 }
 
 function rawFrontendErrorMessageAccessPatternFor(variableName: string) {
