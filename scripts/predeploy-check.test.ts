@@ -49,6 +49,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('aria-disabled reason guard')
     expect(predeploy).toContain('placeholder-link guard')
     expect(predeploy).toContain('no-op handler guard')
+    expect(predeploy).toContain('no-op submit guard')
     expect(predeploy).toContain('dangerous link protocol guard')
     expect(predeploy).toContain('interactive `aria-disabled` controls/links')
     expect(predeploy).toContain('frontend dangerous protocol decision pass')

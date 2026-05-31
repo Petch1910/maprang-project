@@ -164,6 +164,12 @@ describe('frontend static audit', () => {
         <button type="button" onClick = {async () => {}}>Spaced async no-op</button>
         <button type="button" onClick={() => undefined}>Undefined no-op</button>
         <button type="button" onClick = {() => undefined}>Spaced undefined no-op</button>
+        <form onSubmit={() => {}}>No-op submit</form>
+        <form onSubmit = {() => {}}>Spaced no-op submit</form>
+        <form onSubmit={async () => {}}>Async no-op submit</form>
+        <form onSubmit = {async () => {}}>Spaced async no-op submit</form>
+        <form onSubmit={() => undefined}>Undefined no-op submit</form>
+        <form onSubmit = {() => undefined}>Spaced undefined no-op submit</form>
         throw new Error('not implemented')
         throw new Error (\`not implemented\`)
         setNote(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
@@ -196,6 +202,12 @@ describe('frontend static audit', () => {
       'ปุ่มหรือลิงก์มี onClick async ว่างเปล่า',
       'ปุ่มหรือลิงก์มี onClick คืน undefined',
       'ปุ่มหรือลิงก์มี onClick คืน undefined',
+      'ฟอร์มมี onSubmit ว่างเปล่า',
+      'ฟอร์มมี onSubmit ว่างเปล่า',
+      'ฟอร์มมี onSubmit async ว่างเปล่า',
+      'ฟอร์มมี onSubmit async ว่างเปล่า',
+      'ฟอร์มมี onSubmit คืน undefined',
+      'ฟอร์มมี onSubmit คืน undefined',
       'frontend source ยังโยน not implemented',
       'frontend source ยังโยน not implemented',
       'พบข้อความ error ดิบจาก auth/provider ที่อาจแสดงให้ผู้ใช้เห็น',

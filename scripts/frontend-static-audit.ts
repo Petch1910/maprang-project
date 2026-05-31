@@ -291,6 +291,9 @@ export const suspiciousPatterns = [
   { pattern: /onClick\s*=\s*\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick ว่างเปล่า' },
   { pattern: /onClick\s*=\s*\{\s*async\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick async ว่างเปล่า' },
   { pattern: /onClick\s*=\s*\{\s*\(\)\s*=>\s*undefined\s*\}/g, message: 'ปุ่มหรือลิงก์มี onClick คืน undefined' },
+  { pattern: /onSubmit\s*=\s*\{\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ฟอร์มมี onSubmit ว่างเปล่า' },
+  { pattern: /onSubmit\s*=\s*\{\s*async\s*\(\)\s*=>\s*\{\s*\}\s*\}/g, message: 'ฟอร์มมี onSubmit async ว่างเปล่า' },
+  { pattern: /onSubmit\s*=\s*\{\s*\(\)\s*=>\s*undefined\s*\}/g, message: 'ฟอร์มมี onSubmit คืน undefined' },
   { pattern: /throw\s+new\s+Error\s*\(\s*(["'`])not implemented\1\s*\)/gi, message: 'frontend source ยังโยน not implemented' },
   { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบข้อความรอทำ' },
   {
