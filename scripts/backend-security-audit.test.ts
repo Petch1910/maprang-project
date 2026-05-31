@@ -778,6 +778,9 @@ describe('backend security audit', () => {
       "return Promise?.['reject']?.(error as Error)",
       'return new Promise((_resolve, reject) => reject(error as Error))',
       'return new Promise((_resolve, reject) => reject?.(error as Error))',
+      'return new Promise((_resolve, reject) => reject.call(undefined, error as Error))',
+      'return new Promise((_resolve, reject) => reject.apply(undefined, [error as Error]))',
+      'return new Promise((_resolve, reject) => reject.bind(undefined)(error as Error))',
       'return new Promise(function (_resolve, reject) { reject(error as Error) })',
       'return new Promise(function (_resolve, reject) { reject?.(error as Error) })',
     ]) {
@@ -799,6 +802,21 @@ describe('backend security audit', () => {
             } catch (cause) {
               return new Promise((_resolve, reject) => {
                 reject(cause)
+              })
+            }
+          })
+      `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
+    ).toBe(true)
+
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (cause) {
+              return new Promise(function rejectRouteFailure(_resolve, reject) {
+                reject.apply(undefined, [cause])
               })
             }
           })

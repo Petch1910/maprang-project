@@ -164,16 +164,23 @@ function rawPromiseExecutorRejectPatternFor(variableName: string) {
   return rawPromiseExecutorRejectPatternsFor(variableName)[0]
 }
 
+function rawPromiseRejectCallbackInvocationPattern(rawExpression: string, rawArrayElement: string) {
+  const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
+  return String.raw`(?:\b\1\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement})`
+}
+
 function rawPromiseExecutorRejectPatternsFor(variableName: string) {
   const rejectParameterPattern = String.raw`([A-Za-z_$][\w$]*)(?:\s*[:?]\s*[^,)]+)?`
   const rawExpression = rawErrorExpressionPatternFor(variableName)
+  const rawArrayElement = rawErrorArrayElementPatternFor(variableName)
+  const rawRejectInvocation = rawPromiseRejectCallbackInvocationPattern(rawExpression, rawArrayElement)
   return [
     new RegExp(
-      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*${rejectParameterPattern}\s*\)\s*=>[\s\S]{0,240}?\b\1\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawExpression}`,
+      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*${rejectParameterPattern}\s*\)\s*=>[\s\S]{0,240}?${rawRejectInvocation}`,
       'g',
     ),
     new RegExp(
-      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*function(?:\s+[A-Za-z_$][\w$]*)?\s*\([^)]*,\s*${rejectParameterPattern}\s*\)[\s\S]{0,240}?\b\1\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawExpression}`,
+      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*function(?:\s+[A-Za-z_$][\w$]*)?\s*\([^)]*,\s*${rejectParameterPattern}\s*\)[\s\S]{0,240}?${rawRejectInvocation}`,
       'g',
     ),
   ]
