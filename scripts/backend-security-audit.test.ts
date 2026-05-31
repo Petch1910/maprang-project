@@ -776,6 +776,7 @@ describe('backend security audit', () => {
       'return Promise?.reject?.(error)',
       "return Promise['reject'](error)",
       "return Promise?.['reject']?.(error as Error)",
+      'return new Promise((_resolve, reject) => reject(error as Error))',
     ]) {
       expect(
         messagesFor(`
@@ -785,6 +786,21 @@ describe('backend security audit', () => {
         `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
       ).toBe(true)
     }
+
+    expect(
+      messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (cause) {
+              return new Promise((_resolve, reject) => {
+                reject(cause)
+              })
+            }
+          })
+      `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
+    ).toBe(true)
 
     expect(
       messagesFor(`

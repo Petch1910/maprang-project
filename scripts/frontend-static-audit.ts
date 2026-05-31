@@ -151,6 +151,13 @@ function rawFrontendErrorExpressionPatternFor(variableName: string) {
   return `(?:${escaped}\\b(?:\\s+(?:as|satisfies)\\s+[^,)]+)?|\\(\\s*${escaped}\\b\\s+(?:as|satisfies)\\s+[^)]+\\))`
 }
 
+function rawPromiseExecutorRejectPatternFor(variableName: string) {
+  return new RegExp(
+    String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*([A-Za-z_$][\w$]*)\s*\)\s*=>[\s\S]{0,240}?\b\1\s*\(\s*(?:\(\s*)?${rawFrontendErrorExpressionPatternFor(variableName)}`,
+    'g',
+  )
+}
+
 function rawFrontendErrorArrayElementPatternFor(variableName: string) {
   const rawExpression = rawFrontendErrorExpressionPatternFor(variableName)
   return `(?:\\(\\s*)?${rawExpression}\\s*(?:\\)\\s*)?(?:,|\\])`
@@ -695,6 +702,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       message: promiseRejectAliasMessage,
     })
   }
+  for (const match of content.matchAll(rawPromiseExecutorRejectPatternFor('error'))) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: rawUiErrorThrowMessage,
+    })
+  }
 
   for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
     const variableName = catchMatch[1] ?? 'error'
@@ -711,6 +725,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       })
     }
     for (const rejectMatch of catchBlock.matchAll(rawUiErrorRejectPatternFor(variableName))) {
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + (rejectMatch.index ?? 0)),
+        message: rawUiErrorThrowMessage,
+      })
+    }
+    for (const rejectMatch of catchBlock.matchAll(rawPromiseExecutorRejectPatternFor(variableName))) {
       findings.push({
         file,
         line: lineFor(content, openingBraceIndex + 1 + (rejectMatch.index ?? 0)),

@@ -160,6 +160,13 @@ function rawRouteErrorRejectPatternFor(variableName: string) {
   )
 }
 
+function rawPromiseExecutorRejectPatternFor(variableName: string) {
+  return new RegExp(
+    String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*([A-Za-z_$][\w$]*)\s*\)\s*=>[\s\S]{0,240}?\b\1\s*\(\s*(?:\(\s*)?${rawErrorExpressionPatternFor(variableName)}`,
+    'g',
+  )
+}
+
 function rawRouteErrorLogPatternsFor(variableName: string) {
   const rawArgument = rawErrorArgumentPatternFor(variableName)
   const rawArrayElement = rawErrorArrayElementPatternFor(variableName)
@@ -511,6 +518,15 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
       })
     }
 
+    for (const rejectMatch of catchBlock.matchAll(rawPromiseExecutorRejectPatternFor(variableName))) {
+      const blockRejectIndex = rejectMatch.index ?? 0
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + blockRejectIndex),
+        message: rawRouteCatchReturn,
+      })
+    }
+
     if (variableName !== 'error') {
       for (const detailMatch of catchBlock.matchAll(rawErrorDetailMessagePatternFor(variableName))) {
         const blockDetailIndex = detailMatch.index ?? 0
@@ -642,6 +658,14 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     }
 
     for (const match of content.matchAll(rawRouteErrorRejectPattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: rawRouteCatchReturn,
+      })
+    }
+
+    for (const match of content.matchAll(rawPromiseExecutorRejectPatternFor('error'))) {
       findings.push({
         file,
         line: lineFor(content, match.index ?? 0),
