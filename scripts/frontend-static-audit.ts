@@ -38,12 +38,13 @@ const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const promiseObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Promise`
 const promiseRejectAccessor = String.raw`${promiseObjectAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
-const reflectGetPromiseRejectValue = String.raw`Reflect\s*(?:\?\.|\.)\s*get\s*\(\s*${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)`
-const descriptorPromiseRejectValue = String.raw`Object\s*(?:\?\.|\.)\s*getOwnPropertyDescriptor\s*\(\s*${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)\s*(?:\?\.|\.)\s*value`
+const reflectObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Reflect\b`
+const objectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Object\b`
+const reflectGetPromiseRejectValue = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*get|(?:\?\.)?\s*\[\s*["']get["']\s*\])\s*\(\s*${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)`
+const descriptorPromiseRejectValue = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*getOwnPropertyDescriptor|(?:\?\.)?\s*\[\s*["']getOwnPropertyDescriptor["']\s*\])\s*\(\s*${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)\s*(?:\?\.|\.)\s*value`
 const retrievedPromiseRejectValue = String.raw`(?:${reflectGetPromiseRejectValue}|${descriptorPromiseRejectValue})`
 const reflectPromiseRejectApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
 const reflectRetrievedPromiseRejectApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${retrievedPromiseRejectValue}\s*,[\s\S]*?\[\s*`
-const reflectObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Reflect\b`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const variableTypeAnnotation = String.raw`(?:\s*:\s*[^=;,\n]+)?`
