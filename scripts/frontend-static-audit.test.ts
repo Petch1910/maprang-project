@@ -406,6 +406,16 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const globalRejectNow = globalThis.Promise.reject
+          const { reject: windowReject } = window.Promise
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ),
+    ).toHaveLength(2)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           try {
             await save()
           } catch (error) {
@@ -440,11 +450,13 @@ describe('frontend static audit', () => {
             return Promise?.reject?.(error)
             return Promise['reject'](error)
             return Promise?.['reject']?.(error as Error)
+            return window.Promise.reject(error)
+            return globalThis.Promise?.['reject']?.(error as Error)
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(4)
+    ).toHaveLength(6)
 
     expect(
       auditRawUiErrorThrows(
@@ -526,11 +538,13 @@ describe('frontend static audit', () => {
             return Promise?.reject?.(problem)
             return Promise['reject'](problem)
             return Promise?.['reject']?.(problem as Error)
+            return window.Promise.reject(problem)
+            return globalThis.Promise?.['reject']?.(problem as Error)
           }
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
-    ).toHaveLength(4)
+    ).toHaveLength(6)
 
     expect(
       auditRawUiErrorThrows(

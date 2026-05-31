@@ -775,6 +775,8 @@ describe('backend security audit', () => {
               return Promise?.reject?.(error)
               return Promise['reject'](error)
               return Promise?.['reject']?.(error as Error)
+              return globalThis.Promise.reject(error)
+              return globalThis.Promise?.['reject']?.(error as Error)
             }
           })
       `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
@@ -784,6 +786,8 @@ describe('backend security audit', () => {
       'return Promise?.reject?.(error)',
       "return Promise['reject'](error)",
       "return Promise?.['reject']?.(error as Error)",
+      'return globalThis.Promise.reject(error)',
+      "return globalThis.Promise?.['reject']?.(error as Error)",
       'return new Promise((_resolve, reject) => reject(error as Error))',
       'return new Promise((_resolve, reject) => reject?.(error as Error))',
       'return new Promise((_resolve, reject) => reject.call(undefined, error as Error))',
@@ -873,6 +877,13 @@ describe('backend security audit', () => {
         const { reject: typedReject }: PromiseConstructor = Promise
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
     ).toHaveLength(1)
+
+    expect(
+      messagesFor(`
+        const globalRejectNow = globalThis.Promise.reject
+        const { reject: globalReject } = globalThis.Promise
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
 
     expect(
       messagesFor(`

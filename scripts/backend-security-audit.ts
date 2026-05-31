@@ -63,13 +63,14 @@ const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAccessor}\b`,
   'g',
 )
-const promiseRejectAccessor = String.raw`Promise\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
+const promiseObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Promise`
+const promiseRejectAccessor = String.raw`${promiseObjectAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
 const reflectObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Reflect\b`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasValue = String.raw`${promiseRejectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(
-  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*Promise\b`,
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectAccessor}\b`,
   'g',
 )
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
