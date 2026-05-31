@@ -41,6 +41,11 @@ const rawUiErrorRejectPattern = new RegExp(
   String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?error\b`,
   'g',
 )
+const promiseRejectAliasValue = String.raw`${promiseRejectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const promiseRejectAliasPattern = new RegExp(
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}\s*=\s*Promise\b`,
+  'g',
+)
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const consoleObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console`
 const consoleErrorWarnAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
@@ -73,6 +78,8 @@ const rawFrontendFetchMessage =
   'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.'
 const rawUiErrorThrowMessage =
   'หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
+const promiseRejectAliasMessage =
+  'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
 const rawFrontendErrorLogMessage =
   'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย'
 const rawFrontendErrorClassifierMessage =
@@ -679,6 +686,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       file,
       line: lineFor(content, match.index ?? 0),
       message: rawUiErrorThrowMessage,
+    })
+  }
+  for (const match of content.matchAll(promiseRejectAliasPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: promiseRejectAliasMessage,
     })
   }
 

@@ -469,6 +469,21 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const rejectNow = Promise.reject
+          let rejectLater = Promise?.['reject'] as typeof Promise.reject
+          const { reject } = Promise
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).map((finding) => finding.message),
+    ).toEqual([
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
+    ])
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           try {
             await save()
           } catch (problem) {

@@ -207,6 +207,7 @@ bun run smoke:image:live
 4. เลือกหนึ่ง blocker หรือหนึ่ง UX/API gap ที่ปิดได้จริง
 5. ทำจนผ่าน test แล้วสรุปเป็นภาษาไทยสั้นๆ
 - Current addendum 2026-05-31: frontend UI and backend route raw Promise rejection guards now also reject optional-chained and bracket-notation Promise reject forms; full `bun run qa:repo` passed after the guard.
+- Current addendum 2026-05-31: frontend UI and backend route guards now also reject aliasing Promise reject before invocation, so detached reject helpers cannot bypass the raw-error rejection checks; full `bun run qa:repo` passed after this guard.
 - Current addendum 2026-05-31: latest full `bun run qa:repo` passed after Reflect.apply retrieved-target raw log guard, frontend raw UI Promise rejection guard, and backend raw route Promise rejection guard; backend remains 178 tests / 611 expects, and frontend static/route/build/bundle gates are green.
 - Current addendum 2026-05-31: frontend component/page surfaces now reject raw `Promise.reject(error)` / `Promise.reject(problem)` via `frontend:static:audit`, while helper-layer rejection in `lib` remains allowed.
 - Current addendum 2026-05-31: backend `.routes.ts` raw error return guard now rejects `Promise.reject(error)`, `Promise.reject(cause)`, and `Promise.reject(error as Error)` so route handlers must return controlled `routeErrorResponse`/safe responses.

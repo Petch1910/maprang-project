@@ -788,6 +788,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const rejectNow = Promise.reject
+        let rejectLater = Promise?.['reject'] as typeof Promise.reject
+        const { reject } = Promise
+      `, 'chat.routes.ts').filter((message) => message === 'route ห้าม alias Promise.reject; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.'),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
         export const chatRoutes = new Elysia()
           .post('/chat', async () => {
             try {

@@ -63,6 +63,11 @@ const consoleErrorWarnAliasPattern = new RegExp(
   'g',
 )
 const promiseRejectAccessor = String.raw`Promise\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
+const promiseRejectAliasValue = String.raw`${promiseRejectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const promiseRejectAliasPattern = new RegExp(
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}\s*=\s*Promise\b`,
+  'g',
+)
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
   `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawErrorArrayElementPatternFor('error')}|${reflectGetConsoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectGetConsoleErrorWarnForwardPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${descriptorConsoleErrorWarnValueCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`,
@@ -91,6 +96,7 @@ const routeErrorResponseCallPattern = /\brouteErrorResponse\(\s*(['"`])([a-z0-9_
 const rawRouteCatchMessage = 'route catch ห้ามคืน error.message เป็น message ตรงๆ; ใช้ routeErrorResponse หรือข้อความที่ควบคุมได้.'
 const rawRouteCatchErrorCode = 'route catch ห้ามคืน raw error ใน field error; ใช้ machine-readable code ที่ควบคุมได้.'
 const rawRouteCatchReturn = 'route catch ห้าม return raw error object ตรงๆ; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.'
+const routePromiseRejectAliasMessage = 'route ห้าม alias Promise.reject; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.'
 const rawResponseJsonMessage = 'ห้าม parse response.json() ตรงใน runtime backend; ให้แยกเป็น read...Payload helper ที่ห่อ JSON พังเป็นข้อความไทยก่อน.'
 const rawResponseTextMessage = 'ห้ามอ่าน response.text() จาก provider/Supabase แล้วใช้ตรงใน runtime backend; ต้องผ่าน redactSensitiveText ก่อนนำไป log หรือคืนเป็น diagnostic.'
 const allowedRawResponseJsonReaders = [
@@ -640,6 +646,14 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
         file,
         line: lineFor(content, match.index ?? 0),
         message: rawRouteCatchReturn,
+      })
+    }
+
+    for (const match of content.matchAll(promiseRejectAliasPattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: routePromiseRejectAliasMessage,
       })
     }
 
