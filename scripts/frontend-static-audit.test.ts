@@ -556,6 +556,37 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports typed catch-variable raw frontend errors', () => {
+    expect(
+      auditSuspiciousPatterns(
+        `
+          try {
+            await signIn()
+          } catch (problem: unknown) {
+            const safeMessage = userSafeErrorMessage(problem)
+            const rawAuthMessage = problem.message.toLowerCase()
+            setNotice(problem instanceof Error ? problem.message : safeMessage)
+            console.warn(problem, 'slow')
+          }
+        `,
+        'apps/frontend/src/pages/AuthFixturePage.tsx',
+      ),
+    ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
+          } catch (problem: any) {
+            throw problem
+          }
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      ),
+    ).toHaveLength(1)
+  })
+
   test('reports raw response JSON parsing outside frontend API helpers', () => {
     expect(
       auditFrontendSourceFile(

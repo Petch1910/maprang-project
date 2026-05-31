@@ -73,6 +73,7 @@ guard ใน repo:
 - Backend generic route detail guards now cover `(error as Error).message` and `String(error as Error)` leaks through response `detail`; this is repo-owned hardening, not an external deploy blocker.
 - Backend AuthError response guard now covers separated `error.code`/`error.message` fields such as `error: (error as AuthError).code, status: 401, message: (error as AuthError).message`; this is repo-owned hardening, not an external deploy blocker.
 - Backend route catch analysis now covers typed catch bindings such as `catch (err: unknown)` and `catch (err: any)`; this is repo-owned hardening, not an external deploy blocker.
+- Frontend static audit now covers typed catch bindings such as `catch (problem: unknown)` and `catch (problem: any)` for raw UI throw/log/classifier/user-visible message guards; this is repo-owned hardening, not an external deploy blocker.
 - Focused frontend dangerous link protocol guard ล่าสุดผ่าน `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run predeploy:check:test`, และ `bun run predeploy:check`; guard นี้ปิด `javascript:`, `vbscript:`, และ `data:text/html` ใน `href`/`to` โดยไม่เปลี่ยน production blocker ภายนอก.
 - backend test suite ฝั่ง local ผ่านแล้ว: 178 pass, 0 fail, 611 expect calls.
 - Local API smoke ผ่านแล้ว
