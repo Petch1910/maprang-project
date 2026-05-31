@@ -16,6 +16,7 @@ Last updated: 2026-05-31
 - 2026-05-31: Frontend static audit now rejects native browser dialogs through `window.alert`, `window.confirm`, and `globalThis.prompt`; use in-app modal/toast/form flows instead.
 - 2026-05-31: Frontend static audit now rejects browser event listeners that add `window`/`globalThis`/`document` listeners without matching `removeEventListener` cleanup in the same file, so drawer/sidebar/menu listeners cannot leak after unmount.
 - 2026-05-31: Character share links now use `characterShareUrl` from `apps/frontend/src/lib/shareUrl.ts`, and frontend static audit rejects direct `window.location.origin`/`globalThis.location.origin` outside that helper.
+- 2026-05-31: Frontend static audit now also rejects bare `location.origin` outside `shareUrl`, closing a share-link origin bypass that did not need the `window` or `globalThis` prefix.
 - 2026-05-31: Decision `0024-guard-frontend-share-url-origins.md` records the share URL origin guard as a frontend static audit contract, and the decision index now links it for future agents.
 - 2026-05-31: Decision `0025-add-frontend-cross-window-messaging-helper.md` records the cross-window messaging helper as a frontend static audit contract, and the decision index now links it for future agents.
 - 2026-05-31: Decision `0026-lock-frontend-ui-route-error-guards.md` records the frontend UI safety and backend route raw-error return guards as a repo baseline before staging.

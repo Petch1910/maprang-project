@@ -2101,6 +2101,7 @@ const checks: Check[] = [
           "window.removeEventListener('resize', closeOnResize)",
           'builds character share URLs through the shared helper',
           'reports direct location origin usage outside share URL helper',
+          'const bare = location . origin',
           'characterShareUrl',
           'routes cross-window messages through trusted origin helpers',
           'allows message event listeners only inside cross-window messaging helper',

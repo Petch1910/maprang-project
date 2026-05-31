@@ -110,6 +110,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('frontend source ที่เพิ่ม browser event listener ต้องมี removeEventListener คู่กัน')
     expect(predeploy).toContain('builds character share URLs through the shared helper')
     expect(predeploy).toContain('reports direct location origin usage outside share URL helper')
+    expect(predeploy).toContain('const bare = location . origin')
     expect(predeploy).toContain('directLocationOriginPattern')
     expect(predeploy).toContain('allowedFrontendLocationOriginFiles')
     expect(predeploy).toContain('shareUrl helper')

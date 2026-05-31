@@ -197,10 +197,12 @@ describe('frontend static audit', () => {
         `
           const url = \`\${window.location.origin}/characters/1\`
           const spaced = globalThis . location . origin
+          const bare = location . origin
         `,
         'apps/frontend/src/pages/ShareFixture.tsx',
       ).map((finding) => finding.message),
     ).toEqual([
+      'ห้ามอ่าน window.location.origin ตรงใน frontend source; ให้ใช้ shareUrl helper กลางเพื่อคุมลิงก์แชร์ให้เสถียรและทดสอบได้.',
       'ห้ามอ่าน window.location.origin ตรงใน frontend source; ให้ใช้ shareUrl helper กลางเพื่อคุมลิงก์แชร์ให้เสถียรและทดสอบได้.',
       'ห้ามอ่าน window.location.origin ตรงใน frontend source; ให้ใช้ shareUrl helper กลางเพื่อคุมลิงก์แชร์ให้เสถียรและทดสอบได้.',
     ])

@@ -263,6 +263,7 @@ bun run smoke:image:live
 - Current addendum 2026-05-31: frontend static audit now rejects `window.alert`, `window.confirm`, and `globalThis.prompt` style native browser dialogs; use app modal/toast/form flows instead.
 - Current addendum 2026-05-31: frontend static audit now rejects browser event listeners that add `window`/`globalThis`/`document` listeners without matching `removeEventListener` cleanup in the same file, so drawer/sidebar/menu listeners cannot leak after unmount.
 - Current addendum 2026-05-31: frontend share links now use `characterShareUrl` from `apps/frontend/src/lib/shareUrl.ts`, and frontend static audit rejects direct `window.location.origin`/`globalThis.location.origin` outside that helper.
+- Current addendum 2026-05-31: frontend static audit now also rejects bare `location.origin` outside `shareUrl`, so component/page code cannot bypass the share URL origin helper by omitting `window` or `globalThis`.
 - Current addendum 2026-05-31: decision `0024-guard-frontend-share-url-origins.md` records the share URL origin guard as the baseline contract for character share links.
 - Current addendum 2026-05-31: `crossWindowMessaging` centralizes trusted `postMessage` and `message` listener handling, and frontend static audit allows direct message listeners only in that helper while still blocking wildcard `postMessage`.
 - Current addendum 2026-05-31: decision `0025-add-frontend-cross-window-messaging-helper.md` records the cross-window messaging helper as the baseline contract for future UI surfaces.
