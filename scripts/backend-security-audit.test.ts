@@ -134,6 +134,13 @@ describe('backend security audit', () => {
     expect(
       messagesFor(`
         const providerFailure = classifyChatProviderError(error)
+        globalThis.console.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error)
+      `),
+    ).toContain('ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.')
+
+    expect(
+      messagesFor(`
+        const providerFailure = classifyChatProviderError(error)
         console.error('สตรีมแชทไม่สำเร็จ:', providerFailure)
       `),
     ).toEqual([])
@@ -163,10 +170,12 @@ describe('backend security audit', () => {
           console.warn.bind(console)('seed slow', error as Error)
           Reflect.apply(console.error, console, [error])
           Reflect.apply(console.warn, console, ['seed slow', error as Error])
+          globalThis.console.error(error)
+          globalThis.console.warn('seed slow', error)
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(18)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(20)
 
     expect(
       messagesFor(`
@@ -588,6 +597,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        function logRouteFailure(error: unknown) {
+          globalThis.console.warn('stream failed', error as Error)
+        }
+      `, 'chat.routes.ts'),
+    ).toContain('route log raw error object ตรงๆ ไม่ได้; ใช้ safeRouteErrorSummary เพื่อกันข้อมูลลับหลุด log.')
+
+    expect(
+      messagesFor(`
         export const uploadRoutes = new Elysia()
           .post('/uploads/avatar', async () => {
             try {
@@ -850,6 +867,8 @@ describe('backend security audit', () => {
               console.warn.bind(console)('stream failed', err)
               Reflect.apply(console.error, console, [err])
               Reflect.apply(console.warn, console, ['stream failed', err])
+              globalThis.console.error(err)
+              globalThis.console.warn('stream failed', err)
               return routeErrorResponse('unknown_error')
             }
           })
@@ -958,6 +977,8 @@ describe('backend security audit', () => {
               console.warn.bind(console)('stream failed', (err as Error))
               Reflect.apply(console.error, console, [err as Error])
               Reflect.apply(console.warn, console, ['stream failed', (err as Error)])
+              globalThis.console.error(err as Error)
+              globalThis.console.warn('stream failed', (err as Error))
               return routeErrorResponse('unknown_error')
             }
           })
