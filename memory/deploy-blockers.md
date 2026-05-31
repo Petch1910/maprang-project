@@ -1,6 +1,6 @@
 # ตัวกั้นก่อน deploy
 
-อัปเดตล่าสุด: 2026-05-31
+อัปเดตล่าสุด: 2026-06-01
 
 ## ตัวกั้นที่ยังเปิดอยู่
 
@@ -70,6 +70,7 @@ guard ใน repo:
 - Backend route raw log guard now also covers later-argument type-asserted route logs such as `console.warn('stream failed', error as Error)` outside catch-block analysis; this is repo-owned hardening, not an external deploy blocker.
 - Backend route throw/return guards now cover type-asserted legacy route flows such as `throw (error as Error)` and `return (error as Error)`, with `rawRouteErrorReturnPattern` wired into top-level `.routes.ts` scanning; this is repo-owned hardening, not an external deploy blocker.
 - Backend route throw/return guards now cover raw promise rejections such as `Promise.reject(error)`, `Promise.reject(cause)`, `Promise.reject(error as Error)`, `globalThis.Promise.reject(error)`, reflected `Reflect.apply(Promise.reject, ..., [error])`, retrieved `Reflect.get(Promise, "reject")` / descriptor value forwarding including namespace/computed Reflect/Object access, method-forwarded `Promise.reject.call/apply/bind`, optional-chained/bracket-notation Promise reject variants, aliasing Promise reject before invocation including typed declarations and typed destructuring, and Promise executor raw reject callbacks in both arrow/function-style route files including `reject?.(error)` optional calls plus `.call`/`.apply`/`.bind`, `Reflect.apply(reject, ...)`, global Reflect forwarding, computed Reflect apply forwarding, parenthesized Reflect apply forwarding, local/destructured Reflect apply aliases, local reject callback aliases, method-forwarded reject callback aliases, and typed alias declarations inside executors; this is repo-owned hardening, not an external deploy blocker.
+- Frontend/backend raw Promise rejection guards now also cover namespace/computed `Reflect.apply` forwarding of direct and retrieved `Promise.reject` targets such as `globalThis.Reflect.apply(Promise.reject, ...)`, window bracket-apply forwarding of `Promise.reject`, `globalThis.Reflect.apply(Reflect.get(Promise, "reject"), ...)`, and descriptor-value targets; this is repo-owned hardening, not an external deploy blocker.
 - Backend generic AuthError response guard now covers `(error as AuthError).code/message` in global handlers; this is repo-owned hardening, not an external deploy blocker.
 - Backend generic route detail guards now cover `(error as Error).message` and `String(error as Error)` leaks through response `detail`; this is repo-owned hardening, not an external deploy blocker.
 - Backend AuthError response guard now covers separated `error.code`/`error.message` fields such as `error: (error as AuthError).code, status: 401, message: (error as AuthError).message`; this is repo-owned hardening, not an external deploy blocker.
