@@ -40,12 +40,13 @@ const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unkn
 const consoleObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console`
 const consoleErrorWarnAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
 const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
-const reflectConsoleErrorWarnApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${consoleErrorWarnAccessor}\s*,[\s\S]*?\[\s*`
 const reflectGetConsoleErrorWarnValue = String.raw`Reflect\s*(?:\?\.|\.)\s*get\s*\(\s*${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)`
 const reflectGetConsoleErrorWarnCallPrefix = String.raw`${reflectGetConsoleErrorWarnValue}\s*(?:\?\.)?\s*\(`
 const reflectGetConsoleErrorWarnForwardPrefix = String.raw`${reflectGetConsoleErrorWarnValue}\s*(?:(?:\?\.|\.)\s*(?:call|apply)\s*(?:\?\.)?\s*\(|(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const descriptorConsoleErrorWarnValue = String.raw`Object\s*(?:\?\.|\.)\s*getOwnPropertyDescriptor\s*\(\s*${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["']\s*\)\s*(?:\?\.|\.)\s*value`
 const descriptorConsoleErrorWarnValueCallPrefix = String.raw`${descriptorConsoleErrorWarnValue}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
+const reflectConsoleErrorWarnApplyTarget = String.raw`(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})`
+const reflectConsoleErrorWarnApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${reflectConsoleErrorWarnApplyTarget}\s*,[\s\S]*?\[\s*`
 const consoleObjectAliasValue = String.raw`${consoleObjectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,

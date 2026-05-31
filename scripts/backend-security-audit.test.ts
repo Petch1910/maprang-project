@@ -235,6 +235,23 @@ describe('backend security audit', () => {
     expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(9)
   })
 
+  test('catches Reflect.apply console retrieval targets', () => {
+    const rawLogMessage = 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.'
+    const messages = messagesFor(`
+        try {
+          await seed()
+        } catch (error) {
+          Reflect.apply(Reflect.get(console, 'error'), console, [error])
+          Reflect.apply(Reflect.get(globalThis.console, 'warn'), globalThis.console, ['seed slow', error as Error])
+          Reflect.apply(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [error])
+          Reflect.apply(Object.getOwnPropertyDescriptor(globalThis.console, 'warn')?.value, globalThis.console, ['seed slow', error as Error])
+          console.error(summarizeSeedError(error))
+        }
+      `, 'prisma/seed.ts')
+
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(4)
+  })
+
   test('catches backend console object aliases', () => {
     const messages = messagesFor(`
         const logger = console

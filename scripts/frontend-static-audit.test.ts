@@ -652,6 +652,25 @@ describe('frontend static audit', () => {
     expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(9)
   })
 
+  test('reports frontend Reflect.apply console retrieval targets', () => {
+    const messages = auditSuspiciousPatterns(
+      `
+        try {
+          await load()
+        } catch (problem) {
+          Reflect.apply(Reflect.get(console, 'error'), console, [problem])
+          Reflect.apply(Reflect.get(window.console, 'warn'), window.console, ['slow reflect target', problem])
+          Reflect.apply(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
+          Reflect.apply(Object.getOwnPropertyDescriptor(window.console, 'warn')?.value, window.console, ['slow descriptor target', problem])
+          console.error('safe summary:', safeBrowserErrorSummary(problem))
+        }
+      `,
+      'apps/frontend/src/pages/FixturePage.tsx',
+    ).map((finding) => finding.message)
+
+    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(4)
+  })
+
   test('reports frontend console object aliases', () => {
     const messages = auditSuspiciousPatterns(
       `
