@@ -190,11 +190,11 @@ const patterns = [
     message: 'ห้ามประกอบ AuthError response จาก error.code/error.message ตรงๆ; ใช้ authErrorResponse(error) เพื่อคุมข้อความ public.',
   },
   {
-    pattern: /\bdetail\s*:\s*error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\b/g,
+    pattern: rawErrorDetailMessagePatternFor('error'),
     message: 'route response ห้ามส่ง raw error.message ใน detail; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
   },
   {
-    pattern: /\bdetail\s*:\s*(?:error\s*\.\s*message|String\s*\(\s*error\s*\))/g,
+    pattern: rawErrorDetailDirectPatternFor('error'),
     message: 'route response ห้ามส่ง raw error detail ตรงๆ; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
   },
 ]

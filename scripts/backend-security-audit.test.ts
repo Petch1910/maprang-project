@@ -238,6 +238,26 @@ describe('backend security audit', () => {
     )
 
     expect(messages).toContain('route response ห้ามส่ง raw error.message ใน detail; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.')
+
+    expect(
+      messagesFor(
+        `
+          export const routes = new Elysia()
+            .get('/admin/evals/local', async () => {
+              try {
+                return await runLocalEvalSuite()
+              } catch (error) {
+                return {
+                  error: 'local_eval_unavailable',
+                  message: 'รันชุดทดสอบไม่สำเร็จ',
+                  detail: error instanceof Error ? (error as Error).message : String(error as Error),
+                }
+              }
+            })
+        `,
+        'apps/backend/src/admin.routes.ts',
+      ),
+    ).toContain('route response ห้ามส่ง raw error.message ใน detail; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.')
   })
 
   test('catches direct raw error details in route responses', () => {
@@ -250,6 +270,38 @@ describe('backend security audit', () => {
                 return await runLocalEvalSuite()
               } catch (error) {
                 return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: String ( error ) }
+              }
+            })
+        `,
+        'apps/backend/src/admin.routes.ts',
+      ),
+    ).toContain('route response ห้ามส่ง raw error detail ตรงๆ; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.')
+
+    expect(
+      messagesFor(
+        `
+          export const routes = new Elysia()
+            .get('/admin/evals/local', async () => {
+              try {
+                return await runLocalEvalSuite()
+              } catch (error) {
+                return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: String(error as Error) }
+              }
+            })
+        `,
+        'apps/backend/src/admin.routes.ts',
+      ),
+    ).toContain('route response ห้ามส่ง raw error detail ตรงๆ; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.')
+
+    expect(
+      messagesFor(
+        `
+          export const routes = new Elysia()
+            .get('/admin/evals/local', async () => {
+              try {
+                return await runLocalEvalSuite()
+              } catch (error) {
+                return { error: 'local_eval_unavailable', message: 'รันชุดทดสอบไม่สำเร็จ', detail: (error as Error).message }
               }
             })
         `,
