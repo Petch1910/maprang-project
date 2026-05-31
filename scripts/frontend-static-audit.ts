@@ -35,14 +35,18 @@ export function compact(value: string) {
 const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*json\s*\(\s*\)/g
 const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
+const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const rawFrontendResponseJsonMessage =
   'ห้าม parse response.json() ตรงใน frontend source; ให้ใช้ readApiJson/readErrorPayload เพื่อห่อ JSON พังเป็นข้อความไทยก่อน.'
 const rawFrontendResponseTextMessage =
   'ห้ามอ่าน response.text() ตรงใน frontend source; ให้ backend/API helper แปลงเป็น ApiError ข้อความไทยที่ควบคุมได้ก่อนถึง UI.'
 const rawFrontendFetchMessage =
   'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.'
+const rawUiErrorThrowMessage =
+  'หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
 const allowedFrontendResponseJsonReaders = ['readApiJson', 'readErrorPayload']
 const allowedFrontendFetchFiles = new Set(['apps/frontend/src/lib/api.ts'])
+const frontendUiSurfacePattern = /^apps\/frontend\/src\/(?:components|pages)\//
 const allowedUnmountedFrontendComponents = new Map([
   [
     'apps/frontend/src/components/AuthPanel.tsx',
@@ -476,6 +480,19 @@ export function auditRawFrontendFetchUsage(content: string, file: string) {
   return findings
 }
 
+export function auditRawUiErrorThrows(content: string, file: string) {
+  if (!frontendUiSurfacePattern.test(file)) return []
+  const findings: Finding[] = []
+  for (const match of content.matchAll(rawUiErrorThrowPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: rawUiErrorThrowMessage,
+    })
+  }
+  return findings
+}
+
 export function auditFrontendSourceFile(content: string, file: string) {
   return [
     ...auditButtonsWithAst(content, file),
@@ -483,6 +500,7 @@ export function auditFrontendSourceFile(content: string, file: string) {
     ...auditLinksWithAst(content, file),
     ...auditSuspiciousPatterns(content, file),
     ...auditRawFrontendFetchUsage(content, file),
+    ...auditRawUiErrorThrows(content, file),
     ...auditRawResponseJsonParsing(content, file),
     ...auditRawResponseTextParsing(content, file),
   ]

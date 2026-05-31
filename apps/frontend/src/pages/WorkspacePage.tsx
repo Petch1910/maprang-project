@@ -575,7 +575,7 @@ export function WorkspacePage() {
   const saveWorldState = async (input: WorldStateInput) => {
     if (!chatId) {
       setConnectionNote('ต้องเริ่มแชทให้ระบบสร้างห้องก่อน แล้วค่อยบันทึกสถานะโลก')
-      return
+      return false
     }
 
     setIsWorldStateSaving(true)
@@ -591,10 +591,11 @@ export function WorkspacePage() {
         relationshipState: current?.relationshipState ?? defaultRelationshipState(),
       }))
       setConnectionNote('บันทึกสถานะโลกของแชทนี้แล้ว')
+      return true
     } catch (error) {
       logUnexpectedWorkspaceError('บันทึกสถานะโลกไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'บันทึกสถานะโลกไม่สำเร็จ กรุณาลองใหม่'))
-      throw error
+      return false
     } finally {
       setIsWorldStateSaving(false)
     }

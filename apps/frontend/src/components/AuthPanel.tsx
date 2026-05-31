@@ -94,7 +94,10 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
         return
       }
       const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
+      if (error) {
+        setNote(signInErrorMessage(error))
+        return
+      }
       await refreshAuthState({ silent: true })
       await onAuthChanged()
       setNote('เข้าสู่ระบบแล้ว')
@@ -115,7 +118,11 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
         return
       }
       const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      if (error) {
+        logUnexpectedError('ออกจากระบบไม่สำเร็จ:', error)
+        setNote(authFailureMessage('ออกจากระบบ'))
+        return
+      }
       await refreshAuthState({ silent: true })
       await onAuthChanged()
       setNote('ออกจากระบบแล้ว')

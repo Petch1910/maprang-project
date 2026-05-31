@@ -6,6 +6,7 @@ import {
   auditFrontendSourceFile,
   auditLinksWithAst,
   auditRawFrontendFetchUsage,
+  auditRawUiErrorThrows,
   auditReferencedFrontendModules,
   auditRawResponseTextParsing,
   auditSuspiciousPatterns,
@@ -231,6 +232,48 @@ describe('frontend static audit', () => {
       'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
       'frontend source ห้ามใช้ regex กับ raw error.message เพื่อ classify โดยตรง; ให้ผ่าน helper ที่ sanitize หรือแปลงเป็นข้อความที่ควบคุมได้ก่อน',
     ])
+  })
+
+  test('reports raw UI error throws in components and pages', () => {
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
+          } catch (error) {
+            setNote('ไม่สำเร็จ')
+            throw error
+          }
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      ).map((finding) => finding.message),
+    ).toEqual(['หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'])
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
+          } catch (error) {
+            throw (error)
+          }
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ),
+    ).toHaveLength(1)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          try {
+            await save()
+          } catch (error) {
+            throw error
+          }
+        `,
+        'apps/frontend/src/lib/api.ts',
+      ),
+    ).toEqual([])
   })
 
   test('reports risky frontend DOM and code execution patterns', () => {

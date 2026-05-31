@@ -1,6 +1,6 @@
 # คู่มือเอเจนต์ Maprang AI (Maprang AI Agent Guide)
 
-Last updated: 2026-05-26
+Last updated: 2026-05-31
 
 ไฟล์นี้คือคู่มือสำหรับ AI agent หรือ developer ที่มาสานต่องาน Maprang AI ใน repo นี้ ให้เริ่มจากภาพรวมเดียวกันและไม่ทำงานหลุดทิศทาง
 
@@ -27,7 +27,7 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 สถานะล่าสุดที่ต้องจำ:
 
 - Local QA พร้อมใช้งาน
-- Backend tests ล่าสุดผ่าน 178 tests / 611 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-26 หลัง AuthError response helper guard, frontend placeholder/no-op/dangerous link protocol guards, raw classifier/UI error spacing guards, iframe `srcDoc` guard, backend raw error log guards, spaced assignment hardening, และ static/security hardening ล่าสุด; memory audit ครอบ 33 Markdown files, docs command audit ครอบ 335 refs, test coverage audit ครอบ 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit ครอบ 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, frontend static audit allowlist guard, aria-disabled reason guard, placeholder-link guard, no-op handler guard, dangerous link protocol guard, frontend build, และ bundle budget
+- Backend tests ล่าสุดผ่าน 178 tests / 611 expects และ `qa:repo` ล่าสุดผ่านวันที่ 2026-05-31 หลัง frontend raw UI error throw guard, AuthError response helper guard, frontend placeholder/no-op/dangerous link protocol guards, raw classifier/UI error spacing guards, iframe `srcDoc` guard, backend raw error log guards, spaced assignment hardening, และ static/security hardening ล่าสุด; memory audit ครอบ 33 Markdown files, docs command audit ครอบ 341 refs, test coverage audit ครอบ 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit ครอบ 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, frontend static audit allowlist guard, aria-disabled reason guard, placeholder-link guard, no-op handler guard, dangerous link protocol guard, raw UI error throw guard, frontend build, และ bundle budget
 - Decision/predeploy handoff lock ล่าสุดอยู่ถึง `0023-guard-dangerous-frontend-link-protocols.md`; decision markdown files ถูก audit แบบ dynamic ทั้ง docs command references และ Markdown Thai-first headings
 - API smoke ล่าสุดผ่าน 32 pass, 1 skip สำหรับ live chat local mode
 - E2E smoke ล่าสุดผ่าน 4 tests บน desktop และ mobile; command/config regression tests ผ่าน 13 tests, Playwright จะ start dev server เฉพาะ local loopback targets, และ `runE2eSmoke` ส่ง env ที่ validate แล้วเข้า runner steps
@@ -256,3 +256,5 @@ bun run smoke:image:live
 - Current addendum 2026-05-26: full deterministic `bun run qa:repo` passed after dangerous link protocol guard landed, with backend tests 177 pass / 609 expects, frontend static audit/build/bundle budget, API audit, route/menu audit, and docs/memory/knowledge gates all green.
 - Current addendum 2026-05-26: full deterministic repo QA passed again after frontend raw classifier/UI error spacing guards, iframe `srcDoc` guard, and backend first-argument raw error log guard, with backend tests 177 pass / 609 expects, frontend static/route audit, frontend build/bundle budget, API audit, route/menu audit, and docs/memory/knowledge gates all green.
 - Current addendum 2026-05-26: full deterministic repo QA passed again after AuthError response helper guard, with backend tests 178 pass / 611 expects, backend security audit/predeploy locks, frontend static/route audit, frontend build/bundle budget, API audit, route/menu audit, and docs/memory/knowledge gates all green.
+- Current addendum 2026-05-31: frontend static audit now rejects raw UI error rethrows (`throw error` / `throw (error)`) in `apps/frontend/src/components` and `apps/frontend/src/pages`; keep helper-layer rethrows in `lib` intentional, but UI surfaces should return controlled results or user-safe messages. Focused checks passed: `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run frontend:check`, `bun run predeploy:check:test`, and `bun run predeploy:check`.
+- Current addendum 2026-05-31: full deterministic `bun run qa:repo` passed after the raw UI error throw guard, with memory audit 33 Markdown files, docs command audit 341 refs, backend tests 178 pass / 611 expects, frontend static/route audit, frontend build/bundle budget, API audit, route/menu audit, and docs/memory/knowledge gates all green.

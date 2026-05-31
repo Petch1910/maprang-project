@@ -49,7 +49,7 @@ type ChatPanelProps = {
   onOpenWallet: () => void
   onReportCharacter: () => void
   onReportMessage?: (chat: ChatMessage) => void
-  onSaveWorldState?: (input: WorldStateInput) => Promise<void> | void
+  onSaveWorldState?: (input: WorldStateInput) => Promise<boolean | void> | boolean | void
   onSceneAction: (
     action: 'enter' | 'hold' | 'decline' | 'exit' | 'resolve' | 'accept' | 'reject',
     code?: string,
@@ -348,7 +348,7 @@ function RightRail({
   onOpenCharacterProfile: () => void
   onOpenChats: () => void
   onReportCharacter: () => void
-  onSaveWorldState?: (input: WorldStateInput) => Promise<void> | void
+  onSaveWorldState?: (input: WorldStateInput) => Promise<boolean | void> | boolean | void
   onStartNewChat: () => void
   isWorldStateSaving: boolean
   isReadMode: boolean
@@ -435,7 +435,7 @@ function RightRail({
   const saveWorldDraft = async () => {
     if (!onSaveWorldState || !chatId || isWorldStateSaving) return
     try {
-      await onSaveWorldState({
+      const saved = await onSaveWorldState({
         timeOfDay: worldDraft.timeOfDay,
         location: worldDraft.location,
         weather: worldDraft.weather,
@@ -446,7 +446,7 @@ function RightRail({
           .filter(Boolean)
           .slice(0, 5),
       })
-      showNotice('บันทึกสถานะโลกแล้ว')
+      showNotice(saved === false ? 'บันทึกสถานะโลกไม่สำเร็จ' : 'บันทึกสถานะโลกแล้ว')
     } catch {
       showNotice('บันทึกสถานะโลกไม่สำเร็จ')
     }
