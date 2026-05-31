@@ -138,8 +138,9 @@ function rawErrorDetailDirectPatternFor(variableName: string) {
 }
 
 function rawAuthErrorResponseBypassPatternFor(variableName: string) {
+  const fieldGap = '\\s*,\\s*(?:[^{}]*?\\s*,\\s*)?'
   return new RegExp(
-    `\\berror\\s*:\\s*${rawErrorCodeAccessPatternFor(variableName)}\\s*,\\s*message\\s*:\\s*${rawErrorMessageAccessPatternFor(variableName)}|\\bmessage\\s*:\\s*${rawErrorMessageAccessPatternFor(variableName)}\\s*,\\s*error\\s*:\\s*${rawErrorCodeAccessPatternFor(variableName)}`,
+    `\\berror\\s*:\\s*${rawErrorCodeAccessPatternFor(variableName)}${fieldGap}message\\s*:\\s*${rawErrorMessageAccessPatternFor(variableName)}|\\bmessage\\s*:\\s*${rawErrorMessageAccessPatternFor(variableName)}${fieldGap}error\\s*:\\s*${rawErrorCodeAccessPatternFor(variableName)}`,
     'g',
   )
 }

@@ -158,6 +158,30 @@ describe('backend security audit', () => {
           .onError(({ error, set }) => {
             if (error instanceof AuthError) {
               set.status = 401
+              return { error: (error as AuthError).code, status: 401, message: (error as AuthError).message }
+            }
+          })
+      `, 'apps/backend/index.ts'),
+    ).toContain(message)
+
+    expect(
+      messagesFor(`
+        export const app = new Elysia()
+          .onError(({ error, set }) => {
+            if (error instanceof AuthError) {
+              set.status = 401
+              return { message: (error as AuthError).message, status: 401, error: (error as AuthError).code }
+            }
+          })
+      `, 'apps/backend/index.ts'),
+    ).toContain(message)
+
+    expect(
+      messagesFor(`
+        export const app = new Elysia()
+          .onError(({ error, set }) => {
+            if (error instanceof AuthError) {
+              set.status = 401
               return authErrorResponse(error)
             }
           })
@@ -843,7 +867,7 @@ describe('backend security audit', () => {
               return await sendChat()
             } catch (err) {
               if (err instanceof AuthError) {
-                return { error: (err as AuthError).code, message: (err as AuthError).message }
+                return { error: (err as AuthError).code, status: 401, message: (err as AuthError).message }
               }
               return routeErrorResponse('unknown_error')
             }
