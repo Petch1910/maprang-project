@@ -24,6 +24,7 @@ import { displayCharacterDetail, displayCharacterSummary, displayMessageContent 
 import { characterStatusLabel, characterVisibilityLabel } from '../lib/characterLabels'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
+import { characterShareUrl } from '../lib/shareUrl'
 import { Composer } from './Composer'
 import { MessageBubble } from './MessageBubble'
 
@@ -426,7 +427,7 @@ function RightRail({
   }
 
   const shareCharacter = () => {
-    const url = `${window.location.origin}/characters/${character.id}`
+    const url = characterShareUrl(character.id)
     void safeWriteClipboardText(getSafeClipboard(), url).then((copied) => {
       showNotice(copied ? 'คัดลอกลิงก์ตัวละครแล้ว' : `คัดลอกลิงก์นี้: ${url}`)
     })

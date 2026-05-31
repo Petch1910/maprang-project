@@ -1,9 +1,11 @@
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
+import { characterShareUrl } from '../apps/frontend/src/lib/shareUrl'
 import {
   auditBrowserEventListenerCleanup,
   auditButtonsWithAst,
   auditDisabledControlsWithAst,
+  auditDirectLocationOriginUsage,
   auditFrontendSourceFile,
   auditLinksWithAst,
   auditRawFrontendFetchUsage,
@@ -27,6 +29,13 @@ const profileHelperMixedFinding = 'พบข้อความ profile/tag helpe
 const knowledgePersonaMixedFinding = 'พบข้อความคลังความรู้หรือตัวตนผู้เล่นปนอังกฤษที่ควรเป็น Thai-first'
 
 describe('frontend static audit', () => {
+  test('builds character share URLs through the shared helper', () => {
+    expect(characterShareUrl('abc-123', 'https://app.example.com')).toBe('https://app.example.com/characters/abc-123')
+    expect(characterShareUrl('id with space', 'https://app.example.com/')).toBe(
+      'https://app.example.com/characters/id%20with%20space',
+    )
+  })
+
   test('reports buttons without explicit type and icon-only labels', () => {
     const findings = auditButtonsWithAst(
       `
@@ -175,6 +184,25 @@ describe('frontend static audit', () => {
     ])
     expect(findings[0]?.message).toContain('scroll')
     expect(findings[0]?.message).toContain('closeOnScroll')
+  })
+
+  test('reports direct location origin usage outside share URL helper', () => {
+    expect(
+      auditDirectLocationOriginUsage(
+        `
+          const url = \`\${window.location.origin}/characters/1\`
+          const spaced = globalThis . location . origin
+        `,
+        'apps/frontend/src/pages/ShareFixture.tsx',
+      ).map((finding) => finding.message),
+    ).toEqual([
+      'ห้ามอ่าน window.location.origin ตรงใน frontend source; ให้ใช้ shareUrl helper กลางเพื่อคุมลิงก์แชร์ให้เสถียรและทดสอบได้.',
+      'ห้ามอ่าน window.location.origin ตรงใน frontend source; ให้ใช้ shareUrl helper กลางเพื่อคุมลิงก์แชร์ให้เสถียรและทดสอบได้.',
+    ])
+
+    expect(
+      auditDirectLocationOriginUsage('const origin = window.location.origin', 'apps/frontend/src/lib/shareUrl.ts'),
+    ).toEqual([])
   })
 
   test('reports placeholder links, empty handlers, and not implemented errors', () => {

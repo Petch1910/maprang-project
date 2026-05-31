@@ -38,6 +38,7 @@ const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const browserEventListenerPattern =
   /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
+const directLocationOriginPattern = /\b(?:window|globalThis)\s*\.\s*location\s*\.\s*origin\b/g
 const rawFrontendResponseJsonMessage =
   'ห้าม parse response.json() ตรงใน frontend source; ให้ใช้ readApiJson/readErrorPayload เพื่อห่อ JSON พังเป็นข้อความไทยก่อน.'
 const rawFrontendResponseTextMessage =
@@ -48,8 +49,11 @@ const rawUiErrorThrowMessage =
   'หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
 const browserEventListenerCleanupMessage =
   'frontend source ที่เพิ่ม browser event listener ต้องมี removeEventListener คู่กันในไฟล์เดียวกัน เพื่อกันเมนู/drawer/sidebar ค้าง listener หลัง unmount.'
+const directLocationOriginMessage =
+  'ห้ามอ่าน window.location.origin ตรงใน frontend source; ให้ใช้ shareUrl helper กลางเพื่อคุมลิงก์แชร์ให้เสถียรและทดสอบได้.'
 const allowedFrontendResponseJsonReaders = ['readApiJson', 'readErrorPayload']
 const allowedFrontendFetchFiles = new Set(['apps/frontend/src/lib/api.ts'])
+const allowedFrontendLocationOriginFiles = new Set(['apps/frontend/src/lib/shareUrl.ts'])
 const frontendUiSurfacePattern = /^apps\/frontend\/src\/(?:components|pages)\//
 const allowedUnmountedFrontendComponents = new Map([
   [
@@ -537,6 +541,19 @@ export function auditRawUiErrorThrows(content: string, file: string) {
   return findings
 }
 
+export function auditDirectLocationOriginUsage(content: string, file: string) {
+  if (allowedFrontendLocationOriginFiles.has(file)) return []
+  const findings: Finding[] = []
+  for (const match of content.matchAll(directLocationOriginPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: directLocationOriginMessage,
+    })
+  }
+  return findings
+}
+
 export function auditFrontendSourceFile(content: string, file: string) {
   return [
     ...auditButtonsWithAst(content, file),
@@ -545,6 +562,7 @@ export function auditFrontendSourceFile(content: string, file: string) {
     ...auditBrowserEventListenerCleanup(content, file),
     ...auditSuspiciousPatterns(content, file),
     ...auditRawFrontendFetchUsage(content, file),
+    ...auditDirectLocationOriginUsage(content, file),
     ...auditRawUiErrorThrows(content, file),
     ...auditRawResponseJsonParsing(content, file),
     ...auditRawResponseTextParsing(content, file),
