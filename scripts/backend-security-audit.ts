@@ -98,6 +98,14 @@ function rawRouteErrorThrowPatternFor(variableName: string) {
   return new RegExp(`throw\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
 }
 
+function rawRouteErrorLogPatternsFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return [
+    new RegExp(`console\\.(?:error|warn)\\s*\\(\\s*${escaped}\\b\\s*(?:,|\\))`, 'g'),
+    new RegExp(`console\\.(?:error|warn)\\s*\\([\\s\\S]*?,\\s*${escaped}\\b[\\s\\S]*?\\)`, 'g'),
+  ]
+}
+
 type BackendRouteCall = {
   path: string
   handlerText: string
@@ -326,6 +334,17 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
     }
 
     if (variableName !== 'error') {
+      for (const logPattern of rawRouteErrorLogPatternsFor(variableName)) {
+        for (const logMatch of catchBlock.matchAll(logPattern)) {
+          const blockLogIndex = logMatch.index ?? 0
+          findings.push({
+            file,
+            line: lineFor(content, openingBraceIndex + 1 + blockLogIndex),
+            message: 'route log raw error object เธ•เธฃเธเน เนเธกเนเนเธ”เน; เนเธเน safeRouteErrorSummary เน€เธเธทเนเธญเธเธฑเธเธเนเธญเธกเธนเธฅเธฅเธฑเธเธซเธฅเธธเธ” log.',
+          })
+        }
+      }
+
       for (const throwMatch of catchBlock.matchAll(rawRouteErrorThrowPatternFor(variableName))) {
         const blockThrowIndex = throwMatch.index ?? 0
         findings.push({

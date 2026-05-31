@@ -611,6 +611,18 @@ describe('backend security audit', () => {
       `, 'chat.routes.ts'),
       ...messagesFor(`
         export const chatRoutes = new Elysia()
+          .post('/chat/stream', async () => {
+            try {
+              return streamChat()
+            } catch (err) {
+              console.error(err)
+              console.warn('stream failed', err)
+              return routeErrorResponse('unknown_error')
+            }
+          })
+      `, 'chat.routes.ts'),
+      ...messagesFor(`
+        export const chatRoutes = new Elysia()
           .post('/chat', async () => {
             try {
               return await sendChat()
@@ -642,6 +654,7 @@ describe('backend security audit', () => {
     ]
 
     expect(messages.some((message) => message.includes('route throw raw error object'))).toBe(true)
+    expect(messages.some((message) => message.includes('route log raw error object'))).toBe(true)
     expect(messages.some((message) => message.includes('return raw error object'))).toBe(true)
     expect(messages.some((message) => message.includes('error.message') && message.includes('message'))).toBe(true)
     expect(messages.some((message) => message.includes('field error'))).toBe(true)
