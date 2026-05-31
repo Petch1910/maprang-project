@@ -496,6 +496,26 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports alternate catch-variable raw frontend error logs', () => {
+    expect(
+      auditSuspiciousPatterns(
+        `
+          try {
+            await load()
+          } catch (problem) {
+            console.error('โหลดข้อมูลไม่สำเร็จ:', problem)
+            console.warn(problem, 'โหลดข้อมูลช้า')
+            console.error('สรุปแล้ว:', safeBrowserErrorSummary(problem))
+          }
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      ).map((finding) => finding.message),
+    ).toEqual([
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+    ])
+  })
+
   test('reports raw response JSON parsing outside frontend API helpers', () => {
     expect(
       auditFrontendSourceFile(

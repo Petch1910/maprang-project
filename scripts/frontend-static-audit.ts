@@ -48,6 +48,8 @@ const rawFrontendFetchMessage =
   'ห้ามเรียก fetch ตรงนอก apps/frontend/src/lib/api.ts; ให้ผ่าน API helper กลางเพื่อคุม auth, error, stream และ diagnostics ให้สม่ำเสมอ.'
 const rawUiErrorThrowMessage =
   'หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
+const rawFrontendErrorLogMessage =
+  'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย'
 const browserEventListenerCleanupMessage =
   'frontend source ที่เพิ่ม browser event listener ต้องมี removeEventListener คู่กันในไฟล์เดียวกัน เพื่อกันเมนู/drawer/sidebar ค้าง listener หลัง unmount.'
 const directLocationOriginMessage =
@@ -88,6 +90,14 @@ function rawUiErrorThrowPatternFor(variableName: string) {
   if (variableName === 'error') return rawUiErrorThrowPattern
   const escaped = escapeRegExp(variableName)
   return new RegExp(`\\bthrow\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
+}
+
+function rawFrontendErrorLogPatternFor(variableName: string) {
+  const escaped = escapeRegExp(variableName)
+  return new RegExp(
+    `\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\(\\s*(?:\\(\\s*)?${escaped}\\b\\s*(?:,|\\))|\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\([\\s\\S]*?,\\s*(?:\\(\\s*)?${escaped}\\b\\s*(?:,|\\))`,
+    'g',
+  )
 }
 
 function browserEventListenerRemovalPattern(target: string | undefined, eventName: string, handlerName: string) {
@@ -393,11 +403,11 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
   },
   {
     pattern: /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g,
-    message: 'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+    message: rawFrontendErrorLogMessage,
   },
   {
     pattern: /console\.(?:error|warn)\s*\(\s*error\b\s*(?:,|\))/g,
-    message: 'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+    message: rawFrontendErrorLogMessage,
   },
   {
     pattern: /\berror\s*\.\s*message\s*\.\s*toLowerCase\s*\(\s*\)|\bString\s*\(\s*error\s*\)\s*\.\s*toLowerCase\s*\(\s*\)/g,
@@ -502,6 +512,23 @@ export function auditSuspiciousPatterns(content: string, file: string) {
       })
     }
   }
+
+  for (const catchMatch of content.matchAll(catchErrorStartPattern)) {
+    const variableName = catchMatch[1] ?? 'error'
+    if (variableName === 'error') continue
+    const openingBraceIndex = content.indexOf('{', catchMatch.index ?? 0)
+    if (openingBraceIndex < 0) continue
+    const closingBraceIndex = findMatchingBrace(content, openingBraceIndex)
+    const catchBlock = content.slice(openingBraceIndex + 1, closingBraceIndex)
+    for (const logMatch of catchBlock.matchAll(rawFrontendErrorLogPatternFor(variableName))) {
+      findings.push({
+        file,
+        line: lineFor(content, openingBraceIndex + 1 + (logMatch.index ?? 0)),
+        message: rawFrontendErrorLogMessage,
+      })
+    }
+  }
+
   return findings
 }
 
