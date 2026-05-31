@@ -639,6 +639,8 @@ describe('frontend static audit', () => {
         let logWarn = window.console.warn.bind(console)
         logError = globalThis.console['error']
         const assertedError = console.error as typeof console.error
+        const reflectedError = Reflect.get(console, 'error')
+        reflectedError = Reflect.get(window.console, 'warn') as typeof console.warn
         const descriptorError = Object.getOwnPropertyDescriptor(console, 'error')?.value
         descriptorError = Object.getOwnPropertyDescriptor(window.console, 'warn')?.value as typeof console.warn
         const { error: aliasedError, warn } = console
@@ -647,7 +649,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(7)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(9)
   })
 
   test('reports frontend console object aliases', () => {

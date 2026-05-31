@@ -224,13 +224,15 @@ describe('backend security audit', () => {
         let logWarn = globalThis.console.warn.bind(console)
         logError = console['error']
         const assertedError = console.error as typeof console.error
+        const reflectedError = Reflect.get(console, 'error')
+        reflectedError = Reflect.get(globalThis.console, 'warn') as typeof console.warn
         const descriptorError = Object.getOwnPropertyDescriptor(console, 'error')?.value
         descriptorError = Object.getOwnPropertyDescriptor(globalThis.console, 'warn')?.value as typeof console.warn
         const { error: aliasedError, warn } = console
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(7)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(9)
   })
 
   test('catches backend console object aliases', () => {
