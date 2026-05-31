@@ -62,6 +62,7 @@ const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}\s*=\s*${consoleObjectAccessor}\b`,
   'g',
 )
+const promiseRejectAccessor = String.raw`Promise\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
   `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawErrorArrayElementPatternFor('error')}|${reflectGetConsoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectGetConsoleErrorWarnForwardPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${descriptorConsoleErrorWarnValueCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`,
@@ -73,7 +74,7 @@ const rawRouteErrorReturnPattern = new RegExp(
   'gm',
 )
 const rawRouteErrorRejectPattern = new RegExp(
-  `\\b(?:return\\s+)?Promise\\s*\\.\\s*reject\\s*\\(\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}`,
+  String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawErrorExpressionPatternFor('error')}`,
   'g',
 )
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
@@ -148,7 +149,7 @@ function rawRouteErrorThrowPatternFor(variableName: string) {
 
 function rawRouteErrorRejectPatternFor(variableName: string) {
   return new RegExp(
-    `\\b(?:return\\s+)?Promise\\s*\\.\\s*reject\\s*\\(\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}`,
+    String.raw`\b(?:return\s+)?${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawErrorExpressionPatternFor(variableName)}`,
     'g',
   )
 }

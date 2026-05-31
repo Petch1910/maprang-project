@@ -36,7 +36,11 @@ const rawFrontendResponseJsonPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\s*\))?\s*\.\s*text\s*\(\s*\)/g
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
-const rawUiErrorRejectPattern = /\bPromise\s*\.\s*reject\s*\(\s*(?:\(\s*)?error\b/g
+const promiseRejectAccessor = String.raw`Promise\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
+const rawUiErrorRejectPattern = new RegExp(
+  String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?error\b`,
+  'g',
+)
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const consoleObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console`
 const consoleErrorWarnAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
@@ -122,7 +126,7 @@ function rawUiErrorThrowPatternFor(variableName: string) {
 function rawUiErrorRejectPatternFor(variableName: string) {
   if (variableName === 'error') return rawUiErrorRejectPattern
   const escaped = escapeRegExp(variableName)
-  return new RegExp(`\\bPromise\\s*\\.\\s*reject\\s*\\(\\s*(?:\\(\\s*)?${escaped}\\b`, 'g')
+  return new RegExp(String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${escaped}\b`, 'g')
 }
 
 function rawFrontendErrorLogPatternFor(variableName: string) {

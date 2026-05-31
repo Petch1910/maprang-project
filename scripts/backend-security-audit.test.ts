@@ -764,10 +764,27 @@ describe('backend security audit', () => {
               return await sendChat()
             } catch (error) {
               return Promise.reject(error)
+              return Promise?.reject?.(error)
+              return Promise['reject'](error)
+              return Promise?.['reject']?.(error as Error)
             }
           })
       `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
     ).toBe(true)
+
+    for (const rejectedExpression of [
+      'return Promise?.reject?.(error)',
+      "return Promise['reject'](error)",
+      "return Promise?.['reject']?.(error as Error)",
+    ]) {
+      expect(
+        messagesFor(`
+          function rejectRouteFailure(error: unknown) {
+            ${rejectedExpression}
+          }
+        `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
+      ).toBe(true)
+    }
 
     expect(
       messagesFor(`

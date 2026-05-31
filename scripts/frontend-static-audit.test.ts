@@ -428,11 +428,14 @@ describe('frontend static audit', () => {
             await save()
           } catch (error) {
             return Promise.reject(error)
+            return Promise?.reject?.(error)
+            return Promise['reject'](error)
+            return Promise?.['reject']?.(error as Error)
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(1)
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
@@ -454,11 +457,14 @@ describe('frontend static audit', () => {
             await save()
           } catch (problem) {
             return Promise.reject(problem)
+            return Promise?.reject?.(problem)
+            return Promise['reject'](problem)
+            return Promise?.['reject']?.(problem as Error)
           }
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
-    ).toHaveLength(1)
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
