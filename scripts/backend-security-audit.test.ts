@@ -784,6 +784,7 @@ describe('backend security audit', () => {
       'return new Promise((_resolve, reject) => Reflect.apply(reject, undefined, [error as Error]))',
       'return new Promise((_resolve, reject) => globalThis.Reflect.apply(reject, undefined, [error as Error]))',
       'return new Promise((_resolve, reject) => globalThis.Reflect["apply"](reject, undefined, [error as Error]))',
+      'return new Promise((_resolve, reject) => (Reflect.apply)(reject, undefined, [error as Error]))',
       'return new Promise(function (_resolve, reject) { reject(error as Error) })',
       'return new Promise(function (_resolve, reject) { reject?.(error as Error) })',
     ]) {

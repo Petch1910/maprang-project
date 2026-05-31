@@ -463,11 +463,12 @@ describe('frontend static audit', () => {
             return new Promise((_resolve, reject) => Reflect.apply(reject, undefined, [error]))
             return new Promise((_resolve, reject) => globalThis.Reflect.apply(reject, undefined, [error]))
             return new Promise((_resolve, reject) => window.Reflect['apply'](reject, undefined, [error]))
+            return new Promise((_resolve, reject) => (Reflect.apply)(reject, undefined, [error]))
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(6)
+    ).toHaveLength(7)
 
     expect(
       auditRawUiErrorThrows(
