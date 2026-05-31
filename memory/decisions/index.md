@@ -1,6 +1,6 @@
 # บันทึก decision
 
-อัปเดตล่าสุด: 2026-05-26
+อัปเดตล่าสุด: 2026-05-31
 
 - [0001 - ใช้ SocratiCode เป็น local codebase intelligence](./0001-use-socraticode-local-tool.md)
 - [0002 - เพิ่ม Markdown memory vault](./0002-add-markdown-memory-vault.md)
@@ -25,3 +25,4 @@
 - [0021 - ล็อก baseline handoff ของ agent guide](./0021-lock-agent-handoff-baseline.md)
 - [0022 - ตรวจ allowlist ของ frontend static audit](./0022-validate-frontend-unmounted-allowlists.md)
 - [0023 - ปิด protocol link อันตรายใน frontend static audit](./0023-guard-dangerous-frontend-link-protocols.md)
+- [0024 - ล็อกต้นทางลิงก์แชร์ตัวละครใน frontend static audit](./0024-guard-frontend-share-url-origins.md)
