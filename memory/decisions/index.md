@@ -27,3 +27,4 @@
 - [0023 - ปิด protocol link อันตรายใน frontend static audit](./0023-guard-dangerous-frontend-link-protocols.md)
 - [0024 - ล็อกต้นทางลิงก์แชร์ตัวละครใน frontend static audit](./0024-guard-frontend-share-url-origins.md)
 - [0025 - เพิ่ม helper กลางสำหรับ cross-window messaging](./0025-add-frontend-cross-window-messaging-helper.md)
+- [0026 - ล็อกชุด guard ความปลอดภัย UI และ route error](./0026-lock-frontend-ui-route-error-guards.md)
