@@ -40,6 +40,7 @@ const promiseRejectAccessor = String.raw`Promise\s*(?:(?:\?\.|\.)\s*reject|(?:\?
 const reflectObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Reflect\b`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const variableTypeAnnotation = String.raw`(?:\s*:\s*[^=;,\n]+)?`
 const rawUiErrorRejectPattern = new RegExp(
   String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?error\b`,
   'g',
@@ -160,7 +161,18 @@ function rawPromiseExecutorRejectPatternFor(variableName: string) {
 
 function rawPromiseRejectCallbackInvocationPattern(rawExpression: string, rawArrayElement: string) {
   const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
-  return String.raw`(?:\b\1\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|(?:\(\s*)?\b${reflectApplyAccessor}\s*(?:\)\s*)?\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)\s*=\s*${reflectApplyAliasValue}[\s\S]{0,120}?\b\2\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:const|let|var)\s*\{[^}]*\bapply\b(?!\s*:)[^}]*\}\s*=\s*${reflectObjectAccessor}[\s\S]{0,120}?\bapply\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:const|let|var)\s*\{[^}]*\bapply\s*:\s*([A-Za-z_$][\w$]*)[^}]*\}\s*=\s*${reflectObjectAccessor}[\s\S]{0,120}?\b\3\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)\s*=\s*\1(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))[\s\S]{0,120}?(?:\b\4\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\4\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\4\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\4\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}))`
+  const patterns = [
+    String.raw`\b\1\s*(?:\?\.)?\s*\(\s*${rawArgument}`,
+    String.raw`\b\1\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}`,
+    String.raw`\b\1\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}`,
+    String.raw`\b\1\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`,
+    String.raw`(?:\(\s*)?\b${reflectApplyAccessor}\s*(?:\)\s*)?\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`,
+    String.raw`\b(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)${variableTypeAnnotation}\s*=\s*${reflectApplyAliasValue}[\s\S]{0,120}?\b\2\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`,
+    String.raw`\b(?:const|let|var)\s*\{[^}]*\bapply\b(?!\s*:)[^}]*\}\s*=\s*${reflectObjectAccessor}[\s\S]{0,120}?\bapply\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`,
+    String.raw`\b(?:const|let|var)\s*\{[^}]*\bapply\s*:\s*([A-Za-z_$][\w$]*)[^}]*\}\s*=\s*${reflectObjectAccessor}[\s\S]{0,120}?\b\3\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}`,
+    String.raw`\b(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)${variableTypeAnnotation}\s*=\s*\1(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))[\s\S]{0,120}?(?:\b\4\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\4\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\4\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\4\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement})`,
+  ]
+  return String.raw`(?:${patterns.join('|')})`
 }
 
 function rawPromiseExecutorRejectPatternsFor(variableName: string) {

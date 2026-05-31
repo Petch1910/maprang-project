@@ -465,9 +465,11 @@ describe('frontend static audit', () => {
             return new Promise((_resolve, reject) => window.Reflect['apply'](reject, undefined, [error]))
             return new Promise((_resolve, reject) => (Reflect.apply)(reject, undefined, [error]))
             return new Promise((_resolve, reject) => { const apply = Reflect.apply; return apply(reject, undefined, [error]) })
+            return new Promise((_resolve, reject) => { const typedApply: typeof Reflect.apply = Reflect.apply; return typedApply(reject, undefined, [error]) })
             return new Promise((_resolve, reject) => { const { apply } = Reflect; return apply(reject, undefined, [error]) })
             return new Promise((_resolve, reject) => { const { apply: reflectApply } = Reflect; return reflectApply(reject, undefined, [error]) })
             return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow(error) })
+            return new Promise((_resolve, reject) => { const typedReject: typeof reject = reject; return typedReject(error) })
             return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow.call(undefined, error) })
             return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow.apply(undefined, [error]) })
             return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow.bind(undefined)(error) })
@@ -475,7 +477,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(14)
+    ).toHaveLength(16)
 
     expect(
       auditRawUiErrorThrows(
