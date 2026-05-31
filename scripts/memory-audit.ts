@@ -231,7 +231,7 @@ export async function collectMemoryAuditResult(): Promise<MemoryAuditResult> {
       'cross-window messaging helper/guard',
       'backend raw route return guard',
       'memory audit 36 Markdown files',
-      'docs command audit 343 refs',
+      'docs command audit 345 refs',
       'frontend static audit allowlist guard',
       'aria-disabled reason guard',
       'placeholder-link guard',

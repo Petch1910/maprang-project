@@ -37,7 +37,7 @@ const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
-const consoleErrorWarnCallPrefix = String.raw`console\s*(?:\?\.|\.)\s*(?:error|warn)\s*(?:\?\.)?\s*\(`
+const consoleErrorWarnCallPrefix = String.raw`console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])\s*(?:\?\.)?\s*\(`
 const browserEventListenerPattern =
   /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
 const directLocationOriginPattern = /\b(?:(?:window|globalThis)\s*\.\s*)?location\s*\.\s*origin\b/g
