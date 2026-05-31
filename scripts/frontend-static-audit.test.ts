@@ -497,6 +497,9 @@ describe('frontend static audit', () => {
         Reflect.apply(console.warn, console, ['โหลดข้อมูลช้า', error])
         Reflect.get(console, 'error')(error)
         Reflect.get(window.console, 'warn')('โหลดข้อมูลช้า', error)
+        Reflect.get(console, 'error').call(console, error)
+        Reflect.get(window.console, 'warn').apply(window.console, ['โหลดข้อมูลช้า', error])
+        Reflect.get(console, 'error').bind(console)(error)
         globalThis.console.error(error)
         window.console.warn('โหลดข้อมูลช้า', error)
       `,
@@ -549,6 +552,9 @@ describe('frontend static audit', () => {
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
     ])
   })
 
@@ -575,6 +581,9 @@ describe('frontend static audit', () => {
             Reflect.apply(console.warn, console, ['slow reflect', problem])
             Reflect.get(console, 'error')(problem)
             Reflect.get(window.console, 'warn')('slow reflect get', problem)
+            Reflect.get(console, 'error').call(console, problem)
+            Reflect.get(window.console, 'warn').apply(window.console, ['slow reflect get', problem])
+            Reflect.get(console, 'error').bind(console)(problem)
             window.console.error(problem)
             globalThis.console.warn('slow global', problem)
             console.error('สรุปแล้ว:', safeBrowserErrorSummary(problem))
@@ -583,6 +592,9 @@ describe('frontend static audit', () => {
         'apps/frontend/src/pages/FixturePage.tsx',
       ).map((finding) => finding.message),
     ).toEqual([
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
