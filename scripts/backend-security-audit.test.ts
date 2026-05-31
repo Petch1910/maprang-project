@@ -427,6 +427,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        function throwRouteFailure(error: unknown) {
+          throw (error as Error)
+        }
+      `, 'chat.routes.ts'),
+    ).toContain('route throw raw error object ตรงๆ ไม่ได้; คืน routeErrorResponse หรือ response ที่ควบคุมข้อความได้.')
+
+    expect(
+      messagesFor(`
         export const chatRoutes = new Elysia()
           .post('/chat/stream', async ({ set }) => {
             try {
@@ -452,6 +460,14 @@ describe('backend security audit', () => {
               return error
             }
           })
+      `, 'chat.routes.ts'),
+    ).toContain('route catch ห้าม return raw error object ตรงๆ; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.')
+
+    expect(
+      messagesFor(`
+        function returnRouteFailure(error: unknown) {
+          return (error as Error)
+        }
       `, 'chat.routes.ts'),
     ).toContain('route catch ห้าม return raw error object ตรงๆ; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.')
 

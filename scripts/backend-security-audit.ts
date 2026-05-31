@@ -47,8 +47,11 @@ const rawRouteErrorLogPattern = new RegExp(
   `console\\.(?:error|warn)\\s*\\([\\s\\S]*?,\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}\\s*(?=,|\\))[\\s\\S]*?\\)`,
   'g',
 )
-const rawRouteErrorThrowPattern = /throw\s*(?:\(\s*)?error\b/g
-const rawRouteErrorReturnPattern = /\breturn\s*(?:\(\s*)?error\s*(?:\)\s*)?(?:;|$)/gm
+const rawRouteErrorThrowPattern = new RegExp(`throw\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}`, 'g')
+const rawRouteErrorReturnPattern = new RegExp(
+  `\\breturn\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}[ \\t]*(?:\\)[ \\t]*)?(?:;|$)`,
+  'gm',
+)
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
@@ -105,7 +108,7 @@ function rawErrorCodePropertyPatternFor(variableName: string) {
 }
 
 function rawRouteErrorReturnPatternFor(variableName: string) {
-  return new RegExp(`\\breturn\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}\\s*(?:\\)\\s*)?(?:;|$)`, 'gm')
+  return new RegExp(`\\breturn\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}[ \\t]*(?:\\)[ \\t]*)?(?:;|$)`, 'gm')
 }
 
 function rawRouteErrorThrowPatternFor(variableName: string) {
@@ -494,6 +497,14 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
         file,
         line: lineFor(content, match.index ?? 0),
         message: 'route throw raw error object ตรงๆ ไม่ได้; คืน routeErrorResponse หรือ response ที่ควบคุมข้อความได้.',
+      })
+    }
+
+    for (const match of content.matchAll(rawRouteErrorReturnPattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: rawRouteCatchReturn,
       })
     }
 
