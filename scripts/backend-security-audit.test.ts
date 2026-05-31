@@ -781,6 +781,7 @@ describe('backend security audit', () => {
       'return new Promise((_resolve, reject) => reject.call(undefined, error as Error))',
       'return new Promise((_resolve, reject) => reject.apply(undefined, [error as Error]))',
       'return new Promise((_resolve, reject) => reject.bind(undefined)(error as Error))',
+      'return new Promise((_resolve, reject) => Reflect.apply(reject, undefined, [error as Error]))',
       'return new Promise(function (_resolve, reject) { reject(error as Error) })',
       'return new Promise(function (_resolve, reject) { reject?.(error as Error) })',
     ]) {
@@ -816,7 +817,7 @@ describe('backend security audit', () => {
               return await sendChat()
             } catch (cause) {
               return new Promise(function rejectRouteFailure(_resolve, reject) {
-                reject.apply(undefined, [cause])
+                Reflect.apply(reject, undefined, [cause])
               })
             }
           })

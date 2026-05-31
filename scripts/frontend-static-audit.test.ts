@@ -460,11 +460,12 @@ describe('frontend static audit', () => {
             return new Promise((_resolve, reject) => reject.call(undefined, error))
             return new Promise((_resolve, reject) => reject.apply(undefined, [error]))
             return new Promise((_resolve, reject) => reject.bind(undefined)(error))
+            return new Promise((_resolve, reject) => Reflect.apply(reject, undefined, [error]))
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(3)
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
@@ -532,7 +533,7 @@ describe('frontend static audit', () => {
             await save()
           } catch (problem) {
             return new Promise(function rejectLater(_resolve, reject) {
-              reject.call(undefined, problem as Error)
+              Reflect.apply(reject, undefined, [problem as Error])
             })
           }
         `,

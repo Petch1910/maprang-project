@@ -44,7 +44,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('decision `0025` cross-window messaging helper contract')
     expect(predeploy).toContain('decision `0026` frontend UI/route guard contract')
     expect(predeploy).toContain('memory audit ครอบ 36 Markdown files')
-    expect(predeploy).toContain('docs command audit ครอบ 346 refs')
+    expect(predeploy).toContain('docs command audit ครอบ 349 refs')
     expect(predeploy).toContain('raw UI error throw guard')
     expect(predeploy).toContain('cross-window messaging helper/guard')
     expect(predeploy).toContain('backend raw route return guard')

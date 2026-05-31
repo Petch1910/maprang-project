@@ -166,7 +166,7 @@ function rawPromiseExecutorRejectPatternFor(variableName: string) {
 
 function rawPromiseRejectCallbackInvocationPattern(rawExpression: string, rawArrayElement: string) {
   const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
-  return String.raw`(?:\b\1\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement})`
+  return String.raw`(?:\b\1\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\bReflect\s*(?:\?\.)?\.\s*apply\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement})`
 }
 
 function rawPromiseExecutorRejectPatternsFor(variableName: string) {
