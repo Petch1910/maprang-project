@@ -773,6 +773,16 @@ describe('backend security audit', () => {
           })
       `, 'chat.routes.ts'),
       ...messagesFor(`
+        export const chatRoutes = new Elysia()
+          .post('/chat', async () => {
+            try {
+              return await sendChat()
+            } catch (err: unknown) {
+              return { error: 'chat_failed', message: err instanceof Error ? err.message : String(err) }
+            }
+          })
+      `, 'chat.routes.ts'),
+      ...messagesFor(`
         export const adminRoutes = new Elysia()
           .get('/admin/evals/local', async () => {
             try {

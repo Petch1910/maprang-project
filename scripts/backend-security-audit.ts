@@ -52,7 +52,7 @@ const rawRouteErrorReturnPattern = new RegExp(
   `\\breturn\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}[ \\t]*(?:\\)[ \\t]*)?(?:;|$)`,
   'gm',
 )
-const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{/g
+const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const rawErrorMessagePropertyPattern =
   /\bmessage\s*:\s*(?:error\s+instanceof\s+Error\s*\?\s*error\s*\.\s*message\s*:\s*String\s*\(\s*error\s*\)|error\s*\.\s*message\b|String\s*\(\s*error\s*\))/g
 const rawErrorCodePropertyPattern =
