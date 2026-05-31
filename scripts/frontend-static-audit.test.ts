@@ -489,6 +489,8 @@ describe('frontend static audit', () => {
         console.warn('โหลดข้อมูลช้า:', error)
         console.error(error)
         console.warn(error, 'โหลดข้อมูลช้า')
+        console.error.call(console, error)
+        console.warn.apply(console, [error, 'โหลดข้อมูลช้า'])
       `,
       'RiskyFrontendFixture.tsx',
     )
@@ -529,6 +531,8 @@ describe('frontend static audit', () => {
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
     ])
   })
 
@@ -547,12 +551,16 @@ describe('frontend static audit', () => {
             console.warn?.(problem, 'slow')
             console['error'](problem)
             console?.['warn']?.(problem, 'slow bracket')
+            console.error.call(console, problem)
+            console.warn.apply(console, [problem, 'slow apply'])
             console.error('สรุปแล้ว:', safeBrowserErrorSummary(problem))
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ).map((finding) => finding.message),
     ).toEqual([
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
