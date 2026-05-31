@@ -43,6 +43,7 @@ const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\
 const reflectConsoleErrorWarnApplyPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*apply\s*\(\s*${consoleErrorWarnAccessor}\s*,[\s\S]*?\[\s*`
 const reflectGetConsoleErrorWarnCallPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*get\s*\(\s*${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)\s*(?:\?\.)?\s*\(`
 const reflectGetConsoleErrorWarnForwardPrefix = String.raw`Reflect\s*(?:\?\.|\.)\s*get\s*\(\s*${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)\s*(?:(?:\?\.|\.)\s*(?:call|apply)\s*(?:\?\.)?\s*\(|(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
+const descriptorConsoleErrorWarnValueCallPrefix = String.raw`Object\s*(?:\?\.|\.)\s*getOwnPropertyDescriptor\s*\(\s*${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["']\s*\)\s*(?:\?\.|\.)\s*value(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const consoleObjectAliasValue = String.raw`${consoleObjectAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
@@ -119,7 +120,7 @@ function rawFrontendErrorLogPatternFor(variableName: string) {
   const rawArgument = `(?:\\[\\s*)?(?:\\(\\s*)?${rawExpression}\\s*(?:\\)\\s*)?(?:\\]\\s*)?(?:,|\\))`
   const rawArrayElement = rawFrontendErrorArrayElementPatternFor(variableName)
   return new RegExp(
-    `\\b${consoleErrorWarnCallPrefix}\\s*${rawArgument}|\\b${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}|\\b${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawArrayElement}|\\b${reflectGetConsoleErrorWarnCallPrefix}\\s*${rawArgument}|\\b${reflectGetConsoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}|\\b${reflectGetConsoleErrorWarnForwardPrefix}\\s*${rawArgument}|\\b${reflectGetConsoleErrorWarnForwardPrefix}[\\s\\S]*?,\\s*${rawArgument}`,
+    `\\b${consoleErrorWarnCallPrefix}\\s*${rawArgument}|\\b${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}|\\b${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawArrayElement}|\\b${reflectGetConsoleErrorWarnCallPrefix}\\s*${rawArgument}|\\b${reflectGetConsoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}|\\b${reflectGetConsoleErrorWarnForwardPrefix}\\s*${rawArgument}|\\b${reflectGetConsoleErrorWarnForwardPrefix}[\\s\\S]*?,\\s*${rawArgument}|\\b${descriptorConsoleErrorWarnValueCallPrefix}\\s*${rawArgument}|\\b${descriptorConsoleErrorWarnValueCallPrefix}[\\s\\S]*?,\\s*${rawArgument}`,
     'g',
   )
 }
