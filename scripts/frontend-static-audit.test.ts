@@ -495,6 +495,8 @@ describe('frontend static audit', () => {
         console.warn.bind(console)('โหลดข้อมูลช้า', error)
         Reflect.apply(console.error, console, [error])
         Reflect.apply(console.warn, console, ['โหลดข้อมูลช้า', error])
+        Reflect.get(console, 'error')(error)
+        Reflect.get(window.console, 'warn')('โหลดข้อมูลช้า', error)
         globalThis.console.error(error)
         window.console.warn('โหลดข้อมูลช้า', error)
       `,
@@ -545,6 +547,8 @@ describe('frontend static audit', () => {
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
     ])
   })
 
@@ -569,6 +573,8 @@ describe('frontend static audit', () => {
             console.warn.bind(console)('slow bind', problem)
             Reflect.apply(console.error, console, [problem])
             Reflect.apply(console.warn, console, ['slow reflect', problem])
+            Reflect.get(console, 'error')(problem)
+            Reflect.get(window.console, 'warn')('slow reflect get', problem)
             window.console.error(problem)
             globalThis.console.warn('slow global', problem)
             console.error('สรุปแล้ว:', safeBrowserErrorSummary(problem))
@@ -577,6 +583,8 @@ describe('frontend static audit', () => {
         'apps/frontend/src/pages/FixturePage.tsx',
       ).map((finding) => finding.message),
     ).toEqual([
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
+      'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
       'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย',
