@@ -100,8 +100,9 @@ function rawUiErrorThrowPatternFor(variableName: string) {
 
 function rawFrontendErrorLogPatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
+  const rawArgument = `(?:\\(\\s*)?${escaped}\\b(?:\\s+(?:as|satisfies)\\s+[^,)]+)?\\s*(?:,|\\))`
   return new RegExp(
-    `\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\(\\s*(?:\\(\\s*)?${escaped}\\b\\s*(?:,|\\))|\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\([\\s\\S]*?,\\s*(?:\\(\\s*)?${escaped}\\b\\s*(?:,|\\))`,
+    `\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\(\\s*${rawArgument}|\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\([\\s\\S]*?,\\s*${rawArgument}`,
     'g',
   )
 }

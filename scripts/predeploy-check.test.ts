@@ -174,6 +174,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain("console.error(\\'")
     expect(predeploy).toContain("\\', problem)")
     expect(predeploy).toContain('console.warn(problem,')
+    expect(predeploy).toContain('console.error(problem as Error)')
+    expect(predeploy).toContain('console.warn((problem as Error),')
     expect(predeploy).toContain('problem.message.toLowerCase')
     expect(predeploy).toContain('String(problem).toLowerCase')
     expect(predeploy).toContain('/admin_unauthorized|forbidden/i.test(problem.message)')

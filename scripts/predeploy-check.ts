@@ -2152,6 +2152,8 @@ const checks: Check[] = [
           'throw problem',
           'console.error(\'โหลดข้อมูลไม่สำเร็จ:\', problem)',
           'console.warn(problem, \'โหลดข้อมูลช้า\')',
+          'console.error(problem as Error)',
+          'console.warn((problem as Error), \'โหลดข้อมูลช้า\')',
           'problem.message.toLowerCase',
           'String(problem).toLowerCase',
           '/admin_unauthorized|forbidden/i.test(problem.message)',
