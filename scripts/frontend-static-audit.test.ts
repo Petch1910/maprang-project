@@ -465,11 +465,13 @@ describe('frontend static audit', () => {
             return new Promise((_resolve, reject) => window.Reflect['apply'](reject, undefined, [error]))
             return new Promise((_resolve, reject) => (Reflect.apply)(reject, undefined, [error]))
             return new Promise((_resolve, reject) => { const apply = Reflect.apply; return apply(reject, undefined, [error]) })
+            return new Promise((_resolve, reject) => { const { apply } = Reflect; return apply(reject, undefined, [error]) })
+            return new Promise((_resolve, reject) => { const { apply: reflectApply } = Reflect; return reflectApply(reject, undefined, [error]) })
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(8)
+    ).toHaveLength(10)
 
     expect(
       auditRawUiErrorThrows(

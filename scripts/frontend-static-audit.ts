@@ -37,7 +37,8 @@ const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const promiseRejectAccessor = String.raw`Promise\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
-const reflectApplyAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Reflect\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
+const reflectObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Reflect\b`
+const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const rawUiErrorRejectPattern = new RegExp(
   String.raw`\b${promiseRejectAccessor}\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?error\b`,
@@ -159,7 +160,7 @@ function rawPromiseExecutorRejectPatternFor(variableName: string) {
 
 function rawPromiseRejectCallbackInvocationPattern(rawExpression: string, rawArrayElement: string) {
   const rawArgument = String.raw`(?:\(\s*)?${rawExpression}`
-  return String.raw`(?:\b\1\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|(?:\(\s*)?\b${reflectApplyAccessor}\s*(?:\)\s*)?\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)\s*=\s*${reflectApplyAliasValue}[\s\S]{0,120}?\b\2\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement})`
+  return String.raw`(?:\b\1\s*(?:\?\.)?\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*(?:call|bind)\s*\([\s\S]{0,120}?,\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*bind\s*\([\s\S]{0,120}?\)\s*\(\s*${rawArgument}|\b\1\s*(?:\?\.)?\s*\.\s*apply\s*\([\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|(?:\(\s*)?\b${reflectApplyAccessor}\s*(?:\)\s*)?\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:(?:const|let|var)\s+)?([A-Za-z_$][\w$]*)\s*=\s*${reflectApplyAliasValue}[\s\S]{0,120}?\b\2\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:const|let|var)\s*\{[^}]*\bapply\b(?!\s*:)[^}]*\}\s*=\s*${reflectObjectAccessor}[\s\S]{0,120}?\bapply\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement}|\b(?:const|let|var)\s*\{[^}]*\bapply\s*:\s*([A-Za-z_$][\w$]*)[^}]*\}\s*=\s*${reflectObjectAccessor}[\s\S]{0,120}?\b\3\s*(?:\?\.)?\s*\(\s*\1\s*,[\s\S]{0,120}?,\s*\[[\s\S]{0,120}?${rawArrayElement})`
 }
 
 function rawPromiseExecutorRejectPatternsFor(variableName: string) {
