@@ -789,6 +789,9 @@ describe('backend security audit', () => {
       'return new Promise((_resolve, reject) => { const { apply } = Reflect; return apply(reject, undefined, [error as Error]) })',
       'return new Promise((_resolve, reject) => { const { apply: reflectApply } = Reflect; return reflectApply(reject, undefined, [error as Error]) })',
       'return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow(error as Error) })',
+      'return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow.call(undefined, error as Error) })',
+      'return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow.apply(undefined, [error as Error]) })',
+      'return new Promise((_resolve, reject) => { const rejectNow = reject; return rejectNow.bind(undefined)(error as Error) })',
       'return new Promise(function (_resolve, reject) { reject(error as Error) })',
       'return new Promise(function (_resolve, reject) { reject?.(error as Error) })',
     ]) {
