@@ -92,6 +92,13 @@ describe('backend security audit', () => {
     expect(
       messagesFor(`
         const providerFailure = classifyChatProviderError(error)
+        console?.error('สตรีมแชทไม่สำเร็จ:', providerFailure, error)
+      `),
+    ).toContain('ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.')
+
+    expect(
+      messagesFor(`
+        const providerFailure = classifyChatProviderError(error)
         console.error('สตรีมแชทไม่สำเร็จ:', providerFailure)
       `),
     ).toEqual([])
@@ -109,10 +116,12 @@ describe('backend security audit', () => {
           console.warn ( error , 'seed slow' )
           console.error(error as Error)
           console.warn((error as Error), 'seed slow')
+          console?.error(error)
+          console.warn?.(error, 'seed slow')
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(6)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(8)
 
     expect(
       messagesFor(`
@@ -486,6 +495,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        function logRouteFailure(error: unknown) {
+          console.warn?.('stream failed', error as Error)
+        }
+      `, 'chat.routes.ts'),
+    ).toContain('route log raw error object ตรงๆ ไม่ได้; ใช้ safeRouteErrorSummary เพื่อกันข้อมูลลับหลุด log.')
+
+    expect(
+      messagesFor(`
         export const uploadRoutes = new Elysia()
           .post('/uploads/avatar', async () => {
             try {
@@ -738,6 +755,8 @@ describe('backend security audit', () => {
             } catch (err) {
               console.error(err)
               console.warn('stream failed', err)
+              console?.error(err)
+              console.warn?.('stream failed', err)
               return routeErrorResponse('unknown_error')
             }
           })
@@ -836,6 +855,8 @@ describe('backend security audit', () => {
             } catch (err) {
               console.error(err as Error)
               console.warn('stream failed', (err as Error))
+              console?.error(err as Error)
+              console.warn?.('stream failed', (err as Error))
               return routeErrorResponse('unknown_error')
             }
           })

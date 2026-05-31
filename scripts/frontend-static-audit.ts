@@ -37,6 +37,7 @@ const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
+const consoleErrorWarnCallPrefix = String.raw`console\s*(?:\?\.|\.)\s*(?:error|warn)\s*(?:\?\.)?\s*\(`
 const browserEventListenerPattern =
   /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
 const directLocationOriginPattern = /\b(?:(?:window|globalThis)\s*\.\s*)?location\s*\.\s*origin\b/g
@@ -102,7 +103,7 @@ function rawFrontendErrorLogPatternFor(variableName: string) {
   const escaped = escapeRegExp(variableName)
   const rawArgument = `(?:\\(\\s*)?${escaped}\\b(?:\\s+(?:as|satisfies)\\s+[^,)]+)?\\s*(?:,|\\))`
   return new RegExp(
-    `\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\(\\s*${rawArgument}|\\bconsole\\s*\\.\\s*(?:error|warn)\\s*\\([\\s\\S]*?,\\s*${rawArgument}`,
+    `\\b${consoleErrorWarnCallPrefix}\\s*${rawArgument}|\\b${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}`,
     'g',
   )
 }
@@ -445,11 +446,11 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
     message: 'ห้ามใช้ลิงก์ protocol ที่รันโค้ดหรือ HTML ตรงใน frontend source',
   },
   {
-    pattern: /console\.(?:error|warn)\s*\([\s\S]*?,\s*error\b[\s\S]*?\)/g,
+    pattern: new RegExp(`${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*error\\b[\\s\\S]*?\\)`, 'g'),
     message: rawFrontendErrorLogMessage,
   },
   {
-    pattern: /console\.(?:error|warn)\s*\(\s*error\b\s*(?:,|\))/g,
+    pattern: new RegExp(`${consoleErrorWarnCallPrefix}\\s*error\\b\\s*(?:,|\\))`, 'g'),
     message: rawFrontendErrorLogMessage,
   },
   {

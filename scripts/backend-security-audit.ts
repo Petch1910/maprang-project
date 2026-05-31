@@ -42,9 +42,10 @@ function escapeRegExp(value: string) {
 }
 
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
+const consoleErrorWarnCallPrefix = String.raw`console\s*(?:\?\.|\.)\s*(?:error|warn)\s*(?:\?\.)?\s*\(`
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
-  `console\\.(?:error|warn)\\s*\\([\\s\\S]*?,\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}\\s*(?=,|\\))[\\s\\S]*?\\)`,
+  `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}\\s*(?=,|\\))[\\s\\S]*?\\)`,
   'g',
 )
 const rawRouteErrorThrowPattern = new RegExp(`throw\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}`, 'g')
@@ -117,8 +118,8 @@ function rawRouteErrorThrowPatternFor(variableName: string) {
 function rawRouteErrorLogPatternsFor(variableName: string) {
   const rawArgument = `(?:\\(\\s*)?${rawErrorExpressionPatternFor(variableName)}\\s*(?:,|\\))`
   return [
-    new RegExp(`console\\.(?:error|warn)\\s*\\(\\s*${rawArgument}`, 'g'),
-    new RegExp(`console\\.(?:error|warn)\\s*\\([\\s\\S]*?,\\s*${rawArgument}`, 'g'),
+    new RegExp(`${consoleErrorWarnCallPrefix}\\s*${rawArgument}`, 'g'),
+    new RegExp(`${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawArgument}`, 'g'),
   ]
 }
 
@@ -174,14 +175,14 @@ const patterns = [
   },
   {
     pattern: new RegExp(
-      `console\\.(?:error|warn)\\s*\\([\\s\\S]*?providerFailure[\\s\\S]*?,\\s*${rawErrorExpressionPatternFor('error')}[\\s\\S]*?\\)`,
+      `${consoleErrorWarnCallPrefix}[\\s\\S]*?providerFailure[\\s\\S]*?,\\s*${rawErrorExpressionPatternFor('error')}[\\s\\S]*?\\)`,
       'g',
     ),
     message: 'ห้าม log raw provider error คู่กับ providerFailure; ให้ log เฉพาะผล classify เพื่อกัน secret หลุดใน log.',
   },
   {
     pattern: new RegExp(
-      `console\\.(?:error|warn)\\s*\\(\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}\\s*(?:,|\\))`,
+      `${consoleErrorWarnCallPrefix}\\s*(?:\\(\\s*)?${rawErrorExpressionPatternFor('error')}\\s*(?:,|\\))`,
       'g',
     ),
     message: 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.',
