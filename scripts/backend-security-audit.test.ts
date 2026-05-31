@@ -777,7 +777,9 @@ describe('backend security audit', () => {
       "return Promise['reject'](error)",
       "return Promise?.['reject']?.(error as Error)",
       'return new Promise((_resolve, reject) => reject(error as Error))',
+      'return new Promise((_resolve, reject) => reject?.(error as Error))',
       'return new Promise(function (_resolve, reject) { reject(error as Error) })',
+      'return new Promise(function (_resolve, reject) { reject?.(error as Error) })',
     ]) {
       expect(
         messagesFor(`
@@ -811,7 +813,7 @@ describe('backend security audit', () => {
               return await sendChat()
             } catch (cause) {
               return new Promise(function rejectRouteFailure(_resolve, reject) {
-                reject(cause)
+                reject?.(cause)
               })
             }
           })

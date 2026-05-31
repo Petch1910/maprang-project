@@ -160,11 +160,11 @@ function rawPromiseExecutorRejectPatternsFor(variableName: string) {
   const rawExpression = rawFrontendErrorExpressionPatternFor(variableName)
   return [
     new RegExp(
-      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*${rejectParameterPattern}\s*\)\s*=>[\s\S]{0,240}?\b\1\s*\(\s*(?:\(\s*)?${rawExpression}`,
+      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*(?:async\s*)?\([^)]*,\s*${rejectParameterPattern}\s*\)\s*=>[\s\S]{0,240}?\b\1\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawExpression}`,
       'g',
     ),
     new RegExp(
-      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*function(?:\s+[A-Za-z_$][\w$]*)?\s*\([^)]*,\s*${rejectParameterPattern}\s*\)[\s\S]{0,240}?\b\1\s*\(\s*(?:\(\s*)?${rawExpression}`,
+      String.raw`\bnew\s+Promise(?:\s*<[^>]+>)?\s*\(\s*function(?:\s+[A-Za-z_$][\w$]*)?\s*\([^)]*,\s*${rejectParameterPattern}\s*\)[\s\S]{0,240}?\b\1\s*(?:\?\.)?\s*\(\s*(?:\(\s*)?${rawExpression}`,
       'g',
     ),
   ]
