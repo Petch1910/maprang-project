@@ -408,10 +408,12 @@ describe('frontend static audit', () => {
         `
           const globalRejectNow = globalThis.Promise.reject
           const { reject: windowReject } = window.Promise
+          const bracketRejectNow = globalThis['Promise']['reject']
+          const parenthesizedRejectNow = (window).Promise.reject
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
-    ).toHaveLength(2)
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
@@ -452,23 +454,27 @@ describe('frontend static audit', () => {
             return Promise?.['reject']?.(error as Error)
             return window.Promise.reject(error)
             return globalThis.Promise?.['reject']?.(error as Error)
+            return (window).Promise.reject(error)
+            return globalThis['Promise']['reject'](error)
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(6)
+    ).toHaveLength(8)
 
     for (const rejectedExpression of [
       'return Promise.reject.call(Promise, error)',
       'return Promise.reject.apply(Promise, [error])',
       'return Promise.reject.bind(Promise)(error)',
       'return window.Promise.reject.call(window.Promise, error)',
+      "return globalThis['Promise']['reject'].call(globalThis['Promise'], error)",
       'return Reflect.apply(Promise.reject, Promise, [error])',
       'return globalThis.Reflect.apply(Promise.reject, Promise, [error])',
       'return window.Reflect["apply"](Promise.reject, Promise, [error])',
       'return (Reflect.apply)(Promise.reject, Promise, [error])',
       'return (window.Reflect["apply"])(Promise.reject, Promise, [error])',
       'return Reflect.apply(window.Promise.reject, window.Promise, [error])',
+      "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [error])",
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(window.Promise, "reject").call(window.Promise, error)',
       'return window.Reflect["get"](Promise, "reject")(error)',
@@ -585,21 +591,25 @@ describe('frontend static audit', () => {
             return Promise?.['reject']?.(problem as Error)
             return window.Promise.reject(problem)
             return globalThis.Promise?.['reject']?.(problem as Error)
+            return (window).Promise.reject(problem)
+            return globalThis['Promise']['reject'](problem)
           }
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
-    ).toHaveLength(6)
+    ).toHaveLength(8)
 
     for (const rejectedExpression of [
       'return Promise.reject.call(Promise, problem)',
       'return Promise.reject.apply(Promise, [problem])',
       'return Promise.reject.bind(Promise)(problem)',
+      "return globalThis['Promise']['reject'].call(globalThis['Promise'], problem)",
       'return Reflect.apply(Promise.reject, Promise, [problem])',
       'return globalThis.Reflect.apply(Promise.reject, Promise, [problem])',
       "return window.Reflect['apply'](Promise.reject, Promise, [problem])",
       'return (Reflect.apply)(Promise.reject, Promise, [problem])',
       "return (window.Reflect['apply'])(Promise.reject, Promise, [problem])",
+      "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [problem])",
       'return Reflect.get(Promise, "reject")(problem)',
       'return globalThis.Reflect.get(Promise, "reject")(problem)',
       'return (Reflect.get)(Promise, "reject")(problem)',
@@ -698,10 +708,12 @@ describe('frontend static audit', () => {
           const promiseCtor = Promise
           const typedPromiseCtor: PromiseConstructor = window.Promise
           promiseCtor = (globalThis.Promise)
+          const bracketPromiseCtor = window['Promise']
+          promiseCtor = (globalThis)['Promise']
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(3)
+    ).toHaveLength(5)
 
     expect(
       auditRawUiErrorThrows(

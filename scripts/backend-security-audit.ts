@@ -97,7 +97,9 @@ const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
-const promiseObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Promise`
+const promiseNamespaceRoot = String.raw`globalThis`
+const promiseNamespaceObjectAccessor = String.raw`(?:${promiseNamespaceRoot}|\(\s*${promiseNamespaceRoot}\s*\))`
+const promiseObjectAccessor = String.raw`(?:Promise|${promiseNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Promise\b|(?:\?\.)?\s*\[\s*["']Promise["']\s*\]))`
 const promiseRejectAccessor = String.raw`${promiseObjectAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
 const reflectGetPromiseRejectValue = String.raw`(?:${reflectGetCallPrefix}\s*${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\))`
 const descriptorPromiseRejectValue = String.raw`(?:${objectDescriptorCallPrefix}\s*${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodCallPrefix}${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodApplyPrefix}${promiseObjectAccessor}\s*,\s*["']reject["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${promiseObjectAccessor}\s*,\s*["']reject["']\s*\))\s*(?:\?\.|\.)\s*value`

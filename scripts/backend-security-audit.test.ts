@@ -887,6 +887,8 @@ describe('backend security audit', () => {
               return Promise?.['reject']?.(error as Error)
               return globalThis.Promise.reject(error)
               return globalThis.Promise?.['reject']?.(error as Error)
+              return (globalThis).Promise.reject(error)
+              return globalThis['Promise']['reject'](error)
             }
           })
       `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
@@ -902,12 +904,14 @@ describe('backend security audit', () => {
       'return Promise.reject.apply(Promise, [error])',
       'return Promise.reject.bind(Promise)(error)',
       'return globalThis.Promise.reject.call(globalThis.Promise, error)',
+      "return globalThis['Promise']['reject'].call(globalThis['Promise'], error)",
       'return Reflect.apply(Promise.reject, Promise, [error])',
       'return globalThis.Reflect.apply(Promise.reject, Promise, [error])',
       'return globalThis.Reflect["apply"](Promise.reject, Promise, [error])',
       'return (Reflect.apply)(Promise.reject, Promise, [error])',
       'return (globalThis.Reflect["apply"])(Promise.reject, Promise, [error])',
       'return Reflect.apply(globalThis.Promise.reject, globalThis.Promise, [error])',
+      "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [error])",
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(globalThis.Promise, "reject").call(globalThis.Promise, error)',
       'return globalThis.Reflect["get"](Promise, "reject")(error)',
@@ -1016,8 +1020,10 @@ describe('backend security audit', () => {
         const promiseCtor = Promise
         const typedPromiseCtor: PromiseConstructor = globalThis.Promise
         promiseCtor = (globalThis.Promise)
+        const bracketPromiseCtor = globalThis['Promise']
+        promiseCtor = (globalThis)['Promise']
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
-    ).toHaveLength(3)
+    ).toHaveLength(5)
 
     expect(
       messagesFor(`
@@ -1041,9 +1047,11 @@ describe('backend security audit', () => {
     expect(
       messagesFor(`
         const globalRejectNow = globalThis.Promise.reject
+        const bracketRejectNow = globalThis['Promise']['reject']
+        const parenthesizedRejectNow = (globalThis).Promise.reject
         const { reject: globalReject } = globalThis.Promise
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
-    ).toHaveLength(2)
+    ).toHaveLength(4)
 
     expect(
       messagesFor(`

@@ -165,6 +165,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('objectObjectAliasPattern')
     expect(predeploy).toContain('reflectApplyAliasValue')
     expect(predeploy).toContain('reflectApplyAliasPattern')
+    expect(predeploy).toContain('promiseNamespaceRoot')
+    expect(predeploy).toContain('promiseNamespaceObjectAccessor')
     expect(predeploy).toContain('promiseObjectAliasValue')
     expect(predeploy).toContain('promiseObjectAliasPattern')
     expect(predeploy).toContain(String.raw`(?:window|globalThis)\\s*(?:\\?\\.|\\.)\\s*`)
