@@ -58,13 +58,13 @@ const reflectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
   'g',
 )
-const reflectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${reflectObjectAliasValue}|=\s*\[\s*${reflectObjectAliasValue}|=\s*\[[^\]\n;]*?,\s*${reflectObjectAliasValue}|=\s*\{\s*Reflect\b(?=\s*(?:[,}]|$))|=\s*\{[^}\n;]*?,\s*Reflect\b(?=\s*(?:[,}]|$)))`, 'g')
+const reflectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${reflectObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${reflectObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${reflectObjectAliasValue}|=\s*(?:\(\s*)?\{\s*Reflect\b(?=\s*(?:[,}]|$))|=\s*(?:\(\s*)?\{[^}\n;]*?,\s*Reflect\b(?=\s*(?:[,}]|$)))`, 'g')
 const objectObjectAliasValue = String.raw`(?:\(\s*)?${objectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const objectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${objectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${objectObjectAliasValue}`,
   'g',
 )
-const objectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${objectObjectAliasValue}|=\s*\[\s*${objectObjectAliasValue}|=\s*\[[^\]\n;]*?,\s*${objectObjectAliasValue}|=\s*\{\s*Object\b(?=\s*(?:[,}]|$))|=\s*\{[^}\n;]*?,\s*Object\b(?=\s*(?:[,}]|$)))`, 'g')
+const objectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${objectObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${objectObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${objectObjectAliasValue}|=\s*(?:\(\s*)?\{\s*Object\b(?=\s*(?:[,}]|$))|=\s*(?:\(\s*)?\{[^}\n;]*?,\s*Object\b(?=\s*(?:[,}]|$)))`, 'g')
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyCallPrefix = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const reflectGetAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*get|(?:\?\.)?\s*\[\s*["']get["']\s*\])`

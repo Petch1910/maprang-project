@@ -363,9 +363,13 @@ describe('backend security audit', () => {
         const reflectShorthandWithPrefix = { safeNs, Reflect }
         const reflectList = [Reflect]
         const reflectListWithPrefix = [safeNs, globalThis.Reflect]
+        const reflectParenthesizedList = ([Reflect])
+        const reflectParenthesizedListWithPrefix = ([safeNs, Reflect])
+        const reflectParenthesizedShorthand = ({ Reflect })
+        const reflectParenthesizedShorthandWithPrefix = ({ safeNs, Reflect })
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(11)
+    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(15)
   })
 
   test('catches backend Object object aliases', () => {
@@ -380,9 +384,13 @@ describe('backend security audit', () => {
         const objectShorthandWithPrefix = { safeNs, Object }
         const objectList = [Object]
         const objectListWithPrefix = [safeNs, globalThis.Object]
+        const objectParenthesizedList = ([Object])
+        const objectParenthesizedListWithPrefix = ([safeNs, Object])
+        const objectParenthesizedShorthand = ({ Object })
+        const objectParenthesizedShorthandWithPrefix = ({ safeNs, Object })
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(11)
+    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(15)
   })
 
   test('catches Reflect.apply console retrieval targets', () => {

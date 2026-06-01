@@ -1276,11 +1276,15 @@ describe('frontend static audit', () => {
         const reflectShorthandWithPrefix = { safeNs, Reflect }
         const reflectList = [Reflect]
         const reflectListWithPrefix = [safeNs, window.Reflect]
+        const reflectParenthesizedList = ([Reflect])
+        const reflectParenthesizedListWithPrefix = ([safeNs, Reflect])
+        const reflectParenthesizedShorthand = ({ Reflect })
+        const reflectParenthesizedShorthandWithPrefix = ({ safeNs, Reflect })
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(11)
+    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(15)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1296,11 +1300,15 @@ describe('frontend static audit', () => {
         const objectShorthandWithPrefix = { safeNs, Object }
         const objectList = [Object]
         const objectListWithPrefix = [safeNs, globalThis.Object]
+        const objectParenthesizedList = ([Object])
+        const objectParenthesizedListWithPrefix = ([safeNs, Object])
+        const objectParenthesizedShorthand = ({ Object })
+        const objectParenthesizedShorthandWithPrefix = ({ safeNs, Object })
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(11)
+    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(15)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
