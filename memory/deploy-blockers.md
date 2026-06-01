@@ -2,7 +2,7 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend raw console log guards now lock parenthesized method-forwarded console namespace retrieval through `(Reflect.get.apply)(...)`, `(Reflect.get.bind(...))(...)`, `(Object.getOwnPropertyDescriptor.apply)(...)`, and `(Object.getOwnPropertyDescriptor.bind(...))(...)`, covering console method aliases, console object aliases, and `Reflect.apply` raw log targets. Full repo QA passed with frontend static audit 39 tests / 154 expects, backend security audit 37 tests / 173 expects, predeploy lock 483 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
+สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend raw Promise rejection and console log guards now lock optional-call method-forwarded namespace retrieval such as `(Reflect.get.apply)?.(...)`, `(Reflect.get.bind(...))?.(...)`, `(Object.getOwnPropertyDescriptor.apply)?.(...)`, and `(Object.getOwnPropertyDescriptor.bind(...))?.(...)`, covering direct Promise rejection, Promise/reject aliases, console method/object aliases, and `Reflect.apply` raw log targets. Full repo QA passed with frontend static audit 39 tests / 154 expects, backend security audit 37 tests / 173 expects, predeploy lock 483 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
 
 ## ตัวกั้นที่ยังเปิดอยู่
 
@@ -104,6 +104,7 @@ guard ใน repo:
 - 2026-06-01 repo-owned hardening: frontend/backend raw Promise rejection guards now lock method-forwarded `Reflect.get`/`Object.getOwnPropertyDescriptor` Promise namespace retrieval before raw rejection forwarding; full repo QA passed and this adds no new external deploy blocker.
 - 2026-06-01 repo-owned hardening: frontend/backend raw Promise rejection guards now reject parenthesized full method-forwarded Promise namespace retrieval before raw rejection forwarding; full repo QA passed and this adds no new external deploy blocker.
 - 2026-06-01 repo-owned hardening: frontend/backend raw console log guards now lock parenthesized method-forwarded console namespace retrieval for method aliases, object aliases, and `Reflect.apply` raw log targets; full repo QA passed and this adds no new external deploy blocker.
+- 2026-06-01 repo-owned hardening: frontend/backend raw Promise rejection and console log guards now lock optional-call method-forwarded namespace retrieval for direct Promise rejection, Promise/reject aliases, console method/object aliases, and `Reflect.apply` raw log targets; full repo QA passed and this adds no new external deploy blocker.
 - Frontend/backend raw error log guards now also reject console object aliases such as `const logger = console`, typed console object aliases, and `logger = window.console`; this is repo-owned hardening, not an external deploy blocker.
 - Focused frontend dangerous link protocol guard ล่าสุดผ่าน `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run predeploy:check:test`, และ `bun run predeploy:check`; guard นี้ปิด `javascript:`, `vbscript:`, และ `data:text/html` ใน `href`/`to` โดยไม่เปลี่ยน production blocker ภายนอก.
 - backend test suite ฝั่ง local ผ่านแล้ว: 178 pass, 0 fail, 611 expect calls.
