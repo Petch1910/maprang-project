@@ -1,6 +1,6 @@
 # บันทึก decision
 
-อัปเดตล่าสุด: 2026-05-31
+อัปเดตล่าสุด: 2026-06-01
 
 - [0001 - ใช้ SocratiCode เป็น local codebase intelligence](./0001-use-socraticode-local-tool.md)
 - [0002 - เพิ่ม Markdown memory vault](./0002-add-markdown-memory-vault.md)
@@ -28,3 +28,4 @@
 - [0024 - ล็อกต้นทางลิงก์แชร์ตัวละครใน frontend static audit](./0024-guard-frontend-share-url-origins.md)
 - [0025 - เพิ่ม helper กลางสำหรับ cross-window messaging](./0025-add-frontend-cross-window-messaging-helper.md)
 - [0026 - ล็อกชุด guard ความปลอดภัย UI และ route error](./0026-lock-frontend-ui-route-error-guards.md)
+- [0027 - ล็อก namespace reflection guard ของ Promise และ console](./0027-lock-namespace-reflection-guards.md)
