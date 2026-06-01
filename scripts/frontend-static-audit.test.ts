@@ -1271,11 +1271,14 @@ describe('frontend static audit', () => {
         const parenthesizedTypedReflectNs: typeof Reflect = (window).Reflect
         const computedTypedReflectNs: typeof Reflect = window['Reflect']
         reflectNs = (globalThis.Reflect)
+        const reflectHooks = { ReflectRef: Reflect, windowReflect: window.Reflect }
+        const reflectList = [Reflect]
+        const reflectListWithPrefix = [safeNs, window.Reflect]
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(5)
+    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(9)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1286,11 +1289,14 @@ describe('frontend static audit', () => {
         const parenthesizedTypedObjectNs: ObjectConstructor = (globalThis).Object
         const computedTypedObjectNs: ObjectConstructor = globalThis['Object']
         objectNs = (globalThis.Object)
+        const objectHooks = { ObjectRef: Object, windowObject: window.Object }
+        const objectList = [Object]
+        const objectListWithPrefix = [safeNs, globalThis.Object]
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(5)
+    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(9)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {

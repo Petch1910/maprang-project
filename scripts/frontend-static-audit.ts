@@ -55,11 +55,13 @@ const reflectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
   'g',
 )
+const reflectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${reflectObjectAliasValue}|=\s*\[\s*${reflectObjectAliasValue}|=\s*\[[^\]\n;]*?,\s*${reflectObjectAliasValue})`, 'g')
 const objectObjectAliasValue = String.raw`(?:\(\s*)?${objectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const objectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${objectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${objectObjectAliasValue}`,
   'g',
 )
+const objectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${objectObjectAliasValue}|=\s*\[\s*${objectObjectAliasValue}|=\s*\[[^\]\n;]*?,\s*${objectObjectAliasValue})`, 'g')
 const reflectGetAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*get|(?:\?\.)?\s*\[\s*["']get["']\s*\])`
 const reflectGetCallPrefix = String.raw`(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const reflectGetMethodCallPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*${callMethodAccessor}\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*${callMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
@@ -586,7 +588,17 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
       'frontend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
   },
   {
+    pattern: reflectObjectContainerAliasPattern,
+    message:
+      'frontend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
+  },
+  {
     pattern: objectObjectAliasPattern,
+    message:
+      'frontend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
+  },
+  {
+    pattern: objectObjectContainerAliasPattern,
     message:
       'frontend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
   },

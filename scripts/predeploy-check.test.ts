@@ -164,6 +164,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('consoleErrorWarnContainerAliasPattern')
     expect(predeploy).toContain('reflectConsoleErrorWarnApplyPrefix')
     expect(predeploy).toContain('reflectObjectAccessor')
+    expect(predeploy).toContain('reflectObjectContainerAliasPattern')
+    expect(predeploy).toContain('objectObjectContainerAliasPattern')
     expect(predeploy).toContain('reflectApplyAccessor')
     expect(predeploy).toContain('reflectApplyCallPrefix')
     expect(predeploy).toContain('reflectGetAccessor')
