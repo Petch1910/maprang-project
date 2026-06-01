@@ -48,6 +48,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('memory audit 37 Markdown files')
     expect(predeploy).toContain('memory audit ครอบ 36 Markdown files')
     expect(predeploy).toContain('docs command audit ครอบ 349 refs')
+    expect(predeploy).toContain('docs command audit 354 refs')
     expect(predeploy).toContain('raw UI error throw guard')
     expect(predeploy).toContain('cross-window messaging helper/guard')
     expect(predeploy).toContain('backend raw route return guard')

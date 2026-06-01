@@ -2,8 +2,8 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend raw Promise rejection guards now reject parenthesized full method-forwarded Promise namespace retrieval such as `(Reflect.get.apply)(...)`, `(Reflect.get.bind(...))(...)`, `(Object.getOwnPropertyDescriptor.apply)(...)`, and `(Object.getOwnPropertyDescriptor.bind(...))(...)` before raw `.reject(...)`, `Reflect.apply`, Promise object alias, retrieved `reject` alias, or destructured `reject` alias paths can bypass controlled UI/route responses. Full repo QA passed with frontend static audit 39 tests / 154 expects, backend security audit 37 tests / 173 expects, predeploy lock 483 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; production checklist blockers remain external staging/live-provider work.
-Repo-owned decision lock: decision `0027` namespace reflection guard contract is now the current production checklist baseline; full deterministic `bun run qa:repo` passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 488 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green before staging/live-provider smoke.
+สถานะ repo-owned ล่าสุด: 2026-06-01 decision `0027` namespace reflection guard contract is locked as the latest repo-owned baseline. Full deterministic `bun run qa:repo` passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 489 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green; external staging/live-provider/database blockers are unchanged.
+Repo-owned decision lock: decision `0027` namespace reflection guard contract is now the current production checklist baseline; full deterministic `bun run qa:repo` passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 489 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green before staging/live-provider smoke.
 
 ## ก่อนขึ้น production
 
