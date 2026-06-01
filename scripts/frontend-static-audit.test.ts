@@ -962,12 +962,14 @@ describe('frontend static audit', () => {
         const descriptorErrorViaParen = (Object.getOwnPropertyDescriptor)(console, 'warn')?.value
         const descriptorErrorViaApply = Object.getOwnPropertyDescriptor.apply(Object, [console, 'warn'])?.value
         const { error: aliasedError, warn } = console
+        const { error: bracketAliasedError } = window['console']
+        const { warn: parenthesizedBracketAliasedWarn } = (globalThis['console'])
         console.error('safe summary:', safeBrowserErrorSummary(error))
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(22)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(24)
 
     expect(
       auditSuspiciousPatterns(

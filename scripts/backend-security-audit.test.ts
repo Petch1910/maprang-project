@@ -242,10 +242,12 @@ describe('backend security audit', () => {
         const descriptorErrorViaParen = (Object.getOwnPropertyDescriptor)(console, 'warn')?.value
         const descriptorErrorViaApply = Object.getOwnPropertyDescriptor.apply(Object, [console, 'warn'])?.value
         const { error: aliasedError, warn } = console
+        const { error: bracketAliasedError } = globalThis['console']
+        const { warn: parenthesizedBracketAliasedWarn } = (globalThis['console'])
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(22)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(24)
 
     expect(
       messagesFor(`
