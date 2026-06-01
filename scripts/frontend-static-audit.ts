@@ -91,7 +91,8 @@ const promiseRejectAliasPattern = new RegExp(
 )
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const consoleObjectAccessor = String.raw`(?:\bconsole\b|(?:window|globalThis)\s*(?:(?:\?\.|\.)\s*console\b|(?:\?\.)?\s*\[\s*["']console["']\s*\]))`
-const consoleErrorWarnAccessor = String.raw`${consoleObjectAccessor}\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
+const consoleObjectMemberAccessor = String.raw`(?:${consoleObjectAccessor}|\(\s*${consoleObjectAccessor}\s*\))`
+const consoleErrorWarnAccessor = String.raw`${consoleObjectMemberAccessor}\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
 const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const reflectGetConsoleErrorWarnValue = String.raw`(?:${reflectGetCallPrefix}\s*${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${consoleObjectAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\))`
 const reflectGetConsoleErrorWarnCallPrefix = String.raw`${reflectGetConsoleErrorWarnValue}\s*(?:\?\.)?\s*\(`

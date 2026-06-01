@@ -2,7 +2,7 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend static/security audits now reject bracket-notation console namespace aliases such as `window['console'].error`, `globalThis['console']['warn']`, and `window['console']`/`globalThis['console']` object aliases. Full repo QA passed with frontend static audit 39 tests / 137 expects, backend security audit 37 tests / 164 expects, predeploy lock 471 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
+สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend static/security audits now reject parenthesized bracket-notation console namespace aliases such as `(window['console']).error`, `(globalThis['console'])['warn']`, and parenthesized `window['console']`/`globalThis['console']` object aliases. Full repo QA passed with frontend static audit 39 tests / 137 expects, backend security audit 37 tests / 164 expects, predeploy lock 473 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
 
 ## ตัวกั้นที่ยังเปิดอยู่
 
