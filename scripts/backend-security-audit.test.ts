@@ -275,6 +275,16 @@ describe('backend security audit', () => {
     expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(5)
   })
 
+  test('catches backend Reflect object aliases', () => {
+    const messages = messagesFor(`
+        const reflectNs = Reflect
+        const typedReflectNs: typeof Reflect = globalThis.Reflect
+        reflectNs = (globalThis.Reflect)
+      `, 'prisma/seed.ts')
+
+    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(3)
+  })
+
   test('catches Reflect.apply console retrieval targets', () => {
     const rawLogMessage = 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.'
     const messages = messagesFor(`

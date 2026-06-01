@@ -45,6 +45,11 @@ const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const variableTypeAnnotation = String.raw`(?:\s*:\s*[^=;,\n]+)?`
 const reflectObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Reflect\b`
 const objectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?Object\b`
+const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const reflectObjectAliasPattern = new RegExp(
+  String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
+  'g',
+)
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyCallPrefix = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?\s*\(`
 const reflectGetAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*get|(?:\?\.)?\s*\[\s*["']get["']\s*\])`
@@ -298,6 +303,11 @@ const patterns = [
     pattern: retrievalMethodAliasPattern,
     message:
       'backend source ห้าม alias Reflect.get/Object.getOwnPropertyDescriptor; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม retrieved console/Promise targets ได้',
+  },
+  {
+    pattern: reflectObjectAliasPattern,
+    message:
+      'backend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
   },
   {
     pattern: reflectApplyAliasPattern,

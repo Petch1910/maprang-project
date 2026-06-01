@@ -151,6 +151,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('objectDescriptorMethodBindPrefix')
     expect(predeploy).toContain('retrievalMethodAliasValue')
     expect(predeploy).toContain('retrievalMethodAliasPattern')
+    expect(predeploy).toContain('reflectObjectAliasValue')
+    expect(predeploy).toContain('reflectObjectAliasPattern')
     expect(predeploy).toContain('reflectApplyAliasValue')
     expect(predeploy).toContain('reflectApplyAliasPattern')
     expect(predeploy).toContain('promiseObjectAliasValue')

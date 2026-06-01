@@ -1008,6 +1008,19 @@ describe('frontend static audit', () => {
     expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(5)
   })
 
+  test('reports frontend Reflect object aliases', () => {
+    const messages = auditSuspiciousPatterns(
+      `
+        const reflectNs = Reflect
+        const typedReflectNs: typeof Reflect = window.Reflect
+        reflectNs = (globalThis.Reflect)
+      `,
+      'apps/frontend/src/pages/FixturePage.tsx',
+    ).map((finding) => finding.message)
+
+    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(3)
+  })
+
   test('reports frontend Reflect.apply console retrieval targets', () => {
     const messages = auditSuspiciousPatterns(
       `
