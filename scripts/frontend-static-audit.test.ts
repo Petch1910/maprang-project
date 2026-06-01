@@ -472,8 +472,12 @@ describe('frontend static audit', () => {
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(window.Promise, "reject").call(window.Promise, error)',
       'return window.Reflect["get"](Promise, "reject")(error)',
+      'return (Reflect.get)(Promise, "reject")(error)',
+      'return (window.Reflect["get"])(Promise, "reject")(error)',
       'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value(error)',
       'return globalThis.Object.getOwnPropertyDescriptor(Promise, "reject")?.value(error)',
+      'return (Object.getOwnPropertyDescriptor)(Promise, "reject")?.value(error)',
+      'return (globalThis.Object.getOwnPropertyDescriptor)(Promise, "reject")?.value(error)',
       'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value.apply(Promise, [error])',
       'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [error])',
       'return window.Reflect["apply"](Reflect.get(Promise, "reject"), Promise, [error])',
@@ -594,8 +598,12 @@ describe('frontend static audit', () => {
       "return (window.Reflect['apply'])(Promise.reject, Promise, [problem])",
       'return Reflect.get(Promise, "reject")(problem)',
       'return globalThis.Reflect.get(Promise, "reject")(problem)',
+      'return (Reflect.get)(Promise, "reject")(problem)',
+      "return (window.Reflect['get'])(Promise, 'reject')(problem)",
       'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value(problem)',
       'return Object["getOwnPropertyDescriptor"](Promise, "reject")?.value(problem)',
+      'return (Object.getOwnPropertyDescriptor)(Promise, "reject")?.value(problem)',
+      "return (Object['getOwnPropertyDescriptor'])(Promise, 'reject')?.value(problem)",
       'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [problem])',
       'return globalThis.Reflect.apply(Reflect.get(Promise, "reject"), Promise, [problem])',
       "return window.Reflect['apply'](Object['getOwnPropertyDescriptor'](Promise, 'reject')?.value, Promise, [problem])",
@@ -919,16 +927,18 @@ describe('frontend static audit', () => {
         const reflectedError = Reflect.get(console, 'error')
         reflectedError = Reflect.get(window.console, 'warn') as typeof console.warn
         const reflectedErrorViaWindow = window.Reflect['get'](console, 'error')
+        const reflectedErrorViaParen = (Reflect.get)(console, 'error')
         const descriptorError = Object.getOwnPropertyDescriptor(console, 'error')?.value
         descriptorError = Object.getOwnPropertyDescriptor(window.console, 'warn')?.value as typeof console.warn
         const descriptorErrorViaWindow = window.Object['getOwnPropertyDescriptor'](console, 'warn')?.value
+        const descriptorErrorViaParen = (Object.getOwnPropertyDescriptor)(console, 'warn')?.value
         const { error: aliasedError, warn } = console
         console.error('safe summary:', safeBrowserErrorSummary(error))
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(12)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(14)
 
     expect(
       auditSuspiciousPatterns(
@@ -959,13 +969,17 @@ describe('frontend static audit', () => {
           globalThis.Reflect.get(console, 'error')(problem)
           window.Reflect['get'](window.console, 'warn').call(window.console, 'slow reflect get', problem)
           window.Object['getOwnPropertyDescriptor'](console, 'error')?.value(problem)
+          Reflect.apply((Reflect.get)(console, 'error'), console, [problem])
+          Reflect.apply((Object.getOwnPropertyDescriptor)(console, 'warn')?.value, console, [problem])
+          (Reflect.get)(console, 'error')(problem)
+          (window.Object['getOwnPropertyDescriptor'])(console, 'warn')?.value(problem)
           console.error('safe summary:', safeBrowserErrorSummary(problem))
         }
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(11)
+    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(15)
   })
 
   test('reports frontend console object aliases', () => {

@@ -228,14 +228,16 @@ describe('backend security audit', () => {
         const reflectedError = Reflect.get(console, 'error')
         reflectedError = Reflect.get(globalThis.console, 'warn') as typeof console.warn
         const reflectedErrorViaGlobal = globalThis.Reflect['get'](console, 'error')
+        const reflectedErrorViaParen = (Reflect.get)(console, 'error')
         const descriptorError = Object.getOwnPropertyDescriptor(console, 'error')?.value
         descriptorError = Object.getOwnPropertyDescriptor(globalThis.console, 'warn')?.value as typeof console.warn
         const descriptorErrorViaGlobal = globalThis.Object['getOwnPropertyDescriptor'](console, 'warn')?.value
+        const descriptorErrorViaParen = (Object.getOwnPropertyDescriptor)(console, 'warn')?.value
         const { error: aliasedError, warn } = console
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(12)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(14)
 
     expect(
       messagesFor(`
@@ -261,11 +263,15 @@ describe('backend security audit', () => {
           globalThis.Reflect.get(console, 'error')(error)
           globalThis.Reflect['get'](globalThis.console, 'warn').call(globalThis.console, 'seed slow', error as Error)
           globalThis.Object['getOwnPropertyDescriptor'](console, 'error')?.value(error)
+          Reflect.apply((Reflect.get)(console, 'error'), console, [error])
+          Reflect.apply((Object.getOwnPropertyDescriptor)(console, 'warn')?.value, console, [error])
+          (Reflect.get)(console, 'error')(error)
+          (globalThis.Object['getOwnPropertyDescriptor'])(console, 'warn')?.value(error)
           console.error(summarizeSeedError(error))
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(12)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(17)
   })
 
   test('catches backend console object aliases', () => {
@@ -810,8 +816,12 @@ describe('backend security audit', () => {
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(globalThis.Promise, "reject").call(globalThis.Promise, error)',
       'return globalThis.Reflect["get"](Promise, "reject")(error)',
+      'return (Reflect.get)(Promise, "reject")(error)',
+      'return (globalThis.Reflect["get"])(Promise, "reject")(error)',
       'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value(error)',
       'return globalThis.Object.getOwnPropertyDescriptor(Promise, "reject")?.value(error)',
+      'return (Object.getOwnPropertyDescriptor)(Promise, "reject")?.value(error)',
+      'return (globalThis.Object["getOwnPropertyDescriptor"])(Promise, "reject")?.value(error)',
       'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value.apply(Promise, [error])',
       'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [error])',
       'return globalThis.Reflect.apply(Reflect.get(Promise, "reject"), Promise, [error])',
@@ -914,8 +924,10 @@ describe('backend security audit', () => {
         const descriptorReject = Object.getOwnPropertyDescriptor(Promise, 'reject')?.value
         const reflectedRejectViaGlobal = globalThis.Reflect['get'](Promise, 'reject')
         const descriptorRejectViaBracket = Object['getOwnPropertyDescriptor'](Promise, 'reject')?.value
+        const reflectedRejectViaParen = (Reflect.get)(Promise, 'reject')
+        const descriptorRejectViaParen = (Object.getOwnPropertyDescriptor)(Promise, 'reject')?.value
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
-    ).toHaveLength(4)
+    ).toHaveLength(6)
 
     expect(
       messagesFor(`
