@@ -287,10 +287,12 @@ describe('backend security audit', () => {
         descriptorLater = globalThis['Object'].getOwnPropertyDescriptor as typeof Object.getOwnPropertyDescriptor
         const { get } = Reflect
         const { get: reflectGet } = globalThis.Reflect
+        const { get: computedReflectGet } = globalThis['Reflect']
         const { getOwnPropertyDescriptor: getOwn } = globalThis.Object
+        const { getOwnPropertyDescriptor: computedGetOwn } = globalThis['Object']
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(12)
+    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(14)
   })
 
   test('catches backend Reflect.apply aliases', () => {
@@ -302,9 +304,10 @@ describe('backend security audit', () => {
         applyReflect = (Reflect.apply)
         const { apply } = Reflect
         const { apply: reflectApply } = globalThis.Reflect
+        const { apply: computedReflectApply } = globalThis['Reflect']
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(7)
+    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(8)
   })
 
   test('catches backend Reflect object aliases', () => {
