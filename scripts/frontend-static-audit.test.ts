@@ -855,6 +855,17 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const rejectDefined = Object.defineProperty({}, 'reject', { value: Promise.reject })
+          const rejectDefinedMany = Object.defineProperties({}, { reject: { value: Promise.reject } })
+          const reflectedRejectDefined = window.Object.defineProperty({}, 'reject', { value: Reflect.get(Promise, 'reject') })
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const rejectSet = new Set([Promise.reject])
           const rejectArrayFactory = Array.from([Promise.reject])
         `,
@@ -983,6 +994,17 @@ describe('frontend static audit', () => {
           const promiseAssigned = Object.assign({}, { Promise })
           const promiseAssignedWithPrefix = Object.assign(target, { fallback }, { Promise: window.Promise })
           const reflectedPromiseAssigned = window.Object.assign({}, { Promise: Reflect.get(window, 'Promise') })
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          const promiseDefined = Object.defineProperty({}, 'Promise', { value: Promise })
+          const promiseDefinedMany = Object.defineProperties({}, { Promise: { value: window.Promise } })
+          const reflectedPromiseDefined = window.Object.defineProperty({}, 'Promise', { value: Reflect.get(window, 'Promise') })
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
@@ -1375,6 +1397,19 @@ describe('frontend static audit', () => {
     expect(
       auditSuspiciousPatterns(
         `
+          const loggerDefined = Object.defineProperty({}, 'error', { value: console.error })
+          const loggerDefinedMany = Object.defineProperties({}, { warn: { value: console.warn } })
+          const reflectedLoggerDefined = window.Object.defineProperty({}, 'warn', { value: Reflect.get(console, 'warn') })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(3)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
           const loggerSet = new Set([console.error])
           const loggerArrayFactory = Array.of(console.warn)
         `,
@@ -1548,6 +1583,18 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
     ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const reflectDefined = Object.defineProperty({}, 'Reflect', { value: Reflect })
+          const reflectDefinedMany = Object.defineProperties({}, { Reflect: { value: window.Reflect } })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(2)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1604,6 +1651,18 @@ describe('frontend static audit', () => {
         `
           const objectAssigned = Object.assign({}, { Object })
           const objectAssignedWithPrefix = Object.assign(target, { safeNs }, { Object: globalThis.Object })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const objectDefined = Object.defineProperty({}, 'Object', { value: Object })
+          const objectDefinedMany = Object.defineProperties({}, { Object: { value: globalThis.Object } })
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
@@ -1781,6 +1840,19 @@ describe('frontend static audit', () => {
           const loggerAssigned = Object.assign({}, { console })
           const loggerAssignedWithPrefix = Object.assign(target, { safe: safeLogger }, { console: globalThis.console })
           const reflectedLoggerAssigned = window.Object.assign({}, { console: Reflect.get(window, 'console') })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(3)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const loggerDefined = Object.defineProperty({}, 'console', { value: console })
+          const loggerDefinedMany = Object.defineProperties({}, { console: { value: globalThis.console } })
+          const reflectedLoggerDefined = window.Object.defineProperty({}, 'console', { value: Reflect.get(window, 'console') })
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )

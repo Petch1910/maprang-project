@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-06-01
+Last updated: 2026-06-02
+- 2026-06-02 Object.defineProperty container alias guard pass: frontend/backend static/security audits now reject `Object.defineProperty`/`Object.defineProperties` descriptor-value containers for Reflect/Object namespace objects, Promise object, `Promise.reject`, console object, and `console.error`/`console.warn`. Full deterministic `bun run qa:repo` passed with memory audit 38 Markdown files, docs command audit 358 refs, predeploy regression 3 tests / 561 expects, frontend static audit 39 tests / 219 expects, backend security audit 37 tests / 230 expects, backend tests 178 pass / 751 expects, frontend build, and bundle budget green.
+
 - 2026-06-01 Object.assign container alias guard pass: frontend/backend static/security audits now reject `Object.assign` object-registry containers for Reflect/Object namespace objects, Promise object, `Promise.reject`, console object, and `console.error`/`console.warn`. Full deterministic `bun run qa:repo` passed with memory audit 38 Markdown files, docs command audit 356 refs, predeploy regression 3 tests / 554 expects, frontend static audit 39 tests / 213 expects, backend security audit 37 tests / 224 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green.
 
 - 2026-06-01 Object.fromEntries container alias guard pass: frontend/backend static/security audits now reject `Object.fromEntries` tuple containers for Reflect/Object namespace objects, Promise object, `Promise.reject`, console object, and `console.error`/`console.warn`. Focused checks passed with frontend static audit 39 tests / 207 expects, backend security audit 37 tests / 218 expects, predeploy regression 3 tests / 547 expects, frontend/backend source audits, and predeploy check green.
