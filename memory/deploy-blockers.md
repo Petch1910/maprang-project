@@ -2,7 +2,7 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend raw Promise rejection and console log guards now reject optional-call `Reflect.apply` forwarding such as `Reflect.apply?.(...)`, `(Reflect.apply)?.(...)`, and `window/globalThis.Reflect['apply']?.(...)`, covering direct/retrieved Promise.reject targets, Promise executor reject callbacks, and console raw-log apply targets. Full repo QA passed with frontend static audit 39 tests / 164 expects, backend security audit 37 tests / 181 expects, predeploy lock 483 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
+สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend raw Promise rejection and console log guards now reject optional-call direct retrieval through `Reflect.get?.(...)`, `(Reflect.get)?.(...)`, `Object.getOwnPropertyDescriptor?.(...)`, and `(Object.getOwnPropertyDescriptor)?.(...)`, covering Promise namespace/reject retrieval, Promise/reject aliases, console method/object aliases, and console raw-log retrieval/apply targets. Full repo QA passed with frontend static audit 39 tests / 172 expects, backend security audit 37 tests / 185 expects, predeploy lock 483 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
 
 ## ตัวกั้นที่ยังเปิดอยู่
 
