@@ -982,6 +982,21 @@ describe('frontend static audit', () => {
     expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(8)
   })
 
+  test('reports frontend Reflect.apply aliases', () => {
+    const messages = auditSuspiciousPatterns(
+      `
+        const applyReflect = Reflect.apply
+        const typedApplyReflect: typeof Reflect.apply = window.Reflect['apply']
+        applyReflect = (Reflect.apply)
+        const { apply } = Reflect
+        const { apply: reflectApply } = window.Reflect
+      `,
+      'apps/frontend/src/pages/FixturePage.tsx',
+    ).map((finding) => finding.message)
+
+    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(5)
+  })
+
   test('reports frontend Reflect.apply console retrieval targets', () => {
     const messages = auditSuspiciousPatterns(
       `
