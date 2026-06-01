@@ -71,8 +71,9 @@ const reflectGetPromiseRejectValue = String.raw`${reflectObjectAccessor}\s*(?:(?
 const descriptorPromiseRejectValue = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*getOwnPropertyDescriptor|(?:\?\.)?\s*\[\s*["']getOwnPropertyDescriptor["']\s*\])\s*\(\s*${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)\s*(?:\?\.|\.)\s*value`
 const retrievedPromiseRejectValue = String.raw`(?:${reflectGetPromiseRejectValue}|${descriptorPromiseRejectValue})`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
-const reflectPromiseRejectApplyPrefix = String.raw`${reflectApplyAccessor}\s*\(\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
-const reflectRetrievedPromiseRejectApplyPrefix = String.raw`${reflectApplyAccessor}\s*\(\s*${retrievedPromiseRejectValue}\s*,[\s\S]*?\[\s*`
+const reflectApplyCallPrefix = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?\s*\(`
+const reflectPromiseRejectApplyPrefix = String.raw`${reflectApplyCallPrefix}\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
+const reflectRetrievedPromiseRejectApplyPrefix = String.raw`${reflectApplyCallPrefix}\s*${retrievedPromiseRejectValue}\s*,[\s\S]*?\[\s*`
 const reflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(

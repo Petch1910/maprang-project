@@ -466,6 +466,8 @@ describe('frontend static audit', () => {
       'return Reflect.apply(Promise.reject, Promise, [error])',
       'return globalThis.Reflect.apply(Promise.reject, Promise, [error])',
       'return window.Reflect["apply"](Promise.reject, Promise, [error])',
+      'return (Reflect.apply)(Promise.reject, Promise, [error])',
+      'return (window.Reflect["apply"])(Promise.reject, Promise, [error])',
       'return Reflect.apply(window.Promise.reject, window.Promise, [error])',
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(window.Promise, "reject").call(window.Promise, error)',
@@ -476,6 +478,8 @@ describe('frontend static audit', () => {
       'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [error])',
       'return window.Reflect["apply"](Reflect.get(Promise, "reject"), Promise, [error])',
       'return globalThis.Reflect.apply(Object.getOwnPropertyDescriptor(Promise, "reject")?.value, Promise, [error])',
+      'return (Reflect.apply)(Reflect.get(Promise, "reject"), Promise, [error])',
+      'return (window.Reflect["apply"])(Object.getOwnPropertyDescriptor(Promise, "reject")?.value, Promise, [error])',
     ]) {
       expect(
         auditRawUiErrorThrows(
@@ -586,6 +590,8 @@ describe('frontend static audit', () => {
       'return Reflect.apply(Promise.reject, Promise, [problem])',
       'return globalThis.Reflect.apply(Promise.reject, Promise, [problem])',
       "return window.Reflect['apply'](Promise.reject, Promise, [problem])",
+      'return (Reflect.apply)(Promise.reject, Promise, [problem])',
+      "return (window.Reflect['apply'])(Promise.reject, Promise, [problem])",
       'return Reflect.get(Promise, "reject")(problem)',
       'return globalThis.Reflect.get(Promise, "reject")(problem)',
       'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value(problem)',
@@ -593,6 +599,8 @@ describe('frontend static audit', () => {
       'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [problem])',
       'return globalThis.Reflect.apply(Reflect.get(Promise, "reject"), Promise, [problem])',
       "return window.Reflect['apply'](Object['getOwnPropertyDescriptor'](Promise, 'reject')?.value, Promise, [problem])",
+      'return (Reflect.apply)(Reflect.get(Promise, "reject"), Promise, [problem])',
+      "return (window.Reflect['apply'])(Object['getOwnPropertyDescriptor'](Promise, 'reject')?.value, Promise, [problem])",
     ]) {
       expect(
         auditRawUiErrorThrows(
