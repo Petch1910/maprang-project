@@ -1048,8 +1048,10 @@ describe('frontend static audit', () => {
         } catch (problem) {
           Reflect.apply(Reflect.get(console, 'error'), console, [problem])
           Reflect.apply(Reflect.get(window.console, 'warn'), window.console, ['slow reflect target', problem])
+          Reflect.apply(Reflect.get((window['console']), 'error'), window.console, [problem])
           Reflect.apply(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
           Reflect.apply(Object.getOwnPropertyDescriptor(window.console, 'warn')?.value, window.console, ['slow descriptor target', problem])
+          Reflect.apply(Object.getOwnPropertyDescriptor((globalThis['console']), 'warn')?.value, globalThis.console, ['slow descriptor target', problem])
           globalThis.Reflect.apply(Reflect.get(console, 'error'), console, [problem])
           window.Reflect['apply'](window.Reflect['get'](console, 'warn'), window.console, ['slow reflect target', problem])
           (Reflect.apply)(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
@@ -1060,7 +1062,9 @@ describe('frontend static audit', () => {
           Reflect.apply((Reflect.get)(console, 'error'), console, [problem])
           Reflect.apply((Object.getOwnPropertyDescriptor)(console, 'warn')?.value, console, [problem])
           (Reflect.get)(console, 'error')(problem)
+          (Reflect.get)((window['console']), 'error')(problem)
           (window.Object['getOwnPropertyDescriptor'])(console, 'warn')?.value(problem)
+          (window.Object['getOwnPropertyDescriptor'])((globalThis['console']), 'warn')?.value(problem)
           Reflect.apply(Reflect.get.call(Reflect, console, 'error'), console, [problem])
           Reflect.get.call(Reflect, console, 'error')(problem)
           Object.getOwnPropertyDescriptor.call(Object, console, 'error')?.value(problem)
@@ -1071,7 +1075,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(19)
+    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(23)
   })
 
   test('reports frontend console object aliases', () => {

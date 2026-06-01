@@ -309,8 +309,10 @@ describe('backend security audit', () => {
         } catch (error) {
           Reflect.apply(Reflect.get(console, 'error'), console, [error])
           Reflect.apply(Reflect.get(globalThis.console, 'warn'), globalThis.console, ['seed slow', error as Error])
+          Reflect.apply(Reflect.get((globalThis['console']), 'error'), globalThis.console, [error])
           Reflect.apply(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [error])
           Reflect.apply(Object.getOwnPropertyDescriptor(globalThis.console, 'warn')?.value, globalThis.console, ['seed slow', error as Error])
+          Reflect.apply(Object.getOwnPropertyDescriptor((globalThis['console']), 'warn')?.value, globalThis.console, ['seed slow', error as Error])
           globalThis.Reflect.apply(Reflect.get(console, 'error'), console, [error])
           globalThis.Reflect['apply'](globalThis.Reflect['get'](console, 'warn'), globalThis.console, ['seed slow', error as Error])
           (Reflect.apply)(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [error])
@@ -321,7 +323,9 @@ describe('backend security audit', () => {
           Reflect.apply((Reflect.get)(console, 'error'), console, [error])
           Reflect.apply((Object.getOwnPropertyDescriptor)(console, 'warn')?.value, console, [error])
           (Reflect.get)(console, 'error')(error)
+          (Reflect.get)((globalThis['console']), 'error')(error)
           (globalThis.Object['getOwnPropertyDescriptor'])(console, 'warn')?.value(error)
+          (globalThis.Object['getOwnPropertyDescriptor'])((globalThis['console']), 'warn')?.value(error)
           Reflect.apply(Reflect.get.call(Reflect, console, 'error'), console, [error])
           Reflect.get.call(Reflect, console, 'error')(error)
           Object.getOwnPropertyDescriptor.call(Object, console, 'error')?.value(error)
@@ -330,7 +334,7 @@ describe('backend security audit', () => {
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(23)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(27)
   })
 
   test('catches backend console object aliases', () => {
