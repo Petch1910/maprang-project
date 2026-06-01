@@ -90,9 +90,9 @@ const promiseRejectAliasPattern = new RegExp(
   'g',
 )
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
-const consoleObjectAccessor = String.raw`(?:\bconsole\b|(?:window|globalThis)\s*(?:(?:\?\.|\.)\s*console\b|(?:\?\.)?\s*\[\s*["']console["']\s*\]))`
 const consoleNamespaceRoot = String.raw`(?:window|globalThis)`
 const consoleNamespaceObjectAccessor = String.raw`(?:${consoleNamespaceRoot}|\(\s*${consoleNamespaceRoot}\s*\))`
+const consoleObjectAccessor = String.raw`(?:\bconsole\b|${consoleNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*console\b|(?:\?\.)?\s*\[\s*["']console["']\s*\]))`
 const retrievedConsoleObjectValue = String.raw`(?:${reflectGetCallPrefix}\s*${consoleNamespaceObjectAccessor}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|(?:${objectDescriptorCallPrefix}\s*${consoleNamespaceObjectAccessor}\s*,\s*["']console["']\s*\)|${objectDescriptorMethodCallPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["']\s*\)|${objectDescriptorMethodApplyPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["']\s*\))\s*(?:\?\.|\.)\s*value)`
 const consoleObjectValue = String.raw`(?:${consoleObjectAccessor}|${retrievedConsoleObjectValue})`
 const consoleObjectMemberAccessor = String.raw`(?:${consoleObjectValue}|\(\s*${consoleObjectValue}\s*\))`

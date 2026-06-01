@@ -227,6 +227,8 @@ describe('backend security audit', () => {
         const assertedError = console.error as typeof console.error
         const parenthesizedError = (console.error)
         parenthesizedWarn = (globalThis.console.warn) as typeof console.warn
+        const parenthesizedRootError = (globalThis).console.error
+        parenthesizedRootWarn = (globalThis)['console']['warn'] as typeof console.warn
         const bracketError = globalThis['console'].error
         bracketWarn = globalThis['console']['warn'] as typeof console.warn
         const parenthesizedBracketError = (globalThis['console']).error
@@ -253,7 +255,7 @@ describe('backend security audit', () => {
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(30)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(32)
 
     expect(
       messagesFor(`
@@ -317,6 +319,8 @@ describe('backend security audit', () => {
         } catch (error) {
           Reflect.apply(Reflect.get(console, 'error'), console, [error])
           Reflect.apply(Reflect.get(globalThis.console, 'warn'), globalThis.console, ['seed slow', error as Error])
+          Reflect.apply((globalThis).console.error, console, [error])
+          Reflect.apply((globalThis)['console']['warn'], console, ['seed parenthesized root', error as Error])
           Reflect.apply(Reflect.get(Reflect.get(globalThis, 'console'), 'error'), console, [error])
           Reflect.apply(Reflect.get(Reflect.get((globalThis), 'console'), 'error'), console, [error])
           Reflect.apply(Reflect.get(Reflect.get.apply(Reflect, [globalThis, 'console']), 'error'), console, [error])
@@ -348,7 +352,7 @@ describe('backend security audit', () => {
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(33)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(35)
   })
 
   test('catches backend console object aliases', () => {
@@ -359,6 +363,8 @@ describe('backend security audit', () => {
         logger = console
         const parenthesizedLogger = (console)
         globalLogger = (globalThis.console)
+        const parenthesizedRootObjectLogger = (globalThis).console
+        globalLogger = (globalThis)['console']
         const bracketLogger = globalThis['console']
         globalLogger = globalThis['console']
         const parenthesizedBracketLogger = (globalThis['console'])
@@ -372,7 +378,7 @@ describe('backend security audit', () => {
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(16)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(18)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {

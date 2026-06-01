@@ -947,6 +947,8 @@ describe('frontend static audit', () => {
         const assertedError = console.error as typeof console.error
         const parenthesizedError = (console.error)
         parenthesizedWarn = (window.console.warn) as typeof console.warn
+        const parenthesizedRootError = (window).console.error
+        parenthesizedRootWarn = (globalThis)['console']['warn'] as typeof console.warn
         const bracketError = window['console'].error
         bracketWarn = globalThis['console']['warn'] as typeof console.warn
         const parenthesizedBracketError = (window['console']).error
@@ -975,7 +977,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(30)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(32)
 
     expect(
       auditSuspiciousPatterns(
@@ -1056,6 +1058,8 @@ describe('frontend static audit', () => {
         } catch (problem) {
           Reflect.apply(Reflect.get(console, 'error'), console, [problem])
           Reflect.apply(Reflect.get(window.console, 'warn'), window.console, ['slow reflect target', problem])
+          Reflect.apply((window).console.error, console, [problem])
+          Reflect.apply((globalThis)['console']['warn'], console, ['slow parenthesized root', problem])
           Reflect.apply(Reflect.get(Reflect.get(window, 'console'), 'error'), console, [problem])
           Reflect.apply(Reflect.get(Reflect.get((window), 'console'), 'error'), console, [problem])
           Reflect.apply(Reflect.get(Reflect.get.apply(Reflect, [window, 'console']), 'error'), console, [problem])
@@ -1089,7 +1093,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(29)
+    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(32)
   })
 
   test('reports frontend console object aliases', () => {
@@ -1101,6 +1105,8 @@ describe('frontend static audit', () => {
         logger = window.console
         const parenthesizedLogger = (console)
         globalLogger = (window.console)
+        const parenthesizedRootObjectLogger = (window).console
+        globalLogger = (globalThis)['console']
         const bracketLogger = window['console']
         globalLogger = globalThis['console']
         const parenthesizedBracketLogger = (window['console'])
@@ -1116,7 +1122,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(16)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(18)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {
