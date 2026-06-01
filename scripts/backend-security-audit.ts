@@ -57,6 +57,11 @@ const objectDescriptorCallPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccess
 const objectDescriptorMethodCallPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*call\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
 const objectDescriptorMethodApplyPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
 const objectDescriptorMethodBindPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\(`
+const retrievalMethodAliasValue = String.raw`(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const retrievalMethodAliasPattern = new RegExp(
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${retrievalMethodAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${retrievalMethodAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bget\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectObjectAccessor}\b|\b(?:const|let|var)\s*\{[^}]*\bgetOwnPropertyDescriptor\b[^}]*\}${variableTypeAnnotation}\s*=\s*${objectAccessor}\b`,
+  'g',
+)
 const consoleObjectAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?console`
 const consoleErrorWarnAccessor = String.raw`(?:globalThis\s*(?:\?\.|\.)\s*)?console\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
 const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
@@ -278,6 +283,11 @@ const patterns = [
     pattern: consoleErrorWarnAliasPattern,
     message:
       'backend source ห้าม alias console.error/console.warn; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
+    pattern: retrievalMethodAliasPattern,
+    message:
+      'backend source ห้าม alias Reflect.get/Object.getOwnPropertyDescriptor; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม retrieved console/Promise targets ได้',
   },
   {
     pattern: /\.\s*\$queryRawUnsafe\s*\(/g,

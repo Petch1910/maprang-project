@@ -248,6 +248,21 @@ describe('backend security audit', () => {
     ).toHaveLength(1)
   })
 
+  test('catches backend retrieval method aliases', () => {
+    const messages = messagesFor(`
+        const getReflect = Reflect.get
+        const typedGetReflect: typeof Reflect.get = globalThis.Reflect['get']
+        getReflect = (Reflect.get)
+        const getDescriptor = Object.getOwnPropertyDescriptor
+        descriptorLater = globalThis.Object['getOwnPropertyDescriptor'] as typeof Object.getOwnPropertyDescriptor
+        const { get } = Reflect
+        const { get: reflectGet } = globalThis.Reflect
+        const { getOwnPropertyDescriptor: getOwn } = globalThis.Object
+      `, 'prisma/seed.ts')
+
+    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(8)
+  })
+
   test('catches Reflect.apply console retrieval targets', () => {
     const rawLogMessage = 'ห้าม log raw error object ตรงๆ; ให้สรุป error แบบปลอดภัยก่อนเขียน log.'
     const messages = messagesFor(`

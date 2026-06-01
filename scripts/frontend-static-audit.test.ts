@@ -964,6 +964,24 @@ describe('frontend static audit', () => {
     ).toHaveLength(1)
   })
 
+  test('reports frontend retrieval method aliases', () => {
+    const messages = auditSuspiciousPatterns(
+      `
+        const getReflect = Reflect.get
+        const typedGetReflect: typeof Reflect.get = window.Reflect['get']
+        getReflect = (Reflect.get)
+        const getDescriptor = Object.getOwnPropertyDescriptor
+        descriptorLater = window.Object['getOwnPropertyDescriptor'] as typeof Object.getOwnPropertyDescriptor
+        const { get } = Reflect
+        const { get: reflectGet } = window.Reflect
+        const { getOwnPropertyDescriptor: getOwn } = window.Object
+      `,
+      'apps/frontend/src/pages/FixturePage.tsx',
+    ).map((finding) => finding.message)
+
+    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(8)
+  })
+
   test('reports frontend Reflect.apply console retrieval targets', () => {
     const messages = auditSuspiciousPatterns(
       `
