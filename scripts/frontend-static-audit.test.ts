@@ -483,9 +483,12 @@ describe('frontend static audit', () => {
       'return window.Promise.reject.call(window.Promise, error)',
       "return globalThis['Promise']['reject'].call(globalThis['Promise'], error)",
       'return Reflect.apply(Promise.reject, Promise, [error])',
+      'return Reflect.apply?.(Promise.reject, Promise, [error])',
       'return globalThis.Reflect.apply(Promise.reject, Promise, [error])',
       'return window.Reflect["apply"](Promise.reject, Promise, [error])',
+      'return window.Reflect["apply"]?.(Promise.reject, Promise, [error])',
       'return (Reflect.apply)(Promise.reject, Promise, [error])',
+      'return (Reflect.apply)?.(Promise.reject, Promise, [error])',
       'return (window.Reflect["apply"])(Promise.reject, Promise, [error])',
       'return Reflect.apply(window.Promise.reject, window.Promise, [error])',
       "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [error])",
@@ -510,9 +513,11 @@ describe('frontend static audit', () => {
       'return window.Object["getOwnPropertyDescriptor"].apply(window.Object, [Promise, "reject"])?.value(error)',
       'return Object.getOwnPropertyDescriptor(Promise, "reject")?.value.apply(Promise, [error])',
       'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [error])',
+      'return Reflect.apply?.(Reflect.get(Promise, "reject"), Promise, [error])',
       'return window.Reflect["apply"](Reflect.get(Promise, "reject"), Promise, [error])',
       'return globalThis.Reflect.apply(Object.getOwnPropertyDescriptor(Promise, "reject")?.value, Promise, [error])',
       'return (Reflect.apply)(Reflect.get(Promise, "reject"), Promise, [error])',
+      'return (Reflect.apply)?.(Reflect.get(Promise, "reject"), Promise, [error])',
       'return (window.Reflect["apply"])(Object.getOwnPropertyDescriptor(Promise, "reject")?.value, Promise, [error])',
     ]) {
       expect(
@@ -553,9 +558,12 @@ describe('frontend static audit', () => {
             return new Promise((_resolve, reject) => reject.apply(undefined, [error]))
             return new Promise((_resolve, reject) => reject.bind(undefined)(error))
             return new Promise((_resolve, reject) => Reflect.apply(reject, undefined, [error]))
+            return new Promise((_resolve, reject) => Reflect.apply?.(reject, undefined, [error]))
             return new Promise((_resolve, reject) => globalThis.Reflect.apply(reject, undefined, [error]))
             return new Promise((_resolve, reject) => window.Reflect['apply'](reject, undefined, [error]))
+            return new Promise((_resolve, reject) => window.Reflect['apply']?.(reject, undefined, [error]))
             return new Promise((_resolve, reject) => (Reflect.apply)(reject, undefined, [error]))
+            return new Promise((_resolve, reject) => (Reflect.apply)?.(reject, undefined, [error]))
             return new Promise((_resolve, reject) => { const apply = Reflect.apply; return apply(reject, undefined, [error]) })
             return new Promise((_resolve, reject) => { const typedApply: typeof Reflect.apply = Reflect.apply; return typedApply(reject, undefined, [error]) })
             return new Promise((_resolve, reject) => { const { apply } = Reflect; return apply(reject, undefined, [error]) })
@@ -569,7 +577,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(16)
+    ).toHaveLength(19)
 
     expect(
       auditRawUiErrorThrows(
@@ -639,9 +647,12 @@ describe('frontend static audit', () => {
       'return Promise.reject.bind(Promise)(problem)',
       "return globalThis['Promise']['reject'].call(globalThis['Promise'], problem)",
       'return Reflect.apply(Promise.reject, Promise, [problem])',
+      'return Reflect.apply?.(Promise.reject, Promise, [problem])',
       'return globalThis.Reflect.apply(Promise.reject, Promise, [problem])',
       "return window.Reflect['apply'](Promise.reject, Promise, [problem])",
+      "return window.Reflect['apply']?.(Promise.reject, Promise, [problem])",
       'return (Reflect.apply)(Promise.reject, Promise, [problem])',
+      'return (Reflect.apply)?.(Promise.reject, Promise, [problem])',
       "return (window.Reflect['apply'])(Promise.reject, Promise, [problem])",
       "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [problem])",
       "return Reflect.apply(Reflect.get(window, 'Promise').reject, Reflect.get(window, 'Promise'), [problem])",
@@ -663,9 +674,11 @@ describe('frontend static audit', () => {
       'return Object.getOwnPropertyDescriptor.call(Object, Promise, "reject")?.value(problem)',
       "return Object['getOwnPropertyDescriptor'].apply(Object, [Promise, 'reject'])?.value(problem)",
       'return Reflect.apply(Reflect.get(Promise, "reject"), Promise, [problem])',
+      'return Reflect.apply?.(Reflect.get(Promise, "reject"), Promise, [problem])',
       'return globalThis.Reflect.apply(Reflect.get(Promise, "reject"), Promise, [problem])',
       "return window.Reflect['apply'](Object['getOwnPropertyDescriptor'](Promise, 'reject')?.value, Promise, [problem])",
       'return (Reflect.apply)(Reflect.get(Promise, "reject"), Promise, [problem])',
+      'return (Reflect.apply)?.(Reflect.get(Promise, "reject"), Promise, [problem])',
       "return (window.Reflect['apply'])(Object['getOwnPropertyDescriptor'](Promise, 'reject')?.value, Promise, [problem])",
     ]) {
       expect(
@@ -706,11 +719,14 @@ describe('frontend static audit', () => {
             return new Promise(function rejectLater(_resolve, reject) {
               window.Reflect['apply'](reject, undefined, [problem as Error])
             })
+            return new Promise(function optionalRejectLater(_resolve, reject) {
+              window.Reflect['apply']?.(reject, undefined, [problem as Error])
+            })
           }
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
-    ).toHaveLength(1)
+    ).toHaveLength(2)
 
     expect(
       auditRawUiErrorThrows(
@@ -1145,6 +1161,7 @@ describe('frontend static audit', () => {
           await load()
         } catch (problem) {
           Reflect.apply(Reflect.get(console, 'error'), console, [problem])
+          Reflect.apply?.(Reflect.get(console, 'error'), console, [problem])
           Reflect.apply(Reflect.get(window.console, 'warn'), window.console, ['slow reflect target', problem])
           Reflect.apply((window).console.error, console, [problem])
           Reflect.apply((globalThis)['console']['warn'], console, ['slow parenthesized root', problem])
@@ -1164,7 +1181,9 @@ describe('frontend static audit', () => {
           Reflect.apply(Object.getOwnPropertyDescriptor((globalThis['console']), 'warn')?.value, globalThis.console, ['slow descriptor target', problem])
           globalThis.Reflect.apply(Reflect.get(console, 'error'), console, [problem])
           window.Reflect['apply'](window.Reflect['get'](console, 'warn'), window.console, ['slow reflect target', problem])
+          window.Reflect['apply']?.(window.Reflect['get'](console, 'warn'), window.console, ['slow optional reflect target', problem])
           (Reflect.apply)(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
+          (Reflect.apply)?.(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
           (window.Reflect['apply'])(window.Object['getOwnPropertyDescriptor'](console, 'warn')?.value, window.console, ['slow descriptor target', problem])
           globalThis.Reflect.get(console, 'error')(problem)
           window.Reflect['get'](window.console, 'warn').call(window.console, 'slow reflect get', problem)
@@ -1189,7 +1208,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(40)
+    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(43)
   })
 
   test('reports frontend console object aliases', () => {
