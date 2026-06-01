@@ -285,6 +285,8 @@ describe('backend security audit', () => {
         const typedBoundGetReflect: typeof Reflect.get = globalThis.Reflect['get'].bind(globalThis.Reflect)
         const bracketBoundGetReflect = Reflect.get['bind'](Reflect)
         const fullyBracketBoundGetReflect = Reflect['get']['bind'](Reflect)
+        const getCall = Reflect.get['call']
+        const getApply = globalThis.Reflect['get']['apply']
         boundGetReflect = (Reflect['get'].bind(Reflect))
         const getDescriptor = Object.getOwnPropertyDescriptor
         descriptorLater = globalThis.Object['getOwnPropertyDescriptor'] as typeof Object.getOwnPropertyDescriptor
@@ -294,15 +296,19 @@ describe('backend security audit', () => {
         const typedBoundGetDescriptor: typeof Object.getOwnPropertyDescriptor = globalThis.Object['getOwnPropertyDescriptor'].bind(globalThis.Object)
         const bracketBoundGetDescriptor = Object.getOwnPropertyDescriptor['bind'](Object)
         const fullyBracketBoundGetDescriptor = Object['getOwnPropertyDescriptor']['bind'](Object)
+        const descriptorCall = Object.getOwnPropertyDescriptor['call']
+        const descriptorApply = globalThis.Object['getOwnPropertyDescriptor']['apply']
         descriptorLater = (globalThis['Object'].getOwnPropertyDescriptor.bind(globalThis.Object)) as typeof Object.getOwnPropertyDescriptor
         const { get } = Reflect
         const { get: reflectGet } = globalThis.Reflect
         const { get: computedReflectGet } = globalThis['Reflect']
         const { getOwnPropertyDescriptor: getOwn } = globalThis.Object
         const { getOwnPropertyDescriptor: computedGetOwn } = globalThis['Object']
+        const { call: reflectedGetCall } = Reflect.get
+        const { apply: descriptorGetApply } = Object.getOwnPropertyDescriptor
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(24)
+    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(30)
   })
 
   test('catches backend Reflect.apply aliases', () => {
@@ -316,13 +322,17 @@ describe('backend security audit', () => {
         const typedBoundApplyReflect: typeof Reflect.apply = globalThis.Reflect['apply'].bind(globalThis.Reflect)
         const bracketBoundApplyReflect = Reflect.apply['bind'](Reflect)
         const fullyBracketBoundApplyReflect = Reflect['apply']['bind'](Reflect)
+        const applyCall = Reflect.apply['call']
+        const applyApply = globalThis.Reflect['apply']['apply']
         applyReflect = (Reflect['apply'].bind(Reflect))
         const { apply } = Reflect
         const { apply: reflectApply } = globalThis.Reflect
         const { apply: computedReflectApply } = globalThis['Reflect']
+        const { call: reflectApplyCall } = Reflect.apply
+        const { apply: forwardedReflectApply } = globalThis.Reflect['apply']
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(13)
+    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(17)
   })
 
   test('catches backend Reflect object aliases', () => {

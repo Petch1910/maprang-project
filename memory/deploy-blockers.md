@@ -2,8 +2,8 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 computed call/apply reflection forwarding guard is locked as the latest repo-owned baseline on top of decision `0027` namespace reflection guard contract. Full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 504 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green; external staging/live-provider/database blockers are unchanged.
-Repo-owned decision lock: decision `0027` namespace reflection guard contract plus computed call/apply reflection forwarding, including bracket-call/bracket-apply forms for `Reflect.get` and `Reflect.apply`, are now the current baseline; full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 504 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green before staging/live-provider/database verification.
+สถานะ repo-owned ล่าสุด: 2026-06-01 method-forwarded call/apply alias guard is locked as the latest repo-owned baseline on top of decision `0027` namespace reflection guard contract. Full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 511 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green; external staging/live-provider/database blockers are unchanged.
+Repo-owned decision lock: decision `0027` namespace reflection guard contract plus method-forwarded call/apply alias assignments for reflected retrieval and `Reflect.apply` methods are now the current baseline; full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 511 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green before staging/live-provider/database verification.
 
 ## ตัวกั้นที่ยังเปิดอยู่
 

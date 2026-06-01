@@ -1170,6 +1170,8 @@ describe('frontend static audit', () => {
         const typedBoundGetReflect: typeof Reflect.get = window.Reflect['get'].bind(window.Reflect)
         const bracketBoundGetReflect = Reflect.get['bind'](Reflect)
         const fullyBracketBoundGetReflect = Reflect['get']['bind'](Reflect)
+        const getCall = Reflect.get['call']
+        const getApply = window.Reflect['get']['apply']
         boundGetReflect = (Reflect['get'].bind(Reflect))
         const getDescriptor = Object.getOwnPropertyDescriptor
         descriptorLater = window.Object['getOwnPropertyDescriptor'] as typeof Object.getOwnPropertyDescriptor
@@ -1179,17 +1181,21 @@ describe('frontend static audit', () => {
         const typedBoundGetDescriptor: typeof Object.getOwnPropertyDescriptor = window.Object['getOwnPropertyDescriptor'].bind(window.Object)
         const bracketBoundGetDescriptor = Object.getOwnPropertyDescriptor['bind'](Object)
         const fullyBracketBoundGetDescriptor = Object['getOwnPropertyDescriptor']['bind'](Object)
+        const descriptorCall = Object.getOwnPropertyDescriptor['call']
+        const descriptorApply = globalThis.Object['getOwnPropertyDescriptor']['apply']
         descriptorLater = (globalThis['Object'].getOwnPropertyDescriptor.bind(globalThis.Object)) as typeof Object.getOwnPropertyDescriptor
         const { get } = Reflect
         const { get: reflectGet } = window.Reflect
         const { get: computedReflectGet } = window['Reflect']
         const { getOwnPropertyDescriptor: getOwn } = window.Object
         const { getOwnPropertyDescriptor: computedGetOwn } = globalThis['Object']
+        const { call: reflectedGetCall } = Reflect.get
+        const { apply: descriptorGetApply } = Object.getOwnPropertyDescriptor
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(24)
+    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(30)
   })
 
   test('reports frontend Reflect.apply aliases', () => {
@@ -1204,15 +1210,19 @@ describe('frontend static audit', () => {
         const typedBoundApplyReflect: typeof Reflect.apply = window.Reflect['apply'].bind(window.Reflect)
         const bracketBoundApplyReflect = Reflect.apply['bind'](Reflect)
         const fullyBracketBoundApplyReflect = Reflect['apply']['bind'](Reflect)
+        const applyCall = Reflect.apply['call']
+        const applyApply = window.Reflect['apply']['apply']
         applyReflect = (Reflect['apply'].bind(Reflect))
         const { apply } = Reflect
         const { apply: reflectApply } = window.Reflect
         const { apply: computedReflectApply } = window['Reflect']
+        const { call: reflectApplyCall } = Reflect.apply
+        const { apply: forwardedReflectApply } = window.Reflect['apply']
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(13)
+    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(17)
   })
 
   test('reports frontend Reflect object aliases', () => {
