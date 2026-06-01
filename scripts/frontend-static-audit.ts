@@ -41,8 +41,10 @@ const promiseNamespaceRoot = String.raw`(?:window|globalThis)`
 const promiseNamespaceObjectAccessor = String.raw`(?:${promiseNamespaceRoot}|\(\s*${promiseNamespaceRoot}\s*\))`
 const promiseObjectAccessor = String.raw`(?:Promise|${promiseNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Promise\b|(?:\?\.)?\s*\[\s*["']Promise["']\s*\]))`
 const globalNamespaceObjectAccessor = String.raw`(?:window|globalThis|\(\s*(?:window|globalThis)\s*\))`
-const reflectObjectAccessor = String.raw`(?:${globalNamespaceObjectAccessor}\s*(?:\?\.|\.)\s*)?Reflect\b`
-const objectAccessor = String.raw`(?:${globalNamespaceObjectAccessor}\s*(?:\?\.|\.)\s*)?Object\b`
+const globalReflectObjectAccessor = String.raw`${globalNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Reflect\b|(?:\?\.)?\s*\[\s*["']Reflect["']\s*\])`
+const globalObjectObjectAccessor = String.raw`${globalNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Object\b|(?:\?\.)?\s*\[\s*["']Object["']\s*\])`
+const reflectObjectAccessor = String.raw`(?:Reflect\b|${globalReflectObjectAccessor})`
+const objectAccessor = String.raw`(?:Object\b|${globalObjectObjectAccessor})`
 const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const reflectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
