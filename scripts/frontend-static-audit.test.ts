@@ -947,6 +947,8 @@ describe('frontend static audit', () => {
         const assertedError = console.error as typeof console.error
         const parenthesizedError = (console.error)
         parenthesizedWarn = (window.console.warn) as typeof console.warn
+        const bracketError = window['console'].error
+        bracketWarn = globalThis['console']['warn'] as typeof console.warn
         const reflectedError = Reflect.get(console, 'error')
         reflectedError = Reflect.get(window.console, 'warn') as typeof console.warn
         const reflectedErrorViaWindow = window.Reflect['get'](console, 'error')
@@ -963,7 +965,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(18)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(20)
 
     expect(
       auditSuspiciousPatterns(
@@ -1079,12 +1081,14 @@ describe('frontend static audit', () => {
         logger = window.console
         const parenthesizedLogger = (console)
         globalLogger = (window.console)
+        const bracketLogger = window['console']
+        globalLogger = globalThis['console']
         console.error('safe summary:', safeBrowserErrorSummary(error))
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(6)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(8)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {
