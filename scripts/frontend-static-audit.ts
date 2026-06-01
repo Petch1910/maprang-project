@@ -54,14 +54,14 @@ const objectObjectAliasPattern = new RegExp(
 )
 const reflectGetAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*get|(?:\?\.)?\s*\[\s*["']get["']\s*\])`
 const reflectGetCallPrefix = String.raw`(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*\(`
-const reflectGetMethodCallPrefix = String.raw`(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*call\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
-const reflectGetMethodApplyPrefix = String.raw`(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
-const reflectGetMethodBindPrefix = String.raw`(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\(`
+const reflectGetMethodCallPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*(?:\?\.|\.)\s*call\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*call)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
+const reflectGetMethodApplyPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*(?:\?\.|\.)\s*apply\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*apply)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
+const reflectGetMethodBindPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*(?:\?\.|\.)\s*bind\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*bind)\s*(?:\)\s*)?(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const objectDescriptorAccessor = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*getOwnPropertyDescriptor|(?:\?\.)?\s*\[\s*["']getOwnPropertyDescriptor["']\s*\])`
 const objectDescriptorCallPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*\(`
-const objectDescriptorMethodCallPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*call\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
-const objectDescriptorMethodApplyPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*apply\s*(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
-const objectDescriptorMethodBindPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\(`
+const objectDescriptorMethodCallPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*(?:\?\.|\.)\s*call\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*call)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
+const objectDescriptorMethodApplyPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*(?:\?\.|\.)\s*apply\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*apply)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
+const objectDescriptorMethodBindPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*(?:\?\.|\.)\s*bind\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*bind)\s*(?:\)\s*)?(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const retrievalMethodAliasValue = String.raw`(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const retrievalMethodAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${retrievalMethodAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${retrievalMethodAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bget\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectObjectAccessor}\b|\b(?:const|let|var)\s*\{[^}]*\bgetOwnPropertyDescriptor\b[^}]*\}${variableTypeAnnotation}\s*=\s*${objectAccessor}\b`,

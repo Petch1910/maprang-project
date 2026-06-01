@@ -462,11 +462,15 @@ describe('frontend static audit', () => {
             return Reflect.get.bind(Reflect)(window, 'Promise').reject(error)
             return Object.getOwnPropertyDescriptor.apply(Object, [globalThis, 'Promise'])?.value.reject(error)
             return Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'Promise')?.value.reject(error)
+            return (Reflect.get.apply)(Reflect, [window, 'Promise']).reject(error)
+            return (Reflect.get.bind(Reflect))(window, 'Promise').reject(error)
+            return (Object.getOwnPropertyDescriptor.apply)(Object, [globalThis, 'Promise'])?.value.reject(error)
+            return (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'Promise')?.value.reject(error)
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(14)
+    ).toHaveLength(18)
 
     for (const rejectedExpression of [
       'return Promise.reject.call(Promise, error)',
@@ -485,6 +489,8 @@ describe('frontend static audit', () => {
       "return Reflect.apply(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value['reject'], Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, [error])",
       "return Reflect.apply(Reflect.get.apply(Reflect, [window, 'Promise']).reject, Reflect.get.apply(Reflect, [window, 'Promise']), [error])",
       "return Reflect.apply(Object.getOwnPropertyDescriptor.apply(Object, [globalThis, 'Promise'])?.value['reject'], Object.getOwnPropertyDescriptor.apply(Object, [globalThis, 'Promise'])?.value, [error])",
+      "return Reflect.apply((Reflect.get.apply)(Reflect, [window, 'Promise']).reject, (Reflect.get.apply)(Reflect, [window, 'Promise']), [error])",
+      "return Reflect.apply((Object.getOwnPropertyDescriptor.apply)(Object, [globalThis, 'Promise'])?.value['reject'], (Object.getOwnPropertyDescriptor.apply)(Object, [globalThis, 'Promise'])?.value, [error])",
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(window.Promise, "reject").call(window.Promise, error)',
       'return window.Reflect["get"](Promise, "reject")(error)',
@@ -609,11 +615,15 @@ describe('frontend static audit', () => {
             return Reflect.get.bind(Reflect)(window, 'Promise').reject(problem)
             return Object.getOwnPropertyDescriptor.apply(Object, [globalThis, 'Promise'])?.value.reject(problem)
             return Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'Promise')?.value.reject(problem)
+            return (Reflect.get.apply)(Reflect, [window, 'Promise']).reject(problem)
+            return (Reflect.get.bind(Reflect))(window, 'Promise').reject(problem)
+            return (Object.getOwnPropertyDescriptor.apply)(Object, [globalThis, 'Promise'])?.value.reject(problem)
+            return (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'Promise')?.value.reject(problem)
           }
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
-    ).toHaveLength(14)
+    ).toHaveLength(18)
 
     for (const rejectedExpression of [
       'return Promise.reject.call(Promise, problem)',
@@ -630,6 +640,8 @@ describe('frontend static audit', () => {
       "return Reflect.apply(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value['reject'], Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, [problem])",
       "return Reflect.apply(Reflect.get.apply(Reflect, [window, 'Promise']).reject, Reflect.get.apply(Reflect, [window, 'Promise']), [problem])",
       "return Reflect.apply(Object.getOwnPropertyDescriptor.apply(Object, [globalThis, 'Promise'])?.value['reject'], Object.getOwnPropertyDescriptor.apply(Object, [globalThis, 'Promise'])?.value, [problem])",
+      "return Reflect.apply((Reflect.get.apply)(Reflect, [window, 'Promise']).reject, (Reflect.get.apply)(Reflect, [window, 'Promise']), [problem])",
+      "return Reflect.apply((Object.getOwnPropertyDescriptor.apply)(Object, [globalThis, 'Promise'])?.value['reject'], (Object.getOwnPropertyDescriptor.apply)(Object, [globalThis, 'Promise'])?.value, [problem])",
       'return Reflect.get(Promise, "reject")(problem)',
       'return globalThis.Reflect.get(Promise, "reject")(problem)',
       'return (Reflect.get)(Promise, "reject")(problem)',
@@ -729,10 +741,12 @@ describe('frontend static audit', () => {
           const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
           const { reject: applyReflectedReject } = Reflect.get.apply(Reflect, [window, 'Promise'])
           const { reject: bindDescriptorReject } = Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'Promise')?.value
+          const { reject: parenthesizedApplyReject } = (Reflect.get.apply)(Reflect, [window, 'Promise'])
+          const { reject: parenthesizedBindReject } = (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'Promise')?.value
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(4)
+    ).toHaveLength(6)
 
     expect(
       auditRawUiErrorThrows(
@@ -746,10 +760,12 @@ describe('frontend static audit', () => {
           promiseCtor = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
           const applyReflectedPromiseCtor = Reflect.get.apply(Reflect, [window, 'Promise'])
           promiseCtor = Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'Promise')?.value
+          const parenthesizedApplyPromiseCtor = (Reflect.get.apply)(Reflect, [window, 'Promise'])
+          promiseCtor = (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'Promise')?.value
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(9)
+    ).toHaveLength(11)
 
     expect(
       auditRawUiErrorThrows(
@@ -764,10 +780,12 @@ describe('frontend static audit', () => {
           const descriptorNamespaceReject = Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, 'reject')?.value
           const applyReflectedNamespaceReject = Reflect.get(Reflect.get.apply(Reflect, [window, 'Promise']), 'reject')
           const bindDescriptorNamespaceReject = Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'Promise')?.value, 'reject')?.value
+          const parenthesizedApplyNamespaceReject = Reflect.get((Reflect.get.apply)(Reflect, [window, 'Promise']), 'reject')
+          const parenthesizedBindNamespaceReject = Object.getOwnPropertyDescriptor((Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'Promise')?.value, 'reject')?.value
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(10)
+    ).toHaveLength(12)
 
     expect(
       auditRawUiErrorThrows(
