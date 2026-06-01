@@ -291,6 +291,13 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const loggerSet = new Set([console.error])
+        const loggerArrayFactory = Array.of(console.warn)
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
         const { error: typedAliasedError, warn: typedWarn }: Console = console
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
     ).toHaveLength(1)
@@ -539,6 +546,13 @@ describe('backend security audit', () => {
         const reflectedLoggerMap = new Map([['console', Reflect.get(globalThis, 'console')]])
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
     ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
+        const loggerSet = new Set([console])
+        const loggerArrayFactory = Array.from([globalThis.console])
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
+    ).toHaveLength(2)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {
@@ -1254,6 +1268,13 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const rejectSet = new Set([Promise.reject])
+        const rejectArrayFactory = Array.from([Promise.reject])
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
         const { reject: reflectedReject } = Reflect.get(globalThis, 'Promise')
         const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
         const { reject: parenthesizedReflectNamespaceReject } = (globalThis).Reflect.get(globalThis, 'Promise')
@@ -1328,6 +1349,13 @@ describe('backend security audit', () => {
         const reflectedPromiseMap = new Map([['Promise', Reflect.get(globalThis, 'Promise')]])
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
     ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
+        const promiseSet = new Set([Promise])
+        const promiseArrayFactory = Array.of(globalThis.Promise)
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(2)
 
     expect(
       messagesFor(`
