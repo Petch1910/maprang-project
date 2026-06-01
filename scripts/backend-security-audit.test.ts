@@ -225,6 +225,8 @@ describe('backend security audit', () => {
         let logWarn = globalThis.console.warn.bind(console)
         logError = console['error']
         const assertedError = console.error as typeof console.error
+        const parenthesizedError = (console.error)
+        parenthesizedWarn = (globalThis.console.warn) as typeof console.warn
         const reflectedError = Reflect.get(console, 'error')
         reflectedError = Reflect.get(globalThis.console, 'warn') as typeof console.warn
         const reflectedErrorViaGlobal = globalThis.Reflect['get'](console, 'error')
@@ -239,7 +241,7 @@ describe('backend security audit', () => {
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(16)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(18)
 
     expect(
       messagesFor(`
@@ -333,10 +335,12 @@ describe('backend security audit', () => {
         const typedLogger: Console = console
         let globalLogger = globalThis.console as Console
         logger = console
+        const parenthesizedLogger = (console)
+        globalLogger = (globalThis.console)
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(4)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(6)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {
