@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-01
+- 2026-06-01 Object.fromEntries container alias guard pass: frontend/backend static/security audits now reject `Object.fromEntries` tuple containers for Reflect/Object namespace objects, Promise object, `Promise.reject`, console object, and `console.error`/`console.warn`. Focused checks passed with frontend static audit 39 tests / 207 expects, backend security audit 37 tests / 218 expects, predeploy regression 3 tests / 547 expects, frontend/backend source audits, and predeploy check green.
+
 - 2026-06-01 readonly container wrapper alias guard pass: frontend/backend static/security audits now reject `Object.freeze`/`Object.seal` readonly container wrappers for Reflect/Object namespace objects, Promise object, `Promise.reject`, console object, and `console.error`/`console.warn`. Full deterministic `bun run qa:repo` passed with memory audit 38 Markdown files, docs command audit 356 refs, frontend static audit 39 tests / 201 expects, backend security audit 37 tests / 212 expects, predeploy regression 3 tests / 540 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green.
 
 - 2026-06-01 Promise/console Set/Array factory container alias guard pass: frontend/backend static/security audits now reject Set/Array factory container aliases for Promise object, `Promise.reject`, console object, and `console.error`/`console.warn`. Full deterministic repo QA passed with memory audit 38 Markdown files, docs command audit 355 refs, predeploy regression 3 tests / 532 expects, frontend static audit 39 tests / 195 expects, backend security audit 37 tests / 206 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green.

@@ -291,6 +291,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const loggerEntries = Object.fromEntries([['error', console.error]])
+        const loggerEntriesWithPrefix = Object.fromEntries([['safe', safeLog], ['warn', console.warn]])
+        const reflectedLoggerEntries = globalThis.Object.fromEntries([['warn', Reflect.get(console, 'warn')]])
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
         const loggerSet = new Set([console.error])
         const loggerArrayFactory = Array.of(console.warn)
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
@@ -413,6 +421,14 @@ describe('backend security audit', () => {
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Reflect object')),
     ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
+        const reflectEntries = Object.fromEntries([['Reflect', Reflect]])
+        const reflectEntriesWithPrefix = Object.fromEntries([['safeNs', safeNs], ['Reflect', globalThis.Reflect]])
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(2)
   })
 
   test('catches backend Object object aliases', () => {
@@ -444,6 +460,14 @@ describe('backend security audit', () => {
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Object object')),
     ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
+        const objectEntries = Object.fromEntries([['Object', Object]])
+        const objectEntriesWithPrefix = Object.fromEntries([['safeNs', safeNs], ['Object', globalThis.Object]])
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(2)
   })
 
   test('catches Reflect.apply console retrieval targets', () => {
@@ -573,6 +597,14 @@ describe('backend security audit', () => {
         const loggerMap = new Map([['console', console]])
         const loggerMapWithPrefix = new Map([['safe', safeLogger], ['console', globalThis.console]])
         const reflectedLoggerMap = new Map([['console', Reflect.get(globalThis, 'console')]])
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
+        const loggerEntries = Object.fromEntries([['console', console]])
+        const loggerEntriesWithPrefix = Object.fromEntries([['safe', safeLogger], ['console', globalThis.console]])
+        const reflectedLoggerEntries = globalThis.Object.fromEntries([['console', Reflect.get(globalThis, 'console')]])
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
     ).toHaveLength(3)
 
@@ -1308,6 +1340,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const rejectEntries = Object.fromEntries([['reject', Promise.reject]])
+        const rejectEntriesWithPrefix = Object.fromEntries([['safe', safeReject], ['reject', Promise.reject]])
+        const reflectedRejectEntries = globalThis.Object.fromEntries([['reject', Reflect.get(Promise, 'reject')]])
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
         const rejectSet = new Set([Promise.reject])
         const rejectArrayFactory = Array.from([Promise.reject])
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
@@ -1396,6 +1436,14 @@ describe('backend security audit', () => {
         const promiseMap = new Map([['Promise', Promise]])
         const promiseMapWithPrefix = new Map([['fallback', fallback], ['Promise', globalThis.Promise]])
         const reflectedPromiseMap = new Map([['Promise', Reflect.get(globalThis, 'Promise')]])
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
+        const promiseEntries = Object.fromEntries([['Promise', Promise]])
+        const promiseEntriesWithPrefix = Object.fromEntries([['fallback', fallback], ['Promise', globalThis.Promise]])
+        const reflectedPromiseEntries = globalThis.Object.fromEntries([['Promise', Reflect.get(globalThis, 'Promise')]])
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
     ).toHaveLength(3)
 

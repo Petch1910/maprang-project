@@ -833,6 +833,17 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const rejectEntries = Object.fromEntries([['reject', Promise.reject]])
+          const rejectEntriesWithPrefix = Object.fromEntries([['safe', safeReject], ['reject', Promise.reject]])
+          const reflectedRejectEntries = window.Object.fromEntries([['reject', Reflect.get(Promise, 'reject')]])
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const rejectSet = new Set([Promise.reject])
           const rejectArrayFactory = Array.from([Promise.reject])
         `,
@@ -939,6 +950,17 @@ describe('frontend static audit', () => {
           const promiseMap = new Map([['Promise', Promise]])
           const promiseMapWithPrefix = new Map([['fallback', fallback], ['Promise', window.Promise]])
           const reflectedPromiseMap = new Map([['Promise', Reflect.get(window, 'Promise')]])
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          const promiseEntries = Object.fromEntries([['Promise', Promise]])
+          const promiseEntriesWithPrefix = Object.fromEntries([['fallback', fallback], ['Promise', window.Promise]])
+          const reflectedPromiseEntries = window.Object.fromEntries([['Promise', Reflect.get(window, 'Promise')]])
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
@@ -1305,6 +1327,19 @@ describe('frontend static audit', () => {
     expect(
       auditSuspiciousPatterns(
         `
+          const loggerEntries = Object.fromEntries([['error', console.error]])
+          const loggerEntriesWithPrefix = Object.fromEntries([['safe', safeLog], ['warn', console.warn]])
+          const reflectedLoggerEntries = window.Object.fromEntries([['warn', Reflect.get(console, 'warn')]])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(3)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
           const loggerSet = new Set([console.error])
           const loggerArrayFactory = Array.of(console.warn)
         `,
@@ -1454,6 +1489,18 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
     ).toHaveLength(4)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const reflectEntries = Object.fromEntries([['Reflect', Reflect]])
+          const reflectEntriesWithPrefix = Object.fromEntries([['safeNs', safeNs], ['Reflect', window.Reflect]])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(2)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1492,6 +1539,18 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Object object')),
     ).toHaveLength(4)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const objectEntries = Object.fromEntries([['Object', Object]])
+          const objectEntriesWithPrefix = Object.fromEntries([['safeNs', safeNs], ['Object', globalThis.Object]])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(2)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -1644,6 +1703,18 @@ describe('frontend static audit', () => {
         .filter((message) => message.includes('alias console object')),
     ).toHaveLength(3)
 
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const loggerEntries = Object.fromEntries([['console', console]])
+          const loggerEntriesWithPrefix = Object.fromEntries([['safe', safeLogger], ['console', globalThis.console]])
+          const reflectedLoggerEntries = window.Object.fromEntries([['console', Reflect.get(window, 'console')]])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(3)
     expect(
       auditSuspiciousPatterns(
         `
