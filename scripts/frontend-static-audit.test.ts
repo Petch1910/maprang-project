@@ -1021,6 +1021,19 @@ describe('frontend static audit', () => {
     expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(3)
   })
 
+  test('reports frontend Object object aliases', () => {
+    const messages = auditSuspiciousPatterns(
+      `
+        const objectNs = Object
+        const typedObjectNs: ObjectConstructor = window.Object
+        objectNs = (globalThis.Object)
+      `,
+      'apps/frontend/src/pages/FixturePage.tsx',
+    ).map((finding) => finding.message)
+
+    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(3)
+  })
+
   test('reports frontend Reflect.apply console retrieval targets', () => {
     const messages = auditSuspiciousPatterns(
       `

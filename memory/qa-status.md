@@ -9,6 +9,7 @@ Last updated: 2026-06-01
 - 2026-06-01: Full repo QA passed after frontend/backend static/security audits started rejecting aliases of Reflect.apply itself, including typed, assigned, and destructured alias forms. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
 - 2026-06-01: Full repo QA passed after frontend UI and backend route audits started rejecting aliases of the Promise object itself before raw rejection paths, including typed and assigned alias forms. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
 - 2026-06-01: Full repo QA passed after frontend/backend static/security audits started rejecting aliases of the Reflect object itself, including typed and assigned alias forms. Frontend static audit is 38 tests / 136 expects; backend security audit is 36 tests / 163 expects; predeploy lock is 464 expects; backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
+- 2026-06-01: Full repo QA passed after frontend/backend static/security audits started rejecting aliases of the Object object itself, including typed and assigned alias forms. Frontend static audit is 39 tests / 137 expects; backend security audit is 37 tests / 164 expects; predeploy lock is 466 expects; backend tests remain 178 pass / 611 expects; docs command audit is 351 refs; frontend build and bundle budget passed.
 
 ## สรุปล่าสุดสำหรับรอบถัดไป
 
