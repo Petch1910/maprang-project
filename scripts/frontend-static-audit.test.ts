@@ -957,12 +957,14 @@ describe('frontend static audit', () => {
         const reflectedErrorViaParen = (Reflect.get)(console, 'error')
         const reflectedErrorViaCall = Reflect.get.call(Reflect, console, 'error')
         const reflectedNamespaceError = Reflect.get(Reflect.get(window, 'console'), 'error')
+        const parenthesizedRootNamespaceError = Reflect.get(Reflect.get((window), 'console'), 'error')
         const descriptorError = Object.getOwnPropertyDescriptor(console, 'error')?.value
         descriptorError = Object.getOwnPropertyDescriptor(window.console, 'warn')?.value as typeof console.warn
         const descriptorErrorViaWindow = window.Object['getOwnPropertyDescriptor'](console, 'warn')?.value
         const descriptorErrorViaParen = (Object.getOwnPropertyDescriptor)(console, 'warn')?.value
         const descriptorErrorViaApply = Object.getOwnPropertyDescriptor.apply(Object, [console, 'warn'])?.value
         const descriptorNamespaceWarn = Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor(globalThis, 'console')?.value, 'warn')?.value
+        const descriptorParenthesizedRootWarn = Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor((globalThis), 'console')?.value, 'warn')?.value
         const { error: aliasedError, warn } = console
         const { error: bracketAliasedError } = window['console']
         const { warn: parenthesizedBracketAliasedWarn } = (globalThis['console'])
@@ -971,7 +973,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(26)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(28)
 
     expect(
       auditSuspiciousPatterns(
@@ -1053,10 +1055,12 @@ describe('frontend static audit', () => {
           Reflect.apply(Reflect.get(console, 'error'), console, [problem])
           Reflect.apply(Reflect.get(window.console, 'warn'), window.console, ['slow reflect target', problem])
           Reflect.apply(Reflect.get(Reflect.get(window, 'console'), 'error'), console, [problem])
+          Reflect.apply(Reflect.get(Reflect.get((window), 'console'), 'error'), console, [problem])
           Reflect.apply(Reflect.get((window['console']), 'error'), window.console, [problem])
           Reflect.apply(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
           Reflect.apply(Object.getOwnPropertyDescriptor(window.console, 'warn')?.value, window.console, ['slow descriptor target', problem])
           Reflect.apply(Object.getOwnPropertyDescriptor(Reflect.get(globalThis, 'console'), 'warn')?.value, console, ['slow retrieved namespace target', problem])
+          Reflect.apply(Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor((globalThis), 'console')?.value, 'warn')?.value, console, ['slow parenthesized namespace target', problem])
           Reflect.apply(Object.getOwnPropertyDescriptor((globalThis['console']), 'warn')?.value, globalThis.console, ['slow descriptor target', problem])
           globalThis.Reflect.apply(Reflect.get(console, 'error'), console, [problem])
           window.Reflect['apply'](window.Reflect['get'](console, 'warn'), window.console, ['slow reflect target', problem])
@@ -1081,7 +1085,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(25)
+    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(27)
   })
 
   test('reports frontend console object aliases', () => {
@@ -1098,13 +1102,15 @@ describe('frontend static audit', () => {
         const parenthesizedBracketLogger = (window['console'])
         globalLogger = (globalThis['console'])
         const reflectedLogger = Reflect.get(window, 'console')
+        const parenthesizedRootLogger = Reflect.get((window), 'console')
         globalLogger = Object.getOwnPropertyDescriptor(globalThis, 'console')?.value
+        globalLogger = Object.getOwnPropertyDescriptor((globalThis), 'console')?.value
         console.error('safe summary:', safeBrowserErrorSummary(error))
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(12)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(14)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {

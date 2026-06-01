@@ -74,7 +74,8 @@ const retrievalMethodAliasPattern = new RegExp(
 )
 const consoleObjectAccessor = String.raw`(?:\bconsole\b|globalThis\s*(?:(?:\?\.|\.)\s*console\b|(?:\?\.)?\s*\[\s*["']console["']\s*\]))`
 const consoleNamespaceRoot = String.raw`globalThis`
-const retrievedConsoleObjectValue = String.raw`(?:${reflectGetCallPrefix}\s*${consoleNamespaceRoot}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${consoleNamespaceRoot}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|(?:${objectDescriptorCallPrefix}\s*${consoleNamespaceRoot}\s*,\s*["']console["']\s*\)|${objectDescriptorMethodCallPrefix}${consoleNamespaceRoot}\s*,\s*["']console["']\s*\))\s*(?:\?\.|\.)\s*value)`
+const consoleNamespaceObjectAccessor = String.raw`(?:${consoleNamespaceRoot}|\(\s*${consoleNamespaceRoot}\s*\))`
+const retrievedConsoleObjectValue = String.raw`(?:${reflectGetCallPrefix}\s*${consoleNamespaceObjectAccessor}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|(?:${objectDescriptorCallPrefix}\s*${consoleNamespaceObjectAccessor}\s*,\s*["']console["']\s*\)|${objectDescriptorMethodCallPrefix}${consoleNamespaceObjectAccessor}\s*,\s*["']console["']\s*\))\s*(?:\?\.|\.)\s*value)`
 const consoleObjectValue = String.raw`(?:${consoleObjectAccessor}|${retrievedConsoleObjectValue})`
 const consoleObjectMemberAccessor = String.raw`(?:${consoleObjectValue}|\(\s*${consoleObjectValue}\s*\))`
 const consoleErrorWarnAccessor = String.raw`${consoleObjectMemberAccessor}\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`

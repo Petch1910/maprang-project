@@ -135,6 +135,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain("'โหลดข้อมูลไม่สำเร็จ:',")
     expect(predeploy).toContain('consoleErrorWarnAccessor')
     expect(predeploy).toContain('retrievedConsoleObjectValue')
+    expect(predeploy).toContain('consoleNamespaceObjectAccessor')
     expect(predeploy).toContain('consoleObjectValue')
     expect(predeploy).toContain('consoleObjectMemberAccessor')
     expect(predeploy).toContain('consoleErrorWarnCallPrefix')

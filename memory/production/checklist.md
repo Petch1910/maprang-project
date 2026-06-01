@@ -2,7 +2,7 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend static/security audits now reject reflected and descriptor console object retrieval aliases such as `Reflect.get(window, 'console')`, `Reflect.get(globalThis, 'console')`, and `Object.getOwnPropertyDescriptor(globalThis, 'console')?.value`, including nested `Reflect.get(Reflect.get(..., 'console'), 'error')` and descriptor raw-log forwarding. Full repo QA passed with frontend static audit 39 tests / 137 expects, backend security audit 37 tests / 164 expects, predeploy lock 477 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; production checklist blockers remain external staging/live-provider work.
+สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend static/security audits now reject parenthesized namespace-root console object retrieval aliases such as `Reflect.get((window), 'console')`, `Reflect.get((globalThis), 'console')`, and `Object.getOwnPropertyDescriptor((globalThis), 'console')?.value`, including nested reflected console method aliases and descriptor raw-log forwarding. Full repo QA passed with frontend static audit 39 tests / 137 expects, backend security audit 37 tests / 164 expects, predeploy lock 478 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; production checklist blockers remain external staging/live-provider work.
 
 ## ก่อนขึ้น production
 
