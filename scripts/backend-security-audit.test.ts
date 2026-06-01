@@ -1021,6 +1021,13 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const { reject: reflectedReject } = Reflect.get(globalThis, 'Promise')
+        const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
         const promiseCtor = Promise
         const typedPromiseCtor: PromiseConstructor = globalThis.Promise
         promiseCtor = (globalThis.Promise)
