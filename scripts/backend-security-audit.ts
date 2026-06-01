@@ -73,7 +73,10 @@ const retrievalMethodAliasPattern = new RegExp(
   'g',
 )
 const consoleObjectAccessor = String.raw`(?:\bconsole\b|globalThis\s*(?:(?:\?\.|\.)\s*console\b|(?:\?\.)?\s*\[\s*["']console["']\s*\]))`
-const consoleObjectMemberAccessor = String.raw`(?:${consoleObjectAccessor}|\(\s*${consoleObjectAccessor}\s*\))`
+const consoleNamespaceRoot = String.raw`globalThis`
+const retrievedConsoleObjectValue = String.raw`(?:${reflectGetCallPrefix}\s*${consoleNamespaceRoot}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${consoleNamespaceRoot}\s*,\s*["']console["'](?:\s*,[^)]*)?\s*\)|(?:${objectDescriptorCallPrefix}\s*${consoleNamespaceRoot}\s*,\s*["']console["']\s*\)|${objectDescriptorMethodCallPrefix}${consoleNamespaceRoot}\s*,\s*["']console["']\s*\))\s*(?:\?\.|\.)\s*value)`
+const consoleObjectValue = String.raw`(?:${consoleObjectAccessor}|${retrievedConsoleObjectValue})`
+const consoleObjectMemberAccessor = String.raw`(?:${consoleObjectValue}|\(\s*${consoleObjectValue}\s*\))`
 const consoleErrorWarnAccessor = String.raw`${consoleObjectMemberAccessor}\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
 const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const reflectGetConsoleErrorWarnValue = String.raw`(?:${reflectGetCallPrefix}\s*${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\))`
@@ -83,7 +86,7 @@ const descriptorConsoleErrorWarnValue = String.raw`(?:${objectDescriptorCallPref
 const descriptorConsoleErrorWarnValueCallPrefix = String.raw`${descriptorConsoleErrorWarnValue}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*(?:\?\.|\.)\s*bind\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const reflectConsoleErrorWarnApplyTarget = String.raw`(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})`
 const reflectConsoleErrorWarnApplyPrefix = String.raw`${reflectApplyCallPrefix}\s*${reflectConsoleErrorWarnApplyTarget}\s*,[\s\S]*?\[\s*`
-const consoleObjectAliasValue = String.raw`(?:\(\s*)?${consoleObjectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const consoleObjectAliasValue = String.raw`(?:\(\s*)?${consoleObjectValue}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
   'g',

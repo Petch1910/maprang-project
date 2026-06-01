@@ -2,7 +2,7 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend static/security audits now reject destructured console method aliases from bracket namespace objects such as `const { error } = window['console']`, `const { error } = globalThis['console']`, and `const { warn } = (globalThis['console'])`. Full repo QA passed with frontend static audit 39 tests / 137 expects, backend security audit 37 tests / 164 expects, predeploy lock 473 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
+สถานะ repo-owned ล่าสุด: 2026-06-01 frontend/backend static/security audits now reject reflected and descriptor console object retrieval aliases such as `Reflect.get(window, 'console')`, `Reflect.get(globalThis, 'console')`, and `Object.getOwnPropertyDescriptor(globalThis, 'console')?.value`, including nested `Reflect.get(Reflect.get(..., 'console'), 'error')` and descriptor raw-log forwarding. Full repo QA passed with frontend static audit 39 tests / 137 expects, backend security audit 37 tests / 164 expects, predeploy lock 477 expects, backend tests 178 pass / 611 expects, docs command audit 353 refs, frontend build, and bundle budget green; external deploy blockers below are unchanged.
 
 ## ตัวกั้นที่ยังเปิดอยู่
 

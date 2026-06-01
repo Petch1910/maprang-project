@@ -236,18 +236,20 @@ describe('backend security audit', () => {
         const reflectedErrorViaGlobal = globalThis.Reflect['get'](console, 'error')
         const reflectedErrorViaParen = (Reflect.get)(console, 'error')
         const reflectedErrorViaCall = Reflect.get.call(Reflect, console, 'error')
+        const reflectedNamespaceError = Reflect.get(Reflect.get(globalThis, 'console'), 'error')
         const descriptorError = Object.getOwnPropertyDescriptor(console, 'error')?.value
         descriptorError = Object.getOwnPropertyDescriptor(globalThis.console, 'warn')?.value as typeof console.warn
         const descriptorErrorViaGlobal = globalThis.Object['getOwnPropertyDescriptor'](console, 'warn')?.value
         const descriptorErrorViaParen = (Object.getOwnPropertyDescriptor)(console, 'warn')?.value
         const descriptorErrorViaApply = Object.getOwnPropertyDescriptor.apply(Object, [console, 'warn'])?.value
+        const descriptorNamespaceWarn = Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor(globalThis, 'console')?.value, 'warn')?.value
         const { error: aliasedError, warn } = console
         const { error: bracketAliasedError } = globalThis['console']
         const { warn: parenthesizedBracketAliasedWarn } = (globalThis['console'])
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(24)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(26)
 
     expect(
       messagesFor(`
@@ -311,9 +313,11 @@ describe('backend security audit', () => {
         } catch (error) {
           Reflect.apply(Reflect.get(console, 'error'), console, [error])
           Reflect.apply(Reflect.get(globalThis.console, 'warn'), globalThis.console, ['seed slow', error as Error])
+          Reflect.apply(Reflect.get(Reflect.get(globalThis, 'console'), 'error'), console, [error])
           Reflect.apply(Reflect.get((globalThis['console']), 'error'), globalThis.console, [error])
           Reflect.apply(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [error])
           Reflect.apply(Object.getOwnPropertyDescriptor(globalThis.console, 'warn')?.value, globalThis.console, ['seed slow', error as Error])
+          Reflect.apply(Object.getOwnPropertyDescriptor(Reflect.get(globalThis, 'console'), 'warn')?.value, console, ['seed retrieved namespace target', error as Error])
           Reflect.apply(Object.getOwnPropertyDescriptor((globalThis['console']), 'warn')?.value, globalThis.console, ['seed slow', error as Error])
           globalThis.Reflect.apply(Reflect.get(console, 'error'), console, [error])
           globalThis.Reflect['apply'](globalThis.Reflect['get'](console, 'warn'), globalThis.console, ['seed slow', error as Error])
@@ -336,7 +340,7 @@ describe('backend security audit', () => {
         }
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(27)
+    expect(messages.filter((message) => message === rawLogMessage)).toHaveLength(29)
   })
 
   test('catches backend console object aliases', () => {
@@ -351,10 +355,12 @@ describe('backend security audit', () => {
         globalLogger = globalThis['console']
         const parenthesizedBracketLogger = (globalThis['console'])
         globalLogger = (globalThis['console'])
+        const reflectedLogger = Reflect.get(globalThis, 'console')
+        globalLogger = Object.getOwnPropertyDescriptor(globalThis, 'console')?.value
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(10)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(12)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {
