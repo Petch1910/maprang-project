@@ -109,11 +109,13 @@ const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
+const consoleObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleObjectAliasValue}|=\s*\[\s*${consoleObjectAliasValue}|=\s*\[[^\]\n;]*?,\s*${consoleObjectAliasValue})`, 'g')
 const consoleErrorWarnAliasValue = String.raw`(?:\(\s*)?(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})\s*(?:\)\s*)?(?=\s*(?:[;,\n)\]}]|$|${bindMethodAccessor}|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
+const consoleErrorWarnContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleErrorWarnAliasValue}|=\s*\[\s*${consoleErrorWarnAliasValue}|=\s*\[[^\]\n;]*?,\s*${consoleErrorWarnAliasValue})`, 'g')
 const promiseNamespaceRoot = String.raw`globalThis`
 const promiseNamespaceObjectAccessor = String.raw`(?:${promiseNamespaceRoot}|\(\s*${promiseNamespaceRoot}\s*\))`
 const promiseObjectAccessor = String.raw`(?:Promise|${promiseNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Promise\b|(?:\?\.)?\s*\[\s*["']Promise["']\s*\]))`
@@ -335,7 +337,17 @@ const patterns = [
       'backend source ห้าม alias console object; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
   {
+    pattern: consoleObjectContainerAliasPattern,
+    message:
+      'backend source ห้าม alias console object; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
     pattern: consoleErrorWarnAliasPattern,
+    message:
+      'backend source ห้าม alias console.error/console.warn; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
+    pattern: consoleErrorWarnContainerAliasPattern,
     message:
       'backend source ห้าม alias console.error/console.warn; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },

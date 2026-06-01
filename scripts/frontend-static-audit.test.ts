@@ -1158,6 +1158,11 @@ describe('frontend static audit', () => {
         const descriptorParenthesizedBindNamespaceWarn = Object.getOwnPropertyDescriptor((Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'console')?.value, 'warn')?.value
         const optionalApplyNamespaceError = Reflect.get((Reflect.get.apply)?.(Reflect, [window, 'console']), 'error')
         const descriptorOptionalBindNamespaceWarn = Object.getOwnPropertyDescriptor((Object.getOwnPropertyDescriptor.bind(Object))?.(globalThis, 'console')?.value, 'warn')?.value
+        const loggerHooks = { error: console.error, warn: window.console.warn }
+        const loggerList = [console.error]
+        const loggerListWithPrefix = [safeLog, console.warn]
+        const reflectedLoggerHooks = { error: Reflect.get(console, 'error') }
+        const reflectedLoggerListWithPrefix = [safeLog, Reflect.get(console, 'warn')]
         const { error: aliasedError, warn } = console
         const { error: bracketAliasedError } = window['console']
         const { warn: parenthesizedBracketAliasedWarn } = (globalThis['console'])
@@ -1166,7 +1171,7 @@ describe('frontend static audit', () => {
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(42)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(48)
 
     expect(
       auditSuspiciousPatterns(
@@ -1385,12 +1390,17 @@ describe('frontend static audit', () => {
         globalLogger = Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'console')?.value
         globalLogger = (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'console')?.value
         globalLogger = (Object.getOwnPropertyDescriptor.bind(Object))?.(globalThis, 'console')?.value
+        const loggerHooks = { logger: console, globalLogger: window.console }
+        const loggerList = [console]
+        const loggerListWithPrefix = [safeLogger, globalThis.console]
+        const reflectedLoggerHooks = { logger: Reflect.get(window, 'console') }
+        const reflectedLoggerListWithPrefix = [safeLogger, Object.getOwnPropertyDescriptor(globalThis, 'console')?.value]
         console.error('safe summary:', safeBrowserErrorSummary(error))
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(28)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(34)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {

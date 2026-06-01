@@ -140,11 +140,13 @@ const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
+const consoleObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleObjectAliasValue}|=\s*\[\s*${consoleObjectAliasValue}|=\s*\[[^\]\n;]*?,\s*${consoleObjectAliasValue})`, 'g')
 const consoleErrorWarnAliasValue = String.raw`(?:\(\s*)?(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})\s*(?:\)\s*)?(?=\s*(?:[;,\n)\]}]|$|${bindMethodAccessor}|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
+const consoleErrorWarnContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleErrorWarnAliasValue}|=\s*\[\s*${consoleErrorWarnAliasValue}|=\s*\[[^\]\n;]*?,\s*${consoleErrorWarnAliasValue})`, 'g')
 const browserEventListenerPattern =
   /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
 const directLocationOriginPattern = /\b(?:(?:window|globalThis)\s*\.\s*)?location\s*\.\s*origin\b/g
@@ -554,7 +556,17 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
       'frontend source ห้าม alias console object; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
   {
+    pattern: consoleObjectContainerAliasPattern,
+    message:
+      'frontend source ห้าม alias console object; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
     pattern: consoleErrorWarnAliasPattern,
+    message:
+      'frontend source ห้าม alias console.error/console.warn; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
+    pattern: consoleErrorWarnContainerAliasPattern,
     message:
       'frontend source ห้าม alias console.error/console.warn; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },

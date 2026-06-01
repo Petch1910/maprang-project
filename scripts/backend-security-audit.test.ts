@@ -259,13 +259,18 @@ describe('backend security audit', () => {
         const descriptorParenthesizedBindNamespaceWarn = Object.getOwnPropertyDescriptor((Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'console')?.value, 'warn')?.value
         const optionalApplyNamespaceError = Reflect.get((Reflect.get.apply)?.(Reflect, [globalThis, 'console']), 'error')
         const descriptorOptionalBindNamespaceWarn = Object.getOwnPropertyDescriptor((Object.getOwnPropertyDescriptor.bind(Object))?.(globalThis, 'console')?.value, 'warn')?.value
+        const loggerHooks = { error: console.error, warn: globalThis.console.warn }
+        const loggerList = [console.error]
+        const loggerListWithPrefix = [safeLog, console.warn]
+        const reflectedLoggerHooks = { error: Reflect.get(console, 'error') }
+        const reflectedLoggerListWithPrefix = [safeLog, Reflect.get(console, 'warn')]
         const { error: aliasedError, warn } = console
         const { error: bracketAliasedError } = globalThis['console']
         const { warn: parenthesizedBracketAliasedWarn } = (globalThis['console'])
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(42)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(48)
 
     expect(
       messagesFor(`
@@ -464,10 +469,15 @@ describe('backend security audit', () => {
         globalLogger = Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'console')?.value
         globalLogger = (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'console')?.value
         globalLogger = (Object.getOwnPropertyDescriptor.bind(Object))?.(globalThis, 'console')?.value
+        const loggerHooks = { logger: console, globalLogger: globalThis.console }
+        const loggerList = [console]
+        const loggerListWithPrefix = [safeLogger, globalThis.console]
+        const reflectedLoggerHooks = { logger: Reflect.get(globalThis, 'console') }
+        const reflectedLoggerListWithPrefix = [safeLogger, Object.getOwnPropertyDescriptor(globalThis, 'console')?.value]
         console.error(summarizeSeedError(error))
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(28)
+    expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(34)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {
