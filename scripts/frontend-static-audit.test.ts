@@ -810,6 +810,18 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const rejectParenthesizedList = ([Promise.reject])
+          const rejectParenthesizedListWithPrefix = ([safeReject, Promise.reject])
+          const reflectedRejectParenthesizedList = ([Reflect.get(Promise, 'reject')])
+          const reflectedRejectParenthesizedListWithPrefix = ([safeReject, Reflect.get(Promise, 'reject')])
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(4)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const { reject: reflectedReject } = Reflect.get(window, 'Promise')
           const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
           const { reject: parenthesizedReflectNamespaceReject } = (window).Reflect.get(window, 'Promise')
@@ -863,6 +875,18 @@ describe('frontend static audit', () => {
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
     ).toHaveLength(25)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          const promiseParenthesizedList = ([window.Promise])
+          const promiseParenthesizedListWithPrefix = ([fallback, window.Promise])
+          const reflectedPromiseParenthesizedList = ([Reflect.get(window, 'Promise')])
+          const reflectedPromiseParenthesizedListWithPrefix = ([fallback, Reflect.get(window, 'Promise')])
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
@@ -1176,6 +1200,20 @@ describe('frontend static audit', () => {
     expect(
       auditSuspiciousPatterns(
         `
+          const loggerParenthesizedList = ([console.error])
+          const loggerParenthesizedListWithPrefix = ([safeLog, console.warn])
+          const reflectedLoggerParenthesizedList = ([Reflect.get(console, 'error')])
+          const reflectedLoggerParenthesizedListWithPrefix = ([safeLog, Reflect.get(console, 'warn')])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(4)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
           const { error: typedAliasedError, warn: typedWarn }: Console = console
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
@@ -1419,6 +1457,20 @@ describe('frontend static audit', () => {
     ).map((finding) => finding.message)
 
     expect(messages.filter((message) => message.includes('alias console object'))).toHaveLength(34)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const loggerParenthesizedList = ([console])
+          const loggerParenthesizedListWithPrefix = ([safeLogger, globalThis.console])
+          const reflectedLoggerParenthesizedList = ([Reflect.get(window, 'console')])
+          const reflectedLoggerParenthesizedListWithPrefix = ([safeLogger, Object.getOwnPropertyDescriptor(globalThis, 'console')?.value])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(4)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {
