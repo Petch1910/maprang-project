@@ -918,15 +918,17 @@ describe('frontend static audit', () => {
         const assertedError = console.error as typeof console.error
         const reflectedError = Reflect.get(console, 'error')
         reflectedError = Reflect.get(window.console, 'warn') as typeof console.warn
+        const reflectedErrorViaWindow = window.Reflect['get'](console, 'error')
         const descriptorError = Object.getOwnPropertyDescriptor(console, 'error')?.value
         descriptorError = Object.getOwnPropertyDescriptor(window.console, 'warn')?.value as typeof console.warn
+        const descriptorErrorViaWindow = window.Object['getOwnPropertyDescriptor'](console, 'warn')?.value
         const { error: aliasedError, warn } = console
         console.error('safe summary:', safeBrowserErrorSummary(error))
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(10)
+    expect(messages.filter((message) => message.includes('alias console.error/console.warn'))).toHaveLength(12)
 
     expect(
       auditSuspiciousPatterns(
@@ -950,13 +952,20 @@ describe('frontend static audit', () => {
           Reflect.apply(Reflect.get(window.console, 'warn'), window.console, ['slow reflect target', problem])
           Reflect.apply(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
           Reflect.apply(Object.getOwnPropertyDescriptor(window.console, 'warn')?.value, window.console, ['slow descriptor target', problem])
+          globalThis.Reflect.apply(Reflect.get(console, 'error'), console, [problem])
+          window.Reflect['apply'](window.Reflect['get'](console, 'warn'), window.console, ['slow reflect target', problem])
+          (Reflect.apply)(Object.getOwnPropertyDescriptor(console, 'error')?.value, console, [problem])
+          (window.Reflect['apply'])(window.Object['getOwnPropertyDescriptor'](console, 'warn')?.value, window.console, ['slow descriptor target', problem])
+          globalThis.Reflect.get(console, 'error')(problem)
+          window.Reflect['get'](window.console, 'warn').call(window.console, 'slow reflect get', problem)
+          window.Object['getOwnPropertyDescriptor'](console, 'error')?.value(problem)
           console.error('safe summary:', safeBrowserErrorSummary(problem))
         }
       `,
       'apps/frontend/src/pages/FixturePage.tsx',
     ).map((finding) => finding.message)
 
-    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(4)
+    expect(messages.filter((message) => message.includes('log raw error object'))).toHaveLength(11)
   })
 
   test('reports frontend console object aliases', () => {
