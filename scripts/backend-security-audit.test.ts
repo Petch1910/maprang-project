@@ -283,6 +283,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const loggerMap = new Map([['error', console.error]])
+        const loggerMapWithPrefix = new Map([['safe', safeLog], ['warn', console.warn]])
+        const reflectedLoggerMap = new Map([['warn', Reflect.get(console, 'warn')]])
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
         const { error: typedAliasedError, warn: typedWarn }: Console = console
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
     ).toHaveLength(1)
@@ -523,6 +531,14 @@ describe('backend security audit', () => {
         const loggerParenthesizedShorthandBoxWithPrefix = ({ safeLogger, console })
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
     ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
+        const loggerMap = new Map([['console', console]])
+        const loggerMapWithPrefix = new Map([['safe', safeLogger], ['console', globalThis.console]])
+        const reflectedLoggerMap = new Map([['console', Reflect.get(globalThis, 'console')]])
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
+    ).toHaveLength(3)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {
@@ -1230,6 +1246,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const rejectMap = new Map([['reject', Promise.reject]])
+        const rejectMapWithPrefix = new Map([['safe', safeReject], ['reject', Promise.reject]])
+        const reflectedRejectMap = new Map([['reject', Reflect.get(Promise, 'reject')]])
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
         const { reject: reflectedReject } = Reflect.get(globalThis, 'Promise')
         const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
         const { reject: parenthesizedReflectNamespaceReject } = (globalThis).Reflect.get(globalThis, 'Promise')
@@ -1296,6 +1320,14 @@ describe('backend security audit', () => {
         const promiseParenthesizedShorthandBoxWithPrefix = ({ fallback, Promise })
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
     ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
+        const promiseMap = new Map([['Promise', Promise]])
+        const promiseMapWithPrefix = new Map([['fallback', fallback], ['Promise', globalThis.Promise]])
+        const reflectedPromiseMap = new Map([['Promise', Reflect.get(globalThis, 'Promise')]])
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(3)
 
     expect(
       messagesFor(`

@@ -822,6 +822,17 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const rejectMap = new Map([['reject', Promise.reject]])
+          const rejectMapWithPrefix = new Map([['safe', safeReject], ['reject', Promise.reject]])
+          const reflectedRejectMap = new Map([['reject', Reflect.get(Promise, 'reject')]])
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const { reject: reflectedReject } = Reflect.get(window, 'Promise')
           const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
           const { reject: parenthesizedReflectNamespaceReject } = (window).Reflect.get(window, 'Promise')
@@ -899,6 +910,17 @@ describe('frontend static audit', () => {
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
     ).toHaveLength(4)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          const promiseMap = new Map([['Promise', Promise]])
+          const promiseMapWithPrefix = new Map([['fallback', fallback], ['Promise', window.Promise]])
+          const reflectedPromiseMap = new Map([['Promise', Reflect.get(window, 'Promise')]])
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(3)
 
     expect(
       auditRawUiErrorThrows(
@@ -1226,6 +1248,19 @@ describe('frontend static audit', () => {
     expect(
       auditSuspiciousPatterns(
         `
+          const loggerMap = new Map([['error', console.error]])
+          const loggerMapWithPrefix = new Map([['safe', safeLog], ['warn', console.warn]])
+          const reflectedLoggerMap = new Map([['warn', Reflect.get(console, 'warn')]])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(3)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
           const { error: typedAliasedError, warn: typedWarn }: Console = console
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
@@ -1497,6 +1532,19 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
     ).toHaveLength(4)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const loggerMap = new Map([['console', console]])
+          const loggerMapWithPrefix = new Map([['safe', safeLogger], ['console', globalThis.console]])
+          const reflectedLoggerMap = new Map([['console', Reflect.get(window, 'console')]])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(3)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {
