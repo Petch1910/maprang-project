@@ -4,6 +4,7 @@ Last updated: 2026-06-01
 
 - 2026-06-01: Full repo QA passed after raw error log and Promise rejection guards started rejecting parenthesized Reflect.get/Object.getOwnPropertyDescriptor retrieval for console error/warn and Promise.reject targets. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
 - 2026-06-01: Full repo QA passed after raw error log guards started rejecting namespace, computed, and parenthesized Reflect/Object forwarding for console error/warn retrieval targets, including globalThis/window Reflect get/apply and Object descriptor-value forms. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
+- 2026-06-01: Full repo QA passed after raw error log and Promise rejection guards started rejecting `.call`/`.apply`/`.bind` forwarding of Reflect.get/Object.getOwnPropertyDescriptor retrieval for console error/warn and Promise.reject targets. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
 
 ## สรุปล่าสุดสำหรับรอบถัดไป
 
