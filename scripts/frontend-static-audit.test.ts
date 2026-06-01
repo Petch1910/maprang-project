@@ -833,6 +833,16 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const rejectCreated = Object.create(null, { reject: { value: Promise.reject } })
+          const reflectedRejectCreated = window.Object.create(null, { reject: { value: Reflect.get(Promise, 'reject') } })
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const rejectEntries = Object.fromEntries([['reject', Promise.reject]])
           const rejectEntriesWithPrefix = Object.fromEntries([['safe', safeReject], ['reject', Promise.reject]])
           const reflectedRejectEntries = window.Object.fromEntries([['reject', Reflect.get(Promise, 'reject')]])
@@ -840,6 +850,16 @@ describe('frontend static audit', () => {
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
     ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          const promiseCreated = Object.create(null, { Promise: { value: Promise } })
+          const reflectedPromiseCreated = window.Object.create(null, { Promise: { value: Reflect.get(window, 'Promise') } })
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(2)
 
     expect(
       auditRawUiErrorThrows(
@@ -1371,6 +1391,18 @@ describe('frontend static audit', () => {
     expect(
       auditSuspiciousPatterns(
         `
+          const loggerCreated = Object.create(null, { error: { value: console.error } })
+          const reflectedLoggerCreated = window.Object.create(null, { warn: { value: Reflect.get(console, 'warn') } })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
           const loggerEntries = Object.fromEntries([['error', console.error]])
           const loggerEntriesWithPrefix = Object.fromEntries([['safe', safeLog], ['warn', console.warn]])
           const reflectedLoggerEntries = window.Object.fromEntries([['warn', Reflect.get(console, 'warn')]])
@@ -1595,6 +1627,18 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
     ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const reflectCreated = Object.create(null, { Reflect: { value: Reflect } })
+          const reflectedReflectCreated = window.Object.create(null, { Reflect: { value: window.Reflect } })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(2)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1663,6 +1707,18 @@ describe('frontend static audit', () => {
         `
           const objectDefined = Object.defineProperty({}, 'Object', { value: Object })
           const objectDefinedMany = Object.defineProperties({}, { Object: { value: globalThis.Object } })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const objectCreated = Object.create(null, { Object: { value: Object } })
+          const reflectedObjectCreated = window.Object.create(null, { Object: { value: globalThis.Object } })
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
@@ -1859,6 +1915,19 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
     ).toHaveLength(3)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const loggerCreated = Object.create(null, { console: { value: console } })
+          const reflectedLoggerCreated = window.Object.create(null, { console: { value: Reflect.get(window, 'console') } })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(2)
+
     expect(
       auditSuspiciousPatterns(
         `

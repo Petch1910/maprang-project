@@ -315,6 +315,13 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const loggerCreated = Object.create(null, { error: { value: console.error } })
+        const reflectedLoggerCreated = globalThis.Object.create(null, { warn: { value: Reflect.get(console, 'warn') } })
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
         const loggerSet = new Set([console.error])
         const loggerArrayFactory = Array.of(console.warn)
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
@@ -461,6 +468,14 @@ describe('backend security audit', () => {
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Reflect object')),
     ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        const reflectCreated = Object.create(null, { Reflect: { value: Reflect } })
+        const reflectedReflectCreated = globalThis.Object.create(null, { Reflect: { value: globalThis.Reflect } })
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(2)
   })
 
   test('catches backend Object object aliases', () => {
@@ -513,6 +528,14 @@ describe('backend security audit', () => {
       messagesFor(`
         const objectDefined = Object.defineProperty({}, 'Object', { value: Object })
         const objectDefinedMany = Object.defineProperties({}, { Object: { value: globalThis.Object } })
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        const objectCreated = Object.create(null, { Object: { value: Object } })
+        const reflectedObjectCreated = globalThis.Object.create(null, { Object: { value: globalThis.Object } })
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Object object')),
     ).toHaveLength(2)
@@ -671,6 +694,13 @@ describe('backend security audit', () => {
         const reflectedLoggerDefined = globalThis.Object.defineProperty({}, 'console', { value: Reflect.get(globalThis, 'console') })
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
     ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
+        const loggerCreated = Object.create(null, { console: { value: console } })
+        const reflectedLoggerCreated = globalThis.Object.create(null, { console: { value: Reflect.get(globalThis, 'console') } })
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
+    ).toHaveLength(2)
 
     expect(
       messagesFor(`
@@ -1428,6 +1458,13 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const rejectCreated = Object.create(null, { reject: { value: Promise.reject } })
+        const reflectedRejectCreated = globalThis.Object.create(null, { reject: { value: Reflect.get(Promise, 'reject') } })
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
         const rejectSet = new Set([Promise.reject])
         const rejectArrayFactory = Array.from([Promise.reject])
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
@@ -1542,6 +1579,13 @@ describe('backend security audit', () => {
         const reflectedPromiseDefined = globalThis.Object.defineProperty({}, 'Promise', { value: Reflect.get(globalThis, 'Promise') })
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
     ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
+        const promiseCreated = Object.create(null, { Promise: { value: Promise } })
+        const reflectedPromiseCreated = globalThis.Object.create(null, { Promise: { value: Reflect.get(globalThis, 'Promise') } })
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(2)
 
     expect(
       messagesFor(`
