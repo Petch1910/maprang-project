@@ -29,3 +29,4 @@
 - [0025 - เพิ่ม helper กลางสำหรับ cross-window messaging](./0025-add-frontend-cross-window-messaging-helper.md)
 - [0026 - ล็อกชุด guard ความปลอดภัย UI และ route error](./0026-lock-frontend-ui-route-error-guards.md)
 - [0027 - ล็อก namespace reflection guard ของ Promise และ console](./0027-lock-namespace-reflection-guards.md)
+- [0028 - ล็อก container alias guard ของ Promise และ console](./0028-lock-promise-console-container-guards.md)
