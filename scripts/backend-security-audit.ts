@@ -53,18 +53,19 @@ const globalReflectObjectAccessor = String.raw`${globalNamespaceObjectAccessor}\
 const globalObjectObjectAccessor = String.raw`${globalNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Object\b|(?:\?\.)?\s*\[\s*["']Object["']\s*\])`
 const reflectObjectAccessor = String.raw`(?:Reflect\b|${globalReflectObjectAccessor})`
 const objectAccessor = String.raw`(?:Object\b|${globalObjectObjectAccessor})`
+const readonlyContainerPrefix = String.raw`(?:${objectAccessor}\s*(?:(?:\?\.|\.)\s*(?:freeze|seal)|(?:\?\.)?\s*\[\s*["'](?:freeze|seal)["']\s*\])\s*\(\s*)?`
 const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const reflectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
   'g',
 )
-const reflectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${reflectObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${reflectObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${reflectObjectAliasValue}|=\s*(?:\(\s*)?\{\s*Reflect\b(?=\s*(?:[,}]|$))|=\s*(?:\(\s*)?\{[^}\n;]*?,\s*Reflect\b(?=\s*(?:[,}]|$)))`, 'g')
+const reflectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${reflectObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${reflectObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${reflectObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\{\s*Reflect\b(?=\s*(?:[,}]|$))|=\s*${readonlyContainerPrefix}(?:\(\s*)?\{[^}\n;]*?,\s*Reflect\b(?=\s*(?:[,}]|$)))`, 'g')
 const objectObjectAliasValue = String.raw`(?:\(\s*)?${objectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const objectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${objectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${objectObjectAliasValue}`,
   'g',
 )
-const objectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${objectObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${objectObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${objectObjectAliasValue}|=\s*(?:\(\s*)?\{\s*Object\b(?=\s*(?:[,}]|$))|=\s*(?:\(\s*)?\{[^}\n;]*?,\s*Object\b(?=\s*(?:[,}]|$)))`, 'g')
+const objectObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${objectObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${objectObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${objectObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\{\s*Object\b(?=\s*(?:[,}]|$))|=\s*${readonlyContainerPrefix}(?:\(\s*)?\{[^}\n;]*?,\s*Object\b(?=\s*(?:[,}]|$)))`, 'g')
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyCallPrefix = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const reflectGetAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*get|(?:\?\.)?\s*\[\s*["']get["']\s*\])`
@@ -111,13 +112,13 @@ const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
-const consoleObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\{\s*(?:[^\}\n;]*?,\s*)?\bconsole\b\s*(?=[,\}])|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${consoleObjectAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${consoleObjectAliasValue})`, 'g')
+const consoleObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${consoleObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${consoleObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\{\s*(?:[^\}\n;]*?,\s*)?\bconsole\b\s*(?=[,\}])|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${consoleObjectAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${consoleObjectAliasValue})`, 'g')
 const consoleErrorWarnAliasValue = String.raw`(?:\(\s*)?(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})\s*(?:\)\s*)?(?=\s*(?:[;,\n)\]}]|$|${bindMethodAccessor}|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
-const consoleErrorWarnContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleErrorWarnAliasValue}|=\s*(?:\(\s*)?\[\s*${consoleErrorWarnAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${consoleErrorWarnAliasValue}|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${consoleErrorWarnAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${consoleErrorWarnAliasValue})`, 'g')
+const consoleErrorWarnContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleErrorWarnAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${consoleErrorWarnAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${consoleErrorWarnAliasValue}|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${consoleErrorWarnAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${consoleErrorWarnAliasValue})`, 'g')
 const promiseNamespaceRoot = String.raw`globalThis`
 const promiseNamespaceObjectAccessor = String.raw`(?:${promiseNamespaceRoot}|\(\s*${promiseNamespaceRoot}\s*\))`
 const promiseObjectAccessor = String.raw`(?:Promise|${promiseNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Promise\b|(?:\?\.)?\s*\[\s*["']Promise["']\s*\]))`
@@ -146,13 +147,13 @@ const promiseObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${promiseObjectAliasValue}`,
   'g',
 )
-const promiseObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\{\s*(?:[^\}\n;]*?,\s*)?\bPromise\b\s*(?=[,\}])|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${promiseObjectAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${promiseObjectAliasValue})`, 'g')
+const promiseObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${promiseObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${promiseObjectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\{\s*(?:[^\}\n;]*?,\s*)?\bPromise\b\s*(?=[,\}])|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${promiseObjectAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${promiseObjectAliasValue})`, 'g')
 const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})${aliasValueTerminator}`
 const promiseRejectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectMemberAccessor}`,
   'g',
 )
-const promiseRejectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseRejectAliasValue}|=\s*(?:\(\s*)?\[\s*${promiseRejectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${promiseRejectAliasValue}|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${promiseRejectAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${promiseRejectAliasValue})`, 'g')
+const promiseRejectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseRejectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${promiseRejectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${promiseRejectAliasValue}|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${promiseRejectAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${promiseRejectAliasValue})`, 'g')
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
   `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawErrorArrayElementPatternFor('error')}|${reflectGetConsoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectGetConsoleErrorWarnForwardPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${descriptorConsoleErrorWarnValueCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`,

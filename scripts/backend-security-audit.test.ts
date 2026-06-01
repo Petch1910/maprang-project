@@ -298,6 +298,15 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const loggerFrozenList = Object.freeze([console.error])
+        const loggerFrozenListWithPrefix = Object.seal([safeLog, console.warn])
+        const reflectedLoggerFrozenList = globalThis.Object.freeze([Reflect.get(console, 'error')])
+        const reflectedLoggerFrozenListWithPrefix = globalThis.Object.seal([safeLog, Reflect.get(console, 'warn')])
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
         const { error: typedAliasedError, warn: typedWarn }: Console = console
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
     ).toHaveLength(1)
@@ -394,6 +403,16 @@ describe('backend security audit', () => {
       `, 'prisma/seed.ts')
 
     expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(15)
+
+    expect(
+      messagesFor(`
+        const reflectFrozenList = Object.freeze([Reflect])
+        const reflectFrozenListWithPrefix = Object.seal([safeNs, globalThis.Reflect])
+        const reflectFrozenShorthand = Object.freeze({ Reflect })
+        const reflectFrozenShorthandWithPrefix = globalThis.Object.seal({ safeNs, Reflect })
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(4)
   })
 
   test('catches backend Object object aliases', () => {
@@ -415,6 +434,16 @@ describe('backend security audit', () => {
       `, 'prisma/seed.ts')
 
     expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(15)
+
+    expect(
+      messagesFor(`
+        const objectFrozenList = Object.freeze([Object])
+        const objectFrozenListWithPrefix = Object.seal([safeNs, globalThis.Object])
+        const objectFrozenShorthand = Object.freeze({ Object })
+        const objectFrozenShorthandWithPrefix = globalThis.Object.seal({ safeNs, Object })
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(4)
   })
 
   test('catches Reflect.apply console retrieval targets', () => {
@@ -553,6 +582,17 @@ describe('backend security audit', () => {
         const loggerArrayFactory = Array.from([globalThis.console])
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
     ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        const loggerFrozenList = Object.freeze([console])
+        const loggerFrozenListWithPrefix = Object.seal([safeLogger, globalThis.console])
+        const reflectedLoggerFrozenList = globalThis.Object.freeze([Reflect.get(globalThis, 'console')])
+        const reflectedLoggerFrozenListWithPrefix = globalThis.Object.seal([safeLogger, Object.getOwnPropertyDescriptor(globalThis, 'console')?.value])
+        const loggerFrozenShorthandBox = Object.freeze({ console })
+        const loggerFrozenShorthandBoxWithPrefix = globalThis.Object.seal({ safeLogger, console })
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
+    ).toHaveLength(6)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {
@@ -1275,6 +1315,15 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const rejectFrozenList = Object.freeze([Promise.reject])
+        const rejectFrozenListWithPrefix = Object.seal([safeReject, Promise.reject])
+        const reflectedRejectFrozenList = globalThis.Object.freeze([Reflect.get(Promise, 'reject')])
+        const reflectedRejectFrozenListWithPrefix = globalThis.Object.seal([safeReject, Reflect.get(Promise, 'reject')])
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
         const { reject: reflectedReject } = Reflect.get(globalThis, 'Promise')
         const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
         const { reject: parenthesizedReflectNamespaceReject } = (globalThis).Reflect.get(globalThis, 'Promise')
@@ -1356,6 +1405,15 @@ describe('backend security audit', () => {
         const promiseArrayFactory = Array.of(globalThis.Promise)
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
     ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        const promiseFrozenList = Object.freeze([Promise])
+        const promiseFrozenListWithPrefix = Object.seal([fallback, globalThis.Promise])
+        const promiseFrozenShorthandBox = Object.freeze({ Promise })
+        const promiseFrozenShorthandBoxWithPrefix = globalThis.Object.seal({ fallback, Promise })
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(4)
 
     expect(
       messagesFor(`

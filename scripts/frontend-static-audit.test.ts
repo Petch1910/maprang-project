@@ -843,6 +843,18 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const rejectFrozenList = Object.freeze([Promise.reject])
+          const rejectFrozenListWithPrefix = Object.seal([safeReject, Promise.reject])
+          const reflectedRejectFrozenList = window.Object.freeze([Reflect.get(Promise, 'reject')])
+          const reflectedRejectFrozenListWithPrefix = globalThis.Object.seal([safeReject, Reflect.get(Promise, 'reject')])
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(4)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const { reject: reflectedReject } = Reflect.get(window, 'Promise')
           const { reject: descriptorReject } = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
           const { reject: parenthesizedReflectNamespaceReject } = (window).Reflect.get(window, 'Promise')
@@ -941,6 +953,18 @@ describe('frontend static audit', () => {
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
     ).toHaveLength(2)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          const promiseFrozenList = Object.freeze([Promise])
+          const promiseFrozenListWithPrefix = Object.seal([fallback, window.Promise])
+          const promiseFrozenShorthandBox = Object.freeze({ Promise })
+          const promiseFrozenShorthandBoxWithPrefix = globalThis.Object.seal({ fallback, Promise })
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
@@ -1293,6 +1317,20 @@ describe('frontend static audit', () => {
     expect(
       auditSuspiciousPatterns(
         `
+          const loggerFrozenList = Object.freeze([console.error])
+          const loggerFrozenListWithPrefix = Object.seal([safeLog, console.warn])
+          const reflectedLoggerFrozenList = window.Object.freeze([Reflect.get(console, 'error')])
+          const reflectedLoggerFrozenListWithPrefix = globalThis.Object.seal([safeLog, Reflect.get(console, 'warn')])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(4)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
           const { error: typedAliasedError, warn: typedWarn }: Console = console
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
@@ -1402,6 +1440,20 @@ describe('frontend static audit', () => {
     ).map((finding) => finding.message)
 
     expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(15)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const reflectFrozenList = Object.freeze([Reflect])
+          const reflectFrozenListWithPrefix = Object.seal([safeNs, window.Reflect])
+          const reflectFrozenShorthand = Object.freeze({ Reflect })
+          const reflectFrozenShorthandWithPrefix = globalThis.Object.seal({ safeNs, Reflect })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(4)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1426,6 +1478,20 @@ describe('frontend static audit', () => {
     ).map((finding) => finding.message)
 
     expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(15)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const objectFrozenList = Object.freeze([Object])
+          const objectFrozenListWithPrefix = Object.seal([safeNs, globalThis.Object])
+          const objectFrozenShorthand = Object.freeze({ Object })
+          const objectFrozenShorthandWithPrefix = globalThis.Object.seal({ safeNs, Object })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(4)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -1589,6 +1655,22 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
     ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const loggerFrozenList = Object.freeze([console])
+          const loggerFrozenListWithPrefix = Object.seal([safeLogger, globalThis.console])
+          const reflectedLoggerFrozenList = window.Object.freeze([Reflect.get(window, 'console')])
+          const reflectedLoggerFrozenListWithPrefix = globalThis.Object.seal([safeLogger, Object.getOwnPropertyDescriptor(globalThis, 'console')?.value])
+          const loggerFrozenShorthandBox = Object.freeze({ console })
+          const loggerFrozenShorthandBoxWithPrefix = globalThis.Object.seal({ safeLogger, console })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(6)
   })
 
   test('reports typed catch-variable raw frontend errors', () => {
