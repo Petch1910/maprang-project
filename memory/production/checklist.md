@@ -2,8 +2,8 @@
 
 อัปเดตล่าสุด: 2026-06-01
 
-สถานะ repo-owned ล่าสุด: 2026-06-01 computed bind reflection method alias guard is locked as the latest repo-owned baseline on top of decision `0027` namespace reflection guard contract. Full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 496 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green; external staging/live-provider/database blockers are unchanged.
-Repo-owned decision lock: decision `0027` namespace reflection guard contract plus computed bind reflection method aliases, including bracket-bind forms for `Reflect.get` and `Reflect.apply`, are now the current production checklist baseline; full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 496 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green before staging/live-provider smoke.
+สถานะ repo-owned ล่าสุด: 2026-06-01 computed call/apply reflection forwarding guard is locked as the latest repo-owned baseline on top of decision `0027` namespace reflection guard contract. Full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 504 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green; external staging/live-provider/database blockers are unchanged.
+Repo-owned decision lock: decision `0027` namespace reflection guard contract plus computed call/apply reflection forwarding, including bracket-call/bracket-apply forms for `Reflect.get` and `Reflect.apply`, are now the current production checklist baseline; full deterministic qa:repo passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 504 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green before staging/live-provider smoke.
 
 ## ก่อนขึ้น production
 

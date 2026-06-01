@@ -968,8 +968,12 @@ describe('backend security audit', () => {
               return Object.getOwnPropertyDescriptor?.(globalThis, 'Promise')?.value.reject(error)
               return (Object.getOwnPropertyDescriptor)?.(globalThis, 'Promise')?.value.reject(error)
               return Reflect.get.apply(Reflect, [globalThis, 'Promise']).reject(error)
+              return Reflect.get['call'](Reflect, globalThis, 'Promise').reject(error)
+              return Reflect.get['apply'](Reflect, [globalThis, 'Promise']).reject(error)
               return Reflect.get.bind(Reflect)(globalThis, 'Promise').reject(error)
               return Object.getOwnPropertyDescriptor.apply(Object, [globalThis, 'Promise'])?.value.reject(error)
+              return Object.getOwnPropertyDescriptor['call'](Object, globalThis, 'Promise')?.value.reject(error)
+              return Object.getOwnPropertyDescriptor['apply'](Object, [globalThis, 'Promise'])?.value.reject(error)
               return Object.getOwnPropertyDescriptor.bind(Object)(globalThis, 'Promise')?.value.reject(error)
               return (Reflect.get.apply)(Reflect, [globalThis, 'Promise']).reject(error)
               return (Reflect.get.bind(Reflect))(globalThis, 'Promise').reject(error)
@@ -1002,6 +1006,8 @@ describe('backend security audit', () => {
       'return globalThis.Reflect["apply"]?.(Promise.reject, Promise, [error])',
       'return (Reflect.apply)(Promise.reject, Promise, [error])',
       'return (Reflect.apply)?.(Promise.reject, Promise, [error])',
+      'return Reflect.apply["call"](Reflect, Promise.reject, Promise, [error])',
+      'return Reflect.apply["apply"](Reflect, [Promise.reject, Promise, [error]])',
       'return (globalThis.Reflect["apply"])(Promise.reject, Promise, [error])',
       'return Reflect.apply(globalThis.Promise.reject, globalThis.Promise, [error])',
       "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [error])",

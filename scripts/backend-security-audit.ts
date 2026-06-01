@@ -43,6 +43,9 @@ function escapeRegExp(value: string) {
 
 const routeMethods = new Set(['get', 'post', 'patch', 'put', 'delete'])
 const variableTypeAnnotation = String.raw`(?:\s*:\s*[^=;,\n]+)?`
+const callMethodAccessor = String.raw`(?:(?:\?\.|\.)\s*call|(?:\?\.)?\s*\[\s*["']call["']\s*\])`
+const applyMethodAccessor = String.raw`(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
+const callOrApplyMethodAccessor = String.raw`(?:${callMethodAccessor}|${applyMethodAccessor})`
 const bindMethodAccessor = String.raw`(?:(?:\?\.|\.)\s*bind|(?:\?\.)?\s*\[\s*["']bind["']\s*\])`
 const globalNamespaceObjectAccessor = String.raw`(?:globalThis|\(\s*globalThis\s*\))`
 const globalReflectObjectAccessor = String.raw`${globalNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Reflect\b|(?:\?\.)?\s*\[\s*["']Reflect["']\s*\])`
@@ -63,13 +66,13 @@ const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.
 const reflectApplyCallPrefix = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const reflectGetAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*get|(?:\?\.)?\s*\[\s*["']get["']\s*\])`
 const reflectGetCallPrefix = String.raw`(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?(?:\?\.)?\s*\(`
-const reflectGetMethodCallPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*(?:\?\.|\.)\s*call\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*call)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
-const reflectGetMethodApplyPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*(?:\?\.|\.)\s*apply\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*apply)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
+const reflectGetMethodCallPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*${callMethodAccessor}\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*${callMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
+const reflectGetMethodApplyPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*${applyMethodAccessor}\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*${applyMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
 const reflectGetMethodBindPrefix = String.raw`(?:\(\s*${reflectGetAccessor}\s*${bindMethodAccessor}\s*\)|(?:\(\s*)?${reflectGetAccessor}\s*(?:\)\s*)?\s*${bindMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const objectDescriptorAccessor = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*getOwnPropertyDescriptor|(?:\?\.)?\s*\[\s*["']getOwnPropertyDescriptor["']\s*\])`
 const objectDescriptorCallPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?(?:\?\.)?\s*\(`
-const objectDescriptorMethodCallPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*(?:\?\.|\.)\s*call\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*call)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
-const objectDescriptorMethodApplyPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*(?:\?\.|\.)\s*apply\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*(?:\?\.|\.)\s*apply)\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
+const objectDescriptorMethodCallPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*${callMethodAccessor}\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*${callMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
+const objectDescriptorMethodApplyPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*${applyMethodAccessor}\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*${applyMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
 const objectDescriptorMethodBindPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*${bindMethodAccessor}\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*${bindMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?:\?\.)?\s*\(`
 const boundRetrievalMethodAliasValue = String.raw`(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const retrievalMethodAliasValue = String.raw`(?:${boundRetrievalMethodAliasValue}|(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b)))`
@@ -84,14 +87,17 @@ const retrievedConsoleObjectValue = String.raw`(?:${reflectGetCallPrefix}\s*${co
 const consoleObjectValue = String.raw`(?:${consoleObjectAccessor}|${retrievedConsoleObjectValue})`
 const consoleObjectMemberAccessor = String.raw`(?:${consoleObjectValue}|\(\s*${consoleObjectValue}\s*\))`
 const consoleErrorWarnAccessor = String.raw`${consoleObjectMemberAccessor}\s*(?:(?:\?\.|\.)\s*(?:error|warn)|(?:\?\.)?\s*\[\s*["'](?:error|warn)["']\s*\])`
-const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
+const consoleErrorWarnCallPrefix = String.raw`${consoleErrorWarnAccessor}(?:(?:\s*${callOrApplyMethodAccessor})?\s*(?:\?\.)?\s*\(|\s*${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const reflectGetConsoleErrorWarnValue = String.raw`(?:${reflectGetCallPrefix}\s*${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["'](?:\s*,[^)]*)?\s*\))`
 const reflectGetConsoleErrorWarnCallPrefix = String.raw`${reflectGetConsoleErrorWarnValue}\s*(?:\?\.)?\s*\(`
-const reflectGetConsoleErrorWarnForwardPrefix = String.raw`${reflectGetConsoleErrorWarnValue}\s*(?:(?:\?\.|\.)\s*(?:call|apply)\s*(?:\?\.)?\s*\(|${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
+const reflectGetConsoleErrorWarnForwardPrefix = String.raw`${reflectGetConsoleErrorWarnValue}\s*(?:${callOrApplyMethodAccessor}\s*(?:\?\.)?\s*\(|${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const descriptorConsoleErrorWarnValue = String.raw`(?:${objectDescriptorCallPrefix}\s*${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["']\s*\)|${objectDescriptorMethodCallPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["']\s*\)|${objectDescriptorMethodApplyPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${consoleObjectMemberAccessor}\s*,\s*["'](?:error|warn)["']\s*\))\s*(?:\?\.|\.)\s*value`
-const descriptorConsoleErrorWarnValueCallPrefix = String.raw`${descriptorConsoleErrorWarnValue}(?:(?:\s*(?:\?\.|\.)\s*(?:call|apply))?\s*(?:\?\.)?\s*\(|\s*${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
+const descriptorConsoleErrorWarnValueCallPrefix = String.raw`${descriptorConsoleErrorWarnValue}(?:(?:\s*${callOrApplyMethodAccessor})?\s*(?:\?\.)?\s*\(|\s*${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const reflectConsoleErrorWarnApplyTarget = String.raw`(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})`
-const reflectConsoleErrorWarnApplyPrefix = String.raw`${reflectApplyCallPrefix}\s*${reflectConsoleErrorWarnApplyTarget}\s*,[\s\S]*?\[\s*`
+const reflectApplyMethodCallPrefix = String.raw`(?:\(\s*${reflectApplyAccessor}\s*${callMethodAccessor}\s*\)|(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?\s*${callMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
+const reflectApplyMethodApplyPrefix = String.raw`(?:\(\s*${reflectApplyAccessor}\s*${applyMethodAccessor}\s*\)|(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?\s*${applyMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
+const reflectApplyInvocationPrefix = String.raw`(?:${reflectApplyCallPrefix}|${reflectApplyMethodCallPrefix}|${reflectApplyMethodApplyPrefix})`
+const reflectConsoleErrorWarnApplyPrefix = String.raw`${reflectApplyInvocationPrefix}\s*${reflectConsoleErrorWarnApplyTarget}\s*,[\s\S]*?\[\s*`
 const consoleObjectAliasValue = String.raw`(?:\(\s*)?${consoleObjectValue}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
@@ -112,8 +118,8 @@ const promiseRejectAccessor = String.raw`${promiseObjectMemberAccessor}\s*(?:(?:
 const reflectGetPromiseRejectValue = String.raw`(?:${reflectGetCallPrefix}\s*${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\))`
 const descriptorPromiseRejectValue = String.raw`(?:${objectDescriptorCallPrefix}\s*${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodCallPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodApplyPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\))\s*(?:\?\.|\.)\s*value`
 const retrievedPromiseRejectValue = String.raw`(?:${reflectGetPromiseRejectValue}|${descriptorPromiseRejectValue})`
-const reflectPromiseRejectApplyPrefix = String.raw`${reflectApplyCallPrefix}\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
-const reflectRetrievedPromiseRejectApplyPrefix = String.raw`${reflectApplyCallPrefix}\s*${retrievedPromiseRejectValue}\s*,[\s\S]*?\[\s*`
+const reflectPromiseRejectApplyPrefix = String.raw`${reflectApplyInvocationPrefix}\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
+const reflectRetrievedPromiseRejectApplyPrefix = String.raw`${reflectApplyInvocationPrefix}\s*${retrievedPromiseRejectValue}\s*,[\s\S]*?\[\s*`
 const boundReflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const reflectApplyAliasValue = String.raw`(?:${boundReflectApplyAliasValue}|(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b)))`
 const reflectApplyAliasPattern = new RegExp(
