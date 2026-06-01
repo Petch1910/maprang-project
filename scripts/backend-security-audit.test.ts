@@ -1153,8 +1153,14 @@ describe('backend security audit', () => {
         const typedRejectLater: typeof Promise.reject = Promise.reject
         let rejectLater = Promise?.['reject'] as typeof Promise.reject
         const { reject } = Promise
+        const rejectHooks = {
+          reject: Promise.reject,
+          globalReject: globalThis.Promise['reject'],
+        }
+        const rejectList = [Promise.reject]
+        const reflectedRejectList = [Reflect.get(Promise, 'reject')]
       `, 'chat.routes.ts').filter((message) => message === 'route ห้าม alias Promise.reject; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.'),
-    ).toHaveLength(4)
+    ).toHaveLength(8)
 
     expect(
       messagesFor(`
@@ -1196,8 +1202,14 @@ describe('backend security audit', () => {
         promiseCtor = (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'Promise')?.value
         const optionalApplyPromiseCtor = (Reflect.get.apply)?.(Reflect, [globalThis, 'Promise'])
         promiseCtor = (Object.getOwnPropertyDescriptor.bind(Object))?.(globalThis, 'Promise')?.value
+        const promiseHooks = {
+          PromiseRef: Promise,
+          globalPromiseRef: globalThis.Promise,
+        }
+        const promiseList = [globalThis.Promise]
+        const reflectedPromiseList = [Reflect.get(globalThis, 'Promise')]
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
-    ).toHaveLength(19)
+    ).toHaveLength(23)
 
     expect(
       messagesFor(`

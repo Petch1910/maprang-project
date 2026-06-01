@@ -784,10 +784,20 @@ describe('frontend static audit', () => {
           const rejectNow = Promise.reject
           let rejectLater = Promise?.['reject'] as typeof Promise.reject
           const { reject } = Promise
+          const rejectHooks = {
+            reject: Promise.reject,
+            globalReject: window.Promise['reject'],
+          }
+          const rejectList = [Promise.reject]
+          const reflectedRejectList = [Reflect.get(Promise, 'reject')]
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).map((finding) => finding.message),
     ).toEqual([
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
@@ -837,10 +847,16 @@ describe('frontend static audit', () => {
           promiseCtor = (Object.getOwnPropertyDescriptor.bind(Object))(globalThis, 'Promise')?.value
           const optionalApplyPromiseCtor = (Reflect.get.apply)?.(Reflect, [window, 'Promise'])
           promiseCtor = (Object.getOwnPropertyDescriptor.bind(Object))?.(globalThis, 'Promise')?.value
+          const promiseHooks = {
+            PromiseRef: Promise,
+            globalPromiseRef: window.Promise,
+          }
+          const promiseList = [window.Promise]
+          const reflectedPromiseList = [Reflect.get(window, 'Promise')]
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(19)
+    ).toHaveLength(23)
 
     expect(
       auditRawUiErrorThrows(

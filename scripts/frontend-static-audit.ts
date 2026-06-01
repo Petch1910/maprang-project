@@ -111,12 +111,14 @@ const promiseObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${promiseObjectAliasValue}`,
   'g',
 )
+const promiseObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseObjectAliasValue}|=\s*\[\s*${promiseObjectAliasValue})`, 'g')
 const rawUiErrorRejectPattern = rawPromiseRejectPatternFor('error')
 const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})${aliasValueTerminator}`
 const promiseRejectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectMemberAccessor}`,
   'g',
 )
+const promiseRejectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseRejectAliasValue}|=\s*\[\s*${promiseRejectAliasValue})`, 'g')
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g
 const consoleNamespaceRoot = String.raw`(?:window|globalThis)`
 const consoleNamespaceObjectAccessor = String.raw`(?:${consoleNamespaceRoot}|\(\s*${consoleNamespaceRoot}\s*\))`
@@ -849,7 +851,21 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       message: promiseRejectAliasMessage,
     })
   }
+  for (const match of content.matchAll(promiseRejectContainerAliasPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: promiseRejectAliasMessage,
+    })
+  }
   for (const match of content.matchAll(promiseObjectAliasPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: promiseObjectAliasMessage,
+    })
+  }
+  for (const match of content.matchAll(promiseObjectContainerAliasPattern)) {
     findings.push({
       file,
       line: lineFor(content, match.index ?? 0),
