@@ -142,13 +142,13 @@ const promiseObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${promiseObjectAliasValue}`,
   'g',
 )
-const promiseObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseObjectAliasValue}|=\s*\[\s*${promiseObjectAliasValue})`, 'g')
+const promiseObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseObjectAliasValue}|=\s*\[\s*${promiseObjectAliasValue}|=\s*\[[^\]\n;]*?,\s*${promiseObjectAliasValue})`, 'g')
 const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})${aliasValueTerminator}`
 const promiseRejectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectMemberAccessor}`,
   'g',
 )
-const promiseRejectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseRejectAliasValue}|=\s*\[\s*${promiseRejectAliasValue})`, 'g')
+const promiseRejectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseRejectAliasValue}|=\s*\[\s*${promiseRejectAliasValue}|=\s*\[[^\]\n;]*?,\s*${promiseRejectAliasValue})`, 'g')
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
   `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawErrorArrayElementPatternFor('error')}|${reflectGetConsoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectGetConsoleErrorWarnForwardPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${descriptorConsoleErrorWarnValueCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`,

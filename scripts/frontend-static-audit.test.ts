@@ -789,11 +789,15 @@ describe('frontend static audit', () => {
             globalReject: window.Promise['reject'],
           }
           const rejectList = [Promise.reject]
+          const rejectListWithPrefix = [safeReject, Promise.reject]
           const reflectedRejectList = [Reflect.get(Promise, 'reject')]
+          const reflectedRejectListWithPrefix = [safeReject, Reflect.get(Promise, 'reject')]
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).map((finding) => finding.message),
     ).toEqual([
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
+      'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
       'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.',
@@ -852,11 +856,13 @@ describe('frontend static audit', () => {
             globalPromiseRef: window.Promise,
           }
           const promiseList = [window.Promise]
+          const promiseListWithPrefix = [fallback, window.Promise]
           const reflectedPromiseList = [Reflect.get(window, 'Promise')]
+          const reflectedPromiseListWithPrefix = [fallback, Reflect.get(window, 'Promise')]
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(23)
+    ).toHaveLength(25)
 
     expect(
       auditRawUiErrorThrows(

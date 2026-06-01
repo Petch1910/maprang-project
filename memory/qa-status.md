@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-01
+- 2026-06-01 Promise array-entry container alias guard pass: frontend/backend static/security audits now reject later array entries that hide Promise object or `Promise.reject` references, including reflected Promise/reject entries. Full deterministic repo QA passed with memory audit 37 Markdown files, docs command audit 355 refs, predeploy regression 3 tests / 528 expects, frontend static audit 39 tests / 181 expects, backend security audit 37 tests / 192 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green.
+
 - 2026-06-01 Promise container alias guard pass: frontend/backend static/security audits now reject object/array container aliases for Promise object and `Promise.reject` references, including retrieved reject functions. Full deterministic `bun run qa:repo` passed with memory audit 37 Markdown files, docs command audit 355 refs, predeploy regression 3 tests / 526 expects, frontend static audit 39 tests / 181 expects, backend security audit 37 tests / 192 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green.
 
 - 2026-06-01 object/array reflection container alias guard pass: frontend/backend static/security audits now reject object properties plus array/argument entries that hide reflected retrieval or `Reflect.apply` methods before raw Promise rejection or console log forwarding. Full deterministic `bun run qa:repo` passed with memory audit 37 Markdown files, docs command audit 354 refs, predeploy regression 3 tests / 522 expects, frontend static audit 39 tests / 181 expects, backend security audit 37 tests / 192 expects, backend tests 178 pass / 611 expects, frontend build, and bundle budget green.

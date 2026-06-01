@@ -1158,9 +1158,11 @@ describe('backend security audit', () => {
           globalReject: globalThis.Promise['reject'],
         }
         const rejectList = [Promise.reject]
+        const rejectListWithPrefix = [safeReject, Promise.reject]
         const reflectedRejectList = [Reflect.get(Promise, 'reject')]
+        const reflectedRejectListWithPrefix = [safeReject, Reflect.get(Promise, 'reject')]
       `, 'chat.routes.ts').filter((message) => message === 'route ห้าม alias Promise.reject; ใช้ routeErrorResponse หรือ response ที่ควบคุมได้.'),
-    ).toHaveLength(8)
+    ).toHaveLength(10)
 
     expect(
       messagesFor(`
@@ -1207,9 +1209,11 @@ describe('backend security audit', () => {
           globalPromiseRef: globalThis.Promise,
         }
         const promiseList = [globalThis.Promise]
+        const promiseListWithPrefix = [fallback, globalThis.Promise]
         const reflectedPromiseList = [Reflect.get(globalThis, 'Promise')]
+        const reflectedPromiseListWithPrefix = [fallback, Reflect.get(globalThis, 'Promise')]
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
-    ).toHaveLength(23)
+    ).toHaveLength(25)
 
     expect(
       messagesFor(`
