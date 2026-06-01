@@ -40,7 +40,6 @@ const variableTypeAnnotation = String.raw`(?:\s*:\s*[^=;,\n]+)?`
 const promiseNamespaceRoot = String.raw`(?:window|globalThis)`
 const promiseNamespaceObjectAccessor = String.raw`(?:${promiseNamespaceRoot}|\(\s*${promiseNamespaceRoot}\s*\))`
 const promiseObjectAccessor = String.raw`(?:Promise|${promiseNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Promise\b|(?:\?\.)?\s*\[\s*["']Promise["']\s*\]))`
-const promiseRejectAccessor = String.raw`${promiseObjectAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
 const reflectObjectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Reflect\b`
 const objectAccessor = String.raw`(?:(?:window|globalThis)\s*(?:\?\.|\.)\s*)?Object\b`
 const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
@@ -68,8 +67,12 @@ const retrievalMethodAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${retrievalMethodAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${retrievalMethodAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bget\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectObjectAccessor}\b|\b(?:const|let|var)\s*\{[^}]*\bgetOwnPropertyDescriptor\b[^}]*\}${variableTypeAnnotation}\s*=\s*${objectAccessor}\b`,
   'g',
 )
-const reflectGetPromiseRejectValue = String.raw`(?:${reflectGetCallPrefix}\s*${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${promiseObjectAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\))`
-const descriptorPromiseRejectValue = String.raw`(?:${objectDescriptorCallPrefix}\s*${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodCallPrefix}${promiseObjectAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodApplyPrefix}${promiseObjectAccessor}\s*,\s*["']reject["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${promiseObjectAccessor}\s*,\s*["']reject["']\s*\))\s*(?:\?\.|\.)\s*value`
+const retrievedPromiseObjectValue = String.raw`(?:${reflectGetCallPrefix}\s*${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^)]*)?\s*\)|(?:${objectDescriptorCallPrefix}\s*${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\)|${objectDescriptorMethodCallPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\)|${objectDescriptorMethodApplyPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\))\s*(?:\?\.|\.)\s*value)`
+const promiseObjectValue = String.raw`(?:${promiseObjectAccessor}|${retrievedPromiseObjectValue})`
+const promiseObjectMemberAccessor = String.raw`(?:${promiseObjectValue}|\(\s*${promiseObjectValue}\s*\))`
+const promiseRejectAccessor = String.raw`${promiseObjectMemberAccessor}\s*(?:(?:\?\.|\.)\s*reject|(?:\?\.)?\s*\[\s*["']reject["']\s*\])`
+const reflectGetPromiseRejectValue = String.raw`(?:${reflectGetCallPrefix}\s*${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["'](?:\s*,[^)]*)?\s*\))`
+const descriptorPromiseRejectValue = String.raw`(?:${objectDescriptorCallPrefix}\s*${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodCallPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\)|${objectDescriptorMethodApplyPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${promiseObjectMemberAccessor}\s*,\s*["']reject["']\s*\))\s*(?:\?\.|\.)\s*value`
 const retrievedPromiseRejectValue = String.raw`(?:${reflectGetPromiseRejectValue}|${descriptorPromiseRejectValue})`
 const reflectApplyAccessor = String.raw`${reflectObjectAccessor}\s*(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const reflectApplyCallPrefix = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?\s*\(`
@@ -80,7 +83,7 @@ const reflectApplyAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectApplyAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${reflectApplyAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bapply\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectObjectAccessor}\b`,
   'g',
 )
-const promiseObjectAliasValue = String.raw`(?:\(\s*)?${promiseObjectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const promiseObjectAliasValue = String.raw`(?:\(\s*)?${promiseObjectValue}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${promiseObjectAliasValue}`,
   'g',
@@ -88,7 +91,7 @@ const promiseObjectAliasPattern = new RegExp(
 const rawUiErrorRejectPattern = rawPromiseRejectPatternFor('error')
 const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(
-  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectAccessor}\b`,
+  String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectMemberAccessor}`,
   'g',
 )
 const catchErrorStartPattern = /catch\s*\(\s*([A-Za-z_$][\w$]*)(?:\s*:\s*(?:unknown|any))?\s*\)\s*\{/g

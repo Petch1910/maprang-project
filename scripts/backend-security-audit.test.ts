@@ -889,6 +889,8 @@ describe('backend security audit', () => {
               return globalThis.Promise?.['reject']?.(error as Error)
               return (globalThis).Promise.reject(error)
               return globalThis['Promise']['reject'](error)
+              return Reflect.get(globalThis, 'Promise').reject(error)
+              return Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value.reject(error)
             }
           })
       `, 'chat.routes.ts').some((message) => message.includes('return raw error object')),
@@ -912,6 +914,8 @@ describe('backend security audit', () => {
       'return (globalThis.Reflect["apply"])(Promise.reject, Promise, [error])',
       'return Reflect.apply(globalThis.Promise.reject, globalThis.Promise, [error])',
       "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [error])",
+      "return Reflect.apply(Reflect.get(globalThis, 'Promise').reject, Reflect.get(globalThis, 'Promise'), [error])",
+      "return Reflect.apply(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value['reject'], Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, [error])",
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(globalThis.Promise, "reject").call(globalThis.Promise, error)',
       'return globalThis.Reflect["get"](Promise, "reject")(error)',
@@ -1022,8 +1026,10 @@ describe('backend security audit', () => {
         promiseCtor = (globalThis.Promise)
         const bracketPromiseCtor = globalThis['Promise']
         promiseCtor = (globalThis)['Promise']
+        const reflectedPromiseCtor = Reflect.get(globalThis, 'Promise')
+        promiseCtor = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
-    ).toHaveLength(5)
+    ).toHaveLength(7)
 
     expect(
       messagesFor(`
@@ -1041,8 +1047,10 @@ describe('backend security audit', () => {
         const descriptorRejectViaParen = (Object.getOwnPropertyDescriptor)(Promise, 'reject')?.value
         const reflectedRejectViaCall = Reflect.get.call(Reflect, Promise, 'reject')
         const descriptorRejectViaApply = Object.getOwnPropertyDescriptor.apply(Object, [Promise, 'reject'])?.value
+        const reflectedNamespaceReject = Reflect.get(Reflect.get(globalThis, 'Promise'), 'reject')
+        const descriptorNamespaceReject = Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, 'reject')?.value
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
-    ).toHaveLength(8)
+    ).toHaveLength(10)
 
     expect(
       messagesFor(`

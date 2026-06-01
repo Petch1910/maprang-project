@@ -456,11 +456,13 @@ describe('frontend static audit', () => {
             return globalThis.Promise?.['reject']?.(error as Error)
             return (window).Promise.reject(error)
             return globalThis['Promise']['reject'](error)
+            return Reflect.get(window, 'Promise').reject(error)
+            return Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value.reject(error)
           }
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       ),
-    ).toHaveLength(8)
+    ).toHaveLength(10)
 
     for (const rejectedExpression of [
       'return Promise.reject.call(Promise, error)',
@@ -475,6 +477,8 @@ describe('frontend static audit', () => {
       'return (window.Reflect["apply"])(Promise.reject, Promise, [error])',
       'return Reflect.apply(window.Promise.reject, window.Promise, [error])',
       "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [error])",
+      "return Reflect.apply(Reflect.get(window, 'Promise').reject, Reflect.get(window, 'Promise'), [error])",
+      "return Reflect.apply(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value['reject'], Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, [error])",
       'return Reflect.get(Promise, "reject")(error)',
       'return Reflect.get(window.Promise, "reject").call(window.Promise, error)',
       'return window.Reflect["get"](Promise, "reject")(error)',
@@ -593,11 +597,13 @@ describe('frontend static audit', () => {
             return globalThis.Promise?.['reject']?.(problem as Error)
             return (window).Promise.reject(problem)
             return globalThis['Promise']['reject'](problem)
+            return Reflect.get(window, 'Promise').reject(problem)
+            return Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value.reject(problem)
           }
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ),
-    ).toHaveLength(8)
+    ).toHaveLength(10)
 
     for (const rejectedExpression of [
       'return Promise.reject.call(Promise, problem)',
@@ -610,6 +616,8 @@ describe('frontend static audit', () => {
       'return (Reflect.apply)(Promise.reject, Promise, [problem])',
       "return (window.Reflect['apply'])(Promise.reject, Promise, [problem])",
       "return Reflect.apply(globalThis['Promise']['reject'], globalThis['Promise'], [problem])",
+      "return Reflect.apply(Reflect.get(window, 'Promise').reject, Reflect.get(window, 'Promise'), [problem])",
+      "return Reflect.apply(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value['reject'], Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, [problem])",
       'return Reflect.get(Promise, "reject")(problem)',
       'return globalThis.Reflect.get(Promise, "reject")(problem)',
       'return (Reflect.get)(Promise, "reject")(problem)',
@@ -710,10 +718,12 @@ describe('frontend static audit', () => {
           promiseCtor = (globalThis.Promise)
           const bracketPromiseCtor = window['Promise']
           promiseCtor = (globalThis)['Promise']
+          const reflectedPromiseCtor = Reflect.get(window, 'Promise')
+          promiseCtor = Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(5)
+    ).toHaveLength(7)
 
     expect(
       auditRawUiErrorThrows(
@@ -724,10 +734,12 @@ describe('frontend static audit', () => {
           const descriptorRejectViaBracket = Object['getOwnPropertyDescriptor'](Promise, 'reject')?.value
           const reflectedRejectViaCall = Reflect.get.call(Reflect, Promise, 'reject')
           const descriptorRejectViaApply = Object.getOwnPropertyDescriptor.apply(Object, [Promise, 'reject'])?.value
+          const reflectedNamespaceReject = Reflect.get(Reflect.get(window, 'Promise'), 'reject')
+          const descriptorNamespaceReject = Object.getOwnPropertyDescriptor(Object.getOwnPropertyDescriptor(globalThis, 'Promise')?.value, 'reject')?.value
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(6)
+    ).toHaveLength(8)
 
     expect(
       auditRawUiErrorThrows(
