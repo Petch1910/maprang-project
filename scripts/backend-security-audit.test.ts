@@ -951,6 +951,14 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        const promiseCtor = Promise
+        const typedPromiseCtor: PromiseConstructor = globalThis.Promise
+        promiseCtor = (globalThis.Promise)
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(3)
+
+    expect(
+      messagesFor(`
         const { reject: typedReject }: PromiseConstructor = Promise
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
     ).toHaveLength(1)

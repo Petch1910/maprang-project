@@ -695,6 +695,17 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const promiseCtor = Promise
+          const typedPromiseCtor: PromiseConstructor = window.Promise
+          promiseCtor = (globalThis.Promise)
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(3)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const reflectedReject = Reflect.get(Promise, 'reject')
           const descriptorReject = Object.getOwnPropertyDescriptor(Promise, 'reject')?.value
           const reflectedRejectViaWindow = window.Reflect['get'](Promise, 'reject')

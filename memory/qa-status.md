@@ -7,6 +7,7 @@ Last updated: 2026-06-01
 - 2026-06-01: Full repo QA passed after raw error log and Promise rejection guards started rejecting `.call`/`.apply`/`.bind` forwarding of Reflect.get/Object.getOwnPropertyDescriptor retrieval for console error/warn and Promise.reject targets. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
 - 2026-06-01: Full repo QA passed after frontend/backend static/security audits started rejecting aliases of Reflect.get/Object.getOwnPropertyDescriptor themselves, including typed, assigned, and destructured alias forms. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
 - 2026-06-01: Full repo QA passed after frontend/backend static/security audits started rejecting aliases of Reflect.apply itself, including typed, assigned, and destructured alias forms. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
+- 2026-06-01: Full repo QA passed after frontend UI and backend route audits started rejecting aliases of the Promise object itself before raw rejection paths, including typed and assigned alias forms. Backend tests remain 178 pass / 611 expects; docs command audit is 350 refs; frontend build and bundle budget passed.
 
 ## สรุปล่าสุดสำหรับรอบถัดไป
 

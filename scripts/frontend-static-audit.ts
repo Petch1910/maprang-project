@@ -68,6 +68,11 @@ const reflectApplyAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectApplyAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${reflectApplyAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bapply\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectObjectAccessor}\b`,
   'g',
 )
+const promiseObjectAliasValue = String.raw`(?:\(\s*)?${promiseObjectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const promiseObjectAliasPattern = new RegExp(
+  String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${promiseObjectAliasValue}`,
+  'g',
+)
 const rawUiErrorRejectPattern = rawPromiseRejectPatternFor('error')
 const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
 const promiseRejectAliasPattern = new RegExp(
@@ -108,6 +113,8 @@ const rawUiErrorThrowMessage =
   'หน้า UI ห้าม throw raw error object จาก component/page; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
 const promiseRejectAliasMessage =
   'หน้า UI ห้าม alias Promise.reject; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
+const promiseObjectAliasMessage =
+  'หน้า UI ห้าม alias Promise object; ให้คืนผลลัพธ์ที่ควบคุมได้หรือแปลงเป็นข้อความผู้ใช้ก่อน.'
 const rawFrontendErrorLogMessage =
   'frontend source ห้าม log raw error object; ใช้ logUnexpectedError หรือ summary ที่ปลอดภัย'
 const rawFrontendErrorClassifierMessage =
@@ -777,6 +784,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       file,
       line: lineFor(content, match.index ?? 0),
       message: promiseRejectAliasMessage,
+    })
+  }
+  for (const match of content.matchAll(promiseObjectAliasPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: promiseObjectAliasMessage,
     })
   }
   for (const pattern of rawPromiseExecutorRejectPatternsFor('error')) {

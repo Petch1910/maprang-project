@@ -153,6 +153,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('retrievalMethodAliasPattern')
     expect(predeploy).toContain('reflectApplyAliasValue')
     expect(predeploy).toContain('reflectApplyAliasPattern')
+    expect(predeploy).toContain('promiseObjectAliasValue')
+    expect(predeploy).toContain('promiseObjectAliasPattern')
     expect(predeploy).toContain(String.raw`(?:window|globalThis)\\s*(?:\\?\\.|\\.)\\s*`)
     expect(predeploy).toContain(String.raw`console\\s*(?:(?:\\?\\.|\\.)\\s*(?:error|warn)|(?:\\?\\.)?\\s*\\[`)
     expect(predeploy).toContain(String.raw`["\'](?:error|warn)["\']\\s*\\]`)
