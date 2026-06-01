@@ -514,6 +514,15 @@ describe('backend security audit', () => {
         const reflectedLoggerParenthesizedListWithPrefix = ([safeLogger, Object.getOwnPropertyDescriptor(globalThis, 'console')?.value])
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
     ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
+        const loggerShorthandBox = { console }
+        const loggerShorthandBoxWithPrefix = { safeLogger, console }
+        const loggerParenthesizedShorthandBox = ({ console })
+        const loggerParenthesizedShorthandBoxWithPrefix = ({ safeLogger, console })
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
+    ).toHaveLength(4)
   })
 
   test('catches AuthError responses that bypass the public response helper', () => {
@@ -1276,6 +1285,15 @@ describe('backend security audit', () => {
         const promiseParenthesizedListWithPrefix = ([fallback, globalThis.Promise])
         const reflectedPromiseParenthesizedList = ([Reflect.get(globalThis, 'Promise')])
         const reflectedPromiseParenthesizedListWithPrefix = ([fallback, Reflect.get(globalThis, 'Promise')])
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(4)
+
+    expect(
+      messagesFor(`
+        const promiseShorthandBox = { Promise }
+        const promiseShorthandBoxWithPrefix = { fallback, Promise }
+        const promiseParenthesizedShorthandBox = ({ Promise })
+        const promiseParenthesizedShorthandBoxWithPrefix = ({ fallback, Promise })
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
     ).toHaveLength(4)
 

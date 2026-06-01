@@ -891,6 +891,18 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          const promiseShorthandBox = { Promise }
+          const promiseShorthandBoxWithPrefix = { fallback, Promise }
+          const promiseParenthesizedShorthandBox = ({ Promise })
+          const promiseParenthesizedShorthandBoxWithPrefix = ({ fallback, Promise })
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(4)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const reflectedReject = Reflect.get(Promise, 'reject')
           const descriptorReject = Object.getOwnPropertyDescriptor(Promise, 'reject')?.value
           const optionalReflectedReject = Reflect.get?.(Promise, 'reject')
@@ -1465,6 +1477,20 @@ describe('frontend static audit', () => {
           const loggerParenthesizedListWithPrefix = ([safeLogger, globalThis.console])
           const reflectedLoggerParenthesizedList = ([Reflect.get(window, 'console')])
           const reflectedLoggerParenthesizedListWithPrefix = ([safeLogger, Object.getOwnPropertyDescriptor(globalThis, 'console')?.value])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(4)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          const loggerShorthandBox = { console }
+          const loggerShorthandBoxWithPrefix = { safeLogger, console }
+          const loggerParenthesizedShorthandBox = ({ console })
+          const loggerParenthesizedShorthandBoxWithPrefix = ({ safeLogger, console })
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )

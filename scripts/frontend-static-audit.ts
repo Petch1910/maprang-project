@@ -113,7 +113,7 @@ const promiseObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${promiseObjectAliasValue}`,
   'g',
 )
-const promiseObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${promiseObjectAliasValue})`, 'g')
+const promiseObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${promiseObjectAliasValue}|=\s*(?:\(\s*)?\{\s*(?:[^\}\n;]*?,\s*)?\bPromise\b\s*(?=[,\}]))`, 'g')
 const rawUiErrorRejectPattern = rawPromiseRejectPatternFor('error')
 const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})${aliasValueTerminator}`
 const promiseRejectAliasPattern = new RegExp(
@@ -142,7 +142,7 @@ const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
-const consoleObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${consoleObjectAliasValue})`, 'g')
+const consoleObjectContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\[\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\[[^\]\n;]*?,\s*${consoleObjectAliasValue}|=\s*(?:\(\s*)?\{\s*(?:[^\}\n;]*?,\s*)?\bconsole\b\s*(?=[,\}]))`, 'g')
 const consoleErrorWarnAliasValue = String.raw`(?:\(\s*)?(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})\s*(?:\)\s*)?(?=\s*(?:[;,\n)\]}]|$|${bindMethodAccessor}|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}`,
