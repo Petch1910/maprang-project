@@ -306,9 +306,15 @@ describe('backend security audit', () => {
         const { getOwnPropertyDescriptor: computedGetOwn } = globalThis['Object']
         const { call: reflectedGetCall } = Reflect.get
         const { apply: descriptorGetApply } = Object.getOwnPropertyDescriptor
+        const retrievalHooks = {
+          getReflect: Reflect.get,
+          getCall: Reflect.get['call'],
+          descriptorApply: Object.getOwnPropertyDescriptor['apply'],
+        }
+        const retrievalList = [Reflect.get['apply'], Object.getOwnPropertyDescriptor]
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(30)
+    expect(messages.filter((message) => message.includes('alias Reflect.get/Object.getOwnPropertyDescriptor'))).toHaveLength(35)
   })
 
   test('catches backend Reflect.apply aliases', () => {
@@ -330,9 +336,14 @@ describe('backend security audit', () => {
         const { apply: computedReflectApply } = globalThis['Reflect']
         const { call: reflectApplyCall } = Reflect.apply
         const { apply: forwardedReflectApply } = globalThis.Reflect['apply']
+        const applyHooks = {
+          applyReflect: Reflect.apply,
+          applyCall: Reflect.apply['call'],
+        }
+        const applyList = [Reflect.apply, globalThis.Reflect['apply']['apply']]
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(17)
+    expect(messages.filter((message) => message.includes('alias Reflect.apply'))).toHaveLength(21)
   })
 
   test('catches backend Reflect object aliases', () => {

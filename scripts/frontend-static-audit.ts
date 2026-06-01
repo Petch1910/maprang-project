@@ -37,6 +37,7 @@ const rawFrontendResponseTextPattern = /\b[A-Za-z_$][\w$]*(?:\s*\.\s*clone\s*\(\
 const rawFrontendFetchPattern = /\b(?:fetch|window\s*\.\s*fetch|globalThis\s*\.\s*fetch)\s*\(/g
 const rawUiErrorThrowPattern = /\bthrow\s*(?:\(\s*)?error\b/g
 const variableTypeAnnotation = String.raw`(?:\s*:\s*[^=;,\n]+)?`
+const aliasValueTerminator = String.raw`(?=\s*(?:[;,\n)\]}]|$|\s+(?:as|satisfies)\b))`
 const callMethodAccessor = String.raw`(?:(?:\?\.|\.)\s*call|(?:\?\.)?\s*\[\s*["']call["']\s*\])`
 const applyMethodAccessor = String.raw`(?:(?:\?\.|\.)\s*apply|(?:\?\.)?\s*\[\s*["']apply["']\s*\])`
 const callOrApplyMethodAccessor = String.raw`(?:${callMethodAccessor}|${applyMethodAccessor})`
@@ -49,12 +50,12 @@ const globalReflectObjectAccessor = String.raw`${globalNamespaceObjectAccessor}\
 const globalObjectObjectAccessor = String.raw`${globalNamespaceObjectAccessor}\s*(?:(?:\?\.|\.)\s*Object\b|(?:\?\.)?\s*\[\s*["']Object["']\s*\])`
 const reflectObjectAccessor = String.raw`(?:Reflect\b|${globalReflectObjectAccessor})`
 const objectAccessor = String.raw`(?:Object\b|${globalObjectObjectAccessor})`
-const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const reflectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
   'g',
 )
-const objectObjectAliasValue = String.raw`(?:\(\s*)?${objectAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const objectObjectAliasValue = String.raw`(?:\(\s*)?${objectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const objectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${objectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${objectObjectAliasValue}`,
   'g',
@@ -69,13 +70,17 @@ const objectDescriptorCallPrefix = String.raw`(?:\(\s*)?${objectDescriptorAccess
 const objectDescriptorMethodCallPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*${callMethodAccessor}\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*${callMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*`
 const objectDescriptorMethodApplyPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*${applyMethodAccessor}\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*${applyMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([\s\S]{0,120}?,\s*\[\s*`
 const objectDescriptorMethodBindPrefix = String.raw`(?:\(\s*${objectDescriptorAccessor}\s*${bindMethodAccessor}\s*\)|(?:\(\s*)?${objectDescriptorAccessor}\s*(?:\)\s*)?\s*${bindMethodAccessor})\s*(?:\)\s*)?(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?:\?\.)?\s*\(`
-const forwardedRetrievalMethodAliasValue = String.raw`(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?${callOrApplyMethodAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
-const boundRetrievalMethodAliasValue = String.raw`(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
-const retrievalMethodAliasValue = String.raw`(?:${forwardedRetrievalMethodAliasValue}|${boundRetrievalMethodAliasValue}|(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b)))`
+const forwardedRetrievalMethodAliasTarget = String.raw`(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?${callOrApplyMethodAccessor}`
+const forwardedRetrievalMethodAliasValue = String.raw`${forwardedRetrievalMethodAliasTarget}${aliasValueTerminator}`
+const boundRetrievalMethodAliasTarget = String.raw`(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?`
+const boundRetrievalMethodAliasValue = String.raw`${boundRetrievalMethodAliasTarget}${aliasValueTerminator}`
+const retrievalMethodAliasTarget = String.raw`(?:${forwardedRetrievalMethodAliasTarget}|${boundRetrievalMethodAliasTarget}|(?:\(\s*)?(?:${reflectGetAccessor}|${objectDescriptorAccessor})\s*(?:\)\s*)?)`
+const retrievalMethodAliasValue = String.raw`${retrievalMethodAliasTarget}${aliasValueTerminator}`
 const retrievalMethodAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${retrievalMethodAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${retrievalMethodAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bget\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bgetOwnPropertyDescriptor\b[^}]*\}${variableTypeAnnotation}\s*=\s*${objectObjectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:call|apply)\b[^}]*\}${variableTypeAnnotation}\s*=\s*(?:${reflectGetAccessor}|${objectDescriptorAccessor})`,
   'g',
 )
+const retrievalMethodContainerAliasPattern = new RegExp(String.raw`(?:[:\[,])\s*${retrievalMethodAliasTarget}${aliasValueTerminator}`, 'g')
 const retrievedPromiseObjectValue = String.raw`(?:${reflectGetCallPrefix}\s*${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodCallPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^)]*)?\s*\)|${reflectGetMethodApplyPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^\]]*)?\s*\]\s*\)|${reflectGetMethodBindPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["'](?:\s*,[^)]*)?\s*\)|(?:${objectDescriptorCallPrefix}\s*${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\)|${objectDescriptorMethodCallPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\)|${objectDescriptorMethodApplyPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\]\s*\)|${objectDescriptorMethodBindPrefix}${promiseNamespaceObjectAccessor}\s*,\s*["']Promise["']\s*\))\s*(?:\?\.|\.)\s*value)`
 const promiseObjectValue = String.raw`(?:${promiseObjectAccessor}|${retrievedPromiseObjectValue})`
 const promiseObjectMemberAccessor = String.raw`(?:${promiseObjectValue}|\(\s*${promiseObjectValue}\s*\))`
@@ -90,20 +95,24 @@ const reflectApplyMethodApplyPrefix = String.raw`(?:\(\s*${reflectApplyAccessor}
 const reflectApplyInvocationPrefix = String.raw`(?:${reflectApplyCallPrefix}|${reflectApplyMethodCallPrefix}|${reflectApplyMethodApplyPrefix})`
 const reflectPromiseRejectApplyPrefix = String.raw`${reflectApplyInvocationPrefix}\s*${promiseRejectAccessor}\s*,[\s\S]*?\[\s*`
 const reflectRetrievedPromiseRejectApplyPrefix = String.raw`${reflectApplyInvocationPrefix}\s*${retrievedPromiseRejectValue}\s*,[\s\S]*?\[\s*`
-const forwardedReflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?${callOrApplyMethodAccessor}(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
-const boundReflectApplyAliasValue = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
-const reflectApplyAliasValue = String.raw`(?:${forwardedReflectApplyAliasValue}|${boundReflectApplyAliasValue}|(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b)))`
+const forwardedReflectApplyAliasTarget = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?${callOrApplyMethodAccessor}`
+const forwardedReflectApplyAliasValue = String.raw`${forwardedReflectApplyAliasTarget}${aliasValueTerminator}`
+const boundReflectApplyAliasTarget = String.raw`(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\)\s*)?`
+const boundReflectApplyAliasValue = String.raw`${boundReflectApplyAliasTarget}${aliasValueTerminator}`
+const reflectApplyAliasTarget = String.raw`(?:${forwardedReflectApplyAliasTarget}|${boundReflectApplyAliasTarget}|(?:\(\s*)?${reflectApplyAccessor}\s*(?:\)\s*)?)`
+const reflectApplyAliasValue = String.raw`${reflectApplyAliasTarget}${aliasValueTerminator}`
 const reflectApplyAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectApplyAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${reflectApplyAliasValue}|\b(?:const|let|var)\s*\{[^}]*\bapply\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:call|apply)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${reflectApplyAccessor}`,
   'g',
 )
-const promiseObjectAliasValue = String.raw`(?:\(\s*)?${promiseObjectValue}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const reflectApplyContainerAliasPattern = new RegExp(String.raw`(?:[:\[,])\s*${reflectApplyAliasTarget}${aliasValueTerminator}`, 'g')
+const promiseObjectAliasValue = String.raw`(?:\(\s*)?${promiseObjectValue}\s*(?:\)\s*)?${aliasValueTerminator}`
 const promiseObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${promiseObjectAliasValue}`,
   'g',
 )
 const rawUiErrorRejectPattern = rawPromiseRejectPatternFor('error')
-const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const promiseRejectAliasValue = String.raw`(?:${promiseRejectAccessor}|${retrievedPromiseRejectValue})${aliasValueTerminator}`
 const promiseRejectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${promiseRejectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${promiseRejectAliasValue}|\b(?:const|let|var)\s*\{[^}]*\breject\b[^}]*\}${variableTypeAnnotation}\s*=\s*${promiseObjectMemberAccessor}`,
   'g',
@@ -124,12 +133,12 @@ const descriptorConsoleErrorWarnValue = String.raw`(?:${objectDescriptorCallPref
 const descriptorConsoleErrorWarnValueCallPrefix = String.raw`${descriptorConsoleErrorWarnValue}(?:(?:\s*${callOrApplyMethodAccessor})?\s*(?:\?\.)?\s*\(|\s*${bindMethodAccessor}\s*(?:\?\.)?\s*\([^)]*\)\s*(?:\?\.)?\s*\()`
 const reflectConsoleErrorWarnApplyTarget = String.raw`(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})`
 const reflectConsoleErrorWarnApplyPrefix = String.raw`${reflectApplyInvocationPrefix}\s*${reflectConsoleErrorWarnApplyTarget}\s*,[\s\S]*?\[\s*`
-const consoleObjectAliasValue = String.raw`(?:\(\s*)?${consoleObjectValue}\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|\s+(?:as|satisfies)\b))`
+const consoleObjectAliasValue = String.raw`(?:\(\s*)?${consoleObjectValue}\s*(?:\)\s*)?${aliasValueTerminator}`
 const consoleObjectAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleObjectAliasValue}`,
   'g',
 )
-const consoleErrorWarnAliasValue = String.raw`(?:\(\s*)?(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})\s*(?:\)\s*)?(?=\s*(?:[;,\n)]|$|${bindMethodAccessor}|\s+(?:as|satisfies)\b))`
+const consoleErrorWarnAliasValue = String.raw`(?:\(\s*)?(?:${consoleErrorWarnAccessor}|${reflectGetConsoleErrorWarnValue}|${descriptorConsoleErrorWarnValue})\s*(?:\)\s*)?(?=\s*(?:[;,\n)\]}]|$|${bindMethodAccessor}|\s+(?:as|satisfies)\b))`
 const consoleErrorWarnAliasPattern = new RegExp(
   String.raw`\b(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${consoleErrorWarnAliasValue}|\b[A-Za-z_$][\w$]*\s*=\s*${consoleErrorWarnAliasValue}|\b(?:const|let|var)\s*\{[^}]*\b(?:error|warn)\b[^}]*\}${variableTypeAnnotation}\s*=\s*${consoleObjectAliasValue}`,
   'g',
@@ -553,6 +562,11 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
       'frontend source ห้าม alias Reflect.get/Object.getOwnPropertyDescriptor; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม retrieved console/Promise targets ได้',
   },
   {
+    pattern: retrievalMethodContainerAliasPattern,
+    message:
+      'frontend source ห้าม alias Reflect.get/Object.getOwnPropertyDescriptor; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม retrieved console/Promise targets ได้',
+  },
+  {
     pattern: reflectObjectAliasPattern,
     message:
       'frontend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
@@ -564,6 +578,11 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
   },
   {
     pattern: reflectApplyAliasPattern,
+    message:
+      'frontend source ห้าม alias Reflect.apply; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม forwarded console/Promise targets ได้',
+  },
+  {
+    pattern: reflectApplyContainerAliasPattern,
     message:
       'frontend source ห้าม alias Reflect.apply; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม forwarded console/Promise targets ได้',
   },
