@@ -359,11 +359,13 @@ describe('backend security audit', () => {
         const computedTypedReflectNs: typeof Reflect = globalThis['Reflect']
         reflectNs = (globalThis.Reflect)
         const reflectHooks = { ReflectRef: Reflect, globalReflect: globalThis.Reflect }
+        const reflectShorthand = { Reflect }
+        const reflectShorthandWithPrefix = { safeNs, Reflect }
         const reflectList = [Reflect]
         const reflectListWithPrefix = [safeNs, globalThis.Reflect]
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(9)
+    expect(messages.filter((message) => message.includes('alias Reflect object'))).toHaveLength(11)
   })
 
   test('catches backend Object object aliases', () => {
@@ -374,11 +376,13 @@ describe('backend security audit', () => {
         const computedTypedObjectNs: ObjectConstructor = globalThis['Object']
         objectNs = (globalThis.Object)
         const objectHooks = { ObjectRef: Object, globalObject: globalThis.Object }
+        const objectShorthand = { Object }
+        const objectShorthandWithPrefix = { safeNs, Object }
         const objectList = [Object]
         const objectListWithPrefix = [safeNs, globalThis.Object]
       `, 'prisma/seed.ts')
 
-    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(9)
+    expect(messages.filter((message) => message.includes('alias Object object'))).toHaveLength(11)
   })
 
   test('catches Reflect.apply console retrieval targets', () => {
