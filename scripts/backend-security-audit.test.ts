@@ -338,8 +338,9 @@ describe('backend security audit', () => {
         (Set.prototype.add).apply(loggerBag, [console.warn])
         (Set.prototype).add.apply(loggerBag, [console.warn])
         Set['prototype'].add.apply(loggerBag, [console.warn])
+        globalThis['Set'].prototype.add.apply(loggerBag, [console.warn])
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
-    ).toHaveLength(9)
+    ).toHaveLength(10)
 
     expect(
       messagesFor(`
@@ -502,9 +503,10 @@ describe('backend security audit', () => {
         (Set.prototype.add).call(namespaceBag, globalThis.Reflect)
         (Set.prototype).add.call(namespaceBag, globalThis.Reflect)
         Set['prototype'].add.call(namespaceBag, globalThis.Reflect)
+        globalThis['Set'].prototype.add.call(namespaceBag, globalThis.Reflect)
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Reflect object')),
-    ).toHaveLength(9)
+    ).toHaveLength(10)
   })
 
   test('catches backend Object object aliases', () => {
@@ -580,9 +582,10 @@ describe('backend security audit', () => {
         (Map.prototype.set).bind(namespaceRegistry)('Object', globalThis.Object)
         (Map.prototype).set.bind(namespaceRegistry)('Object', globalThis.Object)
         Map['prototype'].set.bind(namespaceRegistry)('Object', globalThis.Object)
+        globalThis['Map'].prototype.set.bind(namespaceRegistry)('Object', globalThis.Object)
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Object object')),
-    ).toHaveLength(9)
+    ).toHaveLength(10)
   })
 
   test('catches Reflect.apply console retrieval targets', () => {
@@ -764,8 +767,9 @@ describe('backend security audit', () => {
         (WeakSet.prototype.add).call(loggerBag, globalThis.console)
         (WeakSet.prototype).add.call(loggerBag, globalThis.console)
         WeakSet['prototype'].add.call(loggerBag, globalThis.console)
+        globalThis['WeakSet'].prototype.add.call(loggerBag, globalThis.console)
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
-    ).toHaveLength(9)
+    ).toHaveLength(10)
 
     expect(
       messagesFor(`
@@ -1539,8 +1543,9 @@ describe('backend security audit', () => {
         (Map.prototype.set).call(rejectRegistry, 'reject', Promise.reject)
         (Map.prototype).set.call(rejectRegistry, 'reject', Promise.reject)
         Map['prototype'].set.call(rejectRegistry, 'reject', Promise.reject)
+        globalThis['Map'].prototype.set.call(rejectRegistry, 'reject', Promise.reject)
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
-    ).toHaveLength(9)
+    ).toHaveLength(10)
 
     expect(
       messagesFor(`
@@ -1677,8 +1682,9 @@ describe('backend security audit', () => {
         (Set.prototype.add)?.call(promiseBag, globalThis.Promise)
         (Set.prototype).add.call(promiseBag, globalThis.Promise)
         Set['prototype'].add.call(promiseBag, globalThis.Promise)
+        globalThis['Set'].prototype.add.call(promiseBag, globalThis.Promise)
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
-    ).toHaveLength(9)
+    ).toHaveLength(10)
 
     expect(
       messagesFor(`
