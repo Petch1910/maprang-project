@@ -907,10 +907,11 @@ describe('frontend static audit', () => {
           Map['prototype'].set.call(rejectRegistry, 'reject', Promise.reject)
           window['Map'].prototype.set.call(rejectRegistry, 'reject', Promise.reject)
           window?.Map.prototype.set.call(rejectRegistry, 'reject', Promise.reject)
+          (window?.Map).prototype.set.call(rejectRegistry, 'reject', Promise.reject)
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(11)
+    ).toHaveLength(12)
 
     expect(
       auditRawUiErrorThrows(
@@ -1073,10 +1074,11 @@ describe('frontend static audit', () => {
           Set['prototype'].add.call(promiseBag, window.Promise)
           window['Set'].prototype.add.call(promiseBag, window.Promise)
           window?.Set.prototype.add.call(promiseBag, window.Promise)
+          (window?.Set).prototype.add.call(promiseBag, window.Promise)
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(11)
+    ).toHaveLength(12)
 
     expect(
       auditRawUiErrorThrows(
@@ -1503,12 +1505,13 @@ describe('frontend static audit', () => {
           Set['prototype'].add.apply(loggerBag, [console.warn])
           globalThis['Set'].prototype.add.apply(loggerBag, [console.warn])
           globalThis?.Set.prototype.add.apply(loggerBag, [console.warn])
+          (globalThis?.Set).prototype.add.apply(loggerBag, [console.warn])
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console.error/console.warn')),
-    ).toHaveLength(11)
+    ).toHaveLength(12)
 
     expect(
       auditSuspiciousPatterns(
@@ -1713,12 +1716,13 @@ describe('frontend static audit', () => {
           Set['prototype'].add.call(namespaceBag, window.Reflect)
           window['Set'].prototype.add.call(namespaceBag, window.Reflect)
           window?.Set.prototype.add.call(namespaceBag, window.Reflect)
+          (window?.Set).prototype.add.call(namespaceBag, window.Reflect)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
-    ).toHaveLength(11)
+    ).toHaveLength(12)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1820,12 +1824,13 @@ describe('frontend static audit', () => {
           Map['prototype'].set.bind(namespaceRegistry)('Object', globalThis.Object)
           globalThis['Map'].prototype.set.bind(namespaceRegistry)('Object', globalThis.Object)
           globalThis?.Map.prototype.set.bind(namespaceRegistry)('Object', globalThis.Object)
+          (globalThis?.Map).prototype.set.bind(namespaceRegistry)('Object', globalThis.Object)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Object object')),
-    ).toHaveLength(11)
+    ).toHaveLength(12)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -2055,12 +2060,13 @@ describe('frontend static audit', () => {
           WeakSet['prototype'].add.call(loggerBag, globalThis.console)
           globalThis['WeakSet'].prototype.add.call(loggerBag, globalThis.console)
           globalThis?.WeakSet.prototype.add.call(loggerBag, globalThis.console)
+          (globalThis?.WeakSet).prototype.add.call(loggerBag, globalThis.console)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
-    ).toHaveLength(11)
+    ).toHaveLength(12)
 
     expect(
       auditSuspiciousPatterns(
