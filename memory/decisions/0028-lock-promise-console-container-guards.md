@@ -44,4 +44,6 @@ Coverage now also locks bracketed optional-call direct registry/bag mutation syn
 
 Coverage now also locks optional-chain bracket direct registry/bag mutation syntax such as `rejectRegistry?.['set'] (...)`, `promiseBag?.['add'] (...)`, `loggerBag?.['add'] (...)`, and `namespaceBag?.['add'] (...)` wrappers for Promise, console, Reflect, and Object payloads.
 
+Coverage now also locks parenthesized direct registry/bag mutation roots such as `(rejectRegistry).set(...)`, `(rejectRegistry)['set'] (...)`, `(promiseBag).add(...)`, `(loggerBag).add(...)`, and `(namespaceBag).add(...)` wrappers for Promise, console, Reflect, and Object payloads.
+
 Frontend static audit, backend security audit, and `predeploy:check` must keep these snippets locked alongside the earlier direct `registry.set(...)` / `bag.add(...)`, `new WeakSet().add(...)`, and prototype-forwarded collection mutation container guards.
