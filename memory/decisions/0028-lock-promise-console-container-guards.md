@@ -30,3 +30,8 @@
 ## งานตามมา
 
 ถ้าพบ false positive จาก helper ที่จำเป็นจริง ให้แยก helper นั้นออกเป็นไฟล์เฉพาะ เพิ่มเหตุผลใน allowlist และเพิ่ม regression test ที่ยืนยันว่า helper ไม่ส่ง raw error object ออกสู่ public UI, console, route response, หรือ Promise rejection
+## ส่วนเพิ่ม 2026-06-02 optional-call direct collection mutation
+
+Coverage now also includes optional-call direct registry/bag mutation syntax such as `rejectRegistry?.['set']?.('reject', Promise.reject)`, `promiseBag?.['add']?.(window.Promise)`, `promiseBag?.['add']?.(globalThis.Promise)`, `loggerBag?.['add']?.(console.warn)`, `loggerBag?.['add']?.(globalThis.console)`, `namespaceBag?.['add']?.(window.Reflect)`, and `namespaceBag?.['add']?.(globalThis.Object)`.
+
+Frontend static audit, backend security audit, and `predeploy:check` must keep these snippets locked alongside the earlier direct `registry.set(...)` / `bag.add(...)`, `new WeakSet().add(...)`, and prototype-forwarded collection mutation container guards.

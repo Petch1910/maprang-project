@@ -897,6 +897,7 @@ describe('frontend static audit', () => {
       auditRawUiErrorThrows(
         `
           rejectRegistry.set('reject', Promise.reject)
+          rejectRegistry?.['set']?.('reject', Promise.reject)
           rejectBag.add(Reflect.get(Promise, 'reject'))
           new WeakSet().add(Promise.reject)
           Map.prototype.set.call(rejectRegistry, 'reject', Promise.reject)
@@ -916,7 +917,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(17)
+    ).toHaveLength(18)
 
     expect(
       auditRawUiErrorThrows(
@@ -1070,6 +1071,7 @@ describe('frontend static audit', () => {
         `
           promiseRegistry.set('Promise', Promise)
           promiseBag.add(window.Promise)
+          promiseBag?.['add']?.(window.Promise)
           new WeakSet().add(window.Promise)
           Set.prototype.add.call(promiseBag, window.Promise)
           Set.prototype.add?.call(promiseBag, window.Promise)
@@ -1088,7 +1090,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(17)
+    ).toHaveLength(18)
 
     expect(
       auditRawUiErrorThrows(
@@ -1506,6 +1508,7 @@ describe('frontend static audit', () => {
         `
           loggerRegistry.set('error', console.error)
           loggerBag.add(console.warn)
+          loggerBag?.['add']?.(console.warn)
           new WeakSet().add(console.warn)
           Set.prototype.add.call(loggerBag, console.warn)
           Set.prototype['add']['call'](loggerBag, console.warn)
@@ -1526,7 +1529,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console.error/console.warn')),
-    ).toHaveLength(17)
+    ).toHaveLength(18)
 
     expect(
       auditSuspiciousPatterns(
@@ -1722,6 +1725,7 @@ describe('frontend static audit', () => {
         `
           namespaceRegistry.set('Reflect', Reflect)
           namespaceBag.add(window.Reflect)
+          namespaceBag?.['add']?.(window.Reflect)
           new WeakSet().add(window.Reflect)
           Set.prototype.add.call(namespaceBag, window.Reflect)
           Set.prototype['add'].call(namespaceBag, window.Reflect)
@@ -1742,7 +1746,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
-    ).toHaveLength(17)
+    ).toHaveLength(18)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1835,6 +1839,7 @@ describe('frontend static audit', () => {
         `
           namespaceRegistry.set('Object', Object)
           namespaceBag.add(globalThis.Object)
+          namespaceBag?.['add']?.(globalThis.Object)
           new WeakSet().add(globalThis.Object)
           Map.prototype.set.call(namespaceRegistry, 'Object', globalThis.Object)
           Map.prototype.set?.call(namespaceRegistry, 'Object', globalThis.Object)
@@ -1855,7 +1860,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Object object')),
-    ).toHaveLength(17)
+    ).toHaveLength(18)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -2076,6 +2081,7 @@ describe('frontend static audit', () => {
         `
           loggerRegistry.set('console', console)
           loggerBag.add(globalThis.console)
+          loggerBag?.['add']?.(globalThis.console)
           new WeakSet().add(globalThis.console)
           WeakSet.prototype.add.call(loggerBag, globalThis.console)
           globalThis.WeakSet.prototype['add']['call'](loggerBag, globalThis.console)
@@ -2096,7 +2102,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
-    ).toHaveLength(17)
+    ).toHaveLength(18)
 
     expect(
       auditSuspiciousPatterns(
