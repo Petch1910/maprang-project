@@ -897,6 +897,7 @@ describe('frontend static audit', () => {
       auditRawUiErrorThrows(
         `
           rejectRegistry.set('reject', Promise.reject)
+          rejectRegistry['set']('reject', Promise.reject)
           rejectRegistry.set?.('reject', Promise.reject)
           rejectRegistry?.set?.('reject', Promise.reject)
           rejectRegistry?.['set']?.('reject', Promise.reject)
@@ -919,7 +920,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(20)
+    ).toHaveLength(21)
 
     expect(
       auditRawUiErrorThrows(
@@ -1073,6 +1074,7 @@ describe('frontend static audit', () => {
         `
           promiseRegistry.set('Promise', Promise)
           promiseBag.add(window.Promise)
+          promiseBag['add'](window.Promise)
           promiseBag.add?.(window.Promise)
           promiseBag?.add?.(window.Promise)
           promiseBag?.['add']?.(window.Promise)
@@ -1094,7 +1096,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(20)
+    ).toHaveLength(21)
 
     expect(
       auditRawUiErrorThrows(
@@ -1512,6 +1514,7 @@ describe('frontend static audit', () => {
         `
           loggerRegistry.set('error', console.error)
           loggerBag.add(console.warn)
+          loggerBag['add'](console.warn)
           loggerBag.add?.(console.warn)
           loggerBag?.add?.(console.warn)
           loggerBag?.['add']?.(console.warn)
@@ -1535,7 +1538,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console.error/console.warn')),
-    ).toHaveLength(20)
+    ).toHaveLength(21)
 
     expect(
       auditSuspiciousPatterns(
@@ -1731,6 +1734,7 @@ describe('frontend static audit', () => {
         `
           namespaceRegistry.set('Reflect', Reflect)
           namespaceBag.add(window.Reflect)
+          namespaceBag['add'](window.Reflect)
           namespaceBag.add?.(window.Reflect)
           namespaceBag?.add?.(window.Reflect)
           namespaceBag?.['add']?.(window.Reflect)
@@ -1754,7 +1758,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
-    ).toHaveLength(20)
+    ).toHaveLength(21)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1847,6 +1851,7 @@ describe('frontend static audit', () => {
         `
           namespaceRegistry.set('Object', Object)
           namespaceBag.add(globalThis.Object)
+          namespaceBag['add'](globalThis.Object)
           namespaceBag.add?.(globalThis.Object)
           namespaceBag?.add?.(globalThis.Object)
           namespaceBag?.['add']?.(globalThis.Object)
@@ -1870,7 +1875,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Object object')),
-    ).toHaveLength(20)
+    ).toHaveLength(21)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -2091,6 +2096,7 @@ describe('frontend static audit', () => {
         `
           loggerRegistry.set('console', console)
           loggerBag.add(globalThis.console)
+          loggerBag['add'](globalThis.console)
           loggerBag.add?.(globalThis.console)
           loggerBag?.add?.(globalThis.console)
           loggerBag?.['add']?.(globalThis.console)
@@ -2114,7 +2120,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
-    ).toHaveLength(20)
+    ).toHaveLength(21)
 
     expect(
       auditSuspiciousPatterns(
