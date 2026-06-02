@@ -59,6 +59,7 @@ const objectAssignContainerPrefix = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.
 const objectDefinePropertyContainerPrefix = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*definePropert(?:y|ies)|(?:\?\.)?\s*\[\s*["']definePropert(?:y|ies)["']\s*\])\s*\(`
 const objectCreateContainerPrefix = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*create|(?:\?\.)?\s*\[\s*["']create["']\s*\])\s*\(`
 const collectionMutationContainerPrefix = String.raw`(?:\b[A-Za-z_$][\w$]*|new\s+(?:Weak)?Map(?:\s*<[^>]+>)?\s*\([^)]*\)|new\s+(?:Weak)?Set(?:\s*<[^>]+>)?\s*\([^)]*\))\s*(?:(?:\?\.|\.)\s*(?:set|add)|(?:\?\.)?\s*\[\s*["'](?:set|add)["']\s*\])\s*\(`
+const collectionPrototypeMutationContainerPrefix = String.raw`(?:(?:(?:window|globalThis)\s*\.\s*)?(?:Weak)?Map\s*\.\s*prototype\s*\.\s*set|(?:(?:window|globalThis)\s*\.\s*)?(?:Weak)?Set\s*\.\s*prototype\s*\.\s*add)\s*\.\s*(?:call|apply|bind)\s*\(`
 const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const reflectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
@@ -159,6 +160,12 @@ const promiseRejectAliasPattern = new RegExp(
   'g',
 )
 const promiseRejectContainerAliasPattern = new RegExp(String.raw`(?::\s*${promiseRejectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${promiseRejectAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${promiseRejectAliasValue}|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${promiseRejectAliasValue}|${objectFromEntriesContainerPrefix}[\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${promiseRejectAliasValue}|${objectAssignContainerPrefix}[\s\S]{0,240}?:\s*${promiseRejectAliasValue}|${objectDefinePropertyContainerPrefix}[\s\S]{0,260}?\bvalue\s*:\s*${promiseRejectAliasValue}|${objectCreateContainerPrefix}[\s\S]{0,260}?\bvalue\s*:\s*${promiseRejectAliasValue}|${collectionMutationContainerPrefix}[\s\S]{0,160}?(?:["'][^"'\n]+["']\s*,\s*)?${promiseRejectAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${promiseRejectAliasValue})`, 'g')
+const reflectObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${reflectObjectAliasValue}`, 'g')
+const objectObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${objectObjectAliasValue}`, 'g')
+const consoleObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${consoleObjectAliasValue}`, 'g')
+const consoleErrorWarnPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${consoleErrorWarnAliasValue}`, 'g')
+const promiseObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${promiseObjectAliasValue}`, 'g')
+const promiseRejectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${promiseRejectAliasValue}`, 'g')
 const rawRouteErrorResponsePattern = /return\s+\{(?=[^}]*\berror\s*:)(?![^}]*\bmessage\s*:)[^}]*\}/g
 const rawRouteErrorLogPattern = new RegExp(
   `${consoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectConsoleErrorWarnApplyPrefix}[\\s\\S]*?${rawErrorArrayElementPatternFor('error')}|${reflectGetConsoleErrorWarnCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${reflectGetConsoleErrorWarnForwardPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}|${descriptorConsoleErrorWarnValueCallPrefix}[\\s\\S]*?,\\s*${rawErrorArgumentPatternFor('error')}`,
@@ -350,12 +357,22 @@ const patterns = [
       'backend source ห้าม alias console object; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
   {
+    pattern: consoleObjectPrototypeMutationContainerAliasPattern,
+    message:
+      'backend source ห้าม alias console object; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
     pattern: consoleErrorWarnAliasPattern,
     message:
       'backend source ห้าม alias console.error/console.warn; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
   {
     pattern: consoleErrorWarnContainerAliasPattern,
+    message:
+      'backend source ห้าม alias console.error/console.warn; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
+    pattern: consoleErrorWarnPrototypeMutationContainerAliasPattern,
     message:
       'backend source ห้าม alias console.error/console.warn; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
@@ -380,12 +397,22 @@ const patterns = [
       'backend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
   },
   {
+    pattern: reflectObjectPrototypeMutationContainerAliasPattern,
+    message:
+      'backend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
+  },
+  {
     pattern: objectObjectAliasPattern,
     message:
       'backend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
   },
   {
     pattern: objectObjectContainerAliasPattern,
+    message:
+      'backend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
+  },
+  {
+    pattern: objectObjectPrototypeMutationContainerAliasPattern,
     message:
       'backend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
   },
@@ -868,6 +895,13 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
         message: routePromiseRejectAliasMessage,
       })
     }
+    for (const match of content.matchAll(promiseRejectPrototypeMutationContainerAliasPattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: routePromiseRejectAliasMessage,
+      })
+    }
 
     for (const match of content.matchAll(promiseObjectAliasPattern)) {
       findings.push({
@@ -878,6 +912,13 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
     }
 
     for (const match of content.matchAll(promiseObjectContainerAliasPattern)) {
+      findings.push({
+        file,
+        line: lineFor(content, match.index ?? 0),
+        message: routePromiseObjectAliasMessage,
+      })
+    }
+    for (const match of content.matchAll(promiseObjectPrototypeMutationContainerAliasPattern)) {
       findings.push({
         file,
         line: lineFor(content, match.index ?? 0),

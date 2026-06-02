@@ -56,6 +56,7 @@ const objectAssignContainerPrefix = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.
 const objectDefinePropertyContainerPrefix = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*definePropert(?:y|ies)|(?:\?\.)?\s*\[\s*["']definePropert(?:y|ies)["']\s*\])\s*\(`
 const objectCreateContainerPrefix = String.raw`${objectAccessor}\s*(?:(?:\?\.|\.)\s*create|(?:\?\.)?\s*\[\s*["']create["']\s*\])\s*\(`
 const collectionMutationContainerPrefix = String.raw`(?:\b[A-Za-z_$][\w$]*|new\s+(?:Weak)?Map(?:\s*<[^>]+>)?\s*\([^)]*\)|new\s+(?:Weak)?Set(?:\s*<[^>]+>)?\s*\([^)]*\))\s*(?:(?:\?\.|\.)\s*(?:set|add)|(?:\?\.)?\s*\[\s*["'](?:set|add)["']\s*\])\s*\(`
+const collectionPrototypeMutationContainerPrefix = String.raw`(?:(?:(?:window|globalThis)\s*\.\s*)?(?:Weak)?Map\s*\.\s*prototype\s*\.\s*set|(?:(?:window|globalThis)\s*\.\s*)?(?:Weak)?Set\s*\.\s*prototype\s*\.\s*add)\s*\.\s*(?:call|apply|bind)\s*\(`
 const reflectObjectAliasValue = String.raw`(?:\(\s*)?${reflectObjectAccessor}\s*(?:\)\s*)?${aliasValueTerminator}`
 const reflectObjectAliasPattern = new RegExp(
   String.raw`(?:^|[;{\n])\s*(?:const|let|var)\s+[A-Za-z_$][\w$]*${variableTypeAnnotation}\s*=\s*${reflectObjectAliasValue}|(?:^|[;{\n])\s*[A-Za-z_$][\w$]*\s*=\s*${reflectObjectAliasValue}`,
@@ -155,6 +156,12 @@ const consoleErrorWarnAliasPattern = new RegExp(
   'g',
 )
 const consoleErrorWarnContainerAliasPattern = new RegExp(String.raw`(?::\s*${consoleErrorWarnAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[\s*${consoleErrorWarnAliasValue}|=\s*${readonlyContainerPrefix}(?:\(\s*)?\[[^\]\n;]*?,\s*${consoleErrorWarnAliasValue}|new\s+Map(?:\s*<[^>]+>)?\s*\([\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${consoleErrorWarnAliasValue}|${objectFromEntriesContainerPrefix}[\s\S]{0,240}?\[\s*["'][^"'\n]+["']\s*,\s*${consoleErrorWarnAliasValue}|${objectAssignContainerPrefix}[\s\S]{0,240}?:\s*${consoleErrorWarnAliasValue}|${objectDefinePropertyContainerPrefix}[\s\S]{0,260}?\bvalue\s*:\s*${consoleErrorWarnAliasValue}|${objectCreateContainerPrefix}[\s\S]{0,260}?\bvalue\s*:\s*${consoleErrorWarnAliasValue}|${collectionMutationContainerPrefix}[\s\S]{0,160}?(?:["'][^"'\n]+["']\s*,\s*)?${consoleErrorWarnAliasValue}|(?:new\s+Set(?:\s*<[^>]+>)?|Array\s*\.\s*(?:from|of))\s*\([\s\S]{0,160}?(?:\[\s*)?${consoleErrorWarnAliasValue})`, 'g')
+const reflectObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${reflectObjectAliasValue}`, 'g')
+const objectObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${objectObjectAliasValue}`, 'g')
+const promiseObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${promiseObjectAliasValue}`, 'g')
+const promiseRejectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${promiseRejectAliasValue}`, 'g')
+const consoleObjectPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${consoleObjectAliasValue}`, 'g')
+const consoleErrorWarnPrototypeMutationContainerAliasPattern = new RegExp(String.raw`${collectionPrototypeMutationContainerPrefix}[\s\S]{0,180}?${consoleErrorWarnAliasValue}`, 'g')
 const browserEventListenerPattern =
   /(?<![.\w$])(?:(window|globalThis|document)\s*\.\s*)?addEventListener\s*\(\s*(["'])([^"']+)\2\s*,\s*([A-Za-z_$][\w$]*)/g
 const directLocationOriginPattern = /\b(?:(?:window|globalThis)\s*\.\s*)?location\s*\.\s*origin\b/g
@@ -569,12 +576,22 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
       'frontend source ห้าม alias console object; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
   {
+    pattern: consoleObjectPrototypeMutationContainerAliasPattern,
+    message:
+      'frontend source ห้าม alias console object; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
     pattern: consoleErrorWarnAliasPattern,
     message:
       'frontend source ห้าม alias console.error/console.warn; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
   {
     pattern: consoleErrorWarnContainerAliasPattern,
+    message:
+      'frontend source ห้าม alias console.error/console.warn; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
+  },
+  {
+    pattern: consoleErrorWarnPrototypeMutationContainerAliasPattern,
     message:
       'frontend source ห้าม alias console.error/console.warn; ให้เรียก logUnexpectedError หรือ summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
   },
@@ -599,12 +616,22 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
       'frontend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
   },
   {
+    pattern: reflectObjectPrototypeMutationContainerAliasPattern,
+    message:
+      'frontend source ห้าม alias Reflect object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม reflected console/Promise targets ได้',
+  },
+  {
     pattern: objectObjectAliasPattern,
     message:
       'frontend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
   },
   {
     pattern: objectObjectContainerAliasPattern,
+    message:
+      'frontend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
+  },
+  {
+    pattern: objectObjectPrototypeMutationContainerAliasPattern,
     message:
       'frontend source ห้าม alias Object object; ให้เรียกเมธอดตรงๆ เพื่อให้ audit ตาม descriptor console/Promise targets ได้',
   },
@@ -888,6 +915,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
       message: promiseRejectAliasMessage,
     })
   }
+  for (const match of content.matchAll(promiseRejectPrototypeMutationContainerAliasPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: promiseRejectAliasMessage,
+    })
+  }
   for (const match of content.matchAll(promiseObjectAliasPattern)) {
     findings.push({
       file,
@@ -896,6 +930,13 @@ export function auditRawUiErrorThrows(content: string, file: string) {
     })
   }
   for (const match of content.matchAll(promiseObjectContainerAliasPattern)) {
+    findings.push({
+      file,
+      line: lineFor(content, match.index ?? 0),
+      message: promiseObjectAliasMessage,
+    })
+  }
+  for (const match of content.matchAll(promiseObjectPrototypeMutationContainerAliasPattern)) {
     findings.push({
       file,
       line: lineFor(content, match.index ?? 0),

@@ -899,10 +899,11 @@ describe('frontend static audit', () => {
           rejectRegistry.set('reject', Promise.reject)
           rejectBag.add(Reflect.get(Promise, 'reject'))
           new WeakSet().add(Promise.reject)
+          Map.prototype.set.call(rejectRegistry, 'reject', Promise.reject)
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(3)
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
@@ -1057,10 +1058,11 @@ describe('frontend static audit', () => {
           promiseRegistry.set('Promise', Promise)
           promiseBag.add(window.Promise)
           new WeakSet().add(window.Promise)
+          Set.prototype.add.call(promiseBag, window.Promise)
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(3)
+    ).toHaveLength(4)
 
     expect(
       auditRawUiErrorThrows(
@@ -1479,12 +1481,13 @@ describe('frontend static audit', () => {
           loggerRegistry.set('error', console.error)
           loggerBag.add(console.warn)
           new WeakSet().add(console.warn)
+          Set.prototype.add.call(loggerBag, console.warn)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console.error/console.warn')),
-    ).toHaveLength(3)
+    ).toHaveLength(4)
 
     expect(
       auditSuspiciousPatterns(
@@ -1681,12 +1684,13 @@ describe('frontend static audit', () => {
           namespaceRegistry.set('Reflect', Reflect)
           namespaceBag.add(window.Reflect)
           new WeakSet().add(window.Reflect)
+          Set.prototype.add.call(namespaceBag, window.Reflect)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
-    ).toHaveLength(3)
+    ).toHaveLength(4)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1780,12 +1784,13 @@ describe('frontend static audit', () => {
           namespaceRegistry.set('Object', Object)
           namespaceBag.add(globalThis.Object)
           new WeakSet().add(globalThis.Object)
+          Map.prototype.set.call(namespaceRegistry, 'Object', globalThis.Object)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Object object')),
-    ).toHaveLength(3)
+    ).toHaveLength(4)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -2007,12 +2012,13 @@ describe('frontend static audit', () => {
           loggerRegistry.set('console', console)
           loggerBag.add(globalThis.console)
           new WeakSet().add(globalThis.console)
+          WeakSet.prototype.add.call(loggerBag, globalThis.console)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
-    ).toHaveLength(3)
+    ).toHaveLength(4)
 
     expect(
       auditSuspiciousPatterns(
