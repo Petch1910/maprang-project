@@ -34,4 +34,6 @@
 
 Coverage now also includes optional-call direct registry/bag mutation syntax such as `rejectRegistry?.['set']?.('reject', Promise.reject)`, `promiseBag?.['add']?.(window.Promise)`, `promiseBag?.['add']?.(globalThis.Promise)`, `loggerBag?.['add']?.(console.warn)`, `loggerBag?.['add']?.(globalThis.console)`, `namespaceBag?.['add']?.(window.Reflect)`, and `namespaceBag?.['add']?.(globalThis.Object)`.
 
+Coverage now also locks dot optional-call direct registry/bag mutation syntax such as `rejectRegistry.set?.('reject', Promise.reject)`, `promiseBag.add?.(window.Promise)`, `promiseBag.add?.(globalThis.Promise)`, `loggerBag.add?.(console.warn)`, `loggerBag.add?.(globalThis.console)`, `namespaceBag.add?.(window.Reflect)`, and `namespaceBag.add?.(globalThis.Object)`.
+
 Frontend static audit, backend security audit, and `predeploy:check` must keep these snippets locked alongside the earlier direct `registry.set(...)` / `bag.add(...)`, `new WeakSet().add(...)`, and prototype-forwarded collection mutation container guards.
