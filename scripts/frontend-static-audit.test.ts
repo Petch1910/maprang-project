@@ -896,6 +896,16 @@ describe('frontend static audit', () => {
     expect(
       auditRawUiErrorThrows(
         `
+          rejectRegistry.set('reject', Promise.reject)
+          rejectBag.add(Reflect.get(Promise, 'reject'))
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
           const rejectFrozenList = Object.freeze([Promise.reject])
           const rejectFrozenListWithPrefix = Object.seal([safeReject, Promise.reject])
           const reflectedRejectFrozenList = window.Object.freeze([Reflect.get(Promise, 'reject')])
@@ -1035,6 +1045,16 @@ describe('frontend static audit', () => {
         `
           const promiseSet = new Set([Promise])
           const promiseArrayFactory = Array.of(window.Promise)
+        `,
+        'apps/frontend/src/components/FixturePanel.tsx',
+      ).filter((finding) => finding.message.includes('alias Promise object')),
+    ).toHaveLength(2)
+
+    expect(
+      auditRawUiErrorThrows(
+        `
+          promiseRegistry.set('Promise', Promise)
+          promiseBag.add(window.Promise)
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
@@ -1454,6 +1474,18 @@ describe('frontend static audit', () => {
     expect(
       auditSuspiciousPatterns(
         `
+          loggerRegistry.set('error', console.error)
+          loggerBag.add(console.warn)
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
           const loggerFrozenList = Object.freeze([console.error])
           const loggerFrozenListWithPrefix = Object.seal([safeLog, console.warn])
           const reflectedLoggerFrozenList = window.Object.freeze([Reflect.get(console, 'error')])
@@ -1639,6 +1671,18 @@ describe('frontend static audit', () => {
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
     ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          namespaceRegistry.set('Reflect', Reflect)
+          namespaceBag.add(window.Reflect)
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(2)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1719,6 +1763,18 @@ describe('frontend static audit', () => {
         `
           const objectCreated = Object.create(null, { Object: { value: Object } })
           const reflectedObjectCreated = window.Object.create(null, { Object: { value: globalThis.Object } })
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          namespaceRegistry.set('Object', Object)
+          namespaceBag.add(globalThis.Object)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )
@@ -1933,6 +1989,18 @@ describe('frontend static audit', () => {
         `
           const loggerSet = new Set([console])
           const loggerArrayFactory = Array.from([globalThis.console])
+        `,
+        'apps/frontend/src/pages/FixturePage.tsx',
+      )
+        .map((finding) => finding.message)
+        .filter((message) => message.includes('alias console object')),
+    ).toHaveLength(2)
+
+    expect(
+      auditSuspiciousPatterns(
+        `
+          loggerRegistry.set('console', console)
+          loggerBag.add(globalThis.console)
         `,
         'apps/frontend/src/pages/FixturePage.tsx',
       )

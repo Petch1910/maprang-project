@@ -329,6 +329,13 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        loggerRegistry.set('error', console.error)
+        loggerBag.add(console.warn)
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console.error/console.warn')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
         const loggerFrozenList = Object.freeze([console.error])
         const loggerFrozenListWithPrefix = Object.seal([safeLog, console.warn])
         const reflectedLoggerFrozenList = globalThis.Object.freeze([Reflect.get(console, 'error')])
@@ -476,6 +483,14 @@ describe('backend security audit', () => {
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Reflect object')),
     ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        namespaceRegistry.set('Reflect', Reflect)
+        namespaceBag.add(globalThis.Reflect)
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Reflect object')),
+    ).toHaveLength(2)
   })
 
   test('catches backend Object object aliases', () => {
@@ -536,6 +551,14 @@ describe('backend security audit', () => {
       messagesFor(`
         const objectCreated = Object.create(null, { Object: { value: Object } })
         const reflectedObjectCreated = globalThis.Object.create(null, { Object: { value: globalThis.Object } })
+      `, 'prisma/seed.ts')
+        .filter((message) => message.includes('alias Object object')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        namespaceRegistry.set('Object', Object)
+        namespaceBag.add(globalThis.Object)
       `, 'prisma/seed.ts')
         .filter((message) => message.includes('alias Object object')),
     ).toHaveLength(2)
@@ -706,6 +729,13 @@ describe('backend security audit', () => {
       messagesFor(`
         const loggerSet = new Set([console])
         const loggerArrayFactory = Array.from([globalThis.console])
+      `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        loggerRegistry.set('console', console)
+        loggerBag.add(globalThis.console)
       `, 'prisma/seed.ts').filter((message) => message.includes('alias console object')),
     ).toHaveLength(2)
 
@@ -1472,6 +1502,13 @@ describe('backend security audit', () => {
 
     expect(
       messagesFor(`
+        rejectRegistry.set('reject', Promise.reject)
+        rejectBag.add(Reflect.get(Promise, 'reject'))
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise.reject')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
         const rejectFrozenList = Object.freeze([Promise.reject])
         const rejectFrozenListWithPrefix = Object.seal([safeReject, Promise.reject])
         const reflectedRejectFrozenList = globalThis.Object.freeze([Reflect.get(Promise, 'reject')])
@@ -1591,6 +1628,13 @@ describe('backend security audit', () => {
       messagesFor(`
         const promiseSet = new Set([Promise])
         const promiseArrayFactory = Array.of(globalThis.Promise)
+      `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
+    ).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        promiseRegistry.set('Promise', Promise)
+        promiseBag.add(globalThis.Promise)
       `, 'chat.routes.ts').filter((message) => message.includes('alias Promise object')),
     ).toHaveLength(2)
 

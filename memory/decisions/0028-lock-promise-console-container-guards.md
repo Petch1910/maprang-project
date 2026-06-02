@@ -4,6 +4,8 @@
 
 ยอมรับแล้วในวันที่ 2026-06-01
 
+ขยายขอบเขตวันที่ 2026-06-02 ให้รวม collection mutation containers ด้วย
+
 ## บริบท
 
 หลังจาก decision `0027` ล็อก namespace reflection guard แล้ว ยังมีทางเลี่ยงอีกกลุ่มหนึ่งคือการซ่อน `Promise`, `Promise.reject`, `console`, `console.error`, หรือ `console.warn` ไว้ใน wrapper container เช่น object map หรือ array map ก่อนค่อยส่งต่อไปยัง raw rejection, raw console log, หรือ route/UI response ที่ไม่ผ่าน helper กลาง
@@ -13,7 +15,8 @@
 ## การตัดสินใจ
 
 - Frontend static audit และ backend security audit ต้องบล็อก container alias ของ Promise object, `Promise.reject`, console object, และ `console.error`/`console.warn`
-- Coverage ต้องรวม object property, array entry, later array entry, parenthesized array, `new Map` tuple entry, `new Set`, `Array.from`, `Array.of`, `Object.freeze`/`Object.seal` readonly container wrappers, `Object.fromEntries` tuple containers, `Object.assign` object-registry containers, `Object.defineProperty`/`Object.defineProperties` descriptor-value containers, `Object.create` descriptor-value containers, object-literal shorthand, และ parenthesized object-literal shorthand
+- Coverage ต้องรวม object property, array entry, later array entry, parenthesized array, `new Map` tuple entry, `new Set`, `Array.from`, `Array.of`, `Object.freeze`/`Object.seal` readonly container wrappers, `Object.fromEntries` tuple containers, `Object.assign` object-registry containers, `Object.defineProperty`/`Object.defineProperties` descriptor-value containers, `Object.create` descriptor-value containers, `Map.set`/`Set.add` collection mutation containers, object-literal shorthand, และ parenthesized object-literal shorthand
+- Collection mutation coverage ต้องรวม registry/bag syntax เช่น `registry.set('reject', Promise.reject)`, `bag.add(Reflect.get(Promise, 'reject'))`, `registry.set('Promise', Promise)`, `loggerRegistry.set('error', console.error)`, `loggerRegistry.set('console', console)`, `namespaceRegistry.set('Reflect', Reflect)`, และ `namespaceRegistry.set('Object', Object)`
 - Reflected และ descriptor-retrieved entries เช่น `Reflect.get(Promise, 'reject')`, `Reflect.get(window, 'Promise')`, `Reflect.get(console, 'error')`, และ `Object.getOwnPropertyDescriptor(globalThis, 'console')?.value` ต้องยังถูกจับเมื่ออยู่ใน container
 - Predeploy regression ต้องล็อก source snippets ของทั้ง frontend และ backend เพื่อไม่ให้ guard ชุดนี้หลุดจาก QA gate
 - ถ้ามี use case ที่ต้องทำ registry map จริงในอนาคต ต้องสร้าง helper กลางที่จำกัดพฤติกรรมชัดเจน พร้อม allowlist แคบและ regression test ก่อนใช้งาน
