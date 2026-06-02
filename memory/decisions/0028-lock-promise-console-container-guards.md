@@ -50,4 +50,6 @@ Coverage now also locks optional parenthesized registry/bag mutation roots such 
 
 Coverage now also locks parenthesized constructed collection mutation roots such as `(new Map()).set('reject', Promise.reject)`, `(new Map())['set'] ('reject', Promise.reject)`, `(new Set()).add(window.Promise)`, `(new Set())['add'] (window.Promise)`, `(new Set()).add(console.warn)`, `(new Set())['add'] (console.warn)`, `(new Set()).add(window.Reflect)`, and `(new Set()).add(globalThis.Object)` wrappers for Promise, console, Reflect, and Object payloads.
 
+Coverage now also locks optional parenthesized constructed collection mutation roots such as `(new Map())?.set('reject', Promise.reject)`, `(new Map())?.['set'] ('reject', Promise.reject)`, `(new Map()).set?.('reject', Promise.reject)`, `(new Map())['set']?.('reject', Promise.reject)`, `(new Set())?.add(window.Promise)`, `(new Set())?.['add'] (window.Promise)`, `(new Set()).add?.(window.Promise)`, and `(new Set())['add']?.(window.Promise)` wrappers for Promise, console, Reflect, and Object payloads.
+
 Frontend static audit, backend security audit, and `predeploy:check` must keep these snippets locked alongside the earlier direct `registry.set(...)` / `bag.add(...)`, `new WeakSet().add(...)`, and prototype-forwarded collection mutation container guards.
