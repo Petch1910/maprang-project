@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-05
 
+- 2026-06-05 full deterministic repo QA pass after relationship/creator preset hardening: repo QA gate passed with secrets clean, memory audit 38 Markdown files, knowledge audit 12 files / 5 structured packs, docs command audit 408 refs, test coverage audit 60 test files / 33 root scripts, eval 3 scenarios, import-cycle audit 125 files / 296 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 180 pass / 769 expects, frontend static/route audit, production build, and bundle budget green.
+
 - 2026-06-05 backend relationship stranger preset pass: `/relationship/presets?surface=contract` now returns `stranger` / คนแปลกหน้า from the API as a contract-only preset. All presets are now 25, contract presets 20, creator presets remain 24, and Creator Studio is protected from `stranger` by the creator surface filter. Passing gates: backend check 180 pass / 769 expects, API smoke 34 pass / 2 live-provider skips, predeploy regression/check, and e2e smoke 4/4 desktop+mobile.
 
 - 2026-06-05 creator relationship preset picker state pass: Creator Studio preset picker now uses dark UI styling and has explicit loading, retryable failure, empty, select-disabled, and apply-disabled states. E2E checks the `relationship-preset-picker-select` hook is visible/enabled after `/relationship/presets?surface=creator` responds. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.
