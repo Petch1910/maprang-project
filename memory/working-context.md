@@ -2,6 +2,7 @@
 
 Last updated: 2026-06-05
 
+- 2026-06-05: Route/Menu Audit now documents and guards the `/admin/health` phase deploy runbook. `routeMenuAuditRows`, `ROUTE_MENU_AUDIT.md`, and `route-menu-doc-check` require the visible staging/live-provider/production commands (`bun run staging:verify + bun run e2e:smoke`, `bun run api:smoke:live`, `bun run production:check`), and `predeploy:check` locks those snippets. Passing focused gates: `bun run route-menu:audit:test` (12 pass / 20 expects), `bun run route-menu:audit` (14 surfaces), `bun run predeploy:check:test` (3 pass / 1124 expects), and `bun run predeploy:check`.
 - 2026-06-05: `/admin/health` now shows a phase-specific deploy runbook section `ลำดับงานก่อนปล่อยจริง` with three operator cards: staging/domain config (`bun run staging:verify + bun run e2e:smoke`), live provider smoke (`bun run api:smoke:live`), and final production check (`bun run production:check`). E2E smoke and predeploy now lock those visible snippets. In-app Browser verification on `http://127.0.0.1:5173/admin/health` confirmed the section, commands, and no horizontal overflow on desktop; screenshot capture timed out in the browser bridge only. Passing focused gates: `bun run frontend:static:audit`, `bun run frontend:check`, `bun run e2e:smoke:test` (13 pass / 41 expects), `bun run predeploy:check:test` (3 pass / 1123 expects), `bun run predeploy:check`, and `bun run e2e:smoke` (4/4 desktop+mobile).
 
 ## สรุปล่าสุดสำหรับรอบถัดไป

@@ -1129,6 +1129,7 @@ describe('predeploy check wiring', () => {
       'productionNextSteps',
       'ลำดับงานก่อนปล่อยจริง',
       'bun run staging:verify + bun run e2e:smoke',
+      'bun run production:check',
     ]) {
       expect(predeploy).toContain(deployHandoffField)
     }

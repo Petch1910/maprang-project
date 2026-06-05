@@ -4892,7 +4892,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/route-menu-doc-check.ts'),
-        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'includesEvery', 'includesSome', 'findSourceAuditRow', 'hasRoutePathToken', 'STAGING_RUNBOOK.md', '/admin/health', 'ห้ามอ้าง route แบบ `/path`', 'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต', 'สถานะ future ต้องไม่อ้าง route แบบ /path', 'ที่ไม่มีใน routeMenuAuditRows', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
+        ['defaultForbiddenSnippets', 'Automated route smoke', 'horizontal overflow', 'ข้อความ placeholder', 'includesEvery', 'includesSome', 'findSourceAuditRow', 'hasRoutePathToken', 'STAGING_RUNBOOK.md', '/admin/health', 'ห้ามอ้าง route แบบ `/path`', 'สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต', 'สถานะ future ต้องไม่อ้าง route แบบ /path', 'ที่ไม่มีใน routeMenuAuditRows', 'bun run staging:verify + bun run e2e:smoke', 'bun run api:smoke:live', 'bun run production:check', 'collectRouteMenuDocCheckResult', 'runRouteMenuDocCheck', 'if (import.meta.main) process.exit(await runRouteMenuDocCheck())'],
         'scripts/route-menu-doc-check.ts',
       )
       requireIncludes(
@@ -5111,6 +5111,9 @@ const checks: Check[] = [
           'bun run frontend:route:audit',
           'bun run route-menu:audit',
           'bun run e2e:smoke',
+          'bun run staging:verify + bun run e2e:smoke',
+          'bun run api:smoke:live',
+          'bun run production:check',
           'Creator Studio',
           'Moderation',
         ],
