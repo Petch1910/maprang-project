@@ -41,6 +41,10 @@ export type HealthPayload = {
       productionReady?: boolean
       status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
       liveSmokeCommand?: string
+      localFallbackEnabled?: boolean
+      forcedLocal?: boolean
+      activeRuntimeProvider?: 'local' | 'openrouter' | string
+      localModel?: string
     }
     imageGeneration?: {
       configured?: boolean
@@ -118,6 +122,10 @@ export function buildHealthRows(health: HealthPayload, apiBaseUrl: string) {
     ['modelMinRoleplayReplyChars', String(health.model?.minRoleplayReplyChars ?? 'ค่าเริ่มต้น')],
     ['chatProviderRetryAttempts', String(health.model?.providerRetry?.chatAttempts ?? 'ค่าเริ่มต้น')],
     ['creatorDraftRetryAttempts', String(health.model?.providerRetry?.creatorDraftAttempts ?? 'ค่าเริ่มต้น')],
+    ['chatRuntimeProvider', health.model?.chatProvider?.activeRuntimeProvider ?? 'ไม่ทราบ'],
+    ['chatLocalFallbackEnabled', String(health.model?.chatProvider?.localFallbackEnabled ?? false)],
+    ['chatForcedLocal', String(health.model?.chatProvider?.forcedLocal ?? false)],
+    ['chatLocalModel', health.model?.chatProvider?.localModel ?? 'local/mock-roleplay'],
     ['chatStatus', health.model?.chatProvider?.status ?? 'ไม่ทราบ'],
     ['chatLiveVerified', String(health.model?.chatProvider?.liveVerified ?? false)],
     ['chatProductionReady', String(health.model?.chatProvider?.productionReady ?? false)],

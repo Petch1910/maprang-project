@@ -33,6 +33,10 @@ type DeployStatusPayload = {
     authMode: string
     avatarStorage: string
     avatarStorageAccess: string
+    chatRuntimeProvider: string
+    chatLocalFallbackEnabled: boolean
+    chatForcedLocal: boolean
+    chatLocalModel: string
     chatStatus: string
     imageStatus: string
   }
@@ -91,6 +95,10 @@ export function buildDeployStatusPayload(
       authMode: health.security?.authMode ?? 'unknown',
       avatarStorage: health.security?.avatarStorage ?? 'unknown',
       avatarStorageAccess: health.security?.avatarStorageAccess ?? 'unknown',
+      chatRuntimeProvider: health.model?.chatProvider?.activeRuntimeProvider ?? 'unknown',
+      chatLocalFallbackEnabled: health.model?.chatProvider?.localFallbackEnabled ?? false,
+      chatForcedLocal: health.model?.chatProvider?.forcedLocal ?? false,
+      chatLocalModel: health.model?.chatProvider?.localModel ?? 'local/mock-roleplay',
       chatStatus: health.model?.chatProvider?.status ?? 'unknown',
       imageStatus: health.model?.imageGeneration?.status ?? 'unknown',
     },

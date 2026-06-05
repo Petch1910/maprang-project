@@ -42,6 +42,10 @@ const baseHealth: HealthPayload = {
       productionReady: true,
       status: 'verified',
       liveSmokeCommand: 'bun run smoke:chat',
+      localFallbackEnabled: false,
+      forcedLocal: false,
+      activeRuntimeProvider: 'openrouter',
+      localModel: 'local/mock-roleplay',
     },
     imageGeneration: {
       configured: true,
@@ -103,6 +107,10 @@ describe('deploy readiness evaluation', () => {
     const rows = new Map(buildHealthRows(baseHealth, 'https://api.example.com'))
 
     expect(rows.get('backend')).toBe('พร้อม')
+    expect(rows.get('chatRuntimeProvider')).toBe('openrouter')
+    expect(rows.get('chatLocalFallbackEnabled')).toBe('false')
+    expect(rows.get('chatForcedLocal')).toBe('false')
+    expect(rows.get('chatLocalModel')).toBe('local/mock-roleplay')
     expect(rows.get('structuredKnowledge')).toBe('5 ไฟล์พร้อม')
     expect(rows.get('securityPosture')).toBe('ไม่ได้รายงาน')
 
@@ -111,7 +119,11 @@ describe('deploy readiness evaluation', () => {
         cloneHealth({
           ok: false,
           knowledge: { structured: { ok: false, fileCount: 0, missing: [], errors: [] } },
-          model: { name: undefined as unknown as string, chatProvider: { status: undefined }, imageGeneration: { model: undefined, status: undefined } },
+          model: {
+            name: undefined as unknown as string,
+            chatProvider: { status: undefined, activeRuntimeProvider: undefined },
+            imageGeneration: { model: undefined, status: undefined },
+          },
           security: { authMode: undefined, avatarStorage: undefined, avatarStorageAccess: undefined, signedUrlExpiresIn: undefined },
         }),
         'http://127.0.0.1:3000',
@@ -121,7 +133,34 @@ describe('deploy readiness evaluation', () => {
     expect(brokenRows.get('backend')).toBe('ยังไม่พร้อม')
     expect(brokenRows.get('model')).toBe('ยังไม่ได้ตั้งค่า')
     expect(brokenRows.get('chatStatus')).toBe('ไม่ทราบ')
+    expect(brokenRows.get('chatRuntimeProvider')).toBe('ไม่ทราบ')
     expect(brokenRows.get('structuredKnowledge')).toBe('ยังไม่พร้อม')
+  })
+
+  test('formats local chat runtime rows for smoke handoff', () => {
+    const rows = new Map(
+      buildHealthRows(
+        cloneHealth({
+          model: {
+            chatProvider: {
+              liveVerified: false,
+              productionReady: false,
+              status: 'needs_live_smoke',
+              localFallbackEnabled: true,
+              forcedLocal: true,
+              activeRuntimeProvider: 'local',
+              localModel: 'local/mock-roleplay',
+            },
+          },
+        }),
+        'http://127.0.0.1:3000',
+      ),
+    )
+
+    expect(rows.get('chatRuntimeProvider')).toBe('local')
+    expect(rows.get('chatLocalFallbackEnabled')).toBe('true')
+    expect(rows.get('chatForcedLocal')).toBe('true')
+    expect(rows.get('chatLocalModel')).toBe('local/mock-roleplay')
   })
 
   test('passes a production-ready health payload', () => {

@@ -29,7 +29,15 @@ function baseHealth(overrides: Partial<HealthPayload> = {}): HealthPayload {
     },
     model: {
       name: 'google/gemini-2.0-flash-001',
-      chatProvider: { status: 'verified', liveVerified: true, productionReady: true },
+      chatProvider: {
+        status: 'verified',
+        liveVerified: true,
+        productionReady: true,
+        localFallbackEnabled: false,
+        forcedLocal: false,
+        activeRuntimeProvider: 'openrouter',
+        localModel: 'local/mock-roleplay',
+      },
       imageGeneration: {
         configured: true,
         status: 'verified',
@@ -56,6 +64,10 @@ describe('deploy status formatting', () => {
     expect(payload.productionReady).toBe(true)
     expect(payload.productionBlockerCount).toBe(0)
     expect(payload.health.chatStatus).toBe('verified')
+    expect(payload.health.chatRuntimeProvider).toBe('openrouter')
+    expect(payload.health.chatLocalFallbackEnabled).toBe(false)
+    expect(payload.health.chatForcedLocal).toBe(false)
+    expect(payload.health.chatLocalModel).toBe('local/mock-roleplay')
     expect(payload.rootIdentity.service).toBe('maprang-backend')
     expect(payload.nextSteps.join('\n')).toContain('production:check')
   })
