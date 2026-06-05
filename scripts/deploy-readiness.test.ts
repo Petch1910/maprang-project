@@ -210,9 +210,44 @@ describe('deploy readiness evaluation', () => {
     expect(nextSteps).toContain(
       'backend URL ยังเป็น local: ตั้ง SMOKE_API_BASE_URL และ VITE_API_BASE_URL ฝั่งหน้าบ้านเป็น URL ระบบหลังบ้านที่ deploy แล้ว',
     )
+    expect(nextSteps).toContain(
+      'หลัง backend/frontend staging มี HTTPS origins จริงแล้ว ให้ตั้ง E2E_BASE_URL และ E2E_API_BASE_URL เป็น deployed origins แล้วรัน `bun run e2e:smoke`',
+    )
     expect(nextSteps).not.toContain(
       'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน: รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับสเตจจิงหรือโปรดักชัน แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน',
     )
+  })
+
+  test('guides operator handoff when only live provider verification remains', () => {
+    const providerPendingHealth = cloneHealth({
+      model: {
+        chatProvider: {
+          liveVerified: false,
+          productionReady: false,
+          status: 'needs_live_smoke',
+        },
+        imageGeneration: {
+          liveVerified: false,
+          productionReady: false,
+          status: 'needs_live_smoke',
+        },
+      },
+    })
+
+    const readiness = evaluateDeployReadiness(providerPendingHealth, { isLocalSmokeTarget: false })
+    const nextSteps = buildNextDeploySteps(readiness)
+
+    expect(readiness.stagingReady).toBe(true)
+    expect(readiness.productionReady).toBe(false)
+    expect(readiness.stagingBlockers).toEqual([])
+    expect(nextSteps).toContain(
+      'รัน `bun run api:smoke:live` หนึ่งรอบกับ staging เพื่อยืนยัน normal chat, stream chat, wallet CHAT_USAGE, และ image generation พร้อมกัน',
+    )
+    expect(nextSteps).toContain(
+      'คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หรือ IMAGE_GENERATION_LIVE_VERIFIED=1',
+    )
+    expect(nextSteps.join('\n')).toContain('CHAT_PROVIDER_LIVE_VERIFIED=1')
+    expect(nextSteps.join('\n')).toContain('IMAGE_GENERATION_LIVE_VERIFIED=1')
   })
 
   test('turns missing production hardening into staging blockers', () => {

@@ -246,8 +246,17 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
   if (!readiness.stagingReady) {
     for (const fix of readiness.stagingFixes) steps.push(fix)
     steps.push('รัน `bun run staging:verify` พร้อม SMOKE_API_BASE_URL และ SMOKE_ADMIN_API_KEY')
+    steps.push(
+      'หลัง backend/frontend staging มี HTTPS origins จริงแล้ว ให้ตั้ง E2E_BASE_URL และ E2E_API_BASE_URL เป็น deployed origins แล้วรัน `bun run e2e:smoke`',
+    )
   } else if (!readiness.productionReady) {
     for (const fix of readiness.productionFixes) steps.push(fix)
+    steps.push(
+      'รัน `bun run api:smoke:live` หนึ่งรอบกับ staging เพื่อยืนยัน normal chat, stream chat, wallet CHAT_USAGE, และ image generation พร้อมกัน',
+    )
+    steps.push(
+      'คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` ก่อนตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หรือ IMAGE_GENERATION_LIVE_VERIFIED=1',
+    )
     steps.push('รัน `bun run production:check` ใหม่กับระบบหลังบ้านสเตจจิงหรือโปรดักชัน')
   } else {
     steps.push('รัน `bun run production:check` รอบสุดท้ายกับโดเมนระบบหลังบ้านและหน้าบ้านโปรดักชัน')

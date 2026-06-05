@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest repo-owned deploy-status handoff: 2026-06-05 `deploy:status` / `buildNextDeploySteps` now gives operators the exact staging-to-production handoff sequence. With staging URL/CORS blockers, it points to deployed HTTPS `E2E_BASE_URL` and `E2E_API_BASE_URL` before `bun run e2e:smoke`; when only live provider verification remains, it points to one `bun run api:smoke:live` pass, JSON `handoffEvidence`, `RELEASE_HANDOFF.md`, `CHAT_PROVIDER_LIVE_VERIFIED=1`, and `IMAGE_GENERATION_LIVE_VERIFIED=1`. Passing gates: `bun run deploy:readiness:test` (9 pass / 60 expects) and `bun run deploy:status:test` (14 pass / 93 expects). External blockers remain real deployed URLs/CORS plus live chat/image provider smoke.
+
 Latest local full gate: 2026-06-05 `bun run qa:full` passed with local backend forced to `local/mock-roleplay` and roleplay reply budget 1600/420. This confirms local frontend/backend/browser smoke is green; it still does not clear deployed HTTPS URL/CORS, production DB/migration, signed Supabase storage verification, live chat provider smoke, or live image provider smoke.
 
 Latest local full gate addendum: 2026-06-05 `bun run qa:full` passed again after commit `be05917` locked the abuse QA coverage map. Local repo/runtime/browser readiness is green with API smoke 34 pass / 2 live skips and Playwright 4/4 desktop+mobile. This still does not clear the external staging/production blockers: deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
