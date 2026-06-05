@@ -1606,13 +1606,36 @@ const checks: Check[] = [
         'chatLocalModel',
         'local/mock-roleplay',
       ]
-      requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', ...localRuntimeFieldSnippets], 'DEPLOYMENT_QA.md')
+      const adminHealthRunbookSnippets = [
+        '/admin/health',
+        'ลำดับงานก่อนปล่อยจริง',
+        'bun run staging:verify + bun run e2e:smoke',
+        'bun run api:smoke:live',
+        'bun run production:check',
+      ]
+      requireIncludes(
+        deploymentQa,
+        ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', ...localRuntimeFieldSnippets, ...adminHealthRunbookSnippets],
+        'DEPLOYMENT_QA.md',
+      )
       requireIncludes(
         readme,
-        ['bun run deploy:status', '`staging:verify` จะพิมพ์', 'stagingBlockerCount', 'rootIdentity.ok=false', 'สรุป blocker และ next steps', ...localRuntimeFieldSnippets],
+        [
+          'bun run deploy:status',
+          '`staging:verify` จะพิมพ์',
+          'stagingBlockerCount',
+          'rootIdentity.ok=false',
+          'สรุป blocker และ next steps',
+          ...localRuntimeFieldSnippets,
+          ...adminHealthRunbookSnippets,
+        ],
         'README.md',
       )
-      requireIncludes(stagingRunbook, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', 'bun run staging:verify', 'bun run production:check'], 'STAGING_RUNBOOK.md')
+      requireIncludes(
+        stagingRunbook,
+        ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', 'bun run staging:verify', 'bun run production:check', ...adminHealthRunbookSnippets],
+        'STAGING_RUNBOOK.md',
+      )
       requireIncludes(
         await readRepoFile('memory/production/checklist.md'),
         ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false'],

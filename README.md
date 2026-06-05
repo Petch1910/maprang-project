@@ -296,6 +296,8 @@ SMOKE_API_BASE_URL=https://api-staging.example.com SMOKE_ADMIN_API_KEY=<admin-ke
 
 `staging:verify` จะพิมพ์ `bun run deploy:status` ก่อน. Deploy status ตรวจ backend root identity ก่อน health จากนั้นปฏิเสธ localhost/loopback backend URLs, local/non-https CORS, CORS origin ที่มี credential/userinfo หรือ path/query/hash, Supabase signed storage ที่ขาด, `/ready` ที่ไม่ผ่าน, และ admin smoke coverage ที่ขาด. มันตั้งใจปล่อยให้ chat/image live verification flags ยัง pending ได้ เพื่อให้คุณรัน live provider smoke ต่อ แล้วค่อยใช้ `production:check` เป็น go/no-go สุดท้าย.
 
+บนหน้าเว็บให้เปิด `/admin/health` แล้วดู section `ลำดับงานก่อนปล่อยจริง` ควบคู่กับผล CLI. หน้า Admin Health ต้องแสดงลำดับเดียวกันคือ `bun run staging:verify + bun run e2e:smoke`, ต่อด้วย `bun run api:smoke:live`, แล้วปิดด้วย `bun run production:check` เพื่อไม่ให้ทีม deploy ข้ามด่าน staging หรือ live-provider smoke โดยไม่ตั้งใจ.
+
 หรือรันแต่ละ check แยกกัน:
 
 ```bash

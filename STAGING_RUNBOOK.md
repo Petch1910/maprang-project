@@ -49,6 +49,7 @@ bunx prisma migrate deploy
   - `VITE_SUPABASE_URL=https://<project-ref>.supabase.co`
   - `VITE_SUPABASE_ANON_KEY=<anon-key>`
 - เปิด `/admin/health` แล้วเช็ก deploy checklist ให้เขียวมากที่สุด
+- ใน `/admin/health` ต้องเห็น section `ลำดับงานก่อนปล่อยจริง` พร้อมคำสั่ง `bun run staging:verify + bun run e2e:smoke`, `bun run api:smoke:live`, และ `bun run production:check` เพื่อใช้เป็น handoff UI สำหรับคนกด deploy รอบสุดท้าย
 
 ## ขั้นที่ 4 เตรียม QA seed และ smoke
 
