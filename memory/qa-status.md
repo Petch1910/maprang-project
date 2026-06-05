@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-05
 
+- 2026-06-05 creator relationship preset surface pass: Creator Studio now loads relationship presets with the creator surface filter instead of the unfiltered endpoint. Browser e2e waits for `/relationship/presets?surface=creator` while opening `/create`, and predeploy locks both the picker source and smoke expectation. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.
+
 - 2026-06-05 relationship contract seed de-dupe pass: Character Lobby now trims preset ids, merges API presets with fallback `stranger` without rendering duplicate seed buttons, and keeps unknown preset colors stable. Browser e2e locks exactly one `character-seed-stranger`, no duplicate `character-seed-*` controls, and the existing `rival` Thai chat-note flow. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check. Browser plugin verification was attempted but timed out in the browser bridge during CDP click/screenshot, so Playwright e2e remains the runtime evidence for this scope.
 - 2026-06-05 relationship seed Thai label pass: the character lobby to chat flow now renders the selected relationship seed as Thai copy in the chat note, e.g. `คู่ปรับ`, instead of leaking the raw `rival` id. Route/Menu Audit and predeploy now lock this expectation, and Playwright e2e asserts both the Thai copy and absence of the raw seed text. Passing gates: frontend check/build/bundle, frontend static and route audit, route-menu audit/test, predeploy regression/check, docs command audit (408 refs), secrets check, and browser e2e smoke 4/4 desktop+mobile.
 

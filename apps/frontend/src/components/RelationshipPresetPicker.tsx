@@ -13,7 +13,7 @@ export function RelationshipPresetPicker({
   const [selectedId, setSelectedId] = useState('')
 
   useEffect(() => {
-    fetchRelationshipPresets()
+    fetchRelationshipPresets('creator')
       .then((data) => setPresets(data.presets))
       .catch((error) => {
         logUnexpectedError('โหลดพรีเซ็ตความสัมพันธ์ไม่สำเร็จ:', error)

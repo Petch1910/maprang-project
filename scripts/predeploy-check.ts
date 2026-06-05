@@ -1388,6 +1388,7 @@ const checks: Check[] = [
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const routeMenuAudit = await readRepoFile('apps/frontend/src/lib/routeMenuAudit.ts')
       const e2eSmoke = await readRepoFile('tests/e2e/maprang-smoke.spec.ts')
+      const relationshipPresetPicker = await readRepoFile('apps/frontend/src/components/RelationshipPresetPicker.tsx')
       requireIncludes(
         deploymentQa,
         [
@@ -1411,6 +1412,16 @@ const checks: Check[] = [
       requireIncludes(
         e2eSmoke,
         ['character-seed-stranger', 'relationship contract seed buttons must not render duplicate choices'],
+        'tests/e2e/maprang-smoke.spec.ts',
+      )
+      requireIncludes(
+        relationshipPresetPicker,
+        ["fetchRelationshipPresets('creator')"],
+        'apps/frontend/src/components/RelationshipPresetPicker.tsx',
+      )
+      requireIncludes(
+        e2eSmoke,
+        ['/relationship/presets?surface=creator'],
         'tests/e2e/maprang-smoke.spec.ts',
       )
     },

@@ -187,7 +187,11 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.getByTestId('report-cancel').click()
   await expect(page.getByTestId('report-dialog')).toBeHidden()
 
+  const creatorPresetResponse = page.waitForResponse((response) =>
+    response.url().includes('/relationship/presets?surface=creator') && response.ok(),
+  )
   await page.goto('/create')
+  await creatorPresetResponse
   await expect(page.getByTestId('creator-name')).toBeVisible()
 
   await expect(page.getByTestId('creator-ai-image-only')).toBeVisible()
