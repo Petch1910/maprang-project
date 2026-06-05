@@ -914,6 +914,7 @@ describe('frontend static audit', () => {
           (new WeakMap<object, Promise<void>>()).set({}, Promise.reject)
           (new window.WeakMap<object, Promise<void>>()).set({}, Promise.reject)
           (new (window?.WeakMap)<object, Promise<void>>()).set({}, Promise.reject)
+          (new (window?.['WeakMap'])<object, Promise<void>>()).set({}, Promise.reject)
           (new Map()).set('reject', Promise.reject)
           (new Map())['set']('reject', Promise.reject)
           (new Map())?.set('reject', Promise.reject)
@@ -945,7 +946,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise.reject')),
-    ).toHaveLength(46)
+    ).toHaveLength(47)
 
     expect(
       auditRawUiErrorThrows(
@@ -1115,6 +1116,7 @@ describe('frontend static audit', () => {
           (new WeakSet<PromiseConstructor>()).add(window.Promise)
           (new window.WeakSet<PromiseConstructor>()).add(window.Promise)
           (new (window?.WeakSet)<PromiseConstructor>()).add(window.Promise)
+          (new (window?.['WeakSet'])<PromiseConstructor>()).add(window.Promise)
           (new Set()).add(window.Promise)
           (new Set())['add'](window.Promise)
           (new Set())?.add(window.Promise)
@@ -1146,7 +1148,7 @@ describe('frontend static audit', () => {
         `,
         'apps/frontend/src/components/FixturePanel.tsx',
       ).filter((finding) => finding.message.includes('alias Promise object')),
-    ).toHaveLength(46)
+    ).toHaveLength(47)
 
     expect(
       auditRawUiErrorThrows(
@@ -1580,6 +1582,7 @@ describe('frontend static audit', () => {
           (new WeakSet<typeof console.warn>()).add(console.warn)
           (new globalThis.WeakSet<typeof console.warn>()).add(console.warn)
           (new (globalThis?.WeakSet)<typeof console.warn>()).add(console.warn)
+          (new (globalThis?.['WeakSet'])<typeof console.warn>()).add(console.warn)
           (new Set()).add(console.warn)
           (new Set())['add'](console.warn)
           (new Set())?.add(console.warn)
@@ -1613,7 +1616,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console.error/console.warn')),
-    ).toHaveLength(46)
+    ).toHaveLength(47)
 
     expect(
       auditSuspiciousPatterns(
@@ -1825,6 +1828,7 @@ describe('frontend static audit', () => {
           (new WeakSet<typeof Reflect>()).add(window.Reflect)
           (new window.WeakSet<typeof Reflect>()).add(window.Reflect)
           (new (window?.WeakSet)<typeof Reflect>()).add(window.Reflect)
+          (new (window?.['WeakSet'])<typeof Reflect>()).add(window.Reflect)
           (new Set()).add(window.Reflect)
           (new Set())['add'](window.Reflect)
           (new Set())?.add(window.Reflect)
@@ -1858,7 +1862,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Reflect object')),
-    ).toHaveLength(46)
+    ).toHaveLength(47)
   })
 
   test('reports frontend Object object aliases', () => {
@@ -1967,6 +1971,7 @@ describe('frontend static audit', () => {
           (new WeakSet<ObjectConstructor>()).add(globalThis.Object)
           (new globalThis.WeakSet<ObjectConstructor>()).add(globalThis.Object)
           (new (globalThis?.WeakSet)<ObjectConstructor>()).add(globalThis.Object)
+          (new (globalThis?.['WeakSet'])<ObjectConstructor>()).add(globalThis.Object)
           (new Set()).add(globalThis.Object)
           (new Set())['add'](globalThis.Object)
           (new Set())?.add(globalThis.Object)
@@ -2000,7 +2005,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias Object object')),
-    ).toHaveLength(46)
+    ).toHaveLength(47)
   })
 
   test('reports frontend Reflect.apply console retrieval targets', () => {
@@ -2237,6 +2242,7 @@ describe('frontend static audit', () => {
           (new WeakSet<Console>()).add(globalThis.console)
           (new globalThis.WeakSet<Console>()).add(globalThis.console)
           (new (globalThis?.WeakSet)<Console>()).add(globalThis.console)
+          (new (globalThis?.['WeakSet'])<Console>()).add(globalThis.console)
           (new Set()).add(globalThis.console)
           (new Set())['add'](globalThis.console)
           (new Set())?.add(globalThis.console)
@@ -2270,7 +2276,7 @@ describe('frontend static audit', () => {
       )
         .map((finding) => finding.message)
         .filter((message) => message.includes('alias console object')),
-    ).toHaveLength(46)
+    ).toHaveLength(47)
 
     expect(
       auditSuspiciousPatterns(
