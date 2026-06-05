@@ -1123,6 +1123,10 @@ describe('predeploy check wiring', () => {
       'CHAT_PROVIDER_LIVE_VERIFIED=1',
       'IMAGE_GENERATION_LIVE_VERIFIED=1',
       'guides operator handoff when only live provider verification remains',
+      'buildStagingNextDeploySteps',
+      'buildProductionNextDeploySteps',
+      'stagingNextSteps',
+      'productionNextSteps',
     ]) {
       expect(predeploy).toContain(deployHandoffField)
     }

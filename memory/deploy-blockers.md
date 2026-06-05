@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest deploy-status phase split: 2026-06-05 `deploy:status` now reports `stagingNextSteps` and `productionNextSteps` separately, and predeploy locks the new helper/field snippets. Full deterministic `bun run qa:repo` passed after the change. This improves operator/admin dashboard handoff clarity but does not remove the external blockers: deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
+
 Latest local full gate after handoff locks: 2026-06-05 `bun run qa:full` passed after commits `f20c3c6` and `393524a`. This reconfirms repo-owned local readiness after deploy-status next-step changes and predeploy snippet locks: `qa:repo`, `smoke:doctor`, `smoke:local`, `api:smoke` 34 pass / 2 live skips, and Playwright 4/4 desktop+mobile are green. External blockers remain real deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
 
 Latest predeploy handoff lock: 2026-06-05 `predeploy:check` now locks the deploy readiness operator-handoff snippets so staged E2E and live-provider promotion guidance cannot drift out of `deploy:status`. Locked snippets include `E2E_BASE_URL`, `E2E_API_BASE_URL`, deployed origins, `bun run e2e:smoke`, `bun run api:smoke:live`, `wallet CHAT_USAGE`, `handoffEvidence`, `CHAT_PROVIDER_LIVE_VERIFIED=1`, and `IMAGE_GENERATION_LIVE_VERIFIED=1`. Passing gates: `bun run predeploy:check:test` (3 pass / 1117 expects) and `bun run predeploy:check`.

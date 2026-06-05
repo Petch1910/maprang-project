@@ -69,6 +69,8 @@ describe('deploy status formatting', () => {
     expect(payload.health.chatForcedLocal).toBe(false)
     expect(payload.health.chatLocalModel).toBe('local/mock-roleplay')
     expect(payload.rootIdentity.service).toBe('maprang-backend')
+    expect(payload.stagingNextSteps.join('\n')).toContain('staging gate ผ่านแล้ว')
+    expect(payload.productionNextSteps.join('\n')).toContain('production:check')
     expect(payload.nextSteps.join('\n')).toContain('production:check')
   })
 
@@ -110,7 +112,10 @@ describe('deploy status formatting', () => {
     expect(text).toContain('backend URL ยังเป็น local')
     expect(text).toContain('CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน')
     expect(text).toContain('ขั้นตอนถัดไป:')
+    expect(text).toContain('stagingNextSteps:')
+    expect(text).toContain('productionNextSteps:')
     expect(text).toContain('วิธีแก้สเตจจิง:')
+    expect(text).toContain('ปิด staging blockers ให้ผ่านก่อนตั้ง verification flags ของ production')
     expect(text).not.toContain('วิธีแก้ staging:')
   })
 

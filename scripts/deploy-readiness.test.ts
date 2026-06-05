@@ -2,6 +2,8 @@ import { describe, expect, test } from 'bun:test'
 import {
   buildHealthRows,
   buildNextDeploySteps,
+  buildProductionNextDeploySteps,
+  buildStagingNextDeploySteps,
   evaluateDeployReadiness,
   healthFailures,
   isUnsafeCorsOrigin,
@@ -176,6 +178,8 @@ describe('deploy readiness evaluation', () => {
     expect(buildNextDeploySteps(readiness)).toContain(
       'กรอก `RELEASE_HANDOFF.md` ด้วย URL ที่ deploy แล้ว, สถานะ migration, storage/auth/CORS, ผล live smoke, ข้อจำกัดที่ยังรู้, และบันทึก go/no-go',
     )
+    expect(buildStagingNextDeploySteps(readiness).join('\n')).toContain('staging gate ผ่านแล้ว')
+    expect(buildProductionNextDeploySteps(readiness)).toEqual(buildNextDeploySteps(readiness))
     expect(buildNextDeploySteps(readiness).join('\n')).not.toContain('deployed URLs')
     expect(buildNextDeploySteps(readiness).join('\n')).not.toContain('known limitations')
   })
@@ -201,6 +205,8 @@ describe('deploy readiness evaluation', () => {
 
     const readiness = evaluateDeployReadiness(localHealth, { isLocalSmokeTarget: true })
     const nextSteps = buildNextDeploySteps(readiness)
+    const stagingNextSteps = buildStagingNextDeploySteps(readiness)
+    const productionNextSteps = buildProductionNextDeploySteps(readiness)
 
     expect(readiness.stagingReady).toBe(false)
     expect(readiness.productionReady).toBe(false)
@@ -213,6 +219,10 @@ describe('deploy readiness evaluation', () => {
     expect(nextSteps).toContain(
       'หลัง backend/frontend staging มี HTTPS origins จริงแล้ว ให้ตั้ง E2E_BASE_URL และ E2E_API_BASE_URL เป็น deployed origins แล้วรัน `bun run e2e:smoke`',
     )
+    expect(stagingNextSteps).toEqual(nextSteps)
+    expect(productionNextSteps.join('\n')).toContain('ปิด staging blockers ให้ผ่านก่อนตั้ง verification flags ของ production')
+    expect(productionNextSteps.join('\n')).toContain('bun run api:smoke:live')
+    expect(productionNextSteps.join('\n')).toContain('handoffEvidence')
     expect(nextSteps).not.toContain(
       'live smoke ของผู้ให้บริการแชทยังไม่ได้ยืนยันผ่าน: รัน `bun run smoke:chat` หรือ `bun run api:smoke:live` กับสเตจจิงหรือโปรดักชัน แล้วตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1 หลังผ่าน',
     )
@@ -236,10 +246,14 @@ describe('deploy readiness evaluation', () => {
 
     const readiness = evaluateDeployReadiness(providerPendingHealth, { isLocalSmokeTarget: false })
     const nextSteps = buildNextDeploySteps(readiness)
+    const stagingNextSteps = buildStagingNextDeploySteps(readiness)
+    const productionNextSteps = buildProductionNextDeploySteps(readiness)
 
     expect(readiness.stagingReady).toBe(true)
     expect(readiness.productionReady).toBe(false)
     expect(readiness.stagingBlockers).toEqual([])
+    expect(stagingNextSteps.join('\n')).toContain('staging gate ผ่านแล้ว')
+    expect(productionNextSteps).toEqual(nextSteps)
     expect(nextSteps).toContain(
       'รัน `bun run api:smoke:live` หนึ่งรอบกับ staging เพื่อยืนยัน normal chat, stream chat, wallet CHAT_USAGE, และ image generation พร้อมกัน',
     )

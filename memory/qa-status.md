@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-05
+- 2026-06-05 phase-specific deploy status pass: `deploy:status` now has `stagingNextSteps` and `productionNextSteps` in JSON/text output, with helper coverage for `buildStagingNextDeploySteps` and `buildProductionNextDeploySteps` while keeping `nextSteps` backward-compatible. Passing focused gates: `bun run deploy:readiness:test` (9 pass / 68 expects), `bun run deploy:status:test` (14 pass / 98 expects), `bun run predeploy:check:test` (3 pass / 1121 expects), `bun run predeploy:check`, `bun run memory:audit`, `bun run docs:commands`, `bun run secrets:check`, and `git diff --check`. Full deterministic `bun run qa:repo` passed afterward with backend tests 180 pass / 763 expects, frontend build, and bundle budget green.
+
 - 2026-06-05 full local gate pass after deploy handoff locks: `bun run qa:full` passed after commits `f20c3c6` and `393524a`. The run covered `qa:repo`, `smoke:doctor`, `smoke:local`, `api:smoke`, and `e2e:smoke`; deploy status showed the new staged E2E next step, API smoke passed 34 pass / 2 live skips with `local/mock-roleplay`, backend tests passed 180 / 763 expects, frontend build/bundle budget passed, and Playwright passed 4/4 desktop+mobile.
 
 - 2026-06-05 predeploy deploy-handoff snippet lock pass: `predeploy:check` now requires deploy readiness source/test coverage for staged E2E and live-provider handoff snippets (`E2E_BASE_URL`, `E2E_API_BASE_URL`, deployed origins, `bun run e2e:smoke`, `bun run api:smoke:live`, `wallet CHAT_USAGE`, `handoffEvidence`, `CHAT_PROVIDER_LIVE_VERIFIED=1`, `IMAGE_GENERATION_LIVE_VERIFIED=1`). Passing gates: `bun run predeploy:check:test` (3 pass / 1117 expects) and `bun run predeploy:check`.

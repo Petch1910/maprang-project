@@ -11,6 +11,8 @@ import {
 import {
   buildHealthRows,
   buildNextDeploySteps,
+  buildProductionNextDeploySteps,
+  buildStagingNextDeploySteps,
   evaluateDeployReadiness,
   healthFailures,
   type DeployReadiness,
@@ -42,6 +44,8 @@ type DeployStatusPayload = {
   }
   readiness: DeployReadiness
   nextSteps: string[]
+  stagingNextSteps: string[]
+  productionNextSteps: string[]
   failures: string[]
   rootIdentity: {
     ok: boolean | undefined
@@ -77,6 +81,8 @@ export function buildDeployStatusPayload(
 ): DeployStatusPayload {
   const readiness = evaluateDeployReadiness(health, { isLocalSmokeTarget: options.isLocalSmokeTarget })
   const nextSteps = buildNextDeploySteps(readiness)
+  const stagingNextSteps = buildStagingNextDeploySteps(readiness)
+  const productionNextSteps = buildProductionNextDeploySteps(readiness)
   const failures = healthFailures(health)
 
   return {
@@ -104,6 +110,8 @@ export function buildDeployStatusPayload(
     },
     readiness,
     nextSteps,
+    stagingNextSteps,
+    productionNextSteps,
     failures,
     rootIdentity: {
       ok: options.rootIdentity?.ok,
@@ -117,7 +125,7 @@ export function formatDeployStatusText(
   options: { apiBaseUrl: string; isLocalSmokeTarget: boolean; rootIdentity?: RootIdentityPayload },
 ) {
   const payload = buildDeployStatusPayload(health, options)
-  const { readiness, nextSteps, failures } = payload
+  const { readiness, nextSteps, stagingNextSteps, productionNextSteps, failures } = payload
   const lines = ['สถานะ deploy Maprang', '=====================']
 
   for (const [name, value] of buildHealthRows(health, options.apiBaseUrl)) {
@@ -155,6 +163,18 @@ export function formatDeployStatusText(
   if (readiness.productionFixes.length > 0) {
     lines.push('วิธีแก้โปรดักชัน:')
     for (const fix of readiness.productionFixes) lines.push(`- ${fix}`)
+  }
+
+  lines.push('')
+  lines.push('stagingNextSteps:')
+  for (const [index, step] of stagingNextSteps.entries()) {
+    lines.push(`${index + 1}. ${step}`)
+  }
+
+  lines.push('')
+  lines.push('productionNextSteps:')
+  for (const [index, step] of productionNextSteps.entries()) {
+    lines.push(`${index + 1}. ${step}`)
   }
 
   lines.push('')

@@ -240,7 +240,7 @@ export function healthFailures(health: HealthPayload) {
   return failures
 }
 
-export function buildNextDeploySteps(readiness: DeployReadiness) {
+export function buildStagingNextDeploySteps(readiness: DeployReadiness) {
   const steps: string[] = []
 
   if (!readiness.stagingReady) {
@@ -249,7 +249,20 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
     steps.push(
       'หลัง backend/frontend staging มี HTTPS origins จริงแล้ว ให้ตั้ง E2E_BASE_URL และ E2E_API_BASE_URL เป็น deployed origins แล้วรัน `bun run e2e:smoke`',
     )
-  } else if (!readiness.productionReady) {
+  } else {
+    steps.push('staging gate ผ่านแล้ว: คงหลักฐาน `bun run staging:verify` และ `bun run e2e:smoke` ใน `RELEASE_HANDOFF.md` ก่อนเข้า live-provider handoff')
+  }
+
+  return steps
+}
+
+export function buildProductionNextDeploySteps(readiness: DeployReadiness) {
+  const steps: string[] = []
+
+  if (!readiness.productionReady) {
+    if (!readiness.stagingReady) {
+      steps.push('ปิด staging blockers ให้ผ่านก่อนตั้ง verification flags ของ production')
+    }
     for (const fix of readiness.productionFixes) steps.push(fix)
     steps.push(
       'รัน `bun run api:smoke:live` หนึ่งรอบกับ staging เพื่อยืนยัน normal chat, stream chat, wallet CHAT_USAGE, และ image generation พร้อมกัน',
@@ -264,4 +277,9 @@ export function buildNextDeploySteps(readiness: DeployReadiness) {
   }
 
   return steps
+}
+
+export function buildNextDeploySteps(readiness: DeployReadiness) {
+  if (!readiness.stagingReady) return buildStagingNextDeploySteps(readiness)
+  return buildProductionNextDeploySteps(readiness)
 }
