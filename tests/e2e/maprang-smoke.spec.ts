@@ -163,6 +163,11 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
 
   await page.goto(`/characters/${seededCharacterId}`)
   await expect(page.getByTestId('character-start-chat')).toBeVisible()
+  await expect(page.getByTestId('character-seed-stranger')).toHaveCount(1)
+  const contractSeedTestIds = await page.locator('[data-testid^="character-seed-"]').evaluateAll((nodes) =>
+    nodes.map((node) => node.getAttribute('data-testid') ?? '').filter((value) => value.length > 0),
+  )
+  expect(new Set(contractSeedTestIds).size, 'relationship contract seed buttons must not render duplicate choices').toBe(contractSeedTestIds.length)
   await page.getByTestId('character-seed-rival').click()
   await expect(page.getByTestId('character-seed-rival')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByTestId('character-start-chat')).toHaveAttribute(

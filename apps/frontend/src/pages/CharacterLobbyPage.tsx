@@ -49,17 +49,31 @@ const fallbackRelationshipSeeds: RelationshipContractSeed[] = [
 
 const seedColorById = new Map(fallbackRelationshipSeeds.map((seed) => [seed.id, seed.color]))
 
+function uniqueContractSeeds(seeds: RelationshipContractSeed[]) {
+  const seen = new Set<string>()
+  return seeds.filter((seed) => {
+    if (!seed.id || seen.has(seed.id)) return false
+    seen.add(seed.id)
+    return true
+  })
+}
+
+function relationshipSeedFromPreset(preset: RelationshipPreset): RelationshipContractSeed {
+  const id = preset.id.trim()
+  const fallback = fallbackRelationshipSeeds.find((seed) => seed.id === id)
+  return {
+    id,
+    label: preset.name.trim() || fallback?.label || id,
+    tone: preset.description.trim() || fallback?.tone || id,
+    color: seedColorById.get(id) ?? fallback?.color ?? 'bg-slate-600',
+  }
+}
+
 function contractSeedsFromPresets(presets: RelationshipPreset[]) {
   if (presets.length === 0) return fallbackRelationshipSeeds
-  return [
-    fallbackRelationshipSeeds[0],
-    ...presets.map((preset) => ({
-      id: preset.id,
-      label: preset.name,
-      tone: preset.description,
-      color: seedColorById.get(preset.id) ?? 'bg-slate-600',
-    })),
-  ]
+  const presetSeeds = uniqueContractSeeds(presets.map(relationshipSeedFromPreset))
+  const hasDefaultSeed = presetSeeds.some((seed) => seed.id === fallbackRelationshipSeeds[0].id)
+  return uniqueContractSeeds(hasDefaultSeed ? presetSeeds : [fallbackRelationshipSeeds[0], ...presetSeeds])
 }
 
 export function CharacterLobbyPage() {

@@ -1408,6 +1408,11 @@ const checks: Check[] = [
         ['character-seed-rival', 'relationship_seed=rival', 'เลือกจุดเริ่มต้นความสัมพันธ์: คู่ปรับ'],
         'tests/e2e/maprang-smoke.spec.ts',
       )
+      requireIncludes(
+        e2eSmoke,
+        ['character-seed-stranger', 'relationship contract seed buttons must not render duplicate choices'],
+        'tests/e2e/maprang-smoke.spec.ts',
+      )
     },
   },
   {
