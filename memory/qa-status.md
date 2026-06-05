@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-05
+- 2026-06-05 local reply-budget/runtime override pass: The ignored local backend env was updated to the recommended roleplay budget and forced local mock runtime. After restarting backend, `/health` reported `modelMaxOutputTokens=1600`, `modelMinRoleplayReplyChars=420`, `chatRuntimeProvider=local`, `chatForcedLocal=true`, and `chatLocalModel=local/mock-roleplay`; `bun run smoke:doctor` passed without the reply-budget warning, and `bun run api:smoke` passed 34 rows / 2 live-provider skips with `warn=0`.
+
 - 2026-06-05 local playable runtime and browser smoke pass: `bun run smoke:doctor` passed with backend/database ready and local chat runtime fields visible, `bun run smoke:local` passed with local avatar storage fallback, `bun run api:smoke` passed 34 rows / 2 live-provider skips including `POST /chat local mock` and `POST /chat/stream local mock`, and `bun run e2e:smoke` passed 4/4 desktop+mobile route/menu checks.
 
 - 2026-06-05 full repo QA pass after local runtime handoff locks: `bun run qa:repo` passed after Admin Health local runtime Route/Menu Audit docs, README/DEPLOYMENT_QA local runtime field docs, and predeploy guards were committed. Highlights: secrets scan, memory audit 38 Markdown files, knowledge audit 12 files / 5 structured packs, docs command audit 358 refs, test coverage audit 60 files / 33 root scripts, eval 3 scenarios, backend security audit 37 tests / 242 expects, import-cycle audit 125 files / 295 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, predeploy regression 3 tests / 1102 expects, backend tests 180 pass / 763 expects, frontend build, and bundle budget green.
