@@ -141,6 +141,16 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expectBackendRootIdentity(request, 'ตรวจเบราว์เซอร์')
   const health = await request.get(`${backendUrl}/health`)
   expect(health.ok(), 'ระบบหลังบ้าน /health ต้องเรียกได้ก่อนตรวจเบราว์เซอร์').toBeTruthy()
+  const healthPayload = (await health.json()) as {
+    model?: {
+      chatProvider?: {
+        activeRuntimeProvider?: string
+        forcedLocal?: boolean
+      }
+    }
+  }
+  const expectsLocalChatRuntime =
+    healthPayload.model?.chatProvider?.activeRuntimeProvider === 'local' || healthPayload.model?.chatProvider?.forcedLocal === true
 
   await page.goto('/')
   await expect(page.locator('body')).toContainText('Maprang')
@@ -526,6 +536,12 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.locator('body')).toContainText('สรุปด่านค้างก่อนโปรดักชัน')
   await expect(page.locator('body')).toContainText('bun run production:check')
   await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
+  await expect(page.locator('body')).toContainText('Runtime แชท')
+  if (expectsLocalChatRuntime) {
+    await expect(page.locator('body')).toContainText('local mock พร้อมเล่น')
+    await expect(page.locator('body')).toContainText('แชท local สำหรับ QA')
+    await expect(page.locator('body')).toContainText('local/mock-roleplay')
+  }
   await expect(page.locator('body')).toContainText('ตรวจเส้นทาง/เมนู')
   await expect(page.locator('body')).toContainText('แถบแชท')
 

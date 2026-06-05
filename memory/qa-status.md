@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-05
+- 2026-06-05 e2e admin health local runtime lock pass: Playwright core route/menu smoke now reads backend health and asserts Admin Health runtime labels. It always checks `Runtime แชท`, and in local runtime checks `local mock พร้อมเล่น`, `แชท local สำหรับ QA`, and `local/mock-roleplay` on `/admin/health`. Passing gates: `bun run e2e:smoke:test` (13 pass / 41 expects) and `bun run e2e:smoke` 4/4 desktop+mobile.
+
 - 2026-06-05 deploy/smoke local runtime output pass: CLI handoff now exposes local chat runtime fields in both text and JSON deploy diagnostics. `smoke:doctor` prints `chatRuntimeProvider`, `chatLocalFallbackEnabled`, `chatForcedLocal`, and `chatLocalModel`; `deploy:status --json` returns the same fields under `health` for automation. Passing gates: focused deploy readiness/status/smoke-doctor tests 33 pass / 202 expects, `bun run smoke:doctor`, and `bun run deploy:status -- --json`.
 
 - 2026-06-05 admin health local runtime UI pass: frontend health typing and Admin Health/System Status now display backend local chat runtime fields. `/admin/health` visibly shows local mock chat status, runtime mode, local fallback model, and the local QA deploy check while still listing live chat/image provider blockers for production. Browser plugin verification passed for `http://127.0.0.1:5173/admin/health` with `local mock พร้อมเล่น`, `Runtime แชท`, and `แชท local สำหรับ QA` visible and zero console warnings/errors. Passing gates: `bun run frontend:check`, `bun run e2e:smoke` 4/4 desktop+mobile.
