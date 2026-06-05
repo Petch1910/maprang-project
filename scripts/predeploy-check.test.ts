@@ -981,7 +981,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('`qa:repo` ล่าสุดผ่านวันที่ 2026-06-05')
     expect(predeploy).toContain('memory audit ครอบ 38 Markdown files')
     expect(predeploy).toContain('docs command audit ครอบ 408 refs')
-    expect(predeploy).toContain('Backend tests ล่าสุดผ่าน 180 tests / 763 expects')
+    expect(predeploy).toContain('Backend tests ล่าสุดผ่าน 180 tests / 769 expects')
     expect(predeploy).toContain('0028-lock-promise-console-container-guards.md')
     expect(predeploy).toContain('Decision/predeploy handoff lock ล่าสุดอยู่ถึง')
     expect(predeploy).toContain('0027-lock-namespace-reflection-guards.md')
