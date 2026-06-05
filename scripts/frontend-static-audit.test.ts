@@ -2786,7 +2786,7 @@ describe('frontend static audit', () => {
         '<p>ยืนยัน live chat smoke แล้ว</p>',
         '<p>ยืนยัน live image smoke แล้ว</p>',
         '<p>เช็คด้วย browser smoke</p>',
-        '<p>สรุป blocker production</p>',
+        '<p>สรุปด่านค้างก่อนโปรดักชัน</p>',
         '<p>พร้อมสำหรับ production smoke</p>',
         '<p>รัน production gate ซ้ำ</p>',
         '<p>ก่อน production ต้องเช็ค</p>',
@@ -2796,7 +2796,7 @@ describe('frontend static audit', () => {
     )
 
     expect(findings.map((finding) => finding.message)).toEqual(
-      Array.from({ length: 28 }, () => adminHealthMixedFinding),
+      Array.from({ length: 27 }, () => adminHealthMixedFinding),
     )
   })
 

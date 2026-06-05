@@ -5106,7 +5106,7 @@ const checks: Check[] = [
       requireIncludes(await readRepoFile('STAGING_RUNBOOK.md'), ['local/non-https CORS', 'frontend HTTPS origin', 'credential/userinfo, path/query/hash, หรือ backend URL'], 'STAGING_RUNBOOK.md')
       requireIncludes(
         e2eSmoke,
-        ['ตรวจเส้นทาง/เมนู', 'ตรวจพรอมป์ก่อนยิงโมเดล', 'กฎคุมพรอมป์ของแพลตฟอร์ม', 'ทดสอบคุณภาพพรอมป์และบริบท', 'สรุป blocker production', 'เช็กลิสต์ deploy', 'แถบแชท'],
+        ['ตรวจเส้นทาง/เมนู', 'ตรวจพรอมป์ก่อนยิงโมเดล', 'กฎคุมพรอมป์ของแพลตฟอร์ม', 'ทดสอบคุณภาพพรอมป์และบริบท', 'สรุปด่านค้างก่อนโปรดักชัน', 'เช็กลิสต์ deploy', 'แถบแชท'],
         'tests/e2e/maprang-smoke.spec.ts',
       )
       requireIncludes(e2eSmoke, ['expectBackendRootIdentity', 'maprang-backend'], 'tests/e2e/maprang-smoke.spec.ts')

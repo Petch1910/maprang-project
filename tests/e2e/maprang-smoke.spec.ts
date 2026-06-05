@@ -523,7 +523,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   expect(await page.getByTestId('events-scene-row').count()).toBeGreaterThan(0)
 
   await page.goto('/admin/health')
-  await expect(page.locator('body')).toContainText('สรุป blocker production')
+  await expect(page.locator('body')).toContainText('สรุปด่านค้างก่อนโปรดักชัน')
   await expect(page.locator('body')).toContainText('bun run production:check')
   await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
   await expect(page.locator('body')).toContainText('ตรวจเส้นทาง/เมนู')

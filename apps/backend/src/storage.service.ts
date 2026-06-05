@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, stat, writeFile } from 'node:fs/promises'
 import { dirname, extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { storageProvider } from './config'
@@ -7,6 +7,7 @@ const backendRoot = dirname(dirname(fileURLToPath(import.meta.url)))
 
 export const uploadRoot = join(backendRoot, 'uploads', 'avatars')
 export const maxAvatarBytes = 2 * 1024 * 1024
+export const localStorageFallbackEnabled = process.env.NODE_ENV !== 'production' && process.env.LOCAL_STORAGE_FALLBACK !== '0'
 export const supabaseSignedUrlExpiresInSeconds = Number(process.env.SUPABASE_SIGNED_URL_EXPIRES_IN ?? 3600)
 export const supabaseStorageAccess =
   process.env.SUPABASE_STORAGE_ACCESS === 'public' || process.env.SUPABASE_STORAGE_ACCESS === 'signed'
@@ -49,6 +50,19 @@ export function avatarExtensionFromContentType(contentType: string) {
 
 export function avatarUrl(origin: string, filename: string) {
   return `${origin}/uploads/avatars/${filename}`
+}
+
+export function localAvatarPath(filename: string) {
+  return join(uploadRoot, filename)
+}
+
+async function localAvatarExists(filename: string) {
+  try {
+    const file = await stat(localAvatarPath(filename))
+    return file.isFile() && file.size > 0
+  } catch {
+    return false
+  }
 }
 
 export function normalizeSupabaseSignedUrl(supabaseUrl: string, signedPath: string) {
@@ -108,7 +122,10 @@ async function uploadSupabaseAvatar({
 }
 
 export async function resolveAvatarLocation(filename: string) {
-  if (storageProvider === 'local') return { type: 'local' as const, path: join(uploadRoot, filename) }
+  if (storageProvider === 'local') return { type: 'local' as const, path: localAvatarPath(filename) }
+  if (localStorageFallbackEnabled && (await localAvatarExists(filename))) {
+    return { type: 'local' as const, path: localAvatarPath(filename) }
+  }
 
   const { supabaseUrl, serviceRoleKey, bucket } = supabaseStorageConfig()
   const objectPath = `avatars/${filename}`
@@ -159,7 +176,21 @@ export async function uploadAvatarFile({ file, origin }: { file: File; origin: s
   const filename = `${crypto.randomUUID()}${extension}`
   const bytes = new Uint8Array(await file.arrayBuffer())
   if (storageProvider === 'supabase') {
-    await uploadSupabaseAvatar({ bytes, contentType: file.type, filename })
+    try {
+      await uploadSupabaseAvatar({ bytes, contentType: file.type, filename })
+    } catch (error) {
+      if (!localStorageFallbackEnabled) throw error
+      await uploadLocalAvatar({ bytes, filename })
+      return {
+        ok: true as const,
+        url: avatarUrl(origin, filename),
+        filename,
+        provider: 'local' as const,
+        access: 'local' as const,
+        size: file.size,
+        contentType: file.type,
+      }
+    }
   } else {
     await uploadLocalAvatar({ bytes, filename })
   }
@@ -206,7 +237,21 @@ export async function uploadAvatarBytes({
 
   const filename = `${crypto.randomUUID()}${extension}`
   if (storageProvider === 'supabase') {
-    await uploadSupabaseAvatar({ bytes, contentType, filename })
+    try {
+      await uploadSupabaseAvatar({ bytes, contentType, filename })
+    } catch (error) {
+      if (!localStorageFallbackEnabled) throw error
+      await uploadLocalAvatar({ bytes, filename })
+      return {
+        ok: true as const,
+        url: avatarUrl(origin, filename),
+        filename,
+        provider: 'local' as const,
+        access: 'local' as const,
+        size: bytes.byteLength,
+        contentType,
+      }
+    }
   } else {
     await uploadLocalAvatar({ bytes, filename })
   }
