@@ -71,5 +71,5 @@
 - `SMOKE_API_BASE_URL=https://<backend-staging-domain> bun run smoke:ready`
 - Supabase Storage bucket `avatars` ต้องเป็น private + signed URL
 - `CORS_ORIGINS` ต้องเป็น frontend HTTPS origin จริงเท่านั้น ไม่ใช่ localhost/loopback, `http://`, wildcard, credential/userinfo, path/query, หรือ backend URL
-- Automated abuse QA ต้องผ่าน: SQL-like id/input guard, admin route guard, owner resource guard, และ prompt injection guard ผ่าน `security:audit:test`, `backend:check`, `eval:local`, และ `api:smoke`
-- ทำ manual abuse QA ตาม `ABUSE_QA_CHECKLIST.md` ก่อนเปิดจริง: SQL-like search/chat input, cross-user resource id guessing, prompt injection asking for system prompt/secrets, frontend XSS, audit logs, และ token/rate-limit
+- Automated abuse QA ต้องผ่านตามตาราง `Automated Coverage Map` ใน `ABUSE_QA_CHECKLIST.md`: SQL-like id/input guard, admin route guard, owner resource guard, prompt injection guard, frontend XSS/link guard, storage guard, และ token/rate-limit smoke ผ่าน `security:audit:test`, `frontend:static:audit`, `backend:check`, `eval:local`, `api:smoke`, และ `supabase:storage:check`
+- ทำ manual/staging abuse QA ตาม `ABUSE_QA_CHECKLIST.md` ก่อนเปิดจริง: SQL-like search/chat input, cross-user resource id guessing, auth spoofing, prompt injection asking for system prompt/secrets, frontend XSS, audit logs, token/rate-limit, และ signed storage จริง

@@ -10,6 +10,22 @@
 - เตรียม `SMOKE_ADMIN_API_KEY` สำหรับตรวจ admin-only APIs และ audit logs
 - จด timestamp เริ่มทดสอบเพื่อหา audit logs/usage rows ภายหลังได้เร็ว
 
+## ตารางครอบคลุมอัตโนมัติ (Automated Coverage Map)
+
+ตารางนี้บอกว่า abuse area ไหนถูก repo-owned gates ครอบแล้ว และจุดไหนยังต้องลองด้วยมือบน staging จริงก่อนเปิด production. ถ้าเพิ่ม abuse case ใหม่ให้เพิ่มแถวหรือ command ที่เกี่ยวข้องตรงนี้ด้วย เพื่อไม่ให้ checklist กลายเป็นงานจำล้วน.
+
+| พื้นที่ | Gate อัตโนมัติที่ต้องผ่าน | สิ่งที่ล็อกแล้วใน repo | ยังต้องลองด้วยมือ/staging |
+| --- | --- | --- | --- |
+| SQL-like input | `bun run security:audit`, `bun run security:audit:test`, `bun run backend:check`, `bun run api:smoke` | route id validation, Prisma-safe query guard, invalid id 400/404, no raw DB error | payload จริงใน search/report/chat/lore id ที่ยาวหรือแปลกกว่าชุด smoke |
+| Broken access | `bun run security:audit`, `bun run backend:check`, `bun run api:smoke`, `bun run e2e:smoke` | owner/admin guard, admin route guard, private character/report/message guard | cross-user guessing ด้วย User A/User B บน staging และตรวจว่าไม่มีข้อมูลส่วนตัวหลุด |
+| Auth spoofing | `bun run security:audit`, `bun run smoke:doctor`, `bun run deploy:status` | production ต้องใช้ Supabase JWT, local `x-user-id` จำกัด dev/admin smoke | ส่ง `x-user-id` ปลอมบน staging โดยไม่มี JWT ที่ถูกต้อง |
+| Prompt control | `bun run eval:local`, `bun run backend:check`, `bun run api:smoke` | prompt-control policy อยู่ก่อน untrusted context, client history ตัด system role, inspector redaction | สนทนาต่อเนื่องขอ system prompt/API key/DB URL และตรวจ snapshot ที่ redact แล้ว |
+| Lore/persona injection | `bun run eval:local`, `bun run backend:check`, `bun run api:smoke` | lore/persona/creator prompt ถูกจัดเป็น untrusted narrative/input data | ใส่ lore/persona ที่สั่ง ignore policy แล้วคุยต่อหลายเทิร์น |
+| Frontend XSS/link safety | `bun run frontend:static:audit`, `bun run frontend:static:audit:test`, `bun run e2e:smoke` | ห้าม `dangerouslySetInnerHTML`, direct `window.open`, unsafe new-tab link, raw UI error leak | payload HTML/markdown แปลกใน profile/creator/chat/report บน browser จริง |
+| Admin audit | `bun run backend:check`, `bun run api:smoke`, `bun run e2e:smoke` | admin-only API guard, report/moderation/token action flow, audit-log response shape | ทำ action จริงบน staging แล้วค้น `/admin/audit-logs` ด้วย timestamp |
+| Token/rate limit | `bun run backend:check`, `bun run api:smoke`, `bun run smoke:chat:test` | minimum token guard, provider failure classification, wallet debit evidence, stream smoke validation | กดส่งซ้ำระหว่าง streaming, user token ต่ำ, และ live provider fail จริง |
+| Storage/avatar | `bun run smoke:local`, `bun run supabase:storage:test`, `bun run supabase:storage:check` | local storage fallback เฉพาะ dev, signed storage contract, upload validation | private `avatars` bucket + signed URL บน Supabase/staging จริง |
+
 ## ตารางทดสอบ
 
 | พื้นที่ | เคสที่ต้องลอง | ผลที่ต้องได้ |
