@@ -242,13 +242,15 @@ describe('relationship preview simulator', () => {
     const creatorPresets = listRelationshipPresets('creator')
 
     expect(allPresets).toHaveLength(RELATIONSHIP_PRESETS.length)
-    expect(contractPresets).toHaveLength(19)
-    expect(creatorPresets).toHaveLength(RELATIONSHIP_PRESETS.length)
+    expect(contractPresets).toHaveLength(20)
+    expect(creatorPresets).toHaveLength(RELATIONSHIP_PRESETS.length - 1)
 
     expect(contractPresets.every((preset) => preset.surfaces.includes('contract'))).toBe(true)
     expect(creatorPresets.every((preset) => preset.surfaces.includes('creator'))).toBe(true)
+    expect(contractPresets.map((preset) => preset.id)).toContain('stranger')
     expect(contractPresets.map((preset) => preset.id)).toContain('soulmate')
     expect(contractPresets.map((preset) => preset.id)).not.toContain('safe-family-bond')
+    expect(creatorPresets.map((preset) => preset.id)).not.toContain('stranger')
     expect(creatorPresets.map((preset) => preset.id)).toContain('safe-family-bond')
   })
 })

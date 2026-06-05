@@ -373,7 +373,7 @@ docker build -f apps/frontend/Dockerfile -t maprang-frontend \
 
 - ใช้ `ABUSE_QA_CHECKLIST.md` เป็นรอบ exploratory security เพิ่มเติมหลัง automated gates ผ่าน โดยเฉพาะ SQL-like input, broken access, prompt injection, frontend XSS/link safety, admin audit logs, และ token/rate-limit.
 - เปิด `/health` และยืนยัน `ok=true`, `databaseConnected=true`, และ `avatarStorage` เป็นค่าที่คาดหวัง.
-- เปิด `/relationship/presets?surface=contract` และยืนยันว่าคืนเฉพาะ relationship contracts สำหรับผู้เล่น ต้องมี `soulmate` และไม่รวม creator-only presets เช่น `safe-family-bond`.
+- เปิด `/relationship/presets?surface=contract` และยืนยันว่าคืนเฉพาะ relationship contracts สำหรับผู้เล่น ต้องมี `stranger` และ `soulmate` และไม่รวม creator-only presets เช่น `safe-family-bond`.
 - เปิด `/relationship/presets?surface=creator` และยืนยันว่ายังมี creator-only presets เช่น `safe-family-bond` สำหรับ Creator Studio.
 - สร้าง character ในฐานะ owner.
 - แก้ไข character และยืนยันว่า validation notes อัปเดต.

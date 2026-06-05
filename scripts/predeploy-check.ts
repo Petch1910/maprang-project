@@ -1393,6 +1393,7 @@ const checks: Check[] = [
         deploymentQa,
         [
           '/relationship/presets?surface=contract',
+          'stranger',
           'safe-family-bond',
           'relationship_seed=<selected-id>',
           'relationship preset picker',

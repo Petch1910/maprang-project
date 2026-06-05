@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-05
 
+- 2026-06-05 backend relationship stranger preset pass: `/relationship/presets?surface=contract` now returns `stranger` / คนแปลกหน้า from the API as a contract-only preset. All presets are now 25, contract presets 20, creator presets remain 24, and Creator Studio is protected from `stranger` by the creator surface filter. Passing gates: backend check 180 pass / 769 expects, API smoke 34 pass / 2 live-provider skips, predeploy regression/check, and e2e smoke 4/4 desktop+mobile.
+
 - 2026-06-05 creator relationship preset picker state pass: Creator Studio preset picker now uses dark UI styling and has explicit loading, retryable failure, empty, select-disabled, and apply-disabled states. E2E checks the `relationship-preset-picker-select` hook is visible/enabled after `/relationship/presets?surface=creator` responds. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.
 
 - 2026-06-05 creator relationship preset surface pass: Creator Studio now loads relationship presets with the creator surface filter instead of the unfiltered endpoint. Browser e2e waits for `/relationship/presets?surface=creator` while opening `/create`, and predeploy locks both the picker source and smoke expectation. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.

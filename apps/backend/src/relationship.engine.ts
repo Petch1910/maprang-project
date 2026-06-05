@@ -123,6 +123,12 @@ const DISCOVERY_TAGS = new Set([
 
 export const RELATIONSHIP_PRESETS: RelationshipPreset[] = [
   {
+    id: 'stranger',
+    name: 'คนแปลกหน้า',
+    description: 'ยังไม่รู้จักกัน ระวังตัวแต่มีพื้นที่ให้เริ่มใหม่',
+    tags: ['stranger'],
+  },
+  {
     id: 'enemy',
     name: 'ศัตรู',
     description: 'เริ่มจากแรงต้านสูง ไม่ไว้ใจ และพร้อมปะทะ',
@@ -269,6 +275,7 @@ export const RELATIONSHIP_PRESETS: RelationshipPreset[] = [
 ]
 
 const RELATIONSHIP_CONTRACT_PRESET_IDS = new Set([
+  'stranger',
   'enemy',
   'disliked',
   'rival',
@@ -290,16 +297,24 @@ const RELATIONSHIP_CONTRACT_PRESET_IDS = new Set([
   'soulmate',
 ])
 
+const RELATIONSHIP_CREATOR_PRESET_IDS = new Set(RELATIONSHIP_PRESETS.map((preset) => preset.id).filter((id) => id !== 'stranger'))
+
+function relationshipPresetSurfaces(id: string): RelationshipPresetSurface[] {
+  const surfaces: RelationshipPresetSurface[] = []
+  if (RELATIONSHIP_CONTRACT_PRESET_IDS.has(id)) surfaces.push('contract')
+  if (RELATIONSHIP_CREATOR_PRESET_IDS.has(id)) surfaces.push('creator')
+  return surfaces
+}
+
 export function listRelationshipPresets(surface?: RelationshipPresetSurface): RelationshipPresetResponse[] {
   return RELATIONSHIP_PRESETS.map((preset) => ({
     ...preset,
-    surfaces: RELATIONSHIP_CONTRACT_PRESET_IDS.has(preset.id)
-      ? (['contract', 'creator'] satisfies RelationshipPresetSurface[])
-      : (['creator'] satisfies RelationshipPresetSurface[]),
+    surfaces: relationshipPresetSurfaces(preset.id),
   })).filter((preset) => (surface ? preset.surfaces.includes(surface) : true))
 }
 
 const TAG_RULES: Record<string, TagRule> = {
+  stranger: { kind: 'engine', status: 'NEUTRAL', flags: ['early_distance'] },
   enemy: { kind: 'engine', offsets: { affinity: -80, trust: -60, respect: -10 }, status: 'ENEMY', flags: ['hostile'] },
   disliked: { kind: 'engine', offsets: { affinity: -55, trust: -25, respect: -5 }, status: 'DISLIKED', flags: ['guarded'] },
   rival: { kind: 'engine', offsets: { affinity: -30, trust: -15, respect: 25 }, status: 'RIVAL', flags: ['competitive'] },

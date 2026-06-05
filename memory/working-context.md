@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-05
 
+- 2026-06-05: Backend relationship presets now include `stranger` / คนแปลกหน้า as a contract-only preset owned by the API instead of only a frontend fallback. Surface generation now separates contract and creator ids, so all presets=25, contract presets=20, creator presets stay 24, and `stranger` does not leak into Creator Studio. Backend tests, API smoke, predeploy, and browser e2e all passed; e2e also reconfirmed frontend seed de-dupe when the backend now provides `stranger` directly.
+
 - 2026-06-05: Creator Studio relationship preset picker now matches the dark Creator UI and has complete local states: loading text, failure text with retry, empty-state copy, disabled select/apply reasons, and a stable `relationship-preset-picker-select` hook for browser QA. The picker still uses the creator-only preset surface, and e2e verifies the select is visible/enabled after the creator preset response. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.
 
 - 2026-06-05: Creator Studio relationship preset picker now calls the creator-only preset surface instead of the unfiltered preset endpoint. Browser e2e waits for `/relationship/presets?surface=creator` on `/create`, and predeploy locks both the picker source and e2e response expectation so future contract-only presets cannot leak into creator tags. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.

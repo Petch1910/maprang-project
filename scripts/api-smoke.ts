@@ -462,13 +462,15 @@ await check('GET/PATCH /me/persona', async () => {
 
 await check('GET /relationship/presets', async () => {
   const payload = await readJson<{ presets?: unknown[] }>('/relationship/presets')
-  if (payload.presets?.length !== 24) throw new Error(`preset ทั้งหมดควรมี 24 รายการ แต่ได้ ${payload.presets?.length ?? 0}`)
+  if (payload.presets?.length !== 25) throw new Error(`preset ทั้งหมดควรมี 25 รายการ แต่ได้ ${payload.presets?.length ?? 0}`)
   const contractPayload = await readJson<{ presets?: Array<{ id?: string; surfaces?: string[] }> }>('/relationship/presets?surface=contract')
   const creatorPayload = await readJson<{ presets?: Array<{ id?: string; surfaces?: string[] }> }>('/relationship/presets?surface=creator')
-  if (contractPayload.presets?.length !== 19) throw new Error(`contract preset ควรมี 19 รายการ แต่ได้ ${contractPayload.presets?.length ?? 0}`)
+  if (contractPayload.presets?.length !== 20) throw new Error(`contract preset ควรมี 20 รายการ แต่ได้ ${contractPayload.presets?.length ?? 0}`)
   if (creatorPayload.presets?.length !== 24) throw new Error(`creator preset ควรมี 24 รายการ แต่ได้ ${creatorPayload.presets?.length ?? 0}`)
+  if (!contractPayload.presets.some((preset) => preset.id === 'stranger')) throw new Error('contract preset ยังไม่มี stranger')
   if (!contractPayload.presets.some((preset) => preset.id === 'soulmate')) throw new Error('contract preset ยังไม่มี soulmate')
   if (contractPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('contract preset มี creator-only preset ปนอยู่')
+  if (creatorPayload.presets.some((preset) => preset.id === 'stranger')) throw new Error('creator preset มี contract-only stranger ปนอยู่')
   if (!creatorPayload.presets.some((preset) => preset.id === 'safe-family-bond')) throw new Error('creator preset ยังไม่มี safe-family-bond')
   if (!contractPayload.presets.every((preset) => preset.surfaces?.includes('contract'))) throw new Error('contract preset ยังไม่มี surface contract ครบ')
   if (!creatorPayload.presets.every((preset) => preset.surfaces?.includes('creator'))) throw new Error('creator preset ยังไม่มี surface creator ครบ')
