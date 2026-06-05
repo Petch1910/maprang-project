@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-05
+- 2026-06-05 full local gate pass after abuse coverage-map lock: `bun run qa:full` passed after commit `be05917`. The run covered `qa:repo`, `smoke:doctor`, `smoke:local`, `api:smoke`, and `e2e:smoke`; highlights include docs command audit 387 refs, predeploy regression 3 tests / 1107 expects, backend tests 180 pass / 763 expects, API smoke 34 pass / 2 live skips with `local/mock-roleplay`, QA seed restore, and Playwright 4/4 desktop+mobile.
+
 - 2026-06-05 abuse QA coverage-map lock pass: `ABUSE_QA_CHECKLIST.md` now has an explicit `Automated Coverage Map` linking each abuse area to repo-owned automated gates and the remaining manual/staging checks. `SECURITY_CHECKLIST.md` now points production must-pass abuse QA to that map, and `predeploy:check` locks the map snippets so the deploy handoff cannot lose the SQL-like input, broken access, auth spoofing, prompt control, lore/persona injection, frontend XSS/link safety, admin audit, token/rate-limit, and storage/avatar coverage. Passing gates: `bun run predeploy:check:test` (3 pass / 1107 expects), `bun run predeploy:check`, `bun run docs:commands` (387 refs), `bun run secrets:check`, and `git diff --check`.
 
 - 2026-06-05 full local gate pass: `bun run qa:full` passed end-to-end after restarting backend with local roleplay budget 1600/420 and forced `local/mock-roleplay` runtime. The run covered full `qa:repo`, `smoke:doctor`, `smoke:local`, `api:smoke`, and `e2e:smoke`; API smoke passed 34 rows / 2 live skips with `warn=0`, backend tests passed 180 / 763 expects, and Playwright passed 4/4 desktop+mobile.
