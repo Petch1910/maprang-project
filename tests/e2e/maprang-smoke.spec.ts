@@ -193,6 +193,8 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.goto('/create')
   await creatorPresetResponse
   await expect(page.getByTestId('creator-name')).toBeVisible()
+  await expect(page.getByTestId('relationship-preset-picker-select')).toBeVisible()
+  await expect(page.getByTestId('relationship-preset-picker-select')).toBeEnabled()
 
   await expect(page.getByTestId('creator-ai-image-only')).toBeVisible()
   await expect(page.getByTestId('creator-image-style')).toBeVisible()

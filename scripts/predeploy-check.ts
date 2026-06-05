@@ -1416,12 +1416,19 @@ const checks: Check[] = [
       )
       requireIncludes(
         relationshipPresetPicker,
-        ["fetchRelationshipPresets('creator')"],
+        [
+          "fetchRelationshipPresets('creator')",
+          'relationship-preset-picker-select',
+          'กำลังโหลดพรีเซ็ตความสัมพันธ์',
+          'โหลดพรีเซ็ตความสัมพันธ์ไม่สำเร็จ',
+          'ยังไม่มีพรีเซ็ตความสัมพันธ์ให้เลือก',
+          'ลองโหลดใหม่',
+        ],
         'apps/frontend/src/components/RelationshipPresetPicker.tsx',
       )
       requireIncludes(
         e2eSmoke,
-        ['/relationship/presets?surface=creator'],
+        ['/relationship/presets?surface=creator', 'relationship-preset-picker-select'],
         'tests/e2e/maprang-smoke.spec.ts',
       )
     },

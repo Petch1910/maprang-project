@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { fetchRelationshipPresets, logUnexpectedError, type RelationshipPreset } from '../lib/api'
 import { parseTags } from '../lib/tagAnalysis'
 
@@ -11,17 +11,39 @@ export function RelationshipPresetPicker({
 }) {
   const [presets, setPresets] = useState<RelationshipPreset[]>([])
   const [selectedId, setSelectedId] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [presetError, setPresetError] = useState('')
 
-  useEffect(() => {
+  const loadPresets = useCallback(() => {
+    setIsLoading(true)
+    setPresetError('')
     fetchRelationshipPresets('creator')
-      .then((data) => setPresets(data.presets))
+      .then((data) => {
+        setPresets(data.presets)
+        setSelectedId((current) => (data.presets.some((preset) => preset.id === current) ? current : ''))
+      })
       .catch((error) => {
+        setPresets([])
+        setSelectedId('')
+        setPresetError('โหลดพรีเซ็ตความสัมพันธ์ไม่สำเร็จ')
         logUnexpectedError('โหลดพรีเซ็ตความสัมพันธ์ไม่สำเร็จ:', error)
       })
+      .finally(() => setIsLoading(false))
   }, [])
 
+  useEffect(() => {
+    loadPresets()
+  }, [loadPresets])
+
   const selected = presets.find((preset) => preset.id === selectedId)
-  const applyDisabledReason = selected ? '' : 'เลือกพรีเซ็ตความสัมพันธ์ก่อนใช้งาน'
+  const presetUnavailableReason = isLoading
+    ? 'กำลังโหลดพรีเซ็ตความสัมพันธ์'
+    : presetError
+      ? presetError
+      : presets.length === 0
+        ? 'ยังไม่มีพรีเซ็ตความสัมพันธ์ให้เลือก'
+        : ''
+  const applyDisabledReason = selected ? '' : presetUnavailableReason || 'เลือกพรีเซ็ตความสัมพันธ์ก่อนใช้งาน'
   const applyPreset = () => {
     if (!selected) return
 
@@ -30,13 +52,13 @@ export function RelationshipPresetPicker({
   }
 
   return (
-    <div className="rounded-lg border border-slate-900/10 bg-white p-3 text-xs leading-relaxed text-slate-600">
+    <div className="rounded-xl border border-white/10 bg-white/6 p-3 text-xs leading-relaxed text-white/62">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <strong className="text-slate-900">พรีเซ็ตความสัมพันธ์</strong>
+        <strong className="text-white">พรีเซ็ตความสัมพันธ์</strong>
         <button type="button"
-          className="min-h-8 rounded-full border border-blue-600/20 bg-blue-600/10 px-3 font-bold text-blue-700 transition hover:bg-blue-600/15 disabled:opacity-60"
+          className="min-h-8 rounded-full border border-orange-300/25 bg-orange-500/12 px-3 font-bold text-orange-100 transition hover:bg-orange-500/18 disabled:opacity-50"
           aria-disabled={Boolean(applyDisabledReason)}
-          disabled={!selected}
+          disabled={Boolean(applyDisabledReason)}
           onClick={applyPreset}
           title={applyDisabledReason || 'ใช้พรีเซ็ตนี้กับแท็กตัวละคร'}
         >
@@ -44,21 +66,40 @@ export function RelationshipPresetPicker({
         </button>
       </div>
       <select
-        className="min-h-9 w-full rounded-lg border border-slate-900/15 bg-white px-2 text-xs font-bold text-slate-800 outline-none"
+        aria-disabled={Boolean(presetUnavailableReason)}
+        className="min-h-9 w-full rounded-lg border border-white/10 bg-[#111116] px-2 text-xs font-bold text-white outline-none transition disabled:cursor-not-allowed disabled:opacity-55"
+        data-testid="relationship-preset-picker-select"
+        disabled={Boolean(presetUnavailableReason)}
+        title={presetUnavailableReason || 'เลือกพรีเซ็ตความสัมพันธ์'}
         value={selectedId}
         onChange={(event) => setSelectedId(event.target.value)}
       >
-        <option value="">เลือกพรีเซ็ต</option>
+        <option value="">{presetUnavailableReason || 'เลือกพรีเซ็ต'}</option>
         {presets.map((preset) => (
           <option key={preset.id} value={preset.id}>
             {preset.name}
           </option>
         ))}
       </select>
+      {presetError && (
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-rose-300/20 bg-rose-500/10 p-2 text-rose-100">
+          <span>{presetError}</span>
+          <button
+            className="min-h-8 rounded-full border border-rose-200/25 px-3 font-black text-rose-50 transition hover:bg-rose-200/10"
+            onClick={loadPresets}
+            type="button"
+          >
+            ลองโหลดใหม่
+          </button>
+        </div>
+      )}
+      {!isLoading && !presetError && presets.length === 0 && (
+        <p className="mt-2 mb-0 rounded-lg border border-white/10 bg-black/20 p-2 text-white/45">ยังไม่มีพรีเซ็ตความสัมพันธ์ให้เลือก</p>
+      )}
       {selected && (
-        <div className="mt-2">
+        <div className="mt-2 rounded-lg border border-white/10 bg-black/20 p-2">
           <p className="m-0">{selected.description}</p>
-          <p className="mt-1 mb-0 font-bold text-slate-500">{selected.tags.join(', ')}</p>
+          <p className="mt-1 mb-0 font-bold text-orange-100/70">{selected.tags.join(', ')}</p>
         </div>
       )}
     </div>

@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-05
 
+- 2026-06-05 creator relationship preset picker state pass: Creator Studio preset picker now uses dark UI styling and has explicit loading, retryable failure, empty, select-disabled, and apply-disabled states. E2E checks the `relationship-preset-picker-select` hook is visible/enabled after `/relationship/presets?surface=creator` responds. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.
+
 - 2026-06-05 creator relationship preset surface pass: Creator Studio now loads relationship presets with the creator surface filter instead of the unfiltered endpoint. Browser e2e waits for `/relationship/presets?surface=creator` while opening `/create`, and predeploy locks both the picker source and smoke expectation. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.
 
 - 2026-06-05 relationship contract seed de-dupe pass: Character Lobby now trims preset ids, merges API presets with fallback `stranger` without rendering duplicate seed buttons, and keeps unknown preset colors stable. Browser e2e locks exactly one `character-seed-stranger`, no duplicate `character-seed-*` controls, and the existing `rival` Thai chat-note flow. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check. Browser plugin verification was attempted but timed out in the browser bridge during CDP click/screenshot, so Playwright e2e remains the runtime evidence for this scope.
