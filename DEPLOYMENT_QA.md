@@ -24,6 +24,7 @@ bun run qa:local
 
 Gate นี้ไม่เรียก live AI provider. มันตรวจ secrets ที่ commit แล้ว, regression ของเส้นทาง secret scan, coverage mapping ของ API route, architecture import cycles, helper tests ของ API smoke, memory/knowledge vault, output ของ local eval, error message ฝั่ง frontend API, bundle/static/route และ route/menu audits, smoke auth, provider guards, smoke doctor blockers, readiness summary, image fallback, validation ของการทดสอบแชทจริง, helper ของ local smoke, command plan ของ e2e smoke ฝั่งเบราว์เซอร์, predeploy wiring, DB-required backend check planning, Supabase signed-storage helpers, deploy status formatting, deploy env doctor helpers, deploy configuration, backend tests, frontend build, backend health, database connectivity, seeded data, relationship preview, runtime flows ของ character/lore ชั่วคราว, avatar upload, และ local chat normal/stream runtime เมื่อ backend health รายงาน `chatRuntimeProvider=local`. Local API smoke ยังส่ง `skipImageProvider=true` สำหรับ creator draft checks จึงตรวจ endpoint shape ได้โดยไม่ใช้เครดิตสร้างรูป; การสร้างรูปจริงอยู่ใน `api:smoke:live`, `smoke:image:live`, และ `production:check`.
 ใน local runtime, `api:smoke` จะเพิ่ม `POST /chat local mock` และ `POST /chat/stream local mock` เพื่อยืนยัน `local/mock-roleplay`, `totalTokens=0`, ไม่มี provider failure, มีคำตอบ roleplay ที่ยาวพอ, และมี streamed delta จริง ก่อนยังคงข้ามเฉพาะ live provider routes ที่ต้องรันกับ staging/production.
+`smoke:doctor` และ `deploy:status --json` จะรายงาน local runtime fields คือ `chatRuntimeProvider`, `chatLocalFallbackEnabled`, `chatForcedLocal`, และ `chatLocalModel`; ถ้า `chatRuntimeProvider=local` หรือ `chatForcedLocal=true` ให้ถือว่า local QA ใช้งานได้ แต่ staging/production ยังต้องรัน live provider smoke แยก.
 Real `.env` และ `.env.*` files ต้องไม่ถูก track. `secrets:check` จะ ignore local untracked env files เพื่อความสะดวกของ developer แต่จะ fail ถ้าไฟล์นั้นถูก commit หรือ tracked.
 
 ถ้าต้องการตรวจ backend API coverage และ frontend API helper contract โดยไม่รัน full suite:
@@ -90,6 +91,7 @@ bun scripts/deploy-status.ts --json
 ```
 
 JSON response มี fields top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` เพื่อให้ automation ไม่ต้อง parse nested readiness details. ถ้า root identity หรือ `/health` อ่านไม่ได้ JSON จะยังคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ dashboard/CI อ่านสาเหตุได้โดยไม่ต้อง parse stderr.
+เมื่อ backend ตอบ `/health` ได้ JSON จะมี `health.chatRuntimeProvider`, `health.chatLocalFallbackEnabled`, `health.chatForcedLocal`, และ `health.chatLocalModel` เพื่อให้ dashboard แยก local mock ออกจาก live provider verification.
 
 readiness rules ด้านล่างมี deterministic self-test:
 
@@ -201,6 +203,7 @@ bun run smoke:doctor
 ```
 
 `smoke:doctor` ผ่านได้สำหรับ local development แต่ยังพิมพ์ `productionReady`, `productionBlockerCount`, `productionBlockers`, และ `nextSteps` ตามลำดับไว้ให้ดูเสมอ ให้ถือ blocker เหล่านั้นเป็นงานของสเตจจิง/โปรดักชัน แล้วค่อยยืนยันด้วย `smoke:ready` กับ backend URL จริง.
+มันยังพิมพ์ `chatRuntimeProvider`, `chatLocalFallbackEnabled`, `chatForcedLocal`, และ `chatLocalModel` เมื่อ backend health ส่งค่าเหล่านี้กลับมา เพื่อให้รู้ว่า runtime ตอนนี้เป็น `local/mock-roleplay` หรือ provider จริง.
 มันยังพิมพ์ `securityPosture` เพื่อให้เห็นเร็วว่า CIA/AAA checks ตอนนี้พร้อมกี่ข้อ.
 ถ้า `/health` รายงาน production env ไม่ถูกต้อง `smoke:doctor` จะพิมพ์ `env จำเป็นที่ขาด` และ `env ไม่ถูกต้อง` ด้วย เพื่อให้เห็นทางแก้ก่อน `/ready` ล้ม.
 

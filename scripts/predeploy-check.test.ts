@@ -1025,6 +1025,7 @@ describe('predeploy check wiring', () => {
     const productionSmoke = await readRepoFile('.github/workflows/production-smoke.yml')
     const readme = await readRepoFile('README.md')
     const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
+    const predeploy = await readRepoFile('scripts/predeploy-check.ts')
 
     const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
     const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
@@ -1094,6 +1095,17 @@ describe('predeploy check wiring', () => {
       expect(docs).toContain('bun run frontend:env:test')
       expect(docs).toContain('bun run frontend:storage:test')
       expect(docs).toContain('bun run frontend:clipboard:test')
+    }
+    for (const localRuntimeField of [
+      'chatRuntimeProvider',
+      'chatLocalFallbackEnabled',
+      'chatForcedLocal',
+      'chatLocalModel',
+      'local/mock-roleplay',
+    ]) {
+      expect(predeploy).toContain(localRuntimeField)
+      expect(readme).toContain(localRuntimeField)
+      expect(deploymentQa).toContain(localRuntimeField)
     }
     for (const command of [
       'bun run security:audit',

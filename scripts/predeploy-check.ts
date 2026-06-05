@@ -1562,8 +1562,19 @@ const checks: Check[] = [
         ],
         'scripts/deploy-readiness.test.ts',
       )
-      requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false'], 'DEPLOYMENT_QA.md')
-      requireIncludes(readme, ['bun run deploy:status', '`staging:verify` จะพิมพ์', 'stagingBlockerCount', 'rootIdentity.ok=false', 'สรุป blocker และ next steps'], 'README.md')
+      const localRuntimeFieldSnippets = [
+        'chatRuntimeProvider',
+        'chatLocalFallbackEnabled',
+        'chatForcedLocal',
+        'chatLocalModel',
+        'local/mock-roleplay',
+      ]
+      requireIncludes(deploymentQa, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', ...localRuntimeFieldSnippets], 'DEPLOYMENT_QA.md')
+      requireIncludes(
+        readme,
+        ['bun run deploy:status', '`staging:verify` จะพิมพ์', 'stagingBlockerCount', 'rootIdentity.ok=false', 'สรุป blocker และ next steps', ...localRuntimeFieldSnippets],
+        'README.md',
+      )
       requireIncludes(stagingRunbook, ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', 'bun run staging:verify', 'bun run production:check'], 'STAGING_RUNBOOK.md')
       requireIncludes(
         await readRepoFile('memory/production/checklist.md'),

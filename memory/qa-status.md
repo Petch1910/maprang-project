@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-05
+- 2026-06-05 deploy docs local runtime field lock pass: README and DEPLOYMENT_QA now explain the deploy/smoke local chat runtime fields `chatRuntimeProvider`, `chatLocalFallbackEnabled`, `chatForcedLocal`, and `chatLocalModel`; predeploy now requires those docs plus `local/mock-roleplay` so local QA cannot be mistaken for live-provider verification. Passing gates: `bun run predeploy:check:test` (3 pass / 1102 expects), `bun run predeploy:check`, `bun run docs:commands`, and `bun run docs:commands:test` (7 pass / 15 expects).
+
 - 2026-06-05 route/menu admin health local runtime doc lock pass: Route/Menu Audit and `routeMenuAuditRows` now explicitly describe the Admin Health local chat runtime surface, including `Runtime แชท`, `local mock พร้อมเล่น`, `แชท local สำหรับ QA`, and `local/mock-roleplay`. The doc checker now requires those snippets so the handoff cannot drop local runtime evidence. Passing gates: `bun run route-menu:audit:test` (12 pass / 20 expects) and `bun run route-menu:audit` (14 surfaces).
 
 - 2026-06-05 e2e admin health local runtime lock pass: Playwright core route/menu smoke now reads backend health and asserts Admin Health runtime labels. It always checks `Runtime แชท`, and in local runtime checks `local mock พร้อมเล่น`, `แชท local สำหรับ QA`, and `local/mock-roleplay` on `/admin/health`. Passing gates: `bun run e2e:smoke:test` (13 pass / 41 expects) and `bun run e2e:smoke` 4/4 desktop+mobile.
