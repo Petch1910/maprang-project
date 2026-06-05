@@ -712,7 +712,7 @@ Last updated: 2026-06-05
 - GitHub Actions visible CI/Production Smoke step labels are Thai-first and covered by `predeploy:check`.
 - Latest `bun run qa:local` attempt on this machine reached the final runtime smoke phase but failed because Docker Desktop/Postgres and the backend at `http://127.0.0.1:3000` were not running; all preceding static/unit/build gates in that run passed.
 - Backend tests: 157 pass, 0 fail, 507 expect calls.
-- API smoke: 32 pass, 0 fail, 1 skip for live chat in local mode.
+- API smoke: current local runtime baseline is 34 pass, 0 fail, 2 skip with local chat normal/stream mock verified and live provider routes skipped until staging/production.
 - E2E smoke: 4 pass, 0 fail across desktop and mobile.
 - Frontend build: pass.
 - Bundle budget: pass.
