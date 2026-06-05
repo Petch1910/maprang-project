@@ -44,9 +44,21 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
   const imageGeneration = healthStatus?.model?.imageGeneration
   const structuredKnowledge = healthStatus?.knowledge?.structured
   const chatProductionReady = Boolean(chatProvider?.productionReady ?? chatProvider?.liveVerified)
+  const chatRuntimeIsLocal = chatProvider?.activeRuntimeProvider === 'local' || chatProvider?.forcedLocal === true
   const imageConfigured = Boolean(checks?.imageGenerationConfigured || imageGeneration?.configured)
   const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
-  const chatStatusLabel = chatProductionReady ? 'ยืนยันแล้ว' : checks?.openRouterConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ยังขาด'
+  const chatStatusLabel = chatProductionReady
+    ? 'ยืนยันแล้ว'
+    : chatRuntimeIsLocal
+      ? 'local mock พร้อมเล่น'
+      : checks?.openRouterConfigured
+        ? 'ตั้งค่าแล้ว รอทดสอบจริง'
+        : 'ยังขาด'
+  const chatRuntimeLabel = chatRuntimeIsLocal
+    ? `local mock${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
+    : chatProvider?.activeRuntimeProvider === 'openrouter'
+      ? 'OpenRouter'
+      : chatProvider?.activeRuntimeProvider ?? 'ยังไม่ทราบ'
   const imageStatusLabel = imageProductionReady ? 'ยืนยันแล้ว' : imageConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ยังใช้ภาพตัวอย่าง'
   const refreshDisabledReason = isLoading ? 'กำลังโหลดสถานะระบบ' : ''
 
@@ -86,10 +98,17 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2">
-            <Dot ok={Boolean(checks?.openRouterConfigured)} />
+            <Dot ok={Boolean(checks?.openRouterConfigured || chatRuntimeIsLocal)} />
             AI แชท
           </span>
           <span>{chatStatusLabel}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2">
+            <Dot ok={Boolean(chatProductionReady || chatRuntimeIsLocal)} />
+            Runtime แชท
+          </span>
+          <span>{chatRuntimeLabel}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2">
@@ -151,6 +170,10 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
               </span>
             )}
             {healthStatus.model.chatProvider?.status && <span>แชท {providerStatusLabel(healthStatus.model.chatProvider.status)}</span>}
+            {healthStatus.model.chatProvider?.activeRuntimeProvider && <span>runtime {chatRuntimeLabel}</span>}
+            {healthStatus.model.chatProvider?.localFallbackEnabled && (
+              <span>local fallback {healthStatus.model.chatProvider.localModel ?? 'local/mock-roleplay'}</span>
+            )}
             <span>รูป {healthStatus.model.imageGeneration?.model ?? 'ยังไม่ตั้งค่า'}</span>
             {healthStatus.model.imageGeneration?.status && (
               <span>สถานะรูป {providerStatusLabel(healthStatus.model.imageGeneration.status)}</span>

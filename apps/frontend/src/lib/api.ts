@@ -435,6 +435,10 @@ export type HealthStatus = {
       productionReady?: boolean
       status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
       liveSmokeCommand?: string
+      localFallbackEnabled?: boolean
+      forcedLocal?: boolean
+      activeRuntimeProvider?: 'local' | 'openrouter' | string
+      localModel?: string
     }
     imageGeneration?: {
       configured: boolean
