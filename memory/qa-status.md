@@ -6,6 +6,8 @@ Last updated: 2026-06-05
 
 - 2026-06-05 relationship preset QA handoff sync pass: agent and production checklist baselines now reference the latest relationship/creator preset hardening evidence, including import-cycle audit 125 files / 296 edges and backend tests 180 pass / 769 expects. Predeploy now locks the refreshed agent guide and production checklist snippets. External production blockers are unchanged.
 
+- 2026-06-05 deploy blockers QA handoff sync pass: `memory/deploy-blockers.md` now leads with the relationship/creator preset hardening local QA gate, including API smoke 34 pass / 2 live-provider skips, import-cycle audit 125 files / 296 edges, and backend tests 180 pass / 769 expects while keeping deployed HTTPS URLs/CORS and live chat/image smoke as external blockers.
+
 - 2026-06-05 backend relationship stranger preset pass: `/relationship/presets?surface=contract` now returns `stranger` / คนแปลกหน้า from the API as a contract-only preset. All presets are now 25, contract presets 20, creator presets remain 24, and Creator Studio is protected from `stranger` by the creator surface filter. Passing gates: backend check 180 pass / 769 expects, API smoke 34 pass / 2 live-provider skips, predeploy regression/check, and e2e smoke 4/4 desktop+mobile.
 
 - 2026-06-05 creator relationship preset picker state pass: Creator Studio preset picker now uses dark UI styling and has explicit loading, retryable failure, empty, select-disabled, and apply-disabled states. E2E checks the `relationship-preset-picker-select` hook is visible/enabled after `/relationship/presets?surface=creator` responds. Passing gates: frontend check/build/bundle, e2e smoke unit/full 4/4 desktop+mobile, route-menu audit, and predeploy regression/check.
