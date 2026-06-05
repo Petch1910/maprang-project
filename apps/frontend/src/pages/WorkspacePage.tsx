@@ -30,6 +30,7 @@ import {
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
+import { relationshipSeedLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { isPlayableChatSummary } from '../store/slices/chatsSlice'
 import { selectContentSettings } from '../store/slices/contentSlice'
@@ -137,6 +138,7 @@ export function WorkspacePage() {
   const [searchParams] = useSearchParams()
   const routeCharacterId = searchParams.get('characterId')
   const relationshipSeed = searchParams.get('relationship_seed')
+  const relationshipSeedName = relationshipSeedLabel(relationshipSeed)
   const [message, setMessage] = useState('')
   const [character, setCharacter] = useState<Character>(fallbackCharacter)
   const [characters, setCharacters] = useState<Character[]>([fallbackCharacter])
@@ -340,7 +342,7 @@ export function WorkspacePage() {
                   {
                     id: crypto.randomUUID(),
                     role: 'assistant' as const,
-                    content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeed} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
+                    content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeedName} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
                   },
                 ]
               : []),
@@ -365,6 +367,7 @@ export function WorkspacePage() {
     openChat,
     refreshWorkspaceAuth,
     relationshipSeed,
+    relationshipSeedName,
     routeCharacterId,
     routeChatId,
   ])

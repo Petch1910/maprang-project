@@ -169,6 +169,12 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     'href',
     `/chat?characterId=${seededCharacterId}&relationship_seed=rival`,
   )
+  await page.getByTestId('character-start-chat').click()
+  await expect(page.getByTestId('chat-composer-input')).toBeVisible()
+  await expect(page.locator('body')).toContainText('เลือกจุดเริ่มต้นความสัมพันธ์: คู่ปรับ')
+  await expect(page.locator('body')).not.toContainText('เลือกจุดเริ่มต้นความสัมพันธ์: rival')
+  await page.goto(`/characters/${seededCharacterId}`)
+  await expect(page.getByTestId('character-start-chat')).toBeVisible()
   await page.getByTestId('character-share-button').click()
   await expect(page.getByTestId('character-action-note')).toBeVisible()
   await page.getByTestId('character-report-button').click()

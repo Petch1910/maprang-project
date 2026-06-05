@@ -45,6 +45,29 @@ export const relationshipTierLabels: Record<string, string> = {
   warming: 'อบอุ่นขึ้น',
 }
 
+export const relationshipSeedLabels: Record<string, string> = {
+  acquaintance: 'คนรู้จัก',
+  'bickering-rival': 'คู่กัด',
+  'close-friend': 'เพื่อนสนิท',
+  crush: 'แอบชอบ',
+  'dating-trial': 'ลองคุย',
+  disliked: 'ไม่ถูกกัน',
+  enemy: 'ศัตรู',
+  friend: 'เพื่อน',
+  'friend-crush': 'เพื่อนสนิทคิดไม่ซื่อ',
+  'life-partner': 'คู่ชีวิต',
+  lover: 'คนรัก',
+  partner: 'แฟน',
+  'ride-or-die': 'เพื่อนตาย',
+  rival: 'คู่ปรับ',
+  soulmate: 'คู่แท้',
+  spouse: 'คู่ครอง',
+  stranger: 'คนแปลกหน้า',
+  'talking-stage': 'คนคุย',
+  'toxic-partner': 'แฟน Toxic',
+  'toxic-spouse': 'คู่ครอง Toxic',
+}
+
 export function relationshipStatusLabel(status?: string) {
   if (!status) return 'เริ่มต้น'
   return relationshipStatusLabels[status] ?? status
@@ -53,4 +76,10 @@ export function relationshipStatusLabel(status?: string) {
 export function relationshipTierLabel(tier?: string) {
   if (!tier) return 'โหมดอิสระ'
   return relationshipTierLabels[tier.toLowerCase()] ?? tier
+}
+
+export function relationshipSeedLabel(seed?: string | null) {
+  const normalized = seed?.trim().toLowerCase()
+  if (!normalized) return 'เริ่มต้น'
+  return relationshipSeedLabels[normalized] ?? seed?.trim() ?? 'เริ่มต้น'
 }

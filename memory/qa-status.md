@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-05
+- 2026-06-05 relationship seed Thai label pass: the character lobby to chat flow now renders the selected relationship seed as Thai copy in the chat note, e.g. `คู่ปรับ`, instead of leaking the raw `rival` id. Route/Menu Audit and predeploy now lock this expectation, and Playwright e2e asserts both the Thai copy and absence of the raw seed text. Passing gates: frontend check/build/bundle, frontend static and route audit, route-menu audit/test, predeploy regression/check, docs command audit (408 refs), secrets check, and browser e2e smoke 4/4 desktop+mobile.
+
 - 2026-06-05 browser route/menu smoke pass after local QA gate: Playwright reset/restored QA seed data and passed 4/4 across desktop and mobile. The smoke covered core route/menu behavior plus all primary routes rendering without console-error or horizontal-overflow failures, then restored 3 QA characters, 13 chats, 1 report, and 2 token transactions.
 
 - 2026-06-05 local QA gate pass after production checklist baseline sync: backend and frontend were already running locally, health showed database connected and forced local chat runtime `local/mock-roleplay`, local smoke passed, API smoke passed 34 rows with 2 live-provider skips, local normal chat and stream chat generated playable roleplay output, creator AI draft used deterministic fallback image evidence, chat menu/runtime routes worked, admin prompt inspector/evals/reports/audit routes worked, and frontend build/bundle budget remained green. External blockers are unchanged: deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
