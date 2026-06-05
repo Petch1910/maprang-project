@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest local full gate: 2026-06-05 `bun run qa:full` passed with local backend forced to `local/mock-roleplay` and roleplay reply budget 1600/420. This confirms local frontend/backend/browser smoke is green; it still does not clear deployed HTTPS URL/CORS, production DB/migration, signed Supabase storage verification, live chat provider smoke, or live image provider smoke.
+
 Latest local runtime verification: 2026-06-05 repo-owned local playable flow remains green after the latest docs/guard commits. `smoke:doctor`, `smoke:local`, `api:smoke`, and `e2e:smoke` passed; local chat normal/stream use `local/mock-roleplay` with zero provider tokens, avatar upload falls back to local storage in dev, and browser route/menu smoke passes on desktop and mobile. This does not clear live-provider or deployed-domain blockers.
 
 Latest repo-owned status override: 2026-06-05 full deterministic `bun run qa:repo` passed after local chat runtime docs and Route/Menu Audit handoff locks. Repo-owned local QA is green through secrets, memory/knowledge/docs/tests/eval/security/import-cycle/API/route-menu/predeploy, backend tests 180 pass / 763 expects, frontend build, and bundle budget. External staging/live-provider/database blockers are unchanged: deployed backend/frontend HTTPS origins, production CORS, production DB/migrations, signed Supabase `avatars` verification, live chat provider smoke, and live image provider smoke.

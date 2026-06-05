@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
 Last updated: 2026-06-05
+- 2026-06-05 full local gate pass: `bun run qa:full` passed end-to-end after restarting backend with local roleplay budget 1600/420 and forced `local/mock-roleplay` runtime. The run covered full `qa:repo`, `smoke:doctor`, `smoke:local`, `api:smoke`, and `e2e:smoke`; API smoke passed 34 rows / 2 live skips with `warn=0`, backend tests passed 180 / 763 expects, and Playwright passed 4/4 desktop+mobile.
+
 - 2026-06-05 local reply-budget/runtime override pass: The ignored local backend env was updated to the recommended roleplay budget and forced local mock runtime. After restarting backend, `/health` reported `modelMaxOutputTokens=1600`, `modelMinRoleplayReplyChars=420`, `chatRuntimeProvider=local`, `chatForcedLocal=true`, and `chatLocalModel=local/mock-roleplay`; `bun run smoke:doctor` passed without the reply-budget warning, and `bun run api:smoke` passed 34 rows / 2 live-provider skips with `warn=0`.
 
 - 2026-06-05 local playable runtime and browser smoke pass: `bun run smoke:doctor` passed with backend/database ready and local chat runtime fields visible, `bun run smoke:local` passed with local avatar storage fallback, `bun run api:smoke` passed 34 rows / 2 live-provider skips including `POST /chat local mock` and `POST /chat/stream local mock`, and `bun run e2e:smoke` passed 4/4 desktop+mobile route/menu checks.
