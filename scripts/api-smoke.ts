@@ -110,6 +110,7 @@ type StreamSmokeEvent =
       chatId?: string | null
       usage?: {
         totalTokens?: number
+        modelName?: string
         contextLoreCount?: number
         providerFailure?: { code?: string }
       }
@@ -125,6 +126,11 @@ type HealthSmokePayload = {
     minRoleplayReplyChars?: number
     promptBudgetTokens?: number
     promptHistoryMaxMessages?: number
+    chatProvider?: {
+      activeRuntimeProvider?: string
+      forcedLocal?: boolean
+      localModel?: string
+    }
   }
 }
 
@@ -214,6 +220,84 @@ function apiChatSmokeEvidence({
     'Chat smoke stream chatId': streamChatId,
     'Chat smoke stream tokens': streamTokens,
     'Chat smoke stream walletTransactionId': streamDebit.id,
+  }
+}
+
+const fallbackLocalChatModel = 'local/mock-roleplay'
+
+function activeLocalChatModel(health: HealthSmokePayload | null) {
+  return health?.model?.chatProvider?.localModel ?? fallbackLocalChatModel
+}
+
+function hasLocalChatRuntime(health: HealthSmokePayload | null) {
+  const provider = health?.model?.chatProvider
+  return provider?.activeRuntimeProvider === 'local' || provider?.forcedLocal === true
+}
+
+function validateLocalChatSmokeResponse(
+  payload: {
+    reply?: string
+    chatId?: string | null
+    usage?: {
+      totalTokens?: number
+      modelName?: string
+      providerFailure?: { code?: string; retryable?: boolean; userMessage?: string }
+    }
+  },
+  expectedModel: string,
+  minRoleplayReplyChars: number,
+) {
+  if (payload.usage?.providerFailure) {
+    throw new Error(`local chat mock ไม่ควรคืน providerFailure: ${payload.usage.providerFailure.code ?? 'unknown'}`)
+  }
+  if (!payload.chatId) throw new Error('local chat mock ไม่ได้สร้าง chat id')
+  if (!payload.reply) throw new Error('local chat mock ไม่คืนคำตอบ')
+  if (payload.reply.length < minRoleplayReplyChars) {
+    throw new Error(`local chat mock ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
+  }
+  if ((payload.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat mock ต้องไม่คิดโทเคน')
+  if (payload.usage?.modelName !== expectedModel) {
+    throw new Error(`local chat mock ต้องคืน modelName=${expectedModel} แต่ได้ ${payload.usage?.modelName ?? 'missing'}`)
+  }
+
+  return {
+    chatId: payload.chatId,
+    replyChars: payload.reply.length,
+    totalTokens: payload.usage?.totalTokens ?? 0,
+    modelName: payload.usage?.modelName ?? expectedModel,
+  }
+}
+
+function validateLocalChatSmokeStream(
+  events: StreamSmokeEvent[],
+  expectedModel: string,
+  minReplyChars = 80,
+) {
+  const reply = events
+    .filter((event): event is Extract<StreamSmokeEvent, { type: 'delta' }> => event.type === 'delta')
+    .map((event) => event.content ?? '')
+    .join('')
+    .trim()
+  const error = events.find((event): event is Extract<StreamSmokeEvent, { type: 'error' }> => event.type === 'error')
+  const done = events.find((event): event is Extract<StreamSmokeEvent, { type: 'done' }> => event.type === 'done')
+
+  if (error?.message) throw new Error(`local chat stream คืน error: ${error.message}`)
+  if (!done) throw new Error('local chat stream ไม่คืน event ปิดท้าย')
+  if (!done.chatId) throw new Error('local chat stream ไม่คืน chat id')
+  if (done.usage?.providerFailure) {
+    throw new Error(`local chat stream ไม่ควรคืน providerFailure: ${done.usage.providerFailure.code ?? 'unknown'}`)
+  }
+  if ((done.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat stream ต้องไม่คิดโทเคน')
+  if (done.usage?.modelName !== expectedModel) {
+    throw new Error(`local chat stream ต้องคืน modelName=${expectedModel} แต่ได้ ${done.usage?.modelName ?? 'missing'}`)
+  }
+  if (reply.length < minReplyChars) throw new Error(`local chat stream คืนคำตอบสั้นเกินไป: ${reply}`)
+
+  return {
+    chatId: done.chatId,
+    replyChars: reply.length,
+    totalTokens: done.usage?.totalTokens ?? 0,
+    modelName: done.usage?.modelName ?? expectedModel,
   }
 }
 
@@ -713,6 +797,60 @@ if (live) {
     return `chatId=${streamResult.chatId}, โทเคน=${streamTotalTokens}, deltaChars=${streamResult.replyChars}, walletDebits=${chatDebits.length}, ${formatApiHandoffEvidence(chatEvidence)}`
   })
 } else {
+  if (hasLocalChatRuntime(healthStatus)) {
+    let localChatId: string | null = null
+    const localModel = activeLocalChatModel(healthStatus)
+    const minRoleplayReplyChars = Math.max(420, healthStatus?.model?.minRoleplayReplyChars ?? 420)
+
+    await check('POST /chat local mock', async () => {
+      const payload = await readJson<{
+        reply?: string
+        chatId?: string | null
+        usage?: {
+          totalTokens?: number
+          modelName?: string
+          providerFailure?: { code?: string; retryable?: boolean; userMessage?: string }
+        }
+      }>('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
+        body: JSON.stringify({
+          characterId: primaryCharacter.id,
+          relationshipSeed: 'stranger',
+          maxRating: 'restricted_18',
+          history: [],
+          message:
+            'ฉันเปิดประตูเข้ามาในคาเฟ่ช่วงฝนตก แล้วทักเธอด้วยน้ำเสียงเกรงใจ ช่วยตอบเป็นฉากโรลเพลย์ภาษาไทยที่มีบรรยากาศ ความรู้สึก การกระทำ และเหลือพื้นที่ให้ฉันตอบต่อ',
+        }),
+      })
+
+      const result = validateLocalChatSmokeResponse(payload, localModel, minRoleplayReplyChars)
+      localChatId = result.chatId
+      return `chatId=${result.chatId}, model=${result.modelName}, โทเคน=${result.totalTokens}, ความยาวคำตอบ=${result.replyChars}, ขั้นต่ำคำตอบโรลเพลย์=${minRoleplayReplyChars}`
+    })
+
+    await check('POST /chat/stream local mock', async () => {
+      if (!localChatId) throw new Error('ยังไม่มี local chat id ให้ใช้ต่อใน stream smoke')
+
+      const events = await readStreamEvents('/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
+        body: JSON.stringify({
+          chatId: localChatId,
+          characterId: primaryCharacter.id,
+          relationshipSeed: 'stranger',
+          maxRating: 'restricted_18',
+          history: [],
+          message:
+            'ต่อฉากเดิมแบบสตรีม ให้เห็นจังหวะการตอบและบรรยากาศโดยไม่เรียกผู้ให้บริการจริง',
+        }),
+      })
+
+      const result = validateLocalChatSmokeStream(events, localModel)
+      return `chatId=${result.chatId}, model=${result.modelName}, โทเคน=${result.totalTokens}, deltaChars=${result.replyChars}, event=${events.length}`
+    })
+  }
+
   record('POST /chat', 'skip', 'ข้ามการเรียกโมเดลจริง; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
   record('POST /chat/stream live', 'skip', 'ข้ามการเรียกสตรีมจริง; รัน `bun run api:smoke:live` เมื่อต้องการตรวจจริง')
 }
