@@ -1112,6 +1112,20 @@ describe('predeploy check wiring', () => {
       expect(readme).toContain(localRuntimeField)
       expect(deploymentQa).toContain(localRuntimeField)
     }
+    for (const deployHandoffField of [
+      'E2E_BASE_URL',
+      'E2E_API_BASE_URL',
+      'deployed origins',
+      'bun run e2e:smoke',
+      'bun run api:smoke:live',
+      'wallet CHAT_USAGE',
+      'handoffEvidence',
+      'CHAT_PROVIDER_LIVE_VERIFIED=1',
+      'IMAGE_GENERATION_LIVE_VERIFIED=1',
+      'guides operator handoff when only live provider verification remains',
+    ]) {
+      expect(predeploy).toContain(deployHandoffField)
+    }
     for (const command of [
       'bun run security:audit',
       'bun run import-cycle:audit',
