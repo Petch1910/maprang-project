@@ -84,11 +84,29 @@ function securityPosture({
   }
 }
 
+function localChatProviderHealth() {
+  const fallbackEnabled =
+    process.env.NODE_ENV !== 'production' &&
+    process.env.LOCAL_CHAT_PROVIDER !== '0' &&
+    process.env.CHAT_PROVIDER !== 'remote'
+  const forcedLocal = fallbackEnabled && process.env.CHAT_PROVIDER === 'local'
+  const active = fallbackEnabled && (forcedLocal || !process.env.OPENROUTER_API_KEY)
+
+  return {
+    fallbackEnabled,
+    forcedLocal,
+    active,
+    runtimeProvider: active ? 'local' : 'openrouter',
+    model: process.env.LOCAL_CHAT_MODEL_NAME || 'local/mock-roleplay',
+  }
+}
+
 export async function loadHealthStatus() {
   const prisma = getPrisma()
   const chatLiveVerified = process.env.CHAT_PROVIDER_LIVE_VERIFIED === '1'
   const imageLiveVerified = process.env.IMAGE_GENERATION_LIVE_VERIFIED === '1'
   const chatProviderConfigured = Boolean(process.env.OPENROUTER_API_KEY)
+  const localChatProvider = localChatProviderHealth()
   const chatProviderStatus = !chatProviderConfigured
     ? 'missing_provider'
     : chatLiveVerified
@@ -150,6 +168,10 @@ export async function loadHealthStatus() {
         productionReady: chatProviderConfigured && chatLiveVerified,
         status: chatProviderStatus,
         liveSmokeCommand: 'bun run smoke:chat',
+        localFallbackEnabled: localChatProvider.fallbackEnabled,
+        forcedLocal: localChatProvider.forcedLocal,
+        activeRuntimeProvider: localChatProvider.runtimeProvider,
+        localModel: localChatProvider.model,
       },
       imageGeneration: {
         configured: imageGenerationConfigured,

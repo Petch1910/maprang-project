@@ -45,6 +45,10 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
         productionReady: true,
         status: 'verified',
         liveSmokeCommand: 'bun run smoke:chat',
+        localFallbackEnabled: false,
+        forcedLocal: false,
+        activeRuntimeProvider: 'openrouter',
+        localModel: 'local/mock-roleplay',
       },
       imageGeneration: {
         configured: true,
@@ -231,6 +235,10 @@ describe('readiness gate', () => {
               productionReady: false,
               status: 'needs_live_smoke',
               liveSmokeCommand: 'bun run smoke:chat',
+              localFallbackEnabled: false,
+              forcedLocal: false,
+              activeRuntimeProvider: 'openrouter',
+              localModel: 'local/mock-roleplay',
             },
             imageGeneration: {
               configured: true,

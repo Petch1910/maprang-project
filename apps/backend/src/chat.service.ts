@@ -243,6 +243,20 @@ function fallbackUsage(): CompletionUsage {
   }
 }
 
+type EnvLike = Record<string, string | undefined>
+
+export function localChatProviderEnabled(env: EnvLike = process.env) {
+  return env.NODE_ENV !== 'production' && env.LOCAL_CHAT_PROVIDER !== '0' && env.CHAT_PROVIDER !== 'remote'
+}
+
+export function preferLocalChatProvider(env: EnvLike = process.env) {
+  return localChatProviderEnabled(env) && (env.CHAT_PROVIDER === 'local' || !env.OPENROUTER_API_KEY)
+}
+
+function localChatModelName(env: EnvLike = process.env) {
+  return env.LOCAL_CHAT_MODEL_NAME || 'local/mock-roleplay'
+}
+
 function calculateCost(promptTokens: number, completionTokens: number) {
   return Number(
     ((promptTokens / 1_000_000) * modelInputCostPer1M + (completionTokens / 1_000_000) * modelOutputCostPer1M).toFixed(
@@ -782,6 +796,71 @@ function clip(value: string, maxLength: number) {
   return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}...` : normalized
 }
 
+function readableCharacterName(character: CharacterWithTags | null) {
+  return clip(character?.name || 'มะปราง', 80)
+}
+
+function readableScenario(character: CharacterWithTags | null) {
+  return clip(
+    character?.scenario ||
+      character?.description ||
+      character?.tagline ||
+      'พื้นที่แชทเงียบลงพอดี เหลือแค่จังหวะหายใจและคำพูดที่ทั้งสองฝ่ายต้องเลือกอย่างระวัง',
+    220,
+  )
+}
+
+function readableRelationshipBeat(character: CharacterWithTags | null, relationshipSeed?: string) {
+  const relationship = relationshipFromSeed(character, relationshipSeed)
+  const status = String(relationship.status || '').toLowerCase()
+  if (['enemy', 'rival', 'toxic-partner', 'toxic-spouse'].some((hint) => status.includes(hint))) {
+    return 'มีแรงปะทะในน้ำเสียง เหมือนต่างฝ่ายต่างไม่ยอมถอย แต่ยังมีช่องว่างเล็ก ๆ ให้บทสนทนาพาไปต่อ'
+  }
+  if (['lover', 'partner', 'spouse', 'soulmate'].some((hint) => status.includes(hint))) {
+    return 'ความใกล้ชิดทำให้ทุกคำพูดมีน้ำหนักกว่าเดิม ทั้งอ่อนโยนและต้องระวังไม่ให้ทำร้ายกัน'
+  }
+  if (['friend', 'crush', 'talking'].some((hint) => status.includes(hint))) {
+    return 'ความคุ้นเคยเริ่มชัดขึ้น จังหวะตอบสนองจึงอบอุ่นแต่ยังมีบางอย่างที่รอให้ผู้เล่นค่อย ๆ เปิด'
+  }
+  return 'ความสัมพันธ์ยังเปิดกว้าง ทุกคำตอบควรทิ้งจังหวะให้ผู้เล่นเลือกว่าจะขยับเข้าใกล้หรือถอยออกมา'
+}
+
+export function buildLocalRoleplayReply({
+  character,
+  userMessage,
+  relationshipSeed,
+}: {
+  character: CharacterWithTags | null
+  userMessage: string
+  relationshipSeed?: string
+}) {
+  const name = readableCharacterName(character)
+  const scenario = readableScenario(character)
+  const userCue = clip(userMessage || '...', 120)
+  const relationshipBeat = readableRelationshipBeat(character, relationshipSeed)
+  const greeting = clip(character?.greeting || '', 160)
+  const anchor = clip(character?.characterAnchor || character?.compactPrompt || character?.tagline || '', 180)
+
+  return [
+    `${name} เงียบไปครู่หนึ่งหลังได้ยินคำพูดนั้น สีหน้าของเธอไม่ได้เปลี่ยนทันที แต่สายตากลับจับอยู่กับจังหวะที่คุณเพิ่งทิ้งไว้ เหมือนกำลังชั่งน้ำหนักว่า "${userCue}" ควรถูกตอบรับด้วยความนุ่มนวลหรือด้วยความจริงใจที่ตรงกว่าเดิม`,
+    `บรรยากาศรอบตัวค่อย ๆ กดเสียงอื่นให้เบาลง ${scenario} ${relationshipBeat} เธอขยับตัวเล็กน้อย ไม่รีบปิดบทสนทนา และไม่ดึงคุณเข้าสู่คำตอบที่เธอต้องการเพียงฝ่ายเดียว`,
+    anchor
+      ? `แก่นของเธอยังชัดเจน: ${anchor} นั่นทำให้คำตอบต่อจากนี้ไม่ใช่แค่การเออออตาม แต่เป็นการค่อย ๆ เปิดพื้นที่ให้ความสัมพันธ์เปลี่ยนตามสิ่งที่คุณเลือกจริง ๆ`
+      : `เธอยังรักษาระยะของตัวเองไว้พอดี ไม่ได้ผลักไส แต่ก็ไม่ได้ยอมให้ทุกอย่างเร็วเกินกว่าความรู้สึกจะตามทัน`,
+    greeting
+      ? `"${greeting}" น้ำเสียงเดิมของเธอเหมือนถูกปรับให้จริงจังขึ้นเล็กน้อย "ถ้าจะคุยเรื่องนี้ต่อ ฉันอยากให้เธอพูดให้ชัดกว่านี้อีกนิด... ไม่ใช่เพื่อบังคับคำตอบ แต่เพื่อให้ฉันรู้ว่าควรวางใจตรงไหน"`
+      : `"ถ้าจะคุยเรื่องนี้ต่อ" เธอพูดช้า ๆ "ฉันอยากให้เธอพูดให้ชัดกว่านี้อีกนิด... ไม่ใช่เพื่อบังคับคำตอบ แต่เพื่อให้ฉันรู้ว่าควรวางใจตรงไหน"`,
+  ].join('\n\n')
+}
+
+function streamReplyChunks(reply: string) {
+  const chunks: string[] = []
+  for (let index = 0; index < reply.length; index += 180) {
+    chunks.push(reply.slice(index, index + 180))
+  }
+  return chunks.length > 0 ? chunks : [reply]
+}
+
 function defaultSceneState(relationship: RelationshipState, userMessage: string, turnCount: number): ChatRuntimeState['sceneState'] {
   return runtimeUpdateSceneState({
     previousSceneState: null,
@@ -987,6 +1066,7 @@ async function persistChatTurn({
   loreKeywords,
   promptBudget,
   relationshipSeed,
+  modelLabel = modelName,
 }: {
   prisma: Prisma
   chatId?: string
@@ -998,6 +1078,7 @@ async function persistChatTurn({
   loreKeywords: string[]
   promptBudget?: PromptBudget
   relationshipSeed?: string
+  modelLabel?: string
 }): Promise<PersistResult> {
   const chat = await findOrCreateChat({
     prisma,
@@ -1017,7 +1098,7 @@ async function persistChatTurn({
         tokenUsed: usage.promptTokens,
         promptTokens: usage.promptTokens,
         totalTokens: usage.promptTokens,
-        modelUsed: modelName,
+        modelUsed: modelLabel,
         cost: 0,
         metadata: {
           contextLoreCount: loreKeywords.length,
@@ -1031,10 +1112,10 @@ async function persistChatTurn({
         tokenUsed: usage.completionTokens,
         completionTokens: usage.completionTokens,
         totalTokens: usage.completionTokens,
-        modelUsed: modelName,
+        modelUsed: modelLabel,
         cost: usage.cost,
         metadata: {
-          modelName,
+          modelName: modelLabel,
           totalTokens: usage.totalTokens,
           contextLoreCount: loreKeywords.length,
           contextLoreKeywords: loreKeywords,
@@ -1095,7 +1176,7 @@ async function persistChatTurn({
         metadata: {
           chatId: chat.id,
           characterId: character.id,
-          modelName,
+          modelName: modelLabel,
           previousBalance: debit.previousBalance,
           chargedTokens: debit.chargedTokens,
           unchargedTokens: Math.max(usage.totalTokens - debit.chargedTokens, 0),
@@ -1115,6 +1196,72 @@ async function persistChatTurn({
     chatId: chat.id,
     tokenBalance,
     memory: runtimeState,
+  }
+}
+
+async function completeLocalChatTurn({
+  prisma,
+  chatId,
+  character,
+  userId,
+  userMessage,
+  loreKeywords,
+  promptBudget,
+  relationshipSeed,
+  tokenBalance,
+}: {
+  prisma: Prisma | null
+  chatId?: string
+  character: CharacterWithTags
+  userId: string
+  userMessage: string
+  loreKeywords: string[]
+  promptBudget?: PromptBudget
+  relationshipSeed?: string
+  tokenBalance: number | null
+}) {
+  const reply = buildLocalRoleplayReply({ character, userMessage, relationshipSeed })
+  const usage = fallbackUsage()
+  const modelLabel = localChatModelName()
+  const persistResult = prisma
+    ? await persistChatTurn({
+        prisma,
+        chatId,
+        character,
+        userId,
+        userMessage,
+        reply,
+        usage,
+        loreKeywords,
+        promptBudget,
+        relationshipSeed,
+        modelLabel,
+      })
+    : {
+        chatId: responseChatId(chatId),
+        tokenBalance,
+        memory: updateRuntimeState({
+          previousMemory: null,
+          previousSceneState: null,
+          previousRelationshipState: null,
+          character,
+          userMessage,
+          reply,
+          relationshipSeed,
+        }),
+      }
+
+  return {
+    reply,
+    chatId: persistResult.chatId,
+    memory: persistResult.memory,
+    usage: {
+      ...usage,
+      modelName: modelLabel,
+      contextLoreCount: loreKeywords.length,
+      tokenBalance: persistResult.tokenBalance,
+      promptBudget,
+    },
   }
 }
 
@@ -1190,6 +1337,7 @@ export async function sendChat(input: SendChatInput) {
       },
     }
   }
+  const chatCharacter = character as CharacterWithTags
 
   const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
   if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
@@ -1204,21 +1352,6 @@ export async function sendChat(input: SendChatInput) {
         modelName,
         contextLoreCount: 0,
         tokenBalance,
-      },
-    }
-  }
-
-  if (!process.env.OPENROUTER_API_KEY) {
-    const providerFailure = classifyChatProviderError(new Error('invalid api key: OPENROUTER_API_KEY is missing'))
-    return {
-      reply: providerFailure.userMessage,
-      chatId: responseChatId(input.chatId),
-      usage: {
-        ...fallbackUsage(),
-        modelName,
-        contextLoreCount: 0,
-        tokenBalance,
-        providerFailure,
       },
     }
   }
@@ -1246,6 +1379,21 @@ export async function sendChat(input: SendChatInput) {
     input.userPersona,
     activeUserId,
   )
+  const loreKeywords = loreEntries.map((entry) => entry.keyword)
+
+  if (preferLocalChatProvider()) {
+    return completeLocalChatTurn({
+      prisma,
+      chatId: input.chatId,
+      character: chatCharacter,
+      userId: activeUserId,
+      userMessage: input.message,
+      loreKeywords,
+      promptBudget,
+      relationshipSeed: input.relationshipSeed,
+      tokenBalance,
+    })
+  }
 
   const completion = await createChatCompletion({
     model: modelName,
@@ -1260,6 +1408,20 @@ export async function sendChat(input: SendChatInput) {
   })
 
   if ('providerFailure' in completion) {
+    if (localChatProviderEnabled()) {
+      return completeLocalChatTurn({
+        prisma,
+        chatId: input.chatId,
+        character: chatCharacter,
+        userId: activeUserId,
+        userMessage: input.message,
+        loreKeywords,
+        promptBudget,
+        relationshipSeed: input.relationshipSeed,
+        tokenBalance,
+      })
+    }
+
     return {
       reply: completion.providerFailure.userMessage,
       chatId: responseChatId(input.chatId),
@@ -1289,7 +1451,6 @@ export async function sendChat(input: SendChatInput) {
     reply = extension.reply
     usage = addUsage(usage, extension.usage)
   }
-  const loreKeywords = loreEntries.map((entry) => entry.keyword)
   const persistResult =
     prisma && character
       ? await persistChatTurn({
@@ -1378,24 +1539,7 @@ export function streamChat(input: SendChatInput) {
           })
           return
         }
-
-        if (!process.env.OPENROUTER_API_KEY) {
-          const providerFailure = classifyChatProviderError(new Error('invalid api key: OPENROUTER_API_KEY is missing'))
-          const reply = providerFailure.userMessage
-          send({ type: 'delta', content: reply })
-          send({
-            type: 'done',
-            chatId: responseChatId(input.chatId),
-            usage: {
-              ...fallbackUsage(),
-              modelName,
-              contextLoreCount: 0,
-              tokenBalance: prisma ? await loadTokenBalance(prisma, activeUserId) : null,
-              providerFailure,
-            },
-          })
-          return
-        }
+        const chatCharacter = character as CharacterWithTags
 
         const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
         streamTokenBalance = tokenBalance
@@ -1443,35 +1587,85 @@ export function streamChat(input: SendChatInput) {
         const loreKeywords = loreEntries.map((entry) => entry.keyword)
         streamPromptBudget = promptBudget
         streamContextLoreCount = loreKeywords.length
-        const stream = await createChatCompletionStream({
-          model: modelName,
-          messages,
-          max_tokens: modelMaxOutputTokens,
-          stream: true,
-          stream_options: {
-            include_usage: true,
-          },
-          temperature: modelTemperature,
-        })
+
+        if (preferLocalChatProvider()) {
+          const localResult = await completeLocalChatTurn({
+            prisma,
+            chatId: input.chatId,
+            character: chatCharacter,
+            userId: activeUserId,
+            userMessage: input.message,
+            loreKeywords,
+            promptBudget,
+            relationshipSeed: input.relationshipSeed,
+            tokenBalance,
+          })
+          for (const chunk of streamReplyChunks(localResult.reply)) {
+            send({ type: 'delta', content: chunk })
+          }
+          send({
+            type: 'done',
+            chatId: localResult.chatId,
+            usage: localResult.usage,
+            memory: localResult.memory,
+          })
+          return
+        }
 
         let reply = ''
         let usage = fallbackUsage()
 
-        for await (const chunk of stream) {
-          const delta = chunk.choices[0]?.delta?.content ?? ''
-          if (delta) {
-            reply += delta
-            send({ type: 'delta', content: delta })
-          }
+        try {
+          const stream = await createChatCompletionStream({
+            model: modelName,
+            messages,
+            max_tokens: modelMaxOutputTokens,
+            stream: true,
+            stream_options: {
+              include_usage: true,
+            },
+            temperature: modelTemperature,
+          })
 
-          if (chunk.usage) {
-            usage = {
-              promptTokens: chunk.usage.prompt_tokens ?? 0,
-              completionTokens: chunk.usage.completion_tokens ?? 0,
-              totalTokens: chunk.usage.total_tokens ?? 0,
-              cost: calculateCost(chunk.usage.prompt_tokens ?? 0, chunk.usage.completion_tokens ?? 0),
+          for await (const chunk of stream) {
+            const delta = chunk.choices[0]?.delta?.content ?? ''
+            if (delta) {
+              reply += delta
+              send({ type: 'delta', content: delta })
+            }
+
+            if (chunk.usage) {
+              usage = {
+                promptTokens: chunk.usage.prompt_tokens ?? 0,
+                completionTokens: chunk.usage.completion_tokens ?? 0,
+                totalTokens: chunk.usage.total_tokens ?? 0,
+                cost: calculateCost(chunk.usage.prompt_tokens ?? 0, chunk.usage.completion_tokens ?? 0),
+              }
             }
           }
+        } catch (error) {
+          if (!localChatProviderEnabled()) throw error
+          const localResult = await completeLocalChatTurn({
+            prisma,
+            chatId: input.chatId,
+            character: chatCharacter,
+            userId: activeUserId,
+            userMessage: input.message,
+            loreKeywords,
+            promptBudget,
+            relationshipSeed: input.relationshipSeed,
+            tokenBalance,
+          })
+          for (const chunk of streamReplyChunks(localResult.reply)) {
+            send({ type: 'delta', content: chunk })
+          }
+          send({
+            type: 'done',
+            chatId: localResult.chatId,
+            usage: localResult.usage,
+            memory: localResult.memory,
+          })
+          return
         }
 
         let trimmedReply = reply.trim() || chatReplyMessages.emptyProviderReply

@@ -2,10 +2,13 @@ import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 import {
   applyPromptBudget,
+  buildLocalRoleplayReply,
   buildRoleplayContinuationInstruction,
   chatReplyMessages,
   classifyChatProviderError,
   isTransientChatProviderError,
+  localChatProviderEnabled,
+  preferLocalChatProvider,
   sendChat,
   shouldExtendShortRoleplayReply,
   streamChat,
@@ -278,6 +281,39 @@ describe('roleplay reply quality guard', () => {
 })
 
 describe('chat provider retry guard', () => {
+  test('keeps local chat provider enabled only for safe local play', () => {
+    expect(localChatProviderEnabled({ NODE_ENV: 'development', LOCAL_CHAT_PROVIDER: '1' })).toBe(true)
+    expect(preferLocalChatProvider({ NODE_ENV: 'development', LOCAL_CHAT_PROVIDER: '1' })).toBe(true)
+    expect(preferLocalChatProvider({ NODE_ENV: 'development', LOCAL_CHAT_PROVIDER: '1', CHAT_PROVIDER: 'local', OPENROUTER_API_KEY: 'set' })).toBe(true)
+    expect(localChatProviderEnabled({ NODE_ENV: 'development', LOCAL_CHAT_PROVIDER: '0' })).toBe(false)
+    expect(localChatProviderEnabled({ NODE_ENV: 'production', LOCAL_CHAT_PROVIDER: '1' })).toBe(false)
+    expect(localChatProviderEnabled({ NODE_ENV: 'development', CHAT_PROVIDER: 'remote' })).toBe(false)
+  })
+
+  test('builds a playable local roleplay reply instead of provider setup copy', () => {
+    const reply = buildLocalRoleplayReply({
+      character: {
+        name: 'มิกะ | MIKA',
+        tagline: 'คนสนิทที่ยังไม่กล้าพูดตรง ๆ',
+        description: 'นักศึกษาที่คุยเหมือนไม่สนใจ แต่จำรายละเอียดของผู้เล่นได้ดี',
+        scenario: 'ทั้งสองยืนอยู่หน้าร้านสะดวกซื้อหลังฝนหยุดใหม่ ๆ',
+        greeting: 'มาช้ากว่าที่คิดนะ',
+        compactPrompt: 'มิกะพูดน้อย แต่สังเกตเก่งและไม่ยอมเปิดใจเร็ว',
+        characterAnchor: 'เธอไม่ชอบคำสัญญาลอย ๆ แต่ให้ค่ากับการกระทำที่สม่ำเสมอ',
+        tags: [{ tag: { name: 'friend-crush' } }],
+      } as any,
+      userMessage: 'ฉันไม่ได้ตั้งใจให้เธอต้องรอนาน',
+      relationshipSeed: 'friend-crush',
+    })
+
+    expect(reply.length).toBeGreaterThan(420)
+    expect(reply).toContain('มิกะ | MIKA')
+    expect(reply).toContain('ฉันไม่ได้ตั้งใจให้เธอต้องรอนาน')
+    expect(reply).toContain('ทั้งสองยืนอยู่หน้าร้านสะดวกซื้อ')
+    expect(reply).not.toContain('OPENROUTER_API_KEY')
+    expect(reply).not.toContain('บริการ AI ยังไม่พร้อม')
+  })
+
   test('retries transient provider failures but not credential failures', () => {
     expect(isTransientChatProviderError({ status: 429, message: 'rate limited' })).toBe(true)
     expect(isTransientChatProviderError({ status: 504, message: 'gateway timeout' })).toBe(true)
