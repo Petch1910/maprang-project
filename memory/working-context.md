@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-05
 
+- 2026-06-05: `/admin/health` now shows a phase-specific deploy runbook section `ลำดับงานก่อนปล่อยจริง` with three operator cards: staging/domain config (`bun run staging:verify + bun run e2e:smoke`), live provider smoke (`bun run api:smoke:live`), and final production check (`bun run production:check`). E2E smoke and predeploy now lock those visible snippets. In-app Browser verification on `http://127.0.0.1:5173/admin/health` confirmed the section, commands, and no horizontal overflow on desktop; screenshot capture timed out in the browser bridge only. Passing focused gates: `bun run frontend:static:audit`, `bun run frontend:check`, `bun run e2e:smoke:test` (13 pass / 41 expects), `bun run predeploy:check:test` (3 pass / 1123 expects), `bun run predeploy:check`, and `bun run e2e:smoke` (4/4 desktop+mobile).
+
 ## สรุปล่าสุดสำหรับรอบถัดไป
 
 - 2026-06-05: Deploy status now exposes phase-specific handoff steps in both JSON and text output. `deploy:status --json` includes `stagingNextSteps` and `productionNextSteps`, backed by new `buildStagingNextDeploySteps` / `buildProductionNextDeploySteps` helpers while preserving the legacy `nextSteps` behavior. Predeploy now locks the new helpers/fields/snippets. Passing focused gates: `bun run deploy:readiness:test` (9 pass / 68 expects), `bun run deploy:status:test` (14 pass / 98 expects), `bun run predeploy:check:test` (3 pass / 1121 expects), `bun run predeploy:check`, `bun run memory:audit`, `bun run docs:commands`, `bun run secrets:check`, and `git diff --check`. Full deterministic `bun run qa:repo` also passed with backend tests 180 pass / 763 expects, frontend build, and bundle budget green.

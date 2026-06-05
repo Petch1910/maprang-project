@@ -534,6 +534,9 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
 
   await page.goto('/admin/health')
   await expect(page.locator('body')).toContainText('สรุปด่านค้างก่อนโปรดักชัน')
+  await expect(page.locator('body')).toContainText('ลำดับงานก่อนปล่อยจริง')
+  await expect(page.locator('body')).toContainText('bun run staging:verify + bun run e2e:smoke')
+  await expect(page.locator('body')).toContainText('bun run api:smoke:live')
   await expect(page.locator('body')).toContainText('bun run production:check')
   await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
   await expect(page.locator('body')).toContainText('Runtime แชท')
