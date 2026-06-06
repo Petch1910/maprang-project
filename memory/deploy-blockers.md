@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest local UI QA gate after Profile dark polish: 2026-06-06 `/profile` matches the dark app theme, keeps persona autosave/content-mode/token/account links wired, and Browser plugin verified desktop/mobile with no console warnings/errors or horizontal overflow. `bun run frontend:check` and `bun run e2e:smoke` passed 4/4 with QA seed restored. This improves local UX readiness only; it does not remove the external blockers: deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
+
 Latest local UI QA gate after Wallet dark polish: 2026-06-06 `/wallet` matches the dark app theme, keeps wallet refresh/admin-key/token-adjustment/usage controls wired, and Browser plugin verified desktop/mobile with no console warnings/errors or horizontal overflow. `bun run frontend:check` and `bun run e2e:smoke` passed 4/4 with QA seed restored. This improves local UX readiness only; it does not remove the external blockers: deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
 
 Latest local UI QA gate after My Chats dark polish: 2026-06-06 `/chats` matches the dark app theme, keeps all chat management actions wired, and Browser plugin verified desktop/mobile with no console warnings/errors or horizontal overflow. `bun run frontend:check` and `bun run e2e:smoke` passed 4/4 with QA seed restored. This improves local UX readiness only; it does not remove the external blockers: deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
