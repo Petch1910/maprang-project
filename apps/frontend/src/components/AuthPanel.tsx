@@ -9,7 +9,7 @@ type AuthPanelProps = {
 }
 
 const inputClass =
-  'min-h-10 rounded-xl border border-slate-900/15 bg-white px-3 text-sm font-normal text-slate-900 outline-none focus:border-blue-500/60 focus:ring-4 focus:ring-blue-500/15'
+  'min-h-10 rounded-lg border border-white/10 bg-black/22 px-3 text-sm font-normal text-white outline-none placeholder:text-white/35 focus:border-orange-400/70 focus:ring-4 focus:ring-orange-500/10'
 
 function signInErrorMessage(error: unknown) {
   const message = safeErrorTextForClassification(error)
@@ -150,15 +150,15 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
   }
 
   return (
-    <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
+    <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">บัญชี</p>
-          <h2 className="m-0 text-base font-bold text-slate-900">
+          <p className="mb-1 text-xs font-bold tracking-widest text-white/42 uppercase">บัญชี</p>
+          <h2 className="m-0 text-base font-bold text-white">
             {authState.user?.email ?? (authState.isConfigured ? 'Supabase พร้อมแล้ว' : 'ผู้ใช้ dev ในเครื่อง')}
           </h2>
         </div>
-        <span className="rounded-full border border-slate-900/10 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500">
+        <span className="rounded-full border border-white/10 bg-white/7 px-2.5 py-1 text-[11px] font-bold text-white/55">
           {authState.isConfigured ? 'supabase' : 'dev'}
         </span>
       </div>
@@ -176,7 +176,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
                 type="password"
               />
               <button type="button"
-                className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white disabled:opacity-60"
+                className="min-h-10 rounded-lg bg-orange-500 px-4 text-sm font-extrabold text-white transition hover:bg-orange-400 disabled:opacity-60"
                 aria-disabled={Boolean(signInDisabledReason)}
                 disabled={isBusy || !email || !password}
                 onClick={signIn}
@@ -189,7 +189,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
 
           {authState.user && (
             <button type="button"
-              className="min-h-10 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-extrabold text-slate-700 disabled:opacity-60"
+              className="min-h-10 rounded-lg border border-white/10 bg-white/7 px-4 text-sm font-extrabold text-white/74 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
               aria-disabled={isBusy}
               disabled={isBusy}
               onClick={signOut}
@@ -204,7 +204,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
           <input className={inputClass} value={devUserId} onChange={(event) => setDevUserId(event.target.value)} />
           <button
             type="button"
-            className="min-h-10 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white disabled:opacity-60"
+            className="min-h-10 rounded-lg bg-orange-500 px-4 text-sm font-extrabold text-white transition hover:bg-orange-400 disabled:opacity-60"
             aria-disabled={isBusy}
             disabled={isBusy}
             onClick={applyDevUser}
@@ -215,7 +215,7 @@ export function AuthPanel({ onAuthChanged }: AuthPanelProps) {
         </div>
       )}
 
-      {note && <p className="mt-2 mb-0 text-xs font-bold text-slate-500">{note}</p>}
+      {note && <p className="mt-2 mb-0 text-xs font-bold text-white/52">{note}</p>}
     </section>
   )
 }
