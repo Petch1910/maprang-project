@@ -52,11 +52,11 @@ export type CreatorDraftStatus = {
 }
 
 const inputClass =
-  'min-h-11 rounded-lg border border-slate-900/15 bg-white px-3 text-sm font-normal text-slate-900 outline-none transition focus:border-orange-500/60 focus:ring-4 focus:ring-orange-500/15'
+  'min-h-11 rounded-lg border border-white/10 bg-black/22 px-3 text-sm font-normal text-white outline-none transition placeholder:text-white/35 focus:border-orange-400/70 focus:ring-4 focus:ring-orange-500/10'
 const textareaClass =
-  'min-h-24 resize-y rounded-lg border border-slate-900/15 bg-white px-3 py-2.5 text-sm font-normal leading-relaxed text-slate-900 outline-none transition focus:border-orange-500/60 focus:ring-4 focus:ring-orange-500/15'
+  'min-h-24 resize-y rounded-lg border border-white/10 bg-black/22 px-3 py-2.5 text-sm font-normal leading-relaxed text-white outline-none transition placeholder:text-white/35 focus:border-orange-400/70 focus:ring-4 focus:ring-orange-500/10'
 const quietButtonClass =
-  'inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50'
+  'inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/7 px-3 text-xs font-black text-white/72 transition hover:bg-white/10 hover:text-white'
 
 const emptyCharacter = {
   name: '',
@@ -123,9 +123,9 @@ function FieldBlock({
 }) {
   return (
     <label className="grid gap-1.5">
-      <span className="text-xs font-black text-slate-700">{label}</span>
+      <span className="text-xs font-black text-white/72">{label}</span>
       {children}
-      {hint && <span className="text-[11px] font-bold leading-5 text-slate-500">{hint}</span>}
+      {hint && <span className="text-[11px] font-bold leading-5 text-white/45">{hint}</span>}
     </label>
   )
 }
@@ -143,15 +143,15 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 grid size-8 flex-none place-items-center rounded-lg bg-slate-950 text-xs font-black text-white">
+      <span className="mt-0.5 grid size-8 flex-none place-items-center rounded-lg border border-orange-300/25 bg-orange-500/12 text-xs font-black text-orange-100">
         {step}
       </span>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Icon className="text-orange-500" size={17} />
-          <h3 className="m-0 text-base font-black text-slate-950">{title}</h3>
+          <h3 className="m-0 text-base font-black text-white">{title}</h3>
         </div>
-        <p className="m-0 mt-1 text-xs font-bold leading-5 text-slate-500">{detail}</p>
+        <p className="m-0 mt-1 text-xs font-bold leading-5 text-white/48">{detail}</p>
       </div>
     </div>
   )
@@ -506,9 +506,9 @@ export function CharacterCreateForm({
   }
 
   return (
-    <section className="overflow-hidden rounded-lg border border-slate-900/10 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+    <section className="overflow-hidden rounded-lg border border-white/10 bg-[#18181d]/90 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
       <button
-        className="flex min-h-12 w-full items-center justify-between gap-3 border-b border-slate-900/10 bg-white px-4 text-left text-sm font-black text-slate-950 transition hover:bg-slate-50 sm:px-5"
+        className="flex min-h-12 w-full items-center justify-between gap-3 border-b border-white/10 bg-white/5 px-4 text-left text-sm font-black text-white transition hover:bg-white/8 sm:px-5"
         data-testid="creator-form-toggle"
         onClick={() => setIsOpen((value) => !value)}
         type="button"
@@ -516,7 +516,7 @@ export function CharacterCreateForm({
         <span className="flex min-w-0 items-center gap-2">
           <Bot className="text-orange-500" size={18} />
           <span>สร้างตัวละครใหม่</span>
-          <span className="hidden rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500 sm:inline-flex">
+          <span className="hidden rounded-full border border-white/10 bg-black/18 px-2.5 py-1 text-[11px] font-black text-white/55 sm:inline-flex">
             {status.readinessLabel}
           </span>
         </span>
@@ -524,7 +524,7 @@ export function CharacterCreateForm({
       </button>
 
       {isOpen && (
-        <div className="divide-y divide-slate-900/10">
+        <div className="divide-y divide-white/10">
           <div className="grid gap-4 p-4 sm:p-5">
             <SectionHeader
               detail="เริ่มจากภาพเหมือนที่ผู้ใช้คุ้นกับ Khuiai แล้วให้ Maprang ช่วยคิดรายละเอียดต่อ"
@@ -535,11 +535,11 @@ export function CharacterCreateForm({
 
             <div className="grid justify-items-center gap-4">
               <div className="w-full max-w-[280px]">
-                <div className="aspect-[3/4] overflow-hidden rounded-lg border border-slate-900/10 bg-slate-100">
+                <div className="aspect-[3/4] overflow-hidden rounded-lg border border-white/10 bg-black/24">
                   {hasAvatar ? (
                     <img alt="รูปตัวละคร" className="h-full w-full object-cover" src={form.avatarUrl} />
                   ) : (
-                    <div className="grid h-full place-items-center p-5 text-center text-sm font-black text-slate-400">
+                    <div className="grid h-full place-items-center p-5 text-center text-sm font-black text-white/38">
                       <div>
                         <ImageIcon className="mx-auto mb-2" size={30} />
                         รูปตัวละคร
@@ -548,7 +548,7 @@ export function CharacterCreateForm({
                   )}
                 </div>
                 {generatedImages.length > 0 && (
-                  <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200">
+                  <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20">
                     {generatedImages.map((img, idx) => (
                       <button
                         key={idx}
@@ -559,7 +559,7 @@ export function CharacterCreateForm({
                           setStoredAvatarSource(img.source)
                         }}
                         className={`relative aspect-[3/4] w-14 flex-none overflow-hidden rounded-md border-2 transition-all ${
-                          form.avatarUrl === img.url ? 'border-orange-500 shadow-sm' : 'border-transparent hover:border-slate-300'
+                          form.avatarUrl === img.url ? 'border-orange-500 shadow-sm' : 'border-transparent hover:border-white/30'
                         }`}
                       >
                         <img alt="ประวัติรูป" className="h-full w-full object-cover" src={img.url} />
@@ -584,7 +584,7 @@ export function CharacterCreateForm({
                     {isGeneratingDraft ? 'ร่าง...' : 'รูป+ข้อความ'}
                   </button>
                   <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-800 px-3 text-xs font-black text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/8 px-3 text-xs font-black text-white transition hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-60"
                     aria-disabled={isGeneratingDraft}
                     data-testid="creator-ai-image-only"
                     disabled={isGeneratingDraft}
@@ -597,7 +597,7 @@ export function CharacterCreateForm({
                   </button>
                   <label
                     aria-disabled={isUploading}
-                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50 ${
+                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/7 px-3 text-xs font-black text-white/72 transition hover:bg-white/10 hover:text-white ${
                       isUploading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
                     }`}
                     title={uploadDisabledReason || 'อัปโหลดรูปตัวละครจากเครื่อง'}
@@ -616,7 +616,7 @@ export function CharacterCreateForm({
                     />
                   </label>
                   <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/7 px-3 text-xs font-black text-white/72 transition hover:bg-white/10 hover:text-white"
                     onClick={() => {
                       if (avatarSource === 'placeholder' || avatarSource === 'provider') {
                         update('avatarUrl', '')
@@ -637,7 +637,7 @@ export function CharacterCreateForm({
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <select
-                    className="h-10 rounded-lg border border-slate-900/10 bg-white px-3 text-sm font-bold text-slate-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="h-10 rounded-lg border border-white/10 bg-black/22 px-3 text-sm font-bold text-white outline-none focus:border-orange-400/70 focus:ring-1 focus:ring-orange-400"
                     data-testid="creator-image-style"
                     value={imageStyle}
                     onChange={(e) => setImageStyle(e.target.value)}
@@ -651,7 +651,7 @@ export function CharacterCreateForm({
                   </select>
                 </div>
 
-                <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs font-bold leading-5 text-slate-500">
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs font-bold leading-5 text-white/52">
                   กด AI สร้างรูป + เนื้อหาเพื่อให้ระบบหลังบ้านช่วยร่างตัวละคร ถ้ายังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูปจริง ระบบจะแสดงภาพตัวอย่างชั่วคราวและบอกสถานะให้เห็นชัด
                 </div>
 
@@ -670,14 +670,14 @@ export function CharacterCreateForm({
 
                 <FieldBlock label="ลิงก์รูปตัวละคร">
                   {avatarSource === 'placeholder' || avatarSource === 'provider' ? (
-                    <div className="grid min-h-11 gap-2 rounded-lg border border-orange-500/20 bg-orange-50 px-3 py-2 text-sm text-orange-950 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                    <div className="grid min-h-11 gap-2 rounded-lg border border-orange-300/25 bg-orange-500/12 px-3 py-2 text-sm text-orange-50 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                       <span className="min-w-0 font-bold sm:truncate">
                         {avatarSource === 'placeholder'
                           ? 'ภาพตัวอย่างระบบ (ยังไม่ใช่รูป AI จริง)'
                           : 'รูปจากผู้ให้บริการสร้างรูป (เก็บเป็น URL ระบบแล้ว)'}
                       </span>
                       <button
-                        className="inline-flex min-h-9 items-center justify-center rounded-md border border-orange-500/25 bg-white px-2.5 py-1 text-xs font-black text-orange-800 transition hover:bg-orange-100"
+                        className="inline-flex min-h-9 items-center justify-center rounded-md border border-orange-200/25 bg-orange-200/12 px-2.5 py-1 text-xs font-black text-orange-50 transition hover:bg-orange-200/18"
                         onClick={() => {
                           update('avatarUrl', '')
                           setStoredAvatarSource('none')
@@ -708,8 +708,8 @@ export function CharacterCreateForm({
                 </FieldBlock>
 
                 {hasAvatar && (
-                  <div className="rounded-lg border border-orange-500/20 bg-orange-50 p-3">
-                    <p className="m-0 flex items-center gap-2 text-sm font-black text-orange-900">
+                  <div className="rounded-lg border border-orange-300/25 bg-orange-500/12 p-3">
+                    <p className="m-0 flex items-center gap-2 text-sm font-black text-orange-50">
                       <Sparkles size={16} />
                       {isPlaceholderGeneratedAvatar
                         ? 'ภาพตัวอย่างพร้อม ให้ระบบคิดเนื้อหาต่อ'
@@ -727,7 +727,7 @@ export function CharacterCreateForm({
                         เติมช่องว่างจากรูป
                       </button>
                       <button
-                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-orange-500/25 bg-white px-3 text-xs font-black text-orange-800 transition hover:bg-orange-100"
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-orange-200/25 bg-orange-200/12 px-3 text-xs font-black text-orange-50 transition hover:bg-orange-200/18"
                         onClick={() => applyImageDraft({ imageName: lastImageSignal, imageUrl: form.avatarUrl }, true)}
                         type="button"
                       >
@@ -819,12 +819,12 @@ export function CharacterCreateForm({
               />
             </FieldBlock>
 
-            <details className="rounded-lg border border-slate-900/10 bg-slate-50" open>
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 text-sm font-black text-slate-900">
+            <details className="rounded-lg border border-white/10 bg-white/5" open>
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 text-sm font-black text-white">
                 รายละเอียดขั้นสูงจากดราฟต์
                 <ChevronDown size={17} />
               </summary>
-              <div className="grid gap-3 border-t border-slate-900/10 p-3">
+              <div className="grid gap-3 border-t border-white/10 p-3">
                 <FieldBlock label="ประวัติตัวละคร">
                   <textarea
                     className={textareaClass}
@@ -881,13 +881,13 @@ export function CharacterCreateForm({
 
             <CreatorReadinessPanel analysis={tagAnalysis} />
 
-            <div className="rounded-lg border border-slate-900/10 bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
-              <p className="m-0 font-black text-slate-900">
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs leading-relaxed text-white/58">
+              <p className="m-0 font-black text-white">
                 แท็กค้นหา {tagAnalysis.discovery.length}, แท็กระบบ {tagAnalysis.engine.length}, แท็กความปลอดภัย {tagAnalysis.safety.length}
               </p>
               {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">แท็กที่ยังไม่รู้จัก: {tagAnalysis.unknown.join(', ')}</p>}
               {tagAnalysis.issues.length === 0 && (
-                <p className="mt-2 mb-0 flex items-center gap-2 font-black text-emerald-700">
+                <p className="mt-2 mb-0 flex items-center gap-2 font-black text-emerald-100">
                   <CheckCircle2 size={15} />
                   ยังไม่พบแท็กที่ขัดแย้งกัน
                 </p>
@@ -895,7 +895,7 @@ export function CharacterCreateForm({
               {tagAnalysis.issues.map((issue) => (
                 <p
                   className={`mt-2 mb-0 flex items-start gap-2 font-bold ${
-                    issue.level === 'danger' ? 'text-red-700' : 'text-amber-700'
+                    issue.level === 'danger' ? 'text-red-200' : 'text-amber-100'
                   }`}
                   key={issue.message}
                 >
@@ -918,9 +918,9 @@ export function CharacterCreateForm({
             <RelationshipPreviewPanel tags={form.tags} onPreviewComplete={() => setHasPreviewRun(true)} />
           </div>
 
-          <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-slate-900/10 bg-white/95 p-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <div className="min-w-0 text-xs font-bold leading-5 text-slate-500">
-              <span className="block font-black text-slate-900">{status.readinessLabel}</span>
+          <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-white/10 bg-[#18181d]/96 p-4 shadow-[0_-18px_58px_rgba(0,0,0,0.22)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="min-w-0 text-xs font-bold leading-5 text-white/50">
+              <span className="block font-black text-white">{status.readinessLabel}</span>
               {note ? <span>{note}</span> : <span>สร้างเป็นดราฟต์ส่วนตัวก่อน แล้วค่อยตรวจในหน้าโปรไฟล์ตัวละคร</span>}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -944,7 +944,7 @@ export function CharacterCreateForm({
                 ล้างฟอร์ม
               </button>
               <button type="button"
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60"
                 aria-disabled={Boolean(submitDisabledReason)}
                 data-testid="creator-submit"
                 disabled={!canSubmit}
