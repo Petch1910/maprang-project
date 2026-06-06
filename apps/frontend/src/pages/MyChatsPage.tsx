@@ -310,15 +310,15 @@ export function MyChatsPage() {
   const bulkDeleteConfirmDisabledReason = pendingAction === 'bulk-delete' ? 'กำลังลบแชทที่เลือก' : undefined
 
   return (
-    <div className="space-y-4 p-4 sm:p-6 lg:p-8">
+    <div className="space-y-4 p-4 text-white sm:p-6 lg:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black">แชทของฉัน</h1>
-          <p className="mt-2 text-slate-600">กลับไปเล่นต่อในเส้นทาง ฉาก และความสัมพันธ์ที่บันทึกไว้</p>
+          <h1 className="text-3xl font-black text-white">แชทของฉัน</h1>
+          <p className="mt-2 text-sm font-bold text-white/58">กลับไปเล่นต่อในเส้นทาง ฉาก และความสัมพันธ์ที่บันทึกไว้</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white"
             data-testid="my-chats-select-mode"
             onClick={() => (isSelectionMode ? clearSelection() : startSelection())}
             type="button"
@@ -328,7 +328,7 @@ export function MyChatsPage() {
           </button>
           <button type="button"
             aria-disabled={Boolean(refreshDisabledReason)}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 disabled:cursor-not-allowed disabled:opacity-55"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
             data-testid="my-chats-refresh"
             disabled={Boolean(refreshDisabledReason)}
             onClick={refreshChats}
@@ -338,7 +338,7 @@ export function MyChatsPage() {
             รีเฟรช
           </button>
           <Link
-            className="inline-flex min-h-11 items-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white"
+            className="inline-flex min-h-11 items-center rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
             to="/events"
           >
             กล่องอีเวนต์
@@ -346,11 +346,11 @@ export function MyChatsPage() {
         </div>
       </div>
 
-      <section className="grid gap-3 rounded-lg border border-slate-900/10 bg-white p-3 shadow-sm md:grid-cols-[minmax(0,1fr)_auto]">
-        <label className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-900/10 bg-slate-50 px-3 text-slate-500 focus-within:border-blue-500/50 focus-within:bg-white">
+      <section className="grid gap-3 rounded-lg border border-white/10 bg-[#18181d]/92 p-3 shadow-[0_22px_70px_rgba(0,0,0,0.22)] md:grid-cols-[minmax(0,1fr)_auto]">
+        <label className="flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-black/22 px-3 text-white/42 transition focus-within:border-orange-400/45 focus-within:bg-black/32">
           <Search size={17} />
           <input
-            className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400"
+            className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/35"
             onChange={(event) => setSearch(event.target.value)}
             placeholder="ค้นหาชื่อตัวละคร สถานะ หรือข้อความล่าสุด"
             value={search}
@@ -359,7 +359,7 @@ export function MyChatsPage() {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button
             className={`min-h-11 rounded-lg px-3 text-sm font-black ${
-              filter === 'all' ? 'bg-slate-950 text-white' : 'border border-slate-900/10 bg-slate-50 text-slate-600'
+              filter === 'all' ? 'bg-white text-slate-950' : 'border border-white/10 bg-white/6 text-white/62 hover:bg-white/10 hover:text-white'
             }`}
             data-testid="my-chats-filter-all"
             onClick={() => setFilter('all')}
@@ -369,7 +369,7 @@ export function MyChatsPage() {
           </button>
           <button
             className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-black ${
-              filter === 'pinned' ? 'bg-slate-950 text-white' : 'border border-slate-900/10 bg-slate-50 text-slate-600'
+              filter === 'pinned' ? 'bg-white text-slate-950' : 'border border-white/10 bg-white/6 text-white/62 hover:bg-white/10 hover:text-white'
             }`}
             data-testid="my-chats-filter-pinned"
             onClick={() => setFilter('pinned')}
@@ -380,7 +380,7 @@ export function MyChatsPage() {
           </button>
           <button
             className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-black ${
-              filter === 'pending' ? 'bg-amber-500 text-white' : 'border border-slate-900/10 bg-slate-50 text-slate-600'
+              filter === 'pending' ? 'bg-orange-500 text-white' : 'border border-white/10 bg-white/6 text-white/62 hover:bg-white/10 hover:text-white'
             }`}
             data-testid="my-chats-filter-pending"
             onClick={() => setFilter('pending')}
@@ -391,7 +391,7 @@ export function MyChatsPage() {
           </button>
           <button
             className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-black ${
-              filter === 'archived' ? 'bg-slate-950 text-white' : 'border border-slate-900/10 bg-slate-50 text-slate-600'
+              filter === 'archived' ? 'bg-white text-slate-950' : 'border border-white/10 bg-white/6 text-white/62 hover:bg-white/10 hover:text-white'
             }`}
             data-testid="my-chats-filter-archived"
             onClick={() => setFilter('archived')}
@@ -403,19 +403,19 @@ export function MyChatsPage() {
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-black text-slate-500">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-black text-white/48">
         <span>
           {hasListError
             ? 'ยังโหลดรายการแชทไม่ได้'
             : `แสดง ${visibleChats.length.toLocaleString()} จาก ${sourceChats.length.toLocaleString()} แชท`}
         </span>
-        {filter === 'pinned' && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">เฉพาะแชทที่ปักหมุดไว้</span>}
-        {filter === 'pending' && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">เฉพาะแชทที่มีฉากรออยู่</span>}
-        {filter === 'archived' && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">แชทที่จัดเก็บไว้ ไม่แสดงในรายการหลัก</span>}
+        {filter === 'pinned' && <span className="rounded-full bg-white/8 px-2.5 py-1 text-white/70">เฉพาะแชทที่ปักหมุดไว้</span>}
+        {filter === 'pending' && <span className="rounded-full bg-orange-400/12 px-2.5 py-1 text-orange-100">เฉพาะแชทที่มีฉากรออยู่</span>}
+        {filter === 'archived' && <span className="rounded-full bg-white/8 px-2.5 py-1 text-white/70">แชทที่จัดเก็บไว้ ไม่แสดงในรายการหลัก</span>}
       </div>
 
       {actionNote && (
-        <div className="rounded-xl border border-slate-900/10 bg-white px-4 py-3 text-sm font-bold text-slate-600 shadow-sm">
+        <div className="rounded-lg border border-white/10 bg-white/7 px-4 py-3 text-sm font-bold text-white/70 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
           {actionNote}
         </div>
       )}
@@ -483,13 +483,13 @@ export function MyChatsPage() {
 
       {error && (
         <div
-          className="flex flex-col gap-3 rounded-lg border border-rose-500/20 bg-rose-50 p-4 text-sm font-bold text-rose-700 shadow-[0_18px_44px_rgba(0,0,0,0.12)] sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-lg border border-rose-300/20 bg-rose-500/10 p-4 text-sm font-bold text-rose-100 shadow-[0_18px_44px_rgba(0,0,0,0.2)] sm:flex-row sm:items-center sm:justify-between"
           data-testid="my-chats-load-error"
           role="status"
         >
           <span>โหลดรายการแชทไม่ได้ ตรวจการเชื่อมต่อระบบหลังบ้านแล้วลองรีเฟรชอีกครั้ง</span>
           <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-rose-500/20 bg-white px-3 text-xs font-black text-rose-700 transition hover:bg-rose-100"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-rose-300/20 bg-rose-400/12 px-3 text-xs font-black text-rose-100 transition hover:bg-rose-400/18"
             onClick={refreshChats}
             type="button"
           >
@@ -500,7 +500,7 @@ export function MyChatsPage() {
       )}
 
       <div className="grid min-w-0 gap-2">
-        {isListLoading && [1, 2, 3, 4].map((item) => <div className="h-28 animate-pulse rounded-2xl bg-slate-200" key={item} />)}
+        {isListLoading && [1, 2, 3, 4].map((item) => <div className="h-28 animate-pulse rounded-lg bg-white/8" key={item} />)}
 
         {!isListLoading &&
           visibleChats.map((chat) => {
@@ -518,8 +518,8 @@ export function MyChatsPage() {
 
             return (
               <article
-                className={`relative min-w-0 overflow-visible rounded-xl border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-4 ${
-                  selectedChatIds.includes(chat.id) ? 'border-slate-950 bg-slate-50 ring-2 ring-slate-950/10' : 'border-slate-900/10 bg-white'
+                className={`relative min-w-0 overflow-visible rounded-lg border p-3 shadow-[0_18px_58px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:border-white/16 hover:bg-[#1d1d23] sm:p-4 ${
+                  selectedChatIds.includes(chat.id) ? 'border-orange-400/45 bg-orange-400/8 ring-2 ring-orange-400/12' : 'border-white/10 bg-[#18181d]/90'
                 } ${openMenuChatId === chat.id ? 'z-[70]' : 'z-0'}`}
                 key={chat.id}
               >
@@ -528,7 +528,7 @@ export function MyChatsPage() {
                     <button
                       aria-label="เลือกแชท"
                       aria-pressed={selectedChatIds.includes(chat.id)}
-                      className="mt-0.5 grid size-9 flex-none place-items-center rounded-lg border border-slate-900/10 bg-white text-slate-600 transition hover:border-slate-950 hover:text-slate-950"
+                      className="mt-0.5 grid size-9 flex-none place-items-center rounded-lg border border-white/10 bg-white/7 text-white/62 transition hover:border-white/22 hover:bg-white/10 hover:text-white"
                       data-testid={`my-chat-checkbox-${chat.id}`}
                       onClick={() => toggleSelectedChat(chat.id)}
                       type="button"
@@ -536,21 +536,21 @@ export function MyChatsPage() {
                       {selectedChatIds.includes(chat.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                     </button>
                   )}
-                  <div className="grid size-10 flex-none place-items-center rounded-xl bg-slate-950 text-sm font-black text-white shadow-sm">
+                  <div className="grid size-10 flex-none place-items-center rounded-lg bg-linear-to-br from-orange-500 to-amber-300 text-sm font-black text-slate-950 shadow-[0_14px_32px_rgba(249,115,22,0.18)]">
                     {(chat.characterName || chat.title || 'M').trim().slice(0, 1).toUpperCase()}
                   </div>
                   <div className="pointer-events-none min-w-0 flex-1 overflow-hidden">
-                    <p className="flex min-w-0 items-center gap-1.5 font-black">
-                      {isPinned && <Pin className="flex-none text-amber-500" size={14} />}
+                    <p className="flex min-w-0 items-center gap-1.5 font-black text-white">
+                      {isPinned && <Pin className="flex-none text-amber-300" size={14} />}
                       <span className="min-w-0 max-w-full truncate">{chat.title || chat.characterName}</span>
                     </p>
-                    <p className="mt-1 line-clamp-2 break-words text-sm text-slate-500 [overflow-wrap:anywhere]">
+                    <p className="mt-1 line-clamp-2 break-words text-sm font-semibold leading-6 text-white/52 [overflow-wrap:anywhere]">
                       {chat.preview ? displayMessageContent(chat.preview) : 'ยังไม่มีตัวอย่างข้อความ'}
                     </p>
                   </div>
                   <div className="absolute right-0 top-0 z-30 flex flex-none items-center gap-2">
                     {pendingCount > 0 && (
-                      <span className="pointer-events-none rounded-full bg-amber-100 px-2.5 py-1 text-xs font-black text-amber-800">
+                      <span className="pointer-events-none rounded-full bg-orange-400/14 px-2.5 py-1 text-xs font-black text-orange-100">
                         {pendingCount} ฉาก
                       </span>
                     )}
@@ -560,7 +560,7 @@ export function MyChatsPage() {
                         aria-haspopup="menu"
                         aria-label={`เปิดเมนูแชท ${chat.title || chat.characterName}`}
                         aria-disabled={isBusy}
-                        className="relative z-20 grid size-9 scroll-mt-28 touch-manipulation place-items-center rounded-lg border border-slate-900/10 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                        className="relative z-20 grid size-9 scroll-mt-28 touch-manipulation place-items-center rounded-lg border border-white/10 bg-white/7 text-white/52 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
                         data-testid={`my-chat-menu-${chat.id}`}
                         disabled={isBusy}
                         onClick={(event) => {
@@ -574,11 +574,11 @@ export function MyChatsPage() {
                       </button>
                       {openMenuChatId === chat.id && (
                         <div
-                          className="absolute right-0 top-10 z-[80] w-44 overflow-hidden rounded-xl border border-slate-900/10 bg-white py-1 shadow-[0_18px_44px_rgba(15,23,42,0.16)]"
+                          className="absolute right-0 top-10 z-[80] w-44 overflow-hidden rounded-lg border border-white/10 bg-[#111114] py-1 shadow-[0_20px_70px_rgba(0,0,0,0.65)]"
                           role="menu"
                         >
                           <button
-                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-700 transition hover:bg-slate-50"
+                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-white/80 transition hover:bg-white/8 hover:text-white"
                             data-testid={`my-chat-rename-${chat.id}`}
                             onClick={() => openRenameDialog(chat)}
                             role="menuitem"
@@ -589,7 +589,7 @@ export function MyChatsPage() {
                           </button>
                           {!isArchived && (
                             <button
-                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-700 transition hover:bg-slate-50"
+                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-white/80 transition hover:bg-white/8 hover:text-white"
                               data-testid={`my-chat-pin-${chat.id}`}
                               onClick={() => togglePinChat(chat)}
                               role="menuitem"
@@ -601,7 +601,7 @@ export function MyChatsPage() {
                           )}
                           {isArchived ? (
                             <button
-                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-700 transition hover:bg-slate-50"
+                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-white/80 transition hover:bg-white/8 hover:text-white"
                               data-testid={`my-chat-restore-${chat.id}`}
                               onClick={() => void handleRestore(chat)}
                               role="menuitem"
@@ -612,7 +612,7 @@ export function MyChatsPage() {
                             </button>
                           ) : (
                             <button
-                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-700 transition hover:bg-slate-50"
+                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-white/80 transition hover:bg-white/8 hover:text-white"
                               data-testid={`my-chat-archive-${chat.id}`}
                               onClick={() => void handleArchive(chat)}
                               role="menuitem"
@@ -623,7 +623,7 @@ export function MyChatsPage() {
                             </button>
                           )}
                           <button
-                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-700 transition hover:bg-slate-50"
+                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-white/80 transition hover:bg-white/8 hover:text-white"
                             data-testid={`my-chat-select-${chat.id}`}
                             onClick={() => startSelection(chat)}
                             role="menuitem"
@@ -633,7 +633,7 @@ export function MyChatsPage() {
                             เลือก
                           </button>
                           <button
-                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-rose-600 transition hover:bg-rose-50"
+                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-rose-300 transition hover:bg-rose-500/12 hover:text-rose-200"
                             data-testid={`my-chat-delete-${chat.id}`}
                             onClick={() => {
                               setOpenMenuChatId(null)
@@ -651,29 +651,29 @@ export function MyChatsPage() {
                   </div>
                 </div>
                 <div className={`mt-3 flex flex-wrap gap-2 ${openMenuChatId === chat.id ? 'pointer-events-none' : ''}`}>
-                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-700">{chat.characterName}</span>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-600">
+                  <span className="rounded-full bg-sky-400/12 px-2.5 py-1 text-xs font-black text-sky-100">{chat.characterName}</span>
+                  <span className="rounded-full bg-white/8 px-2.5 py-1 text-xs font-black text-white/65">
                     {relationshipStatusLabel(relationshipStatus)}
                   </span>
                   {relationship?.tier && (
-                    <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
+                    <span className="rounded-full bg-emerald-400/12 px-2.5 py-1 text-xs font-black text-emerald-100">
                       {relationshipTierLabel(relationship.tier)}
                     </span>
                   )}
                   {activeScene && (
-                    <span className="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-black text-white">โหมดฉาก</span>
+                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-black text-slate-950">โหมดฉาก</span>
                   )}
                 </div>
                 <div className={`mt-4 flex flex-wrap gap-2 sm:justify-end ${openMenuChatId === chat.id ? 'pointer-events-none' : ''}`}>
                   <Link
-                    className="inline-flex min-h-10 items-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white"
+                    className="inline-flex min-h-10 items-center rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
                     to={`/chat/${chat.id}`}
                   >
                     {isArchived ? 'เปิดอ่าน' : 'เข้าแชท'}
                   </Link>
                   {isArchived && (
                     <button
-                      className="inline-flex min-h-10 items-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
+                      className="inline-flex min-h-10 items-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/75 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
                       aria-disabled={isBusy}
                       data-testid={`my-chat-restore-button-${chat.id}`}
                       disabled={isBusy}
@@ -686,7 +686,7 @@ export function MyChatsPage() {
                   )}
                   {pendingCount > 0 && (
                     <Link
-                      className="inline-flex min-h-10 items-center rounded-xl border border-amber-200 bg-amber-50 px-4 text-sm font-black text-amber-800"
+                      className="inline-flex min-h-10 items-center rounded-lg border border-orange-300/25 bg-orange-400/12 px-4 text-sm font-black text-orange-100 transition hover:bg-orange-400/18"
                       to={`/chat/${chat.id}`}
                     >
                       เข้าฉากที่รออยู่
@@ -698,8 +698,8 @@ export function MyChatsPage() {
           })}
 
         {!isListLoading && visibleChats.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-900/15 bg-white p-6 text-slate-500">
-            <p className="m-0 text-sm leading-6">
+          <div className="rounded-lg border border-dashed border-white/14 bg-[#18181d]/82 p-6 text-white/58 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+            <p className="m-0 text-sm font-bold leading-6">
               {filter === 'archived'
                 ? hasListError
                   ? 'ยังโหลดแชทที่จัดเก็บไว้ไม่ได้ ลองรีเฟรชอีกครั้งหลังระบบหลังบ้านพร้อมใช้งาน'
@@ -713,11 +713,11 @@ export function MyChatsPage() {
                   : 'ไม่พบแชทที่ตรงกับคำค้นหาหรือตัวกรองตอนนี้'}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link className="inline-flex min-h-10 items-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white" to="/">
+              <Link className="inline-flex min-h-10 items-center rounded-lg bg-white px-4 text-sm font-black text-slate-950" to="/">
                 ไปสำรวจตัวละคร
               </Link>
               <Link
-                className="inline-flex min-h-10 items-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700"
+                className="inline-flex min-h-10 items-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
                 to="/create"
               >
                 สร้างตัวละครของฉัน
@@ -728,12 +728,12 @@ export function MyChatsPage() {
       </div>
 
       {renameTarget && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 backdrop-blur-sm" data-testid="my-chat-rename-dialog">
-          <div className="w-full max-w-md rounded-2xl border border-slate-900/10 bg-white p-5 shadow-2xl">
-            <h2 className="m-0 text-xl font-black text-slate-950">แก้ไขชื่อแชท</h2>
-            <p className="m-0 mt-1 text-sm leading-6 text-slate-500">ตั้งชื่อให้จำง่ายขึ้น ข้อความเดิมและสถานะความสัมพันธ์จะยังอยู่ครบ</p>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm" data-testid="my-chat-rename-dialog">
+          <div className="w-full max-w-md rounded-xl border border-white/10 bg-[#151518] p-5 shadow-2xl">
+            <h2 className="m-0 text-xl font-black text-white">แก้ไขชื่อแชท</h2>
+            <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/52">ตั้งชื่อให้จำง่ายขึ้น ข้อความเดิมและสถานะความสัมพันธ์จะยังอยู่ครบ</p>
             <input
-              className="mt-4 min-h-11 w-full rounded-xl border border-slate-900/10 bg-slate-50 px-3 text-sm font-bold text-slate-950 outline-none focus:border-blue-500/50 focus:bg-white"
+              className="mt-4 min-h-11 w-full rounded-lg border border-white/10 bg-white/6 px-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-orange-400/70 focus:bg-white/8 focus:ring-4 focus:ring-orange-400/10"
               data-testid="my-chat-rename-input"
               onChange={(event) => setRenameValue(event.target.value)}
               onKeyDown={(event) => {
@@ -744,7 +744,7 @@ export function MyChatsPage() {
             />
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-slate-900/10 bg-white text-sm font-black text-slate-600"
+                className="min-h-11 rounded-lg border border-white/10 text-sm font-black text-white/72 transition hover:bg-white/8 hover:text-white"
                 data-testid="my-chat-rename-cancel"
                 onClick={() => setRenameTarget(null)}
                 type="button"
@@ -752,7 +752,7 @@ export function MyChatsPage() {
                 ยกเลิก
               </button>
               <button
-                className="min-h-11 rounded-xl bg-slate-950 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                className="min-h-11 rounded-lg bg-white text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
                 aria-disabled={Boolean(renameConfirmDisabledReason)}
                 data-testid="my-chat-rename-confirm"
                 disabled={Boolean(renameConfirmDisabledReason)}
@@ -768,15 +768,15 @@ export function MyChatsPage() {
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 backdrop-blur-sm" data-testid="my-chat-delete-dialog">
-          <div className="w-full max-w-md rounded-2xl border border-rose-200 bg-white p-5 shadow-2xl">
-            <h2 className="m-0 text-xl font-black text-slate-950">ลบแชทนี้?</h2>
-            <p className="m-0 mt-2 text-sm leading-6 text-slate-500">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm" data-testid="my-chat-delete-dialog">
+          <div className="w-full max-w-md rounded-xl border border-rose-400/20 bg-[#151518] p-5 shadow-2xl">
+            <h2 className="m-0 text-xl font-black text-white">ลบแชทนี้?</h2>
+            <p className="m-0 mt-2 text-sm font-bold leading-6 text-white/55">
               {deleteTarget.title || deleteTarget.characterName} จะถูกนำออกจากรายการแชทของคุณ
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-slate-900/10 bg-white text-sm font-black text-slate-600"
+                className="min-h-11 rounded-lg border border-white/10 text-sm font-black text-white/72 transition hover:bg-white/8 hover:text-white"
                 data-testid="my-chat-delete-cancel"
                 onClick={() => setDeleteTarget(null)}
                 type="button"
@@ -784,7 +784,7 @@ export function MyChatsPage() {
                 ยกเลิก
               </button>
               <button
-                className="min-h-11 rounded-xl bg-rose-600 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                className="min-h-11 rounded-lg bg-rose-500 text-sm font-black text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-45"
                 aria-disabled={Boolean(deleteConfirmDisabledReason)}
                 data-testid="my-chat-delete-confirm"
                 disabled={Boolean(deleteConfirmDisabledReason)}
@@ -800,15 +800,15 @@ export function MyChatsPage() {
       )}
 
       {bulkDeleteIds.length > 0 && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 backdrop-blur-sm" data-testid="my-chats-bulk-delete-dialog">
-          <div className="w-full max-w-md rounded-2xl border border-rose-200 bg-white p-5 shadow-2xl">
-            <h2 className="m-0 text-xl font-black text-slate-950">ลบแชทที่เลือก?</h2>
-            <p className="m-0 mt-2 text-sm leading-6 text-slate-500">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm" data-testid="my-chats-bulk-delete-dialog">
+          <div className="w-full max-w-md rounded-xl border border-rose-400/20 bg-[#151518] p-5 shadow-2xl">
+            <h2 className="m-0 text-xl font-black text-white">ลบแชทที่เลือก?</h2>
+            <p className="m-0 mt-2 text-sm font-bold leading-6 text-white/55">
               แชท {bulkDeleteIds.length.toLocaleString()} รายการจะถูกนำออกจากรายการแชทของคุณ
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-slate-900/10 bg-white text-sm font-black text-slate-600"
+                className="min-h-11 rounded-lg border border-white/10 text-sm font-black text-white/72 transition hover:bg-white/8 hover:text-white"
                 data-testid="my-chats-bulk-delete-cancel"
                 onClick={() => setBulkDeleteIds([])}
                 type="button"
@@ -816,7 +816,7 @@ export function MyChatsPage() {
                 ยกเลิก
               </button>
               <button
-                className="min-h-11 rounded-xl bg-rose-600 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                className="min-h-11 rounded-lg bg-rose-500 text-sm font-black text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-45"
                 aria-disabled={Boolean(bulkDeleteConfirmDisabledReason)}
                 data-testid="my-chats-bulk-delete-confirm"
                 disabled={Boolean(bulkDeleteConfirmDisabledReason)}
