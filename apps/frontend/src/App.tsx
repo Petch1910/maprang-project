@@ -86,23 +86,23 @@ function preloadRoute(to: string) {
 function NotFoundPage() {
   return (
     <main className="grid min-h-[calc(100svh-4rem)] place-items-center px-4 py-12">
-      <section className="w-full max-w-lg rounded-lg border border-slate-900/10 bg-white p-6 text-center shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-        <span className="mx-auto grid size-12 place-items-center rounded-xl bg-slate-950 text-white">
+      <section className="w-full max-w-lg rounded-lg border border-white/10 bg-[#18181d]/92 p-6 text-center text-white shadow-[0_22px_70px_rgba(0,0,0,0.24)]">
+        <span className="mx-auto grid size-12 place-items-center rounded-xl border border-white/10 bg-white/7 text-white">
           <SearchX size={22} />
         </span>
-        <h1 className="m-0 mt-4 text-2xl font-black text-slate-950">ไม่พบหน้านี้</h1>
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
+        <h1 className="m-0 mt-4 text-2xl font-black text-white">ไม่พบหน้านี้</h1>
+        <p className="mx-auto mt-2 max-w-sm text-sm font-bold leading-6 text-white/55">
           ลิงก์นี้อาจถูกย้ายหรือยังไม่เปิดใช้งาน เลือกทางไปต่อได้เลย
         </p>
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           <NavLink
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-950 px-4 text-sm font-black text-white"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-orange-500 px-4 text-sm font-black text-white transition hover:bg-orange-400"
             to="/"
           >
             ไปหน้าหลัก
           </NavLink>
           <NavLink
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-900/10 bg-slate-50 px-4 text-sm font-black text-slate-700"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/75 transition hover:bg-white/10 hover:text-white"
             to="/create"
           >
             สร้างตัวละคร
@@ -195,11 +195,50 @@ function App() {
   const shellClass = isDarkMode
     ? 'maprang-standard-shell maprang-dark min-h-svh bg-[#101012] text-slate-100'
     : 'maprang-standard-shell min-h-svh bg-slate-50 text-slate-950'
+  const headerClass = isDarkMode
+    ? 'sticky top-0 z-40 border-b border-white/10 bg-[#151518]/92 text-white shadow-[0_18px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl'
+    : 'sticky top-0 z-40 border-b border-slate-900/10 bg-white/90 backdrop-blur-xl'
+  const subtleTextClass = isDarkMode ? 'hidden text-xs font-bold text-white/42 sm:block' : 'hidden text-xs font-bold text-slate-500 sm:block'
+  const walletPillClass = isDarkMode
+    ? 'flex min-h-10 max-w-[7.5rem] items-center gap-1.5 rounded-full border border-amber-300/25 bg-amber-400/12 px-2 text-xs font-black text-amber-100 sm:max-w-none sm:gap-2 sm:px-3 sm:text-sm'
+    : 'flex min-h-10 max-w-[7.5rem] items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-50 px-2 text-xs font-black text-amber-700 sm:max-w-none sm:gap-2 sm:px-3 sm:text-sm'
+  const iconButtonClass = isDarkMode
+    ? 'grid size-10 place-items-center rounded-full border border-white/10 bg-white/7 text-white/75 transition hover:bg-white/10 hover:text-white'
+    : 'grid size-10 place-items-center rounded-full border border-slate-900/10 bg-white text-slate-700'
+  const sideNavClass = isDarkMode
+    ? 'hidden border-r border-white/10 bg-[#151518]/74 px-3 py-5 text-white shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)] md:block'
+    : 'hidden border-r border-slate-900/10 bg-white/70 px-3 py-5 md:block'
+  const inactiveNavClass = isDarkMode ? 'text-white/64 hover:bg-white/7 hover:text-white' : 'text-slate-600 hover:bg-slate-100'
+  const utilityInactiveNavClass = isDarkMode ? 'text-white/62 hover:bg-white/7 hover:text-white' : 'text-slate-600 hover:bg-slate-100'
+  const adminInactiveNavClass = isDarkMode ? 'text-white/62 hover:bg-white/7 hover:text-white' : 'text-slate-600 hover:bg-slate-100'
+  const sideDividerClass = isDarkMode ? 'my-3 border-t border-white/10 pt-3' : 'my-3 border-t border-slate-900/10 pt-3'
+  const sideHeadingClass = isDarkMode
+    ? 'mb-2 px-3 text-[11px] font-black tracking-widest text-white/35 uppercase'
+    : 'mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase'
+  const adminActiveClass = isDarkMode
+    ? 'bg-white text-slate-950 shadow-[0_14px_28px_rgba(255,255,255,0.12)]'
+    : 'bg-slate-950 text-white shadow-[0_14px_28px_rgba(15,23,42,0.18)]'
+  const statusPanelClass = isDarkMode
+    ? 'mt-auto rounded-lg border border-white/10 bg-white/6 p-3 shadow-[0_18px_58px_rgba(0,0,0,0.18)]'
+    : 'mt-auto rounded-2xl border border-slate-900/10 bg-slate-50 p-3 shadow-sm'
+  const statusLabelClass = isDarkMode
+    ? 'm-0 text-[11px] font-black tracking-widest text-white/35 uppercase'
+    : 'm-0 text-[11px] font-black tracking-widest text-slate-400 uppercase'
+  const statusRowClass = isDarkMode
+    ? 'flex min-h-9 items-center justify-between rounded-lg border border-white/10 bg-black/18 px-3 text-xs font-black text-white/68 transition hover:bg-white/10 hover:text-white'
+    : 'flex min-h-9 items-center justify-between rounded-xl bg-white px-3 text-xs font-black text-slate-600 transition hover:bg-slate-100'
+  const statusActionClass = isDarkMode
+    ? 'mt-3 inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-white/10 bg-white/7 px-3 text-xs font-black text-white/74 transition hover:bg-white/10 hover:text-white'
+    : 'mt-3 inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-100'
+  const bottomNavClass = isDarkMode
+    ? 'fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-white/10 bg-[#151518]/96 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 text-white shadow-[0_-16px_58px_rgba(0,0,0,0.34)] backdrop-blur-xl md:hidden'
+    : 'fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-slate-900/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden'
+  const bottomInactiveNavClass = isDarkMode ? 'text-white/56 hover:bg-white/7 hover:text-white' : 'text-slate-500'
 
   return (
     <div className={shellClass}>
       <AgeGate />
-      <header className="sticky top-0 z-40 border-b border-slate-900/10 bg-white/90 backdrop-blur-xl">
+      <header className={headerClass}>
         <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <NavLink className="flex min-w-0 items-center gap-3" to="/">
             <span className="grid size-10 flex-none place-items-center rounded-xl bg-linear-to-br from-amber-400 to-rose-500 text-lg font-black text-white shadow-[0_12px_24px_rgba(244,114,52,0.22)]">
@@ -207,7 +246,7 @@ function App() {
             </span>
             <span className="min-w-0">
               <span className="block truncate text-base font-black">Maprang AI</span>
-              <span className="hidden text-xs font-bold text-slate-500 sm:block">
+              <span className={subtleTextClass}>
                 โรลเพลย์ภาษาไทย พร้อมระบบความสัมพันธ์เชิงลึก
               </span>
             </span>
@@ -215,7 +254,7 @@ function App() {
 
           <div className="flex items-center gap-2">
             <NavLink
-              className="flex min-h-10 max-w-[7.5rem] items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-50 px-2 text-xs font-black text-amber-700 sm:max-w-none sm:gap-2 sm:px-3 sm:text-sm"
+              className={walletPillClass}
               to="/wallet"
             >
               <Coins size={16} />
@@ -224,7 +263,7 @@ function App() {
             </NavLink>
             <button
               aria-pressed={isDarkMode}
-              className="grid size-10 place-items-center rounded-full border border-slate-900/10 bg-white text-slate-700"
+              className={iconButtonClass}
               onClick={() => setIsDarkMode((current) => !current)}
               title={isDarkMode ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
               type="button"
@@ -232,7 +271,7 @@ function App() {
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <NavLink
-              className="relative grid size-10 place-items-center rounded-full border border-slate-900/10 bg-white text-slate-700"
+              className={`relative ${iconButtonClass}`}
               to="/events"
               title="อีเวนต์"
             >
@@ -248,13 +287,13 @@ function App() {
       </header>
 
       <div className="mx-auto grid w-full max-w-7xl grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
-        <nav className="hidden border-r border-slate-900/10 bg-white/70 px-3 py-5 md:block">
+        <nav className={sideNavClass}>
           <div className="sticky top-21 flex min-h-[calc(100svh-6rem)] flex-col gap-1">
             {primaryNavItems.map((item) => (
               <NavLink
                 className={({ isActive }) =>
                   `flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-black transition ${
-                    isActive ? 'bg-orange-500 text-white shadow-[0_14px_28px_rgba(249,115,22,0.22)]' : 'text-slate-600 hover:bg-slate-100'
+                    isActive ? 'bg-orange-500 text-white shadow-[0_14px_28px_rgba(249,115,22,0.22)]' : inactiveNavClass
                   }`
                 }
                 end={item.to === '/'}
@@ -269,13 +308,13 @@ function App() {
               </NavLink>
             ))}
 
-            <div className="my-3 border-t border-slate-900/10 pt-3">
-              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">บัญชี</p>
+            <div className={sideDividerClass}>
+              <p className={sideHeadingClass}>บัญชี</p>
               {utilityNavItems.map((item) => (
                 <NavLink
                   className={({ isActive }) =>
                     `flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-black transition ${
-                      isActive ? 'bg-amber-500 text-white shadow-[0_14px_28px_rgba(245,158,11,0.2)]' : 'text-slate-600 hover:bg-slate-100'
+                      isActive ? 'bg-amber-500 text-white shadow-[0_14px_28px_rgba(245,158,11,0.2)]' : utilityInactiveNavClass
                     }`
                   }
                   key={item.to}
@@ -290,13 +329,13 @@ function App() {
               ))}
             </div>
 
-            <div className="my-3 border-t border-slate-900/10 pt-3">
-              <p className="mb-2 px-3 text-[11px] font-black tracking-widest text-slate-400 uppercase">ผู้ดูแล</p>
+            <div className={sideDividerClass}>
+              <p className={sideHeadingClass}>ผู้ดูแล</p>
               {adminNavItems.map((item) => (
                 <NavLink
                   className={({ isActive }) =>
                     `flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-black transition ${
-                      isActive ? 'bg-slate-950 text-white shadow-[0_14px_28px_rgba(15,23,42,0.18)]' : 'text-slate-600 hover:bg-slate-100'
+                      isActive ? adminActiveClass : adminInactiveNavClass
                     }`
                   }
                   key={item.to}
@@ -311,11 +350,11 @@ function App() {
               ))}
             </div>
 
-            <div className="mt-auto rounded-2xl border border-slate-900/10 bg-slate-50 p-3 shadow-sm">
-              <p className="m-0 text-[11px] font-black tracking-widest text-slate-400 uppercase">สถานะวันนี้</p>
+            <div className={statusPanelClass}>
+              <p className={statusLabelClass}>สถานะวันนี้</p>
               <div className="mt-3 grid gap-2">
                 <NavLink
-                  className="flex min-h-9 items-center justify-between rounded-xl bg-white px-3 text-xs font-black text-slate-600 transition hover:bg-slate-100"
+                  className={statusRowClass}
                   to="/events"
                 >
                   <span className="inline-flex items-center gap-2">
@@ -325,7 +364,7 @@ function App() {
                   <span className="text-amber-700">{eventCount.toLocaleString()}</span>
                 </NavLink>
                 <NavLink
-                  className="flex min-h-9 items-center justify-between rounded-xl bg-white px-3 text-xs font-black text-slate-600 transition hover:bg-slate-100"
+                  className={statusRowClass}
                   to="/wallet"
                 >
                   <span className="inline-flex items-center gap-2">
@@ -336,7 +375,7 @@ function App() {
                 </NavLink>
               </div>
               <NavLink
-                className="mt-3 inline-flex min-h-9 w-full items-center justify-center rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-100"
+                className={statusActionClass}
                 to="/admin/health"
               >
                 ตรวจความพร้อม
@@ -348,12 +387,12 @@ function App() {
         <section className="min-w-0 pb-24 md:pb-0">{appRoutes}</section>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-slate-900/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden">
+      <nav className={bottomNavClass}>
         {primaryNavItems.map((item) => (
           <NavLink
             className={({ isActive }) =>
               `flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-black ${
-                isActive ? 'bg-orange-500 text-white' : 'text-slate-500'
+                isActive ? 'bg-orange-500 text-white' : bottomInactiveNavClass
               }`
             }
             end={item.to === '/'}
