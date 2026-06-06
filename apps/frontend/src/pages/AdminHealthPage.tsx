@@ -25,7 +25,7 @@ function StatusPill({ ok }: { ok: boolean }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black ${
-        ok ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'
+        ok ? 'border border-emerald-300/25 bg-emerald-400/12 text-emerald-100' : 'border border-amber-300/25 bg-amber-400/12 text-amber-100'
       }`}
     >
       {ok ? <CheckCircle2 size={14} /> : <CircleAlert size={14} />}
@@ -35,10 +35,10 @@ function StatusPill({ ok }: { ok: boolean }) {
 }
 
 function auditStatusClass(status: RouteMenuAuditStatus) {
-  if (status === 'ready') return 'bg-emerald-50 text-emerald-800'
-  if (status === 'guarded') return 'bg-sky-50 text-sky-800'
-  if (status === 'needs-staging') return 'bg-amber-50 text-amber-900'
-  return 'bg-slate-100 text-slate-700'
+  if (status === 'ready') return 'border border-emerald-300/25 bg-emerald-400/12 text-emerald-100'
+  if (status === 'guarded') return 'border border-sky-300/25 bg-sky-400/12 text-sky-100'
+  if (status === 'needs-staging') return 'border border-amber-300/25 bg-amber-400/12 text-amber-100'
+  return 'border border-white/10 bg-white/7 text-white/65'
 }
 
 function checkScopeLabel(scope: DeployCheck['scope']) {
@@ -48,9 +48,9 @@ function checkScopeLabel(scope: DeployCheck['scope']) {
 }
 
 function checkScopeClass(scope: DeployCheck['scope']) {
-  if (scope === 'local') return 'bg-emerald-50 text-emerald-800'
-  if (scope === 'frontend') return 'bg-sky-50 text-sky-800'
-  return 'bg-amber-50 text-amber-900'
+  if (scope === 'local') return 'border border-emerald-300/25 bg-emerald-400/12 text-emerald-100'
+  if (scope === 'frontend') return 'border border-sky-300/25 bg-sky-400/12 text-sky-100'
+  return 'border border-amber-300/25 bg-amber-400/12 text-amber-100'
 }
 
 function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
@@ -353,25 +353,25 @@ export function AdminHealthPage() {
   const refreshDisabledReason = isLoading ? 'กำลังโหลดสถานะระบบ' : ''
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 lg:p-8">
-      <section className="rounded-2xl border border-slate-900/10 bg-white p-5 shadow-sm">
+    <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
+      <section className="rounded-lg border border-white/10 bg-[#18181d]/92 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
-            <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-slate-500 uppercase">
+            <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
               <ShieldCheck size={16} />
               ตรวจระบบผู้ดูแล
             </p>
-            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-slate-950 sm:text-3xl">
+            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-white sm:text-3xl">
               ตรวจความพร้อมก่อนสเตจจิง/โปรดักชัน
             </h1>
-            <p className="m-0 mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className="m-0 mt-2 max-w-3xl text-sm font-bold leading-6 text-white/58">
               หน้านี้รวมสถานะระบบหลังบ้าน ค่าแวดล้อม Supabase พื้นที่เก็บรูปแบบ signed URL ผู้ให้บริการสร้างรูป และการตรวจเส้นทาง/เมนู
               เพื่อกันปุ่มหลอกหรือ config พลาดก่อน deploy จริง
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-3 lg:w-auto">
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60"
               aria-disabled={isLoading}
               data-testid="admin-health-refresh"
               disabled={isLoading}
@@ -383,24 +383,24 @@ export function AdminHealthPage() {
               รีเฟรช
             </button>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
               to="/admin/prompt-inspector"
             >
               ตรวจพรอมป์
             </Link>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
               to="/admin/evals"
             >
               ทดสอบคุณภาพ
             </Link>
           </div>
         </div>
-        {note && <p className="m-0 mt-4 rounded-xl bg-slate-50 p-3 text-sm font-bold text-slate-600">{note}</p>}
+        {note && <p className="m-0 mt-4 rounded-lg border border-white/10 bg-white/7 p-3 text-sm font-bold text-white/70">{note}</p>}
       </section>
 
       <section className="grid gap-3 md:grid-cols-3">
-        <article className="rounded-2xl border border-emerald-500/20 bg-emerald-50 p-4 text-emerald-950">
+        <article className="rounded-lg border border-emerald-300/25 bg-emerald-400/10 p-4 text-emerald-100">
           <p className="m-0 text-xs font-black tracking-widest uppercase">ความพร้อมเครื่องนี้</p>
           <p className="m-0 mt-2 text-2xl font-black">
             {localReadyCount}/{localChecks.length}
@@ -409,7 +409,7 @@ export function AdminHealthPage() {
             {localReadyCount === localChecks.length ? 'ระบบในเครื่องพร้อมทดสอบ flow หลักแล้ว' : 'ยังมีค่าพื้นฐานในเครื่องที่ต้องแก้ก่อน QA'}
           </p>
         </article>
-        <article className="rounded-2xl border border-amber-500/20 bg-amber-50 p-4 text-amber-950">
+        <article className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-amber-100">
           <p className="m-0 text-xs font-black tracking-widest uppercase">ด่านก่อนโปรดักชัน</p>
           <p className="m-0 mt-2 text-2xl font-black">
             {productionReadyCount}/{productionChecks.length}
@@ -420,7 +420,7 @@ export function AdminHealthPage() {
               : `ยังค้าง ${productionBlockers.map((check) => check.label).join(', ')}`}
           </p>
         </article>
-        <article className="rounded-2xl border border-sky-500/20 bg-sky-50 p-4 text-sky-950">
+        <article className="rounded-lg border border-sky-300/25 bg-sky-400/10 p-4 text-sky-100">
           <p className="m-0 text-xs font-black tracking-widest uppercase">ด่าน QA</p>
           <p className="m-0 mt-2 text-2xl font-black">qa:full</p>
           <p className="m-0 mt-1 text-sm font-bold leading-6">
@@ -429,27 +429,27 @@ export function AdminHealthPage() {
         </article>
       </section>
 
-      <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
+      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="m-0 text-sm font-black text-slate-950">ลำดับงานก่อนปล่อยจริง</p>
-            <p className="m-0 mt-1 text-xs font-bold text-slate-400">
+            <p className="m-0 text-sm font-black text-white">ลำดับงานก่อนปล่อยจริง</p>
+            <p className="m-0 mt-1 text-xs font-bold text-white/45">
               แยกสิ่งที่ต้องปิดก่อนสเตจจิง ออกจาก smoke ผู้ให้บริการจริงและด่านโปรดักชัน
             </p>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
+          <span className="rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-black text-white/65">
             สเตจจิง → ทดสอบจริง → โปรดักชัน
           </span>
         </div>
         <div className="grid gap-3 lg:grid-cols-3">
           {deployPhaseSteps.map((step) => (
-            <article className="rounded-xl border border-slate-900/10 bg-slate-50 p-3" key={step.title}>
+            <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={step.title}>
               <div className="flex items-start justify-between gap-3">
-                <p className="m-0 text-sm font-black text-slate-950">{step.title}</p>
+                <p className="m-0 text-sm font-black text-white">{step.title}</p>
                 <StatusPill ok={step.ok} />
               </div>
-              <p className="m-0 mt-2 text-xs font-bold leading-5 text-slate-500">{step.detail}</p>
-              <code className="mt-3 block min-h-9 rounded-lg bg-white px-2 py-2 text-[11px] font-black leading-5 text-slate-700">
+              <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/52">{step.detail}</p>
+              <code className="mt-3 block min-h-9 rounded-lg border border-white/10 bg-black/22 px-2 py-2 text-[11px] font-black leading-5 text-white/70">
                 {step.command}
               </code>
             </article>
@@ -458,8 +458,8 @@ export function AdminHealthPage() {
       </section>
 
       <section
-        className={`rounded-2xl border p-4 shadow-sm ${
-          productionReady ? 'border-emerald-500/20 bg-emerald-50 text-emerald-950' : 'border-amber-500/25 bg-amber-50 text-amber-950'
+        className={`rounded-lg border p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)] ${
+          productionReady ? 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100' : 'border-amber-300/25 bg-amber-400/10 text-amber-100'
         }`}
       >
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
@@ -471,7 +471,7 @@ export function AdminHealthPage() {
                 : `ยังค้าง ${productionBlockers.length} ข้อก่อน deploy จริง แก้ตามรายการนี้ก่อนค่อยรันด่านโปรดักชันซ้ำ`}
             </p>
           </div>
-          <code className="inline-flex min-h-9 items-center rounded-xl bg-white/75 px-3 text-xs font-black text-slate-800 shadow-sm">
+          <code className="inline-flex min-h-9 items-center rounded-lg border border-white/10 bg-black/22 px-3 text-xs font-black text-white/75 shadow-sm">
             bun run production:check
           </code>
         </div>
@@ -479,15 +479,15 @@ export function AdminHealthPage() {
         {!productionReady && (
           <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
             {productionBlockers.map((check) => (
-              <article className="rounded-xl border border-amber-900/10 bg-white/70 p-3" key={check.label}>
+              <article className="rounded-lg border border-amber-300/25 bg-black/18 p-3" key={check.label}>
                 <div className="flex items-start justify-between gap-3">
-                  <p className="m-0 text-sm font-black text-amber-950">{check.label}</p>
+                  <p className="m-0 text-sm font-black text-amber-50">{check.label}</p>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-black ${checkScopeClass(check.scope)}`}>
                     {checkScopeLabel(check.scope)}
                   </span>
                 </div>
-                <p className="m-0 mt-2 text-xs font-bold leading-5 text-amber-900/80">{check.detail}</p>
-                <p className="m-0 mt-2 rounded-lg bg-white/70 p-2 text-xs font-black leading-5 text-amber-950">
+                <p className="m-0 mt-2 text-xs font-bold leading-5 text-amber-100/70">{check.detail}</p>
+                <p className="m-0 mt-2 rounded-lg border border-white/10 bg-white/7 p-2 text-xs font-black leading-5 text-amber-50">
                   ขั้นต่อไป: {check.action}
                 </p>
               </article>
@@ -496,32 +496,32 @@ export function AdminHealthPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
+      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
+            <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
               <ShieldCheck size={17} />
               สถานะความปลอดภัย CIA / AAA
             </p>
-            <p className="m-0 mt-1 text-xs font-bold text-slate-400">
+            <p className="m-0 mt-1 text-xs font-bold text-white/45">
               พร้อมแล้ว {postureReadyCount}/{postureRows.length} หมวด
             </p>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
+          <span className="rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-black text-white/65">
             ความลับ / ความถูกต้อง / ความพร้อมใช้งาน + ยืนยันตัวตน / สิทธิ์ / Audit
           </span>
         </div>
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           {postureRows.map((row) => (
-            <article className="rounded-xl border border-slate-900/10 bg-slate-50 p-3" key={row.key}>
+            <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={row.key}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-black text-slate-500">{row.group}</span>
-                  <p className="m-0 mt-2 text-sm font-black text-slate-950">{row.label}</p>
+                  <span className="rounded-full border border-white/10 bg-black/22 px-2 py-0.5 text-[11px] font-black text-white/55">{row.group}</span>
+                  <p className="m-0 mt-2 text-sm font-black text-white">{row.label}</p>
                 </div>
                 <StatusPill ok={row.ok} />
               </div>
-              <p className="m-0 mt-2 text-xs font-bold leading-5 text-slate-500">{row.detail}</p>
+              <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/52">{row.detail}</p>
             </article>
           ))}
         </div>
@@ -530,35 +530,35 @@ export function AdminHealthPage() {
       <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
         <SystemStatus healthStatus={healthStatus} isLoading={isLoading} onRefresh={loadHealth} />
 
-        <section className="rounded-2xl border border-slate-900/10 bg-white p-4 shadow-sm">
+        <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="m-0 flex items-center gap-2 text-sm font-black text-slate-950">
+              <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
                 <Activity size={17} />
                 เช็กลิสต์ deploy
               </p>
-              <p className="m-0 mt-1 text-xs font-bold text-slate-400">
+              <p className="m-0 mt-1 text-xs font-bold text-white/45">
                 พร้อมแล้ว {readyCount}/{deployChecks.length} ข้อ
               </p>
             </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
+            <span className="rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-black text-white/65">
               API: {API_BASE_URL}
             </span>
           </div>
           <div className="grid gap-2 md:grid-cols-2">
             {deployChecks.map((check) => (
-              <article className="rounded-xl border border-slate-900/10 bg-slate-50 p-3" key={check.label}>
+              <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={check.label}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="m-0 text-sm font-black text-slate-950">{check.label}</p>
+                    <p className="m-0 text-sm font-black text-white">{check.label}</p>
                     <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-black ${checkScopeClass(check.scope)}`}>
                       {checkScopeLabel(check.scope)}
                     </span>
                   </div>
                   <StatusPill ok={check.ok} />
                 </div>
-                <p className="m-0 mt-2 text-xs font-bold leading-5 text-slate-500">{check.detail}</p>
-                <p className="m-0 mt-2 rounded-lg bg-white p-2 text-xs font-black leading-5 text-slate-700">
+                <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/52">{check.detail}</p>
+                <p className="m-0 mt-2 rounded-lg border border-white/10 bg-black/22 p-2 text-xs font-black leading-5 text-white/70">
                   ขั้นต่อไป: {check.action}
                 </p>
               </article>
@@ -567,21 +567,21 @@ export function AdminHealthPage() {
         </section>
       </div>
 
-      <section className="rounded-2xl border border-slate-900/10 bg-white shadow-sm">
-        <div className="flex flex-col gap-2 border-b border-slate-900/10 p-4 sm:flex-row sm:items-end sm:justify-between">
+      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="flex flex-col gap-2 border-b border-white/10 p-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="m-0 text-sm font-black text-slate-950">ตรวจเส้นทาง/เมนู</p>
-            <p className="m-0 mt-1 text-xs font-bold text-slate-400">
+            <p className="m-0 text-sm font-black text-white">ตรวจเส้นทาง/เมนู</p>
+            <p className="m-0 mt-1 text-xs font-bold text-white/45">
               ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็นด่านสเตจจิงหรือฟีเจอร์เผื่ออนาคต
             </p>
           </div>
-          <span className="inline-flex min-h-9 items-center justify-center rounded-xl border border-slate-900/10 bg-white px-3 text-xs font-black text-slate-700">
+          <span className="inline-flex min-h-9 items-center justify-center rounded-lg border border-white/10 bg-white/7 px-3 text-xs font-black text-white/65">
             STAGING_RUNBOOK.md
           </span>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-[980px] w-full border-collapse text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-black text-slate-500">
+            <thead className="bg-white/5 text-xs font-black text-white/48">
               <tr>
                 <th className="px-4 py-3">พื้นที่</th>
                 <th className="px-4 py-3">เส้นทาง</th>
@@ -592,15 +592,15 @@ export function AdminHealthPage() {
                 <th className="px-4 py-3">สถานะ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-900/10">
+            <tbody className="divide-y divide-white/10">
               {routeMenuAuditRows.map((row) => (
-                <tr className="align-top" key={`${row.area}-${row.route}`}>
-                  <td className="px-4 py-3 font-black text-slate-950">{row.area}</td>
-                  <td className="px-4 py-3 font-mono text-xs font-bold text-slate-500">{row.route}</td>
-                  <td className="px-4 py-3 font-bold leading-6 text-slate-700">{row.control}</td>
-                  <td className="px-4 py-3 leading-6 text-slate-600">{row.result}</td>
-                  <td className="px-4 py-3 leading-6 text-slate-600">{row.disabledReason}</td>
-                  <td className="px-4 py-3 leading-6 text-slate-600">{row.emptyState}</td>
+                <tr className="align-top hover:bg-white/4" key={`${row.area}-${row.route}`}>
+                  <td className="px-4 py-3 font-black text-white">{row.area}</td>
+                  <td className="px-4 py-3 font-mono text-xs font-bold text-white/45">{row.route}</td>
+                  <td className="px-4 py-3 font-bold leading-6 text-white/70">{row.control}</td>
+                  <td className="px-4 py-3 leading-6 text-white/58">{row.result}</td>
+                  <td className="px-4 py-3 leading-6 text-white/58">{row.disabledReason}</td>
+                  <td className="px-4 py-3 leading-6 text-white/58">{row.emptyState}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-black ${auditStatusClass(row.status)}`}>
                       {routeMenuAuditStatusLabel(row.status)}
@@ -613,9 +613,9 @@ export function AdminHealthPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+      <section className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
         <p className="m-0 font-black">ด่านสเตจจิงก่อนโปรดักชัน</p>
-        <p className="m-0 mt-1">
+        <p className="m-0 mt-1 font-bold text-amber-100/78">
           ใช้ Supabase project จริงสำหรับสเตจจิง, bucket avatars แบบ private + signed URL, ระบบหลังบ้านบน Render/Railway,
           โดเมนหน้าบ้านทดลอง, CORS โดเมนจริง แล้วรัน `bun run qa:full` และ `bun run production:check` กับ URL สเตจจิง
           ก่อนปล่อยโปรดักชัน

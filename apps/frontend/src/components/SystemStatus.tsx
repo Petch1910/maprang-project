@@ -63,15 +63,15 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
   const refreshDisabledReason = isLoading ? 'กำลังโหลดสถานะระบบ' : ''
 
   return (
-    <section className="rounded-lg border border-slate-900/10 bg-white p-4 shadow-[0_20px_60px_rgba(61,79,112,0.08)]">
+    <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase">ระบบ</p>
-          <h2 className="m-0 text-lg font-bold text-slate-900">สถานะ</h2>
+          <p className="mb-1 text-xs font-bold tracking-widest text-white/42 uppercase">ระบบ</p>
+          <h2 className="m-0 text-lg font-bold text-white">สถานะ</h2>
         </div>
         <button type="button"
           aria-disabled={isLoading}
-          className="min-h-8 rounded-full border border-slate-900/10 bg-white px-3 text-xs font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-55"
+          className="min-h-8 rounded-full border border-white/10 bg-white/7 px-3 text-xs font-bold text-white/70 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
           data-testid="system-status-refresh"
           disabled={isLoading}
           onClick={onRefresh}
@@ -81,7 +81,7 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
         </button>
       </div>
 
-      <div className="flex flex-col gap-2 text-sm font-bold text-slate-600">
+      <div className="flex flex-col gap-2 text-sm font-bold text-white/62">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2">
             <Dot ok={Boolean(checks?.databaseConfigured)} />
@@ -148,8 +148,8 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
       </div>
 
       {healthStatus?.model && (
-        <div className="mt-3 rounded-lg bg-slate-50 p-3 text-xs font-bold text-slate-500">
-          <div className="truncate text-slate-700">{healthStatus.model.name}</div>
+        <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-3 text-xs font-bold text-white/52">
+          <div className="truncate text-white/78">{healthStatus.model.name}</div>
           <div className="mt-1 flex flex-wrap gap-2">
             <span>ขาเข้า ${healthStatus.model.inputCostPer1M}/1M</span>
             <span>ขาออก ${healthStatus.model.outputCostPer1M}/1M</span>
@@ -185,13 +185,13 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
       )}
 
       {healthStatus?.env && healthStatus.env.missingRecommended.length > 0 && (
-        <p className="mt-3 mb-0 line-clamp-3 text-xs leading-relaxed text-slate-500">
+        <p className="mt-3 mb-0 line-clamp-3 text-xs font-bold leading-relaxed text-white/52">
           ค่าระบบแนะนำที่ยังขาด: {healthStatus.env.missingRecommended.join(', ')}
         </p>
       )}
 
       {healthStatus?.env && (healthStatus.env.missingRequired.length > 0 || (healthStatus.env.invalid?.length ?? 0) > 0) && (
-        <div className="mt-3 rounded-lg border border-rose-500/20 bg-rose-50 p-3 text-xs leading-relaxed text-rose-800">
+        <div className="mt-3 rounded-lg border border-rose-300/25 bg-rose-400/10 p-3 text-xs leading-relaxed text-rose-100">
           <p className="m-0 font-black">ค่าระบบใช้งานจริงยังไม่พร้อม</p>
           {healthStatus.env.missingRequired.length > 0 && <p className="m-0 mt-1">ขาด: {healthStatus.env.missingRequired.join(', ')}</p>}
           {(healthStatus.env.invalid?.length ?? 0) > 0 && <p className="m-0 mt-1">ผิดค่า: {healthStatus.env.invalid?.join(', ')}</p>}
@@ -199,14 +199,14 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
       )}
 
       {frontendWarnings.length > 0 && (
-        <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">
+        <div className="mt-3 rounded-lg border border-amber-300/25 bg-amber-400/10 p-3 text-xs leading-relaxed text-amber-100">
           <p className="m-0 font-black">ค่าหน้าเว็บควรตรวจเพิ่ม</p>
           <p className="m-0 mt-1">{frontendWarnings.join(' / ')}</p>
         </div>
       )}
 
       {structuredKnowledge && !structuredKnowledge.ok && (
-        <div className="mt-3 rounded-lg border border-rose-500/20 bg-rose-50 p-3 text-xs leading-relaxed text-rose-800">
+        <div className="mt-3 rounded-lg border border-rose-300/25 bg-rose-400/10 p-3 text-xs leading-relaxed text-rose-100">
           <p className="m-0 font-black">คลังความรู้ต้องแก้ไข</p>
           <p className="m-0 mt-1">
             {[...structuredKnowledge.missing.map((name) => `ขาด ${name}`), ...structuredKnowledge.errors].join(' / ') ||
@@ -216,7 +216,7 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
       )}
 
       {healthStatus?.databaseError && (
-        <p className="mt-3 mb-0 line-clamp-3 text-xs leading-relaxed text-amber-700">{healthStatus.databaseError}</p>
+        <p className="mt-3 mb-0 line-clamp-3 text-xs font-bold leading-relaxed text-amber-100/78">{healthStatus.databaseError}</p>
       )}
     </section>
   )
