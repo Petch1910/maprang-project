@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
+
+- 2026-06-06 mobile chat header QA pass: Chat mobile header no longer squeezes title/status/actions into one fixed 64px row. The UI now keeps read/report visible, moves secondary actions into a three-dot mobile menu, and renders relationship/status chips under the title on small screens. Verification passed with Browser plugin desktop route render and no console warnings/errors; Playwright mobile screenshot/interaction confirmed `chat-composer-input`, `chat-read-mode`, `chat-report-character`, `chat-mobile-actions`, and `chat-mobile-open-wallet` hooks. Docker/Postgres was restarted, `prisma migrate deploy` had no pending migrations, QA seed restored demo data, `bun run frontend:check` passed, `bun run e2e:smoke` passed 4/4 desktop+mobile, and full `bun run qa:local` passed with backend tests 180 pass / 769 expects and API smoke 34 pass / 2 live-provider skips.
 
 - 2026-06-05 full deterministic repo QA pass after relationship/creator preset hardening: repo QA gate passed with secrets clean, memory audit 38 Markdown files, knowledge audit 12 files / 5 structured packs, docs command audit 408 refs, test coverage audit 60 test files / 33 root scripts, eval 3 scenarios, import-cycle audit 125 files / 296 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 180 pass / 769 expects, frontend static/route audit, production build, and bundle budget green.
 

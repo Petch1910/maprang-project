@@ -1,6 +1,8 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
+
+- 2026-06-06: Mobile Chat header polish is closed. `ChatPanel` now uses an auto-height header, compact mobile icon buttons, relationship/status chips below the title on small screens, and a solid three-dot mobile action menu for secondary chat actions. Browser plugin rendered the desktop chat route with no console warnings/errors, Playwright fallback captured mobile screenshots, and the mobile menu opened with composer/read/report/action hooks present. Docker Desktop/Postgres was restarted, migrations had no pending changes, QA seed restored 3 characters / 13 chats / 1 report / 2 token transactions, `/health` returned `ok=true`, `bun run e2e:smoke` passed 4/4 on desktop+mobile, and `bun run qa:local` passed with backend tests 180 pass / 769 expects plus API smoke 34 pass / 2 live-provider skips. External blockers remain deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
 
 - 2026-06-05: Full deterministic repo QA passed after the relationship/creator preset hardening sequence. Current highlights: secrets clean, memory audit 38 Markdown files, knowledge audit 12 files / 5 structured packs, docs command audit 408 refs, test coverage audit 60 test files / 33 root scripts, eval 3 scenarios, import-cycle audit 125 files / 296 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 180 pass / 769 expects, frontend static/route audit, production build, and bundle budget green. External blockers remain deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
 

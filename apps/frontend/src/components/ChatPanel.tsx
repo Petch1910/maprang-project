@@ -11,6 +11,7 @@ import {
   Image,
   MapPin,
   Menu,
+  MoreHorizontal,
   MessageSquare,
   Music,
   Settings,
@@ -820,6 +821,7 @@ export function ChatPanel({
   const hasAvatarBackdrop = Boolean(character.avatarUrl)
   const isSceneMode = runtimeState?.sceneState.mode === 'scene'
   const [isReadMode, setIsReadMode] = useState(false)
+  const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false)
   const isLowToken = !isWalletLoading && tokenBalance <= 250
   const isOutOfTokens = !isWalletLoading && tokenBalance <= 0
   const visibleMessages = useMemo(
@@ -832,11 +834,17 @@ export function ChatPanel({
   const hasUserTurn = visibleMessages.some((chat) => chat.role === 'user')
   const showIntro = !hasUserTurn && visibleMessages.length <= 2
   const readingWidthClass = isReadMode ? 'max-w-[700px]' : 'max-w-[820px]'
+  const relationshipLabel = relationshipStatusLabel(runtimeState?.relationshipState.status)
+  const relationshipTier = relationshipTierLabel(runtimeState?.relationshipState.tier)
+
+  useEffect(() => {
+    setIsMobileActionsOpen(false)
+  }, [character.id, chatId])
 
   return (
     <section className="grid h-svh min-w-0 grid-cols-1 overflow-hidden bg-[#0c0c0f] lg:grid-cols-[minmax(0,1fr)_300px]">
       <div
-        className={`relative grid min-h-0 grid-rows-[64px_1fr_auto] overflow-hidden transition duration-300 ${isSceneMode ? 'shadow-[inset_0_0_0_9999px_rgba(0,0,0,0.22)]' : ''}`}
+        className={`relative grid min-h-0 grid-rows-[auto_1fr_auto] overflow-hidden transition duration-300 ${isSceneMode ? 'shadow-[inset_0_0_0_9999px_rgba(0,0,0,0.22)]' : ''}`}
         style={{
           backgroundImage: hasAvatarBackdrop
             ? `linear-gradient(90deg,rgba(7,7,9,0.88),rgba(7,7,9,0.38) 48%,rgba(7,7,9,0.84)), linear-gradient(180deg,rgba(0,0,0,0.36),rgba(0,0,0,0.82)), url(${backdropUrl})`
@@ -848,74 +856,149 @@ export function ChatPanel({
         <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_72%,rgba(0,0,0,0.42))]" />
         <div className="pointer-events-none absolute inset-x-10 top-20 z-0 h-px bg-linear-to-r from-transparent via-white/14 to-transparent" />
 
-        <header className="relative z-20 flex items-center gap-3 border-b border-white/8 bg-black/28 px-4 backdrop-blur-2xl">
+        <header className="relative z-20 flex min-h-16 items-center gap-2 border-b border-white/8 bg-black/30 px-3 py-2 backdrop-blur-2xl sm:gap-3 sm:px-4">
           <button type="button"
             aria-label="เปิดเมนูแชท"
-            className="grid size-10 place-items-center rounded-lg border border-white/10 bg-black/35 text-white md:hidden"
+            className="grid size-9 flex-none place-items-center rounded-lg border border-white/10 bg-black/35 text-white md:hidden"
             data-testid="chat-mobile-menu"
             onClick={onOpenMenu}
             title="เปิดเมนู"
           >
-            <Menu size={19} />
+            <Menu size={18} />
           </button>
           {character.avatarUrl ? (
-            <img alt="" className="size-10 rounded-xl object-cover ring-1 ring-white/20" src={character.avatarUrl} />
+            <img alt="" className="size-9 flex-none rounded-xl object-cover ring-1 ring-white/20 sm:size-10" src={character.avatarUrl} />
           ) : (
-            <div className="grid size-10 place-items-center rounded-xl border border-white/12 bg-linear-to-br from-indigo-500 via-violet-600 to-fuchsia-500 text-sm font-black">
+            <div className="grid size-9 flex-none place-items-center rounded-xl border border-white/12 bg-linear-to-br from-indigo-500 via-violet-600 to-fuchsia-500 text-sm font-black sm:size-10">
               {characterInitial(character.name)}
             </div>
           )}
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-2">
-              <h1 className="m-0 truncate text-sm font-black text-white">{character.name}</h1>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-black text-white/70">
-                {relationshipStatusLabel(runtimeState?.relationshipState.status)}
+              <h1 className="m-0 min-w-0 truncate text-sm font-black text-white">{character.name}</h1>
+              <span className="hidden max-w-[9rem] truncate rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-black text-white/70 sm:inline-flex">
+                {relationshipLabel}
               </span>
             </div>
             <p className="m-0 mt-0.5 truncate text-xs text-white/45">
               {chatId ? 'แชทที่บันทึกไว้' : 'แชทใหม่'} · {compactSceneLabel(runtimeState)}
             </p>
+            <div className="mt-1 flex min-w-0 items-center gap-1.5 sm:hidden">
+              <span className="max-w-[8rem] truncate rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black text-white/72">
+                {relationshipLabel}
+              </span>
+              <span className="max-w-[8rem] truncate rounded-full bg-orange-400/12 px-2 py-0.5 text-[10px] font-black text-orange-100/78">
+                {relationshipTier}
+              </span>
+            </div>
           </div>
-          <button type="button"
-            aria-label="เริ่มแชทใหม่"
-            className="grid size-9 place-items-center rounded-lg text-white/55 hover:bg-white/8 hover:text-white"
-            data-testid="chat-start-new"
-            onClick={onStartNewChat}
-            title="แชทใหม่"
-          >
-            <MessageSquare size={18} />
-          </button>
-          <button
-            type="button"
-            aria-label={isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
-            aria-pressed={isReadMode}
-            className={`grid size-9 place-items-center rounded-lg transition ${
-              isReadMode ? 'bg-orange-500/18 text-orange-100' : 'text-white/55 hover:bg-white/8 hover:text-white'
-            }`}
-            data-testid="chat-read-mode"
-            onClick={() => setIsReadMode((value) => !value)}
-            title={isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
-          >
-            <BookOpen size={18} />
-          </button>
-          <button type="button"
-            aria-label="รายงานตัวละคร"
-            className="grid size-9 place-items-center rounded-lg text-white/55 hover:bg-white/8 hover:text-white"
-            data-testid="chat-report-character"
-            onClick={onReportCharacter}
-            title="รายงานตัวละคร"
-          >
-            <Flag size={18} />
-          </button>
-          <button type="button"
-            aria-label="เปิดโปรไฟล์ตัวละคร"
-            className="grid size-9 place-items-center rounded-lg text-white/55 hover:bg-white/8 hover:text-white"
-            data-testid="chat-open-character"
-            onClick={onOpenCharacterProfile}
-            title="เปิดโปรไฟล์ตัวละคร"
-          >
-            <UserRound size={18} />
-          </button>
+          <div className="flex flex-none items-center gap-1">
+            <button type="button"
+              aria-label="เริ่มแชทใหม่"
+              className="hidden size-9 place-items-center rounded-lg text-white/55 hover:bg-white/8 hover:text-white sm:grid"
+              data-testid="chat-start-new"
+              onClick={onStartNewChat}
+              title="แชทใหม่"
+            >
+              <MessageSquare size={18} />
+            </button>
+            <button
+              type="button"
+              aria-label={isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
+              aria-pressed={isReadMode}
+              className={`grid size-8 place-items-center rounded-lg transition sm:size-9 ${
+                isReadMode ? 'bg-orange-500/18 text-orange-100' : 'text-white/55 hover:bg-white/8 hover:text-white'
+              }`}
+              data-testid="chat-read-mode"
+              onClick={() => setIsReadMode((value) => !value)}
+              title={isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
+            >
+              <BookOpen size={17} />
+            </button>
+            <button type="button"
+              aria-label="รายงานตัวละคร"
+              className="grid size-8 place-items-center rounded-lg text-white/55 hover:bg-white/8 hover:text-white sm:size-9"
+              data-testid="chat-report-character"
+              onClick={onReportCharacter}
+              title="รายงานตัวละคร"
+            >
+              <Flag size={17} />
+            </button>
+            <button type="button"
+              aria-label="เปิดโปรไฟล์ตัวละคร"
+              className="hidden size-9 place-items-center rounded-lg text-white/55 hover:bg-white/8 hover:text-white sm:grid"
+              data-testid="chat-open-character"
+              onClick={onOpenCharacterProfile}
+              title="เปิดโปรไฟล์ตัวละคร"
+            >
+              <UserRound size={18} />
+            </button>
+            <div className="relative sm:hidden">
+              <button
+                aria-expanded={isMobileActionsOpen}
+                aria-label="เปิดคำสั่งแชทเพิ่มเติม"
+                className="grid size-8 place-items-center rounded-lg text-white/58 hover:bg-white/8 hover:text-white"
+                data-testid="chat-mobile-actions"
+                onClick={() => setIsMobileActionsOpen((value) => !value)}
+                title="คำสั่งเพิ่มเติม"
+                type="button"
+              >
+                <MoreHorizontal size={18} />
+              </button>
+              {isMobileActionsOpen && (
+                <div className="absolute right-0 top-10 z-30 w-52 rounded-xl border border-white/10 bg-[#15151a] p-1.5 text-sm font-bold text-white shadow-[0_20px_70px_rgba(0,0,0,0.65)]">
+                  <button
+                    className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-left text-white/76 hover:bg-white/8 hover:text-white"
+                    data-testid="chat-mobile-start-new"
+                    onClick={() => {
+                      setIsMobileActionsOpen(false)
+                      onStartNewChat()
+                    }}
+                    type="button"
+                  >
+                    <MessageSquare size={16} />
+                    แชทใหม่
+                  </button>
+                  <button
+                    className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-left text-white/76 hover:bg-white/8 hover:text-white"
+                    data-testid="chat-mobile-open-character"
+                    onClick={() => {
+                      setIsMobileActionsOpen(false)
+                      onOpenCharacterProfile()
+                    }}
+                    type="button"
+                  >
+                    <UserRound size={16} />
+                    โปรไฟล์ตัวละคร
+                  </button>
+                  <button
+                    className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-left text-white/76 hover:bg-white/8 hover:text-white"
+                    data-testid="chat-mobile-open-chats"
+                    onClick={() => {
+                      setIsMobileActionsOpen(false)
+                      onOpenChats()
+                    }}
+                    type="button"
+                  >
+                    <MessageSquare size={16} />
+                    แชททั้งหมด
+                  </button>
+                  <button
+                    className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-left text-white/76 hover:bg-white/8 hover:text-white"
+                    data-testid="chat-mobile-open-wallet"
+                    onClick={() => {
+                      setIsMobileActionsOpen(false)
+                      onOpenWallet()
+                    }}
+                    type="button"
+                  >
+                    <Coins size={16} />
+                    กระเป๋าโทเคน
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </header>
 
         <div className="relative z-10 min-h-0 overflow-y-auto px-3 pb-6 pt-5 sm:px-6">
