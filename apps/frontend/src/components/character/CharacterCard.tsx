@@ -118,11 +118,13 @@ export function CharacterCard({
 
         {/* Favorite Button */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation()
             // TODO: Toggle favorite
           }}
           className="absolute right-3 top-3 rounded-full bg-black/30 p-2 backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110"
+          aria-label="ถูกใจ"
         >
           <Heart className="h-4 w-4 text-white" />
         </button>

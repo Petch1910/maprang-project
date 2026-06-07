@@ -59,6 +59,7 @@ export function CategorySection({
 
         {onSeeAll && (
           <button
+            type="button"
             onClick={onSeeAll}
             className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
           >
@@ -94,9 +95,10 @@ export function CategorySection({
         {/* Left Scroll Button */}
         {showLeftButton && (
           <button
+            type="button"
             onClick={() => scroll('left')}
             className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-slate-800/90 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-slate-700/90 hover:scale-110"
-            aria-label="Scroll left"
+            aria-label="เลื่อนซ้าย"
           >
             <ChevronLeft className="h-5 w-5 text-slate-300" />
           </button>
@@ -105,9 +107,10 @@ export function CategorySection({
         {/* Right Scroll Button */}
         {showRightButton && (
           <button
+            type="button"
             onClick={() => scroll('right')}
             className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-slate-800/90 p-2 shadow-lg backdrop-blur-sm transition-all hover:bg-slate-700/90 hover:scale-110"
-            aria-label="Scroll right"
+            aria-label="เลื่อนขวา"
           >
             <ChevronRight className="h-5 w-5 text-slate-300" />
           </button>
