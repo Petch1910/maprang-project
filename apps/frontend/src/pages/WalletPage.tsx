@@ -47,8 +47,12 @@ function transactionLabel(type: NonNullable<UsageSummary['wallet']>['transaction
     PROMOTION: 'โปรโมชัน',
     PURCHASE: 'เติมโทเคน',
     REFUND: 'คืนโทเคน',
+    DAILY_LOGIN: 'เข้าสู่ระบบประจำวัน',
+    ACHIEVEMENT: 'รางวัลความสำเร็จ',
+    PENALTY: 'หักโทเคน',
+    EXPIRY: 'โทเคนหมดอายุ',
   }
-  return labels[type]
+  return labels[type] || type
 }
 
 export function WalletPage() {
