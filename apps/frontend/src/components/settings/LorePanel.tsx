@@ -239,6 +239,7 @@ export function LorePanel({
             <div className="space-y-2 p-4 pt-0">
               {/* Add Lore Button */}
               <button
+                type="button"
                 onClick={onAddLore}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 py-3 text-sm text-slate-400 transition-colors hover:border-purple-500 hover:text-purple-400"
               >
@@ -272,14 +273,18 @@ export function LorePanel({
                         {/* Actions */}
                         <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                           <button
+                            type="button"
                             onClick={() => onEditLore?.(entry.id)}
                             className="rounded p-1 hover:bg-slate-600/50"
+                            aria-label="แก้ไข"
                           >
                             <Edit2 className="h-3 w-3 text-slate-400" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => onDeleteLore?.(entry.id)}
                             className="rounded p-1 hover:bg-slate-600/50"
+                            aria-label="ลบ"
                           >
                             <Trash2 className="h-3 w-3 text-red-400" />
                           </button>
