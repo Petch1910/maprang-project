@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Calendar, Gift, Zap, AlertCircle, Coins } from 'lucide-react'
-import { logUnexpectedError, readApiJson } from '../lib/api'
+import { logUnexpectedError } from '../lib/api'
+import { claimDailyLogin } from '../lib/componentApi'
 import { toast } from './Toast'
 
 interface DailyLoginButtonProps {
@@ -15,14 +16,7 @@ export function DailyLoginButton({ onClaim }: DailyLoginButtonProps) {
     setClaiming(true)
 
     try {
-      const response = await fetch('/api/user/me/daily-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const data = await readApiJson(response)
+      const data = await claimDailyLogin()
 
       if (data.rewarded) {
         toast.success(data.message, 5000)
