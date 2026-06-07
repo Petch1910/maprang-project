@@ -14,7 +14,7 @@ const quietLogger: E2eSmokeLogger = {
 }
 
 describe('e2e smoke command plan', () => {
-  test('runs seed, Playwright, then seed restore in order', () => {
+  test('runs seed, Playwright, then QA cleanup in order', () => {
     expect(e2eSmokeSteps()).toEqual([
       {
         label: 'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
@@ -25,8 +25,8 @@ describe('e2e smoke command plan', () => {
         command: ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'],
       },
       {
-        label: 'คืนข้อมูล QA: คืน demo data หลังตรวจเบราว์เซอร์',
-        command: ['bun', 'run', 'qa:seed'],
+        label: 'ล้างข้อมูล QA: ลบ seed ทดสอบหลังตรวจเบราว์เซอร์',
+        command: ['bun', 'run', 'qa:clear'],
         alwaysRun: true,
       },
     ])
@@ -88,7 +88,7 @@ describe('e2e smoke command plan', () => {
     }
   })
 
-  test('restores demo seed data after Playwright failure', async () => {
+  test('cleans QA seed data after Playwright failure', async () => {
     const calls: string[] = []
 
     const exitCode = await runE2eSmoke(
@@ -103,7 +103,7 @@ describe('e2e smoke command plan', () => {
     expect(calls).toEqual([
       'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
       'ตรวจเบราว์เซอร์ Playwright: ตรวจ routes บนเดสก์ท็อปและมือถือ',
-      'คืนข้อมูล QA: คืน demo data หลังตรวจเบราว์เซอร์',
+      'ล้างข้อมูล QA: ลบ seed ทดสอบหลังตรวจเบราว์เซอร์',
     ])
   })
 

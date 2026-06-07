@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-platform-prompt-management": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/agent-platform-prompt-management/SKILL.md",
+      "computedHash": "28a3e4af09ce9b16d45e7b513c7d222a23cd65434fdbe77c8e41f8afe197082d"
+    },
+    "agent-platform-rag-engine-management": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/agent-platform-rag-engine-management/SKILL.md",
+      "computedHash": "3183cf20fe0ad48ac2d3047611902cfe7260f9df6769f917ffbe5ae141442219"
+    },
+    "firebase-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/firebase-basics/SKILL.md",
+      "computedHash": "08f2141b439feae6dfda3588b7fea5ffa1f7fd19e0cb8f12b8fbeb71da650b43"
+    },
+    "google-cloud-recipe-auth": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/google-cloud-recipe-auth/SKILL.md",
+      "computedHash": "90d9d648f587f2ca9b8b5f817df5844298b998c3ef03793cb3dc8807f104f084"
+    }
+  }
+}

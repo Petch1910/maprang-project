@@ -41,7 +41,7 @@ function errorMessage(error: unknown) {
 }
 
 function transactionLabel(type: NonNullable<UsageSummary['wallet']>['transactions'][number]['type']) {
-  const labels: Record<NonNullable<UsageSummary['wallet']>['transactions'][number]['type'], string> = {
+  const labels = {
     CHAT_USAGE: 'ใช้แชท AI',
     ADMIN_ADJUSTMENT: 'ผู้ดูแลปรับยอด',
     PROMOTION: 'โปรโมชัน',
@@ -51,8 +51,8 @@ function transactionLabel(type: NonNullable<UsageSummary['wallet']>['transaction
     ACHIEVEMENT: 'รางวัลความสำเร็จ',
     PENALTY: 'หักโทเคน',
     EXPIRY: 'โทเคนหมดอายุ',
-  }
-  return labels[type] || type
+  } as const
+  return labels[type as keyof typeof labels] || type
 }
 
 export function WalletPage() {

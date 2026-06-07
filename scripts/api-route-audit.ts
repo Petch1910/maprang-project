@@ -74,6 +74,46 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['smoke', 'live-smoke', 'backend-test'],
     note: 'api-smoke ตรวจเนื้อหาร่าง; smoke:image:live ตรวจผู้ให้บริการสร้างรูปจริงเมื่อวงเงินและโควตาพร้อม',
   },
+  'POST /creator/preview-chat': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'creator-preview.service.test.ts ตรวจการทดสอบตัวละครก่อนเผยแพร่',
+  },
+  'GET /creator/scenarios': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'scenario-templates.test.ts ตรวจ template สำหรับทดสอบตัวละคร',
+  },
+  'GET /creator/scenarios/categories': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'scenario-templates.test.ts ตรวจรายการ category',
+  },
+  'GET /creator/scenarios/category/:category': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'scenario-templates.test.ts ตรวจ filter ตาม category',
+  },
+  'GET /creator/scenarios/difficulty/:difficulty': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'scenario-templates.test.ts ตรวจ filter ตามระดับความยาก',
+  },
+  'GET /creator/scenarios/preset/basic': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'scenario-templates.test.ts ตรวจชุดทดสอบพื้นฐาน 4 สถานการณ์',
+  },
+  'GET /creator/scenarios/preset/comprehensive': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'scenario-templates.test.ts ตรวจชุดทดสอบครบถ้วน 11 สถานการณ์',
+  },
+  'GET /creator/scenarios/:scenarioId': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'scenario-templates.test.ts ตรวจการเรียก scenario เฉพาะ',
+  },
   'GET /relationship/presets': {
     owner: 'relationship',
     coverage: ['smoke', 'backend-test'],

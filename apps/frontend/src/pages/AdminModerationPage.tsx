@@ -16,6 +16,7 @@ import {
   type ReportSummary,
   type ReportTargetType,
 } from '../lib/api'
+import { canShowQaSeedData, isQaSeedCharacterId, isQaSeedChatId } from '../lib/qaSeedVisibility'
 import { safeErrorTextForClassification } from '../lib/safeError'
 import { safeGetStorageItem } from '../lib/safeStorage'
 
@@ -97,6 +98,13 @@ function reportTargetPath(report: ReportSummary) {
   return null
 }
 
+function isQaSeedReport(report: ReportSummary) {
+  if (isQaSeedCharacterId(report.characterId)) return true
+  if (isQaSeedChatId(report.message?.chatId)) return true
+  if (report.details?.includes('QA seed')) return true
+  return false
+}
+
 function auditActionLabel(action: AdminAuditLog['action']) {
   const labels: Record<AdminAuditLog['action'], string> = {
     REPORT_STATUS_UPDATE: 'เปลี่ยนสถานะรายงาน',
@@ -164,10 +172,11 @@ export function AdminModerationPage() {
     setIsLoading(true)
     try {
       const data = await fetchAdminReports({ status, targetType, limit: 80 })
-      setReports(data.reports)
+      const visibleReports = canShowQaSeedData() ? data.reports : data.reports.filter((report) => !isQaSeedReport(report))
+      setReports(visibleReports)
       const auditData = await fetchAdminAuditLogs(12)
       setAuditLogs(auditData.logs)
-      setNote(data.reports.length > 0 ? `โหลดรายงานแล้ว ${data.reports.length} รายการ` : 'ไม่มีรายงานที่ตรงกับตัวกรองนี้')
+      setNote(visibleReports.length > 0 ? `โหลดรายงานแล้ว ${visibleReports.length} รายการ` : 'ไม่มีรายงานที่ตรงกับตัวกรองนี้')
     } catch (error) {
       if (!isExpectedAdminAuthError(error)) logUnexpectedError('โหลดคิวรายงานผู้ดูแลไม่สำเร็จ:', error)
       setReports([])

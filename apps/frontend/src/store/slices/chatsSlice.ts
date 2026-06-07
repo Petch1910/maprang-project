@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import { fetchChats, type ChatSummary } from '../../lib/api'
+import { isVisibleChatSummary } from '../../lib/qaSeedVisibility'
 import type { ChatsState, RootState } from '../types'
 
 const initialState: ChatsState = {
@@ -42,7 +43,8 @@ export function isPlayableChatSummary(chat: ChatSummary) {
     title === 'message report guard' ||
     title.startsWith('reply with a very short') ||
     preview.includes('only the chat owner should be able to report') ||
-    preview.includes('reply with a very short thai greeting')
+    preview.includes('reply with a very short thai greeting') ||
+    !isVisibleChatSummary(chat)
   )
 }
 

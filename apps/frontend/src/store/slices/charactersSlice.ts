@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { fetchCharacters, type CharacterListFilters } from '../../lib/api'
+import { filterVisibleCharacters } from '../../lib/qaSeedVisibility'
 import type { CharactersState, RootState } from '../types'
 
 const initialState: CharactersState = {
@@ -12,7 +13,7 @@ export const loadExploreCharacters = createAsyncThunk(
   'characters/loadExplore',
   async (filters: CharacterListFilters = {}) => {
     const data = await fetchCharacters({ view: 'public', sort: 'popular', limit: 24, ...filters })
-    return data.characters ?? []
+    return filterVisibleCharacters(data.characters ?? [])
   },
 )
 

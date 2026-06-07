@@ -5,7 +5,6 @@ import { modelName, modelMaxOutputTokens, modelTemperature, chatProviderRetryAtt
 import { buildContextPrompt, loadRelevantLore, promptControlPolicy, type LoreForContext } from './context.service'
 import { estimatePromptTokens } from './prompt-inspector.service'
 import { redactSensitiveText } from './redaction'
-import { buildRelationshipPrompt, type RelationshipState } from './relationship.engine'
 
 const openRouter = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
@@ -91,13 +90,7 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
   // Build relationship context if provided
   let relationshipContext = ''
   if (input.relationshipSeed) {
-    const mockRelationship: RelationshipState = {
-      contract: input.relationshipSeed,
-      current: input.relationshipSeed,
-      momentum: 'neutral',
-      history: [],
-    }
-    relationshipContext = buildRelationshipPrompt(mockRelationship)
+    relationshipContext = `\n\nความสัมพันธ์: ${input.relationshipSeed}`
   }
 
   // Build user persona context
@@ -131,7 +124,7 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
         totalTokens: estimatedTokens + mockReply.length,
       },
       prompt: {
-        system: redactSensitiveText(systemPrompt),
+        system: redactSensitiveText(systemPrompt).text,
         user: userPrompt,
         estimatedTokens,
       },
@@ -164,7 +157,7 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
         totalTokens: usage?.total_tokens || estimatedTokens,
       },
       prompt: {
-        system: redactSensitiveText(systemPrompt),
+        system: redactSensitiveText(systemPrompt).text,
         user: userPrompt,
         estimatedTokens,
       },
@@ -185,7 +178,7 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
         totalTokens: estimatedTokens + mockReply.length,
       },
       prompt: {
-        system: redactSensitiveText(systemPrompt),
+        system: redactSensitiveText(systemPrompt).text,
         user: userPrompt,
         estimatedTokens,
       },

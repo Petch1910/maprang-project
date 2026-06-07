@@ -4,6 +4,15 @@ import { defaultUserId } from './config'
 import { clampMaxRating, normalizeMaxRating } from './content-rating'
 import { generateCreatorDraft, getCreatorDraft, saveCreatorDraft } from './creator-draft.service'
 import { previewCharacterChat } from './creator-preview.service'
+import {
+  scenarioTemplates,
+  getScenariosByCategory,
+  getScenariosByDifficulty,
+  getScenarioById,
+  getAllCategories,
+  getBasicTestScenarios,
+  getComprehensiveTestScenarios,
+} from './scenario-templates'
 import { requireDatabase } from './db'
 import {
   createCharacter,
@@ -129,17 +138,17 @@ export const characterRoutes = new Elysia()
     async ({ body }) => {
       const result = await previewCharacterChat({
         name: body.name,
-        description: body.description,
-        biography: body.biography,
-        scenario: body.scenario,
+        description: body.description ?? undefined,
+        biography: body.biography ?? undefined,
+        scenario: body.scenario ?? undefined,
         systemPrompt: body.systemPrompt,
-        compactPrompt: body.compactPrompt,
-        characterAnchor: body.characterAnchor,
-        constraints: body.constraints,
-        greeting: body.greeting,
+        compactPrompt: body.compactPrompt ?? undefined,
+        characterAnchor: body.characterAnchor ?? undefined,
+        constraints: body.constraints ?? undefined,
+        greeting: body.greeting ?? undefined,
         userMessage: body.userMessage,
-        userPersona: body.userPersona,
-        relationshipSeed: body.relationshipSeed,
+        userPersona: body.userPersona ?? undefined,
+        relationshipSeed: body.relationshipSeed ?? undefined,
         skipProvider: body.skipProvider,
       })
       return { preview: result }
@@ -162,6 +171,32 @@ export const characterRoutes = new Elysia()
       }),
     },
   )
+  .get('/creator/scenarios', () => ({ scenarios: scenarioTemplates }))
+  .get('/creator/scenarios/categories', () => ({ categories: getAllCategories() }))
+  .get('/creator/scenarios/category/:category', ({ params }) => ({
+    scenarios: getScenariosByCategory(params.category as any),
+  }), {
+    params: t.Object({
+      category: t.String(),
+    }),
+  })
+  .get('/creator/scenarios/difficulty/:difficulty', ({ params }) => ({
+    scenarios: getScenariosByDifficulty(params.difficulty as any),
+  }), {
+    params: t.Object({
+      difficulty: t.Union([t.Literal('easy'), t.Literal('medium'), t.Literal('hard')]),
+    }),
+  })
+  .get('/creator/scenarios/preset/basic', () => ({ scenarios: getBasicTestScenarios() }))
+  .get('/creator/scenarios/preset/comprehensive', () => ({ scenarios: getComprehensiveTestScenarios() }))
+  .get('/creator/scenarios/:scenarioId', ({ params }) => {
+    const scenario = getScenarioById(params.scenarioId)
+    return scenario ? { scenario } : { scenario: null }
+  }, {
+    params: t.Object({
+      scenarioId: t.String(),
+    }),
+  })
   .get('/relationship/presets', ({ query }) => ({ presets: listRelationshipPresets(query.surface) }), {
     query: t.Object({
       surface: t.Optional(t.Union([t.Literal('contract'), t.Literal('creator')])),
