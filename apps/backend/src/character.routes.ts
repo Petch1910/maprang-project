@@ -189,12 +189,12 @@ export const characterRoutes = new Elysia()
   })
   .get('/creator/scenarios/preset/basic', () => ({ scenarios: getBasicTestScenarios() }))
   .get('/creator/scenarios/preset/comprehensive', () => ({ scenarios: getComprehensiveTestScenarios() }))
-  .get('/creator/scenarios/:id', ({ params }) => {
-    const scenario = getScenarioById(params.id)
+  .get('/creator/scenarios/:scenarioId', ({ params }) => {
+    const scenario = getScenarioById(params.scenarioId)
     return scenario ? { scenario } : { scenario: null }
   }, {
     params: t.Object({
-      id: t.String(),
+      scenarioId: t.String(),
     }),
   })
   .get('/relationship/presets', ({ query }) => ({ presets: listRelationshipPresets(query.surface) }), {
