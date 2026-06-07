@@ -1,4 +1,4 @@
-import type { CharacterWithTags } from './character.service'
+import type { CharacterWithTags } from './character.types'
 
 export type RelationshipStats = {
   affinity: number
@@ -42,6 +42,12 @@ export type RelationshipPreset = {
   name: string
   description: string
   tags: string[]
+}
+
+export type RelationshipPresetSurface = 'contract' | 'creator'
+
+export type RelationshipPresetResponse = RelationshipPreset & {
+  surfaces: RelationshipPresetSurface[]
 }
 
 export type RelationshipState = RelationshipStats & {
@@ -91,6 +97,7 @@ const DEFAULT_MULTIPLIERS: RelationshipMultipliers = {
 const DISCOVERY_TAGS = new Set([
   'thai',
   'assistant',
+  'roleplay',
   'original',
   'anime',
   'manga',
@@ -104,6 +111,7 @@ const DISCOVERY_TAGS = new Set([
   'thriller',
   'drama',
   'slice-of-life',
+  'slow-burn',
   'historical-thai',
   'medieval',
   'utopia',
@@ -114,6 +122,126 @@ const DISCOVERY_TAGS = new Set([
 ])
 
 export const RELATIONSHIP_PRESETS: RelationshipPreset[] = [
+  {
+    id: 'stranger',
+    name: 'คนแปลกหน้า',
+    description: 'ยังไม่รู้จักกัน ระวังตัวแต่มีพื้นที่ให้เริ่มใหม่',
+    tags: ['stranger'],
+  },
+  {
+    id: 'enemy',
+    name: 'ศัตรู',
+    description: 'เริ่มจากแรงต้านสูง ไม่ไว้ใจ และพร้อมปะทะ',
+    tags: ['enemy', 'hard-to-get'],
+  },
+  {
+    id: 'disliked',
+    name: 'ไม่ถูกกัน',
+    description: 'ไม่ถึงขั้นศัตรู แต่คุยแล้วติดขัด มีอคติและระยะห่าง',
+    tags: ['disliked', 'guarded'],
+  },
+  {
+    id: 'rival',
+    name: 'คู่ปรับ',
+    description: 'มีการแข่งขัน เคารพกันบางส่วน แต่ยังไม่ยอมลงให้กัน',
+    tags: ['rival', 'hard-to-get'],
+  },
+  {
+    id: 'bickering-rival',
+    name: 'คู่กัด',
+    description: 'ปะทะด้วยคำพูด หยอกแรง แต่ยังมีช่องให้สนิทขึ้น',
+    tags: ['bickering-rival', 'tsundere'],
+  },
+  {
+    id: 'acquaintance',
+    name: 'คนรู้จัก',
+    description: 'รู้จักกันผิวเผิน ไว้ใจต่ำแต่ไม่ตึงเกินไป',
+    tags: ['acquaintance'],
+  },
+  {
+    id: 'friend',
+    name: 'เพื่อน',
+    description: 'เริ่มจากความเป็นมิตร คุยง่ายและไว้ใจกันระดับหนึ่ง',
+    tags: ['friend', 'green-flag'],
+  },
+  {
+    id: 'close-friend',
+    name: 'เพื่อนสนิท',
+    description: 'สนิทและสบายใจ เหมาะกับ slow-burn หรือ comfort roleplay',
+    tags: ['close-friend', 'green-flag'],
+  },
+  {
+    id: 'ride-or-die',
+    name: 'เพื่อนตาย',
+    description: 'ไว้ใจกันมาก ผ่านอะไรมาด้วยกัน และพร้อมยืนข้างกัน',
+    tags: ['ride-or-die', 'loyal', 'green-flag'],
+  },
+  {
+    id: 'crush',
+    name: 'แอบชอบ',
+    description: 'มีแรงดึงดูดซ่อนอยู่ เขิน ระวังตัว และยังไม่กล้าพูดตรง ๆ',
+    tags: ['crush', 'shy', 'slow-burn'],
+  },
+  {
+    id: 'friend-crush',
+    name: 'เพื่อนสนิทคิดไม่ซื่อ',
+    description: 'สนิทมากแต่มีความรู้สึกเกินเพื่อนซ่อนอยู่',
+    tags: ['friend-crush', 'close-friend', 'crush', 'slow-burn'],
+  },
+  {
+    id: 'dating-trial',
+    name: 'ลองคุย',
+    description: 'กำลังเปิดใจทดลองคุย ยังไม่ผูกมัดและยังวัดใจกันอยู่',
+    tags: ['dating-trial', 'slow-burn', 'romance'],
+  },
+  {
+    id: 'talking-stage',
+    name: 'คนคุย',
+    description: 'ใกล้กว่าแค่ลองคุย มีความคาดหวังและแรงดึงดูดชัดขึ้น',
+    tags: ['talking-stage', 'romance'],
+  },
+  {
+    id: 'partner',
+    name: 'แฟน',
+    description: 'อยู่ในความสัมพันธ์แล้ว มีความใกล้ชิดและความคาดหวังร่วมกัน',
+    tags: ['partner', 'romance'],
+  },
+  {
+    id: 'toxic-partner',
+    name: 'แฟน Toxic',
+    description: 'มีแรงดึงดูดสูงแต่ trust ต่ำ ควรเล่นด้วยความตึงและระวังใจ',
+    tags: ['toxic-partner', 'red-flag', 'romance'],
+  },
+  {
+    id: 'lover',
+    name: 'คนรัก',
+    description: 'รักกันชัดเจน อบอุ่น ลึกซึ้ง และพร้อมมีฉากความสัมพันธ์สำคัญ',
+    tags: ['lover', 'romance', 'green-flag'],
+  },
+  {
+    id: 'life-partner',
+    name: 'คู่ชีวิต',
+    description: 'ผูกพันระยะยาว เชื่อใจกันสูง และมีเป้าหมายร่วมกัน',
+    tags: ['life-partner', 'romance', 'loyal'],
+  },
+  {
+    id: 'spouse',
+    name: 'คู่ครอง',
+    description: 'สถานะผูกมัดแบบคู่ครอง มีประวัติร่วมกันและความรับผิดชอบร่วมกัน',
+    tags: ['spouse', 'romance', 'loyal'],
+  },
+  {
+    id: 'toxic-spouse',
+    name: 'คู่ครอง Toxic',
+    description: 'ผูกมัดแต่มีแรงกดดันสูง trust เสียหาย และมี red flag ชัด',
+    tags: ['toxic-spouse', 'red-flag', 'romance'],
+  },
+  {
+    id: 'soulmate',
+    name: 'คู่แท้',
+    description: 'ผูกพันสูงมาก ไว้ใจลึก และเหมาะกับ payoff/commitment arc',
+    tags: ['soulmate', 'romance', 'green-flag', 'loyal'],
+  },
   {
     id: 'hidden-enemy-crush',
     name: 'ศัตรูที่แอบสนใจ',
@@ -146,14 +274,128 @@ export const RELATIONSHIP_PRESETS: RelationshipPreset[] = [
   },
 ]
 
+const RELATIONSHIP_CONTRACT_PRESET_IDS = new Set([
+  'stranger',
+  'enemy',
+  'disliked',
+  'rival',
+  'bickering-rival',
+  'acquaintance',
+  'friend',
+  'close-friend',
+  'ride-or-die',
+  'crush',
+  'friend-crush',
+  'dating-trial',
+  'talking-stage',
+  'partner',
+  'toxic-partner',
+  'lover',
+  'life-partner',
+  'spouse',
+  'toxic-spouse',
+  'soulmate',
+])
+
+const RELATIONSHIP_CREATOR_PRESET_IDS = new Set(RELATIONSHIP_PRESETS.map((preset) => preset.id).filter((id) => id !== 'stranger'))
+
+function relationshipPresetSurfaces(id: string): RelationshipPresetSurface[] {
+  const surfaces: RelationshipPresetSurface[] = []
+  if (RELATIONSHIP_CONTRACT_PRESET_IDS.has(id)) surfaces.push('contract')
+  if (RELATIONSHIP_CREATOR_PRESET_IDS.has(id)) surfaces.push('creator')
+  return surfaces
+}
+
+export function listRelationshipPresets(surface?: RelationshipPresetSurface): RelationshipPresetResponse[] {
+  return RELATIONSHIP_PRESETS.map((preset) => ({
+    ...preset,
+    surfaces: relationshipPresetSurfaces(preset.id),
+  })).filter((preset) => (surface ? preset.surfaces.includes(surface) : true))
+}
+
 const TAG_RULES: Record<string, TagRule> = {
+  stranger: { kind: 'engine', status: 'NEUTRAL', flags: ['early_distance'] },
   enemy: { kind: 'engine', offsets: { affinity: -80, trust: -60, respect: -10 }, status: 'ENEMY', flags: ['hostile'] },
+  disliked: { kind: 'engine', offsets: { affinity: -55, trust: -25, respect: -5 }, status: 'DISLIKED', flags: ['guarded'] },
   rival: { kind: 'engine', offsets: { affinity: -30, trust: -15, respect: 25 }, status: 'RIVAL', flags: ['competitive'] },
+  'bickering-rival': {
+    kind: 'engine',
+    offsets: { affinity: -25, trust: -5, respect: 15 },
+    status: 'BICKERING_RIVAL',
+    flags: ['competitive', 'banter_tension'],
+  },
+  acquaintance: { kind: 'engine', offsets: { affinity: 10, trust: 10 }, status: 'ACQUAINTANCE', flags: ['early_distance'] },
   friend: { kind: 'engine', offsets: { affinity: 45, trust: 45, respect: 15 }, status: 'FRIEND', flags: ['friendly'] },
-  'close-friend': { kind: 'engine', offsets: { affinity: 70, trust: 70, intimacy: 10 }, status: 'FRIEND' },
-  lover: { kind: 'engine', offsets: { affinity: 100, trust: 75, intimacy: 40 }, status: 'LOVER', route: 'romance' },
+  'close-friend': { kind: 'engine', offsets: { affinity: 70, trust: 70, intimacy: 10 }, status: 'CLOSE_FRIEND', flags: ['friendly'] },
+  'ride-or-die': {
+    kind: 'engine',
+    offsets: { affinity: 110, trust: 120, intimacy: 25, respect: 55 },
+    status: 'RIDE_OR_DIE',
+    flags: ['absolute_trust', 'protective'],
+  },
+  partner: { kind: 'engine', offsets: { affinity: 110, trust: 80, intimacy: 45 }, status: 'PARTNER', route: 'romance' },
+  lover: { kind: 'engine', offsets: { affinity: 120, trust: 90, intimacy: 50 }, status: 'LOVER', route: 'romance' },
+  'toxic-partner': {
+    kind: 'engine',
+    offsets: { affinity: 80, trust: -40, intimacy: 35, dominance: 35, fear: 35 },
+    status: 'TOXIC_PARTNER',
+    route: 'romance',
+    flags: ['red_flag', 'toxic_bond'],
+    constraints: ['slow_progression'],
+  },
+  'life-partner': {
+    kind: 'engine',
+    offsets: { affinity: 140, trust: 130, intimacy: 55, respect: 70 },
+    status: 'LIFE_PARTNER',
+    route: 'romance',
+    flags: ['stable_commitment'],
+  },
+  spouse: {
+    kind: 'engine',
+    offsets: { affinity: 130, trust: 120, intimacy: 55, respect: 60 },
+    status: 'SPOUSE',
+    route: 'romance',
+    flags: ['formal_commitment'],
+  },
+  'toxic-spouse': {
+    kind: 'engine',
+    offsets: { affinity: 110, trust: -55, intimacy: 45, dominance: 45, fear: 45 },
+    status: 'TOXIC_SPOUSE',
+    route: 'romance',
+    flags: ['red_flag', 'toxic_bond', 'formal_commitment'],
+    constraints: ['slow_progression'],
+  },
+  soulmate: {
+    kind: 'engine',
+    offsets: { affinity: 170, trust: 150, intimacy: 65, respect: 90 },
+    status: 'SOULMATE',
+    route: 'romance',
+    flags: ['soulmate', 'stable_commitment'],
+  },
   ex: { kind: 'engine', offsets: { affinity: -15, trust: -35, intimacy: 25 }, status: 'COMPLICATED', flags: ['unfinished_business'] },
   crush: { kind: 'engine', offsets: { affinity: 35, trust: 5 }, status: 'CRUSH', route: 'romance', flags: ['hidden_feelings'] },
+  'friend-crush': {
+    kind: 'engine',
+    offsets: { affinity: 80, trust: 65, intimacy: 18 },
+    status: 'FRIEND_CRUSH',
+    route: 'romance',
+    flags: ['hidden_feelings', 'friendship_tension'],
+  },
+  'dating-trial': {
+    kind: 'engine',
+    offsets: { affinity: 75, trust: 45, intimacy: 20 },
+    status: 'DATING_TRIAL',
+    route: 'romance',
+    flags: ['tentative_romance'],
+  },
+  'talking-stage': {
+    kind: 'engine',
+    offsets: { affinity: 90, trust: 55, intimacy: 28 },
+    status: 'TALKING_STAGE',
+    route: 'romance',
+    flags: ['almost_relationship'],
+  },
+  guarded: { kind: 'engine', offsets: { trust: -15 }, multipliers: { trustGain: 0.75 }, flags: ['guarded'] },
   tsundere: { kind: 'engine', offsets: { affinity: -10, trust: -10 }, multipliers: { affinityGain: 0.7 }, flags: ['guarded'] },
   kuudere: { kind: 'engine', offsets: { trust: -20, respect: 10 }, multipliers: { affinityGain: 0.6, trustGain: 0.8 }, flags: ['reserved'] },
   cold: { kind: 'engine', offsets: { affinity: -20, trust: -15 }, multipliers: { affinityGain: 0.4, trustGain: 0.7 }, flags: ['distant'] },
@@ -181,6 +423,8 @@ const TAG_RULES: Record<string, TagRule> = {
 }
 
 const TAG_ALIASES: Record<string, string> = {
+  'บทบาทสมมุติ': 'roleplay',
+  'ไทย': 'thai',
   '18+': 'nc',
   adult: 'nc',
   mature: 'nc',
@@ -188,13 +432,45 @@ const TAG_ALIASES: Record<string, string> = {
   smut: 'nc',
   spicy: 'nc',
   'ศัตรู': 'enemy',
+  'ไม่ถูกกัน': 'disliked',
   'คู่แข่ง': 'rival',
+  'คู่ปรับ': 'rival',
+  'คู่กัด': 'bickering-rival',
+  'คนรู้จัก': 'acquaintance',
   'เพื่อน': 'friend',
   'เพื่อนสนิท': 'close-friend',
-  'แฟน': 'lover',
+  'เพื่อนตาย': 'ride-or-die',
+  'แฟน': 'partner',
   'แฟนเก่า': 'ex',
+  'แฟน toxic': 'toxic-partner',
+  'แฟนtoxic': 'toxic-partner',
   'แอบรัก': 'crush',
+  'แอบชอบ': 'crush',
   'คนที่ชอบ': 'crush',
+  'เพื่อนสนิทคิดไม่ซื่อ': 'friend-crush',
+  'ลองคุย': 'dating-trial',
+  'คนคุย': 'talking-stage',
+  'คนรัก': 'lover',
+  'คู่ชีวิต': 'life-partner',
+  'คู่ครอง': 'spouse',
+  'คู่ครอง toxic': 'toxic-spouse',
+  'คู่ครองtoxic': 'toxic-spouse',
+  'คู่แท้': 'soulmate',
+  dislike: 'disliked',
+  'not-getting-along': 'disliked',
+  acquaintance: 'acquaintance',
+  'best-friend': 'close-friend',
+  'ride-or-die': 'ride-or-die',
+  'friend-crush': 'friend-crush',
+  'friends-to-lovers': 'friend-crush',
+  'dating-trial': 'dating-trial',
+  'talking-stage': 'talking-stage',
+  partner: 'partner',
+  'toxic-partner': 'toxic-partner',
+  'life-partner': 'life-partner',
+  spouse: 'spouse',
+  'toxic-spouse': 'toxic-spouse',
+  soulmate: 'soulmate',
   'รักต้องห้าม': 'no-romance',
   'ครอบครัว': 'family',
   'พ่อ': 'family',
@@ -313,11 +589,44 @@ function tierFromStats(stats: RelationshipStats) {
   return 'breaking-positive'
 }
 
+const SPECIFIC_STATUS_STICKY = new Set([
+  'DISLIKED',
+  'BICKERING_RIVAL',
+  'ACQUAINTANCE',
+  'CLOSE_FRIEND',
+  'RIDE_OR_DIE',
+  'FRIEND_CRUSH',
+  'DATING_TRIAL',
+  'TALKING_STAGE',
+  'PARTNER',
+  'TOXIC_PARTNER',
+  'LIFE_PARTNER',
+  'SPOUSE',
+  'TOXIC_SPOUSE',
+  'SOULMATE',
+])
+
+const ROMANTIC_ENGINE_TAGS = new Set([
+  'crush',
+  'friend-crush',
+  'dating-trial',
+  'talking-stage',
+  'partner',
+  'toxic-partner',
+  'lover',
+  'life-partner',
+  'spouse',
+  'toxic-spouse',
+  'soulmate',
+])
+
 function statusFromStats(stats: RelationshipStats, constraints: string[], fallback = 'NEUTRAL') {
   if (constraints.includes('no_romance') && fallback === 'FAMILY') return 'FAMILY'
   if (stats.fear >= 150 && stats.trust <= -60) return 'TRAUMA'
+  if (SPECIFIC_STATUS_STICKY.has(fallback) && stats.affinity > -90 && stats.trust > -90) return fallback
   if (stats.affinity >= 150 && stats.trust >= 100 && !constraints.includes('no_romance')) return 'DEVOTED'
   if (stats.affinity >= 120 && stats.trust >= 80 && !constraints.includes('no_romance')) return 'LOVER'
+  if (stats.affinity >= 90 && stats.trust >= 80) return 'CLOSE_FRIEND'
   if (stats.affinity >= 60 && stats.trust >= 40) return 'FRIEND'
   if (stats.affinity <= -80 || stats.trust <= -80) return 'ENEMY'
   if (stats.affinity < -20) return 'RIVAL'
@@ -377,10 +686,16 @@ function relationshipEvents(stats: RelationshipStats, constraints: string[], fla
 
 function arcStageFromState(route: string, status: string, tier: string) {
   if (status === 'TRAUMA' || tier === 'breaking-negative') return 'crisis'
-  if (status === 'ENEMY' || status === 'RIVAL') return route === 'romance' ? 'tension' : 'conflict'
-  if (status === 'FRIEND') return 'bond-building'
-  if (status === 'LOVER') return 'commitment-test'
-  if (status === 'DEVOTED') return 'payoff'
+  if (status === 'ENEMY' || status === 'DISLIKED' || status === 'RIVAL' || status === 'BICKERING_RIVAL') {
+    return route === 'romance' ? 'tension' : 'conflict'
+  }
+  if (status === 'ACQUAINTANCE') return 'getting-to-know'
+  if (status === 'FRIEND' || status === 'CLOSE_FRIEND' || status === 'RIDE_OR_DIE') return 'bond-building'
+  if (status === 'CRUSH' || status === 'FRIEND_CRUSH') return 'hidden-feelings'
+  if (status === 'DATING_TRIAL' || status === 'TALKING_STAGE') return 'testing-chemistry'
+  if (status === 'PARTNER' || status === 'LOVER' || status === 'LIFE_PARTNER' || status === 'SPOUSE') return 'commitment-test'
+  if (status === 'TOXIC_PARTNER' || status === 'TOXIC_SPOUSE') return 'volatile-bond'
+  if (status === 'DEVOTED' || status === 'SOULMATE') return 'payoff'
   if (tier === 'warming') return 'opening-up'
   return route === 'romance' ? 'slow-burn' : 'setup'
 }
@@ -395,15 +710,22 @@ function promptProfileForState(state: {
   normalized: RelationshipStats
 }) {
   const lines = [
-    `Status is ${state.status}; tier is ${state.tier}; tone should read as ${state.tone}.`,
-    state.tone === 'warm' ? 'Behavior: softer wording, more willingness to share, gentle curiosity.' : '',
-    state.tone === 'guarded' ? 'Behavior: cautious, short trust tests, avoids immediate vulnerability.' : '',
-    state.tone === 'hostile' ? 'Behavior: tense, defensive, may challenge the user without breaking character.' : '',
-    state.tone === 'fearful' ? 'Behavior: careful compliance, visible unease, does not become instantly affectionate.' : '',
-    state.flags.includes('high_difficulty') ? 'Progression: affection and trust should rise slowly; make earned moments feel meaningful.' : '',
-    state.flags.includes('unfinished_business') ? 'Narrative: unresolved history may surface through subtext, hesitation, or pointed questions.' : '',
-    state.constraints.includes('no_romance') ? 'Constraint: block romance/intimacy escalation and redirect to safe relationship dynamics.' : '',
-    state.events.length > 0 ? `Active hooks: ${state.events.map((event) => event.code).join(', ')}.` : '',
+    `สถานะคือ ${state.status}; tier คือ ${state.tier}; โทนควรอ่านเป็น ${state.tone}.`,
+    state.tone === 'warm' ? 'พฤติกรรม: ใช้ถ้อยคำนุ่มขึ้น พร้อมแบ่งปันมากขึ้น และมีความอยากรู้อย่างอ่อนโยน' : '',
+    state.tone === 'guarded' ? 'พฤติกรรม: ระวังตัว ทดสอบความไว้ใจสั้น ๆ และเลี่ยงการเปราะบางทันที' : '',
+    state.tone === 'hostile' ? 'พฤติกรรม: ตึง ป้องกันตัว อาจท้าทายผู้ใช้โดยไม่หลุดคาแรกเตอร์' : '',
+    state.tone === 'fearful' ? 'พฤติกรรม: ยอมตามอย่างระวัง มีความไม่สบายใจให้เห็น และไม่กลายเป็นอบอุ่นทันที' : '',
+    state.flags.includes('high_difficulty') ? 'จังหวะพัฒนา: ความรักและความไว้ใจควรเพิ่มช้า ทำให้ช่วงที่ได้มารู้สึกมีความหมาย' : '',
+    state.flags.includes('unfinished_business') ? 'การเล่าเรื่อง: ประวัติที่ยังค้างคาอาจโผล่ผ่าน subtext ความลังเล หรือคำถามที่มีน้ำหนัก' : '',
+    state.flags.includes('banter_tension') ? 'การเล่าเรื่อง: ใช้แรงเสียดทานเชิงหยอกและ push-pull banter โดยไม่ทำให้ทุกบรรทัดกลายเป็นศัตรู' : '',
+    state.flags.includes('friendship_tension') ? 'การเล่าเรื่อง: รักษาความสบายใจของความเป็นเพื่อน พร้อมบอกใบ้ความรู้สึกที่ยังไม่พูดเต็มปาก' : '',
+    state.flags.includes('tentative_romance') ? 'จังหวะพัฒนา: ให้ความสัมพันธ์ยังเป็นการลองสำรวจ หลีกเลี่ยงการทำเหมือนตกลงผูกมัดแล้ว' : '',
+    state.flags.includes('almost_relationship') ? 'จังหวะพัฒนา: แสดงความคาดหวังและ chemistry แต่เหลือพื้นที่ให้ความไม่แน่ใจและการตกลงกัน' : '',
+    state.flags.includes('toxic_bond') ? 'ความปลอดภัย: ถ่ายทอด toxicity เป็นแรงตึงและความขัดแย้ง ไม่ใช่โรแมนซ์สุขภาพดี และให้การซ่อม trust ต้องอาศัยพฤติกรรมชัดเจน' : '',
+    state.flags.includes('stable_commitment') ? 'การเล่าเรื่อง: อ้างอิงประวัติร่วม การดูแลที่เป็นกิจวัตร และเดิมพันระยะยาว' : '',
+    state.flags.includes('soulmate') ? 'การเล่าเรื่อง: ความผูกพันอาจรู้สึกเหมือนถูกกำหนดหรือเข้ากันลึก แต่ยังต้องตอบสนองต่อเทิร์นผู้ใช้อย่างเป็นธรรมชาติ' : '',
+    state.constraints.includes('no_romance') ? 'ข้อจำกัด: บล็อกการยกระดับสู่โรแมนซ์/ความใกล้ชิด และเบนไปสู่ dynamic ความสัมพันธ์ที่ปลอดภัย' : '',
+    state.events.length > 0 ? `hook ที่พร้อมทำงาน: ${state.events.map((event) => event.code).join(', ')}.` : '',
   ].filter(Boolean)
 
   return lines.join(' ')
@@ -515,33 +837,34 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
   const adultMode = profile.discovery.includes('nc')
   const strictConflictLevel: RelationshipValidationIssue['level'] = adultMode ? 'warning' : 'danger'
   const adultSimulationDisclosure =
-    'This story is fictional simulated adult roleplay. Adult mode keeps this as a creator-facing warning instead of blocking publish; define context and boundaries clearly.'
+    'เนื้อเรื่องนี้เป็นการจำลอง/สมมุติสำหรับผู้ใหญ่ โหมดผู้ใหญ่จะแสดงเป็นคำเตือนสำหรับครีเอเตอร์แทนการบล็อกการเผยแพร่ แต่ควรเขียนบริบทและขอบเขตให้ชัดเจน'
+  const hasRomanticSeed = profile.engine.some((tag) => ROMANTIC_ENGINE_TAGS.has(tag))
 
   if (profile.engine.length > 5) {
     issues.push({
       level: 'warning',
       code: 'too_many_engine_tags',
-      message: 'Engine tags should stay around 3-5 items so behavior remains readable.',
+      message: 'แท็กระบบควรอยู่ราว 3-5 แท็ก เพื่อให้บุคลิกและความสัมพันธ์ยังอ่านทิศทางได้ชัด',
     })
   }
 
-  if (profile.safety.includes('family') && (profile.discovery.includes('nc') || profile.engine.includes('lover'))) {
+  if (profile.safety.includes('family') && (profile.discovery.includes('nc') || hasRomanticSeed)) {
     issues.push({
       level: strictConflictLevel,
       code: 'family_romance_conflict',
       message: adultMode
-        ? `family conflicts with nc/lover. ${adultSimulationDisclosure}`
-        : 'family conflicts with nc/lover. The relationship should use no-romance or remove romantic tags before publishing.',
+        ? `family ขัดแย้งกับแท็ก nc/romance ${adultSimulationDisclosure}`
+        : 'family ขัดแย้งกับแท็กความสัมพันธ์โรแมนติก ให้ใช้ no-romance หรือเอาแท็กโรแมนติกออกก่อนเผยแพร่',
     })
   }
 
-  if (profile.safety.includes('no-romance') && (profile.engine.includes('lover') || profile.engine.includes('crush'))) {
+  if (profile.safety.includes('no-romance') && hasRomanticSeed) {
     issues.push({
       level: strictConflictLevel,
       code: 'no_romance_romantic_seed',
       message: adultMode
-        ? `no-romance conflicts with lover/crush. ${adultSimulationDisclosure} Bot behavior may drift unless the prompt is explicit.`
-        : 'no-romance conflicts with lover/crush. Romance progression will be blocked.',
+        ? `no-romance ขัดแย้งกับแท็กความสัมพันธ์โรแมนติก ${adultSimulationDisclosure} พฤติกรรมบอทอาจแกว่งถ้าพรอมป์ไม่ชัด`
+        : 'no-romance ขัดแย้งกับแท็กความสัมพันธ์โรแมนติก และจะบล็อกการพัฒนาความโรแมนติก',
     })
   }
 
@@ -549,7 +872,7 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
     issues.push({
       level: 'warning',
       code: 'mixed_progression_speed',
-      message: 'hard-to-get and golden send opposite progression signals. Pick slow-earned or quickly approachable.',
+      message: 'hard-to-get และ golden ส่งสัญญาณจังหวะความสัมพันธ์คนละทาง ควรเลือกทางที่ค่อย ๆ ได้ใจ หรือเข้าถึงง่ายเร็วกว่า',
     })
   }
 
@@ -557,7 +880,7 @@ export function validateRelationshipTags(tags: string[]): RelationshipValidation
     issues.push({
       level: 'warning',
       code: 'mixed_safety_tone',
-      message: 'red-flag and green-flag create mixed safety tone. Use yellow-flag for ambiguity.',
+      message: 'red-flag และ green-flag ทำให้โทนความปลอดภัยสับสน ถ้าต้องการความกำกวมให้ใช้ yellow-flag',
     })
   }
 
@@ -717,23 +1040,23 @@ export function applyRelationshipDelta(
 export function buildRelationshipPrompt(state: RelationshipState) {
   const stats = state.normalized
   const tagProfile = [
-    state.tagProfile.engine.length > 0 ? `engine tags=${state.tagProfile.engine.join(', ')}` : '',
-    state.tagProfile.safety.length > 0 ? `safety tags=${state.tagProfile.safety.join(', ')}` : '',
-    state.tagProfile.discovery.length > 0 ? `discovery tags=${state.tagProfile.discovery.join(', ')}` : '',
+    state.tagProfile.engine.length > 0 ? `แท็ก engine=${state.tagProfile.engine.join(', ')}` : '',
+    state.tagProfile.safety.length > 0 ? `แท็ก safety=${state.tagProfile.safety.join(', ')}` : '',
+    state.tagProfile.discovery.length > 0 ? `แท็ก discovery=${state.tagProfile.discovery.join(', ')}` : '',
   ]
     .filter(Boolean)
     .join('; ')
 
   return [
-    'Relationship engine state:',
-    `- route=${state.route}, arc=${state.arcStage}, status=${state.status}, tier=${state.tier}, tone=${state.tone}`,
-    `- normalized stats: affinity=${stats.affinity}, trust=${stats.trust}, intimacy=${stats.intimacy}, dominance=${stats.dominance}, fear=${stats.fear}, respect=${stats.respect}`,
-    tagProfile ? `- tag profile: ${tagProfile}` : '',
-    state.flags.length > 0 ? `- behavior flags: ${state.flags.join(', ')}` : '',
-    state.constraints.length > 0 ? `- constraints: ${state.constraints.join(', ')}` : '',
-    state.events.length > 0 ? `- active relationship hooks: ${state.events.map((event) => event.code).join(', ')}` : '',
-    `- prompt adapter: ${state.promptProfile}`,
-    '- Use this as hidden behavioral direction. Do not expose raw numbers or engine labels unless the user asks for debug details.',
+    'สถานะ Relationship Engine:',
+    `- เส้นทาง=${state.route}, arc=${state.arcStage}, status=${state.status}, tier=${state.tier}, tone=${state.tone}`,
+    `- ค่าสรุป normalized: affinity=${stats.affinity}, trust=${stats.trust}, intimacy=${stats.intimacy}, dominance=${stats.dominance}, fear=${stats.fear}, respect=${stats.respect}`,
+    tagProfile ? `- โปรไฟล์แท็ก: ${tagProfile}` : '',
+    state.flags.length > 0 ? `- flag พฤติกรรม: ${state.flags.join(', ')}` : '',
+    state.constraints.length > 0 ? `- ข้อจำกัด: ${state.constraints.join(', ')}` : '',
+    state.events.length > 0 ? `- hook ความสัมพันธ์ที่พร้อมทำงาน: ${state.events.map((event) => event.code).join(', ')}` : '',
+    `- ตัวปรับพรอมป์: ${state.promptProfile}`,
+    '- ใช้เป็นทิศทางพฤติกรรมแบบซ่อนอยู่ ห้ามเปิดเผยตัวเลขดิบหรือ label ของ engine เว้นแต่ผู้ใช้ขอรายละเอียด debug โดยตรง',
   ]
     .filter(Boolean)
     .join('\n')

@@ -6,6 +6,7 @@ type HealthOverrides = Partial<Omit<HealthStatus, 'checks' | 'model' | 'security
   model?: Partial<HealthStatus['model']>
   security?: Partial<HealthStatus['security']>
   securityPosture?: Partial<HealthStatus['securityPosture']>
+  knowledge?: Partial<HealthStatus['knowledge']>
   env?: Partial<HealthStatus['env']>
 }
 
@@ -26,12 +27,36 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
       inputCostPer1M: 0.1,
       outputCostPer1M: 0.4,
       temperature: 0.85,
-      maxOutputTokens: 900,
+      maxOutputTokens: 1600,
+      minRoleplayReplyChars: 420,
+      promptBudgetTokens: 6000,
+      promptHistoryMaxMessages: 12,
       maxInputChars: 4000,
       minTokenBalanceForChat: 1,
+      providerRetry: {
+        chatAttempts: 2,
+        chatDelayMs: 350,
+        creatorDraftAttempts: 3,
+        creatorDraftDelayMs: 350,
+      },
+      chatProvider: {
+        configured: true,
+        liveVerified: true,
+        productionReady: true,
+        status: 'verified',
+        liveSmokeCommand: 'bun run smoke:chat',
+        localFallbackEnabled: false,
+        forcedLocal: false,
+        activeRuntimeProvider: 'openrouter',
+        localModel: 'local/mock-roleplay',
+      },
       imageGeneration: {
         configured: true,
+        liveVerified: true,
+        productionReady: true,
+        status: 'verified',
         model: 'gpt-image-1.5',
+        liveSmokeCommand: 'bun run smoke:image:live',
       },
     },
     security: {
@@ -50,6 +75,21 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
       authorization: { ok: true, detail: 'Owner/admin checks cover protected actions.' },
       accounting: { ok: true, detail: 'Usage ledger and admin audit logs are available.' },
     },
+    knowledge: {
+      structured: {
+        ok: true,
+        fileCount: 5,
+        missing: [],
+        errors: [],
+        files: [
+          { file: 'chat-style-guide.json', ok: true, id: 'chat-style-guide', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'creator-guides.json', ok: true, id: 'creator-guides', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'relationship-rules.json', ok: true, id: 'relationship-rules', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'scene-rules.json', ok: true, id: 'scene-rules', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+          { file: 'content-policy.json', ok: true, id: 'content-policy', schemaVersion: 1, updatedAt: '2026-05-13', errors: [] },
+        ],
+      },
+    },
     env: {
       mode: 'production',
       missingRequired: [],
@@ -67,6 +107,7 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
     model: { ...base.model, ...overrides.model },
     security: { ...base.security, ...overrides.security },
     securityPosture: { ...base.securityPosture, ...overrides.securityPosture },
+    knowledge: { ...base.knowledge, ...overrides.knowledge },
     env: { ...base.env, ...overrides.env },
   }
 }
@@ -80,6 +121,33 @@ describe('readiness gate', () => {
     expect(summarizeDatabaseError(error)).toBe(
       'PrismaClientKnownRequestError (ECONNREFUSED): connect ECONNREFUSED 127.0.0.1:5432',
     )
+  })
+
+  test('redacts secret-shaped values from database health diagnostics', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const error = new Error(`connect failed for DATABASE_URL=${fakeDatabaseUrl}`)
+    error.name = 'PrismaClientKnownRequestError'
+    ;(error as Error & { code: string }).code = 'P1001'
+
+    const message = summarizeDatabaseError(error)
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
+  })
+
+  test('formats object-shaped database health diagnostics without stringifying raw objects', () => {
+    const fakeDatabaseUrl = 'postgresql://maprang:super-secret@db.example.com:5432/maprang?sslmode=require'
+    const message = summarizeDatabaseError({
+      message: `connect failed for DATABASE_URL=${fakeDatabaseUrl}`,
+      toString() {
+        throw new Error('ไม่ควร stringify raw object')
+      },
+    })
+
+    expect(message).toContain('[REDACTED_SECRET]')
+    expect(message).not.toContain('super-secret')
+    expect(message).not.toContain(fakeDatabaseUrl)
   })
 
   test('accepts a complete production health status', () => {
@@ -101,13 +169,31 @@ describe('readiness gate', () => {
       ),
     ).toEqual(
       expect.arrayContaining([
-        'backend health is not ok',
-        'DATABASE_URL is not configured',
-        'database is not connected',
-        'OPENROUTER_API_KEY is not configured',
-        'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY is not configured',
+        'สถานะ backend ยังไม่พร้อม',
+        'DATABASE_URL ยังไม่ได้ตั้งค่า',
+        'ฐานข้อมูลยังเชื่อมต่อไม่ได้',
+        'OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า',
+        'IMAGE_GENERATION_API_KEY or OPENAI_API_KEY ยังไม่ได้ตั้งค่า',
       ]),
     )
+  })
+
+  test('requires structured knowledge validity', () => {
+    expect(
+      readinessFailures(
+        health({
+          knowledge: {
+            structured: {
+              ok: false,
+              fileCount: 4,
+              missing: ['scene-rules.json'],
+              errors: ['scene-rules.json: missing file'],
+              files: [],
+            },
+          },
+        }),
+      ),
+    ).toEqual(expect.arrayContaining(['คลังความรู้ structured ยังไม่ผ่านการตรวจ']))
   })
 
   test('requires production auth and storage hardening', () => {
@@ -128,12 +214,47 @@ describe('readiness gate', () => {
       ),
     ).toEqual(
       expect.arrayContaining([
-        'Supabase auth is not configured',
-        'ADMIN_API_KEY is not configured',
-        'production avatar storage must use Supabase',
-        'production avatar storage access must use signed URLs',
-        'production auth mode must use Supabase JWT',
-        'production admin guard must use an API key',
+        'Supabase Auth ยังไม่ได้ตั้งค่า',
+        'ADMIN_API_KEY ยังไม่ได้ตั้งค่า',
+        'production พื้นที่เก็บรูปตัวละครต้องใช้ Supabase',
+        'production พื้นที่เก็บรูปตัวละครต้องใช้ signed URL',
+        'production auth mode ต้องใช้ Supabase JWT',
+        'production admin guard ต้องใช้ API key',
+      ]),
+    )
+  })
+
+  test('requires production live provider verification', () => {
+    expect(
+      readinessFailures(
+        health({
+          model: {
+            chatProvider: {
+              configured: true,
+              liveVerified: false,
+              productionReady: false,
+              status: 'needs_live_smoke',
+              liveSmokeCommand: 'bun run smoke:chat',
+              localFallbackEnabled: false,
+              forcedLocal: false,
+              activeRuntimeProvider: 'openrouter',
+              localModel: 'local/mock-roleplay',
+            },
+            imageGeneration: {
+              configured: true,
+              liveVerified: false,
+              productionReady: false,
+              status: 'needs_live_smoke',
+              model: 'gpt-image-1.5',
+              liveSmokeCommand: 'bun run smoke:image:live',
+            },
+          },
+        }),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        'live smoke ของผู้ให้บริการแชทยังไม่ผ่านการยืนยัน',
+        'live smoke ของระบบสร้างรูปยังไม่ผ่านการยืนยัน',
       ]),
     )
   })
@@ -144,14 +265,14 @@ describe('readiness gate', () => {
         health({
           env: {
             missingRequired: ['SUPABASE_SERVICE_ROLE_KEY'],
-            invalid: ['CORS_ORIGINS must use https origins in production'],
+            invalid: ['CORS_ORIGINS ต้องเป็น https origin ใน production'],
           },
         }),
       ),
     ).toEqual(
       expect.arrayContaining([
-        'SUPABASE_SERVICE_ROLE_KEY is missing',
-        'CORS_ORIGINS must use https origins in production',
+        'SUPABASE_SERVICE_ROLE_KEY ยังไม่ได้ตั้งค่า',
+        'CORS_ORIGINS ต้องเป็น https origin ใน production',
       ]),
     )
   })

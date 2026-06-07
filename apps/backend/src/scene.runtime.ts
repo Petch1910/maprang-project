@@ -87,18 +87,18 @@ function sceneTitle(code: string) {
 function sceneObjective(code: string) {
   const objectives: Record<string, string> = {
     soft_confession_available:
-      'Let the character open up carefully. The moment should feel optional, vulnerable, and not like a full confession unless the user leans in.',
+      'ให้ตัวละครค่อย ๆ เปิดใจอย่างระวัง จังหวะนี้ควรรู้สึกเป็นทางเลือก เปราะบาง และยังไม่ใช่การสารภาพเต็มรูปแบบ เว้นแต่ผู้ใช้จะขยับเข้าใกล้เอง',
     devotion_shift:
-      'Move into a major emotional turning point. Show deeper attachment while preserving character consistency and agency.',
+      'พาเข้าสู่จุดเปลี่ยนทางอารมณ์สำคัญ แสดงความผูกพันที่ลึกขึ้น แต่ยังรักษาความคงเส้นคงวาและ agency ของตัวละคร',
     relationship_break:
-      'Handle the conflict as a serious scene. Give the user a chance to repair, apologize, escalate, or step away.',
-    fear_lock: 'Keep the scene tense and careful. The character should protect themself and not become instantly warm.',
+      'จัดการความขัดแย้งเป็นฉากจริงจัง เปิดโอกาสให้ผู้ใช้ซ่อมแซม ขอโทษ ยกระดับ หรือถอยออกไป',
+    fear_lock: 'คุมฉากให้ตึงและระวัง ตัวละครควรปกป้องตัวเอง และไม่กลับมาอบอุ่นทันที',
     unfinished_business_surfaces:
-      'Surface unresolved history through subtext, memory, or a pointed question. Avoid dumping exposition.',
-    constraint_guard: 'Redirect the interaction away from blocked intimacy or romance into a safe dynamic.',
+      'ดึงประวัติที่ยังค้างคาออกมาผ่าน subtext ความทรงจำ หรือคำถามที่มีน้ำหนัก หลีกเลี่ยงการเท exposition ยาว ๆ',
+    constraint_guard: 'เบนปฏิสัมพันธ์ออกจากความใกล้ชิดหรือโรแมนซ์ที่ถูกบล็อก ไปสู่ dynamic ที่ปลอดภัย',
   }
 
-  return objectives[code] ?? 'Run a focused relationship scene that can resolve back into sandbox mode.'
+  return objectives[code] ?? 'ดำเนินฉากความสัมพันธ์แบบมีเป้าหมายชัด และสามารถคลี่คลายกลับสู่ sandbox mode ได้'
 }
 
 function sceneCommand(userMessage: string) {
@@ -308,21 +308,21 @@ export function updateSceneState({
 
 export function buildScenePrompt(sceneState: SceneState) {
   const lines = [
-    `Scene mode: ${sceneState.mode}.`,
+    `โหมดฉาก: ${sceneState.mode}.`,
     sceneState.activeScene
-      ? `Active scene: ${sceneState.activeScene.title}. Objective: ${sceneState.activeScene.objective}`
-      : 'Sandbox mode: continue free roleplay. Do not force pending events into the scene.',
+      ? `ฉากที่กำลังเล่น: ${sceneState.activeScene.title}. เป้าหมาย: ${sceneState.activeScene.objective}`
+      : 'โหมด sandbox: ดำเนินโรลเพลย์อิสระต่อไป ห้ามบังคับ pending events ให้กลายเป็นฉากทันที',
     sceneState.pendingEvents.length > 0 && sceneState.mode === 'sandbox'
-      ? `Pending scene notifications available to the user: ${sceneState.pendingEvents
+      ? `มีแจ้งเตือนฉากที่รอให้ผู้ใช้เลือก: ${sceneState.pendingEvents
           .map((event) => `${event.code} (${event.title})`)
-          .join(', ')}. Mention them only as a subtle system notification, not as character dialogue.`
+          .join(', ')}. กล่าวถึงได้เฉพาะในฐานะ system notification แบบบางเบา ไม่ใช่บทพูดของตัวละคร`
       : '',
     sceneState.mode === 'scene'
-      ? 'In scene mode, keep the scene focused and let the user resolve, reject, or leave the moment naturally.'
+      ? 'ใน scene mode ให้คุมฉากให้อยู่กับเป้าหมาย และปล่อยให้ผู้ใช้คลี่คลาย ปฏิเสธ หรือออกจากจังหวะนั้นอย่างเป็นธรรมชาติ'
       : '',
   ].filter(Boolean)
 
-  return `Scene engine state:\n${lines.join('\n')}`
+  return `สถานะ Scene Engine:\n${lines.join('\n')}`
 }
 
 export function outcomeRelationshipDelta(outcome: SceneOutcome): Partial<{

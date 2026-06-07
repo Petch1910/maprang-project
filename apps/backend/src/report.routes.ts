@@ -2,7 +2,7 @@ import { ReportStatus, ReportTargetType } from '@prisma/client'
 import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
 import { applyReportAdminAction, createReport, listReports, updateReportStatus, type ReportAdminAction } from './report.service'
-import { rejectInvalidUuid } from './route-guards'
+import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
 import { requireAdminApiKey, resolveRequestUserId } from './security'
 
 const reportTargetTypeSchema = t.Union([t.Literal('CHARACTER'), t.Literal('MESSAGE')])
@@ -19,7 +19,7 @@ export const reportRoutes = new Elysia()
     '/reports',
     async ({ body, request, set }) => {
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
 
       const result = await createReport(
         {
@@ -33,11 +33,11 @@ export const reportRoutes = new Elysia()
         await resolveRequestUserId(request),
       )
 
-      if (!result) return { error: 'report_create_failed' }
+      if (!result) return routeErrorResponse('report_create_failed')
       if ('error' in result) {
         const error = result.error ?? 'report_create_failed'
         set.status = error.endsWith('_not_found') ? 404 : 400
-        return { error }
+        return routeErrorResponse(error)
       }
 
       set.status = 201
@@ -57,9 +57,9 @@ export const reportRoutes = new Elysia()
   .get(
     '/admin/reports',
     async ({ query, request, set }) => {
-      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+      if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
 
       return {
         reports: await listReports({
@@ -80,9 +80,9 @@ export const reportRoutes = new Elysia()
   .patch(
     '/admin/reports/:id',
     async ({ body, params, request, set }) => {
-      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+      if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_report_id')
       if (invalidId) return invalidId
 
@@ -90,7 +90,7 @@ export const reportRoutes = new Elysia()
         return { report: await updateReportStatus(params.id, body.status as ReportStatus, await resolveRequestUserId(request)) }
       } catch {
         set.status = 404
-        return { error: 'report_not_found' }
+        return routeErrorResponse('report_not_found')
       }
     },
     {
@@ -101,21 +101,22 @@ export const reportRoutes = new Elysia()
   .post(
     '/admin/reports/:id/actions',
     async ({ body, params, request, set }) => {
-      if (!requireAdminApiKey({ request, set })) return { error: 'admin_unauthorized' }
+      if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
       const prisma = requireDatabase(set)
-      if (!prisma) return { error: 'database_not_configured' }
+      if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_report_id')
       if (invalidId) return invalidId
 
       const result = await applyReportAdminAction(params.id, body.action as ReportAdminAction, await resolveRequestUserId(request))
       if (!result) {
         set.status = 503
-        return { error: 'database_not_configured' }
+        return routeErrorResponse('database_not_configured')
       }
 
       if ('error' in result) {
-        set.status = result.error === 'report_not_found' ? 404 : 422
-        return { error: result.error }
+        const error = result.error ?? 'invalid_report_action'
+        set.status = error === 'report_not_found' ? 404 : 422
+        return routeErrorResponse(error)
       }
 
       return result

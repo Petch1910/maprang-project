@@ -21,15 +21,9 @@ import {
   X,
 } from 'lucide-react'
 import type {
-  AdminSummary as AdminSummaryData,
   Character,
-  CharacterInput,
-  CharacterListFilters,
   ChatSummary,
   ChatRuntimeState,
-  HealthStatus,
-  LoreEntry,
-  LoreInput,
 } from '../lib/api'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { formatTime } from '../lib/chat'
@@ -37,41 +31,22 @@ import { loadPinnedChatIds, savePinnedChatIds, togglePinnedChatId } from '../lib
 
 type SidebarProps = {
   character: Character
-  adminSummary: AdminSummaryData | null
   characters: Character[]
   chatHistory: ChatSummary[]
   chatId: string | null
   runtimeState: ChatRuntimeState | null
   connectionNote: string
-  healthStatus: HealthStatus | null
   isHistoryLoading: boolean
-  isLoreLoading: boolean
   isMobileOpen: boolean
-  isSavingCharacter: boolean
-  isSavingLore: boolean
-  loreEntries: LoreEntry[]
   onArchiveChat: (chatId: string) => void
   onAuthChanged: () => Promise<void>
   onCloseMobile: () => void
-  onCreateCharacter: (input: CharacterInput) => Promise<void>
-  onCreateLore: (input: LoreInput) => Promise<void>
-  onDeleteCharacter: () => Promise<void>
   onDeleteChat: (chatId: string) => void
-  onDeleteLore: (loreId: string) => void
-  onDuplicateCharacter: () => Promise<void>
-  onFilterCharacters: (filters?: CharacterListFilters) => Promise<Character[]>
-  onFavoriteCharacter: (characterId: string, favorite: boolean) => Promise<void>
   onLoadChatHistory: () => void
-  onLoadHealth: () => Promise<void>
-  onLoadAdminSummary: () => Promise<void>
-  onLoadLore: () => Promise<void>
   onOpenChat: (chatId: string) => void
-  onResetCharacterPrompt: () => Promise<void>
-  onSaveCharacter: (input: CharacterInput) => Promise<void>
   onRenameChat: (chatId: string, title: string) => Promise<void>
   onSelectCharacter: (character: Character) => void
   onStartNewChat: () => void
-  onUpdateLore: (loreId: string, input: Partial<LoreInput>) => Promise<void>
 }
 
 export function Sidebar(props: SidebarProps) {
@@ -178,7 +153,7 @@ function SidebarChatRow({
     >
       {isSelectionMode && (
         <button
-          aria-label="Select chat"
+          aria-label="เลือกแชท"
           aria-pressed={isSelected}
           className="grid size-8 place-items-center rounded-lg text-white/55 transition hover:bg-white/8 hover:text-white"
           data-testid={`chat-row-checkbox-${chat.id}`}
@@ -228,7 +203,7 @@ function SidebarChatRow({
           </button>
           <button type="button" className={actionButtonClass} data-testid={`chat-row-pin-${chat.id}`} onClick={onTogglePin} role="menuitem">
             {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
-            {isPinned ? 'เอาออกจากปักหมุดแชท' : 'ปักหมุดแชท'}
+            {isPinned ? 'ถอนหมุดแชท' : 'ปักหมุดแชท'}
           </button>
           <button type="button" className={actionButtonClass} data-testid={`chat-row-archive-${chat.id}`} onClick={onArchive} role="menuitem">
             <Archive size={14} />
@@ -414,6 +389,17 @@ function SidebarContent({
     setDeleteTarget(null)
   }
 
+  const selectionActionDisabledReason =
+    selectedChatIds.length === 0 ? 'เลือกแชทอย่างน้อย 1 รายการก่อนจัดการ' : undefined
+  const refreshDisabledReason = isHistoryLoading ? 'กำลังโหลดรายการแชทในแถบข้าง' : undefined
+  const renameConfirmDisabledReason = renameTarget
+    ? renameValue.trim().length === 0
+      ? 'กรอกชื่อแชทก่อนบันทึก'
+      : isRenaming
+        ? 'กำลังบันทึกชื่อแชท'
+        : undefined
+    : undefined
+
   const renderChatRow = (chat: ChatSummary, index = 0, rows: ChatSummary[] = regularChats) => (
     <SidebarChatRow
       chat={chat}
@@ -449,7 +435,7 @@ function SidebarContent({
         </span>
         <span className="min-w-0">
           <span className="block truncate text-lg font-black tracking-wide">MAPRANG</span>
-          <span className="block truncate text-[11px] font-bold text-white/38">AI roleplay ภาษาไทย</span>
+          <span className="block truncate text-[11px] font-bold text-white/38">บทบาทสมมุติภาษาไทย</span>
         </span>
       </Link>
 
@@ -494,9 +480,12 @@ function SidebarContent({
           />
         </label>
         <button type="button"
-          className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white"
+          aria-disabled={Boolean(refreshDisabledReason)}
+          className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+          data-testid="chat-sidebar-refresh"
+          disabled={Boolean(refreshDisabledReason)}
           onClick={onLoadChatHistory}
-          title="โหลดรายการแชทใหม่"
+          title={refreshDisabledReason || 'โหลดรายการแชทใหม่'}
         >
           <RefreshCw size={16} />
         </button>
@@ -507,7 +496,7 @@ function SidebarContent({
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="text-xs font-black text-white">เลือกไว้ {selectedChatIds.length.toLocaleString()} แชท</span>
             <button
-              aria-label="Cancel chat selection"
+              aria-label="ยกเลิกการเลือกแชท"
               className="grid size-7 place-items-center rounded-md text-white/55 transition hover:bg-white/8 hover:text-white"
               data-testid="chat-selection-cancel"
               onClick={clearSelection}
@@ -519,17 +508,21 @@ function SidebarContent({
           <div className="grid grid-cols-2 gap-2">
             <button type="button"
               className="min-h-9 rounded-lg bg-white px-2 text-xs font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-45"
+              aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-archive"
-              disabled={selectedChatIds.length === 0}
+              disabled={Boolean(selectionActionDisabledReason)}
               onClick={archiveSelectedChats}
+              title={selectionActionDisabledReason || 'จัดเก็บแชทที่เลือก'}
             >
               จัดเก็บ
             </button>
             <button type="button"
               className="min-h-9 rounded-lg bg-rose-500 px-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+              aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-delete"
-              disabled={selectedChatIds.length === 0}
+              disabled={Boolean(selectionActionDisabledReason)}
               onClick={deleteSelectedChats}
+              title={selectionActionDisabledReason || 'ลบแชทที่เลือก'}
             >
               ลบ
             </button>
@@ -647,9 +640,11 @@ function SidebarContent({
               </button>
               <button
                 className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
+                aria-disabled={Boolean(renameConfirmDisabledReason)}
                 data-testid="chat-rename-confirm"
-                disabled={isRenaming || renameValue.trim().length === 0}
+                disabled={Boolean(renameConfirmDisabledReason)}
                 onClick={() => void confirmRenameChat()}
+                title={renameConfirmDisabledReason || 'บันทึกชื่อแชท'}
                 type="button"
               >
                 {isRenaming ? 'กำลังบันทึก...' : 'บันทึก'}

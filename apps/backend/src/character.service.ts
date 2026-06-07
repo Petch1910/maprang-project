@@ -1,14 +1,11 @@
-import { CharacterStatus, type Character, type Prisma, type Visibility } from '@prisma/client'
+import { CharacterStatus, type Prisma, type Visibility } from '@prisma/client'
 import { defaultCharacterId, defaultSystemPrompt, defaultUserId } from './config'
 import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentRating } from './content-rating'
 import { getPrisma } from './db'
 import { validateRelationshipTags } from './relationship.engine'
+import type { CharacterWithTags } from './character.types'
 
-export type CharacterWithTags = Character & {
-  tags?: { tag: { name: string } }[]
-  favoritedBy?: { userId: string }[]
-  _count?: { favoritedBy: number }
-}
+export type { CharacterWithTags } from './character.types'
 
 export type CharacterInput = {
   name: string
@@ -270,32 +267,32 @@ export function reviewCharacterQuality(input: QualityReviewInput) {
   let score = 0
 
   if (input.name.trim().length >= 2) score += 10
-  else notes.push('Name should be at least 2 characters.')
+  else notes.push('ชื่อตัวละครควรมีอย่างน้อย 2 ตัวอักษร')
 
   if ((input.tagline ?? '').trim().length >= 12) score += 10
-  else notes.push('Add a clear tagline.')
+  else notes.push('เพิ่มคำโปรยให้ชัดเจน')
 
   if ((input.description ?? '').trim().length >= 40) score += 15
-  else notes.push('Description should explain the character clearly.')
+  else notes.push('คำอธิบายควรเล่าตัวละครให้เห็นภาพชัด')
 
   if ((input.biography ?? '').trim().length >= 80) score += 15
-  else notes.push('Biography is short; add more identity and background.')
+  else notes.push('ประวัติยังสั้นเกินไป เพิ่มตัวตนและพื้นหลังให้มากขึ้น')
 
   if ((input.scenario ?? '').trim().length >= 40) score += 10
-  else notes.push('Add a starting scenario for roleplay.')
+  else notes.push('เพิ่มสถานการณ์เริ่มต้นสำหรับการเล่นบท')
 
   if (input.systemPrompt.trim().length >= 120) score += 20
-  else notes.push('System prompt should describe personality, behavior, and boundaries.')
+  else notes.push('พรอมป์ระบบควรอธิบายบุคลิก พฤติกรรม และขอบเขตให้ชัด')
 
   if ((input.compactPrompt ?? '').trim().length >= 40) score += 10
-  else notes.push('Compact prompt is needed for lean runtime context.')
+  else notes.push('ต้องมีพรอมป์ย่อเพื่อใช้เป็นบริบทแบบกระชับตอนรันแชท')
 
   if ((input.greeting ?? '').trim().length >= 10) score += 5
-  else notes.push('Greeting is missing or too short.')
+  else notes.push('ข้อความทักทายยังขาดหรือสั้นเกินไป')
 
   const tagCount = input.tags?.length ?? 0
   if (tagCount > 0) score += 5
-  else notes.push('Add at least one discovery tag.')
+  else notes.push('เพิ่มแท็กค้นหาอย่างน้อยหนึ่งแท็ก')
 
   for (const issue of relationshipIssues) {
     notes.push(`[${issue.level}] ${issue.message}`)

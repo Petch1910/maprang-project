@@ -1,0 +1,24 @@
+# 0003 - แยก live provider verification
+
+วันที่: 2026-05-13
+
+สถานะ: done
+
+## การตัดสินใจ (Decision)
+
+ติดตาม live readiness ของ chat provider แยกจาก live readiness ของ image provider.
+
+## เหตุผล
+
+การมีคีย์ผู้ให้บริการที่ตั้งค่าแล้วไม่พอสำหรับ production เพราะ billing, quota, สิทธิ์โมเดล, การเชื่อมต่อออกนอกระบบ, และข้อจำกัดอัตราการเรียกยังทำให้การตรวจล้มได้หลัง env validation ผ่านแล้ว
+
+## สิ่งที่ทำแล้ว
+
+- Chat readiness ใช้ `CHAT_PROVIDER_LIVE_VERIFIED`.
+- Image readiness ใช้ `IMAGE_GENERATION_LIVE_VERIFIED`.
+- Admin Health และ smoke doctor แสดงสถานะและ production blockers แยกกัน.
+- Production gate ต้องยังไม่ผ่านจนกว่า live verification จะผ่านจริง.
+
+## ถัดไป
+
+ตั้งแต่ละ flag เฉพาะหลัง live smoke path ของ flag นั้นผ่านใน environment เป้าหมายแล้วเท่านั้น.

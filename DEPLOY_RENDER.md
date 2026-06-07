@@ -1,14 +1,14 @@
-# Deploy on Render
+# คู่มือ deploy บน Render
 
-This is the recommended first production path because it can host the backend Docker service, frontend static site, and managed Postgres in one place.
+เส้นทางนี้เหมาะเป็นเส้นทาง production แรก เพราะ Render โฮสต์ backend แบบ Docker service, frontend static site, และ managed Postgres ได้ในที่เดียว.
 
-## 1. Create Postgres
+## ขั้นที่ 1 สร้าง Postgres
 
-Create a Render Postgres database and copy the external connection string.
+สร้าง Render Postgres database แล้วคัดลอก external connection string.
 
-Use it as backend `DATABASE_URL`.
+นำค่านี้ไปใช้เป็น backend `DATABASE_URL`.
 
-Before deploying public traffic, run the repository readiness checks locally:
+ก่อนปล่อย traffic สาธารณะ ให้รัน readiness checks ของ repo ในเครื่องก่อน:
 
 ```bash
 bun run secrets:check
@@ -17,20 +17,20 @@ bun run backend:check
 bun run frontend:check
 ```
 
-If Docker/Postgres is not available locally, run `backend:check` against a staging database before production.
+ถ้าเครื่อง local ไม่มี Docker/Postgres ให้รัน `backend:check` กับ staging database ก่อนขึ้น production.
 
-## 2. Deploy Backend
+## ขั้นที่ 2 Deploy backend (Deploy Backend)
 
-Create a new Render Web Service from this repository.
+สร้าง Render Web Service ใหม่จาก repo นี้.
 
-Settings:
+การตั้งค่า:
 
 - Environment: Docker
 - Dockerfile path: `apps/backend/Dockerfile`
 - Docker context: repository root
 - Health check path: `/ready`
 
-Backend environment:
+env ฝั่ง backend:
 
 ```bash
 NODE_ENV=production
@@ -48,7 +48,7 @@ IMAGE_GENERATION_SIZE=1024x1536
 IMAGE_GENERATION_QUALITY=medium
 IMAGE_GENERATION_OUTPUT_FORMAT=webp
 IMAGE_GENERATION_OUTPUT_COMPRESSION=85
-CORS_ORIGINS=<frontend-url>
+CORS_ORIGINS=https://<frontend-domain>
 ADMIN_API_KEY=<long-random-admin-key>
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_JWT_ISSUER=https://<project-ref>.supabase.co/auth/v1
@@ -60,61 +60,63 @@ SUPABASE_STORAGE_ACCESS=signed
 SUPABASE_SIGNED_URL_EXPIRES_IN=3600
 ```
 
-Do not set `PORT` unless Render asks for it. Render injects `PORT`.
+อย่าตั้ง `PORT` เอง เว้นแต่ Render ขอให้ตั้ง เพราะ Render inject `PORT` ให้แล้ว.
 
-After the backend deploys, run migrations from a local terminal with production env loaded, or from a Render shell:
+`CORS_ORIGINS` ต้องเป็น frontend HTTPS origin ที่ deploy แล้วเท่านั้น ห้ามใส่ localhost, `127.0.0.1`, `0.0.0.0`, `::1`, origin แบบ `http://`, wildcard origins, credential/userinfo, path/query/hash, หรือ backend URL ใน staging หรือ production.
+
+หลัง backend deploy แล้ว ให้รัน migrations จาก terminal ที่โหลด production env แล้ว หรือจาก Render shell:
 
 ```bash
 cd apps/backend
 bunx prisma migrate deploy
 ```
 
-The current migration set includes moderation reports and admin audit logs. Do not skip this step.
+migration set ปัจจุบันมี moderation reports และ admin audit logs แล้ว ห้ามข้ามขั้นตอนนี้.
 
-## 3. Deploy Frontend
+## ขั้นที่ 3 Deploy frontend (Deploy Frontend)
 
-Create a Render Static Site from this repository.
+สร้าง Render Static Site จาก repo นี้.
 
-Settings:
+การตั้งค่า:
 
 - Root directory: `apps/frontend`
 - Build command: `bun install --frozen-lockfile && bun run build`
 - Publish directory: `dist`
 
-Frontend environment:
+env ฝั่ง frontend:
 
 ```bash
-VITE_API_BASE_URL=<backend-url>
+VITE_API_BASE_URL=https://<backend-domain>
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY=<supabase-anon-key>
 ```
 
-After the frontend URL is known, update backend `CORS_ORIGINS` to exactly that origin.
+หลังรู้ frontend URL แล้ว ให้อัปเดต backend `CORS_ORIGINS` ให้ตรงกับ HTTPS origin นั้นแบบ exact match.
 
-## 4. Supabase Storage
+## ขั้นที่ 4 ตั้งค่า Supabase Storage
 
-Create bucket:
+สร้าง bucket:
 
 - Name: `avatars`
-- Recommended access: private
+- แนะนำ access: private
 
-Backend will return stable URLs under `/uploads/avatars/<filename>` and redirect to signed Supabase URLs.
+Backend จะคืน stable URLs ใต้ `/uploads/avatars/<filename>` แล้ว redirect ไปยัง signed Supabase URLs.
 
-## 5. Smoke Test Production
+## ขั้นที่ 5 ทดสอบ production smoke (Smoke Test Production)
 
-Use a real Supabase access token or a known UUID user id:
+ใช้ Supabase access token จริง หรือ UUID user id ที่รู้แน่นอน:
 
 ```bash
-SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local
-SMOKE_API_BASE_URL=<backend-url> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:chat
+SMOKE_API_BASE_URL=https://<backend-domain> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run smoke:local
+SMOKE_API_BASE_URL=https://<backend-domain> SMOKE_ACCESS_TOKEN=<supabase-access-token> bun run api:smoke:live
 ```
 
-Before `smoke:chat` calls OpenRouter, it verifies the smoke user has at least `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` tokens, default `1000`. Top up that user through the admin wallet flow before running live production smoke. If you smoke with `SMOKE_USER_ID` instead of a real Supabase token, set `SMOKE_ADMIN_API_KEY` too.
+ก่อน `api:smoke:live` หรือ `smoke:chat` เรียก OpenRouter ระบบจะตรวจว่าผู้ใช้ smoke มี token อย่างน้อย `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` ให้เติม token ผู้ใช้นี้ผ่าน admin wallet flow ก่อนรัน live production smoke ถ้าใช้ `SMOKE_USER_ID` แทน Supabase token จริง ต้องตั้ง `SMOKE_ADMIN_API_KEY` ด้วย. หลัง live smoke ผ่าน ให้คัด JSON `handoffEvidence` ลง `RELEASE_HANDOFF.md` โดยเก็บ `Chat smoke normal chatId`, `Chat smoke normal tokens`, `Chat smoke normal walletTransactionId`, `Chat smoke stream chatId`, `Chat smoke stream tokens`, `Chat smoke stream walletTransactionId`, `Image smoke provider`, `Image smoke source`, `Image smoke urlKind`, และ `Image smoke elapsedMs`. ถ้าใช้ `api:smoke:live` แล้ว summary ยังไม่มี `handoffEvidence` แปลว่าหลักฐานรวมยังไม่ครบพอสำหรับ handoff.
 
-Expected:
+ผลที่คาดหวัง:
 
-- `/health` returns `ok=true`.
-- `/ready` returns `ok=true` before traffic is sent to the service.
-- `/health` reports `imageGenerationConfigured=true` for real Creator Studio image generation.
-- Avatar upload returns `provider=supabase` and `access=signed`.
-- Live chat returns a reply, `chatId`, and token usage.
+- `/health` คืนค่า `ok=true`.
+- `/ready` คืนค่า `ok=true` ก่อนส่ง traffic จริงเข้า service.
+- `/health` รายงาน `imageGenerationConfigured=true` สำหรับการสร้างรูปจริงใน Creator Studio.
+- avatar upload คืนค่า `provider=supabase` และ `access=signed`.
+- live chat คืนคำตอบ, `chatId`, และ token usage.

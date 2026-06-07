@@ -11,7 +11,32 @@ function numberEnv(name: string, fallback: number) {
 }
 
 export const modelTemperature = Math.min(Math.max(numberEnv('MODEL_TEMPERATURE', 0.85), 0), 2)
-export const modelMaxOutputTokens = Math.min(Math.max(Math.round(numberEnv('MODEL_MAX_OUTPUT_TOKENS', 900)), 128), 2400)
+export const modelMaxOutputTokens = Math.min(Math.max(Math.round(numberEnv('MODEL_MAX_OUTPUT_TOKENS', 1600)), 128), 2400)
+export const modelMinRoleplayReplyChars = Math.min(
+  Math.max(Math.round(numberEnv('MODEL_MIN_ROLEPLAY_REPLY_CHARS', 420)), 0),
+  1200,
+)
+export const promptBudgetTokens = Math.min(Math.max(Math.round(numberEnv('PROMPT_BUDGET_TOKENS', 6000)), 1200), 20000)
+export const promptHistoryMaxMessages = Math.min(
+  Math.max(Math.round(numberEnv('PROMPT_HISTORY_MAX_MESSAGES', 12)), 0),
+  40,
+)
+export const chatProviderRetryAttempts = Math.min(
+  Math.max(Math.round(numberEnv('CHAT_PROVIDER_RETRY_ATTEMPTS', 2)), 1),
+  5,
+)
+export const chatProviderRetryDelayMs = Math.min(
+  Math.max(Math.round(numberEnv('CHAT_PROVIDER_RETRY_DELAY_MS', 350)), 0),
+  5000,
+)
+export const creatorDraftRetryAttempts = Math.min(
+  Math.max(Math.round(numberEnv('CREATOR_DRAFT_RETRY_ATTEMPTS', 3)), 1),
+  5,
+)
+export const creatorDraftRetryDelayMs = Math.min(
+  Math.max(Math.round(numberEnv('CREATOR_DRAFT_RETRY_DELAY_MS', 350)), 0),
+  5000,
+)
 export const maxInputChars = Number(process.env.MAX_INPUT_CHARS ?? 4000)
 export const minTokenBalanceForChat = Number(process.env.MIN_TOKEN_BALANCE_FOR_CHAT ?? 1)
 export const imageGenerationConfigured = Boolean(process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY)
@@ -32,4 +57,4 @@ const requestedStorageProvider =
 export const storageProvider =
   requestedStorageProvider ?? (process.env.NODE_ENV === 'production' && supabaseStorageConfigured ? 'supabase' : 'local')
 export const defaultSystemPrompt =
-  'You are Maprang, a Thai-first AI companion. Be warm, practical, emotionally present, and honest. Give enough detail for the user to feel answered rather than brushed off. For roleplay, write naturally in scene with 2-4 short paragraphs, sensory detail, character emotion, and one hook for the user to answer. Unless the user asks for brevity, avoid one-line replies; aim for a satisfying 3-7 sentence turn that gives the player something concrete to react to. For task help, stay clear and useful without being abrupt. If information is missing, ask a short clarifying question. Do not invent facts you are unsure about.'
+  'คุณคือ Maprang ผู้ช่วย AI ที่ใช้ภาษาไทยเป็นหลัก อบอุ่น ใช้งานได้จริง อยู่กับอารมณ์ของผู้ใช้ และซื่อสัตย์ ให้รายละเอียดพอที่ผู้ใช้รู้สึกว่าได้รับคำตอบ ไม่ใช่ถูกปัดผ่าน สำหรับโรลเพลย์ ให้เขียนเป็นฉากอย่างเป็นธรรมชาติด้วย 4-6 ย่อหน้าสั้น มีรายละเอียดประสาทสัมผัส อารมณ์ตัวละคร และ hook หนึ่งจุดให้ผู้ใช้ตอบต่อ เว้นแต่ผู้ใช้ขอให้สั้น อย่าตอบบรรทัดเดียว เทิร์นโรลเพลย์ปกติควรมีอย่างน้อย 5 ประโยคสมบูรณ์ และโดยมากอยู่ราว 8-14 ประโยค ให้ผู้เล่นมีการกระทำ บรรยากาศ subtext และรายละเอียดใหม่ให้ตอบสนอง แทนที่จะจบด้วยคำถามอย่างเดียว ถ้าตัวละครขอสไตล์พูดน้อย ให้คงจังหวะกระชับแต่ยังเป็น beat โรลเพลย์ที่ครบ ไม่ใช่ประโยคเดียวหรือคำถามเดียว สำหรับงานช่วยเหลือทั่วไป ให้ชัดเจน มีประโยชน์ และไม่ห้วนเกินไป ถ้าข้อมูลไม่พอ ให้ถามสั้น ๆ เพื่อความชัดเจน และอย่าแต่งข้อเท็จจริงที่ไม่แน่ใจ'

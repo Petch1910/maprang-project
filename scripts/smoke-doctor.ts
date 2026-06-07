@@ -1,160 +1,215 @@
-import { apiBaseUrl, isLocalSmokeTarget, readJson } from './smoke-helpers'
+import {
+  apiBaseUrl,
+  deployedSmokeTargetIssues,
+  formatUnknownDiagnosticText,
+  isLocalSmokeTarget,
+  readJson,
+  validateBackendRootIdentity,
+  type RootIdentityPayload,
+} from './smoke-helpers'
+import {
+  buildHealthRows,
+  buildNextDeploySteps,
+  evaluateDeployReadiness,
+  healthFailures,
+  type HealthPayload,
+} from './deploy-readiness'
 
-type HealthPayload = {
-  ok: boolean
-  checks: {
-    databaseConfigured: boolean
-    databaseConnected: boolean
-    openRouterConfigured: boolean
-    imageGenerationConfigured?: boolean
-    supabaseAuthConfigured?: boolean
-    adminAuthConfigured?: boolean
+const recommendedRoleplayMaxOutputTokens = 1600
+const recommendedMinRoleplayReplyChars = 420
+const baselineRoleplayMaxOutputTokens = 1200
+const baselineMinRoleplayReplyChars = 320
+
+export type SmokeDoctorReport = {
+  exitCode: number
+  stdout: string[]
+  stderr: string[]
+  warnings: string[]
+}
+
+export type SmokeDoctorRunnerOptions = {
+  argv?: string[]
+  apiBaseUrl?: string
+  isLocalSmokeTarget?: boolean
+  rootIdentityReader?: () => Promise<RootIdentityPayload>
+  healthReader?: () => Promise<HealthPayload>
+  writeLine?: (line: string) => void
+  writeWarning?: (line: string) => void
+  writeError?: (line: string) => void
+}
+
+export function buildSmokeDoctorReport(
+  health: HealthPayload,
+  options: {
+    apiBaseUrl: string
+    isLocalSmokeTarget: boolean
+    strictProductionGate?: boolean
+    strictStagingGate?: boolean
+  },
+): SmokeDoctorReport {
+  const stdout: string[] = []
+  const stderr: string[] = []
+  const warnings: string[] = []
+
+  for (const [name, value] of buildHealthRows(health, options.apiBaseUrl)) {
+    stdout.push(`${name}: ${value}`)
   }
-  security?: {
-    authMode?: string
-    avatarStorage?: string
-    avatarStorageAccess?: string
-    signedUrlExpiresIn?: number | null
-    corsOrigins?: string[]
+
+  if (health.env?.missingRequired?.length) stdout.push(`env จำเป็นที่ขาด: ${health.env.missingRequired.join(', ')}`)
+  if (health.env?.missingRecommended?.length) {
+    stdout.push(`env แนะนำที่ขาด: ${health.env.missingRecommended.join(', ')}`)
   }
-  securityPosture?: Record<string, { ok: boolean; detail: string }>
-  model?: {
-    name: string
-    imageGeneration?: {
-      configured?: boolean
-      model?: string
+  if (health.env?.invalid?.length) stdout.push(`env ไม่ถูกต้อง: ${health.env.invalid.join('; ')}`)
+  if (health.databaseError) stdout.push(`ข้อผิดพลาดฐานข้อมูล: ${health.databaseError}`)
+
+  const failures = healthFailures(health)
+
+  if (failures.length > 0) {
+    stderr.push(`ตรวจ smoke doctor ไม่ผ่าน: ${failures.join('; ')}`)
+    stderr.push('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่มระบบหลังบ้าน')
+    stderr.push('วิธีแก้ตอน deploy: ตรวจ DATABASE_URL, migrations, และเครือข่ายของ service ระบบหลังบ้าน')
+    return { exitCode: 1, stdout, stderr, warnings }
+  }
+
+  if (!health.checks.openRouterConfigured) {
+    warnings.push('คำเตือน: OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า `smoke:local` อาจผ่านได้ แต่ `smoke:chat` จะไม่ผ่าน')
+  }
+  if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
+    warnings.push('คำเตือน: ยังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูป Creator Studio จะใช้ภาพตัวอย่างชั่วคราว')
+  }
+  if (health.model) {
+    const maxOutputTokens = health.model.maxOutputTokens ?? 0
+    const minRoleplayReplyChars = health.model.minRoleplayReplyChars ?? 0
+    if (
+      maxOutputTokens > 0 &&
+      minRoleplayReplyChars > 0 &&
+      maxOutputTokens >= baselineRoleplayMaxOutputTokens &&
+      minRoleplayReplyChars >= baselineMinRoleplayReplyChars &&
+      (maxOutputTokens < recommendedRoleplayMaxOutputTokens ||
+        minRoleplayReplyChars < recommendedMinRoleplayReplyChars)
+    ) {
+      warnings.push(
+        `คำเตือน: งบคำตอบ roleplay ต่ำกว่าค่าแนะนำ ${recommendedRoleplayMaxOutputTokens}/${recommendedMinRoleplayReplyChars} ตอนนี้ MODEL_MAX_OUTPUT_TOKENS=${maxOutputTokens}, MODEL_MIN_ROLEPLAY_REPLY_CHARS=${minRoleplayReplyChars}`,
+      )
     }
   }
-  databaseError?: string
-  env?: {
-    missingRecommended?: string[]
+
+  const {
+    productionReady,
+    productionBlockers,
+    productionFixes,
+    stagingReady,
+    stagingBlockers,
+    stagingFixes,
+  } = evaluateDeployReadiness(health, { isLocalSmokeTarget: options.isLocalSmokeTarget })
+
+  stdout.push(`stagingReady: ${stagingReady}`)
+  stdout.push(`stagingBlockerCount: ${stagingBlockers.length}`)
+  if (stagingBlockers.length > 0) {
+    stdout.push(`stagingBlockers: ${stagingBlockers.join('; ')}`)
+    stdout.push('วิธีแก้สเตจจิง:')
+    for (const fix of stagingFixes) stdout.push(`- ${fix}`)
+    stdout.push('ด่านสเตจจิง: รัน `bun run staging:verify` กับระบบหลังบ้านสเตจจิงที่ deploy แล้วก่อนยืนยันโปรดักชัน')
+    if (options.strictStagingGate) {
+      stderr.push('ด่านสเตจจิงไม่ผ่าน: แก้ตัวกั้นสเตจจิงด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
+      return { exitCode: 1, stdout, stderr, warnings }
+    }
+  } else {
+    stdout.push('stagingBlockers: ไม่พบ')
   }
+
+  stdout.push(`productionReady: ${productionReady}`)
+  stdout.push(`productionBlockerCount: ${productionBlockers.length}`)
+
+  if (productionBlockers.length > 0) {
+    stdout.push(`productionBlockers: ${productionBlockers.join('; ')}`)
+    stdout.push('วิธีแก้โปรดักชัน:')
+    for (const fix of productionFixes) stdout.push(`- ${fix}`)
+    stdout.push('ด่านโปรดักชัน: รัน `bun run production:check` กับระบบหลังบ้านสเตจจิงหรือโปรดักชันก่อน deploy')
+    if (options.strictProductionGate) {
+      stderr.push('ด่านโปรดักชันไม่ผ่าน: แก้ตัวกั้นโปรดักชันด้านบน แล้วรันใหม่ด้วย URL ระบบหลังบ้านที่ deploy แล้ว')
+      return { exitCode: 1, stdout, stderr, warnings }
+    }
+  } else {
+    stdout.push('productionBlockers: ไม่พบ')
+  }
+
+  const nextSteps = buildNextDeploySteps({
+    productionReady,
+    productionBlockers,
+    productionFixes,
+    stagingReady,
+    stagingBlockers,
+    stagingFixes,
+  })
+  stdout.push('ขั้นตอนถัดไป:')
+  for (const [index, step] of nextSteps.entries()) {
+    stdout.push(`${index + 1}. ${step}`)
+  }
+
+  stdout.push('ผ่าน - ตรวจ smoke doctor ผ่านแล้ว')
+  return { exitCode: 0, stdout, stderr, warnings }
 }
 
-let health: HealthPayload
-const strictProductionGate =
-  process.argv.includes('--strict-production') || process.env.STRICT_PRODUCTION_GATE === '1'
-
-try {
-  health = await readJson<HealthPayload>('/health')
-} catch (error) {
-  console.error(`Smoke doctor failed: ${error instanceof Error ? error.message : String(error)}`)
-  console.error('Local fix: start Docker Desktop, run `docker compose up -d postgres`, run migrations, then start the backend.')
-  console.error('Deploy fix: check SMOKE_API_BASE_URL and confirm the deployed backend is reachable.')
-  process.exit(1)
+export function formatSmokeDoctorCaughtError(error: unknown) {
+  return formatUnknownDiagnosticText(error, 500) || 'ไม่ทราบสาเหตุ'
 }
 
-const rows = [
-  ['backend', health.ok ? 'ok' : 'not ready'],
-  ['apiBaseUrl', apiBaseUrl],
-  ['databaseConfigured', String(health.checks.databaseConfigured)],
-  ['databaseConnected', String(health.checks.databaseConnected)],
-  ['openRouterConfigured', String(health.checks.openRouterConfigured)],
-  ['imageGenerationConfigured', String(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured ?? false)],
-  ['authMode', health.security?.authMode ?? 'unknown'],
-  ['avatarStorage', health.security?.avatarStorage ?? 'unknown'],
-  ['avatarStorageAccess', health.security?.avatarStorageAccess ?? 'unknown'],
-  ['signedUrlExpiresIn', String(health.security?.signedUrlExpiresIn ?? 'n/a')],
-  ['model', health.model?.name ?? 'not configured'],
-  ['imageModel', health.model?.imageGeneration?.model ?? 'not configured'],
-  [
-    'securityPosture',
-    health.securityPosture
-      ? `${Object.values(health.securityPosture).filter((item) => item.ok).length}/${Object.values(health.securityPosture).length} ready`
-      : 'not reported',
-  ],
-]
+export async function runSmokeDoctor(argvOrOptions: string[] | SmokeDoctorRunnerOptions = process.argv) {
+  const options: SmokeDoctorRunnerOptions = Array.isArray(argvOrOptions) ? { argv: argvOrOptions } : argvOrOptions
+  const argv = options.argv ?? process.argv
+  const strictProductionGate = argv.includes('--strict-production') || process.env.STRICT_PRODUCTION_GATE === '1'
+  const strictStagingGate = argv.includes('--strict-staging') || process.env.STRICT_STAGING_GATE === '1'
+  const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
+  const currentIsLocalSmokeTarget = options.isLocalSmokeTarget ?? isLocalSmokeTarget
+  const rootIdentityReader = options.rootIdentityReader ?? (() => readJson<RootIdentityPayload>('/'))
+  const healthReader = options.healthReader ?? (() => readJson<HealthPayload>('/health'))
+  const writeLine = options.writeLine ?? ((line: string) => console.log(line))
+  const writeWarning = options.writeWarning ?? ((line: string) => console.warn(line))
+  const writeError = options.writeError ?? ((line: string) => console.error(line))
 
-for (const [name, value] of rows) {
-  console.log(`${name}: ${value}`)
-}
+  if (strictProductionGate || strictStagingGate) {
+    const targetIssues = deployedSmokeTargetIssues(currentApiBaseUrl)
+    if (targetIssues.length > 0) {
+      writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${targetIssues.join('; ')}`)
+      writeError('วิธีแก้ตอน deploy: ตั้ง SMOKE_API_BASE_URL เป็น backend origin ที่ deploy แล้วแบบ https ไม่มี credential/userinfo, path/query/hash, หรือ localhost/loopback')
+      return 1
+    }
+  }
 
-function isLocalOrigin(origin: string) {
   try {
-    const url = new URL(origin)
-    return ['localhost', '127.0.0.1', '::1'].includes(url.hostname)
-  } catch {
-    return true
+    validateBackendRootIdentity(await rootIdentityReader())
+  } catch (error) {
+    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${formatSmokeDoctorCaughtError(error)}`)
+    writeError('วิธีแก้ในเครื่อง: เริ่มระบบหลังบ้าน แล้วเช็กว่า GET / คืน identity payload ของ maprang-backend')
+    writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่า root ของระบบหลังบ้านที่ deploy แล้วไม่ใช่ proxy ของหน้าบ้าน/static')
+    return 1
   }
-}
 
-const productionBlockers: string[] = []
-const productionFixes: string[] = []
-
-function addProductionBlocker(blocker: string, fix: string) {
-  productionBlockers.push(blocker)
-  productionFixes.push(`${blocker}: ${fix}`)
-}
-
-if (isLocalSmokeTarget) {
-  addProductionBlocker(
-    'backend URL is local',
-    'set SMOKE_API_BASE_URL and frontend VITE_API_BASE_URL to the deployed backend URL',
-  )
-}
-if (health.security?.authMode !== 'supabase-jwt') {
-  addProductionBlocker(
-    'auth mode is not Supabase JWT',
-    'set SUPABASE_URL, SUPABASE_JWT_ISSUER, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY in the backend',
-  )
-}
-if (health.security?.avatarStorage !== 'supabase' || health.security?.avatarStorageAccess !== 'signed') {
-  addProductionBlocker(
-    'avatar storage is not Supabase signed URL',
-    'create a private Supabase bucket named avatars, then set STORAGE_PROVIDER=supabase and SUPABASE_STORAGE_ACCESS=signed',
-  )
-}
-if (!health.security?.corsOrigins?.length || health.security.corsOrigins.some(isLocalOrigin)) {
-  addProductionBlocker('CORS_ORIGINS is empty or local', 'set CORS_ORIGINS to the real frontend domain only')
-}
-if (!health.checks.openRouterConfigured) {
-  addProductionBlocker('OPENROUTER_API_KEY is missing', 'set OPENROUTER_API_KEY in the backend host secrets')
-}
-if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
-  addProductionBlocker(
-    'image generation provider is missing',
-    'set IMAGE_GENERATION_API_KEY or OPENAI_API_KEY in the backend host secrets',
-  )
-}
-
-if (health.env?.missingRecommended?.length) {
-  console.log(`missingRecommended: ${health.env.missingRecommended.join(', ')}`)
-}
-
-if (health.databaseError) {
-  console.log(`databaseError: ${health.databaseError}`)
-}
-
-const failures: string[] = []
-if (!health.ok) failures.push('backend health returned ok=false')
-if (!health.checks.databaseConfigured) failures.push('DATABASE_URL is not configured')
-if (!health.checks.databaseConnected) failures.push('database is not connected')
-
-if (failures.length > 0) {
-  console.error(`Smoke doctor failed: ${failures.join('; ')}`)
-  console.error('Local fix: start Docker Desktop, run `docker compose up -d postgres`, run migrations, then start the backend.')
-  console.error('Deploy fix: check DATABASE_URL, migrations, and networking for the backend service.')
-  process.exit(1)
-}
-
-if (!health.checks.openRouterConfigured) {
-  console.warn('Warning: OPENROUTER_API_KEY is not configured. `smoke:local` can still pass, but `smoke:chat` will fail.')
-}
-if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
-  console.warn('Warning: image generation provider is not configured. Creator Studio will use placeholder avatars.')
-}
-
-if (productionBlockers.length > 0) {
-  console.log(`productionBlockers: ${productionBlockers.join('; ')}`)
-  console.log('productionFixes:')
-  for (const fix of productionFixes) console.log(`- ${fix}`)
-  console.log('productionGate: run `bun run production:check` against the staging/production backend before deploy.')
-  if (strictProductionGate) {
-    console.error('Production gate failed. Fix the production blockers above, then rerun with a deployed backend URL.')
-    process.exit(1)
+  let health: HealthPayload
+  try {
+    health = await healthReader()
+  } catch (error) {
+    writeError(`ตรวจ smoke doctor ไม่ผ่าน: ${formatSmokeDoctorCaughtError(error)}`)
+    writeError('วิธีแก้ในเครื่อง: เปิด Docker Desktop, รัน `docker compose up -d postgres`, รัน migrations, แล้วเริ่มระบบหลังบ้าน')
+    writeError('วิธีแก้ตอน deploy: ตรวจ SMOKE_API_BASE_URL และยืนยันว่าระบบหลังบ้านที่ deploy แล้วเข้าถึงได้')
+    return 1
   }
-} else {
-  console.log('productionBlockers: none detected')
+
+  const report = buildSmokeDoctorReport(health, {
+    apiBaseUrl: currentApiBaseUrl,
+    isLocalSmokeTarget: currentIsLocalSmokeTarget,
+    strictProductionGate,
+    strictStagingGate,
+  })
+
+  for (const line of report.stdout) writeLine(line)
+  for (const warning of report.warnings) writeWarning(warning)
+  for (const line of report.stderr) writeError(line)
+
+  return report.exitCode
 }
 
-console.log('Smoke doctor passed.')
+if (import.meta.main) {
+  process.exit(await runSmokeDoctor())
+}

@@ -11,7 +11,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+      - name: ติดตั้ง dependencies ระดับ repo
+        run: bun install --frozen-lockfile
       - run: bun run secrets:check
+      - run: bun run secrets:check:test
+      - run: bun run secrets:patterns:test
+      - run: bun run memory:audit
+      - run: bun run knowledge:audit
+      - run: bun run vault:audit:test
+      - run: bun run docs:commands
+      - run: bun run docs:commands:test
+      - run: bun run eval:local
+      - run: bun run eval:local:test
 
   predeploy:
     runs-on: ubuntu-latest
@@ -19,7 +30,52 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+      - name: ติดตั้ง dependencies ระดับ repo
+        run: bun install --frozen-lockfile
       - run: bun run predeploy:check
+      - run: bun run predeploy:check:test
+      - run: bun run secrets:check:test
+      - run: bun run secrets:patterns:test
+      - run: bun run vault:audit:test
+      - run: bun run docs:commands
+      - run: bun run docs:commands:test
+      - run: bun run tests:audit
+      - run: bun run tests:audit:test
+      - run: bun run eval:local:test
+      - run: bun run security:audit
+      - run: bun run security:audit:test
+      - run: bun run import-cycle:audit
+      - run: bun run import-cycle:audit:test
+      - run: bun run api:audit
+      - run: bun run api:audit:test
+      - run: bun run api:smoke:test
+      - run: bun run frontend:api:test
+      - run: bun run frontend:env:test
+      - run: bun run frontend:storage:test
+      - run: bun run frontend:clipboard:test
+      - run: bun run frontend:bundle:test
+      - run: bun run frontend:static:audit
+      - run: bun run frontend:static:audit:test
+      - run: bun run frontend:route:audit
+      - run: bun run frontend:route:audit:test
+      - run: bun run route-menu:audit
+      - run: bun run route-menu:audit:test
+      - run: bun run smoke:helpers:test
+      - run: bun run provider:smoke:guards:test
+      - run: bun run smoke:doctor:test
+      - run: bun run smoke:ready:test
+      - run: bun run smoke:image:test
+      - run: bun run smoke:chat:test
+      - run: bun run smoke:local:test
+      - run: bun run e2e:smoke:test
+      - run: bun run backend:check:db:test
+      - run: bun run supabase:storage:test
+      - run: bun run release:handoff:check
+      - run: bun run release:handoff:test
+      - run: bun run deploy:readiness:test
+      - run: bun run deploy:status:test
+      - run: bun run deploy:doctor:test
+      - run: bun run deploy:doctor:self-test
 
   backend:
     runs-on: ubuntu-latest
@@ -101,7 +157,7 @@ jobs:
       - run: cd apps/backend && bunx prisma generate
       - run: cd apps/backend && bunx prisma migrate deploy
       - run: cd apps/backend && bun prisma/seed.ts
-      - name: Run seeded local smoke tests
+      - name: รัน local smoke จาก seed
         run: |
           cd apps/backend
           bun run start &

@@ -1,5 +1,13 @@
 import { describe, expect, test } from 'bun:test'
-import { avatarExtension, avatarUrl, safeAvatarFilename, supabaseStorageAccess } from './storage.service'
+import {
+  avatarExtension,
+  avatarStorageMessages,
+  avatarUrl,
+  normalizeSupabaseSignedUrl,
+  readSupabaseSignedUrlPayload,
+  safeAvatarFilename,
+  supabaseStorageAccess,
+} from './storage.service'
 
 describe('storage service', () => {
   test('normalizes supported avatar extensions', () => {
@@ -25,5 +33,35 @@ describe('storage service', () => {
 
   test('defaults Supabase storage access to signed URLs', () => {
     expect(supabaseStorageAccess).toBe('signed')
+  })
+
+  test('normalizes Supabase signed URL response paths', () => {
+    const supabaseUrl = 'https://example.supabase.co'
+    expect(normalizeSupabaseSignedUrl(supabaseUrl, 'https://cdn.example.com/avatar.png')).toBe('https://cdn.example.com/avatar.png')
+    expect(normalizeSupabaseSignedUrl(supabaseUrl, '/storage/v1/object/sign/avatars/a.png?token=abc')).toBe(
+      'https://example.supabase.co/storage/v1/object/sign/avatars/a.png?token=abc',
+    )
+    expect(normalizeSupabaseSignedUrl(supabaseUrl, '/object/sign/avatars/a.png?token=abc')).toBe(
+      'https://example.supabase.co/storage/v1/object/sign/avatars/a.png?token=abc',
+    )
+  })
+
+  test('keeps Supabase storage failure messages Thai-first', () => {
+    expect(avatarStorageMessages.fileRequired).toContain('แนบไฟล์รูปตัวละคร')
+    expect(avatarStorageMessages.typeNotSupported).toContain('JPG')
+    expect(avatarStorageMessages.tooLarge(2 * 1024 * 1024)).toContain('2 MB')
+    expect(avatarStorageMessages.notFound).toContain('ไม่พบรูปตัวละคร')
+    expect(avatarStorageMessages.notConfigured).toContain('ยังไม่ได้ตั้งค่า')
+    expect(avatarStorageMessages.uploadFailed(502)).toContain('อัปโหลดรูปตัวละคร')
+    expect(avatarStorageMessages.signedUrlFailed(500)).toContain('signed URL')
+    expect(avatarStorageMessages.signedUrlMissing).toContain('signed URL')
+    expect(avatarStorageMessages.signedUrlMalformed).toContain('signed URL')
+    expect(avatarStorageMessages.unavailable).toContain('พื้นที่เก็บรูปตัวละคร')
+  })
+
+  test('wraps malformed Supabase signed URL payloads in Thai-first errors', async () => {
+    await expect(readSupabaseSignedUrlPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
+      'Supabase ส่งข้อมูล signed URL ของรูปตัวละครไม่ถูกต้อง',
+    )
   })
 })

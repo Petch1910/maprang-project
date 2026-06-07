@@ -1,12 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '../store'
 import { fetchUsageSummary } from '../../lib/api'
-
-type WalletState = {
-  tokenBalance: number
-  lowTokenThreshold: number
-  isLoading: boolean
-}
+import type { RootState, WalletState } from '../types'
 
 const initialState: WalletState = {
   tokenBalance: 0,
@@ -26,9 +20,6 @@ const walletSlice = createSlice({
     setTokenBalance(state, action: PayloadAction<number>) {
       state.tokenBalance = action.payload
     },
-    setWalletLoading(state, action: PayloadAction<boolean>) {
-      state.isLoading = action.payload
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -45,7 +36,7 @@ const walletSlice = createSlice({
   },
 })
 
-export const { setTokenBalance, setWalletLoading } = walletSlice.actions
+export const { setTokenBalance } = walletSlice.actions
 export const selectTokenBalance = (state: RootState) => state.wallet.tokenBalance
 export const selectWalletLoading = (state: RootState) => state.wallet.isLoading
 export const selectIsLowToken = (state: RootState) => state.wallet.tokenBalance <= state.wallet.lowTokenThreshold

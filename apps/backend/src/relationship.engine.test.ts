@@ -2,7 +2,10 @@ import { describe, expect, test } from 'bun:test'
 import {
   RELATIONSHIP_PRESETS,
   applyRelationshipDelta,
+  analyzeRelationshipTags,
+  buildRelationshipPrompt,
   buildRelationshipSeedFromTags,
+  listRelationshipPresets,
   simulateRelationshipPreview,
   validateRelationshipTags,
 } from './relationship.engine'
@@ -32,6 +35,14 @@ describe('relationship tag validation', () => {
     expect(issues.some((issue) => issue.level === 'danger')).toBe(false)
   })
 
+  test('normalizes Thai discovery aliases from Creator Studio defaults', () => {
+    const profile = analyzeRelationshipTags(['บทบาทสมมุติ', 'ไทย'])
+
+    expect(profile.discovery).toContain('roleplay')
+    expect(profile.discovery).toContain('thai')
+    expect(profile.unknown).toEqual([])
+  })
+
   test('keeps non-adult no-romance conflicts blocking', () => {
     const issues = validateRelationshipTags(['no-romance', 'crush'])
 
@@ -53,9 +64,120 @@ describe('relationship tag validation', () => {
       }),
     )
   })
+
+  test('keeps creator validation messages Thai-first', () => {
+    const issues = validateRelationshipTags([
+      'family',
+      'nc',
+      'no-romance',
+      'lover',
+      'crush',
+      'hard-to-get',
+      'golden',
+      'enemy',
+      'friend',
+      'red-flag',
+      'green-flag',
+    ])
+    const copy = issues.map((issue) => issue.message).join('\n')
+
+    expect(copy).toContain('เนื้อเรื่องนี้เป็นการจำลอง/สมมุติสำหรับผู้ใหญ่')
+    expect(copy).toContain('พฤติกรรมบอทอาจแกว่งถ้าพรอมป์ไม่ชัด')
+    expect(copy).toContain('แท็กระบบควรอยู่ราว 3-5 แท็ก')
+    expect(copy).not.toMatch(/This story|Engine tags|conflicts with|Bot behavior|Romance progression|Pick slow-earned|mixed safety tone/i)
+  })
 })
 
 describe('relationship seed', () => {
+  test('builds Thai-first hidden relationship prompt guidance', () => {
+    const state = buildRelationshipSeedFromTags(['lover', 'golden', 'slow-burn'])
+    const prompt = buildRelationshipPrompt(state)
+
+    expect(prompt).toContain('สถานะ Relationship Engine')
+    expect(prompt).toContain('ตัวปรับพรอมป์')
+    expect(prompt).toContain('ใช้เป็นทิศทางพฤติกรรมแบบซ่อนอยู่')
+    expect(prompt).not.toContain('Relationship engine state')
+    expect(prompt).not.toContain('Status is')
+    expect(prompt).not.toContain('Behavior:')
+  })
+
+  test('normalizes the expanded Thai relationship ladder', () => {
+    const profile = analyzeRelationshipTags([
+      'ศัตรู',
+      'ไม่ถูกกัน',
+      'คู่ปรับ',
+      'คู่กัด',
+      'คนรู้จัก',
+      'เพื่อน',
+      'เพื่อนสนิท',
+      'เพื่อนตาย',
+      'แอบชอบ',
+      'เพื่อนสนิทคิดไม่ซื่อ',
+      'ลองคุย',
+      'คนคุย',
+      'แฟน',
+      'แฟน Toxic',
+      'คนรัก',
+      'คู่ชีวิต',
+      'คู่ครอง',
+      'คู่ครอง Toxic',
+      'คู่แท้',
+    ])
+
+    expect(profile.unknown).toEqual([])
+    expect(profile.engine).toEqual(
+      expect.arrayContaining([
+        'enemy',
+        'disliked',
+        'rival',
+        'bickering-rival',
+        'acquaintance',
+        'friend',
+        'close-friend',
+        'ride-or-die',
+        'crush',
+        'friend-crush',
+        'dating-trial',
+        'talking-stage',
+        'partner',
+        'toxic-partner',
+        'lover',
+        'life-partner',
+        'spouse',
+        'toxic-spouse',
+        'soulmate',
+      ]),
+    )
+  })
+
+  test('creates distinct seed statuses for the expanded ladder', () => {
+    const cases: Array<[string, string]> = [
+      ['ศัตรู', 'ENEMY'],
+      ['ไม่ถูกกัน', 'DISLIKED'],
+      ['คู่ปรับ', 'RIVAL'],
+      ['คู่กัด', 'BICKERING_RIVAL'],
+      ['คนรู้จัก', 'ACQUAINTANCE'],
+      ['เพื่อน', 'FRIEND'],
+      ['เพื่อนสนิท', 'CLOSE_FRIEND'],
+      ['เพื่อนตาย', 'RIDE_OR_DIE'],
+      ['แอบชอบ', 'CRUSH'],
+      ['เพื่อนสนิทคิดไม่ซื่อ', 'FRIEND_CRUSH'],
+      ['ลองคุย', 'DATING_TRIAL'],
+      ['คนคุย', 'TALKING_STAGE'],
+      ['แฟน', 'PARTNER'],
+      ['แฟน Toxic', 'TOXIC_PARTNER'],
+      ['คนรัก', 'LOVER'],
+      ['คู่ชีวิต', 'LIFE_PARTNER'],
+      ['คู่ครอง', 'SPOUSE'],
+      ['คู่ครอง Toxic', 'TOXIC_SPOUSE'],
+      ['คู่แท้', 'SOULMATE'],
+    ]
+
+    for (const [tag, status] of cases) {
+      expect(buildRelationshipSeedFromTags([tag]).status).toBe(status)
+    }
+  })
+
   test('creates a safety-locked family route', () => {
     const seed = buildRelationshipSeedFromTags(['family', 'no-romance', 'slice-of-life'])
 
@@ -112,5 +234,23 @@ describe('relationship preview simulator', () => {
       expect(preview.seed.tagProfile.engine.length + preview.seed.tagProfile.safety.length).toBeGreaterThan(0)
       expect(preview.turns.length).toBeGreaterThan(0)
     }
+  })
+
+  test('splits relationship presets by player contract and creator surfaces', () => {
+    const allPresets = listRelationshipPresets()
+    const contractPresets = listRelationshipPresets('contract')
+    const creatorPresets = listRelationshipPresets('creator')
+
+    expect(allPresets).toHaveLength(RELATIONSHIP_PRESETS.length)
+    expect(contractPresets).toHaveLength(20)
+    expect(creatorPresets).toHaveLength(RELATIONSHIP_PRESETS.length - 1)
+
+    expect(contractPresets.every((preset) => preset.surfaces.includes('contract'))).toBe(true)
+    expect(creatorPresets.every((preset) => preset.surfaces.includes('creator'))).toBe(true)
+    expect(contractPresets.map((preset) => preset.id)).toContain('stranger')
+    expect(contractPresets.map((preset) => preset.id)).toContain('soulmate')
+    expect(contractPresets.map((preset) => preset.id)).not.toContain('safe-family-bond')
+    expect(creatorPresets.map((preset) => preset.id)).not.toContain('stranger')
+    expect(creatorPresets.map((preset) => preset.id)).toContain('safe-family-bond')
   })
 })

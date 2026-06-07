@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {
   Bell,
   ChevronLeft,
@@ -11,9 +11,11 @@ import {
   Globe2,
   MessageCircle,
   Plus,
+  PlusCircle,
   Search,
   Settings,
   Sparkles,
+  UserRound,
   WandSparkles,
   X,
 } from 'lucide-react'
@@ -21,6 +23,7 @@ import type { Character, CharacterListFilters } from '../lib/api'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { buildGeneratedAvatarDataUrl } from '../lib/characterDraft'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
+import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadChatSummaries, selectChatsLoading, selectPlayableChatSummaries } from '../store/slices/chatsSlice'
 import {
@@ -47,6 +50,14 @@ const quickFilters = [
   { label: 'ดราม่า', tag: 'drama' },
   { label: 'ค่อยๆ สนิท', tag: 'slow-burn' },
   { label: 'คู่แข่ง', tag: 'rival' },
+]
+
+const mobileNavItems = [
+  { to: '/', label: 'สำรวจ', icon: Compass },
+  { to: '/chats', label: 'แชท', icon: MessageCircle },
+  { to: '/create', label: 'สร้าง', icon: PlusCircle },
+  { to: '/events', label: 'อีเวนต์', icon: Bell },
+  { to: '/profile', label: 'โปรไฟล์', icon: UserRound },
 ]
 
 function demoAvatar(imagePrompt: string) {
@@ -210,17 +221,6 @@ function getBadges(character: Character) {
   if (character.contentRating && character.contentRating !== 'general') badges.add(ratingLabel(character.contentRating))
   if (badges.size === 0) badges.add('ออริจินัล')
   return [...badges].slice(0, 2)
-}
-
-function relationshipStatusLabel(status?: string) {
-  const labels: Record<string, string> = {
-    RIVAL: 'คู่แข่ง',
-    NEUTRAL: 'เริ่มต้น',
-    CLOSE: 'ใกล้ชิด',
-    TRUSTED: 'ไว้ใจ',
-    ROMANTIC: 'โรแมนติก',
-  }
-  return status ? labels[status] ?? status : 'เริ่มต้น'
 }
 
 function SidebarAvatar({ character }: { character: Character }) {
@@ -541,7 +541,7 @@ function ContinueChattingRail({
                   </span>
                   {chat.relationshipState?.tier && (
                     <span className="rounded-full bg-emerald-400/12 px-2 py-1 text-[11px] font-black text-emerald-100">
-                      {chat.relationshipState.tier}
+                      {relationshipTierLabel(chat.relationshipState.tier)}
                     </span>
                   )}
                   {pendingCount > 0 && (
@@ -636,11 +636,15 @@ export function ExplorePage() {
     <main className="flex min-h-svh bg-[#111113] text-white">
       <Sidebar characters={marketplaceCharacters} chats={chats} isChatsLoading={isChatsLoading} />
 
-      <section className="min-w-0 flex-1">
+      <section className="min-w-0 flex-1 pb-24 md:pb-0">
         <header className="sticky top-0 z-30 border-b border-white/8 bg-[#111113]/92 px-4 py-3 backdrop-blur-xl md:px-8">
           <div className="flex items-center gap-3">
-            <Link className="grid size-10 place-items-center rounded-md bg-white/6 text-white/55 md:hidden" to="/chats">
-              <Compass size={18} />
+            <Link
+              aria-label="เปิดแชทของฉัน"
+              className="grid size-10 place-items-center rounded-md bg-white/6 text-white/55 md:hidden"
+              to="/chats"
+            >
+              <MessageCircle size={18} />
             </Link>
             <label className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/70" size={18} />
@@ -720,6 +724,28 @@ export function ExplorePage() {
           <CharacterRail characters={fresh} icon="🆕" isLoading={isCharactersLoading} title="มาใหม่" />
         </div>
       </section>
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-white/10 bg-[#151518]/96 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden"
+        data-testid="explore-mobile-nav"
+      >
+        {mobileNavItems.map((item) => (
+          <NavLink
+            className={({ isActive }) =>
+              `flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-black ${
+                isActive ? 'bg-[#ff6a1a] text-white shadow-[0_14px_30px_rgba(255,106,26,0.24)]' : 'text-white/52'
+              }`
+            }
+            end={item.to === '/'}
+            key={item.to}
+            data-testid={`explore-mobile-nav-${item.to === '/' ? 'home' : item.to.slice(1)}`}
+            to={item.to}
+          >
+            <item.icon size={18} />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </main>
   )
 }

@@ -23,6 +23,7 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const isUser = chat.role === 'user'
   const canReport = chat.role !== 'system' && chat.content.trim().length > 0 && Boolean(onReport)
+  const reportDisabledReason = isReporting ? 'กำลังส่งรายงานข้อความนี้' : ''
 
   return (
     <article className={`flex w-full items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -57,9 +58,11 @@ export function MessageBubble({
         {canReport && !isUser && (
           <button
             className="mt-2 inline-flex min-h-7 rounded-full border border-white/10 bg-white/5 px-2.5 text-xs font-bold text-white/58 transition hover:bg-white/10 hover:text-white disabled:opacity-60 sm:hidden sm:group-hover:inline-flex"
+            aria-disabled={isReporting}
             data-testid={`message-report-${chat.id}`}
             disabled={isReporting}
             onClick={() => onReport?.(chat)}
+            title={reportDisabledReason || 'รายงานข้อความนี้'}
             type="button"
           >
             {isReporting ? 'กำลังรายงาน...' : 'รายงาน'}

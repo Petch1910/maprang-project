@@ -2,9 +2,15 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { chatRoutes } from './chat.routes'
 import {
   AuthError,
+  authErrorResponse,
+  authErrorMessages,
+  buildRateLimitErrorResponse,
   rateLimitBucket,
   rateLimitKey,
+  rateLimitReplyMessage,
   rateLimitRequestKey,
+  readSupabaseJwksPayload,
+  readSupabaseUserPayload,
   requireAdminApiKey,
   resolveRequestUserId,
   routeRateLimitMax,
@@ -108,6 +114,37 @@ describe('security helpers', () => {
     expect(rateLimitRequestKey(chatRequest)).toBe('user-1:chat')
   })
 
+  test('rate limit response is Thai-first and machine-readable', async () => {
+    const response = buildRateLimitErrorResponse()
+    const body = (await response.json()) as { error?: string; message?: string }
+
+    expect(response.status).toBe(429)
+    expect(response.headers.get('content-type')).toContain('application/json')
+    expect(body.error).toBe('rate_limited')
+    expect(body.message).toBe(rateLimitReplyMessage)
+    expect(body.message).toContain('ส่งคำขอถี่เกินไป')
+  })
+
+  test('wraps malformed Supabase auth payloads in Thai-first errors', async () => {
+    await expect(readSupabaseJwksPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
+      authErrorMessages.jwksMalformed,
+    )
+    await expect(readSupabaseUserPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
+      authErrorMessages.userMalformed,
+    )
+  })
+
+  test('builds controlled public auth error responses', () => {
+    expect(authErrorResponse(new AuthError('auth_required', 'raw custom auth detail'))).toEqual({
+      error: 'auth_required',
+      message: authErrorMessages.authRequired,
+    })
+    expect(authErrorResponse(new AuthError('invalid_auth_token', 'raw token parser detail'))).toEqual({
+      error: 'invalid_auth_token',
+      message: authErrorMessages.invalidAuthToken,
+    })
+  })
+
   test('request user resolution keeps local dev fallback when Supabase issuer is not configured', async () => {
     delete process.env.SUPABASE_URL
     delete process.env.SUPABASE_JWT_ISSUER
@@ -156,7 +193,27 @@ describe('security helpers', () => {
         }),
         'fallback-user',
       ),
-    ).rejects.toBeInstanceOf(AuthError)
+    ).rejects.toMatchObject({ code: 'auth_required', message: authErrorMessages.authRequired })
+  })
+
+  test('production Supabase auth rejects invalid tokens with Thai-first message', async () => {
+    process.env.NODE_ENV = 'production'
+    process.env.SUPABASE_URL = 'https://project-ref.supabase.co'
+    delete process.env.SUPABASE_JWT_ISSUER
+    delete process.env.SUPABASE_ANON_KEY
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY
+    delete process.env.ADMIN_API_KEY
+
+    await expect(
+      resolveRequestUserId(
+        new Request('http://local/me/usage', {
+          headers: {
+            authorization: 'Bearer invalid-token',
+          },
+        }),
+        'fallback-user',
+      ),
+    ).rejects.toMatchObject({ code: 'invalid_auth_token', message: authErrorMessages.invalidAuthToken })
   })
 
   test('production Supabase auth allows admin-key smoke user impersonation', async () => {
@@ -195,9 +252,10 @@ describe('security helpers', () => {
         }),
       }),
     )
-    const body = (await response.json()) as { error?: string }
+    const body = (await response.json()) as { error?: string; message?: string }
 
     expect(response.status).toBe(401)
     expect(body.error).toBe('auth_required')
+    expect(body.message).toBe(authErrorMessages.authRequired)
   })
 })

@@ -90,12 +90,39 @@ describe('chat routes security', () => {
     await cleanup()
   })
 
+  test('returns Thai-first messages when chat persistence is unavailable', async () => {
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await chatRoutes.handle(routeRequest('/chats'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
+  })
+
   test('rejects invalid chat ids before they reach persistence', async () => {
     if (!(await shouldRunDbTest())) return
 
     const invalidId = "' OR 1=1 --"
     const cases = [
       routeRequest(`/chats/${encodeURIComponent(invalidId)}/messages`),
+      routeRequest(`/chats/${encodeURIComponent(invalidId)}/world-state`),
+      routeRequest(`/chats/${encodeURIComponent(invalidId)}/world-state`, {
+        method: 'PATCH',
+        body: { location: 'Injected room' },
+      }),
       routeRequest(`/chats/${encodeURIComponent(invalidId)}`, { method: 'PATCH', body: { title: 'Injected title' } }),
       routeRequest(`/chats/${encodeURIComponent(invalidId)}/archive`, { method: 'PATCH' }),
       routeRequest(`/chats/${encodeURIComponent(invalidId)}/restore`, { method: 'PATCH' }),
@@ -104,9 +131,10 @@ describe('chat routes security', () => {
 
     for (const request of cases) {
       const response = await chatRoutes.handle(request)
-      const body = (await response.json()) as { error: string }
+      const body = (await response.json()) as { error: string; message: string }
       expect(response.status).toBe(400)
       expect(body.error).toBe('invalid_chat_id')
+      expect(body.message).toBe('รหัสแชทไม่ถูกต้อง')
     }
   })
 
@@ -117,6 +145,14 @@ describe('chat routes security', () => {
 
     const readResponse = await chatRoutes.handle(routeRequest(`/chats/${chat.id}/messages`))
     expect(readResponse.status).toBe(404)
+
+    const worldReadResponse = await chatRoutes.handle(routeRequest(`/chats/${chat.id}/world-state`))
+    expect(worldReadResponse.status).toBe(404)
+
+    const worldPatchResponse = await chatRoutes.handle(
+      routeRequest(`/chats/${chat.id}/world-state`, { method: 'PATCH', body: { location: `${testPrefix} Hijacked` } }),
+    )
+    expect(worldPatchResponse.status).toBe(404)
 
     const renameResponse = await chatRoutes.handle(
       routeRequest(`/chats/${chat.id}`, { method: 'PATCH', body: { title: `${testPrefix} Hijacked` } }),
@@ -131,12 +167,47 @@ describe('chat routes security', () => {
 
     const otherChat = await prisma!.chat.findUnique({
       where: { id: chat.id },
-      select: { title: true, isArchived: true, deletedAt: true },
+      select: { title: true, isArchived: true, deletedAt: true, memory: true },
     })
     expect(otherChat).toMatchObject({
       title: chat.title,
       isArchived: false,
       deletedAt: null,
+    })
+    expect(otherChat?.memory).toBeNull()
+  })
+
+  test('lets the owner read and patch world state through chat routes', async () => {
+    if (!(await shouldRunDbTest())) return
+
+    const chat = await createTestChat(ownerUserId)
+    const patchResponse = await chatRoutes.handle(
+      routeRequest(`/chats/${chat.id}/world-state`, {
+        method: 'PATCH',
+        body: {
+          timeOfDay: 'early morning',
+          location: 'train platform',
+          weather: 'cold mist',
+          mood: 'careful distance',
+          sceneNotes: ['Do not jump to another location without player input.'],
+        },
+      }),
+    )
+    expect(patchResponse.status).toBe(200)
+    await expect(patchResponse.json()).resolves.toMatchObject({
+      chatId: chat.id,
+      worldState: {
+        location: 'train platform',
+      },
+    })
+
+    const readResponse = await chatRoutes.handle(routeRequest(`/chats/${chat.id}/world-state`))
+    expect(readResponse.status).toBe(200)
+    await expect(readResponse.json()).resolves.toMatchObject({
+      chatId: chat.id,
+      worldState: {
+        mood: 'careful distance',
+      },
     })
   })
 })

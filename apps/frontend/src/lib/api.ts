@@ -1,9 +1,29 @@
 import { API_BASE_URL } from './env'
+import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem } from './safeStorage'
 
 export { API_BASE_URL }
 
 export const DEFAULT_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const genericApiErrorMessage = 'คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'
+const thaiTextPattern = /[\u0e00-\u0e7f]/
+const rawTechnicalMessagePattern =
+  /\b(?:Cannot read|PrismaClient\w*|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|TypeError|ReferenceError|SyntaxError|DATABASE_URL|OPENROUTER_API_KEY|SUPABASE_SERVICE_ROLE_KEY|service_role|SQLSTATE|stack trace|undefined)\b/i
+const malformedApiJsonPayload = { message: 'API ตอบกลับไม่สมบูรณ์ กรุณาลองใหม่' }
+
+function payloadString(payload: unknown, key: 'message' | 'error') {
+  if (!payload || typeof payload !== 'object') return ''
+  const value = (payload as Record<string, unknown>)[key]
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+export function safeApiUserMessage(value: string) {
+  const message = value.trim()
+  if (!message) return ''
+  if (!thaiTextPattern.test(message)) return ''
+  if (rawTechnicalMessagePattern.test(message)) return ''
+  return message
+}
 
 export class ApiError extends Error {
   path: string
@@ -11,10 +31,7 @@ export class ApiError extends Error {
   payload: unknown
 
   constructor(path: string, status: number, payload: unknown) {
-    const message =
-      payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
-        ? payload.error
-        : `${path} failed with status ${status}`
+    const message = safeApiUserMessage(payloadString(payload, 'message')) || `${genericApiErrorMessage} (สถานะ ${status})`
     super(message)
     this.name = 'ApiError'
     this.path = path
@@ -23,55 +40,86 @@ export class ApiError extends Error {
   }
 }
 
+async function readErrorPayload(response: Response) {
+  return response
+    .clone()
+    .json()
+    .catch(() => null)
+}
+
+async function readApiJson<T>(path: string, response: Response): Promise<T> {
+  try {
+    return (await response.json()) as T
+  } catch {
+    throw new ApiError(path, 502, malformedApiJsonPayload)
+  }
+}
+
+function isAbortLikeError(error: unknown) {
+  if (error instanceof DOMException && error.name === 'AbortError') return true
+  if (error && typeof error === 'object') {
+    return (error as { name?: unknown }).name === 'AbortError'
+  }
+  return false
+}
+
 export function shouldLogUnexpectedError(error: unknown) {
   if (error instanceof ApiError) return false
   if (error instanceof TypeError && error.message === 'Failed to fetch') return false
-  if (error instanceof DOMException && error.name === 'AbortError') return false
+  if (isAbortLikeError(error)) return false
   if (error && typeof error === 'object') {
     const namedError = error as { name?: unknown; path?: unknown; status?: unknown }
     if (namedError.name === 'ApiError') return false
-    if (namedError.name === 'AbortError') return false
     if (typeof namedError.path === 'string' && typeof namedError.status === 'number') return false
   }
   return true
 }
 
+export function safeBrowserErrorSummary(error: unknown) {
+  if (error instanceof Error) return { name: error.name || 'Error' }
+  return { type: typeof error }
+}
+
+export function logUnexpectedError(label: string, error: unknown) {
+  if (shouldLogUnexpectedError(error)) console.error(label, safeBrowserErrorSummary(error))
+}
+
 function localValue(key: string) {
   if (typeof window === 'undefined') return null
-  return window.localStorage.getItem(key)
+  return safeGetStorageItem(window.localStorage, key)
 }
 
 export function setApiUserId(userId: string) {
   if (typeof window === 'undefined') return
   if (!uuidPattern.test(userId)) return
-  window.localStorage.setItem('maprang:userId', userId)
+  safeSetStorageItem(window.localStorage, 'maprang:userId', userId)
 }
 
 export function setAdminApiKey(apiKey: string) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem('maprang:adminKey', apiKey)
+  safeSetStorageItem(window.localStorage, 'maprang:adminKey', apiKey)
 }
 
 export function clearAdminApiKey() {
   if (typeof window === 'undefined') return
-  window.localStorage.removeItem('maprang:adminKey')
+  safeRemoveStorageItem(window.localStorage, 'maprang:adminKey')
 }
 
 export function setAccessToken(accessToken: string) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem('maprang:accessToken', accessToken)
+  safeSetStorageItem(window.localStorage, 'maprang:accessToken', accessToken)
 }
 
 export function clearApiAuth() {
   if (typeof window === 'undefined') return
-  window.localStorage.removeItem('maprang:accessToken')
-  window.localStorage.removeItem('maprang:adminKey')
+  safeRemoveStorageItem(window.localStorage, 'maprang:accessToken')
+  safeRemoveStorageItem(window.localStorage, 'maprang:adminKey')
 }
 
 function authHeaders() {
   const storedUserId = localValue('maprang:userId')
   const userId = storedUserId && uuidPattern.test(storedUserId) ? storedUserId : DEFAULT_USER_ID
-  if (storedUserId && storedUserId !== userId) window.localStorage.removeItem('maprang:userId')
+  if (storedUserId && storedUserId !== userId) safeRemoveStorageItem(window.localStorage, 'maprang:userId')
   const adminKey = localValue('maprang:adminKey')
   const accessToken = localValue('maprang:accessToken')
   const shouldSendLocalUserId = import.meta.env.DEV || Boolean(adminKey)
@@ -144,8 +192,32 @@ export type ChatResponse = {
     modelName: string
     contextLoreCount?: number
     tokenBalance?: number | null
+    promptBudget?: {
+      estimatedTokens: number
+      maxTokens: number
+      historyMessagesIncluded: number
+      historyMessagesDropped: number
+      overBudget: boolean
+    }
+    providerFailure?: {
+      code: 'rate_limited' | 'quota_exhausted' | 'invalid_credentials' | 'timeout' | 'provider_unavailable' | 'unknown'
+      status: number | null
+      retryable: boolean
+      userMessage: string
+    }
   }
 }
+
+export type WorldState = {
+  timeOfDay: string
+  location: string
+  weather: string
+  mood: string
+  sceneNotes: string[]
+  updatedAt: string
+}
+
+export type WorldStateInput = Partial<Pick<WorldState, 'timeOfDay' | 'location' | 'weather' | 'mood' | 'sceneNotes'>>
 
 export type ChatRuntimeState = {
   memory: {
@@ -166,6 +238,7 @@ export type ChatRuntimeState = {
       threatening: number
       updatedAt: string
     }
+    worldState?: WorldState
     turnCount: number
     updatedAt: string
   }
@@ -258,6 +331,27 @@ export type ChatStreamEvent =
     }
   | { type: 'error'; message: string; chatId: string | null }
 
+const chatStreamMalformedPayload = { message: 'สตรีมแชทขัดข้อง กรุณาลองใหม่' }
+
+function malformedChatStreamError() {
+  return new ApiError('/chat/stream', 502, chatStreamMalformedPayload)
+}
+
+export function parseChatStreamEvent(raw: string) {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    throw malformedChatStreamError()
+  }
+
+  if (!parsed || typeof parsed !== 'object' || typeof (parsed as { type?: unknown }).type !== 'string') {
+    throw malformedChatStreamError()
+  }
+
+  return parsed as ChatStreamEvent
+}
+
 export type SavedChat = {
   id: string
   title: string | null
@@ -294,6 +388,22 @@ export type HealthStatus = {
       detail: string
     }
   >
+  knowledge?: {
+    structured?: {
+      ok: boolean
+      fileCount: number
+      missing: string[]
+      errors: string[]
+      files: Array<{
+        file: string
+        ok: boolean
+        id?: string
+        schemaVersion?: number
+        updatedAt?: string
+        errors: string[]
+      }>
+    }
+  }
   env?: {
     mode: 'production' | 'development'
     missingRequired: string[]
@@ -308,11 +418,35 @@ export type HealthStatus = {
     outputCostPer1M: number
     temperature?: number
     maxOutputTokens?: number
+    minRoleplayReplyChars?: number
+    promptBudgetTokens?: number
+    promptHistoryMaxMessages?: number
     maxInputChars: number
     minTokenBalanceForChat: number
+    providerRetry?: {
+      chatAttempts: number
+      chatDelayMs: number
+      creatorDraftAttempts: number
+      creatorDraftDelayMs: number
+    }
+    chatProvider?: {
+      configured: boolean
+      liveVerified?: boolean
+      productionReady?: boolean
+      status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
+      liveSmokeCommand?: string
+      localFallbackEnabled?: boolean
+      forcedLocal?: boolean
+      activeRuntimeProvider?: 'local' | 'openrouter' | string
+      localModel?: string
+    }
     imageGeneration?: {
       configured: boolean
+      liveVerified?: boolean
+      productionReady?: boolean
+      status?: 'missing_provider' | 'needs_live_smoke' | 'verified'
       model: string
+      liveSmokeCommand?: string
     }
   }
 }
@@ -328,6 +462,7 @@ export type UsageSummary = {
   contentSettings?: ContentSettings
   usage: {
     totalTokens: number
+    totalCost: string
     requestCount: number
     recent: Array<{
       id: string
@@ -336,6 +471,23 @@ export type UsageSummary = {
       cost: string | null
       createdAt: string
     }>
+    byModel: Array<{
+      modelName: string | null
+      tokens: number
+      cost: string
+      requestCount: number
+    }>
+    daily: Array<{
+      date: string
+      tokens: number
+      cost: string
+      requestCount: number
+    }>
+    estimate: {
+      averageTokensPerRequest: number
+      averageCostPerRequest: string
+      estimatedRemainingRequests: number | null
+    }
   }
   wallet?: {
     transactions: Array<{
@@ -355,57 +507,118 @@ export type ContentSettings = {
   adultVerifiedAt: string | null
 }
 
-export type AdminSummary = {
-  totals: {
-    users: number
-    characters: number
-    publishedCharacters: number
-    reviewCharacters: number
-    chats: number
-    messages: number
-    loreEntries: number
-    favorites: number
-    usageRequests: number
-    tokens: number
-    cost: string
-    pendingReports?: number
+export type UserPersona = {
+  persona: string
+  updatedAt: string | null
+  maxChars: number
+}
+
+export type PromptInspectorSection = {
+  index: number
+  title: string
+  chars: number
+  estimatedTokens: number
+  fingerprint: string
+  preview: string
+  content: string
+}
+
+export type PromptInspectorSnapshot = {
+  generatedAt: string
+  character: {
+    id: string | null
+    name: string | null
   }
-  topCharacters: Array<{
-    id: string
-    name: string
-    status: Character['status']
-    visibility: Character['visibility']
-    qualityScore: number
-    chatCount: number
-    viewCount: number
-    favoriteCount: number
+  redacted: true
+  prompt: string
+  totals: {
+    chars: number
+    estimatedTokens: number
+    sectionCount: number
+  }
+  sections: PromptInspectorSection[]
+  retrieval: {
+    loreCount: number
+    lore: Array<{
+      keyword: string
+      aliases: string[]
+      priority: number
+      preview: string
+    }>
+  }
+  warnings: string[]
+}
+
+export type PromptInspectorDiff = {
+  previousEstimatedTokens: number
+  currentEstimatedTokens: number
+  estimatedTokenDelta: number
+  charDelta: number
+  changedSections: Array<{
+    index: number
+    title: string
+    status: 'added' | 'removed' | 'changed'
+    estimatedTokenDelta: number
+    charDelta: number
   }>
 }
 
-export type LoreEntry = {
-  id: string
-  characterId: string
-  keyword: string
-  aliases: string[]
-  content: string
-  priority: number
-  hierarchyLevel: number
-  parentLoreId: string | null
-  createdAt: string
-  updatedAt: string
+export type PromptInspectorResponse = {
+  snapshot: PromptInspectorSnapshot
+  diff?: PromptInspectorDiff
+  previousSnapshot?: PromptInspectorSnapshot
 }
 
-export type LoreInput = {
-  keyword: string
-  aliases: string[]
-  content: string
-  priority: number
-  hierarchyLevel: number
-  parentLoreId: string | null
+export type EvalCheck = {
+  label: string
+  status: 'pass' | 'fail'
+  detail: string
+}
+
+export type EvalScenarioResult = {
+  id: string
+  title: string
+  estimatedTokens: number
+  passed: boolean
+  failures: string[]
+  checks: EvalCheck[]
+}
+
+export type LocalEvalRun = {
+  generatedAt: string
+  suite: {
+    schemaVersion: number
+    name: string
+    updatedAt: string | null
+    description: string | null
+  }
+  passed: boolean
+  scenarioCount: number
+  passCount: number
+  failCount: number
+  totalEstimatedTokens: number
+  maxEstimatedTokens: number
+  failures: string[]
+  results: EvalScenarioResult[]
+}
+
+export function apiRequestTimeoutMs(path: string, init?: RequestInit) {
+  const method = (init?.method ?? 'GET').toUpperCase()
+  if (path === '/chat' || path === '/creator/ai-draft') return 60_000
+  if (method === 'GET') return 5_000
+  return 12_000
+}
+
+export function apiUploadTimeoutMs() {
+  return 60_000
+}
+
+export function apiStreamConnectTimeoutMs() {
+  return 60_000
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const timeoutMs = path === '/chat' ? 60_000 : 12_000
+  const timeoutMs = apiRequestTimeoutMs(path, init)
   const controller = init?.signal ? null : new AbortController()
   const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null
 
@@ -422,14 +635,11 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    const payload = await response
-      .clone()
-      .json()
-      .catch(() => null)
+    const payload = await readErrorPayload(response)
     throw new ApiError(path, response.status, payload)
   }
 
-  return response.json() as Promise<T>
+  return readApiJson<T>(path, response)
 }
 
 export type CharacterListFilters = {
@@ -482,8 +692,35 @@ export async function updateContentSettings(input: { isAdult: boolean; maxRating
   })
 }
 
-export async function fetchAdminSummary() {
-  return requestJson<AdminSummary>('/admin/summary')
+export async function fetchUserPersona() {
+  return requestJson<{ persona: UserPersona }>('/me/persona')
+}
+
+export async function updateUserPersona(persona: string) {
+  return requestJson<{ persona: UserPersona }>('/me/persona', {
+    method: 'PATCH',
+    body: JSON.stringify({ persona }),
+  })
+}
+
+export async function inspectAdminPrompt(input: {
+  characterId: string
+  message: string
+  chatId?: string
+  compareWithMessage?: string
+  includePreviousSnapshot?: boolean
+  includeSavedPersona?: boolean
+  runtimeNote?: string
+  userPersona?: string
+}) {
+  return requestJson<PromptInspectorResponse>('/admin/prompt-inspector', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function fetchAdminLocalEvals() {
+  return requestJson<LocalEvalRun>('/admin/evals/local')
 }
 
 export type RelationshipPreset = {
@@ -491,6 +728,7 @@ export type RelationshipPreset = {
   name: string
   description: string
   tags: string[]
+  surfaces?: Array<'contract' | 'creator'>
 }
 
 export type RelationshipPreview = {
@@ -512,8 +750,11 @@ export type RelationshipPreview = {
   }>
 }
 
-export async function fetchRelationshipPresets() {
-  return requestJson<{ presets: RelationshipPreset[] }>('/relationship/presets')
+export async function fetchRelationshipPresets(surface?: 'contract' | 'creator') {
+  const params = new URLSearchParams()
+  if (surface) params.set('surface', surface)
+  const query = params.toString()
+  return requestJson<{ presets: RelationshipPreset[] }>(`/relationship/presets${query ? `?${query}` : ''}`)
 }
 
 export async function previewRelationship(tags: string[], messages?: string[]) {
@@ -571,10 +812,23 @@ export async function generateCreatorAiDraft(input: {
   brief?: string
   imagePrompt?: string
   current?: Partial<CreatorAiDraftFields>
+  imageOnly?: boolean
+  imageStyle?: string
 }) {
   return requestJson<CreatorAiDraftResponse>('/creator/ai-draft', {
     method: 'POST',
     body: JSON.stringify(input),
+  })
+}
+
+export async function fetchCreatorDraft() {
+  return requestJson<{ draft: unknown }>('/creator/draft')
+}
+
+export async function updateCreatorDraft(payload: unknown) {
+  return requestJson<{ ok: boolean }>('/creator/draft', {
+    method: 'PUT',
+    body: JSON.stringify({ payload }),
   })
 }
 
@@ -585,49 +839,34 @@ export async function createCharacter(input: CharacterInput) {
   })
 }
 
-export async function updateCharacter(characterId: string, input: Partial<CharacterInput>) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(input),
-  })
-}
-
-export async function deleteCharacter(characterId: string) {
-  return requestJson<{ ok: boolean }>(`/characters/${characterId}`, {
-    method: 'DELETE',
-  })
-}
-
-export async function duplicateCharacter(characterId: string) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}/duplicate`, {
-    method: 'POST',
-  })
-}
-
-export async function resetCharacterPrompt(characterId: string) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}/reset-prompt`, {
-    method: 'POST',
-  })
-}
-
-export async function uploadAvatar(file: File) {
+export async function uploadAvatar(file: File, timeoutMs = apiUploadTimeoutMs()) {
   const form = new FormData()
   form.append('file', file)
-  const response = await fetch(`${API_BASE_URL}/uploads/avatar`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: form,
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
-  if (!response.ok) {
-    const payload = await response
-      .clone()
-      .json()
-      .catch(() => null)
-    throw new ApiError('/uploads/avatar', response.status, payload)
+  try {
+    const response = await fetch(`${API_BASE_URL}/uploads/avatar`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+      signal: controller.signal,
+    })
+
+    if (!response.ok) {
+      const payload = await readErrorPayload(response)
+      throw new ApiError('/uploads/avatar', response.status, payload)
+    }
+
+    return readApiJson<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>('/uploads/avatar', response)
+  } catch (error) {
+    if (isAbortLikeError(error)) {
+      throw new ApiError('/uploads/avatar', 408, { message: 'อัปโหลดรูปใช้เวลานานเกินไป กรุณาลองใหม่' })
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
   }
-
-  return response.json() as Promise<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>
 }
 
 export async function setCharacterFavorite(characterId: string, favorite: boolean) {
@@ -643,30 +882,6 @@ export async function trackCharacterView(characterId: string) {
   })
 }
 
-export async function fetchLoreEntries(characterId: string) {
-  return requestJson<{ loreEntries?: LoreEntry[] }>(`/characters/${characterId}/lore`)
-}
-
-export async function createLoreEntry(characterId: string, input: LoreInput) {
-  return requestJson<{ loreEntry: LoreEntry }>(`/characters/${characterId}/lore`, {
-    method: 'POST',
-    body: JSON.stringify(input),
-  })
-}
-
-export async function updateLoreEntry(loreId: string, input: Partial<LoreInput>) {
-  return requestJson<{ loreEntry: LoreEntry }>(`/lore/${loreId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(input),
-  })
-}
-
-export async function deleteLoreEntry(loreId: string) {
-  return requestJson<{ ok: boolean }>(`/lore/${loreId}`, {
-    method: 'DELETE',
-  })
-}
-
 export async function fetchChats(options: { archived?: boolean } = {}) {
   const params = new URLSearchParams()
   if (options.archived) params.set('archived', 'true')
@@ -676,6 +891,13 @@ export async function fetchChats(options: { archived?: boolean } = {}) {
 
 export async function fetchChatMessages(chatId: string) {
   return requestJson<{ chat?: SavedChat }>(`/chats/${chatId}/messages`)
+}
+
+export async function updateChatWorldState(chatId: string, input: WorldStateInput) {
+  return requestJson<{ chatId: string; worldState: WorldState }>(`/chats/${chatId}/world-state`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
 }
 
 export async function archiveChat(chatId: string) {
@@ -835,21 +1057,33 @@ export async function streamChatMessage(
     history: Array<{ role: 'user' | 'assistant'; content: string }>
   },
   onEvent: (event: ChatStreamEvent) => void,
+  options: { timeoutMs?: number } = {},
 ) {
-  const response = await fetch(`${API_BASE_URL}/chat/stream`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-    },
-    body: JSON.stringify({ ...input, chatId: input.chatId ?? undefined }),
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs ?? apiStreamConnectTimeoutMs())
+  let response: Response
+
+  try {
+    response = await fetch(`${API_BASE_URL}/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: JSON.stringify({ ...input, chatId: input.chatId ?? undefined }),
+      signal: controller.signal,
+    })
+  } catch (error) {
+    if (isAbortLikeError(error)) {
+      throw new ApiError('/chat/stream', 408, { message: 'เชื่อมต่อสตรีมแชทใช้เวลานานเกินไป กรุณาลองใหม่' })
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   if (!response.ok || !response.body) {
-    const payload = await response
-      .clone()
-      .json()
-      .catch(() => null)
+    const payload = await readErrorPayload(response)
     throw new ApiError('/chat/stream', response.status, payload)
   }
 
@@ -863,22 +1097,27 @@ export async function streamChatMessage(
       .find((item) => item.startsWith('data: '))
 
     if (!line) return
-    onEvent(JSON.parse(line.slice(6)) as ChatStreamEvent)
+    onEvent(parseChatStreamEvent(line.slice(6)))
   }
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
 
-    buffer += decoder.decode(value, { stream: true })
+      buffer += decoder.decode(value, { stream: true })
+      buffer = buffer.replace(/\r\n/g, '\n')
+      const events = buffer.split('\n\n')
+      buffer = events.pop() ?? ''
+
+      for (const rawEvent of events) emitEvent(rawEvent)
+    }
+
+    buffer += decoder.decode()
     buffer = buffer.replace(/\r\n/g, '\n')
-    const events = buffer.split('\n\n')
-    buffer = events.pop() ?? ''
-
-    for (const rawEvent of events) emitEvent(rawEvent)
+    for (const rawEvent of buffer.split('\n\n').filter((event) => event.trim())) emitEvent(rawEvent)
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    throw malformedChatStreamError()
   }
-
-  buffer += decoder.decode()
-  buffer = buffer.replace(/\r\n/g, '\n')
-  for (const rawEvent of buffer.split('\n\n').filter((event) => event.trim())) emitEvent(rawEvent)
 }

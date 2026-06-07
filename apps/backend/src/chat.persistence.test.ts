@@ -3,6 +3,7 @@ import { CharacterStatus, MessageRole, Visibility } from '@prisma/client'
 import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, updateChatTitle } from './chat.service'
 import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
+import { loadChatWorldState, updateChatWorldState } from './world-state.service'
 
 const prisma = getPrisma()
 const shouldRunDbTest = createDbTestGate(prisma, 'chat archive persistence')
@@ -123,5 +124,34 @@ describe('chat archive persistence', () => {
       isArchived: false,
       deletedAt: null,
     })
+  })
+
+  test('persists world state only for the chat owner', async () => {
+    if (!(await shouldRunDbTest())) return
+
+    const chat = await createTestChat(ownerUserId)
+    const saved = await updateChatWorldState(chat.id, ownerUserId, {
+      timeOfDay: 'late night',
+      location: 'empty library',
+      weather: 'soft rain',
+      mood: 'quiet pressure',
+      sceneNotes: ['Keep the scene in the same room until the player moves.'],
+    })
+
+    expect(saved?.worldState).toMatchObject({
+      location: 'empty library',
+      mood: 'quiet pressure',
+    })
+    expect(saved?.worldState.sceneNotes).toContain('Keep the scene in the same room until the player moves.')
+
+    const loaded = await loadChatWorldState(chat.id, ownerUserId)
+    expect(loaded?.worldState.location).toBe('empty library')
+
+    expect(
+      await updateChatWorldState(chat.id, otherUserId, {
+        location: 'hijacked room',
+      }),
+    ).toBeNull()
+    expect((await loadChatWorldState(chat.id, ownerUserId))?.worldState.location).toBe('empty library')
   })
 })

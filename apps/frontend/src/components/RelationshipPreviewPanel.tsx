@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { previewRelationship, type RelationshipPreview } from '../lib/api'
+import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { parseTags } from '../lib/tagAnalysis'
 
 export function RelationshipPreviewPanel({
@@ -15,6 +16,7 @@ export function RelationshipPreviewPanel({
   const [script, setScript] = useState(
     'สวัสดี ฉันอยากรู้จักเธอให้มากขึ้น\nขอบคุณที่เล่าให้ฟังนะ ฉันไว้ใจเธอ\nถ้าเธอยังไม่พร้อมก็ไม่เป็นไร',
   )
+  const previewDisabledReason = isLoading ? 'กำลังจำลองบทสนทนา รอให้เสร็จก่อน' : ''
 
   const runPreview = async () => {
     setIsLoading(true)
@@ -36,47 +38,49 @@ export function RelationshipPreviewPanel({
   }
 
   return (
-    <div className="rounded-lg border border-slate-900/10 bg-white p-3 text-xs leading-relaxed text-slate-600">
+    <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs leading-relaxed text-white/62">
       <div className="flex items-center justify-between gap-2">
-        <strong className="text-slate-900">พรีวิวสำหรับครีเอเตอร์</strong>
+        <strong className="text-white">พรีวิวสำหรับครีเอเตอร์</strong>
         <button type="button"
-          className="min-h-8 rounded-full border border-slate-900/10 bg-slate-50 px-3 font-bold text-slate-700 transition hover:bg-white disabled:opacity-60"
+          className="min-h-8 rounded-full border border-white/10 bg-white/7 px-3 font-bold text-white/72 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
+          aria-disabled={isLoading}
           disabled={isLoading}
           onClick={runPreview}
+          title={previewDisabledReason || 'ทดสอบความสัมพันธ์ 5 เทิร์น'}
         >
           {isLoading ? 'กำลังจำลอง...' : 'ทดสอบ 5 เทิร์น'}
         </button>
       </div>
       <textarea
-        className="mt-2 min-h-24 w-full resize-y rounded-lg border border-slate-900/15 bg-slate-50 px-2 py-2 text-xs text-slate-800 outline-none focus:border-blue-500/60 focus:ring-4 focus:ring-blue-500/15"
+        className="mt-2 min-h-24 w-full resize-y rounded-lg border border-white/10 bg-black/22 px-2 py-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-orange-400/70 focus:ring-4 focus:ring-orange-500/10"
         value={script}
         onChange={(event) => setScript(event.target.value)}
         placeholder="ใส่ข้อความจำลองของผู้ใช้ บรรทัดละ 1 เทิร์น"
       />
 
-      {error && <p className="mt-2 mb-0 rounded-lg bg-red-50 p-2 font-bold text-red-700">{error}</p>}
+      {error && <p className="mt-2 mb-0 rounded-lg border border-red-300/25 bg-red-500/12 p-2 font-bold text-red-100">{error}</p>}
 
       {preview && (
         <div className="mt-2 space-y-2">
-          <p className="m-0 font-bold text-slate-900">
-            seed: {preview.seed.status} / {preview.seed.arcStage} / {preview.seed.tier} / {preview.seed.tone}
+          <p className="m-0 font-bold text-white">
+            seed: {relationshipStatusLabel(preview.seed.status)} / {preview.seed.arcStage} / {relationshipTierLabel(preview.seed.tier)} / {preview.seed.tone}
           </p>
           {preview.validationIssues.map((issue) => (
             <p
-              className={`m-0 font-bold ${issue.level === 'danger' ? 'text-red-700' : 'text-amber-700'}`}
+              className={`m-0 font-bold ${issue.level === 'danger' ? 'text-red-200' : 'text-amber-100'}`}
               key={issue.code}
             >
               {issue.message}
             </p>
           ))}
           {preview.turns.map((turn) => (
-            <div className="rounded-lg bg-slate-50 p-2" key={turn.turn}>
-              <strong className="text-slate-900">เทิร์น {turn.turn}</strong>
+            <div className="rounded-lg border border-white/10 bg-black/18 p-2" key={turn.turn}>
+              <strong className="text-white">เทิร์น {turn.turn}</strong>
               <p className="m-0">{turn.message}</p>
               <p className="m-0">
-                {turn.status} / {turn.tier} / {turn.tone} | ผูกพัน {turn.stats.affinity}, ไว้ใจ {turn.stats.trust}
+                {relationshipStatusLabel(turn.status)} / {relationshipTierLabel(turn.tier)} / {turn.tone} | ผูกพัน {turn.stats.affinity}, ไว้ใจ {turn.stats.trust}
               </p>
-              {turn.events.length > 0 && <p className="m-0">hook: {turn.events.map((event) => event.label).join(', ')}</p>}
+              {turn.events.length > 0 && <p className="m-0">จังหวะเรื่อง: {turn.events.map((event) => event.label).join(', ')}</p>}
             </div>
           ))}
         </div>

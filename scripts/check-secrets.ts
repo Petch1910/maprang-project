@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
+import { repoSecretPatterns } from './secret-patterns'
 
 const root = join(import.meta.dir, '..')
 const selfFile = relative(root, import.meta.path)
@@ -7,18 +8,33 @@ const ignoredDirs = new Set(['.git', 'node_modules', 'dist', 'uploads', '.vite']
 const ignoredFiles = new Set(['.env'])
 const checkedExtensions = new Set(['.md', '.ts', '.tsx', '.js', '.json', '.yml', '.yaml', '.example', '.Dockerfile'])
 
-const secretPatterns = [
-  { name: 'OpenRouter key', pattern: /sk-or-v1-[A-Za-z0-9_-]{16,}/ },
-  { name: 'OpenAI project key', pattern: /sk-proj-[A-Za-z0-9_-]{16,}/ },
-  { name: 'JWT-like key', pattern: /eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/ },
+const committedSecretPatterns = [
+  ...repoSecretPatterns,
   { name: 'Known Supabase project ref', pattern: /rkkdpnvoxghqydozvron/ },
   { name: 'Known generated admin key', pattern: /920961fd9669ce7d8aaf1bf7d81450e404d3756f1ff8e64d6e5c5ed535806fc0/ },
 ]
 
-function shouldCheck(path: string) {
+export type SecretFinding = { file: string; name: string }
+
+export function isUnsafeTrackedEnvPath(path: string) {
   const normalized = path.replaceAll('\\', '/')
-  if (normalized.endsWith('.env')) return false
-  if (relative(root, path) === selfFile) return false
+  const fileName = normalized.split('/').pop() ?? normalized
+  return fileName.startsWith('.env') && !fileName.endsWith('.example')
+}
+
+export function shouldCheckSecretPath(
+  path: string,
+  options: {
+    rootDir?: string
+    selfRelativePath?: string
+  } = {},
+) {
+  const rootDir = options.rootDir ?? root
+  const selfRelativePath = options.selfRelativePath ?? selfFile
+  const normalized = path.replaceAll('\\', '/')
+  if (isUnsafeTrackedEnvPath(normalized)) return false
+  const relativePath = relative(rootDir, path).replaceAll('\\', '/')
+  if (relativePath === selfRelativePath.replaceAll('\\', '/')) return false
   if (normalized.includes('/.env')) return true
   const dot = normalized.lastIndexOf('.')
   const extension = dot >= 0 ? normalized.slice(dot) : ''
@@ -32,29 +48,61 @@ async function walk(dir: string, files: string[] = []) {
     const info = await stat(path)
     if (info.isDirectory()) {
       await walk(path, files)
-    } else if (!ignoredFiles.has(entry) && shouldCheck(path)) {
+    } else if (!ignoredFiles.has(entry) && shouldCheckSecretPath(path)) {
       files.push(path)
     }
   }
   return files
 }
 
-const findings: Array<{ file: string; name: string }> = []
-for (const file of await walk(root)) {
-  const content = await readFile(file, 'utf8').catch(() => '')
-  for (const secret of secretPatterns) {
-    if (secret.pattern.test(content)) {
-      findings.push({ file: relative(root, file), name: secret.name })
+async function gitTrackedFiles() {
+  const proc = Bun.spawn(['git', 'ls-files'], {
+    cwd: root,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
+  const stdout = await new Response(proc.stdout).text()
+  const stderr = await new Response(proc.stderr).text()
+  const exitCode = await proc.exited
+  if (exitCode !== 0) {
+    throw new Error(`git ls-files ไม่สำเร็จ: ${stderr.trim() || `exit code ${exitCode}`}`)
+  }
+  return stdout.split(/\r?\n/).filter(Boolean)
+}
+
+export async function collectSecretFindings(): Promise<SecretFinding[]> {
+  const findings: SecretFinding[] = []
+  for (const file of await walk(root)) {
+    const content = await readFile(file, 'utf8').catch(() => '')
+    for (const secret of committedSecretPatterns) {
+      if (secret.pattern.test(content)) {
+        findings.push({ file: relative(root, file), name: secret.name })
+      }
     }
   }
-}
-
-if (findings.length > 0) {
-  console.error('Potential committed secrets found:')
-  for (const finding of findings) {
-    console.error(`- ${finding.file}: ${finding.name}`)
+  for (const file of await gitTrackedFiles()) {
+    if (isUnsafeTrackedEnvPath(file)) {
+      findings.push({ file, name: 'tracked env file ที่ไม่ควร commit' })
+    }
   }
-  process.exit(1)
+  return findings
 }
 
-console.log('No obvious committed secrets found.')
+export async function runSecretsCheck(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const findings = await collectSecretFindings()
+  if (findings.length > 0) {
+    writeError('พบค่าที่อาจเป็น secret ในไฟล์ที่ commit:')
+    for (const finding of findings) {
+      writeError(`- ${finding.file}: ${finding.name}`)
+    }
+    return 1
+  }
+
+  writeLine('ไม่พบ secret ที่ชัดเจนในไฟล์ที่ commit')
+  return 0
+}
+
+if (import.meta.main) process.exit(await runSecretsCheck())

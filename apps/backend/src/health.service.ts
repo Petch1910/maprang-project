@@ -2,35 +2,49 @@ import { getPrisma } from './db'
 import {
   adminAuthConfigured,
   allowedOrigins,
+  chatProviderRetryAttempts,
+  chatProviderRetryDelayMs,
+  creatorDraftRetryAttempts,
+  creatorDraftRetryDelayMs,
   imageGenerationConfigured,
   imageGenerationModel,
   maxInputChars,
   minTokenBalanceForChat,
   modelInputCostPer1M,
   modelMaxOutputTokens,
+  modelMinRoleplayReplyChars,
   modelName,
   modelOutputCostPer1M,
   modelTemperature,
+  promptBudgetTokens,
+  promptHistoryMaxMessages,
   supabaseAuthConfigured,
   storageProvider,
 } from './config'
 import { validateRuntimeEnv } from './env'
+import { structuredKnowledgeHealth } from './knowledge.service'
+import { redactSensitiveText, redactUnknownDiagnosticText } from './redaction'
 import { supabaseSignedUrlExpiresInSeconds, supabaseStorageAccess } from './storage.service'
 
+function redactDatabaseDiagnostic(value: string, maxLength = 500) {
+  return redactSensitiveText(value).text.slice(0, maxLength) || 'ไม่ทราบสาเหตุ'
+}
+
 export function summarizeDatabaseError(error: unknown) {
-  if (!(error instanceof Error)) return 'Unknown database error'
+  if (!(error instanceof Error)) return redactUnknownDiagnosticText(error, 500) || 'ข้อผิดพลาดฐานข้อมูลไม่ทราบสาเหตุ'
 
   const errorWithCode = error as Error & { code?: unknown }
-  const code = typeof errorWithCode.code === 'string' ? errorWithCode.code : ''
+  const code = typeof errorWithCode.code === 'string' ? redactDatabaseDiagnostic(errorWithCode.code, 120) : ''
+  const redactedMessage = redactDatabaseDiagnostic(error.message, 1000)
   const firstUsefulLine =
-    error.message
+    redactedMessage
       .split('\n')
       .map((line) => line.trim())
       .find((line) => line && !/^Invalid\b.*prisma.*invocation/i.test(line)) ?? ''
-  const detail = firstUsefulLine && firstUsefulLine !== error.name ? firstUsefulLine : 'database connection failed'
+  const detail = firstUsefulLine && firstUsefulLine !== error.name ? firstUsefulLine : 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ'
   const suffix = code ? ` (${code})` : ''
 
-  return `${error.name}${suffix}: ${detail}`
+  return redactDatabaseDiagnostic(`${error.name}${suffix}: ${detail}`)
 }
 
 function securityPosture({
@@ -43,39 +57,70 @@ function securityPosture({
   return {
     confidentiality: {
       ok: supabaseAuthConfigured && adminAuthConfigured,
-      detail: supabaseAuthConfigured && adminAuthConfigured ? 'Supabase JWT and admin API key are configured.' : 'Supabase JWT and admin API key must be configured for protected data.',
+      detail: supabaseAuthConfigured && adminAuthConfigured ? 'ตั้งค่า Supabase JWT และ admin API key แล้ว' : 'ข้อมูลที่ป้องกันไว้ต้องมี Supabase JWT และ admin API key',
     },
     integrity: {
       ok: databaseConnected,
       detail: databaseConnected
-        ? 'Prisma query builder, route id validation, owner guards, and migration-backed schema are active.'
-        : 'Database connectivity must pass before data integrity can be trusted.',
+        ? 'Prisma query builder, route id validation, owner guards, และ schema จาก migration พร้อมใช้งาน'
+        : 'ต้องเชื่อมต่อฐานข้อมูลให้ผ่านก่อนจึงจะเชื่อถือ data integrity ได้',
     },
     availability: {
       ok: databaseConnected && openRouterConfigured,
-      detail: databaseConnected && openRouterConfigured ? 'Database, rate-limit buckets, health/readiness, and model provider checks are available.' : 'Database and OpenRouter must both be reachable for stable service.',
+      detail: databaseConnected && openRouterConfigured ? 'ฐานข้อมูล, rate-limit buckets, health/readiness, และ model provider checks พร้อมใช้งาน' : 'บริการจะนิ่งได้เมื่อฐานข้อมูลและ OpenRouter เข้าถึงได้ทั้งคู่',
     },
     authentication: {
       ok: supabaseAuthConfigured,
-      detail: supabaseAuthConfigured ? 'Supabase JWT authentication is configured.' : 'Production must authenticate users with Supabase JWT.',
+      detail: supabaseAuthConfigured ? 'ตั้งค่า Supabase JWT authentication แล้ว' : 'Production ต้องยืนยันผู้ใช้ด้วย Supabase JWT',
     },
     authorization: {
       ok: true,
-      detail: 'Owner/admin checks cover chat, character, lore, report, wallet, and admin actions.',
+      detail: 'Owner/admin checks ครอบคลุม chat, character, lore, report, wallet, และ admin actions',
     },
     accounting: {
       ok: adminAuthConfigured && databaseConnected,
-      detail: adminAuthConfigured && databaseConnected ? 'Usage ledger, token transactions, reports, and admin audit logs are available.' : 'Admin audit/accounting requires admin guard and database connectivity.',
+      detail: adminAuthConfigured && databaseConnected ? 'Usage ledger, token transactions, reports, และ admin audit logs พร้อมใช้งาน' : 'Admin audit/accounting ต้องมี admin guard และฐานข้อมูลที่เชื่อมต่อได้',
     },
+  }
+}
+
+function localChatProviderHealth() {
+  const fallbackEnabled =
+    process.env.NODE_ENV !== 'production' &&
+    process.env.LOCAL_CHAT_PROVIDER !== '0' &&
+    process.env.CHAT_PROVIDER !== 'remote'
+  const forcedLocal = fallbackEnabled && process.env.CHAT_PROVIDER === 'local'
+  const active = fallbackEnabled && (forcedLocal || !process.env.OPENROUTER_API_KEY)
+
+  return {
+    fallbackEnabled,
+    forcedLocal,
+    active,
+    runtimeProvider: active ? 'local' : 'openrouter',
+    model: process.env.LOCAL_CHAT_MODEL_NAME || 'local/mock-roleplay',
   }
 }
 
 export async function loadHealthStatus() {
   const prisma = getPrisma()
+  const chatLiveVerified = process.env.CHAT_PROVIDER_LIVE_VERIFIED === '1'
+  const imageLiveVerified = process.env.IMAGE_GENERATION_LIVE_VERIFIED === '1'
+  const chatProviderConfigured = Boolean(process.env.OPENROUTER_API_KEY)
+  const localChatProvider = localChatProviderHealth()
+  const chatProviderStatus = !chatProviderConfigured
+    ? 'missing_provider'
+    : chatLiveVerified
+      ? 'verified'
+      : 'needs_live_smoke'
+  const imageGenerationStatus = !imageGenerationConfigured
+    ? 'missing_provider'
+    : imageLiveVerified
+      ? 'verified'
+      : 'needs_live_smoke'
   const checks = {
     databaseConfigured: Boolean(process.env.DATABASE_URL),
     databaseConnected: false,
-    openRouterConfigured: Boolean(process.env.OPENROUTER_API_KEY),
+    openRouterConfigured: chatProviderConfigured,
     imageGenerationConfigured,
     adminAuthConfigured,
     supabaseAuthConfigured,
@@ -93,7 +138,8 @@ export async function loadHealthStatus() {
   }
 
   const ok = checks.databaseConfigured && checks.databaseConnected
-  const env = validateRuntimeEnv()
+  const env = validateRuntimeEnv({ throwOnError: false })
+  const knowledge = structuredKnowledgeHealth()
 
   return {
     ok,
@@ -105,11 +151,35 @@ export async function loadHealthStatus() {
       outputCostPer1M: modelOutputCostPer1M,
       temperature: modelTemperature,
       maxOutputTokens: modelMaxOutputTokens,
+      minRoleplayReplyChars: modelMinRoleplayReplyChars,
+      promptBudgetTokens,
+      promptHistoryMaxMessages,
       maxInputChars,
       minTokenBalanceForChat,
+      providerRetry: {
+        chatAttempts: chatProviderRetryAttempts,
+        chatDelayMs: chatProviderRetryDelayMs,
+        creatorDraftAttempts: creatorDraftRetryAttempts,
+        creatorDraftDelayMs: creatorDraftRetryDelayMs,
+      },
+      chatProvider: {
+        configured: chatProviderConfigured,
+        liveVerified: chatLiveVerified,
+        productionReady: chatProviderConfigured && chatLiveVerified,
+        status: chatProviderStatus,
+        liveSmokeCommand: 'bun run smoke:chat',
+        localFallbackEnabled: localChatProvider.fallbackEnabled,
+        forcedLocal: localChatProvider.forcedLocal,
+        activeRuntimeProvider: localChatProvider.runtimeProvider,
+        localModel: localChatProvider.model,
+      },
       imageGeneration: {
         configured: imageGenerationConfigured,
+        liveVerified: imageLiveVerified,
+        productionReady: imageGenerationConfigured && imageLiveVerified,
+        status: imageGenerationStatus,
         model: imageGenerationModel,
+        liveSmokeCommand: 'bun run smoke:image:live',
       },
     },
     security: {
@@ -124,6 +194,22 @@ export async function loadHealthStatus() {
       databaseConnected: checks.databaseConnected,
       openRouterConfigured: checks.openRouterConfigured,
     }),
+    knowledge: {
+      structured: {
+        ok: knowledge.ok,
+        fileCount: knowledge.files.length,
+        missing: knowledge.missing,
+        errors: knowledge.errors,
+        files: knowledge.files.map((file) => ({
+          file: file.file,
+          ok: file.ok,
+          id: file.id,
+          schemaVersion: file.schemaVersion,
+          updatedAt: file.updatedAt,
+          errors: file.errors,
+        })),
+      },
+    },
     env: {
       mode: env.mode,
       missingRequired: env.missingRequired,
@@ -140,26 +226,33 @@ export type HealthStatus = Awaited<ReturnType<typeof loadHealthStatus>>
 export function readinessFailures(health: HealthStatus) {
   const failures: string[] = []
 
-  if (!health.ok) failures.push('backend health is not ok')
-  if (!health.checks.databaseConfigured) failures.push('DATABASE_URL is not configured')
-  if (!health.checks.databaseConnected) failures.push('database is not connected')
-  if (!health.checks.openRouterConfigured) failures.push('OPENROUTER_API_KEY is not configured')
+  if (!health.ok) failures.push('สถานะ backend ยังไม่พร้อม')
+  if (!health.checks.databaseConfigured) failures.push('DATABASE_URL ยังไม่ได้ตั้งค่า')
+  if (!health.checks.databaseConnected) failures.push('ฐานข้อมูลยังเชื่อมต่อไม่ได้')
+  if (!health.checks.openRouterConfigured) failures.push('OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า')
+  if (!health.knowledge.structured.ok) failures.push('คลังความรู้ structured ยังไม่ผ่านการตรวจ')
 
   for (const name of health.env.missingRequired) {
-    failures.push(`${name} is missing`)
+    failures.push(`${name} ยังไม่ได้ตั้งค่า`)
   }
   for (const issue of health.env.invalid) {
     failures.push(issue)
   }
 
   if (health.env.mode === 'production') {
-    if (!health.checks.supabaseAuthConfigured) failures.push('Supabase auth is not configured')
-    if (!health.checks.adminAuthConfigured) failures.push('ADMIN_API_KEY is not configured')
-    if (!health.checks.imageGenerationConfigured) failures.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY is not configured')
-    if (health.security.avatarStorage !== 'supabase') failures.push('production avatar storage must use Supabase')
-    if (health.security.avatarStorageAccess !== 'signed') failures.push('production avatar storage access must use signed URLs')
-    if (health.security.authMode !== 'supabase-jwt') failures.push('production auth mode must use Supabase JWT')
-    if (health.security.adminGuard !== 'api-key') failures.push('production admin guard must use an API key')
+    if (!health.checks.supabaseAuthConfigured) failures.push('Supabase Auth ยังไม่ได้ตั้งค่า')
+    if (!health.checks.adminAuthConfigured) failures.push('ADMIN_API_KEY ยังไม่ได้ตั้งค่า')
+    if (!health.checks.imageGenerationConfigured) failures.push('IMAGE_GENERATION_API_KEY or OPENAI_API_KEY ยังไม่ได้ตั้งค่า')
+    if (!health.model.chatProvider.liveVerified) {
+      failures.push('live smoke ของผู้ให้บริการแชทยังไม่ผ่านการยืนยัน')
+    }
+    if (!health.model.imageGeneration.liveVerified) {
+      failures.push('live smoke ของระบบสร้างรูปยังไม่ผ่านการยืนยัน')
+    }
+    if (health.security.avatarStorage !== 'supabase') failures.push('production พื้นที่เก็บรูปตัวละครต้องใช้ Supabase')
+    if (health.security.avatarStorageAccess !== 'signed') failures.push('production พื้นที่เก็บรูปตัวละครต้องใช้ signed URL')
+    if (health.security.authMode !== 'supabase-jwt') failures.push('production auth mode ต้องใช้ Supabase JWT')
+    if (health.security.adminGuard !== 'api-key') failures.push('production admin guard ต้องใช้ API key')
   }
 
   return failures

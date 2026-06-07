@@ -72,6 +72,31 @@ export class AuthError extends Error {
   }
 }
 
+export const authErrorMessages = {
+  invalidAuthToken: 'โทเคนเข้าสู่ระบบของ Supabase ไม่ถูกต้องหรือหมดอายุ',
+  authRequired: 'กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้',
+  jwksMalformed: 'Supabase JWKS ตอบกลับ JSON ไม่ถูกต้อง',
+  userMalformed: 'Supabase auth user ตอบกลับ JSON ไม่ถูกต้อง',
+}
+
+export function authErrorResponse(error: AuthError) {
+  return {
+    error: error.code,
+    message: error.code === 'invalid_auth_token' ? authErrorMessages.invalidAuthToken : authErrorMessages.authRequired,
+  }
+}
+
+export const rateLimitReplyMessage = 'ส่งคำขอถี่เกินไป กรุณารอสักครู่แล้วลองใหม่'
+
+export function buildRateLimitErrorResponse() {
+  return new Response(JSON.stringify({ error: 'rate_limited', message: rateLimitReplyMessage }), {
+    status: 429,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+  })
+}
+
 function bearerToken(request: Request) {
   return request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
 }
@@ -114,14 +139,30 @@ async function loadSupabaseJwks() {
   if (!issuer) return []
 
   const response = await fetch(`${issuer}/.well-known/jwks.json`)
-  if (!response.ok) throw new Error(`Supabase JWKS fetch failed with status ${response.status}`)
+  if (!response.ok) throw new Error(`โหลด Supabase JWKS ไม่สำเร็จด้วย status ${response.status}`)
 
-  const body = (await response.json()) as { keys?: JwksKey[] }
+  const body = await readSupabaseJwksPayload(response)
   jwksCache = {
     keys: body.keys ?? [],
     expiresAt: Date.now() + 10 * 60 * 1000,
   }
   return jwksCache.keys
+}
+
+export async function readSupabaseJwksPayload(response: Response) {
+  try {
+    return (await response.json()) as { keys?: JwksKey[] }
+  } catch {
+    throw new Error(authErrorMessages.jwksMalformed)
+  }
+}
+
+export async function readSupabaseUserPayload(response: Response) {
+  try {
+    return (await response.json()) as SupabaseUserResponse
+  } catch {
+    throw new Error(authErrorMessages.userMalformed)
+  }
 }
 
 async function verifySupabaseJwt(token: string) {
@@ -180,7 +221,7 @@ async function verifySupabaseJwtWithAuthServer(token: string) {
       },
     })
     if (!response.ok) return null
-    user = (await response.json()) as SupabaseUserResponse
+    user = await readSupabaseUserPayload(response)
   } catch {
     return null
   }
@@ -234,13 +275,13 @@ export async function resolveRequestUserId(request: Request, fallback?: string) 
     const payload = (await verifySupabaseJwt(token)) ?? (await verifySupabaseJwtWithAuthServer(token))
     if (payload?.sub) return syncSupabaseUser(payload)
     if (strictAuthEnabled()) {
-      throw new AuthError('invalid_auth_token', 'A valid Supabase access token is required.')
+      throw new AuthError('invalid_auth_token', authErrorMessages.invalidAuthToken)
     }
   }
 
   if (strictAuthEnabled()) {
     if (isAdminRequest(request)) return requestUserId(request, fallback)
-    throw new AuthError('auth_required', 'Authentication is required.')
+    throw new AuthError('auth_required', authErrorMessages.authRequired)
   }
 
   return requestUserId(request, fallback)

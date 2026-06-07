@@ -1,26 +1,90 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ReportDialog, type ReportDialogSubmit } from '../components/ReportDialog'
-import { createReport, fetchCharacter, type Character } from '../lib/api'
+import {
+  createReport,
+  fetchCharacter,
+  fetchRelationshipPresets,
+  logUnexpectedError,
+  type Character,
+  type RelationshipPreset,
+} from '../lib/api'
 import { displayCharacterDetail } from '../lib/characterDisplay'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
+import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
+import { characterShareUrl } from '../lib/shareUrl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadExploreCharacters, selectExploreCharacters } from '../store/slices/charactersSlice'
 import { saveContentSettings, selectContentSettings, setAdultStatus } from '../store/slices/contentSlice'
 
-const seeds = [
-  { id: 'stranger', label: 'คนแปลกหน้า', tone: 'ระวังตัว แต่ยังเปิดใจ', color: 'bg-blue-600' },
-  { id: 'ally', label: 'คนไว้ใจ', tone: 'อบอุ่น คุ้นเคย และร่วมมือกัน', color: 'bg-emerald-600' },
-  { id: 'rival', label: 'คู่แข่ง', tone: 'คม เข้ม และมีแรงปะทะทางอารมณ์', color: 'bg-rose-600' },
-  { id: 'crush', label: 'แอบชอบ', tone: 'ละมุน มีแรงดึงดูดแบบเขินๆ', color: 'bg-fuchsia-600' },
+type RelationshipContractSeed = {
+  id: string
+  label: string
+  tone: string
+  color: string
+}
+
+const fallbackRelationshipSeeds: RelationshipContractSeed[] = [
+  { id: 'stranger', label: 'คนแปลกหน้า', tone: 'ยังไม่รู้จักกัน ระวังตัวแต่มีพื้นที่ให้เริ่มใหม่', color: 'bg-blue-600' },
+  { id: 'enemy', label: 'ศัตรู', tone: 'แรงต้านสูง ไม่ไว้ใจ และพร้อมปะทะ', color: 'bg-red-700' },
+  { id: 'disliked', label: 'ไม่ถูกกัน', tone: 'ไม่ถึงขั้นศัตรู แต่มีอคติและความติดขัด', color: 'bg-orange-700' },
+  { id: 'rival', label: 'คู่ปรับ', tone: 'แข่งขัน คม และมีแรงปะทะทางอารมณ์', color: 'bg-rose-600' },
+  { id: 'bickering-rival', label: 'คู่กัด', tone: 'กัดกันด้วยคำพูด มี push-pull และจังหวะหยอกแรง', color: 'bg-pink-700' },
+  { id: 'acquaintance', label: 'คนรู้จัก', tone: 'คุ้นหน้าแต่ยังไม่สนิท ต้องค่อย ๆ เปิดบทสนทนา', color: 'bg-slate-600' },
+  { id: 'friend', label: 'เพื่อน', tone: 'เป็นมิตร คุยง่าย และไว้ใจกันระดับหนึ่ง', color: 'bg-sky-600' },
+  { id: 'close-friend', label: 'เพื่อนสนิท', tone: 'สบายใจ อบอุ่น และมีพื้นที่ปลอดภัย', color: 'bg-emerald-600' },
+  { id: 'ride-or-die', label: 'เพื่อนตาย', tone: 'ไว้ใจกันลึก ผ่านอะไรด้วยกัน และพร้อมยืนข้างกัน', color: 'bg-teal-700' },
+  { id: 'crush', label: 'แอบชอบ', tone: 'ละมุน เขิน และมีแรงดึงดูดที่ยังไม่กล้าพูดตรง ๆ', color: 'bg-fuchsia-600' },
+  { id: 'friend-crush', label: 'เพื่อนสนิทคิดไม่ซื่อ', tone: 'สนิทแบบเดิม แต่มีความรู้สึกเกินเพื่อนซ่อนอยู่', color: 'bg-violet-700' },
+  { id: 'dating-trial', label: 'ลองคุย', tone: 'กำลังเปิดใจ ยังไม่ผูกมัดและยังวัดใจกัน', color: 'bg-indigo-600' },
+  { id: 'talking-stage', label: 'คนคุย', tone: 'ใกล้กว่าแค่ลองคุย มีความคาดหวังและเคมีชัดขึ้น', color: 'bg-purple-700' },
+  { id: 'partner', label: 'แฟน', tone: 'เป็นความสัมพันธ์แล้ว มีความใกล้ชิดและข้อตกลงร่วมกัน', color: 'bg-rose-700' },
+  { id: 'toxic-partner', label: 'แฟน Toxic', tone: 'ดึงดูดสูงแต่ trust ต่ำ ตึงและต้องค่อย ๆ ซ่อมความไว้ใจ', color: 'bg-red-800' },
+  { id: 'lover', label: 'คนรัก', tone: 'รักชัดเจน อบอุ่น และพร้อมเข้าสู่ฉากสำคัญ', color: 'bg-pink-600' },
+  { id: 'life-partner', label: 'คู่ชีวิต', tone: 'ผูกพันระยะยาว เชื่อใจกันสูง และมีเป้าหมายร่วมกัน', color: 'bg-emerald-700' },
+  { id: 'spouse', label: 'คู่ครอง', tone: 'ผูกมัด มีประวัติร่วมกัน และมีความรับผิดชอบร่วมกัน', color: 'bg-cyan-700' },
+  { id: 'toxic-spouse', label: 'คู่ครอง Toxic', tone: 'ผูกมัดแต่มีแรงกดดันสูง ต้องคุมโทนให้เห็นรอยร้าว', color: 'bg-stone-700' },
+  { id: 'soulmate', label: 'คู่แท้', tone: 'ผูกพันลึก เหมือนเข้าใจกันโดยธรรมชาติ แต่ยังเล่นต่อได้', color: 'bg-amber-600' },
 ]
+
+const seedColorById = new Map(fallbackRelationshipSeeds.map((seed) => [seed.id, seed.color]))
+
+function uniqueContractSeeds(seeds: RelationshipContractSeed[]) {
+  const seen = new Set<string>()
+  return seeds.filter((seed) => {
+    if (!seed.id || seen.has(seed.id)) return false
+    seen.add(seed.id)
+    return true
+  })
+}
+
+function relationshipSeedFromPreset(preset: RelationshipPreset): RelationshipContractSeed {
+  const id = preset.id.trim()
+  const fallback = fallbackRelationshipSeeds.find((seed) => seed.id === id)
+  return {
+    id,
+    label: preset.name.trim() || fallback?.label || id,
+    tone: preset.description.trim() || fallback?.tone || id,
+    color: seedColorById.get(id) ?? fallback?.color ?? 'bg-slate-600',
+  }
+}
+
+function contractSeedsFromPresets(presets: RelationshipPreset[]) {
+  if (presets.length === 0) return fallbackRelationshipSeeds
+  const presetSeeds = uniqueContractSeeds(presets.map(relationshipSeedFromPreset))
+  const hasDefaultSeed = presetSeeds.some((seed) => seed.id === fallbackRelationshipSeeds[0].id)
+  return uniqueContractSeeds(hasDefaultSeed ? presetSeeds : [fallbackRelationshipSeeds[0], ...presetSeeds])
+}
 
 export function CharacterLobbyPage() {
   const dispatch = useAppDispatch()
   const { characterId } = useParams()
   const characters = useAppSelector(selectExploreCharacters)
   const content = useAppSelector(selectContentSettings)
-  const [seed, setSeed] = useState(seeds[0])
+  const [contractSeeds, setContractSeeds] = useState<RelationshipContractSeed[]>(fallbackRelationshipSeeds)
+  const [selectedSeedId, setSelectedSeedId] = useState(fallbackRelationshipSeeds[0].id)
+  const [isPresetLoading, setIsPresetLoading] = useState(true)
+  const [presetError, setPresetError] = useState('')
   const [detailCharacter, setDetailCharacter] = useState<Character | null>(null)
   const [isLoadingDetail, setIsLoadingDetail] = useState(false)
   const [detailError, setDetailError] = useState('')
@@ -35,6 +99,28 @@ export function CharacterLobbyPage() {
   useEffect(() => {
     if (characters.length === 0) dispatch(loadExploreCharacters({ maxRating: content.maxRating }))
   }, [characters.length, content.maxRating, dispatch])
+
+  useEffect(() => {
+    let cancelled = false
+    setIsPresetLoading(true)
+    setPresetError('')
+    fetchRelationshipPresets('contract')
+      .then((data) => {
+        if (cancelled) return
+        setContractSeeds(contractSeedsFromPresets(data.presets))
+      })
+      .catch((error) => {
+        if (cancelled) return
+        setPresetError('ใช้รายการความสัมพันธ์สำรองในเครื่องอยู่')
+        logUnexpectedError('โหลดชุดความสัมพันธ์เริ่มต้นไม่สำเร็จ:', error)
+      })
+      .finally(() => {
+        if (!cancelled) setIsPresetLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!characterId) return
@@ -61,6 +147,14 @@ export function CharacterLobbyPage() {
   const rating = character ? characterRating(character) : 'general'
   const canView = canViewRating(rating, content.maxRating)
   const canStartChat = Boolean(character) && canView
+  const reportDisabledReason = isReporting ? 'กำลังส่งรายงาน' : !character ? 'โหลดตัวละครก่อนรายงาน' : ''
+  const shareDisabledReason = !character ? 'โหลดตัวละครก่อนแชร์' : ''
+  const startChatDisabledReason = !character
+    ? 'โหลดตัวละครก่อนเริ่มแชท'
+    : !canView
+      ? 'เปิดโหมดผู้ใหญ่หรือปรับระดับเนื้อหาก่อนเริ่มแชท'
+      : ''
+  const seed = contractSeeds.find((item) => item.id === selectedSeedId) ?? contractSeeds[0] ?? fallbackRelationshipSeeds[0]
 
   const reportCharacter = async ({ reason, details }: ReportDialogSubmit) => {
     if (!character || isReporting) return
@@ -71,7 +165,7 @@ export function CharacterLobbyPage() {
         targetType: 'CHARACTER',
         characterId: character.id,
         reason,
-        details: details || `Reported from Character Lobby. Rating: ${ratingLabel(rating)}.`,
+        details: details || `รายงานจากหน้าโปรไฟล์ตัวละคร ระดับเนื้อหา: ${ratingLabel(rating)}.`,
         metadata: {
           contentRating: rating,
           tags: character.tags,
@@ -87,14 +181,9 @@ export function CharacterLobbyPage() {
   }
   const shareCharacter = async () => {
     if (!character) return
-    const url = `${window.location.origin}/characters/${character.id}`
-    try {
-      if (!navigator.clipboard) throw new Error('clipboard unavailable')
-      await navigator.clipboard.writeText(url)
-      setReportNote('คัดลอกลิงก์ตัวละครแล้ว')
-    } catch {
-      setReportNote(`คัดลอกลิงก์นี้: ${url}`)
-    }
+    const url = characterShareUrl(character.id)
+    const copied = await safeWriteClipboardText(getSafeClipboard(), url)
+    setReportNote(copied ? 'คัดลอกลิงก์ตัวละครแล้ว' : `คัดลอกลิงก์นี้: ${url}`)
   }
 
   return (
@@ -122,19 +211,23 @@ export function CharacterLobbyPage() {
             </div>
             <div className="flex gap-2">
               <button
+                aria-disabled={Boolean(reportDisabledReason)}
                 className="min-h-11 flex-1 rounded-xl border border-white/10 bg-white/6 font-black text-white/78 transition hover:bg-white/10 disabled:opacity-60"
                 data-testid="character-report-button"
-                disabled={isReporting || !character}
+                disabled={Boolean(reportDisabledReason)}
                 onClick={() => setIsReportDialogOpen(true)}
+                title={reportDisabledReason || 'รายงานตัวละครนี้'}
                 type="button"
               >
                 รายงาน
               </button>
               <button
+                aria-disabled={Boolean(shareDisabledReason)}
                 className="min-h-11 flex-1 rounded-xl border border-white/10 bg-white/6 font-black text-white/78 transition hover:bg-white/10 disabled:opacity-60"
                 data-testid="character-share-button"
-                disabled={!character}
+                disabled={Boolean(shareDisabledReason)}
                 onClick={shareCharacter}
+                title={shareDisabledReason || 'คัดลอกลิงก์ตัวละคร'}
                 type="button"
               >
                 แชร์
@@ -158,7 +251,7 @@ export function CharacterLobbyPage() {
                 <h2 className="text-lg font-black">เปิดตัวละครนี้ไม่ได้</h2>
                 <p className="mt-1 text-sm leading-6 text-rose-100/70">{detailError}</p>
                 <Link className="mt-3 inline-flex min-h-10 items-center rounded-full bg-rose-500 px-4 text-sm font-black text-white" to="/">
-                  กลับไปหน้า Explore
+                  กลับไปหน้าสำรวจ
                 </Link>
               </section>
             )}
@@ -203,8 +296,13 @@ export function CharacterLobbyPage() {
             <section className="rounded-2xl border border-white/10 bg-white/6 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <h2 className="text-lg font-black text-white">สัญญาความสัมพันธ์</h2>
               <p className="mt-1 text-sm text-white/52">เลือกจุดเริ่มต้นทางอารมณ์ก่อนส่งข้อความแรก</p>
+              {(isPresetLoading || presetError) && (
+                <p className="mt-2 text-xs font-bold text-white/40">
+                  {isPresetLoading ? 'กำลังเชื่อมรายการความสัมพันธ์จากระบบ...' : presetError}
+                </p>
+              )}
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {seeds.map((item) => (
+                {contractSeeds.map((item) => (
                   <button
                     aria-pressed={seed.id === item.id}
                     className={`rounded-2xl border p-4 text-left transition ${
@@ -214,7 +312,7 @@ export function CharacterLobbyPage() {
                     }`}
                     data-testid={`character-seed-${item.id}`}
                     key={item.id}
-                    onClick={() => setSeed(item)}
+                    onClick={() => setSelectedSeedId(item.id)}
                     type="button"
                   >
                     <p className="font-black text-white">{item.label}</p>
@@ -241,6 +339,7 @@ export function CharacterLobbyPage() {
                 className="block min-h-12 w-full rounded-2xl bg-white/10 px-5 py-3 text-center font-black text-white/35 disabled:cursor-not-allowed"
                 data-testid="character-start-chat-disabled"
                 disabled
+                title={startChatDisabledReason || 'ยังเริ่มแชทไม่ได้'}
                 type="button"
               >
                 เริ่มแชท

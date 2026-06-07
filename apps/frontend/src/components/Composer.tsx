@@ -36,6 +36,10 @@ export function Composer({
   const [isToolTrayOpen, setIsToolTrayOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const canSend = !disabled && canSubmit && message.trim().length > 0
+  const busyDisabledReason = disabled ? 'ระบบกำลังตอบอยู่ รอให้จบก่อนใช้งาน' : ''
+  const sendButtonTitle = canSend
+    ? 'ส่งข้อความ'
+    : busyDisabledReason || (!canSubmit ? sendDisabledReason || 'โทเคนไม่พอสำหรับส่งข้อความ' : 'พิมพ์ข้อความก่อนส่ง')
 
   useEffect(() => {
     const textarea = textareaRef.current
@@ -64,6 +68,7 @@ export function Composer({
             {suggestionPrompts.map((item) => (
               <button
                 className="min-h-9 flex-1 basis-[9rem] rounded-xl border border-white/10 bg-white/6 px-3 text-xs font-black text-white/78 transition hover:bg-white/12 hover:text-white"
+                aria-disabled={disabled}
                 data-testid={`chat-suggestion-${item.label}`}
                 disabled={disabled}
                 key={item.label}
@@ -71,6 +76,7 @@ export function Composer({
                   onMessageChange(item.value)
                   setIsToolTrayOpen(false)
                 }}
+                title={busyDisabledReason || item.label}
                 type="button"
               >
                 {item.label}
@@ -83,13 +89,14 @@ export function Composer({
         <button
           aria-label="เปิดตัวช่วยข้อความ"
           aria-expanded={isToolTrayOpen}
+          aria-disabled={disabled}
           className={`grid size-9 place-items-center rounded-xl text-white/78 transition hover:bg-white/12 hover:text-white disabled:opacity-50 sm:size-10 ${
             isToolTrayOpen ? 'bg-white/14 text-white' : 'bg-white/8'
           }`}
           disabled={disabled}
           onClick={() => setIsToolTrayOpen((current) => !current)}
           data-testid="chat-composer-tools"
-          title="เพิ่มตัวช่วยข้อความ"
+          title={busyDisabledReason || 'เพิ่มตัวช่วยข้อความ'}
           type="button"
         >
           <Plus size={18} />
@@ -108,17 +115,19 @@ export function Composer({
             placeholder="พิมพ์ข้อความ..."
             ref={textareaRef}
             rows={1}
+            title={busyDisabledReason || 'พิมพ์ข้อความถึงตัวละคร'}
             value={message}
           />
         </label>
         <button type="submit"
           aria-label="ส่งข้อความ"
+          aria-disabled={!canSend}
           className={`grid size-10 place-items-center rounded-xl transition sm:size-11 ${
             canSend ? 'bg-white text-slate-950 hover:bg-white/90' : 'bg-white/18 text-white/35'
           }`}
           data-testid="chat-composer-submit"
           disabled={!canSend}
-          title={canSubmit ? 'ส่งข้อความ' : sendDisabledReason || 'ยังส่งข้อความไม่ได้'}
+          title={sendButtonTitle}
         >
           <SendHorizontal size={19} />
         </button>

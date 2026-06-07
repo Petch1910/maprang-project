@@ -5,44 +5,32 @@ import { ReportDialog, type ReportDialogSubmit, type ReportDialogTarget } from '
 import { Sidebar } from '../components/Sidebar'
 import {
   archiveChat as archiveSavedChat,
-  createCharacter,
   createReport,
-  createLoreEntry,
-  deleteCharacter,
   deleteChat as deleteSavedChat,
-  deleteLoreEntry,
-  duplicateCharacter,
-  fetchAdminSummary,
   fetchCharacters,
   fetchChatMessages,
   fetchChats,
   fetchHealthStatus,
-  fetchLoreEntries,
   fetchUsageSummary,
-  resetCharacterPrompt,
+  logUnexpectedError,
   sendChatMessage,
   setCharacterFavorite,
-  shouldLogUnexpectedError,
   streamChatMessage,
   trackCharacterView,
-  updateCharacter,
+  updateChatWorldState as updateSavedChatWorldState,
   updateChatTitle as updateSavedChatTitle,
-  updateLoreEntry,
   ApiError,
   type Character,
-  type AdminSummary,
-  type CharacterInput,
   type CharacterListFilters,
   type ChatMessage,
   type ChatResponse,
   type ChatRuntimeState,
   type ChatSummary,
-  type HealthStatus,
-  type LoreEntry,
-  type LoreInput,
+  type WorldStateInput,
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
+import { relationshipSeedLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { isPlayableChatSummary } from '../store/slices/chatsSlice'
 import { selectContentSettings } from '../store/slices/contentSlice'
@@ -71,11 +59,7 @@ function isExpectedUserApiError(error: unknown) {
 }
 
 function logUnexpectedWorkspaceError(label: string, error: unknown) {
-  if (shouldLogUnexpectedError(error)) console.error(label, error)
-}
-
-function hasStoredAdminKey() {
-  return typeof window !== 'undefined' && Boolean(window.localStorage.getItem('maprang:adminKey')?.trim())
+  logUnexpectedError(label, error)
 }
 
 function shouldUseNonStreamingFallback(error: unknown) {
@@ -93,6 +77,15 @@ function defaultSceneState(): ChatRuntimeState['sceneState'] {
     eventCooldowns: {},
     consumedEvents: [],
     declinedEvents: [],
+    updatedAt: '',
+  }
+}
+
+function defaultMemoryState(): ChatRuntimeState['memory'] {
+  return {
+    summary: '',
+    facts: [],
+    turnCount: 0,
     updatedAt: '',
   }
 }
@@ -145,23 +138,19 @@ export function WorkspacePage() {
   const [searchParams] = useSearchParams()
   const routeCharacterId = searchParams.get('characterId')
   const relationshipSeed = searchParams.get('relationship_seed')
+  const relationshipSeedName = relationshipSeedLabel(relationshipSeed)
   const [message, setMessage] = useState('')
   const [character, setCharacter] = useState<Character>(fallbackCharacter)
   const [characters, setCharacters] = useState<Character[]>([fallbackCharacter])
   const [chatId, setChatId] = useState<string | null>(null)
   const [chatLog, setChatLog] = useState<ChatMessage[]>([createGreeting(fallbackCharacter)])
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>([])
-  const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null)
-  const [adminSummary, setAdminSummary] = useState<AdminSummary | null>(null)
-  const [loreEntries, setLoreEntries] = useState<LoreEntry[]>([])
   const [lastUsage, setLastUsage] = useState<ChatUsage | null>(null)
   const [runtimeState, setRuntimeState] = useState<ChatRuntimeState | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
-  const [isLoreLoading, setIsLoreLoading] = useState(false)
+  const [isWorldStateSaving, setIsWorldStateSaving] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isSavingCharacter, setIsSavingCharacter] = useState(false)
-  const [isSavingLore, setIsSavingLore] = useState(false)
   const [reportTarget, setReportTarget] = useState<WorkspaceReportTarget | null>(null)
   const [isReporting, setIsReporting] = useState(false)
   const [connectionNote, setConnectionNote] = useState('กำลังโหลดตัวละครจากฐานข้อมูล...')
@@ -189,7 +178,6 @@ export function WorkspacePage() {
   const loadHealthStatus = useCallback(async () => {
     try {
       const health = await fetchHealthStatus()
-      setHealthStatus(health)
       if (!health.checks.databaseConnected) {
         setConnectionNote('บริการแชททำงานแล้ว แต่ฐานข้อมูลยังไม่พร้อม')
         return
@@ -199,13 +187,12 @@ export function WorkspacePage() {
         return
       }
       if (!health.checks.imageGenerationConfigured) {
-        setConnectionNote('แชทพร้อมแล้ว แต่ AI สร้างรูปยังใช้ภาพตัวอย่างจนกว่าจะตั้งค่า image provider')
+        setConnectionNote('แชทพร้อมแล้ว แต่ AI สร้างรูปยังใช้ภาพตัวอย่างจนกว่าจะตั้งค่าผู้ให้บริการสร้างรูป')
         return
       }
       setConnectionNote('ฐานข้อมูลและบริการ AI เชื่อมต่อแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Load health status error:', error)
-      setHealthStatus(null)
+      logUnexpectedWorkspaceError('โหลดสถานะระบบไม่สำเร็จ:', error)
       setConnectionNote('เชื่อมต่อบริการแชทไม่ได้')
     }
   }, [])
@@ -215,28 +202,9 @@ export function WorkspacePage() {
       const data = await fetchUsageSummary()
       reduxDispatch(setTokenBalance(data.user.tokenBalance))
     } catch (error) {
-      logUnexpectedWorkspaceError('Load usage summary error:', error)
+      logUnexpectedWorkspaceError('โหลดสรุปการใช้โทเคนไม่สำเร็จ:', error)
     }
   }, [reduxDispatch])
-
-  const loadAdminSummary = useCallback(async () => {
-    if (!hasStoredAdminKey()) {
-      setAdminSummary(null)
-      return
-    }
-
-    try {
-      const data = await fetchAdminSummary()
-      setAdminSummary(data)
-    } catch (error) {
-      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-        setAdminSummary(null)
-        return
-      }
-      logUnexpectedWorkspaceError('Load admin summary error:', error)
-      setAdminSummary(null)
-    }
-  }, [])
 
   const loadChatHistory = useCallback(async () => {
     setIsHistoryLoading(true)
@@ -244,7 +212,7 @@ export function WorkspacePage() {
       const data = await fetchChats()
       setChatHistory((data.chats ?? []).filter(isPlayableChatSummary))
     } catch (error) {
-      logUnexpectedWorkspaceError('Load chat history error:', error)
+      logUnexpectedWorkspaceError('โหลดประวัติแชทไม่สำเร็จ:', error)
       setChatHistory([])
     } finally {
       setIsHistoryLoading(false)
@@ -258,25 +226,19 @@ export function WorkspacePage() {
     return loadedCharacters
   }, [])
 
-  const loadLoreEntries = useCallback(async (characterId: string) => {
-    setIsLoreLoading(true)
+  const refreshWorkspaceAuth = useCallback(async () => {
     try {
-      const data = await fetchLoreEntries(characterId)
-      setLoreEntries(data.loreEntries ?? [])
+      await getAuthState()
+      return true
     } catch (error) {
-      if (error instanceof ApiError && error.status === 404) {
-        setLoreEntries([])
-        return
-      }
-      logUnexpectedWorkspaceError('Load lore error:', error)
-      setLoreEntries([])
-    } finally {
-      setIsLoreLoading(false)
+      logUnexpectedWorkspaceError('โหลดสถานะบัญชีไม่สำเร็จ:', error)
+      setConnectionNote('โหลดสถานะบัญชีไม่สำเร็จ แต่ยังใช้โหมดในเครื่องต่อได้')
+      return false
     }
   }, [])
 
   async function reloadWorkspaceAfterAuthChange() {
-    await getAuthState()
+    await refreshWorkspaceAuth()
     await loadHealthStatus()
     const loadedCharacters = await loadCharacters()
     const nextCharacter = loadedCharacters.find((item) => item.id === character.id) ?? loadedCharacters[0] ?? fallbackCharacter
@@ -284,10 +246,8 @@ export function WorkspacePage() {
     setChatId(null)
     setRuntimeState(null)
     setChatLog([createGreeting(nextCharacter)])
-    await loadLoreEntries(nextCharacter.id)
     await loadChatHistory()
     await loadUsageSummary()
-    await loadAdminSummary()
   }
 
   useEffect(() => {
@@ -333,9 +293,8 @@ export function WorkspacePage() {
       setCharacter(data.character)
       setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
     } catch (error) {
-      logUnexpectedWorkspaceError('Track character view error:', error)
+      logUnexpectedWorkspaceError('บันทึกยอดเข้าชมตัวละครไม่สำเร็จ:', error)
     }
-    await loadLoreEntries(nextCharacter.id)
   }
 
   const openChat = useCallback(async (id: string) => {
@@ -346,12 +305,7 @@ export function WorkspacePage() {
       setChatId(data.chat.id)
       setLastUsage((current) => (lastUsageChatIdRef.current === data.chat!.id ? current : null))
       setRuntimeState({
-        memory: data.chat.memory ?? {
-          summary: '',
-          facts: [],
-          turnCount: 0,
-          updatedAt: '',
-        },
+        memory: { ...defaultMemoryState(), ...(data.chat.memory ?? {}) },
         sceneState: { ...defaultSceneState(), ...(data.chat.sceneState ?? {}) },
         relationshipState: data.chat.relationshipState ?? {
           ...defaultRelationshipState(),
@@ -359,14 +313,13 @@ export function WorkspacePage() {
       })
       setCharacter(data.chat.character)
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
-      await loadLoreEntries(data.chat.character.id)
     } catch (error) {
-      logUnexpectedWorkspaceError('Open chat error:', error)
+      logUnexpectedWorkspaceError('เปิดแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     } finally {
       setIsLoading(false)
     }
-  }, [loadLoreEntries])
+  }, [])
 
   useEffect(() => {
     async function boot() {
@@ -374,7 +327,7 @@ export function WorkspacePage() {
         setIsLoading(true)
         setConnectionNote('กำลังโหลดแชทที่บันทึกไว้...')
       }
-      await getAuthState()
+      await refreshWorkspaceAuth()
       await loadHealthStatus()
 
       try {
@@ -389,34 +342,32 @@ export function WorkspacePage() {
                   {
                     id: crypto.randomUUID(),
                     role: 'assistant' as const,
-                    content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeed} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
+                    content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeedName} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
                   },
                 ]
               : []),
           ])
-          await loadLoreEntries(firstCharacter.id)
         }
       } catch (error) {
-        logUnexpectedWorkspaceError('Load character error:', error)
+        logUnexpectedWorkspaceError('โหลดตัวละครไม่สำเร็จ:', error)
         setConnectionNote('เชื่อมต่อบริการแชทไม่ได้')
       }
 
       await loadChatHistory()
       await loadUsageSummary()
-      await loadAdminSummary()
       if (routeChatId) await openChat(routeChatId)
     }
 
     void boot()
   }, [
-    loadAdminSummary,
     loadCharacters,
     loadChatHistory,
     loadHealthStatus,
-    loadLoreEntries,
     loadUsageSummary,
     openChat,
+    refreshWorkspaceAuth,
     relationshipSeed,
+    relationshipSeedName,
     routeCharacterId,
     routeChatId,
   ])
@@ -426,10 +377,9 @@ export function WorkspacePage() {
       await archiveSavedChat(id)
       if (chatId === id) startNewChat()
       await loadChatHistory()
-      await loadAdminSummary()
       setConnectionNote('จัดเก็บแชทแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Archive chat error:', error)
+      logUnexpectedWorkspaceError('จัดเก็บแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
@@ -440,7 +390,7 @@ export function WorkspacePage() {
       await loadChatHistory()
       setConnectionNote('เปลี่ยนชื่อแชทแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Rename chat error:', error)
+      logUnexpectedWorkspaceError('เปลี่ยนชื่อแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'เปลี่ยนชื่อแชทไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
@@ -450,10 +400,9 @@ export function WorkspacePage() {
       await deleteSavedChat(id)
       if (chatId === id) startNewChat()
       await loadChatHistory()
-      await loadAdminSummary()
       setConnectionNote('ลบแชทแล้ว')
     } catch (error) {
-      logUnexpectedWorkspaceError('Delete chat error:', error)
+      logUnexpectedWorkspaceError('ลบแชทไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ลบแชทไม่สำเร็จ กรุณาลองใหม่'))
     }
   }
@@ -465,145 +414,8 @@ export function WorkspacePage() {
       if (character.id === data.character.id) setCharacter(data.character)
       setConnectionNote(favorite ? `เพิ่ม ${data.character.name} ในรายการโปรดแล้ว` : `นำ ${data.character.name} ออกจากรายการโปรดแล้ว`)
     } catch (error) {
-      logUnexpectedWorkspaceError('Favorite character error:', error)
+      logUnexpectedWorkspaceError('อัปเดตรายการโปรดไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    }
-  }
-
-  const saveCharacter = async (input: CharacterInput) => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await updateCharacter(character.id, input)
-      setCharacter(data.character)
-      setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
-      setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
-      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('Save character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const createNewCharacter = async (input: CharacterInput) => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await createCharacter(input)
-      setCharacter(data.character)
-      setCharacters((prev) => [data.character, ...prev.filter((item) => item.id !== data.character.id)])
-      setChatId(null)
-      lastUsageChatIdRef.current = null
-      setLastUsage(null)
-      setLoreEntries([])
-      setChatLog([createGreeting(data.character)])
-      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('Create character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const duplicateSelectedCharacter = async () => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await duplicateCharacter(character.id)
-      setCharacter(data.character)
-      setCharacters((prev) => [data.character, ...prev.filter((item) => item.id !== data.character.id)])
-      setChatId(null)
-      lastUsageChatIdRef.current = null
-      setLastUsage(null)
-      setLoreEntries([])
-      setChatLog([createGreeting(data.character)])
-      setConnectionNote(`อัปเดต ${character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('Duplicate character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const resetSelectedCharacterPrompt = async () => {
-    setIsSavingCharacter(true)
-    try {
-      const data = await resetCharacterPrompt(character.id)
-      setCharacter(data.character)
-      setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
-      setChatLog((prev) => (prev.length === 1 && prev[0]?.role === 'assistant' ? [createGreeting(data.character)] : prev))
-      setConnectionNote(`บันทึก ${data.character.name} แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('Reset prompt error:', error)
-      setConnectionNote(apiErrorMessage(error, 'รีเซ็ต prompt ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const deleteSelectedCharacter = async () => {
-    setIsSavingCharacter(true)
-    try {
-      await deleteCharacter(character.id)
-      const remaining = characters.filter((item) => item.id !== character.id)
-      const nextCharacter = remaining[0] ?? fallbackCharacter
-      setCharacters(remaining.length > 0 ? remaining : [fallbackCharacter])
-      setCharacter(nextCharacter)
-      setChatId(null)
-      lastUsageChatIdRef.current = null
-      setLastUsage(null)
-      setLoreEntries([])
-      setChatLog([createGreeting(nextCharacter)])
-      setConnectionNote(`อัปเดต ${character.name} แล้ว`)
-      await loadLoreEntries(nextCharacter.id)
-    } catch (error) {
-      logUnexpectedWorkspaceError('Delete character error:', error)
-      setConnectionNote(apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingCharacter(false)
-    }
-  }
-
-  const createNewLore = async (input: LoreInput) => {
-    setIsSavingLore(true)
-    try {
-      const data = await createLoreEntry(character.id, input)
-      setLoreEntries((prev) => [data.loreEntry, ...prev])
-      setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('Create lore error:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingLore(false)
-    }
-  }
-
-  const saveLore = async (loreId: string, input: Partial<LoreInput>) => {
-    setIsSavingLore(true)
-    try {
-      const data = await updateLoreEntry(loreId, input)
-      setLoreEntries((prev) => prev.map((entry) => (entry.id === loreId ? data.loreEntry : entry)))
-      setConnectionNote(`บันทึก lore "${data.loreEntry.keyword}" แล้ว`)
-    } catch (error) {
-      logUnexpectedWorkspaceError('Update lore error:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingLore(false)
-    }
-  }
-
-  const removeLore = async (loreId: string) => {
-    setIsSavingLore(true)
-    try {
-      await deleteLoreEntry(loreId)
-      setLoreEntries((prev) => prev.filter((entry) => entry.id !== loreId))
-      setConnectionNote('อัปเดต lore แล้ว')
-    } catch (error) {
-      logUnexpectedWorkspaceError('Delete lore error:', error)
-      setConnectionNote(apiErrorMessage(error, 'อัปเดต lore ไม่สำเร็จ กรุณาลองใหม่'))
-    } finally {
-      setIsSavingLore(false)
     }
   }
 
@@ -649,7 +461,7 @@ export function WorkspacePage() {
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           userPersona: personaDraft.trim() || undefined,
           maxRating: contentSettings.maxRating,
-          history: [...visibleHistory, { role: 'user', content: currentMsg }],
+          history: visibleHistory,
         },
         (event) => {
           if (event.type === 'delta') {
@@ -681,9 +493,8 @@ export function WorkspacePage() {
       )
       if (completedChatId) await syncOpenChatMessages(completedChatId)
       await loadChatHistory()
-      await loadAdminSummary()
     } catch (error) {
-      if (!isExpectedUserApiError(error)) logUnexpectedWorkspaceError('Chat error:', error)
+      if (!isExpectedUserApiError(error)) logUnexpectedWorkspaceError('ส่งแชทไม่สำเร็จ:', error)
       const streamMessage = apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่')
       if (!shouldUseNonStreamingFallback(error)) {
         setConnectionNote(streamMessage)
@@ -708,7 +519,7 @@ export function WorkspacePage() {
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           userPersona: personaDraft.trim() || undefined,
           maxRating: contentSettings.maxRating,
-          history: [...visibleHistory, { role: 'user', content: currentMsg }],
+          history: visibleHistory,
         })
         if (data.chatId) {
           completedChatId = data.chatId
@@ -734,7 +545,7 @@ export function WorkspacePage() {
         if (completedChatId) await syncOpenChatMessages(completedChatId)
         await loadChatHistory()
       } catch (fallbackError) {
-        if (!isExpectedUserApiError(fallbackError)) logUnexpectedWorkspaceError('Chat fallback error:', fallbackError)
+        if (!isExpectedUserApiError(fallbackError)) logUnexpectedWorkspaceError('ส่งแชทแบบสำรองไม่สำเร็จ:', fallbackError)
         const fallbackMessage = apiErrorMessage(
           fallbackError,
           streamMessage || 'เชื่อมต่อบริการ AI ไม่ได้ กรุณาตรวจการตั้งค่าระบบแชท',
@@ -764,25 +575,49 @@ export function WorkspacePage() {
     sendMessage(command)
   }
 
+  const saveWorldState = async (input: WorldStateInput) => {
+    if (!chatId) {
+      setConnectionNote('ต้องเริ่มแชทให้ระบบสร้างห้องก่อน แล้วค่อยบันทึกสถานะโลก')
+      return false
+    }
+
+    setIsWorldStateSaving(true)
+    try {
+      const data = await updateSavedChatWorldState(chatId, input)
+      setRuntimeState((current) => ({
+        memory: {
+          ...defaultMemoryState(),
+          ...(current?.memory ?? {}),
+          worldState: data.worldState,
+        },
+        sceneState: current?.sceneState ?? defaultSceneState(),
+        relationshipState: current?.relationshipState ?? defaultRelationshipState(),
+      }))
+      setConnectionNote('บันทึกสถานะโลกของแชทนี้แล้ว')
+      return true
+    } catch (error) {
+      logUnexpectedWorkspaceError('บันทึกสถานะโลกไม่สำเร็จ:', error)
+      setConnectionNote(apiErrorMessage(error, 'บันทึกสถานะโลกไม่สำเร็จ กรุณาลองใหม่'))
+      return false
+    } finally {
+      setIsWorldStateSaving(false)
+    }
+  }
+
   const syncOpenChatMessages = async (id: string) => {
     try {
       const data = await fetchChatMessages(id)
       if (!data.chat) return
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
       setRuntimeState({
-        memory: data.chat.memory ?? {
-          summary: '',
-          facts: [],
-          turnCount: 0,
-          updatedAt: '',
-        },
+        memory: { ...defaultMemoryState(), ...(data.chat.memory ?? {}) },
         sceneState: { ...defaultSceneState(), ...(data.chat.sceneState ?? {}) },
         relationshipState: data.chat.relationshipState ?? {
           ...defaultRelationshipState(),
         },
       })
     } catch (error) {
-      logUnexpectedWorkspaceError('Sync chat messages error:', error)
+      logUnexpectedWorkspaceError('ซิงก์ข้อความแชทไม่สำเร็จ:', error)
     }
   }
 
@@ -840,9 +675,8 @@ export function WorkspacePage() {
       }
       setConnectionNote(reportTarget.targetType === 'CHARACTER' ? 'ส่งรายงานตัวละครให้ผู้ดูแลตรวจแล้ว' : 'ส่งรายงานข้อความให้ผู้ดูแลตรวจแล้ว')
       setReportTarget(null)
-      await loadAdminSummary()
     } catch (error) {
-      logUnexpectedWorkspaceError('Report error:', error)
+      logUnexpectedWorkspaceError('ส่งรายงานไม่สำเร็จ:', error)
       setConnectionNote(apiErrorMessage(error, 'ส่งรายงานไม่ได้ กรุณาลองใหม่หลังแชทซิงก์เสร็จ'))
     } finally {
       setIsReporting(false)
@@ -853,41 +687,22 @@ export function WorkspacePage() {
     <main className="grid h-svh grid-cols-1 overflow-hidden bg-[#111113] text-white md:grid-cols-[246px_minmax(0,1fr)]">
       <Sidebar
         character={character}
-        adminSummary={adminSummary}
         characters={characters}
         chatHistory={chatHistory}
         chatId={chatId}
         runtimeState={runtimeState}
         connectionNote={connectionNote}
-        healthStatus={healthStatus}
         isHistoryLoading={isHistoryLoading}
-        isLoreLoading={isLoreLoading}
         isMobileOpen={isMobileMenuOpen}
-        isSavingCharacter={isSavingCharacter}
-        isSavingLore={isSavingLore}
-        loreEntries={loreEntries}
         onArchiveChat={archiveChat}
         onAuthChanged={reloadWorkspaceAfterAuthChange}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
-        onCreateCharacter={createNewCharacter}
-        onCreateLore={createNewLore}
-        onDeleteCharacter={deleteSelectedCharacter}
         onDeleteChat={removeChat}
-        onDeleteLore={removeLore}
-        onDuplicateCharacter={duplicateSelectedCharacter}
-        onFilterCharacters={loadCharacters}
-        onFavoriteCharacter={toggleFavorite}
         onLoadChatHistory={loadChatHistory}
-        onLoadHealth={loadHealthStatus}
-        onLoadAdminSummary={loadAdminSummary}
-        onLoadLore={() => loadLoreEntries(character.id)}
         onOpenChat={openChat}
-        onResetCharacterPrompt={resetSelectedCharacterPrompt}
-        onSaveCharacter={saveCharacter}
         onRenameChat={renameChat}
         onSelectCharacter={selectCharacter}
         onStartNewChat={startNewChat}
-        onUpdateLore={saveLore}
       />
 
       <ChatPanel
@@ -901,6 +716,7 @@ export function WorkspacePage() {
         tokenBalance={tokenBalance}
         runtimeState={runtimeState}
         message={message}
+        isWorldStateSaving={isWorldStateSaving}
         onMessageChange={updateMessageDraft}
         onFavoriteCharacter={toggleFavorite}
         onOpenCharacterProfile={() => navigate(`/characters/${character.id}`)}
@@ -909,6 +725,7 @@ export function WorkspacePage() {
         onOpenMenu={() => setIsMobileMenuOpen(true)}
         onReportCharacter={openCharacterReport}
         onReportMessage={openMessageReport}
+        onSaveWorldState={saveWorldState}
         onSceneAction={handleSceneAction}
         onSendMessage={sendMessage}
         onStartNewChat={startNewChat}

@@ -1,10 +1,13 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, stat, writeFile } from 'node:fs/promises'
 import { dirname, extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { storageProvider } from './config'
 
-export const uploadRoot = join(dirname(fileURLToPath(import.meta.url)), '..', 'uploads', 'avatars')
+const backendRoot = dirname(dirname(fileURLToPath(import.meta.url)))
+
+export const uploadRoot = join(backendRoot, 'uploads', 'avatars')
 export const maxAvatarBytes = 2 * 1024 * 1024
+export const localStorageFallbackEnabled = process.env.NODE_ENV !== 'production' && process.env.LOCAL_STORAGE_FALLBACK !== '0'
 export const supabaseSignedUrlExpiresInSeconds = Number(process.env.SUPABASE_SIGNED_URL_EXPIRES_IN ?? 3600)
 export const supabaseStorageAccess =
   process.env.SUPABASE_STORAGE_ACCESS === 'public' || process.env.SUPABASE_STORAGE_ACCESS === 'signed'
@@ -17,6 +20,19 @@ export const allowedAvatarTypes = new Map([
   ['image/webp', '.webp'],
   ['image/gif', '.gif'],
 ])
+
+export const avatarStorageMessages = {
+  fileRequired: 'กรุณาแนบไฟล์รูปตัวละครก่อนอัปโหลด',
+  typeNotSupported: 'รองรับเฉพาะรูป JPG, PNG, WebP หรือ GIF เท่านั้น',
+  tooLarge: (maxBytes: number) => `รูปตัวละครใหญ่เกินไป ขนาดสูงสุดคือ ${Math.round(maxBytes / 1024 / 1024)} MB`,
+  notFound: 'ไม่พบรูปตัวละครนี้',
+  notConfigured: 'ยังไม่ได้ตั้งค่า Supabase Storage สำหรับรูปตัวละคร',
+  uploadFailed: (status: number) => `อัปโหลดรูปตัวละครไป Supabase ไม่สำเร็จ สถานะ ${status}`,
+  signedUrlFailed: (status: number) => `สร้างลิงก์รูปตัวละครแบบ signed URL ไม่สำเร็จ สถานะ ${status}`,
+  signedUrlMissing: 'Supabase ไม่ได้ส่ง signed URL ของรูปตัวละครกลับมา',
+  signedUrlMalformed: 'Supabase ส่งข้อมูล signed URL ของรูปตัวละครไม่ถูกต้อง',
+  unavailable: 'พื้นที่เก็บรูปตัวละครยังไม่พร้อมใช้งาน กรุณาลองใหม่หรือติดต่อผู้ดูแลระบบ',
+}
 
 export function safeAvatarFilename(filename: string) {
   return /^[a-z0-9-]+\.(jpg|jpeg|png|webp|gif)$/i.test(filename) ? filename : null
@@ -36,11 +52,40 @@ export function avatarUrl(origin: string, filename: string) {
   return `${origin}/uploads/avatars/${filename}`
 }
 
+export function localAvatarPath(filename: string) {
+  return join(uploadRoot, filename)
+}
+
+async function localAvatarExists(filename: string) {
+  try {
+    const file = await stat(localAvatarPath(filename))
+    return file.isFile() && file.size > 0
+  } catch {
+    return false
+  }
+}
+
+export function normalizeSupabaseSignedUrl(supabaseUrl: string, signedPath: string) {
+  if (signedPath.startsWith('http')) return signedPath
+  const baseUrl = supabaseUrl.replace(/\/$/, '')
+  if (signedPath.startsWith('/storage/v1/')) return `${baseUrl}${signedPath}`
+  if (signedPath.startsWith('/object/')) return `${baseUrl}/storage/v1${signedPath}`
+  return `${baseUrl}/storage/v1/${signedPath.replace(/^\//, '')}`
+}
+
+export async function readSupabaseSignedUrlPayload(response: Response) {
+  try {
+    return (await response.json()) as { signedURL?: string; signedUrl?: string }
+  } catch {
+    throw new Error(avatarStorageMessages.signedUrlMalformed)
+  }
+}
+
 function supabaseStorageConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '')
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const bucket = process.env.SUPABASE_STORAGE_BUCKET
-  if (!supabaseUrl || !serviceRoleKey || !bucket) throw new Error('Supabase storage is not configured')
+  if (!supabaseUrl || !serviceRoleKey || !bucket) throw new Error(avatarStorageMessages.notConfigured)
   return { supabaseUrl, serviceRoleKey, bucket }
 }
 
@@ -71,13 +116,16 @@ async function uploadSupabaseAvatar({
     },
     body: bytes,
   })
-  if (!response.ok) throw new Error(`Supabase avatar upload failed with status ${response.status}`)
+  if (!response.ok) throw new Error(avatarStorageMessages.uploadFailed(response.status))
 
   return objectPath
 }
 
 export async function resolveAvatarLocation(filename: string) {
-  if (storageProvider === 'local') return { type: 'local' as const, path: join(uploadRoot, filename) }
+  if (storageProvider === 'local') return { type: 'local' as const, path: localAvatarPath(filename) }
+  if (localStorageFallbackEnabled && (await localAvatarExists(filename))) {
+    return { type: 'local' as const, path: localAvatarPath(filename) }
+  }
 
   const { supabaseUrl, serviceRoleKey, bucket } = supabaseStorageConfig()
   const objectPath = `avatars/${filename}`
@@ -93,29 +141,56 @@ export async function resolveAvatarLocation(filename: string) {
     },
     body: JSON.stringify({ expiresIn: supabaseSignedUrlExpiresInSeconds }),
   })
-  if (!response.ok) throw new Error(`Supabase signed avatar URL failed with status ${response.status}`)
+  if (!response.ok) throw new Error(avatarStorageMessages.signedUrlFailed(response.status))
 
-  const body = (await response.json()) as { signedURL?: string; signedUrl?: string }
+  const body = await readSupabaseSignedUrlPayload(response)
   const signedPath = body.signedURL ?? body.signedUrl
-  if (!signedPath) throw new Error('Supabase signed avatar URL response is missing signedURL')
+  if (!signedPath) throw new Error(avatarStorageMessages.signedUrlMissing)
   return {
     type: 'redirect' as const,
-    url: signedPath.startsWith('http') ? signedPath : `${supabaseUrl}${signedPath}`,
+    url: normalizeSupabaseSignedUrl(supabaseUrl, signedPath),
   }
 }
 
 export async function uploadAvatarFile({ file, origin }: { file: File; origin: string }) {
   if (file.size > maxAvatarBytes) {
-    return { ok: false as const, status: 413, error: 'avatar_too_large', maxBytes: maxAvatarBytes }
+    return {
+      ok: false as const,
+      status: 413,
+      error: 'avatar_too_large',
+      message: avatarStorageMessages.tooLarge(maxAvatarBytes),
+      maxBytes: maxAvatarBytes,
+    }
   }
 
   const extension = avatarExtension(file)
-  if (!extension) return { ok: false as const, status: 415, error: 'avatar_type_not_supported' }
+  if (!extension) {
+    return {
+      ok: false as const,
+      status: 415,
+      error: 'avatar_type_not_supported',
+      message: avatarStorageMessages.typeNotSupported,
+    }
+  }
 
   const filename = `${crypto.randomUUID()}${extension}`
   const bytes = new Uint8Array(await file.arrayBuffer())
   if (storageProvider === 'supabase') {
-    await uploadSupabaseAvatar({ bytes, contentType: file.type, filename })
+    try {
+      await uploadSupabaseAvatar({ bytes, contentType: file.type, filename })
+    } catch (error) {
+      if (!localStorageFallbackEnabled) throw error
+      await uploadLocalAvatar({ bytes, filename })
+      return {
+        ok: true as const,
+        url: avatarUrl(origin, filename),
+        filename,
+        provider: 'local' as const,
+        access: 'local' as const,
+        size: file.size,
+        contentType: file.type,
+      }
+    }
   } else {
     await uploadLocalAvatar({ bytes, filename })
   }
@@ -141,15 +216,42 @@ export async function uploadAvatarBytes({
   origin: string
 }) {
   if (bytes.byteLength > maxAvatarBytes) {
-    return { ok: false as const, status: 413, error: 'avatar_too_large', maxBytes: maxAvatarBytes }
+    return {
+      ok: false as const,
+      status: 413,
+      error: 'avatar_too_large',
+      message: avatarStorageMessages.tooLarge(maxAvatarBytes),
+      maxBytes: maxAvatarBytes,
+    }
   }
 
   const extension = avatarExtensionFromContentType(contentType)
-  if (!extension) return { ok: false as const, status: 415, error: 'avatar_type_not_supported' }
+  if (!extension) {
+    return {
+      ok: false as const,
+      status: 415,
+      error: 'avatar_type_not_supported',
+      message: avatarStorageMessages.typeNotSupported,
+    }
+  }
 
   const filename = `${crypto.randomUUID()}${extension}`
   if (storageProvider === 'supabase') {
-    await uploadSupabaseAvatar({ bytes, contentType, filename })
+    try {
+      await uploadSupabaseAvatar({ bytes, contentType, filename })
+    } catch (error) {
+      if (!localStorageFallbackEnabled) throw error
+      await uploadLocalAvatar({ bytes, filename })
+      return {
+        ok: true as const,
+        url: avatarUrl(origin, filename),
+        filename,
+        provider: 'local' as const,
+        access: 'local' as const,
+        size: bytes.byteLength,
+        contentType,
+      }
+    }
   } else {
     await uploadLocalAvatar({ bytes, filename })
   }

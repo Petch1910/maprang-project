@@ -33,6 +33,35 @@ describe('character quality relationship validation', () => {
     expect(quality.relationshipIssues).toHaveLength(0)
   })
 
+  test('keeps quality review notes Thai-first', () => {
+    const quality = reviewCharacterQuality({
+      name: 'A',
+      tagline: '',
+      description: '',
+      biography: '',
+      scenario: '',
+      systemPrompt: '',
+      compactPrompt: '',
+      greeting: '',
+      tags: [],
+      status: CharacterStatus.DRAFT,
+    })
+    const copy = quality.notes.join('\n')
+
+    expect(quality.passes).toBe(false)
+    expect(quality.notes).toEqual(
+      expect.arrayContaining([
+        'ชื่อตัวละครควรมีอย่างน้อย 2 ตัวอักษร',
+        'เพิ่มคำโปรยให้ชัดเจน',
+        'พรอมป์ระบบควรอธิบายบุคลิก พฤติกรรม และขอบเขตให้ชัด',
+        'ต้องมีพรอมป์ย่อเพื่อใช้เป็นบริบทแบบกระชับตอนรันแชท',
+        'ข้อความทักทายยังขาดหรือสั้นเกินไป',
+        'เพิ่มแท็กค้นหาอย่างน้อยหนึ่งแท็ก',
+      ]),
+    )
+    expect(copy).not.toMatch(/Name should|Add a clear|Description should|Biography is short|System prompt|Compact prompt|Greeting is missing|discovery tag/i)
+  })
+
   test('passes adult-mode relationship conflicts as creator warnings', () => {
     const quality = reviewCharacterQuality({
       ...strongCharacter,
@@ -47,7 +76,7 @@ describe('character quality relationship validation', () => {
         level: 'warning',
       }),
     )
-    expect(quality.notes.some((note) => note.includes('family conflicts'))).toBe(true)
+    expect(quality.notes.some((note) => note.includes('family ขัดแย้งกับแท็ก nc/romance'))).toBe(true)
   })
 
   test('fails publish quality when non-adult relationship tags have a danger conflict', () => {
@@ -68,6 +97,61 @@ describe('character quality relationship validation', () => {
 })
 
 describe('relationship route endpoints', () => {
+  test('returns Thai-first messages when character persistence is unavailable', async () => {
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await characterRoutes.handle(new Request('http://localhost/creator/draft'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
+  })
+
+  test('filters relationship presets by surface', async () => {
+    const allResponse = await characterRoutes.handle(new Request('http://localhost/relationship/presets'))
+    const allBody = (await allResponse.json()) as {
+      presets: Array<{ id: string; surfaces: string[] }>
+    }
+    const contractResponse = await characterRoutes.handle(
+      new Request('http://localhost/relationship/presets?surface=contract'),
+    )
+    const contractBody = (await contractResponse.json()) as {
+      presets: Array<{ id: string; surfaces: string[] }>
+    }
+    const creatorResponse = await characterRoutes.handle(
+      new Request('http://localhost/relationship/presets?surface=creator'),
+    )
+    const creatorBody = (await creatorResponse.json()) as {
+      presets: Array<{ id: string; surfaces: string[] }>
+    }
+
+    expect(allResponse.status).toBe(200)
+    expect(contractResponse.status).toBe(200)
+    expect(creatorResponse.status).toBe(200)
+    expect(allBody.presets).toHaveLength(25)
+    expect(contractBody.presets).toHaveLength(20)
+    expect(creatorBody.presets).toHaveLength(24)
+    expect(contractBody.presets.every((preset) => preset.surfaces.includes('contract'))).toBe(true)
+    expect(creatorBody.presets.every((preset) => preset.surfaces.includes('creator'))).toBe(true)
+    expect(contractBody.presets.map((preset) => preset.id)).toContain('stranger')
+    expect(contractBody.presets.map((preset) => preset.id)).toContain('soulmate')
+    expect(contractBody.presets.map((preset) => preset.id)).not.toContain('safe-family-bond')
+    expect(creatorBody.presets.map((preset) => preset.id)).not.toContain('stranger')
+    expect(creatorBody.presets.map((preset) => preset.id)).toContain('safe-family-bond')
+  })
+
   test('validates relationship tags through HTTP route', async () => {
     const response = await characterRoutes.handle(
       new Request('http://localhost/relationship/validate', {

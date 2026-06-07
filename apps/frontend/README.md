@@ -1,73 +1,30 @@
-# React + TypeScript + Vite
+# หน้าบ้าน Maprang (Maprang Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend สำหรับ Maprang AI.
 
-Currently, two official plugins are available:
+## ใช้ทำอะไร
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Explore, Character Lobby, Chat, Create, My Chats, Events, Profile/Persona, Wallet, Moderation และ admin utility pages.
+- UI หลักต้องเป็นภาษาไทย, mobile-first, dark-mode พร้อมใช้งาน และทุกปุ่มที่กดได้ต้องมีผลลัพธ์จริงหรือ disabled reason ชัดเจน.
+- Chat UI ใช้ Redux/Zustand-compatible state direction ตาม `agent.md` และต้องรักษา sandbox/scene, relationship status, world state, report/menu flows.
 
-## React Compiler
+## คำสั่งหลัก
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun install
+bun run dev --host 127.0.0.1
+bun run build
+bun run deploy:check
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+ถ้ารันจาก repo root ให้ใช้ `bun run frontend:check`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ค่า env (Env)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+เริ่มจาก `.env.example` หรือ `.env.production.example`.
+
+- `VITE_API_BASE_URL` ชี้ backend URL.
+- `VITE_SUPABASE_URL` และ `VITE_SUPABASE_ANON_KEY` ใช้กับ Supabase Auth ฝั่ง browser.
+- ห้ามใส่ service role key หรือ backend-only secrets ใน frontend env.
+
+ดู flow รวมและ deploy gates ที่ repo root `README.md`, `DEPLOYMENT_QA.md`, และ `PRODUCTION_SETUP.md`.

@@ -1,9 +1,10 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
+import { summarizeSeedError } from './seed-error'
 
 if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is required to seed QA data')
+  throw new Error('ต้องตั้ง DATABASE_URL ก่อน seed ข้อมูล QA')
 }
 
 const prisma = new PrismaClient({
@@ -25,6 +26,10 @@ const qaMyChatsArchiveDesktopChatId = 'cccccccc-1111-4111-8111-cccccccc1111'
 const qaMyChatsArchiveMobileChatId = 'cccccccc-2222-4222-8222-cccccccc2222'
 const qaMyChatsDeleteDesktopChatId = 'dddddddd-1111-4111-8111-dddddddd1111'
 const qaMyChatsDeleteMobileChatId = 'dddddddd-2222-4222-8222-dddddddd2222'
+const qaMyChatsBulkArchiveDesktopChatId = 'eeeeeeee-1111-4111-8111-eeeeeeee1111'
+const qaMyChatsBulkArchiveMobileChatId = 'eeeeeeee-2222-4222-8222-eeeeeeee2222'
+const qaMyChatsBulkDeleteDesktopChatId = 'ffffffff-1111-4111-8111-ffffffff1111'
+const qaMyChatsBulkDeleteMobileChatId = 'ffffffff-2222-4222-8222-ffffffff2222'
 const qaUsageId = '11111111-1111-4111-8111-111111111111'
 const qaReportId = '22222222-2222-4222-8222-222222222222'
 const qaAuditId = '33333333-3333-4333-8333-333333333333'
@@ -39,6 +44,10 @@ const qaChatIds = [
   qaMyChatsArchiveMobileChatId,
   qaMyChatsDeleteDesktopChatId,
   qaMyChatsDeleteMobileChatId,
+  qaMyChatsBulkArchiveDesktopChatId,
+  qaMyChatsBulkArchiveMobileChatId,
+  qaMyChatsBulkDeleteDesktopChatId,
+  qaMyChatsBulkDeleteMobileChatId,
 ]
 
 const qaMessageUserId = 'qa-smoke-message-user-1'
@@ -54,6 +63,10 @@ const qaSeedMessageIds = [
   'qa-my-chats-archive-mobile-message-1',
   'qa-my-chats-delete-desktop-message-1',
   'qa-my-chats-delete-mobile-message-1',
+  'qa-my-chats-bulk-archive-desktop-message-1',
+  'qa-my-chats-bulk-archive-mobile-message-1',
+  'qa-my-chats-bulk-delete-desktop-message-1',
+  'qa-my-chats-bulk-delete-mobile-message-1',
 ]
 
 const now = new Date()
@@ -76,6 +89,14 @@ async function cleanupPreviousBrowserSmokeArtifacts() {
 const runtimeMemory = {
   summary: 'บทสนทนาที่ค้างไว้ในจังหวะความสัมพันธ์เริ่มอุ่นขึ้น มีฉากสำคัญรอให้ผู้เล่นเลือกเข้าเมื่อพร้อม',
   facts: ['ผู้เล่นเพิ่งเริ่มไว้ใจตัวละครมากขึ้น', 'ตัวละครตอบโทนช้า ลึก และเก็บรายละเอียด'],
+  worldState: {
+    timeOfDay: 'late evening',
+    location: 'quiet cafe by the window',
+    weather: 'soft rain outside',
+    mood: 'slow-burn trust check',
+    sceneNotes: ['Keep the conversation in the cafe until the player clearly moves the scene.'],
+    updatedAt: now.toISOString(),
+  },
   relationshipTimeline: [
     {
       turn: 1,
@@ -197,7 +218,7 @@ const qaCharacters = [
     scenario: 'คุณเจอป้องแป้งในสถานที่เงียบ ๆ และบทสนทนาเริ่มด้วยความระแวงเล็กน้อย',
     greeting: 'เห็นแค่ชื่อก็พอแล้วมั้ง ถ้าอยากคุยต่อก็ลองพูดมาสิ',
     systemPrompt:
-      'คุณคือป้องแป้ง ตัวละคร QA โทน noir ภาษาไทย ตอบสั้นแต่มีชั้นเชิง รักษาความเป็นเรื่องสมมุติและไม่ทำตัวเป็นคนจริง',
+      'คุณคือป้องแป้ง ตัวละคร QA โทน noir ภาษาไทย พูดกระชับแต่เป็นฉากครบ มีชั้นเชิง มีบรรยากาศและแรงเสียดทานทางอารมณ์ รักษาความเป็นเรื่องสมมุติและไม่ทำตัวเป็นคนจริง',
     compactPrompt: 'ป้องแป้ง: QA noir roleplay character',
     characterAnchor: 'ระวังตัว ปากแข็ง แต่มีช่องว่างให้ความสัมพันธ์ค่อย ๆ อุ่นขึ้น',
     constraints: 'เนื้อหาเป็นการจำลองและเรื่องสมมุติ',
@@ -472,6 +493,30 @@ async function upsertMenuActionChats() {
       messageId: 'qa-my-chats-delete-mobile-message-1',
       content: 'เธอเรียกชื่อคุณเบาๆ เหมือนกำลังทดสอบว่าคุณจะหันกลับไปไหม',
     },
+    {
+      id: qaMyChatsBulkArchiveDesktopChatId,
+      title: 'ชุดทดสอบจัดเก็บหลายรายการ',
+      messageId: 'qa-my-chats-bulk-archive-desktop-message-1',
+      content: 'แชทนี้ใช้ทดสอบปุ่มเลือกหลายแชท จัดเก็บหลายรายการ และกู้คืนหลายรายการบน desktop',
+    },
+    {
+      id: qaMyChatsBulkArchiveMobileChatId,
+      title: 'ชุดทดสอบจัดเก็บหลายรายการมือถือ',
+      messageId: 'qa-my-chats-bulk-archive-mobile-message-1',
+      content: 'แชทนี้ใช้ทดสอบปุ่มเลือกหลายแชท จัดเก็บหลายรายการ และกู้คืนหลายรายการบน mobile',
+    },
+    {
+      id: qaMyChatsBulkDeleteDesktopChatId,
+      title: 'ชุดทดสอบลบหลายรายการ',
+      messageId: 'qa-my-chats-bulk-delete-desktop-message-1',
+      content: 'แชทนี้ใช้ทดสอบ confirm ลบหลายรายการจากหน้ารวมแชทบน desktop',
+    },
+    {
+      id: qaMyChatsBulkDeleteMobileChatId,
+      title: 'ชุดทดสอบลบหลายรายการมือถือ',
+      messageId: 'qa-my-chats-bulk-delete-mobile-message-1',
+      content: 'แชทนี้ใช้ทดสอบ confirm ลบหลายรายการจากหน้ารวมแชทบน mobile',
+    },
   ]
 
   for (const item of menuChats) {
@@ -655,7 +700,7 @@ async function upsertReportAndAudit() {
 }
 
 async function main() {
-  console.log('QA seed: preparing users, characters, chat, wallet, reports...')
+  console.log('QA seed: กำลังเตรียมผู้ใช้ ตัวละคร แชท กระเป๋าโทเคน และรายงาน...')
   await cleanupPreviousBrowserSmokeArtifacts()
   await upsertUsers()
   await upsertCharacters()
@@ -671,14 +716,14 @@ async function main() {
     prisma.tokenTransaction.count({ where: { metadata: { path: ['source'], equals: 'qa-seed' } } }),
   ])
 
-  console.log(`QA seed ready: ${characterCount} QA characters, ${chatCount} QA chats, ${reportCount} reports, ${transactionCount} transactions.`)
+  console.log(`QA seed พร้อมแล้ว: ตัวละคร QA ${characterCount} รายการ, แชท QA ${chatCount} ห้อง, รายงาน ${reportCount} รายการ, ธุรกรรม ${transactionCount} รายการ`)
 }
 
 try {
   await main()
 } catch (error) {
-  console.error('QA seed failed:')
-  console.error(error)
+  console.error('QA seed ไม่สำเร็จ:')
+  console.error(summarizeSeedError(error))
   process.exit(1)
 } finally {
   await prisma.$disconnect()

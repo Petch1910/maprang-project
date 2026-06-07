@@ -1,0 +1,342 @@
+import { describe, expect, test } from 'bun:test'
+import type { RouteMenuAuditRow, RouteMenuAuditStatus } from '../apps/frontend/src/lib/routeMenuAudit.ts'
+import {
+  auditRouteMenuDocumentation,
+  collectAuditRows,
+  collectDeclaredRoutes,
+  collectRouteMenuDocCheckResult,
+  collectRoutePreloadPaths,
+  collectStaticNavigationPaths,
+  findSourceAuditRow,
+  runRouteMenuDocCheck,
+} from './route-menu-doc-check'
+
+function row(overrides: Partial<RouteMenuAuditRow> = {}): RouteMenuAuditRow {
+  return {
+    area: 'Home',
+    route: '/',
+    control: 'open home',
+    result: 'home renders',
+    disabledReason: 'none',
+    emptyState: 'empty home copy',
+    status: 'ready',
+    ...overrides,
+  }
+}
+
+const okStatusLabel = (status: RouteMenuAuditStatus) => `status: ${status}`
+
+describe('route menu doc check', () => {
+  test('collects markdown audit rows and strips inline markdown', () => {
+    const rows = collectAuditRows(`
+      | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+      | --- | --- | --- | --- | --- | --- |
+      | **Home** | \`/\` | open | renders | none | helpful |
+    `)
+
+    expect(rows).toEqual([
+      {
+        area: 'Home',
+        route: '/',
+        cells: ['Home', '/', 'open', 'renders', 'none', 'helpful'],
+      },
+    ])
+  })
+
+  test('passes when documented rows, routes, navigation, and preloads align', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | open | renders | none | helpful |
+        | Chat | /chat | open chat | renders chat | none | no chats copy |
+      `,
+      appContent: `
+        const routePreloads = {
+          '/': () => import('./Home'),
+          '/chat': () => import('./Chat'),
+        }
+        const navItems = [{ to: '/' }, { to: '/chat' }]
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/chat" element={<Chat />} />
+        </Routes>
+      `,
+      rows: [row(), row({ area: 'Chat', route: '/chat', control: 'open chat', result: 'chat renders' })],
+      minRows: 2,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual([])
+  })
+
+  test('collects route preloads from typed object literals', () => {
+    expect(
+      collectRoutePreloadPaths(`
+        const routePaths = {
+          events: '/events',
+        } as const
+        const routePreloads = ({
+          '/': () => import('./Home'),
+          '/chat': () => import('./Chat'),
+          [routePaths.events]: () => import('./Events'),
+          '/admin/health': () => import('./AdminHealth'),
+        } satisfies Record<string, unknown>)
+      `),
+    ).toEqual(['/', '/admin/health', '/chat', '/events'])
+  })
+
+  test('collects declared routes from JSX with multiline attributes', () => {
+    expect(
+      collectDeclaredRoutes(`
+        const routePaths = {
+          chat: '/chat/:chatId?',
+        } as const;
+        <Routes>
+          <Route
+            element={<Chat />}
+            path={routePaths.chat}
+          />
+          <Route element={<NotFound />} path="*" />
+        </Routes>
+      `),
+    ).toEqual(['/chat/:chatId?', '*'])
+  })
+
+  test('collects static navigation paths from object literals and JSX attributes', () => {
+    expect(
+      collectStaticNavigationPaths(`
+        const routePaths = {
+          home: '/',
+          chat: '/chat',
+          wallet: '/wallet',
+          events: '/events',
+          health: '/admin/health',
+        } as const
+        const navItems = [{ to: routePaths.home }, { to: routePaths.chat }, { href: routePaths['wallet'] }];
+        <NavLink to={routePaths.events}>Events</NavLink>
+        <a href="/profile?tab=persona">Profile</a>
+        <button onClick={() => navigate({ pathname: routePaths.health })}>Health</button>
+      `),
+    ).toEqual(['/', '/admin/health', '/chat', '/events', '/profile', '/wallet'])
+  })
+
+  test('reports missing navigation coverage, empty fields, and weak status labels', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | open | renders | none | helpful |
+      `,
+      appContent: `
+        const routePreloads = {
+          '/': () => import('./Home'),
+        }
+        const navItems = [{ to: '/' }, { to: '/ghost' }]
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      `,
+      rows: [row({ control: '' })],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: (status) => status,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'navigation path /ghost ไม่มี Route ที่ตรงกันใน App.tsx',
+        'navigation path /ghost ยังไม่มีใน routeMenuAuditRows',
+        'navigation path /ghost ยังไม่มีใน routePreloads',
+        'routeMenuAuditRows "Home" มี control ว่าง',
+        'routeMenuAuditStatusLabel("ready") ยังไม่มี label ที่ผู้ใช้อ่านรู้เรื่อง',
+      ]),
+    )
+  })
+
+  test('reports stale documented rows and route tokens that drift from source rows', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | /, /old-home | open | renders | none | helpful |
+        | Ghost | /ghost | stale menu | stale result | stale guard | stale empty |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [row()],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findSourceAuditRow([row()], 'Home')).toEqual(row())
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'ROUTE_MENU_AUDIT.md แถว "Home" มี route token "/old-home" ที่ไม่มีใน routeMenuAuditRows',
+        'ROUTE_MENU_AUDIT.md มีแถว "Ghost" ที่ไม่มีใน routeMenuAuditRows',
+      ]),
+    )
+  })
+
+  test('reports route/menu structure problems in Thai-first diagnostics', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | open | renders | none | helpful |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = []
+      `,
+      rows: [row(), row()],
+      minRows: 3,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'routeMenuAuditRows มีจำนวนแถวน้อยเกินไป (2 แถว)',
+        'routeMenuAuditRows มี area/route ซ้ำ',
+        'App.tsx ยังไม่มี <Route path="..."> ให้ตรวจ',
+      ]),
+    )
+  })
+
+  test('requires staging and future rows to explain their next surface', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Staging | โดเมนสเตจจิงจริง | deploy | verify | needs deploy | later |
+        | Future | external | group chat | later | not ready | later |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [
+        row({
+          area: 'Staging',
+          route: 'โดเมนสเตจจิงจริง',
+          status: 'needs-staging',
+          disabledReason: 'ต้อง deploy ก่อน',
+          emptyState: 'ตรวจภายหลัง',
+        }),
+        row({
+          area: 'Future',
+          route: 'external',
+          status: 'future',
+          result: 'จะทำภายหลัง',
+          disabledReason: 'ยังไม่พร้อม',
+          emptyState: 'รอออกแบบ',
+        }),
+      ],
+      minRows: 2,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'routeMenuAuditRows "Staging" สถานะ needs-staging ต้องชี้งานค้างไปที่ STAGING_RUNBOOK.md และ /admin/health',
+        'routeMenuAuditRows "Future" สถานะ future ต้องบอกชัดว่าเป็นงานเผื่ออนาคต ไม่ใช่เมนูที่พร้อมกด',
+      ]),
+    )
+  })
+
+  test('rejects future rows that point to real route paths', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | Disabled/Guard | Empty state |
+        | --- | --- | --- | --- | --- | --- |
+        | Future | /world | group chat | future surface | not ready | future copy |
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [
+        row({
+          area: 'Future',
+          route: '/world',
+          status: 'future',
+          result: 'เป็นงานเผื่ออนาคต',
+          disabledReason: 'ยังไม่แสดงเป็นเมนูให้กด',
+          emptyState: 'รอออกแบบอนาคต',
+        }),
+      ],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'routeMenuAuditRows "Future" สถานะ future ต้องไม่อ้าง route แบบ /path จนกว่าจะเป็นเมนูที่พร้อมตรวจ',
+      ]),
+    )
+  })
+
+  test('reports stale mixed-language copy in route menu documentation', () => {
+    const findings = auditRouteMenuDocumentation({
+      markdown: `
+        | พื้นที่ | Route | ปุ่ม/เมนู | ผลลัพธ์จริง | เงื่อนไขปิดปุ่ม/Guard | สถานะว่าง |
+        | --- | --- | --- | --- | --- | --- |
+        | Home | / | รัน eval | ตรวจ prompt-control และ token budget | ปุ่ม disabled เมื่อยังไม่พร้อม | helpful |
+        Automated route smoke บน desktop/mobile ดัก browser console/page error และ horizontal overflow พร้อม handler ว่าง ข้อความ placeholder text encoding mojibake
+      `,
+      appContent: `
+        const routePreloads = { '/': () => import('./Home') }
+        const navItems = [{ to: '/' }]
+        <Routes><Route path="/" element={<Home />} /></Routes>
+      `,
+      rows: [row()],
+      minRows: 1,
+      requiredSnippets: [],
+      statusLabel: okStatusLabel,
+    })
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "รัน eval"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "prompt-control"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "token budget"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย " disabled "',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "Automated route smoke"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "desktop/mobile"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "browser console"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "page error"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "horizontal overflow"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "handler ว่าง"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "ข้อความ placeholder"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "text encoding"',
+        'ROUTE_MENU_AUDIT.md ยังมีข้อความปนภาษาที่ล้าสมัย "mojibake"',
+      ]),
+    )
+  })
+
+  test('runs the committed route/menu doc check through an importable runner', async () => {
+    const result = await collectRouteMenuDocCheckResult()
+    const lines: string[] = []
+    const errors: string[] = []
+    const exitCode = await runRouteMenuDocCheck((line) => lines.push(line), (line) => errors.push(line))
+
+    expect(result.auditedSurfaces).toBeGreaterThan(0)
+    expect(result.findings).toEqual([])
+    expect(exitCode).toBe(0)
+    expect(lines[0]).toContain('ผ่าน - ตรวจเอกสาร route/menu ผ่านแล้ว')
+    expect(lines[0]).toContain('พื้นที่')
+    expect(lines[0]).not.toContain('document check')
+    expect(lines[0]).not.toContain('surfaces')
+    expect(errors).toEqual([])
+  })
+})

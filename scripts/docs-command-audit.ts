@@ -1,0 +1,191 @@
+import { readFile, readdir } from 'node:fs/promises'
+import { join } from 'node:path'
+
+const root = join(import.meta.dir, '..')
+
+type PackageContext = 'root' | 'apps/backend' | 'apps/frontend'
+
+const packageFiles: Record<PackageContext, string> = {
+  root: 'package.json',
+  'apps/backend': 'apps/backend/package.json',
+  'apps/frontend': 'apps/frontend/package.json',
+}
+
+const auditedCommandFiles = [
+  'README.md',
+  'AGENTS.md',
+  'agent.md',
+  'ABUSE_QA_CHECKLIST.md',
+  'DEPLOY_RENDER.md',
+  'DEPLOYMENT_QA.md',
+  'PRODUCTION_SETUP.md',
+  'RELEASE_HANDOFF.md',
+  'ROUTE_MENU_AUDIT.md',
+  'SECURITY_CHECKLIST.md',
+  'STAGING_RUNBOOK.md',
+  'apps/backend/README.md',
+  'apps/frontend/README.md',
+  'evals/README.md',
+  'knowledge/README.md',
+  '.github/workflows/ci.yml',
+  '.github/workflows/production-smoke.yml',
+]
+
+export type CommandReference = {
+  file: string
+  line: number
+  script: string
+  context: PackageContext
+  text: string
+}
+
+export type CommandAuditResult = {
+  checkedReferences: number
+  findings: string[]
+}
+
+async function readRepoFile(path: string) {
+  return readFile(join(root, path), 'utf8')
+}
+
+export async function collectDefaultAuditedCommandFiles() {
+  const decisionEntries = await readdir(join(root, 'memory/decisions'), { withFileTypes: true })
+  const decisionFiles = decisionEntries
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+    .map((entry) => `memory/decisions/${entry.name}`)
+    .sort()
+
+  return [...auditedCommandFiles, ...decisionFiles]
+}
+
+function defaultContextForFile(file: string): PackageContext {
+  if (file.startsWith('apps/backend/')) return 'apps/backend'
+  if (file.startsWith('apps/frontend/')) return 'apps/frontend'
+  return 'root'
+}
+
+function contextFromCd(line: string): PackageContext | null {
+  if (/\bcd\s+apps[\\/]backend\b/.test(line)) return 'apps/backend'
+  if (/\bcd\s+apps[\\/]frontend\b/.test(line)) return 'apps/frontend'
+  if (/\bcd\s+\.\.[\\/]\.\./.test(line)) return 'root'
+  if (/\bcd\s+["']?\$GITHUB_WORKSPACE["']?/.test(line)) return 'root'
+  return null
+}
+
+function contextFromWorkflowWorkingDirectory(line: string): PackageContext | null {
+  if (/\bworking-directory:\s*apps[\\/]backend\b/.test(line)) return 'apps/backend'
+  if (/\bworking-directory:\s*apps[\\/]frontend\b/.test(line)) return 'apps/frontend'
+  return null
+}
+
+function isWorkflowFile(file: string) {
+  return file.startsWith('.github/workflows/')
+}
+
+function isWorkflowJobBoundary(line: string) {
+  return /^  [A-Za-z0-9_-]+:\s*$/.test(line)
+}
+
+function inferLineContext(file: string, lines: string[], index: number, current: PackageContext) {
+  const line = lines[index]
+  if (line.includes('repo root')) return 'root'
+
+  const cdContext = contextFromCd(line)
+  if (cdContext) return cdContext
+
+  const workflowContext = contextFromWorkflowWorkingDirectory(line)
+  if (workflowContext) return workflowContext
+
+  if (file === 'DEPLOY_RENDER.md' && line.includes('Build command:')) {
+    const previous = lines.slice(Math.max(0, index - 5), index).join('\n')
+    if (previous.includes('Root directory: `apps/frontend`')) return 'apps/frontend'
+    if (previous.includes('Dockerfile path: `apps/backend/Dockerfile`')) return 'apps/backend'
+  }
+
+  return current
+}
+
+export function collectBunRunReferences(file: string, content: string): CommandReference[] {
+  const lines = content.split(/\r?\n/)
+  const references: CommandReference[] = []
+  let context = defaultContextForFile(file)
+  let inFence = false
+  const workflowFile = isWorkflowFile(file)
+
+  lines.forEach((line, index) => {
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence
+      if (!inFence) context = defaultContextForFile(file)
+      return
+    }
+
+    if (workflowFile && isWorkflowJobBoundary(line)) context = 'root'
+
+    const baseContext = inFence || workflowFile ? context : defaultContextForFile(file)
+    const lineContext = inferLineContext(file, lines, index, baseContext)
+    if (inFence || workflowFile) context = lineContext
+
+    for (const match of line.matchAll(/\bbun\s+run\s+([A-Za-z0-9:_-]+)/g)) {
+      references.push({
+        file,
+        line: index + 1,
+        script: match[1],
+        context: lineContext,
+        text: line.trim(),
+      })
+    }
+  })
+
+  return references
+}
+
+async function loadPackageScripts() {
+  const entries = await Promise.all(
+    (Object.entries(packageFiles) as Array<[PackageContext, string]>).map(async ([context, path]) => {
+      const packageJson = JSON.parse(await readRepoFile(path)) as { scripts?: Record<string, string> }
+      return [context, new Set(Object.keys(packageJson.scripts ?? {}))] as const
+    }),
+  )
+
+  return Object.fromEntries(entries) as Record<PackageContext, Set<string>>
+}
+
+export async function collectDocsCommandAuditResult(
+  files?: string[],
+): Promise<CommandAuditResult> {
+  const packageScripts = await loadPackageScripts()
+  const auditFiles = files ?? (await collectDefaultAuditedCommandFiles())
+  const references = (
+    await Promise.all(auditFiles.map(async (file) => collectBunRunReferences(file, await readRepoFile(file))))
+  ).flat()
+
+  const findings = references
+    .filter((reference) => !packageScripts[reference.context].has(reference.script))
+    .map(
+      (reference) =>
+        `${reference.file}:${reference.line} อ้าง \`bun run ${reference.script}\` ในบริบท package \`${reference.context}\` แต่ package นั้นไม่มี script นี้`,
+    )
+
+  return {
+    checkedReferences: references.length,
+    findings,
+  }
+}
+
+export async function runDocsCommandAudit(
+  writeLine: (line: string) => void = (line) => console.log(line),
+  writeError: (line: string) => void = (line) => console.error(line),
+) {
+  const result = await collectDocsCommandAuditResult()
+
+  if (result.findings.length > 0) {
+    writeError('ตรวจคำสั่งในเอกสารไม่ผ่าน:')
+    for (const finding of result.findings) writeError(`- ${finding}`)
+    return 1
+  }
+
+  writeLine(`ผ่าน - ตรวจคำสั่งในเอกสารแล้ว (${result.checkedReferences} จุดอ้างอิง)`)
+  return 0
+}
+
+if (import.meta.main) process.exit(await runDocsCommandAudit())

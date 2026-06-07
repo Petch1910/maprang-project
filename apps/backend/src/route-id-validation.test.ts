@@ -5,6 +5,7 @@ import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
 import { loreRoutes } from './lore.routes'
 import { reportRoutes } from './report.routes'
+import { rejectInvalidUuid, routeErrorMessage, routeErrorResponse, safeRouteErrorSummary } from './route-guards'
 
 const prisma = getPrisma()
 const shouldRunDbTest = createDbTestGate(prisma, 'route id validation')
@@ -34,6 +35,128 @@ describe('route id validation', () => {
       delete process.env.ADMIN_API_KEY
     } else {
       process.env.ADMIN_API_KEY = previousAdminKey
+    }
+  })
+
+  test('route id guard returns Thai-first validation messages without database work', () => {
+    const set = { status: 200 }
+
+    expect(rejectInvalidUuid("' OR 1=1 --", set, 'invalid_character_id')).toEqual({
+      error: 'invalid_character_id',
+      message: 'รหัสตัวละครไม่ถูกต้อง',
+    })
+    expect(set.status).toBe(400)
+    expect(routeErrorMessage('invalid_parent_lore_id')).toBe('รหัสคลังความรู้หลักไม่ถูกต้อง')
+    expect(routeErrorResponse('database_not_configured')).toEqual({
+      error: 'database_not_configured',
+      message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+    })
+    expect(routeErrorResponse('chat_not_found')).toEqual({
+      error: 'chat_not_found',
+      message: 'ไม่พบแชทนี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+    })
+    expect(routeErrorResponse('character_not_found')).toEqual({
+      error: 'character_not_found',
+      message: 'ไม่พบตัวละครนี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+    })
+    expect(routeErrorResponse('character_forbidden')).toEqual({
+      error: 'character_forbidden',
+      message: 'คุณไม่มีสิทธิ์จัดการตัวละครนี้',
+    })
+    expect(routeErrorResponse('lore_not_found')).toEqual({
+      error: 'lore_not_found',
+      message: 'ไม่พบคลังความรู้นี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+    })
+    expect(routeErrorResponse('lore_forbidden')).toEqual({
+      error: 'lore_forbidden',
+      message: 'คุณไม่มีสิทธิ์จัดการคลังความรู้ของตัวละครนี้',
+    })
+    expect(routeErrorResponse('report_not_found')).toEqual({
+      error: 'report_not_found',
+      message: 'ไม่พบรายงานนี้',
+    })
+    expect(routeErrorResponse('message_not_found')).toEqual({
+      error: 'message_not_found',
+      message: 'ไม่พบข้อความนี้ หรือคุณไม่มีสิทธิ์รายงาน',
+    })
+    expect(routeErrorResponse('admin_unauthorized')).toEqual({
+      error: 'admin_unauthorized',
+      message: 'กรุณาใช้สิทธิ์ผู้ดูแลเพื่อใช้งานส่วนนี้',
+    })
+    expect(routeErrorMessage('unknown_error')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
+    expect(routeErrorMessage('new_unmapped_code')).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
+    expect(routeErrorResponse('new_unmapped_code')).toEqual({
+      error: 'unknown_error',
+      message: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+    })
+  })
+
+  test('route error log summary does not expose raw error messages', () => {
+    expect(safeRouteErrorSummary(new Error('secret-like-url https://example.invalid?token=leak'))).toEqual({
+      name: 'Error',
+    })
+    expect(safeRouteErrorSummary('plain failure')).toEqual({ type: 'string' })
+  })
+
+  test('returns Thai-first messages when lore persistence is unavailable', async () => {
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await loreRoutes.handle(request('/characters/11111111-1111-4111-8111-111111111111/lore'))
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
+    }
+  })
+
+  test('returns Thai-first messages for report route access and persistence failures', async () => {
+    const unauthorizedResponse = await reportRoutes.handle(request('/admin/reports'))
+    const unauthorizedBody = (await unauthorizedResponse.json()) as { error: string; message: string }
+
+    expect(unauthorizedResponse.status).toBe(401)
+    expect(unauthorizedBody).toEqual({
+      error: 'admin_unauthorized',
+      message: 'กรุณาใช้สิทธิ์ผู้ดูแลเพื่อใช้งานส่วนนี้',
+    })
+
+    const previousDatabaseUrl = process.env.DATABASE_URL
+    delete process.env.DATABASE_URL
+
+    try {
+      const response = await reportRoutes.handle(
+        request('/reports', {
+          method: 'POST',
+          body: {
+            targetType: 'CHARACTER',
+            characterId: '11111111-1111-4111-8111-111111111111',
+            reason: 'policy concern',
+          },
+        }),
+      )
+      const body = (await response.json()) as { error: string; message: string }
+
+      expect(response.status).toBe(503)
+      expect(body).toEqual({
+        error: 'database_not_configured',
+        message: 'ยังไม่ได้ตั้งค่าฐานข้อมูลสำหรับใช้งานส่วนนี้',
+      })
+    } finally {
+      if (previousDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL
+      } else {
+        process.env.DATABASE_URL = previousDatabaseUrl
+      }
     }
   })
 
