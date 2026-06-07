@@ -1,23 +1,19 @@
 // API helper functions for components
-import { readApiJson, logUnexpectedError } from './api'
+// Note: Uses GET/POST from api.ts to comply with QA standards
+import { GET, POST } from './api'
 
 /**
  * Daily login - Claim daily reward
  */
 export async function claimDailyLogin() {
-  const response = await fetch('/api/user/me/daily-login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  })
-  return readApiJson(response)
+  return POST('/user/me/daily-login', {})
 }
 
 /**
  * Load creator scenarios for preview
  */
 export async function loadCreatorScenarios(preset: string = 'basic') {
-  const response = await fetch(`/api/creator/scenarios?preset=${preset}`)
-  return readApiJson(response)
+  return GET(`/creator/scenarios?preset=${preset}`)
 }
 
 /**
@@ -29,15 +25,5 @@ export async function previewChatMessage(params: {
   userMessage: string
   mockMode?: boolean
 }) {
-  const response = await fetch('/api/creator/preview-chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  })
-
-  if (!response.ok) {
-    throw new Error('Preview chat failed')
-  }
-
-  return readApiJson(response)
+  return POST('/creator/preview-chat', params)
 }

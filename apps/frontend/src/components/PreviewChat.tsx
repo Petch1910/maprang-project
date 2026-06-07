@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Play, Loader2, AlertCircle, CheckCircle, MessageSquare, Sparkles } from 'lucide-react'
 import { logUnexpectedError } from '../lib/api'
+import { loadCreatorScenarios, previewChatMessage } from '../lib/componentApi'
 import { toast } from './Toast'
 
 interface PreviewMessage {
@@ -29,19 +30,17 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
   const [estimatedTokens, setEstimatedTokens] = useState(0)
 
   // Load scenarios on mount
-  useState(() => {
-    loadScenarios()
-  })
-
-  const loadScenarios = async () => {
-    try {
-      const response = await fetch('/api/creator/scenarios?preset=basic')
-      const data = await readApiJson(response)
-      setScenarios(data.scenarios || [])
-    } catch (error) {
-      logUnexpectedError('Failed to load scenarios:', error)
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await loadCreatorScenarios('basic')
+        setScenarios(data.scenarios || [])
+      } catch (error) {
+        logUnexpectedError('Failed to load scenarios:', error)
+      }
     }
-  }
+    load()
+  }, [])
 
   const handlePreview = async (message: string) => {
     if (!message.trim() || isLoading) return
@@ -51,22 +50,12 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
     setUserInput('')
 
     try {
-      const response = await fetch('/api/creator/preview-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          characterId,
-          characterData,
-          userMessage: message,
-          mockMode: true, // Don't use real AI
-        }),
+      const data = await previewChatMessage({
+        characterId,
+        characterData,
+        userMessage: message,
+        mockMode: true,
       })
-
-      if (!response.ok) {
-        throw new Error('Preview failed')
-      }
-
-      const data = await readApiJson(response)
 
       setMessages((prev) => [
         ...prev,
