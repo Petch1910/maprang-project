@@ -204,6 +204,7 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
             disabled={isLoading || !userInput.trim()}
             className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="ส่งข้อความ"
+            title={!characterData ? 'กรุณากรอกข้อมูลตัวละครก่อน' : 'ส่งข้อความทดสอบ'}
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
