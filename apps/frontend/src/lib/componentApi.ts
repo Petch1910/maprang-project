@@ -1,6 +1,26 @@
 // API helper functions for components
-// Note: Uses GET/POST from api.ts to comply with QA standards
-import { GET, POST } from './api'
+// Uses direct fetch with readApiJson to comply with QA standards
+import { readApiJson } from './api'
+
+/**
+ * GET request helper
+ */
+async function GET(path: string) {
+  const response = await fetch(`/api${path}`)
+  return readApiJson(response)
+}
+
+/**
+ * POST request helper
+ */
+async function POST(path: string, body: any) {
+  const response = await fetch(`/api${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return readApiJson(response)
+}
 
 /**
  * Daily login - Claim daily reward
