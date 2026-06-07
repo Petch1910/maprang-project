@@ -7,6 +7,7 @@ import {
   streamChatMessage,
   setCharacterFavorite,
   updateChatWorldState as updateSavedChatWorldState,
+  logUnexpectedError,
   type Character,
   type ChatMessage,
   type ChatResponse,
@@ -76,7 +77,7 @@ export function ChatWrapper({ chatId }: ChatWrapperProps) {
         setRuntimeState(data.runtimeState || null)
       })
       .catch((error) => {
-        console.error('Failed to load chat:', error)
+        logUnexpectedError('Failed to load chat:', error)
       })
   }, [chatId])
 
@@ -133,7 +134,7 @@ export function ChatWrapper({ chatId }: ChatWrapperProps) {
         setLastUsage(response.usage || null)
         setRuntimeState(response.runtimeState || null)
       } catch (error) {
-        console.error('Streaming failed, falling back to regular send:', error)
+        logUnexpectedError('Streaming failed, falling back to regular send:', error)
 
         // Fallback to regular send
         try {
@@ -145,7 +146,7 @@ export function ChatWrapper({ chatId }: ChatWrapperProps) {
           setLastUsage(response.usage || null)
           setRuntimeState(response.runtimeState || null)
         } catch (sendError) {
-          console.error('Send message failed:', sendError)
+          logUnexpectedError('Send message failed:', sendError)
           setChatLog((prev) => prev.filter((msg) => msg.id !== userMessage.id))
         }
       } finally {
@@ -161,7 +162,7 @@ export function ChatWrapper({ chatId }: ChatWrapperProps) {
         await setCharacterFavorite(characterId, favorite)
         setCharacter((prev) => ({ ...prev, isFavorite: favorite }))
       } catch (error) {
-        console.error('Failed to favorite character:', error)
+        logUnexpectedError('Failed to favorite character:', error)
       }
     },
     []
@@ -175,7 +176,7 @@ export function ChatWrapper({ chatId }: ChatWrapperProps) {
         await updateSavedChatWorldState(chatId, input)
         return true
       } catch (error) {
-        console.error('Failed to save world state:', error)
+        logUnexpectedError('Failed to save world state:', error)
         return false
       } finally {
         setIsWorldStateSaving(false)
