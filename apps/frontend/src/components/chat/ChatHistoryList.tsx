@@ -55,6 +55,7 @@ export function ChatHistoryList({ chats, activeChat, onSelectChat, onNewChat }: 
       {/* New Chat Button */}
       <div className="px-4 pb-4">
         <button
+          type="button"
           onClick={onNewChat}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-2.5 text-sm font-medium text-white transition-all hover:bg-purple-500 hover:shadow-lg hover:shadow-purple-500/30"
         >
@@ -76,6 +77,7 @@ export function ChatHistoryList({ chats, activeChat, onSelectChat, onNewChat }: 
           <div className="space-y-1">
             {filteredChats.map((chat) => (
               <button
+                type="button"
                 key={chat.id}
                 onClick={() => onSelectChat?.(chat.id)}
                 className={`

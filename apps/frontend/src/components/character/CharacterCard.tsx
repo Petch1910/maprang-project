@@ -1,4 +1,5 @@
 import { Heart, MessageCircle, Eye, Star } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import type { Character } from '../../lib/api'
 import { characterRating } from '../../lib/contentRating'
 
@@ -47,6 +48,7 @@ export function CharacterCard({
   onSelect,
   showStats = true,
 }: CharacterCardProps) {
+  const navigate = useNavigate()
   const badges = getBadges(character)
   const rating = characterRating(character)
   const isFeatured = variant === 'featured'
@@ -56,7 +58,7 @@ export function CharacterCard({
     if (onSelect) {
       onSelect(character)
     } else {
-      window.location.href = `/characters/${character.id}`
+      navigate(`/characters/${character.id}`)
     }
   }
 
