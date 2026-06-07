@@ -59,6 +59,16 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['smoke', 'e2e', 'backend-test'],
     note: 'api-smoke ตรวจบันทึก/คืนค่า persona และ tests คุมความยาวสูงสุด',
   },
+  'POST /me/daily-login': {
+    owner: 'user/wallet',
+    coverage: ['backend-test'],
+    note: 'daily-login.service.ts ตรวจการรับรางวัลเข้าสู่ระบบประจำวันและการคำนวณ streak bonus',
+  },
+  'GET /me/daily-login-stats': {
+    owner: 'user/wallet',
+    coverage: ['backend-test'],
+    note: 'daily-login.service.ts ตรวจสถิติการเข้าสู่ระบบ (current/longest streak, total logins)',
+  },
   'GET /creator/draft': {
     owner: 'creator',
     coverage: ['smoke', 'e2e', 'backend-test'],

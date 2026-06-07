@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Calendar, Gift, Zap, AlertCircle, Coins } from 'lucide-react'
+import { logUnexpectedError, readApiJson } from '../lib/api'
 import { toast } from './Toast'
 
 interface DailyLoginButtonProps {
@@ -20,7 +22,7 @@ export function DailyLoginButton({ onClaim }: DailyLoginButtonProps) {
         },
       })
 
-      const data = await response.json()
+      const data = await readApiJson(response)
 
       if (data.rewarded) {
         toast.success(data.message, 5000)
@@ -29,7 +31,7 @@ export function DailyLoginButton({ onClaim }: DailyLoginButtonProps) {
         toast.info(data.message, 3000)
       }
     } catch (error) {
-      console.error('Failed to claim daily login:', error)
+      logUnexpectedError('Failed to claim daily login:', error)
       toast.error('ไม่สามารถรับรางวัลได้ กรุณาลองอีกครั้ง')
     } finally {
       setClaiming(false)
@@ -41,6 +43,7 @@ export function DailyLoginButton({ onClaim }: DailyLoginButtonProps) {
       type="button"
       onClick={handleClaim}
       disabled={claiming}
+      title={claiming ? 'กำลังรับรางวัล...' : 'คลิกเพื่อรับรางวัลประจำวัน'}
       className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:shadow-yellow-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <div className="relative flex items-center gap-2">
@@ -70,6 +73,7 @@ interface TokenWarningProps {
 }
 
 export function TokenWarning({ required, current }: TokenWarningProps) {
+  const navigate = useNavigate()
   const shortage = required - current
 
   if (current >= required) return null
@@ -96,13 +100,14 @@ export function TokenWarning({ required, current }: TokenWarningProps) {
               {current.toLocaleString()} / {required.toLocaleString()}
             </span>
           </div>
-          <a
-            href="/wallet"
+          <button
+            type="button"
+            onClick={() => navigate('/wallet')}
             className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-red-300 hover:text-red-200"
           >
             <Coins className="h-4 w-4" />
             ไปเติมโทเคน →
-          </a>
+          </button>
         </div>
       </div>
     </div>
