@@ -197,6 +197,8 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
             placeholder="พิมพ์ข้อความทดสอบ..."
             disabled={isLoading}
             className="flex-1 rounded-lg border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-purple-500 focus:outline-none disabled:opacity-50"
+            title={isLoading ? 'กำลังประมวลผล...' : 'พิมพ์ข้อความเพื่อทดสอบการสนทนา'}
+            aria-label="ข้อความทดสอบ"
           />
           <button
             type="button"
