@@ -138,17 +138,17 @@ export const characterRoutes = new Elysia()
     async ({ body }) => {
       const result = await previewCharacterChat({
         name: body.name,
-        description: body.description,
-        biography: body.biography,
-        scenario: body.scenario,
+        description: body.description ?? undefined,
+        biography: body.biography ?? undefined,
+        scenario: body.scenario ?? undefined,
         systemPrompt: body.systemPrompt,
-        compactPrompt: body.compactPrompt,
-        characterAnchor: body.characterAnchor,
-        constraints: body.constraints,
-        greeting: body.greeting,
+        compactPrompt: body.compactPrompt ?? undefined,
+        characterAnchor: body.characterAnchor ?? undefined,
+        constraints: body.constraints ?? undefined,
+        greeting: body.greeting ?? undefined,
         userMessage: body.userMessage,
-        userPersona: body.userPersona,
-        relationshipSeed: body.relationshipSeed,
+        userPersona: body.userPersona ?? undefined,
+        relationshipSeed: body.relationshipSeed ?? undefined,
         skipProvider: body.skipProvider,
       })
       return { preview: result }

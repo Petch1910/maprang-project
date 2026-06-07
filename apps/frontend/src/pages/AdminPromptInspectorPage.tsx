@@ -22,6 +22,7 @@ import {
   type PromptInspectorResponse,
   type PromptInspectorSection,
 } from '../lib/api'
+import { filterVisibleCharacters } from '../lib/qaSeedVisibility'
 import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
 import { safeGetStorageItem } from '../lib/safeStorage'
 
@@ -207,7 +208,7 @@ export function AdminPromptInspectorPage() {
     setIsLoadingCharacters(true)
     try {
       const data = await fetchCharacters({ view: 'admin', sort: 'newest', limit: 50 })
-      const rows = data.characters ?? []
+      const rows = filterVisibleCharacters(data.characters ?? [])
       setCharacters(rows)
       setSelectedCharacterId((current) => current || rows[0]?.id || '')
       setNote(rows.length > 0 ? `โหลดตัวละครแล้ว ${rows.length} รายการ` : 'ยังไม่มีตัวละครให้ตรวจ')

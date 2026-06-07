@@ -18,6 +18,9 @@ describe('scenario-templates', () => {
 
     test('should have all required fields', () => {
       const scenario = scenarioTemplates[0]
+      if (!scenario) {
+        throw new Error('No scenarios found')
+      }
       expect(scenario.id).toBeDefined()
       expect(scenario.category).toBeDefined()
       expect(scenario.name).toBeDefined()
@@ -151,8 +154,10 @@ describe('scenario-templates', () => {
     test('should return correct scenario content', () => {
       const scenario = getScenarioById('emotional-happy')
       expect(scenario).toBeDefined()
-      expect(scenario?.category).toBe('emotional')
-      expect(scenario?.name).toContain('ความสุข')
+      if (scenario) {
+        expect(scenario.category).toBe('emotional')
+        expect(scenario.name).toContain('ความสุข')
+      }
     })
   })
 

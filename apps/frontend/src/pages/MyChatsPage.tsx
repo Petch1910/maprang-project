@@ -20,7 +20,7 @@ import { archiveChat, deleteChat, fetchChats, restoreChat, updateChatTitle, type
 import { loadPinnedChatIds, savePinnedChatIds, togglePinnedChatId } from '../lib/pinnedChats'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { loadChatSummaries, selectChatsError, selectChatsLoading, selectPlayableChatSummaries } from '../store/slices/chatsSlice'
+import { isPlayableChatSummary, loadChatSummaries, selectChatsError, selectChatsLoading, selectPlayableChatSummaries } from '../store/slices/chatsSlice'
 
 export function MyChatsPage() {
   const dispatch = useAppDispatch()
@@ -100,7 +100,7 @@ export function MyChatsPage() {
     setActionNote('')
     try {
       const data = await fetchChats({ archived: true })
-      setArchivedChats(data.chats ?? [])
+      setArchivedChats((data.chats ?? []).filter(isPlayableChatSummary))
     } catch {
       setActionNote('โหลดแชทที่จัดเก็บไว้ไม่สำเร็จ ลองใหม่อีกครั้ง')
     } finally {

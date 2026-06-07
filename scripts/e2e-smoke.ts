@@ -48,8 +48,8 @@ export function e2eSmokeSteps(): E2eSmokeStep[] {
       command: ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'],
     },
     {
-      label: 'คืนข้อมูล QA: คืน demo data หลังตรวจเบราว์เซอร์',
-      command: ['bun', 'run', 'qa:seed'],
+      label: 'ล้างข้อมูล QA: ลบ seed ทดสอบหลังตรวจเบราว์เซอร์',
+      command: ['bun', 'run', 'qa:clear'],
       alwaysRun: true,
     },
   ]

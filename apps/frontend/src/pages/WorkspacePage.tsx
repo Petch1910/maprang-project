@@ -30,6 +30,7 @@ import {
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting, fallbackCharacter } from '../lib/chat'
+import { canShowQaSeedData, filterVisibleCharacters, isQaSeedCharacter } from '../lib/qaSeedVisibility'
 import { relationshipSeedLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { isPlayableChatSummary } from '../store/slices/chatsSlice'
@@ -221,7 +222,8 @@ export function WorkspacePage() {
 
   const loadCharacters = useCallback(async (filters: CharacterListFilters = { view: 'admin', sort: 'popular', limit: 40 }) => {
     const data = await fetchCharacters(filters)
-    const loadedCharacters = data.characters?.length ? data.characters : [fallbackCharacter]
+    const visibleCharacters = filterVisibleCharacters(data.characters ?? [])
+    const loadedCharacters = visibleCharacters.length ? visibleCharacters : [fallbackCharacter]
     setCharacters(loadedCharacters)
     return loadedCharacters
   }, [])
@@ -302,6 +304,11 @@ export function WorkspacePage() {
     try {
       const data = await fetchChatMessages(id)
       if (!data.chat) return
+      if (isQaSeedCharacter(data.chat.character) && !canShowQaSeedData()) {
+        setConnectionNote('แชท QA สำหรับทดสอบถูกซ่อนในโหมดใช้งานจริง')
+        navigate('/chat', { replace: true })
+        return
+      }
       setChatId(data.chat.id)
       setLastUsage((current) => (lastUsageChatIdRef.current === data.chat!.id ? current : null))
       setRuntimeState({
@@ -319,7 +326,7 @@ export function WorkspacePage() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [navigate])
 
   useEffect(() => {
     async function boot() {

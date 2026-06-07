@@ -71,14 +71,14 @@ export async function checkDailyLoginReward(userId: string): Promise<DailyLoginR
 
   let streak = 1
   if (recentLogins.length > 0) {
-    const lastLogin = new Date(recentLogins[0].createdAt)
+    const lastLogin = new Date(recentLogins[0]!.createdAt)
     lastLogin.setUTCHours(0, 0, 0, 0)
 
     if (lastLogin.getTime() === yesterday.getTime()) {
       // ติดต่อกัน นับ streak
       streak = 1
       for (let i = 1; i < recentLogins.length; i++) {
-        const loginDate = new Date(recentLogins[i].createdAt)
+        const loginDate = new Date(recentLogins[i]!.createdAt)
         loginDate.setUTCHours(0, 0, 0, 0)
         const expectedDate = new Date(yesterday)
         expectedDate.setUTCDate(expectedDate.getUTCDate() - i)
@@ -281,7 +281,7 @@ export async function createTokenTransaction(input: TokenTransactionInput): Prom
         amount: input.amount,
         balanceAfter: nextBalance,
         reason: input.reason?.trim() || null,
-        metadata: input.metadata || {},
+        metadata: (input.metadata as any) ?? undefined,
       },
     })
   })

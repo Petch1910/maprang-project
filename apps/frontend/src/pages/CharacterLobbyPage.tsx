@@ -11,6 +11,7 @@ import {
 } from '../lib/api'
 import { displayCharacterDetail } from '../lib/characterDisplay'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
+import { canShowQaSeedData, isQaSeedCharacter } from '../lib/qaSeedVisibility'
 import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
 import { characterShareUrl } from '../lib/shareUrl'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -130,6 +131,11 @@ export function CharacterLobbyPage() {
     fetchCharacter(characterId)
       .then((data) => {
         if (cancelled) return
+        if (isQaSeedCharacter(data.character) && !canShowQaSeedData()) {
+          setDetailCharacter(null)
+          setDetailError('ตัวละคร QA สำหรับทดสอบถูกซ่อนในโหมดใช้งานจริง')
+          return
+        }
         setDetailCharacter(data.character)
       })
       .catch(() => {

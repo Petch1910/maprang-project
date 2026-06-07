@@ -80,7 +80,7 @@ describe('creator-preview.service', () => {
 
     test('should build persona context when provided', () => {
       const userPersona = 'ฉันเป็นนักเรียนมัธยม ชอบอ่านหนังสือ'
-      const personaContext = userPersona.trim()
+      const personaContext = userPersona?.trim()
         ? `\n\nบุคลิกของผู้ใช้:\n${userPersona.trim()}`
         : ''
       expect(personaContext).toContain('บุคลิกของผู้ใช้:')
@@ -130,7 +130,7 @@ describe('creator-preview.service', () => {
         { label: 'คุยเรื่องทั่วไป', message: 'วันนี้อากาศดีจัง' },
       ]
       expect(scenarios.length).toBe(3)
-      expect(scenarios[0].label).toBe('ทักทาย')
+      expect(scenarios[0]?.label).toBe('ทักทาย')
     })
 
     test('should map scenarios correctly', () => {
@@ -140,7 +140,7 @@ describe('creator-preview.service', () => {
       ]
       const mapped = scenarios.map((s) => ({ label: s.label, message: s.message }))
       expect(mapped.length).toBe(2)
-      expect(mapped[1].label).toBe('B')
+      expect(mapped[1]?.label).toBe('B')
     })
   })
 
@@ -176,8 +176,10 @@ describe('creator-preview.service', () => {
         for (let i = 0; i < maxRetries; i++) {
           try {
             const result = await mockCall()
-            expect(result.success).toBe(true)
-            break
+            if (result) {
+              expect(result.success).toBe(true)
+              break
+            }
           } catch (error) {
             if (i === maxRetries - 1) throw error
           }

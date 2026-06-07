@@ -21,7 +21,6 @@ import {
 } from 'lucide-react'
 import type { Character, CharacterListFilters } from '../lib/api'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
-import { buildGeneratedAvatarDataUrl } from '../lib/characterDraft'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -58,145 +57,6 @@ const mobileNavItems = [
   { to: '/create', label: 'สร้าง', icon: PlusCircle },
   { to: '/events', label: 'อีเวนต์', icon: Bell },
   { to: '/profile', label: 'โปรไฟล์', icon: UserRound },
-]
-
-function demoAvatar(imagePrompt: string) {
-  return buildGeneratedAvatarDataUrl({ imagePrompt })
-}
-
-const demoCharacters: Character[] = [
-  {
-    id: 'demo-lume',
-    name: 'ลูเม [Lume]',
-    avatarUrl: demoAvatar('Lume warm slow burn storyteller golden cafe soft portrait'),
-    tagline: 'นักเล่าเรื่องโทนอุ่นที่เหมาะกับความสัมพันธ์แบบค่อย ๆ เปิดใจ',
-    description: 'ตัวอย่างการ์ดสำหรับดู layout ระหว่างรอครีเอเตอร์ลงตัวละครจริง',
-    biography: null,
-    scenario: null,
-    systemPrompt: '',
-    compactPrompt: null,
-    characterAnchor: null,
-    constraints: null,
-    greeting: 'อยากเริ่มฉากแบบไหนกับฉันดี?',
-    status: 'PUBLISHED',
-    visibility: 'PUBLIC',
-    qualityScore: 82,
-    promptVersion: 1,
-    tags: ['slow-burn', 'romance'],
-    chatCount: 17300,
-    viewCount: 42000,
-    contentRating: 'teen_romance',
-  },
-  {
-    id: 'demo-rival',
-    name: 'ไค | คู่แข่ง',
-    avatarUrl: demoAvatar('Kai rival red flag night city sharp cinematic portrait'),
-    tagline: 'คู่แข่งปากร้ายที่ความสัมพันธ์เปลี่ยนตามการตอบโต้ของผู้เล่น',
-    description: 'ตัวอย่างการ์ดสำหรับดู layout ระหว่างรอครีเอเตอร์ลงตัวละครจริง',
-    biography: null,
-    scenario: null,
-    systemPrompt: '',
-    compactPrompt: null,
-    characterAnchor: null,
-    constraints: null,
-    greeting: 'กล้าพอจะคุยกับฉันไหม?',
-    status: 'PUBLISHED',
-    visibility: 'PUBLIC',
-    qualityScore: 85,
-    promptVersion: 1,
-    tags: ['rival', 'red-flag'],
-    chatCount: 24200,
-    viewCount: 68000,
-    contentRating: 'mature_18',
-  },
-  {
-    id: 'demo-orion',
-    name: 'Orion',
-    avatarUrl: demoAvatar('Orion fantasy rain city blue mage relationship event portrait'),
-    tagline: 'แฟนตาซีเมืองฝนกับอีเวนต์ฉากที่ค่อย ๆ ปลดล็อกตามความไว้ใจ',
-    description: 'ตัวอย่างการ์ดสำหรับดู layout ระหว่างรอครีเอเตอร์ลงตัวละครจริง',
-    biography: null,
-    scenario: null,
-    systemPrompt: '',
-    compactPrompt: null,
-    characterAnchor: null,
-    constraints: null,
-    greeting: 'คืนนี้เมืองดูแปลกไปนะ',
-    status: 'PUBLISHED',
-    visibility: 'PUBLIC',
-    qualityScore: 80,
-    promptVersion: 1,
-    tags: ['fantasy', 'scene'],
-    chatCount: 44100,
-    viewCount: 98000,
-    contentRating: 'teen_romance',
-  },
-  {
-    id: 'demo-sora',
-    name: 'Sora',
-    avatarUrl: demoAvatar('Sora coworker slice of life soft office friendly portrait'),
-    tagline: 'เพื่อนร่วมงานที่เริ่มจากเรื่องธรรมดา แล้วค่อย ๆ ลึกขึ้นตามบทสนทนา',
-    description: 'ตัวอย่างการ์ดสำหรับดู layout ระหว่างรอครีเอเตอร์ลงตัวละครจริง',
-    biography: null,
-    scenario: null,
-    systemPrompt: '',
-    compactPrompt: null,
-    characterAnchor: null,
-    constraints: null,
-    greeting: 'วันนี้เหนื่อยไหม เล่าให้ฟังได้นะ',
-    status: 'PUBLISHED',
-    visibility: 'PUBLIC',
-    qualityScore: 88,
-    promptVersion: 1,
-    tags: ['slice-of-life', 'mentor'],
-    chatCount: 70300,
-    viewCount: 128000,
-    contentRating: 'general',
-  },
-  {
-    id: 'demo-noah',
-    name: 'Noah',
-    avatarUrl: demoAvatar('Noah dark drama mystery rain hidden truth portrait'),
-    tagline: 'โทนดราม่าจัด ชอบซ่อนความจริง และมีฉากสำคัญให้เลือกเข้าหรือเก็บไว้ก่อน',
-    description: 'ตัวอย่างการ์ดสำหรับดู layout ระหว่างรอครีเอเตอร์ลงตัวละครจริง',
-    biography: null,
-    scenario: null,
-    systemPrompt: '',
-    compactPrompt: null,
-    characterAnchor: null,
-    constraints: null,
-    greeting: 'อย่าถาม ถ้ายังไม่พร้อมฟังคำตอบ',
-    status: 'PUBLISHED',
-    visibility: 'PUBLIC',
-    qualityScore: 84,
-    promptVersion: 1,
-    tags: ['drama', 'slow-burn'],
-    chatCount: 195500,
-    viewCount: 260000,
-    contentRating: 'teen_romance',
-  },
-  {
-    id: 'demo-mira',
-    name: 'Mira',
-    avatarUrl: demoAvatar('Mira warm romance trust building gentle layered portrait'),
-    tagline: 'ตัวละครแนวอบอุ่นสำหรับผู้เล่นที่อยากได้ความสัมพันธ์สบาย ๆ แต่มีชั้นเชิง',
-    description: 'ตัวอย่างการ์ดสำหรับดู layout ระหว่างรอครีเอเตอร์ลงตัวละครจริง',
-    biography: null,
-    scenario: null,
-    systemPrompt: '',
-    compactPrompt: null,
-    characterAnchor: null,
-    constraints: null,
-    greeting: 'มาเริ่มจากเรื่องเล็ก ๆ ก่อนก็ได้',
-    status: 'PUBLISHED',
-    visibility: 'PUBLIC',
-    qualityScore: 86,
-    promptVersion: 1,
-    tags: ['romance', 'trust-building'],
-    chatCount: 47900,
-    viewCount: 83000,
-    contentRating: 'teen_romance',
-  },
 ]
 
 function avatarFallback(name: string) {
@@ -315,7 +175,7 @@ function Sidebar({
             <Link
               className="grid min-h-10 grid-cols-[32px_minmax(0,1fr)_22px] items-center gap-2 rounded-md px-1.5 hover:bg-white/6"
               key={character.id}
-              to={character.id.startsWith('demo-') ? '/create' : `/characters/${character.id}`}
+              to={`/characters/${character.id}`}
             >
               <SidebarAvatar character={character} />
               <span className="min-w-0">
@@ -381,9 +241,8 @@ function Sidebar({
 
 function CharacterCard({ character }: { character: Character }) {
   const badges = getBadges(character)
-  const isDemo = character.id.startsWith('demo-')
   return (
-    <Link className="group block w-[132px] flex-none text-white sm:w-[148px]" to={isDemo ? '/create' : `/characters/${character.id}`}>
+    <Link className="group block w-[132px] flex-none text-white sm:w-[148px]" to={`/characters/${character.id}`}>
       <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[#26262a] ring-1 ring-white/8">
         {character.avatarUrl ? (
           <img alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" src={character.avatarUrl} />
@@ -591,16 +450,7 @@ export function ExplorePage() {
     () => characters.filter((character) => canViewRating(characterRating(character), content.maxRating)),
     [characters, content.maxRating],
   )
-  const marketplaceCharacters = useMemo(() => {
-    if (visibleCharacters.length >= 8) return visibleCharacters
-    const visibleIds = new Set(visibleCharacters.map((character) => character.id))
-    return [
-      ...visibleCharacters,
-      ...demoCharacters
-        .filter((character) => !visibleIds.has(character.id) && canViewRating(characterRating(character), content.maxRating))
-        .slice(0, 12 - visibleCharacters.length),
-    ]
-  }, [content.maxRating, visibleCharacters])
+  const marketplaceCharacters = visibleCharacters
 
   const taggedCharacters = useMemo(() => {
     const source = marketplaceCharacters
@@ -616,11 +466,9 @@ export function ExplorePage() {
     .slice(0, 12)
   const fresh = taggedCharacters.length > 6 ? [...taggedCharacters].slice(6, 18) : taggedCharacters.slice(0, 12)
   const openRandomCharacter = () => {
-    const realCharacters = taggedCharacters.filter((character) => !character.id.startsWith('demo-'))
-    const fallbackRealCharacters = marketplaceCharacters.filter((character) => !character.id.startsWith('demo-'))
-    const pool = realCharacters.length > 0 ? realCharacters : fallbackRealCharacters.length > 0 ? fallbackRealCharacters : taggedCharacters
+    const pool = taggedCharacters.length > 0 ? taggedCharacters : marketplaceCharacters
     const picked = pool[Math.floor(Math.random() * pool.length)]
-    if (!picked || picked.id.startsWith('demo-')) {
+    if (!picked) {
       navigate('/create')
       return
     }
@@ -719,6 +567,27 @@ export function ExplorePage() {
           </section>
 
           <ContinueChattingRail chats={chats} isLoading={isChatsLoading} />
+          {!isCharactersLoading && marketplaceCharacters.length === 0 && !charactersError && (
+            <section
+              className="rounded-lg border border-white/10 bg-[#18181c] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+              data-testid="explore-empty-state"
+            >
+              <div className="mx-auto grid size-12 place-items-center rounded-full bg-[#ff6a1a]/14 text-[#ff8a2f]">
+                <Sparkles size={22} />
+              </div>
+              <h2 className="m-0 mt-4 text-xl font-black">ยังไม่มีตัวละครให้สำรวจ</h2>
+              <p className="mx-auto mt-2 max-w-xl text-sm font-bold leading-6 text-white/55">
+                เมื่อมีตัวละครที่เผยแพร่แล้ว รายการจะมาแสดงตรงนี้ทันที ตอนนี้เริ่มจากสร้างตัวละครแรกของ Maprang ได้เลย
+              </p>
+              <Link
+                className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-black text-slate-950 transition hover:bg-white/90"
+                to="/create"
+              >
+                <Plus size={17} />
+                สร้างตัวละคร
+              </Link>
+            </section>
+          )}
           <CharacterRail characters={forYou} icon="✨" isLoading={isCharactersLoading} title="สำหรับคุณ" />
           <CharacterRail characters={popular} icon="🔥" isLoading={isCharactersLoading} title="ตัวละครยอดนิยม" />
           <CharacterRail characters={fresh} icon="🆕" isLoading={isCharactersLoading} title="มาใหม่" />

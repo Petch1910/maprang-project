@@ -67,6 +67,7 @@ test.beforeEach(async ({ page, request }) => {
       window.localStorage.setItem('maprang:userId', userId)
       window.localStorage.setItem('maprang:redux:v1', savedRedux)
       window.localStorage.setItem('maprang:theme:v2', 'dark')
+      window.localStorage.setItem('maprang:showQaSeed', '1')
       if (key) window.localStorage.setItem('maprang:adminKey', key)
     },
     {
