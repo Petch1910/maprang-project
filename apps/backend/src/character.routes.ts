@@ -3,6 +3,7 @@ import { Elysia, t } from 'elysia'
 import { defaultUserId } from './config'
 import { clampMaxRating, normalizeMaxRating } from './content-rating'
 import { generateCreatorDraft, getCreatorDraft, saveCreatorDraft } from './creator-draft.service'
+import { previewCharacterChat } from './creator-preview.service'
 import { requireDatabase } from './db'
 import {
   createCharacter,
@@ -123,6 +124,44 @@ export const characterRoutes = new Elysia()
   .post('/creator/ai-draft', ({ body, request }) => generateCreatorDraft({ ...body, origin: new URL(request.url).origin }), {
     body: creatorDraftBody,
   })
+  .post(
+    '/creator/preview-chat',
+    async ({ body }) => {
+      const result = await previewCharacterChat({
+        name: body.name,
+        description: body.description,
+        biography: body.biography,
+        scenario: body.scenario,
+        systemPrompt: body.systemPrompt,
+        compactPrompt: body.compactPrompt,
+        characterAnchor: body.characterAnchor,
+        constraints: body.constraints,
+        greeting: body.greeting,
+        userMessage: body.userMessage,
+        userPersona: body.userPersona,
+        relationshipSeed: body.relationshipSeed,
+        skipProvider: body.skipProvider,
+      })
+      return { preview: result }
+    },
+    {
+      body: t.Object({
+        name: t.String({ minLength: 1 }),
+        description: t.Optional(t.Nullable(t.String())),
+        biography: t.Optional(t.Nullable(t.String())),
+        scenario: t.Optional(t.Nullable(t.String())),
+        systemPrompt: t.String({ minLength: 1 }),
+        compactPrompt: t.Optional(t.Nullable(t.String())),
+        characterAnchor: t.Optional(t.Nullable(t.String())),
+        constraints: t.Optional(t.Nullable(t.String())),
+        greeting: t.Optional(t.Nullable(t.String())),
+        userMessage: t.String({ minLength: 1 }),
+        userPersona: t.Optional(t.Nullable(t.String())),
+        relationshipSeed: t.Optional(t.Nullable(t.String())),
+        skipProvider: t.Optional(t.Boolean()),
+      }),
+    },
+  )
   .get('/relationship/presets', ({ query }) => ({ presets: listRelationshipPresets(query.surface) }), {
     query: t.Object({
       surface: t.Optional(t.Union([t.Literal('contract'), t.Literal('creator')])),
