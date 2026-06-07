@@ -24,6 +24,11 @@ Maprang AI คือแพลตฟอร์ม chat roleplay ที่หน้
 - `ROUTE_MENU_AUDIT.md`
 - `SECURITY_CHECKLIST.md`
 
+Active Embedded Skills (Google Cloud & Agent Skills)
+โปรเจกต์นี้ได้รับการติดตั้ง Official Google Skills ผ่านเครื่องมือ `skills` ลงในโฟลเดอร์ `.agents/skills/` เรียบร้อยแล้ว (อัปเดตล่าสุด: 2026-06-07) ทุกครั้งที่ AI เอเจนต์ทำการ Generate โค้ดหรือออกแบบระบบเกี่ยวกับหัวข้อเหล่านี้ **ต้องปฏิบัติตามมาตรฐาน (Best Practices) และเงื่อนไข Anti-rationalization ในคลังสกิลอย่างเคร่งครัด**:
+- `agent-platform-prompt-management` -> ใช้คุมเสถียรภาพ กรอบคำสั่ง และการแสดงออกของบอทมะปราง
+- `google-cloud-recipe-auth` -> แนวทางการตั้งค่าสิทธิ์และการยืนยันตัวตนกับบริการของ Google Cloud
+- `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
 - 2026-06-06: Latest full local QA gate after dark UI polish passed. `bun run qa:repo` passed first, then `bun run qa:full` passed with secrets, memory/knowledge/docs/tests/eval/security/import-cycle/API/frontend audits green, import-cycle audit 125 files / 296 edges, backend tests 180 pass / 769 expects, frontend production build and bundle budget green, smoke doctor reporting local backend+DB ready, API smoke 34 pass / 2 live-provider skips, local mock normal/stream chat verified, admin prompt inspector/evals/reports/audit routes passed, and Playwright e2e smoke passed 4/4 on desktop+mobile with QA seed restored. External blockers remain deployed HTTPS backend/frontend URLs, production CORS, live chat smoke, and live image smoke.
@@ -207,10 +212,24 @@ Scene Runtime:
 
 Prompt/Context Engine:
 
-- Prompt assembler ต้องแยก section ชัดเจน
-- Prompt Inspector ต้องแสดง final prompt แบบ redacted, token estimate, lore/context และ diff
-- Evals ต้องจับ regression ของ prompt ordering, relationship continuity, scene continuity และ prompt injection guard
-- ห้ามทำให้ model เห็น secret หรือ raw hidden control ที่ไม่ควรเห็น
+Keyword-based Lore Retrieval & Context Windowing:
+
+- ระบบใช้ **keyword matching** แบบ substring (ไม่ใช่ semantic vector search) เพื่อความเรียบง่ายและเสถียร
+- `loadRelevantLore()` ใน `context.service.ts` ดึง lore entries โดย match `keyword` และ `aliases` กับข้อความผู้ใช้
+- **Context Window Management**: จำกัดผลลัพธ์ไว้ที่ top 8 entries (matched + fallback) เพื่อควบคุม token budget
+- **Priority-based ranking**: lore entries ถูกเรียงตาม `priority` (desc) และ `createdAt` (asc) ก่อนการ filter
+- **Fallback mechanism**: ถ้า keyword ไม่ match ให้เอา 6 entries แรกที่ priority สูงสุดมาใช้แทน
+- **Security Best Practices**:
+  - ห้ามให้ lore content ทับทุน `promptControlPolicy` หรือ platform safety rules
+  - `includesAny()` ต้องใช้ `.toLowerCase()` เพื่อป้องกัน case-sensitive bypass
+  - lore entries จาก DB ต้องถูก sanitize ก่อนส่งเข้า prompt (ดู `compact()` helper)
+  - ห้าม expose raw lore retrieval logic หรือ internal filtering criteria ให้ผู้ใช้เห็น
+- **Prompt Assembly**:
+  - Prompt assembler ต้องแยก section ชัดเจน (control policy → character → lore → runtime instructions)
+  - `promptControlPolicy` ต้องอยู่ด้านบนสุดเสมอเพื่อป้องกัน prompt injection จาก lore/user messages
+  - Prompt Inspector ต้องแสดง final prompt แบบ redacted, token estimate, lore/context และ diff
+  - Evals ต้องจับ regression ของ prompt ordering, lore retrieval logic, relationship continuity, scene continuity และ prompt injection guard
+  - ห้ามทำให้ model เห็น secret หรือ raw hidden control ที่ไม่ควรเห็น
 
 Security:
 
