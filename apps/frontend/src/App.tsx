@@ -29,7 +29,7 @@ import { safeGetStorageItem, safeSetStorageItem } from './lib/safeStorage'
 const loadCreatorStudioPage = () => import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage }))
 const loadChatRoomPage = () => import('./pages/ChatRoomPageNew').then((module) => ({ default: module.ChatRoomPageNew }))
 const loadEventsInboxPage = () => import('./pages/EventsInboxPage').then((module) => ({ default: module.EventsInboxPage }))
-const loadMyChatsPage = () => import('./pages/MyChatsPage').then((module) => ({ default: module.MyChatsPage }))
+const loadMyChatsPage = () => import('./pages/MyChatsPageNew').then((module) => ({ default: module.MyChatsPage }))
 const loadAdminModerationPage = () => import('./pages/AdminModerationPage').then((module) => ({ default: module.AdminModerationPage }))
 const loadAdminHealthPage = () => import('./pages/AdminHealthPage').then((module) => ({ default: module.AdminHealthPage }))
 const loadAdminPromptInspectorPage = () =>
