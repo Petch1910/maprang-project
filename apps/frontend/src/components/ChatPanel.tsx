@@ -611,7 +611,7 @@ function RightRail({
         <>
           <InfoLine label="รูปหลัก" value={character.avatarUrl ? 'มีรูปตัวละครแล้ว' : 'ยังไม่มีรูป อัปโหลดได้ที่หน้าสร้างตัวละคร'} />
           <InfoLine label="เพลงประกอบ" value={isSoundOn ? 'เปิดอยู่' : 'ปิดอยู่'} />
-          <button className="min-h-9 rounded-lg bg-white/10 px-3 text-xs font-black text-white" onClick={() => setIsSoundOn((value) => !value)} type="button">
+          <button type="button" className="min-h-9 rounded-lg bg-white/10 px-3 text-xs font-black text-white" onClick={() => setIsSoundOn((value) => !value)} type="button">
             {isSoundOn ? 'ปิดเพลงประกอบ' : 'เปิดเพลงประกอบ'}
           </button>
         </>
@@ -623,7 +623,7 @@ function RightRail({
           <p className="m-0 text-sm leading-6 text-white/65">
             โหมดอ่านจะบีบพื้นที่ข้อความให้แคบลง ลดสิ่งรบกวน และทำให้ฉากยาวอ่านต่อเนื่องขึ้น
           </p>
-          <button className="min-h-9 rounded-lg bg-white px-3 text-xs font-black text-slate-950" onClick={onToggleReadMode} type="button">
+          <button type="button" className="min-h-9 rounded-lg bg-white px-3 text-xs font-black text-slate-950" onClick={onToggleReadMode} type="button">
             {isReadMode ? 'ปิดโหมดอ่าน' : 'เปิดโหมดอ่าน'}
           </button>
         </>

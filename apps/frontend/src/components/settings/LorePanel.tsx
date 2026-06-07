@@ -303,13 +303,13 @@ export function LorePanel({
 
           {expandedSections.settings && (
             <div className="space-y-3 p-4 pt-0">
-              <button className="w-full rounded-lg bg-slate-700/50 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700">
+              <button type="button" className="w-full rounded-lg bg-slate-700/50 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700">
                 🔊 เสียงและภาษา
               </button>
-              <button className="w-full rounded-lg bg-slate-700/50 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700">
+              <button type="button" className="w-full rounded-lg bg-slate-700/50 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700">
                 🎨 ธีม UI
               </button>
-              <button className="w-full rounded-lg bg-slate-700/50 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700">
+              <button type="button" className="w-full rounded-lg bg-slate-700/50 px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700">
                 ⚙️ ตัวเลือกขั้นสูง
               </button>
             </div>
