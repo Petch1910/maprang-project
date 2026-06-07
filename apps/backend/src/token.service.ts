@@ -290,6 +290,14 @@ export async function createTokenTransaction(input: TokenTransactionInput): Prom
 }
 
 /**
+ * บันทึก token transaction (Alias สำหรับ createTokenTransaction)
+ * ใช้โดย daily-login.service.ts และ token-expiry.service.ts
+ */
+export async function recordTokenTransaction(input: TokenTransactionInput): Promise<void> {
+  await createTokenTransaction(input)
+}
+
+/**
  * ตรวจสอบว่าผู้ใช้มี token เพียงพอหรือไม่
  */
 export async function checkTokenBalance(userId: string, requiredTokens: number): Promise<boolean> {
