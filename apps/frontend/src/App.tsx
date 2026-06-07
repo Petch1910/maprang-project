@@ -33,7 +33,7 @@ const loadAdminPromptInspectorPage = () =>
   import('./pages/AdminPromptInspectorPage').then((module) => ({ default: module.AdminPromptInspectorPage }))
 const loadAdminEvalsPage = () => import('./pages/AdminEvalsPage').then((module) => ({ default: module.AdminEvalsPage }))
 const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPage').then((module) => ({ default: module.CharacterLobbyPage }))
-const loadExplorePage = () => import('./pages/ExplorePage').then((module) => ({ default: module.ExplorePage }))
+const loadExplorePage = () => import('./pages/ExplorePageNew').then((module) => ({ default: module.ExplorePage }))
 const loadProfilePage = () => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage }))
 const loadWalletPage = () => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage }))
 
