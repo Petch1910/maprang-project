@@ -137,6 +137,7 @@ export function ExplorePage() {
         <div className="text-center">
           <p className="text-red-400">เกิดข้อผิดพลาด: {error}</p>
           <button
+            type="button"
             onClick={() => window.location.reload()}
             className="mt-4 rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-500"
           >
@@ -175,8 +176,10 @@ export function ExplorePage() {
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 hover:bg-slate-700/50"
+                  aria-label="ล้างการค้นหา"
                 >
                   <X className="h-4 w-4 text-slate-400" />
                 </button>
@@ -185,8 +188,10 @@ export function ExplorePage() {
 
             {/* Filter Button */}
             <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 rounded-lg bg-slate-800/50 px-4 py-2.5 text-slate-100 ring-1 ring-slate-700/50 transition-all hover:bg-slate-700/50"
+              aria-label={showFilters ? 'ซ่อนตัวกรอง' : 'แสดงตัวกรอง'}
             >
               <SlidersHorizontal className="h-5 w-5" />
               <span className="hidden sm:inline">ตัวกรอง</span>
@@ -215,6 +220,7 @@ export function ExplorePage() {
             <div className="mt-4 flex flex-wrap gap-2">
               {quickFilters.map((filter) => (
                 <button
+                  type="button"
                   key={filter.tag}
                   onClick={() => setSelectedFilter(filter.tag === selectedFilter ? '' : filter.tag)}
                   className={`

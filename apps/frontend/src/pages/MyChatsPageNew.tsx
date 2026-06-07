@@ -197,6 +197,7 @@ export function MyChatsPage() {
                           // TODO: Show action menu
                         }}
                         className="rounded-lg p-2 text-slate-500 opacity-0 transition hover:bg-slate-700 hover:text-white group-hover:opacity-100"
+                        aria-label="ตัวเลือกเพิ่มเติม"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </button>

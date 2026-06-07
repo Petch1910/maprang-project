@@ -114,6 +114,7 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
             type="button"
             onClick={handleClear}
             className="text-sm text-slate-400 hover:text-slate-300"
+            aria-label="ล้างการสนทนา"
           >
             ล้าง
           </button>
@@ -122,6 +123,7 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
               type="button"
               onClick={onClose}
               className="text-sm text-slate-400 hover:text-slate-300"
+              aria-label="ปิดพรีวิว"
             >
               ปิด
             </button>
@@ -212,6 +214,7 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
             onClick={() => handlePreview(userInput)}
             disabled={isLoading || !userInput.trim()}
             className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="ส่งข้อความ"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

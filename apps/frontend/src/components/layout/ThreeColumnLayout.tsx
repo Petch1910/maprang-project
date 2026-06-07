@@ -51,8 +51,10 @@ export function ThreeColumnLayout({
           {isMobile && leftOpen && (
             <div className="flex justify-end p-2">
               <button
+                type="button"
                 onClick={() => setLeftOpen(false)}
                 className="rounded-lg p-2 hover:bg-slate-700/50"
+                aria-label="ปิดแถบด้านซ้าย"
               >
                 <X className="h-5 w-5 text-slate-300" />
               </button>
@@ -68,14 +70,18 @@ export function ThreeColumnLayout({
         {isMobile && (
           <div className="flex items-center justify-between border-b border-slate-700/50 bg-slate-800/50 p-3">
             <button
+              type="button"
               onClick={() => setLeftOpen(!leftOpen)}
               className="rounded-lg p-2 hover:bg-slate-700/50"
+              aria-label="สลับแถบด้านซ้าย"
             >
               <Menu className="h-5 w-5 text-slate-300" />
             </button>
             <button
+              type="button"
               onClick={() => setRightOpen(!rightOpen)}
               className="rounded-lg p-2 hover:bg-slate-700/50"
+              aria-label="สลับแถบด้านขวา"
             >
               <Settings className="h-5 w-5 text-slate-300" />
             </button>
@@ -100,8 +106,10 @@ export function ThreeColumnLayout({
           {isMobile && rightOpen && (
             <div className="flex justify-end p-2">
               <button
+                type="button"
                 onClick={() => setRightOpen(false)}
                 className="rounded-lg p-2 hover:bg-slate-700/50"
+                aria-label="ปิดแถบด้านขวา"
               >
                 <X className="h-5 w-5 text-slate-300" />
               </button>
@@ -127,16 +135,20 @@ export function ThreeColumnLayout({
         <>
           {/* Left toggle */}
           <button
+            type="button"
             onClick={() => setLeftOpen(!leftOpen)}
             className="absolute left-2 top-4 z-30 rounded-lg bg-slate-800/80 p-2 shadow-lg hover:bg-slate-700/80"
+            aria-label={leftOpen ? 'ซ่อนแถบด้านซ้าย' : 'แสดงแถบด้านซ้าย'}
           >
             <Menu className="h-5 w-5 text-slate-300" />
           </button>
 
           {/* Right toggle */}
           <button
+            type="button"
             onClick={() => setRightOpen(!rightOpen)}
             className="absolute right-2 top-4 z-30 rounded-lg bg-slate-800/80 p-2 shadow-lg hover:bg-slate-700/80"
+            aria-label={rightOpen ? 'ซ่อนแถบด้านขวา' : 'แสดงแถบด้านขวา'}
           >
             <Settings className="h-5 w-5 text-slate-300" />
           </button>
