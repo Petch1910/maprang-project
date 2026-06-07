@@ -26,18 +26,18 @@ import { loadWalletSummary, selectTokenBalance, selectWalletLoading } from './st
 import { loadPersonaDraft } from './store/slices/draftsSlice'
 import { safeGetStorageItem, safeSetStorageItem } from './lib/safeStorage'
 
-const loadCreatorStudioPage = () => import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage }))
+const loadCreatorStudioPage = () => import('./pages/CreatorStudioPageNew').then((module) => ({ default: module.CreatorStudioPage }))
 const loadChatRoomPage = () => import('./pages/ChatRoomPageNew').then((module) => ({ default: module.ChatRoomPageNew }))
-const loadEventsInboxPage = () => import('./pages/EventsInboxPage').then((module) => ({ default: module.EventsInboxPage }))
+const loadEventsInboxPage = () => import('./pages/EventsInboxPageNew').then((module) => ({ default: module.EventsInboxPage }))
 const loadMyChatsPage = () => import('./pages/MyChatsPageNew').then((module) => ({ default: module.MyChatsPage }))
 const loadAdminModerationPage = () => import('./pages/AdminModerationPage').then((module) => ({ default: module.AdminModerationPage }))
 const loadAdminHealthPage = () => import('./pages/AdminHealthPage').then((module) => ({ default: module.AdminHealthPage }))
 const loadAdminPromptInspectorPage = () =>
   import('./pages/AdminPromptInspectorPage').then((module) => ({ default: module.AdminPromptInspectorPage }))
 const loadAdminEvalsPage = () => import('./pages/AdminEvalsPage').then((module) => ({ default: module.AdminEvalsPage }))
-const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPage').then((module) => ({ default: module.CharacterLobbyPage }))
+const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPageNew').then((module) => ({ default: module.CharacterLobbyPage }))
 const loadExplorePage = () => import('./pages/ExplorePageNew').then((module) => ({ default: module.ExplorePage }))
-const loadProfilePage = () => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage }))
+const loadProfilePage = () => import('./pages/ProfilePageNew').then((module) => ({ default: module.ProfilePage }))
 const loadWalletPage = () => import('./pages/WalletPageNew').then((module) => ({ default: module.WalletPageNew }))
 
 const CreatorStudioPage = lazy(loadCreatorStudioPage)
