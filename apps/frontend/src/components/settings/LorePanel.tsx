@@ -84,8 +84,10 @@ export function LorePanel({
         {/* Character Info Section */}
         <div className="border-b border-slate-700/50">
           <button
+            type="button"
             onClick={() => toggleSection('character')}
             className="flex w-full items-center justify-between p-4 text-left hover:bg-slate-700/30"
+            aria-label="สลับข้อมูลตัวละคร"
           >
             <h3 className="font-medium text-slate-100">ข้อมูลตัวละคร</h3>
             {expandedSections.character ? (
@@ -144,8 +146,10 @@ export function LorePanel({
         {relationship && (
           <div className="border-b border-slate-700/50">
             <button
+              type="button"
               onClick={() => toggleSection('relationship')}
               className="flex w-full items-center justify-between p-4 text-left hover:bg-slate-700/30"
+              aria-label="สลับความสัมพันธ์"
             >
               <h3 className="font-medium text-slate-100">ความสัมพันธ์</h3>
               {expandedSections.relationship ? (
@@ -216,8 +220,10 @@ export function LorePanel({
         {/* Lore Entries Section */}
         <div className="border-b border-slate-700/50">
           <button
+            type="button"
             onClick={() => toggleSection('lore')}
             className="flex w-full items-center justify-between p-4 text-left hover:bg-slate-700/30"
+            aria-label="สลับความทรงจำ"
           >
             <h3 className="font-medium text-slate-100">
               ความทรงจำ ({loreEntries.length})
