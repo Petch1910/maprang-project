@@ -16,6 +16,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import { AgeGate } from './components/AgeGate'
+import { ToastContainer } from './components/Toast'
 import { useAppDispatch, useAppSelector } from './store/hooks'
 import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chatsSlice'
 import { loadContentSettings } from './store/slices/contentSlice'
@@ -24,7 +25,7 @@ import { loadPersonaDraft } from './store/slices/draftsSlice'
 import { safeGetStorageItem, safeSetStorageItem } from './lib/safeStorage'
 
 const loadCreatorStudioPage = () => import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage }))
-const loadChatRoomPage = () => import('./pages/ChatRoomPage').then((module) => ({ default: module.ChatRoomPage }))
+const loadChatRoomPage = () => import('./pages/ChatRoomPageNew').then((module) => ({ default: module.ChatRoomPageNew }))
 const loadEventsInboxPage = () => import('./pages/EventsInboxPage').then((module) => ({ default: module.EventsInboxPage }))
 const loadMyChatsPage = () => import('./pages/MyChatsPage').then((module) => ({ default: module.MyChatsPage }))
 const loadAdminModerationPage = () => import('./pages/AdminModerationPage').then((module) => ({ default: module.AdminModerationPage }))
@@ -35,7 +36,7 @@ const loadAdminEvalsPage = () => import('./pages/AdminEvalsPage').then((module) 
 const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPage').then((module) => ({ default: module.CharacterLobbyPage }))
 const loadExplorePage = () => import('./pages/ExplorePageNew').then((module) => ({ default: module.ExplorePage }))
 const loadProfilePage = () => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage }))
-const loadWalletPage = () => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage }))
+const loadWalletPage = () => import('./pages/WalletPageNew').then((module) => ({ default: module.WalletPageNew }))
 
 const CreatorStudioPage = lazy(loadCreatorStudioPage)
 const ChatRoomPage = lazy(loadChatRoomPage)
@@ -407,6 +408,9 @@ function App() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   )
 }
