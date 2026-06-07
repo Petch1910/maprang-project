@@ -247,6 +247,7 @@ export function ExplorePage() {
           <div className="mb-6 flex items-center justify-between">
             <div className="flex gap-2 rounded-lg bg-slate-800/50 p-1">
               <button
+                type="button"
                 onClick={() => setViewMode('home')}
                 className={`
                   rounded-md px-4 py-2 text-sm font-medium transition-all
@@ -256,6 +257,7 @@ export function ExplorePage() {
                 หน้าแรก
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode('browse')}
                 className={`
                   rounded-md px-4 py-2 text-sm font-medium transition-all
