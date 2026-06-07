@@ -36,7 +36,7 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
   const loadScenarios = async () => {
     try {
       const response = await fetch('/api/creator/scenarios?preset=basic')
-      const data = await response.json()
+      const data = await readApiJson(response)
       setScenarios(data.scenarios || [])
     } catch (error) {
       logUnexpectedError('Failed to load scenarios:', error)
@@ -66,7 +66,7 @@ export function PreviewChat({ characterId, characterData, onClose }: PreviewChat
         throw new Error('Preview failed')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
 
       setMessages((prev) => [
         ...prev,

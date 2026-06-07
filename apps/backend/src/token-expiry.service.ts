@@ -4,6 +4,9 @@ import { recordTokenTransaction } from './token.service'
 /**
  * Expire promotional tokens that have passed their expiry date
  * Called by cron job daily
+ *
+ * NOTE: Currently uses metadata.expiryDate instead of expiresAt field
+ * Update this when TokenTransaction schema has expiresAt column
  */
 export async function expirePromotionalTokens(): Promise<{
   expiredCount: number
@@ -17,25 +20,18 @@ export async function expirePromotionalTokens(): Promise<{
 
   const now = new Date()
 
-  // Find all promotional transactions that have expiry date and not yet expired
-  const expiredTransactions = await prisma.tokenTransaction.findMany({
+  // Find promotional transactions with expiry date in metadata
+  const allPromotionalTransactions = await prisma.tokenTransaction.findMany({
     where: {
       type: 'PROMOTION',
-      expiresAt: {
-        lte: now, // Expired
-      },
-      // Only get ones that haven't been marked as expired yet
-      NOT: {
-        metadata: {
-          path: ['expired'],
-          equals: true,
-        },
-      },
     },
-    include: {
+    select: {
+      id: true,
+      userId: true,
+      amount: true,
+      metadata: true,
       user: {
         select: {
-          id: true,
           tokenBalance: true,
         },
       },
@@ -48,7 +44,17 @@ export async function expirePromotionalTokens(): Promise<{
     affectedUsers: [] as string[],
   }
 
-  for (const transaction of expiredTransactions) {
+  for (const transaction of allPromotionalTransactions) {
+    // Check if metadata has expiryDate
+    const metadata = transaction.metadata as any
+    if (!metadata?.expiryDate) continue
+
+    const expiryDate = new Date(metadata.expiryDate)
+    if (expiryDate > now) continue // Not expired yet
+
+    // Check if already marked as expired
+    if (metadata.expired) continue
+
     const userId = transaction.userId
     const expiredAmount = transaction.amount
 
@@ -62,16 +68,16 @@ export async function expirePromotionalTokens(): Promise<{
         reason: `โทเคนโปรโมชันหมดอายุ (จากรายการ ${transaction.id})`,
         metadata: {
           originalTransactionId: transaction.id,
-          expiryDate: transaction.expiresAt?.toISOString(),
+          expiryDate: expiryDate.toISOString(),
         },
       })
 
-      // Mark original transaction as expired
+      // Mark original transaction as expired in metadata
       await prisma.tokenTransaction.update({
         where: { id: transaction.id },
         data: {
           metadata: {
-            ...(transaction.metadata as object),
+            ...metadata,
             expired: true,
             expiredAt: now.toISOString(),
           },
@@ -100,35 +106,42 @@ export async function getExpiringTokens(userId: string, daysAhead: number = 7) {
   const futureDate = new Date()
   futureDate.setDate(futureDate.getDate() + daysAhead)
 
-  const expiringTransactions = await prisma.tokenTransaction.findMany({
+  const transactions = await prisma.tokenTransaction.findMany({
     where: {
       userId,
       type: 'PROMOTION',
-      expiresAt: {
-        gte: new Date(),
-        lte: futureDate,
-      },
-      NOT: {
-        metadata: {
-          path: ['expired'],
-          equals: true,
-        },
-      },
     },
-    orderBy: {
-      expiresAt: 'asc',
+    select: {
+      id: true,
+      amount: true,
+      reason: true,
+      metadata: true,
     },
   })
 
-  return expiringTransactions.map((tx) => ({
-    id: tx.id,
-    amount: tx.amount,
-    expiresAt: tx.expiresAt,
-    daysRemaining: Math.ceil(
-      ((tx.expiresAt?.getTime() || 0) - Date.now()) / (1000 * 60 * 60 * 24)
-    ),
-    reason: tx.reason,
-  }))
+  // Filter and map transactions with expiry dates
+  const expiringTokens = transactions
+    .map((tx) => {
+      const metadata = tx.metadata as any
+      if (!metadata?.expiryDate || metadata.expired) return null
+
+      const expiryDate = new Date(metadata.expiryDate)
+      if (expiryDate < new Date() || expiryDate > futureDate) return null
+
+      const daysRemaining = Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+
+      return {
+        id: tx.id,
+        amount: tx.amount,
+        expiresAt: expiryDate,
+        daysRemaining,
+        reason: tx.reason || 'โปรโมชัน',
+      }
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => a.expiresAt.getTime() - b.expiresAt.getTime())
+
+  return expiringTokens
 }
 
 /**
@@ -151,29 +164,30 @@ export async function notifyExpiringTokens(daysAhead: number): Promise<{
   const endDate = new Date(startDate)
   endDate.setHours(23, 59, 59, 999)
 
-  // Find tokens expiring on this specific day
-  const expiringTransactions = await prisma.tokenTransaction.findMany({
+  // Get all promotional transactions
+  const transactions = await prisma.tokenTransaction.findMany({
     where: {
       type: 'PROMOTION',
-      expiresAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-      NOT: {
-        metadata: {
-          path: ['expired'],
-          equals: true,
-        },
-      },
     },
-    include: {
+    select: {
+      userId: true,
+      amount: true,
+      metadata: true,
       user: {
         select: {
-          id: true,
           email: true,
         },
       },
     },
+  })
+
+  // Filter transactions expiring on this specific day
+  const expiringTransactions = transactions.filter((tx) => {
+    const metadata = tx.metadata as any
+    if (!metadata?.expiryDate || metadata.expired) return false
+
+    const expiryDate = new Date(metadata.expiryDate)
+    return expiryDate >= startDate && expiryDate <= endDate
   })
 
   // Group by user

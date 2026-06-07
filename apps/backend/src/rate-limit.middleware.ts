@@ -1,32 +1,44 @@
 import { checkTokenBalance } from './token.service'
-import type { Request, Response, NextFunction } from 'express'
+
+// Elysia context types (not Express)
+type Context = {
+  request: Request
+  set: {
+    status?: number | string
+  }
+}
 
 /**
  * Middleware to check if user has enough tokens before allowing action
+ * Note: For Elysia, use this as a guard function, not Express middleware
  */
 export async function requireTokens(requiredAmount: number) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.id
+  return async (context: Context) => {
+    // This is a placeholder for Elysia
+    // In actual use, integrate with Elysia's guard system
+    const userId = 'user-id' // TODO: Get from Elysia context
 
     if (!userId) {
-      return res.status(401).json({
+      context.set.status = 401
+      return {
         error: 'Unauthorized',
         message: 'ต้องเข้าสู่ระบบก่อน',
-      })
+      }
     }
 
     const hasEnoughTokens = await checkTokenBalance(userId, requiredAmount)
 
     if (!hasEnoughTokens) {
-      return res.status(402).json({
+      context.set.status = 402
+      return {
         error: 'InsufficientTokens',
         message: `ต้องมีโทเคนอย่างน้อย ${requiredAmount} เพื่อดำเนินการต่อ`,
         required: requiredAmount,
         code: 'INSUFFICIENT_TOKENS',
-      })
+      }
     }
 
-    next()
+    return null // Pass through
   }
 }
 
