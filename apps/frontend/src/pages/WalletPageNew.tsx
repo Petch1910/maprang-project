@@ -21,6 +21,7 @@ import { useAppDispatch } from '../store/hooks'
 import { setTokenBalance } from '../store/slices/walletSlice'
 import { LoadingSkeleton, LoadingSpinner } from '../components/LoadingSkeleton'
 import { AchievementBadges, mockAchievements } from '../components/AchievementBadges'
+import { DailyLoginButton } from '../components/DailyLoginButton'
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('th-TH', {
@@ -145,15 +146,18 @@ export function WalletPageNew() {
             <h1 className="text-3xl font-bold text-slate-100">กระเป๋าโทเคน</h1>
             <p className="mt-1 text-slate-400">จัดการและติดตามการใช้งานโทเคนของคุณ</p>
           </div>
-          <button
-            type="button"
-            onClick={loadWallet}
-            disabled={isLoading}
-            className="flex items-center gap-2 rounded-lg bg-slate-800/50 px-4 py-2 text-slate-300 transition-all hover:bg-slate-700/50 disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            รีเฟรช
-          </button>
+          <div className="flex items-center gap-3">
+            <DailyLoginButton onClaim={loadWallet} />
+            <button
+              type="button"
+              onClick={loadWallet}
+              disabled={isLoading}
+              className="flex items-center gap-2 rounded-lg bg-slate-800/50 px-4 py-2 text-slate-300 transition-all hover:bg-slate-700/50 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              รีเฟรช
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}

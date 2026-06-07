@@ -4,6 +4,7 @@ import { requireDatabase } from './db'
 import { routeErrorResponse } from './route-guards'
 import { resolveRequestUserId } from './security'
 import { loadContentSettings, loadUsageSummary, loadUserPersona, updateContentSettings, updateUserPersona } from './user.service'
+import { processDailyLogin, getDailyLoginStats } from './daily-login.service'
 
 const contentRatingSchema = t.Union([
   t.Literal('general'),
@@ -90,3 +91,31 @@ export const userRoutes = new Elysia()
       }),
     },
   )
+  .post('/me/daily-login', async ({ request, set }) => {
+    const prisma = requireDatabase(set)
+    if (!prisma) return routeErrorResponse('database_not_configured')
+
+    const userId = await resolveRequestUserId(request, defaultUserId)
+
+    try {
+      const result = await processDailyLogin(userId)
+      return result
+    } catch (error) {
+      set.status = 500
+      return routeErrorResponse('daily_login_failed')
+    }
+  })
+  .get('/me/daily-login-stats', async ({ request, set }) => {
+    const prisma = requireDatabase(set)
+    if (!prisma) return routeErrorResponse('database_not_configured')
+
+    const userId = await resolveRequestUserId(request, defaultUserId)
+
+    try {
+      const stats = await getDailyLoginStats(userId)
+      return stats
+    } catch (error) {
+      set.status = 500
+      return routeErrorResponse('failed_to_load_stats')
+    }
+  })
