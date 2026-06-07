@@ -99,8 +99,10 @@ export function ToastContainer() {
             {getIcon(toast.type)}
             <p className="flex-1 text-sm text-slate-100">{toast.message}</p>
             <button
+              type="button"
               onClick={() => toastStore.remove(toast.id)}
               className="flex-shrink-0 rounded p-1 transition-colors hover:bg-slate-700/50"
+              aria-label="ปิดการแจ้งเตือน"
             >
               <X className="h-4 w-4 text-slate-400" />
             </button>

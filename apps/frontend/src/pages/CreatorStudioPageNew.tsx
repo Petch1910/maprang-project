@@ -99,7 +99,7 @@ export function CreatorStudioPage() {
               <Wand2 className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Creator Studio</h1>
+              <h1 className="text-3xl font-bold text-white">สตูดิโอสร้างสรรค์</h1>
               <p className="text-slate-400">สร้างตัวละคร AI ของคุณเอง</p>
             </div>
           </div>
@@ -199,6 +199,7 @@ export function CreatorStudioPage() {
                     onClick={() => characterData && setShowPreview(true)}
                     disabled={!characterData}
                     className="mt-4 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    title={!characterData ? 'กรุณากรอกข้อมูลตัวละครก่อนพรีวิว' : 'เปิดพรีวิวการสนทนา'}
                   >
                     <Play className="inline h-4 w-4 mr-2" />
                     เปิดพรีวิว
