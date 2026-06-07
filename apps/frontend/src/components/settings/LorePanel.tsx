@@ -301,8 +301,10 @@ export function LorePanel({
         {/* Settings Section */}
         <div>
           <button
+            type="button"
             onClick={() => toggleSection('settings')}
             className="flex w-full items-center justify-between p-4 text-left hover:bg-slate-700/30"
+            aria-label="สลับการตั้งค่า"
           >
             <h3 className="font-medium text-slate-100">การตั้งค่า</h3>
             {expandedSections.settings ? (
