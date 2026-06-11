@@ -1090,6 +1090,7 @@ Verified:
 - Admin moderation empty-state copy now reads as product guidance instead of an internal test flow: empty queues point admins to reports created from chat or character profiles, the CTA says `ไปสร้างรายงานจากแชท`, and route/menu documentation matches the same wording.
 - Admin Health local readiness copy now says the local system is ready to inspect the main paths instead of saying `ทดสอบ flow`, and frontend component contracts guard both Admin Health and moderation from regressing to the old internal wording.
 - System Status and Admin Health no longer expose `local QA` / `local/mock-roleplay` debug wording in frontend source or route/menu documentation. Local runtime now appears as `โหมดในเครื่องพร้อมเล่น` / `แชทในเครื่องพร้อมใช้`, while deploy details still keep real staging/live-provider blockers visible.
+- Latest repo-owned deterministic gate after this UI copy cleanup is green: `bun run qa:repo` passed, and the in-app browser check of `/admin/health` confirmed no visible `local QA`, `local/mock-roleplay`, or `ทดสอบ flow` copy remains on that page.
 
 ## สถานะ production ปัจจุบัน
 
