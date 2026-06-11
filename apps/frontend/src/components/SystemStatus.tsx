@@ -13,7 +13,7 @@ function Dot({ ok }: { ok: boolean }) {
 
 function authModeLabel(mode?: NonNullable<HealthStatus['security']>['authMode']) {
   if (mode === 'supabase-jwt') return 'Supabase'
-  if (mode === 'local-dev-header') return 'โหมดทดสอบในเครื่อง'
+  if (mode === 'local-dev-header') return 'โหมดในเครื่อง'
   return 'ยังไม่ทราบ'
 }
 
@@ -50,12 +50,12 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
   const chatStatusLabel = chatProductionReady
     ? 'ยืนยันแล้ว'
     : chatRuntimeIsLocal
-      ? 'โหมด local QA พร้อมเล่น'
+      ? 'โหมดในเครื่องพร้อมเล่น'
       : checks?.openRouterConfigured
         ? 'ตั้งค่าแล้ว รอทดสอบจริง'
         : 'ยังขาด'
   const chatRuntimeLabel = chatRuntimeIsLocal
-    ? `โหมด local QA${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
+    ? `โหมดในเครื่อง${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
     : chatProvider?.activeRuntimeProvider === 'openrouter'
       ? 'OpenRouter'
       : chatProvider?.activeRuntimeProvider ?? 'ยังไม่ทราบ'
@@ -172,7 +172,7 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
             {healthStatus.model.chatProvider?.status && <span>แชท {providerStatusLabel(healthStatus.model.chatProvider.status)}</span>}
             {healthStatus.model.chatProvider?.activeRuntimeProvider && <span>runtime {chatRuntimeLabel}</span>}
             {healthStatus.model.chatProvider?.localFallbackEnabled && (
-              <span>แชท local QA {healthStatus.model.chatProvider.localModel ?? 'local/mock-roleplay'}</span>
+              <span>แชทในเครื่องพร้อมใช้</span>
             )}
             <span>รูป {healthStatus.model.imageGeneration?.model ?? 'ยังไม่ตั้งค่า'}</span>
             {healthStatus.model.imageGeneration?.status && (

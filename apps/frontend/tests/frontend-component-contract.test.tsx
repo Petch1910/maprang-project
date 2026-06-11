@@ -313,7 +313,7 @@ describe('frontend component contracts', () => {
     expect(open).toContain('disabled=""')
   })
 
-  test('system status presents local runtime as local QA without mock wording', () => {
+  test('system status presents local runtime without debug provider wording', () => {
     const html = render(
       createElement(SystemStatus, {
         healthStatus: localHealthStatus,
@@ -321,9 +321,10 @@ describe('frontend component contracts', () => {
       }),
     )
 
-    expect(html).toContain('โหมด local QA พร้อมเล่น')
-    expect(html).toContain('แชท local QA')
-    expect(html).toContain('local/mock-roleplay')
+    expect(html).toContain('โหมดในเครื่องพร้อมเล่น')
+    expect(html).toContain('แชทในเครื่องพร้อมใช้')
+    expect(html).not.toContain('local QA')
+    expect(html).not.toContain('local/mock-roleplay')
     expect(html).not.toContain('local mock')
   })
 

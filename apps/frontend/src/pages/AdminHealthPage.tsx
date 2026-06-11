@@ -61,7 +61,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
   const chatRuntimeIsLocal = chatProvider?.activeRuntimeProvider === 'local' || chatProvider?.forcedLocal === true
   const chatRuntimeLabel = chatRuntimeIsLocal
-    ? `โหมด local QA (${chatProvider?.localModel ?? 'local/mock-roleplay'})${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
+    ? `โหมดในเครื่อง${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
     : chatProvider?.activeRuntimeProvider === 'openrouter'
       ? 'OpenRouter'
       : chatProvider?.activeRuntimeProvider ?? 'ยังไม่ทราบ'
@@ -104,23 +104,23 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: checks?.openRouterConfigured
         ? 'ตั้งคีย์แล้ว แต่ยังต้องให้ smoke:chat หรือ api:smoke:live ผ่านเพื่อยืนยันโควตา รุ่นโมเดล และเครือข่ายจริง'
         : chatRuntimeIsLocal
-          ? `ยังไม่ใช้ OpenRouter ใน runtime นี้ เพราะกำลังใช้ ${chatRuntimeLabel} สำหรับ QA local`
+          ? `ยังไม่ใช้ OpenRouter ใน runtime นี้ เพราะกำลังใช้ ${chatRuntimeLabel} สำหรับตรวจระบบในเครื่อง`
           : 'ตั้ง OPENROUTER_API_KEY ก่อนทดสอบแชทจริง',
       action: checks?.openRouterConfigured
         ? 'รัน bun run smoke:chat กับสเตจจิงเพื่อยืนยันผู้ให้บริการจริง'
         : chatRuntimeIsLocal
-          ? 'ใช้โหมด local QA ต่อได้ แต่ก่อน deploy ต้องตั้ง OPENROUTER_API_KEY และรัน live smoke'
+          ? 'ใช้โหมดในเครื่องต่อได้ แต่ก่อน deploy ต้องตั้ง OPENROUTER_API_KEY และรัน live smoke'
           : 'ตั้ง OPENROUTER_API_KEY ที่ขึ้นต้น sk-or- ใน secret ของโฮสต์หลังบ้าน',
       scope: 'local',
     },
     {
-      label: 'แชท local สำหรับ QA',
+      label: 'แชทในเครื่อง',
       ok: chatRuntimeIsLocal,
       detail: chatRuntimeIsLocal
         ? `runtime ตอนนี้ใช้ ${chatRuntimeLabel}; api:smoke ตรวจ normal chat และ stream chat ได้โดยไม่ใช้เครดิตผู้ให้บริการ`
         : chatProvider?.localFallbackEnabled
-          ? `โหมด local สำรองเปิดอยู่ แต่ runtime ตอนนี้เป็น ${chatRuntimeLabel}`
-          : 'ยังไม่ได้เปิด local chat provider สำหรับการเล่นทดสอบในเครื่อง',
+          ? `โหมดในเครื่องสำรองเปิดอยู่ แต่ runtime ตอนนี้เป็น ${chatRuntimeLabel}`
+          : 'ยังไม่ได้เปิด chat provider ในเครื่อง',
       action: chatRuntimeIsLocal
         ? 'ใช้ bun run api:smoke หรือ bun run qa:local เพื่อตรวจแชท local normal/stream ซ้ำได้'
         : 'ตั้ง LOCAL_CHAT_PROVIDER=1 หรือ CHAT_PROVIDER=local ใน backend dev แล้วรีสตาร์ตระบบหลังบ้าน',
