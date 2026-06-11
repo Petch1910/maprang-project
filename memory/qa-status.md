@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 frontend API-helper predeploy lock QA pass: `predeploy:check` now source-locks the frontend static-audit rule that forbids direct `fetch` outside `apps/frontend/src/lib/api.ts`, including `rawFrontendFetchPattern`, `allowedFrontendFetchFiles`, `rawFrontendFetchMessage`, and the Thai diagnostic text. Passing evidence: `bun run predeploy:check:test` (3 pass / 1151 expects), `bun run predeploy:check`, `bun run frontend:static:audit:test` (40 pass / 234 expects), and `bun run frontend:static:audit`.
+
 - 2026-06-11 deploy-blocker no-any handoff lock QA pass: `predeploy:check` now requires `memory/deploy-blockers.md` to retain the latest backend no-any deploy guard addendum, the runtime no-any status, the predeploy source-lock wording, and the reminder that external staging/domain/storage/live-provider blockers remain. Passing evidence: `bun run predeploy:check:test` (3 pass / 1147 expects) and `bun run predeploy:check`.
 
 - 2026-06-11 backend no-any predeploy source-lock QA pass: `predeploy:check` now requires the backend security audit rule for `\bas\s+any\b`, its Thai runtime diagnostic, and the regression fixture `catches unsafe any assertions in runtime backend source` with `const metadata = transaction.metadata as any`. Passing evidence: `bun run predeploy:check:test` (3 pass / 1143 expects), `bun run predeploy:check`, `bun run security:audit:test` (39 pass / 246 expects), and `bun run security:audit`.

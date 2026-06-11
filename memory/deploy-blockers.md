@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest frontend API-helper guard addendum: 2026-06-11 `predeploy:check` now source-locks the frontend static-audit rule that rejects direct `fetch` outside `apps/frontend/src/lib/api.ts`. This keeps API calls behind the central helper and prevents the test-plan/API-audit baseline from drifting; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest backend no-any deploy guard addendum: 2026-06-11 backend runtime no longer has production `as any` casts, and `predeploy:check` now source-locks the `backend-security-audit` rule/test that rejects `as any` in runtime backend source. This improves repo-owned deploy safety; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest saved-message DB index addendum: 2026-06-11 saved chat window queries now have a matching Postgres/Prisma index, `Message_chatId_deletedAt_createdAt_id_idx`, on `(chatId, deletedAt, createdAt DESC, id DESC)` with migration and DB-check regression coverage. This improves local/staging database performance safety for large saved chats; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
