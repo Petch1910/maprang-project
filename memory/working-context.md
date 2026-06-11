@@ -2,7 +2,7 @@
 
 Last updated: 2026-06-12
 
-- 2026-06-12: Frontend shell dedupe pass fixed a UX issue where immersive pages were wrapped by the global app navigation and their own page shell at the same time. `/` and `/chat*` now render as full-screen immersive routes with only their own marketplace/chat shell, the unsupported light-mode branch and theme toggle were removed, and Browser verification showed `/`, `/chat`, `/wallet`, and `/create` with no unsupported-light copy, no horizontal overflow, and no console errors. Full deterministic `bun run qa:repo` passed afterward.
+- 2026-06-12: Frontend shell dedupe pass fixed a UX issue where immersive pages were wrapped by the global app navigation and their own page shell at the same time. `/` and `/chat*` now render as full-screen immersive routes with only their own marketplace/chat shell, the unsupported light-mode branch and theme toggle were removed, and Browser verification showed `/`, `/chat`, `/wallet`, and `/create` with no unsupported-light copy, no horizontal overflow, and no console errors. `frontend:components:test` now source-locks the immersive route branch and absence of the unsupported theme state; full deterministic `bun run qa:repo` passed afterward.
 
 - 2026-06-12: Fresh local PostgreSQL migration readiness is now fixed. Added baseline migration `20260504170000_initial_roleplay_baseline` so `bunx prisma migrate reset --force` can apply the complete migration chain from an empty DB before the existing `20260504183000_character_schema_upgrade`. `backend-db-check.test.ts` and `predeploy:check` now lock the baseline migration so fresh DB setup cannot silently regress.
 

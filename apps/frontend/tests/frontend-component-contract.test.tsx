@@ -396,6 +396,22 @@ describe('frontend component contracts', () => {
     expect(source).not.toContain('function blockerSummary(')
   })
 
+  test('app shell keeps immersive routes out of the global navigation wrapper', async () => {
+    const source = await Bun.file('apps/frontend/src/App.tsx').text()
+    const immersiveRouteIndex = source.indexOf("const isImmersiveRoute = location.pathname === '/' || location.pathname.startsWith('/chat')")
+    const immersiveBranchIndex = source.indexOf('if (isImmersiveRoute)')
+    const globalHeaderIndex = source.indexOf('<header className="sticky top-0')
+
+    expect(immersiveRouteIndex).toBeGreaterThan(0)
+    expect(immersiveBranchIndex).toBeGreaterThan(immersiveRouteIndex)
+    expect(globalHeaderIndex).toBeGreaterThan(immersiveBranchIndex)
+    expect(source).toContain('{appRoutes}')
+    expect(source).not.toContain('maprang:theme:v2')
+    expect(source).not.toContain('โหมดสว่างยังไม่รองรับ')
+    expect(source).not.toContain('setIsDarkMode')
+    expect(source).not.toContain('initialDarkMode')
+  })
+
   test('events inbox selector exposes only playable pending scene summaries', () => {
     const visibleChat = chatSummaryWithPendingScene()
     const heldOnlyChat = chatSummaryWithPendingScene({
