@@ -1,4 +1,6 @@
 import { checkTokenBalance } from './token.service'
+import { defaultUserId } from './config'
+import { AuthError, authErrorResponse, resolveRequestUserId } from './security'
 
 // Elysia context types (not Express)
 type Context = {
@@ -6,6 +8,7 @@ type Context = {
   set: {
     status?: number | string
   }
+  userId?: string
 }
 
 /**
@@ -14,16 +17,13 @@ type Context = {
  */
 export async function requireTokens(requiredAmount: number) {
   return async (context: Context) => {
-    // This is a placeholder for Elysia
-    // In actual use, integrate with Elysia's guard system
-    const userId = 'user-id' // TODO: Get from Elysia context
-
-    if (!userId) {
+    let userId: string
+    try {
+      userId = await resolveTokenGuardUserId(context)
+    } catch (error) {
       context.set.status = 401
-      return {
-        error: 'Unauthorized',
-        message: 'ต้องเข้าสู่ระบบก่อน',
-      }
+      if (error instanceof AuthError) return authErrorResponse(error)
+      return { error: 'auth_required', message: 'กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้' }
     }
 
     const hasEnoughTokens = await checkTokenBalance(userId, requiredAmount)
@@ -38,8 +38,14 @@ export async function requireTokens(requiredAmount: number) {
       }
     }
 
-    return null // Pass through
+    return null
   }
+}
+
+export async function resolveTokenGuardUserId(context: Context) {
+  const contextUserId = context.userId?.trim()
+  if (contextUserId) return contextUserId
+  return resolveRequestUserId(context.request, defaultUserId)
 }
 
 /**
