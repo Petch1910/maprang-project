@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   backendEnvPort,
+  E2E_SMOKE_DB_PREFLIGHT_LABEL,
   e2eSmokeSteps,
   e2eSmokeTargetIssues,
   formatE2eSmokeError,
@@ -53,8 +54,13 @@ describe('e2e smoke command plan', () => {
     })
   })
 
-  test('runs seed, Playwright, then QA cleanup in order', () => {
+  test('runs DB preflight, seed, Playwright, then QA cleanup in order', () => {
     expect(e2eSmokeSteps()).toEqual([
+      {
+        label: E2E_SMOKE_DB_PREFLIGHT_LABEL,
+        command: ['bun', 'src/db.required-check.ts'],
+        cwd: 'apps/backend',
+      },
       {
         label: 'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
         command: ['bun', 'run', 'qa:seed'],
@@ -140,6 +146,7 @@ describe('e2e smoke command plan', () => {
 
     expect(exitCode).toBe(1)
     expect(calls).toEqual([
+      E2E_SMOKE_DB_PREFLIGHT_LABEL,
       'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
       'ตรวจเบราว์เซอร์ Playwright: ตรวจ routes บนเดสก์ท็อปและมือถือ',
       'ล้างข้อมูล QA: ลบ seed ทดสอบหลังตรวจเบราว์เซอร์',
@@ -160,20 +167,42 @@ describe('e2e smoke command plan', () => {
     ])
   })
 
+  test('stops before QA seed when database preflight fails', async () => {
+    const calls: string[] = []
+    const errors: unknown[] = []
+
+    const exitCode = await runE2eSmoke(
+      async (step: E2eSmokeStep) => {
+        calls.push(step.label)
+        return 1
+      },
+      { log: () => undefined, error: (error) => errors.push(error) },
+    )
+
+    expect(exitCode).toBe(1)
+    expect(calls).toEqual([E2E_SMOKE_DB_PREFLIGHT_LABEL])
+    expect(errors).toEqual([
+      `ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: ${E2E_SMOKE_DB_PREFLIGHT_LABEL} ไม่ผ่านด้วย exit code 1`,
+    ])
+  })
+
   test('stops before browser route check when initial seed fails', async () => {
     const calls: string[] = []
+    const errors: unknown[] = []
 
-    await expect(
-      runE2eSmoke(
-        async (step: E2eSmokeStep) => {
-          calls.push(step.label)
-          return 1
-        },
-        quietLogger,
-      ),
-    ).rejects.toThrow('เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์ ไม่ผ่านด้วย exit code 1')
+    const exitCode = await runE2eSmoke(
+      async (step: E2eSmokeStep) => {
+        calls.push(step.label)
+        return step.command.includes('qa:seed') ? 1 : 0
+      },
+      { log: () => undefined, error: (error) => errors.push(error) },
+    )
 
-    expect(calls).toEqual(['เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์'])
+    expect(exitCode).toBe(1)
+    expect(calls).toEqual([E2E_SMOKE_DB_PREFLIGHT_LABEL, 'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์'])
+    expect(errors).toEqual([
+      'ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์ ไม่ผ่านด้วย exit code 1',
+    ])
   })
 
   test('formats unknown e2e smoke errors for QA logs', () => {

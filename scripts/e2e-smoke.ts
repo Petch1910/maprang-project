@@ -5,6 +5,7 @@ import { formatUnknownDiagnosticText, smokeTargetIsLocal } from './smoke-helpers
 export type E2eSmokeStep = {
   label: string
   command: string[]
+  cwd?: string
   alwaysRun?: boolean
 }
 
@@ -13,6 +14,7 @@ export type E2eSmokeEnv = Record<string, string | undefined>
 export type E2eSmokeRunner = (step: E2eSmokeStep, env: E2eSmokeEnv) => Promise<number>
 
 const backendEnvPath = join(import.meta.dir, '..', 'apps/backend/.env')
+export const E2E_SMOKE_DB_PREFLIGHT_LABEL = 'ตรวจฐานข้อมูลก่อน QA: PostgreSQL พร้อมก่อน seed'
 
 function unquoteEnvValue(value: string) {
   const trimmed = value.trim()
@@ -89,6 +91,11 @@ export function e2eSmokeTargetIssues(env: E2eSmokeEnv = process.env) {
 export function e2eSmokeSteps(): E2eSmokeStep[] {
   return [
     {
+      label: E2E_SMOKE_DB_PREFLIGHT_LABEL,
+      command: ['bun', 'src/db.required-check.ts'],
+      cwd: 'apps/backend',
+    },
+    {
       label: 'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
       command: ['bun', 'run', 'qa:seed'],
     },
@@ -106,6 +113,7 @@ export function e2eSmokeSteps(): E2eSmokeStep[] {
 
 async function spawnStep(step: E2eSmokeStep, env: E2eSmokeEnv = process.env) {
   const proc = Bun.spawn(step.command, {
+    cwd: step.cwd,
     env: { ...process.env, ...env },
     stdio: ['inherit', 'inherit', 'inherit'],
   })
@@ -131,8 +139,10 @@ export async function runE2eSmoke(
   steps: E2eSmokeStep[] = e2eSmokeSteps(),
   env: E2eSmokeEnv = process.env,
 ) {
-  const [reset, browserSmoke, restore] = steps
-  if (!reset || !browserSmoke || !restore) throw new Error('e2e smoke ต้องมีขั้น reset, ตรวจเบราว์เซอร์, และ restore')
+  const [dbPreflight, reset, browserSmoke, restore] = steps
+  if (!dbPreflight || !reset || !browserSmoke || !restore) {
+    throw new Error('e2e smoke ต้องมีขั้น DB preflight, reset, ตรวจเบราว์เซอร์, และ restore')
+  }
   const runtimeEnv = resolveE2eSmokeEnv(env, await readBackendEnvText())
   const targetIssues = e2eSmokeTargetIssues(runtimeEnv)
   if (targetIssues.length > 0) {
@@ -142,7 +152,13 @@ export async function runE2eSmoke(
 
   let exitCode = 0
 
-  await runStep(reset, runner, logger, runtimeEnv)
+  try {
+    await runStep(dbPreflight, runner, logger, runtimeEnv)
+    await runStep(reset, runner, logger, runtimeEnv)
+  } catch (error) {
+    logger.error(formatE2eSmokeError(error))
+    return 1
+  }
 
   try {
     await runStep(browserSmoke, runner, logger, runtimeEnv)
