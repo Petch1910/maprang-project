@@ -2613,19 +2613,17 @@ describe('frontend static audit', () => {
     ).toEqual([])
   })
 
-  test('reports unmounted frontend components except explicit allowlist entries', async () => {
+  test('reports unmounted frontend components', async () => {
     const fixtureRoot = join(process.cwd(), 'apps/frontend/src')
     const files = [
       join(fixtureRoot, 'components/DeadPanel.tsx'),
       join(fixtureRoot, 'components/LivePanel.tsx'),
-      join(fixtureRoot, 'components/AuthPanel.tsx'),
       join(fixtureRoot, 'pages/LivePage.tsx'),
     ]
     const contents = new Map([
       [files[0], 'export function DeadPanel() { return <section /> }'],
       [files[1], 'export function LivePanel() { return <section /> }'],
-      [files[2], 'export function AuthPanel() { return <section /> }'],
-      [files[3], "import { LivePanel } from '../components/LivePanel'\nexport function LivePage() { return <LivePanel /> }"],
+      [files[2], "import { LivePanel } from '../components/LivePanel'\nexport function LivePage() { return <LivePanel /> }"],
     ])
 
     const findings = await auditUnmountedFrontendComponents(files, async (file) => contents.get(file) ?? '')

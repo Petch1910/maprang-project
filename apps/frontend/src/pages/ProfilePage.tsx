@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Coins, ShieldCheck } from 'lucide-react'
+import { AuthPanel } from '../components/AuthPanel'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { saveContentSettings, selectContentSettings } from '../store/slices/contentSlice'
-import { savePersonaDraft, savePersonaDraftToCloud, selectPersonaDraft, selectPersonaUpdatedAt } from '../store/slices/draftsSlice'
-import { selectIsLowToken, selectTokenBalance } from '../store/slices/walletSlice'
+import { loadContentSettings, saveContentSettings, selectContentSettings } from '../store/slices/contentSlice'
+import { loadPersonaDraft, savePersonaDraft, savePersonaDraftToCloud, selectPersonaDraft, selectPersonaUpdatedAt } from '../store/slices/draftsSlice'
+import { loadWalletSummary, selectIsLowToken, selectTokenBalance } from '../store/slices/walletSlice'
 import { safeGetStorageItem, safeSetStorageItem } from '../lib/safeStorage'
 
 const personaTemplate = [
@@ -74,6 +75,14 @@ export function ProfilePage() {
       .slice(0, 5)
     return lines.length > 0 ? lines : ['ยังไม่ได้ตั้งค่าตัวตน ผู้ช่วยจะใช้บริบทพื้นฐานของผู้ใช้']
   }, [personaDraft])
+
+  const refreshAccountData = useCallback(async () => {
+    await Promise.allSettled([
+      dispatch(loadWalletSummary()).unwrap(),
+      dispatch(loadContentSettings()).unwrap(),
+      dispatch(loadPersonaDraft()).unwrap(),
+    ])
+  }, [dispatch])
 
   useEffect(() => {
     if (!personaUpdatedAt) return
@@ -237,6 +246,10 @@ export function ProfilePage() {
       </section>
 
       <aside className="rounded-lg border border-white/10 bg-[#18181d]/90 p-5 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="mb-4" data-testid="profile-auth-panel">
+          <AuthPanel onAuthChanged={refreshAccountData} />
+        </div>
+
         <div className="rounded-lg border border-white/10 bg-white/5 p-3">
           <p className="m-0 text-sm font-black text-white">พรีวิวบริบทที่ส่งให้ AI</p>
           <div className="mt-2 space-y-1 text-xs font-bold leading-5 text-white/55">

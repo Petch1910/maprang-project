@@ -4628,7 +4628,7 @@ const checks: Check[] = [
           "Object.getOwnPropertyDescriptor(console, 'error')?.value.bind(console)(error)",
           'globalThis.console.error(error)',
           "window.console.warn('โหลดข้อมูลช้า', error)",
-          'reports unmounted frontend components except explicit allowlist entries',
+          'reports unmounted frontend components',
           'reports stale or unexplained frontend allowlist entries',
           'allowlist ของ frontend static audit ต้องมีเหตุผลชัดเจน',
           'reports unmounted frontend pages that are not wired into routes',

@@ -199,12 +199,7 @@ const allowedFrontendFetchFiles = new Set(['apps/frontend/src/lib/api.ts'])
 const allowedFrontendLocationOriginFiles = new Set(['apps/frontend/src/lib/shareUrl.ts'])
 const allowedFrontendMessageOriginFiles = new Set(['apps/frontend/src/lib/crossWindowMessaging.ts'])
 const frontendUiSurfacePattern = /^apps\/frontend\/src\/(?:components|pages)\//
-const allowedUnmountedFrontendComponents = new Map([
-  [
-    'apps/frontend/src/components/AuthPanel.tsx',
-    'AuthPanel ถูกเก็บไว้เป็น safety surface สำหรับ auth-error ระหว่างที่ UI บัญชีหลักถูกรวมไว้หน้าอื่น',
-  ],
-])
+const allowedUnmountedFrontendComponents = new Map<string, string>()
 const allowedUnmountedFrontendPages = new Map<string, string>()
 const unmountedComponentMessage =
   'component หน้าบ้านไม่ได้ถูก import หรือ mount จาก source อื่น ถ้าตั้งใจเก็บไว้ต้องเพิ่ม allowlist พร้อมเหตุผล'
