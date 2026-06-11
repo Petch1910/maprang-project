@@ -5,10 +5,8 @@ import {
   Coins,
   Compass,
   MessageCircle,
-  Moon,
   PlusCircle,
   SearchX,
-  Sun,
   UserRound,
   Menu,
   X,
@@ -20,7 +18,6 @@ import { loadChatSummaries, selectPendingSceneCount } from './store/slices/chats
 import { loadContentSettings } from './store/slices/contentSlice'
 import { loadWalletSummary, selectTokenBalance, selectWalletLoading } from './store/slices/walletSlice'
 import { loadPersonaDraft } from './store/slices/draftsSlice'
-import { safeGetStorageItem, safeSetStorageItem } from './lib/safeStorage'
 
 const loadCreatorStudioPage = () => import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage }))
 const loadChatRoomPage = () => import('./pages/WorkspacePage').then((module) => ({ default: module.WorkspacePage }))
@@ -98,14 +95,6 @@ function NotFoundPage() {
   )
 }
 
-function initialDarkMode() {
-  if (typeof window === 'undefined') return true
-  const stored = safeGetStorageItem(window.localStorage, 'maprang:theme:v2')
-  if (stored === 'dark') return true
-  if (stored === 'light') return false
-  return true
-}
-
 function App() {
   const dispatch = useAppDispatch()
   const location = useLocation()
@@ -113,7 +102,6 @@ function App() {
   const isWalletLoading = useAppSelector(selectWalletLoading)
   const eventCount = useAppSelector(selectPendingSceneCount)
   const didBootstrap = useRef(false)
-  const [isDarkMode, setIsDarkMode] = useState(initialDarkMode)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   useEffect(() => {
@@ -124,11 +112,6 @@ function App() {
     dispatch(loadChatSummaries())
     dispatch(loadPersonaDraft())
   }, [dispatch])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    safeSetStorageItem(window.localStorage, 'maprang:theme:v2', isDarkMode ? 'dark' : 'light')
-  }, [isDarkMode])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -169,21 +152,14 @@ function App() {
     const loader = routePreloads[path]
     if (loader) loader().catch(() => {})
   }
+  const isImmersiveRoute = location.pathname === '/' || location.pathname.startsWith('/chat')
 
-  if (!isDarkMode) {
+  if (isImmersiveRoute) {
     return (
-      <div className="min-h-screen bg-white text-slate-900">
+      <div className="min-h-screen bg-[#111113] text-white">
         <AgeGate />
-        <div className="text-center py-20">
-          <p className="text-slate-600">โหมดสว่างยังไม่รองรับ กรุณาใช้โหมดมืด</p>
-          <button
-            type="button"
-            onClick={() => setIsDarkMode(true)}
-            className="mt-4 rounded-lg bg-slate-900 px-6 py-3 text-white"
-          >
-            เปลี่ยนเป็นโหมดมืด
-          </button>
-        </div>
+        {appRoutes}
+        <ToastContainer />
       </div>
     )
   }
@@ -254,16 +230,6 @@ function App() {
                   </span>
                 )}
               </NavLink>
-
-              {/* Dark Mode Toggle */}
-              <button
-                type="button"
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
-                title={isDarkMode ? 'โหมดสว่าง' : 'โหมดมืด'}
-              >
-                {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </button>
 
               {/* Mobile Menu Toggle */}
               <button

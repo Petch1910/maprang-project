@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Frontend shell dedupe pass fixed a UX issue where immersive pages were wrapped by the global app navigation and their own page shell at the same time. `/` and `/chat*` now render as full-screen immersive routes with only their own marketplace/chat shell, the unsupported light-mode branch and theme toggle were removed, and Browser verification showed `/`, `/chat`, `/wallet`, and `/create` with no unsupported-light copy, no horizontal overflow, and no console errors. Full deterministic `bun run qa:repo` passed afterward.
+
 - 2026-06-12: Fresh local PostgreSQL migration readiness is now fixed. Added baseline migration `20260504170000_initial_roleplay_baseline` so `bunx prisma migrate reset --force` can apply the complete migration chain from an empty DB before the existing `20260504183000_character_schema_upgrade`. `backend-db-check.test.ts` and `predeploy:check` now lock the baseline migration so fresh DB setup cannot silently regress.
 
 - 2026-06-12: Full runtime `bun run qa:full` passed with `SMOKE_API_BASE_URL=http://127.0.0.1:3001`, `E2E_API_BASE_URL=http://127.0.0.1:3001`, `VITE_API_BASE_URL=http://127.0.0.1:3001`, and `E2E_BASE_URL=http://127.0.0.1:5173` after starting local backend/frontend, starting Docker Postgres, applying all migrations from scratch, and seeding QA data. Runtime evidence included smoke doctor green, local smoke green, API smoke green, Playwright e2e green, backend tests 270 pass / 1220 expects with DB-backed cases active, and frontend build/bundle budget green.

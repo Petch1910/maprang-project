@@ -10,6 +10,7 @@ Maprang ควรรู้สึกคุ้นมือสำหรับผู
 
 - ออกแบบมือถือก่อนเสมอ.
 - หน้าตาโทนมืดเป็นหลัก พร้อมภาษาภาพที่ไปทางเดียวกันทั้งเว็บ.
+- Route ที่เป็นประสบการณ์หลักและมี shell เฉพาะตัว เช่น Explore และ Chat ต้อง render แบบ immersive ไม่ถูก global navigation ครอบซ้ำ.
 - การนำทางหลักเป็นภาษาไทย.
 - เมนูต้องครบและกดแล้วเกิดผลจริง ไม่ใช่องค์ประกอบตกแต่ง.
 - สถานะว่างต้องบอกว่าผู้ใช้ควรทำอะไรต่อ.
@@ -34,6 +35,8 @@ Maprang ควรรู้สึกคุ้นมือสำหรับผู
 
 ## รอบปรับหน้าบ้านล่าสุด (Frontend pass)
 
+- App shell แยก route แบบ immersive แล้ว: `/` และ `/chat*` ใช้ marketplace/chat shell ของตัวเองเท่านั้น ส่วน route utility เช่น `/wallet`, `/create`, `/profile`, และ admin ยังใช้ global shell เพื่อไม่ให้ผู้ใช้หลงทาง.
+- ลบปุ่ม theme toggle และ branch โหมดสว่างที่ยังไม่รองรับออกจาก `App.tsx`; Maprang เป็น dark-first เต็มตัวในรอบนี้ เพื่อไม่ให้ผู้ใช้กดแล้วเจอหน้าขาวที่เหมือนฟีเจอร์ไม่เสร็จ.
 - Explore รองรับ mobile primary navigation ด้วย bottom nav สำหรับ Explore, Chats, Create, Events, และ Profile.
 - Chat read mode ไม่ใช่ของตกแต่งแล้ว: top bar และ right-rail control toggle reading layout ได้จริง, แสดง reading-state notice, และทำให้ message area แคบลงเพื่ออ่านฉากยาว.
 - E2E smoke ตรวจการนำทาง Explore บนมือถือ และโหมดอ่านของ Chat บนจอเดสก์ท็อป/มือถือแล้ว.
