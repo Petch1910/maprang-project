@@ -13,6 +13,18 @@ Last updated: 2026-06-11
 - AI chat: `local/mock-roleplay` ใน local QA, OpenRouter/live provider สำหรับ staging/production
 - AI image: fallback image ใน local ถ้าไม่มี provider, live image provider ต้อง verified ก่อน production
 
+## Status Taxonomy
+
+ใช้สถานะเหล่านี้เท่านั้นเมื่อเขียน test plan, route/menu audit, หรือ deploy handoff:
+
+| Status | Meaning |
+| --- | --- |
+| `local ready` | ใช้ได้ครบในเครื่องและต้องผ่าน repo/runtime smoke |
+| `guarded` | ใช้ได้แต่ต้องมี admin/auth guard หรือ audit log ชัดเจน |
+| `staging required` | ต้องมี HTTPS staging, staging DB, CORS จริง, หรือ Supabase จริงก่อนถือว่าผ่าน |
+| `production blocker` | ยังปล่อย production ไม่ได้จนกว่าจะมี credential/domain/provider ภายนอกและ smoke ผ่าน |
+| `future` | งานเผื่ออนาคต ยังไม่ควรเป็น route/menu ที่ผู้ใช้กดแล้วคาดหวังผลจริง |
+
 ## Route Coverage
 
 Route ที่ต้องตรวจใน browser smoke:
@@ -88,6 +100,7 @@ Baseline/docs:
 ```powershell
 bun run secrets:check
 bun run docs:commands
+bun run test-plan:audit
 git diff --check
 ```
 

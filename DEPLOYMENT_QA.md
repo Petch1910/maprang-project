@@ -70,6 +70,14 @@ bun run docs:commands
 
 `docs:commands` ตรวจ root docs, app READMEs, release/deploy handoff, route/menu audit, staging/production runbooks, และ workflow เพื่อกันคำสั่งที่ไม่มีอยู่จริง เช่น command ของ root หลุดไปอยู่ใน README ของ app package, command ของ app ถูกเขียนเหมือนรันจาก repo root, หรือ CI job อ้าง script ผิด `working-directory`.
 
+Test plan source-of-truth guard:
+
+```bash
+bun run test-plan:audit
+```
+
+`test-plan:audit` keeps `docs/MAPRANG_TEST_PLAN.md`, `START_HERE.md`, `RUN_NOW.md`, and `HOW_TO_RUN.md` aligned with the real React 19/Vite/Redux Toolkit + Elysia/Prisma/PostgreSQL baseline, the current route/product-surface split, local/mock-roleplay local QA, and explicit staging/production blockers.
+
 ถ้าต้องการตรวจ production env files ก่อน deploy โดยไม่พิมพ์ secret values:
 
 ```bash

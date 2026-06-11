@@ -18,6 +18,7 @@ const auditedCommandFiles = [
   'ABUSE_QA_CHECKLIST.md',
   'DEPLOY_RENDER.md',
   'DEPLOYMENT_QA.md',
+  'docs/MAPRANG_TEST_PLAN.md',
   'PRODUCTION_SETUP.md',
   'RELEASE_HANDOFF.md',
   'ROUTE_MENU_AUDIT.md',

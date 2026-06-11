@@ -237,6 +237,14 @@ Use this set to guard Supabase JWT/env parsing, localStorage persisted state, an
 bun run docs:commands
 ```
 
+To verify that the repo-owned Maprang test plan still matches the real source of truth for stack, routes, QA gates, and production blockers:
+
+```bash
+bun run test-plan:audit
+```
+
+This guard keeps `docs/MAPRANG_TEST_PLAN.md`, `START_HERE.md`, `RUN_NOW.md`, and `HOW_TO_RUN.md` aligned to the PostgreSQL/Prisma/Bun baseline, the 14 declared frontend routes / 13 product surfaces split, local/mock-roleplay local QA, and staging/production blocker language.
+
 ถ้าต้องการตรวจว่าไฟล์ทดสอบใหม่ทุกไฟล์ถูกผูกเข้า QA gate แล้ว:
 
 ```bash

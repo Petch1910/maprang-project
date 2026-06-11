@@ -899,6 +899,7 @@ const checks: Check[] = [
           'live-smoke',
           'manual-production',
           'weak coverage reason',
+          'bun run test-plan:audit',
           'bun run frontend:static:audit',
           'bun run frontend:route:audit',
           'bun run frontend:env:test',
@@ -924,6 +925,7 @@ const checks: Check[] = [
           'live-smoke',
           'manual-production',
           'weak coverage reason',
+          'bun run test-plan:audit',
           'bun run frontend:static:audit',
           'bun run frontend:route:audit',
           'bun run frontend:env:test',
@@ -1017,6 +1019,9 @@ const checks: Check[] = [
       }
       if (!qaLocalCommands.includes('bun run tests:audit') || !qaLocalCommands.includes('bun run tests:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน tests:audit และ tests:audit:test เพื่อจับไฟล์ทดสอบที่ยังไม่ได้ผูกเข้า QA')
+      }
+      if (!qaLocalCommands.includes('bun run test-plan:audit') || !qaLocalCommands.includes('bun run test-plan:audit:test')) {
+        throw new Error('package.json qa:local ต้องรัน test-plan:audit และ test-plan:audit:test เพื่อจับ test plan source-of-truth drift')
       }
       if (!qaLocalCommands.includes('bun run security:audit') || !qaLocalCommands.includes('bun run security:audit:test')) {
         throw new Error('package.json qa:local ต้องรัน security:audit และ security:audit:test เพื่อจับ backend security audit กับ regression')
