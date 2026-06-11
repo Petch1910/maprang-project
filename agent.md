@@ -31,6 +31,7 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
+- 2026-06-11: `predeploy:check` now requires `20260611143000_add_message_window_index`, so the saved-message DB index migration is part of the deploy-readiness guard and cannot be dropped silently.
 - 2026-06-11: Saved-chat message window reads now have a matching DB index. Prisma `Message` includes `Message_chatId_deletedAt_createdAt_id_idx` on `chatId, deletedAt, createdAt DESC, id DESC`, there is a matching migration, and `backend-db-check.test.ts` locks both schema and migration coverage.
 - 2026-06-11: Chat room frontend now uses the saved-message window deliberately. `WorkspacePage` has `savedChatMessageWindowLimit = 120` and passes it to both saved-chat open/sync flows; frontend API tests source-lock those calls.
 - 2026-06-11: API smoke now verifies saved chat message-window metadata by requesting `/messages?limit=5`, requiring `messageWindow.limit`, boolean `messageWindow.mayHaveMoreBefore`, and no more messages than the requested window. This extends the bounded-history work from unit/security coverage into runtime smoke evidence.

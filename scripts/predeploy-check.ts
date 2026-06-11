@@ -547,6 +547,7 @@ const checks: Check[] = [
         '20260508210300_add_creator_draft',
         '20260509093000_add_user_persona',
         '20260513103000_add_lore_parent_index',
+        '20260611143000_add_message_window_index',
       ]
       const missing = required.filter((name) => !migrations.includes(name))
       if (missing.length > 0) throw new Error(`ยังไม่มี migration: ${missing.join(', ')}`)

@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Predeploy now explicitly requires the saved-message index migration folder `20260611143000_add_message_window_index`. This complements the schema/migration DB-check test and prevents a deploy handoff from silently losing the migration while keeping the Prisma schema index.
+
 - 2026-06-11: Saved-message window reads now have a matching Postgres index. `Message_chatId_deletedAt_createdAt_id_idx` covers `chatId`, `deletedAt`, `createdAt DESC`, and `id DESC`, matching the `loadChatMessages` latest-window query. A Prisma migration adds the index and `backend-db-check.test.ts` now fails if either schema or migration coverage drifts. Focused DB/backend/predeploy/secrets/diff gates passed.
 
 - 2026-06-11: Frontend saved-chat loading now uses the bounded message window explicitly. `WorkspacePage` defines `savedChatMessageWindowLimit = 120` and passes it to both `openChat` and `syncOpenChatMessages`; `frontend-api-errors.test.ts` locks those call sites so the chat room does not drift back to default-history loading. Focused frontend gates passed.

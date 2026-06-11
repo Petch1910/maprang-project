@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 message-window migration predeploy guard QA pass: `predeploy:check` now treats `20260611143000_add_message_window_index` as a required Prisma migration, so the saved-message DB index migration cannot be deleted while the repo still claims deploy readiness. `predeploy-check.test.ts` source-locks the migration folder name. Passing evidence: `bun run predeploy:check:test` (3 pass / 1139 expects), `bun run predeploy:check`, `bun run docs:commands`, `bun run secrets:check`, and `git diff --check`.
+
 - 2026-06-11 saved-message window DB index QA pass: Prisma `Message` now has `Message_chatId_deletedAt_createdAt_id_idx` on `(chatId, deletedAt, createdAt DESC, id DESC)` with a matching migration, so saved chat window reads match the database access pattern instead of relying only on service-level `take`. `backend-db-check.test.ts` locks both the schema index and migration SQL. Passing evidence: `bun run backend:check:db:test` (7 pass / 28 expects), `bun run backend:check` (270 pass / 1074 expects with DB suites gated when local Postgres is unavailable), `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 
 - 2026-06-11 frontend saved-chat window QA pass: `WorkspacePage` now opens and syncs saved chats through `fetchChatMessages(id, { limit: 120 })` instead of the unbounded/default frontend call path, keeping the chat room lighter on mobile and aligned with the backend message-window contract. `frontend-api-errors.test.ts` now source-checks the shared `savedChatMessageWindowLimit` and both frontend call sites. Passing evidence: `bun run frontend:api:test` (16 pass / 48 expects), `bun run frontend:static:audit`, `bun run frontend:check`, and `bun run tests:audit`.
