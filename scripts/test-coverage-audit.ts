@@ -77,6 +77,12 @@ export function auditTestCoverage(input: TestCoverageAuditInput): TestCoverageAu
     }
   }
 
+  for (const file of testFiles.filter((path) => path.startsWith('apps/frontend/tests/'))) {
+    if (!bunTestReferences.has(file)) {
+      findings.push(`${file} เป็น frontend test แต่ยังไม่มี root package script ที่รันไฟล์นี้ตรง ๆ`)
+    }
+  }
+
   for (const reference of bunTestReferences) {
     if (!testFileSet.has(reference)) {
       findings.push(`package.json อ้าง bun test ${reference} แต่ไม่พบไฟล์ test นี้ใน repo`)

@@ -251,7 +251,7 @@ This guard keeps `docs/MAPRANG_TEST_PLAN.md`, `START_HERE.md`, `RUN_NOW.md`, and
 bun run tests:audit
 ```
 
-คำสั่งนี้ค้นหาไฟล์ `.test.ts`, `.test.tsx`, `.spec.ts`, และ `.spec.tsx` ของ repo โดยไม่แตะ `node_modules` แล้วจะ fail ถ้า test ใน `scripts/` ไม่มี root script รันตรง, root `*:test` ไม่อยู่ใน `qa:repo`, backend tests ไม่ถูกครอบด้วย `backend:check`, หรือ e2e specs ไม่ถูกครอบด้วย `e2e:smoke`.
+คำสั่งนี้ค้นหาไฟล์ `.test.ts`, `.test.tsx`, `.spec.ts`, และ `.spec.tsx` ของ repo โดยไม่แตะ `node_modules` แล้วจะ fail ถ้า test ใน `scripts/` หรือ `apps/frontend/tests/` ไม่มี root script รันตรง, root `*:test` ไม่อยู่ใน `qa:repo`, backend tests ไม่ถูกครอบด้วย `backend:check`, หรือ e2e specs ไม่ถูกครอบด้วย `e2e:smoke`.
 
 คำสั่งนี้ช่วยกันเอกสาร deploy, README ของ app, และ workflow แนะนำ script ที่ไม่มีอยู่จริงในตำแหน่งที่รัน.
 

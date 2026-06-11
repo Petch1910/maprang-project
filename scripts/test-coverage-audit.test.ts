@@ -49,6 +49,35 @@ describe('test coverage audit', () => {
     )
   })
 
+  test('requires frontend tests to have direct root package scripts', () => {
+    const frontendTest = 'apps/frontend/tests/component-contract.test.tsx'
+    const result = auditTestCoverage(
+      baseInput({
+        testFiles: [...baseInput().testFiles, frontendTest],
+      }),
+    )
+
+    expect(result.findings).toContain(
+      `${frontendTest} เป็น frontend test แต่ยังไม่มี root package script ที่รันไฟล์นี้ตรง ๆ`,
+    )
+  })
+
+  test('accepts frontend tests when their root script is included in qa:repo', () => {
+    const frontendTest = 'apps/frontend/tests/component-contract.test.tsx'
+    const result = auditTestCoverage(
+      baseInput({
+        testFiles: [...baseInput().testFiles, frontendTest],
+        rootScripts: {
+          ...baseInput().rootScripts,
+          'frontend:components:test': `bun test ${frontendTest}`,
+          'qa:repo': 'bun run example:test && bun run frontend:components:test && bun run backend:check',
+        },
+      }),
+    )
+
+    expect(result.findings).toEqual([])
+  })
+
   test('flags root test scripts missing from qa:repo', () => {
     const result = auditTestCoverage(
       baseInput({
