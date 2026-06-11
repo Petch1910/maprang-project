@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local stream-chat coverage to `smoke:local`. Repo-owned local baseline remains green across secrets, docs/test-plan/tests/eval/security/import-cycle/API/frontend/route-menu/predeploy/backend/frontend checks. This is local/repo evidence only; external production blockers remain deployed HTTPS origins, production CORS/domain, production/staging DB smoke, signed Supabase `avatars`, live chat smoke, and live image smoke.
+
+- 2026-06-11: `smoke:local` now verifies local stream chat too when backend health reports local runtime. It posts to `/chat/stream`, parses SSE `data:` events, requires streamed delta content plus a done event with `chatId`, expected local model, zero provider tokens, and roleplay reply length at the configured minimum or 420 chars. `predeploy:check` source-locks `validateLocalChatStreamSmoke`, `parseLocalSmokeStreamEvents`, `readLocalSmokeStreamEvents`, `/chat/stream`, `streamReplyChars`, `streamTokens`, and `streamEvents`. Focused verification passed through `smoke:local:test` (10 pass / 51 expects) and `predeploy:check:test` (3 pass / 1164 expects).
+
 - 2026-06-11: `smoke:local` now verifies playable local chat when backend health reports local runtime. It posts to `/chat`, requires `chatId`, roleplay reply length at the configured minimum or 420 chars, expected local model name, and zero provider tokens. `predeploy:check` source-locks `validateLocalChatSmoke`, the local runtime gate, `/chat`, `chatReplyChars`, and `chatTokens`. Focused verification passed through `smoke:local:test`, `predeploy:check:test`, and `predeploy:check`.
 
 - 2026-06-11: Predeploy now source-locks the frontend central API helper rule. `predeploy:check` requires `frontend-static-audit` to keep `rawFrontendFetchPattern`, `allowedFrontendFetchFiles`, `rawFrontendFetchMessage`, and the Thai diagnostic forbidding direct `fetch` outside `apps/frontend/src/lib/api.ts`. Focused verification passed through `predeploy:check:test`, `predeploy:check`, `frontend:static:audit:test`, and `frontend:static:audit`.

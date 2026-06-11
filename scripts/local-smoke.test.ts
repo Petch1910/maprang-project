@@ -5,8 +5,10 @@ import {
   formatLocalSmokeCaughtError,
   hasLocalChatRuntime,
   localRoleplayReplyMinimum,
+  parseLocalSmokeStreamEvents,
   pickSmokeCharacter,
   runLocalSmoke,
+  validateLocalChatStreamSmoke,
   validateLocalChatSmoke,
   validateAvatarUpload,
   type LocalSmokeJsonReader,
@@ -102,6 +104,49 @@ describe('local smoke helpers', () => {
     ).toThrow('ต้องไม่คิดโทเคน')
   })
 
+  test('validates local chat stream events, reply length, model, and zero-token usage', () => {
+    const raw = [
+      'event: delta',
+      `data: ${JSON.stringify({ type: 'delta', content: 'ก'.repeat(230) })}`,
+      '',
+      `data: ${JSON.stringify({ type: 'delta', content: 'ข'.repeat(230) })}`,
+      '',
+      `data: ${JSON.stringify({ type: 'done', chatId: 'chat-1', usage: { totalTokens: 0, modelName: 'local/mock-roleplay' } })}`,
+      '',
+    ].join('\n')
+    const events = parseLocalSmokeStreamEvents(raw)
+
+    expect(events).toHaveLength(3)
+    expect(validateLocalChatStreamSmoke(events, 'local/mock-roleplay', 420)).toMatchObject({
+      chatId: 'chat-1',
+      replyChars: 460,
+      totalTokens: 0,
+      modelName: 'local/mock-roleplay',
+      eventCount: 3,
+    })
+    expect(() => parseLocalSmokeStreamEvents('data: {broken')).toThrow('stream event')
+    expect(() =>
+      validateLocalChatStreamSmoke(
+        [
+          { type: 'delta', content: 'สั้น' },
+          { type: 'done', chatId: 'chat-1', usage: { totalTokens: 0, modelName: 'local/mock-roleplay' } },
+        ],
+        'local/mock-roleplay',
+        420,
+      ),
+    ).toThrow('ตอบสั้นเกินไป')
+    expect(() =>
+      validateLocalChatStreamSmoke(
+        [
+          { type: 'delta', content: 'ก'.repeat(430) },
+          { type: 'done', chatId: 'chat-1', usage: { totalTokens: 1, modelName: 'local/mock-roleplay' } },
+        ],
+        'local/mock-roleplay',
+        420,
+      ),
+    ).toThrow('ต้องไม่คิดโทเคน')
+  })
+
   test('formats local smoke summary fields used by QA logs', () => {
     const summary = buildLocalSmokeSummary({
       apiBaseUrl: 'http://127.0.0.1:3000',
@@ -136,6 +181,7 @@ describe('local smoke helpers', () => {
     const lines: string[] = []
     const errors: string[] = []
     const calls: string[] = []
+    const streamCalls: string[] = []
     const cleaned: string[] = []
     const reader: LocalSmokeJsonReader = async (path) => {
       calls.push(path)
@@ -174,11 +220,24 @@ describe('local smoke helpers', () => {
       }
       throw new Error(`unexpected path ${path}`)
     }
+    const streamReader = async (path: string) => {
+      streamCalls.push(path)
+      return [
+        { type: 'delta' as const, content: 'ก'.repeat(220) },
+        { type: 'delta' as const, content: 'ข'.repeat(220) },
+        {
+          type: 'done' as const,
+          chatId: 'chat-1',
+          usage: { totalTokens: 0, modelName: 'local/mock-roleplay' },
+        },
+      ]
+    }
 
     const exitCode = await runLocalSmoke({
       apiBaseUrl: 'http://127.0.0.1:3000',
       isLocalTarget: true,
       readJson: reader,
+      readStreamEvents: streamReader,
       authHeaders: () => ({ Authorization: 'Bearer smoke' }),
       cleanupLocalUpload: async (filename) => {
         cleaned.push(filename)
@@ -205,6 +264,11 @@ describe('local smoke helpers', () => {
     expect(summary.chatModel).toBe('local/mock-roleplay')
     expect(summary.chatReplyChars).toBe(430)
     expect(summary.chatTokens).toBe(0)
+    expect(streamCalls).toEqual(['/chat/stream'])
+    expect(summary.streamModel).toBe('local/mock-roleplay')
+    expect(summary.streamReplyChars).toBe(440)
+    expect(summary.streamTokens).toBe(0)
+    expect(summary.streamEvents).toBe(3)
     expect(errors).toEqual([])
   })
 

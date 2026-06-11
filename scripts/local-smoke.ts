@@ -2,6 +2,7 @@ import { unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   apiBaseUrl,
+  formatDiagnosticText,
   formatUnknownDiagnosticText,
   isLocalSmokeTarget,
   readJson,
@@ -36,6 +37,11 @@ export type LocalChatSmokePayload = {
   }
 }
 
+export type LocalChatSmokeStreamEvent =
+  | { type: 'delta'; content?: string }
+  | { type: 'done'; chatId?: string | null; usage?: LocalChatSmokePayload['usage'] }
+  | { type: 'error'; message?: string }
+
 export type AvatarUploadPayload = {
   url: string
   filename: string
@@ -45,11 +51,13 @@ export type AvatarUploadPayload = {
 }
 
 export type LocalSmokeJsonReader = <T>(path: string, init?: RequestInit) => Promise<T>
+export type LocalSmokeStreamReader = (path: string, init?: RequestInit) => Promise<LocalChatSmokeStreamEvent[]>
 
 export type LocalSmokeRunnerOptions = {
   apiBaseUrl?: string
   isLocalTarget?: boolean
   readJson?: LocalSmokeJsonReader
+  readStreamEvents?: LocalSmokeStreamReader
   authHeaders?: () => Record<string, string>
   cleanupLocalUpload?: (filename: string) => Promise<void>
   writeLine?: (line: string) => void
@@ -112,6 +120,72 @@ export function validateLocalChatSmoke(
   }
 }
 
+export function parseLocalSmokeStreamEvents(raw: string, path = '/chat/stream') {
+  const events: LocalChatSmokeStreamEvent[] = []
+
+  for (const [index, line] of raw.split(/\r?\n/).entries()) {
+    if (!line.startsWith('data:')) continue
+    const payload = line.slice('data:'.length).trim()
+    if (!payload || payload === '[DONE]') continue
+
+    try {
+      events.push(JSON.parse(payload) as LocalChatSmokeStreamEvent)
+    } catch {
+      throw new Error(`${path} stream event บรรทัด ${index + 1} ไม่ใช่ JSON ที่ถูกต้อง`)
+    }
+  }
+
+  if (events.length === 0) throw new Error(`${path} ไม่คืน stream event`)
+  return events
+}
+
+export async function readLocalSmokeStreamEvents(baseUrl: string, path: string, init?: RequestInit) {
+  const response = await fetch(`${baseUrl}${path}`, init)
+  const raw = await response.text()
+  if (!response.ok) {
+    throw new Error(`${path} ไม่ผ่านด้วยสถานะ ${response.status}: ${formatDiagnosticText(raw, 300) || response.statusText}`)
+  }
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('text/event-stream')) throw new Error(`${path} ไม่คืน event stream: ${contentType}`)
+  return parseLocalSmokeStreamEvents(raw, path)
+}
+
+export function validateLocalChatStreamSmoke(
+  events: LocalChatSmokeStreamEvent[],
+  expectedModel: string,
+  minRoleplayReplyChars: number,
+) {
+  const reply = events
+    .filter((event): event is Extract<LocalChatSmokeStreamEvent, { type: 'delta' }> => event.type === 'delta')
+    .map((event) => event.content ?? '')
+    .join('')
+    .trim()
+  const error = events.find((event): event is Extract<LocalChatSmokeStreamEvent, { type: 'error' }> => event.type === 'error')
+  const done = events.find((event): event is Extract<LocalChatSmokeStreamEvent, { type: 'done' }> => event.type === 'done')
+
+  if (error?.message) throw new Error(`local chat stream คืน error: ${error.message}`)
+  if (!done) throw new Error('local chat stream ไม่คืน event ปิดท้าย')
+  if (!done.chatId) throw new Error('local chat stream ไม่คืน chat id')
+  if (done.usage?.providerFailure) {
+    throw new Error(`local chat stream ไม่ควรคืน providerFailure: ${done.usage.providerFailure.code ?? 'unknown'}`)
+  }
+  if ((done.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat stream ต้องไม่คิดโทเคน')
+  if (done.usage?.modelName !== expectedModel) {
+    throw new Error(`local chat stream ต้องคืน modelName=${expectedModel} แต่ได้ ${done.usage?.modelName ?? 'missing'}`)
+  }
+  if (reply.length < minRoleplayReplyChars) {
+    throw new Error(`local chat stream ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
+  }
+
+  return {
+    chatId: done.chatId,
+    replyChars: reply.length,
+    totalTokens: done.usage?.totalTokens ?? 0,
+    modelName: done.usage?.modelName ?? expectedModel,
+    eventCount: events.length,
+  }
+}
+
 export function buildLocalSmokeSummary(input: {
   apiBaseUrl: string
   health: HealthPayload
@@ -119,6 +193,7 @@ export function buildLocalSmokeSummary(input: {
   loreCount: number
   previewTurns: number
   chat?: ReturnType<typeof validateLocalChatSmoke> | null
+  stream?: ReturnType<typeof validateLocalChatStreamSmoke> | null
   upload: AvatarUploadPayload
 }) {
   return {
@@ -135,6 +210,11 @@ export function buildLocalSmokeSummary(input: {
     chatModel: input.chat?.modelName ?? null,
     chatReplyChars: input.chat?.replyChars ?? 0,
     chatTokens: input.chat?.totalTokens ?? 0,
+    streamChatId: input.stream?.chatId ?? null,
+    streamModel: input.stream?.modelName ?? null,
+    streamReplyChars: input.stream?.replyChars ?? 0,
+    streamTokens: input.stream?.totalTokens ?? 0,
+    streamEvents: input.stream?.eventCount ?? 0,
     uploadProvider: input.upload.provider,
     uploadAccess: input.upload.access,
   }
@@ -152,6 +232,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
   const currentApiBaseUrl = options.apiBaseUrl ?? apiBaseUrl
   const currentIsLocalTarget = options.isLocalTarget ?? isLocalSmokeTarget
   const jsonReader = options.readJson ?? readJson
+  const streamReader = options.readStreamEvents ?? ((path, init) => readLocalSmokeStreamEvents(currentApiBaseUrl, path, init))
   const authHeaders = options.authHeaders ?? smokeAuthHeaders
   const cleanupUpload = options.cleanupLocalUpload ?? cleanupLocalAvatarUpload
   const writeLine = options.writeLine ?? ((line: string) => console.log(line))
@@ -190,6 +271,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
     if (!preview.preview?.turns?.length) throw new Error('ตัวอย่างความสัมพันธ์ไม่คืน turn ทดสอบ')
 
     let chat: ReturnType<typeof validateLocalChatSmoke> | null = null
+    let stream: ReturnType<typeof validateLocalChatStreamSmoke> | null = null
     if (hasLocalChatRuntime(health)) {
       const expectedModel = activeLocalChatModel(health)
       const minRoleplayReplyChars = localRoleplayReplyMinimum(health)
@@ -206,6 +288,21 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
         }),
       })
       chat = validateLocalChatSmoke(chatPayload, expectedModel, minRoleplayReplyChars)
+
+      const streamEvents = await streamReader('/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({
+          chatId: chat.chatId,
+          characterId: smokeCharacter.id,
+          relationshipSeed: 'stranger',
+          maxRating: 'restricted_18',
+          history: [],
+          message:
+            'ต่อฉากเดิมแบบสตรีม ให้เห็นจังหวะการตอบและบรรยากาศ โดยไม่เรียกผู้ให้บริการจริง',
+        }),
+      })
+      stream = validateLocalChatStreamSmoke(streamEvents, expectedModel, minRoleplayReplyChars)
     }
 
     const form = new FormData()
@@ -232,6 +329,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           loreCount: lore.loreEntries?.length ?? 0,
           previewTurns: preview.preview.turns.length,
           chat,
+          stream,
           upload,
         }),
         null,
