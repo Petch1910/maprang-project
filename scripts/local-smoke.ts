@@ -53,6 +53,14 @@ export type LocalPersonaPayload = {
   }
 }
 
+export type LocalAdminReportsPayload = {
+  reports?: unknown[]
+}
+
+export type LocalAdminAuditLogsPayload = {
+  logs?: unknown[]
+}
+
 export type LocalCreatorDraftPayload = {
   draft?: {
     name?: string
@@ -214,6 +222,16 @@ export function validateLocalPersona(payload: LocalPersonaPayload) {
   }
 }
 
+export function validateLocalAdminModerationSnapshot(reportsPayload: LocalAdminReportsPayload, auditPayload: LocalAdminAuditLogsPayload) {
+  if (!Array.isArray(reportsPayload.reports)) throw new Error('local moderation QA ยังไม่มี reports array')
+  if (!Array.isArray(auditPayload.logs)) throw new Error('local moderation QA ยังไม่มี audit logs array')
+
+  return {
+    reports: reportsPayload.reports.length,
+    auditLogs: auditPayload.logs.length,
+  }
+}
+
 export function validateLocalCreatorDraft(payload: LocalCreatorDraftPayload) {
   if (!payload.draft?.name) throw new Error('local creator QA draft ยังไม่มีชื่อ')
   if (!payload.draft.greeting) throw new Error('local creator QA draft ยังไม่มีข้อความทักทาย')
@@ -361,6 +379,8 @@ export function buildLocalSmokeSummary(input: {
   usage: ReturnType<typeof validateLocalUsageSummary>
   contentSettings: ReturnType<typeof validateLocalContentSettings>
   persona: ReturnType<typeof validateLocalPersona>
+  moderation?: ReturnType<typeof validateLocalAdminModerationSnapshot> | null
+  moderationSkippedReason?: string | null
   creatorDraft: ReturnType<typeof validateLocalCreatorDraft>
   creatorPreview: ReturnType<typeof validateLocalCreatorPreview>
   smokeCharacter: SmokeCharacter
@@ -386,6 +406,9 @@ export function buildLocalSmokeSummary(input: {
     personaChars: input.persona.personaChars,
     personaMaxChars: input.persona.personaMaxChars,
     personaUpdated: input.persona.personaUpdated,
+    moderationReports: input.moderation?.reports ?? 0,
+    moderationAuditLogs: input.moderation?.auditLogs ?? 0,
+    moderationSkippedReason: input.moderationSkippedReason ?? null,
     creatorDraftName: input.creatorDraft.draftName,
     creatorDraftGreetingChars: input.creatorDraft.draftGreetingChars,
     creatorDraftImageProvider: input.creatorDraft.imageProvider,
@@ -457,6 +480,20 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
         headers: authHeaders(),
       }),
     )
+    const currentAuthHeaders = authHeaders()
+    let moderation: ReturnType<typeof validateLocalAdminModerationSnapshot> | null = null
+    let moderationSkippedReason: string | null = 'missing-admin-smoke-key'
+    if (currentAuthHeaders['x-admin-key']) {
+      moderation = validateLocalAdminModerationSnapshot(
+        await jsonReader<LocalAdminReportsPayload>('/admin/reports?limit=5', {
+          headers: currentAuthHeaders,
+        }),
+        await jsonReader<LocalAdminAuditLogsPayload>('/admin/audit-logs?limit=5', {
+          headers: currentAuthHeaders,
+        }),
+      )
+      moderationSkippedReason = null
+    }
     const creatorDraft = validateLocalCreatorDraft(
       await jsonReader<LocalCreatorDraftPayload>('/creator/ai-draft', {
         method: 'POST',
@@ -572,6 +609,8 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           usage,
           contentSettings,
           persona,
+          moderation,
+          moderationSkippedReason,
           creatorDraft,
           creatorPreview,
           smokeCharacter,

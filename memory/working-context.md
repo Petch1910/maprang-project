@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local moderation/admin-audit snapshot coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
+
+- 2026-06-11: `smoke:local` now verifies local moderation/admin-audit readiness when an admin smoke key is available. It reads `GET /admin/reports?limit=5` and `GET /admin/audit-logs?limit=5`, requires report/audit-log arrays, and writes `moderationReports`, `moderationAuditLogs`, or `moderationSkippedReason=missing-admin-smoke-key` into the summary. Focused checks passed: `smoke:local:test` (15 pass / 96 expects), `predeploy:check:test` (3 pass / 1196 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, `memory:audit`, and `git diff --check`.
+
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local Creator Preview simulator coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
 
 - 2026-06-11: `smoke:local` now verifies Creator Preview simulator readiness through `POST /creator/preview-chat` with `skipProvider`, after checking `/creator/ai-draft`. It requires a usable local preview reply, `source=local`, `modelName=local/preview`, positive usage estimates, prompt shape, warnings array, and summary fields `creatorPreviewReplyChars`, `creatorPreviewModel`, `creatorPreviewSource`, `creatorPreviewTokens`, and `creatorPreviewWarnings`. Focused checks passed: `smoke:local:test` (14 pass / 90 expects), `predeploy:check:test` (3 pass / 1189 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, `memory:audit`, and `git diff --check`.

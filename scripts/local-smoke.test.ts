@@ -11,6 +11,7 @@ import {
   validateLocalChatStreamSmoke,
   validateLocalChatSmoke,
   validateLocalContentSettings,
+  validateLocalAdminModerationSnapshot,
   validateLocalCreatorDraft,
   validateLocalCreatorPreview,
   validateLocalPersona,
@@ -109,6 +110,15 @@ describe('local smoke helpers', () => {
     expect(() => validateLocalPersona({ persona: { persona: 'ยาวเกิน', updatedAt: null, maxChars: 3 } })).toThrow('ยาวเกิน')
     expect(() => validateLocalPersona({ persona: { persona: '', updatedAt: 123 as never, maxChars: 2000 } })).toThrow('updatedAt')
     expect(() => validateLocalPersona({ persona: { persona: '', updatedAt: null, maxChars: 0 } })).toThrow('maxChars')
+  })
+
+  test('validates local moderation reports and audit log snapshot shape', () => {
+    expect(validateLocalAdminModerationSnapshot({ reports: [{ id: 'report-1' }] }, { logs: [{ id: 'audit-1' }, { id: 'audit-2' }] })).toMatchObject({
+      reports: 1,
+      auditLogs: 2,
+    })
+    expect(() => validateLocalAdminModerationSnapshot({}, { logs: [] })).toThrow('reports array')
+    expect(() => validateLocalAdminModerationSnapshot({ reports: [] }, {})).toThrow('audit logs array')
   })
 
   test('validates local creator AI draft fallback shape', () => {
@@ -293,6 +303,11 @@ describe('local smoke helpers', () => {
         personaMaxChars: 2000,
         personaUpdated: true,
       },
+      moderation: {
+        reports: 1,
+        auditLogs: 2,
+      },
+      moderationSkippedReason: null,
       creatorDraft: {
         draftName: 'มิกะ | MIKA',
         draftGreetingChars: 16,
@@ -334,6 +349,9 @@ describe('local smoke helpers', () => {
       personaChars: 12,
       personaMaxChars: 2000,
       personaUpdated: true,
+      moderationReports: 1,
+      moderationAuditLogs: 2,
+      moderationSkippedReason: null,
       creatorDraftName: 'มิกะ | MIKA',
       creatorDraftImageProvider: 'placeholder',
       creatorDraftSource: 'fallback',
@@ -386,6 +404,8 @@ describe('local smoke helpers', () => {
       if (path === '/me/persona') {
         return { persona: { persona: 'ชื่อ: มะปราง', updatedAt: '2026-06-11T00:00:00.000Z', maxChars: 2000 } } as never
       }
+      if (path === '/admin/reports?limit=5') return { reports: [{ id: 'report-1' }] } as never
+      if (path === '/admin/audit-logs?limit=5') return { logs: [{ id: 'audit-1' }, { id: 'audit-2' }] } as never
       if (path === '/creator/ai-draft') {
         return {
           draft: {
@@ -459,7 +479,7 @@ describe('local smoke helpers', () => {
       isLocalTarget: true,
       readJson: reader,
       readStreamEvents: streamReader,
-      authHeaders: () => ({ Authorization: 'Bearer smoke' }),
+      authHeaders: () => ({ Authorization: 'Bearer smoke', 'x-admin-key': 'admin-smoke-key' }),
       cleanupLocalUpload: async (filename) => {
         cleaned.push(filename)
       },
@@ -475,6 +495,8 @@ describe('local smoke helpers', () => {
       '/me/usage',
       '/me/content-settings',
       '/me/persona',
+      '/admin/reports?limit=5',
+      '/admin/audit-logs?limit=5',
       '/creator/ai-draft',
       '/creator/preview-chat',
       '/characters?view=admin&limit=10',
@@ -503,6 +525,9 @@ describe('local smoke helpers', () => {
     expect(summary.personaChars).toBe(12)
     expect(summary.personaMaxChars).toBe(2000)
     expect(summary.personaUpdated).toBe(true)
+    expect(summary.moderationReports).toBe(1)
+    expect(summary.moderationAuditLogs).toBe(2)
+    expect(summary.moderationSkippedReason).toBeNull()
     expect(summary.creatorDraftName).toBe('มิกะ | MIKA')
     expect(summary.creatorDraftImageProvider).toBe('placeholder')
     expect(summary.creatorDraftSource).toBe('fallback')

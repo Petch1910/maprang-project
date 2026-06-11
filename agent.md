@@ -31,6 +31,7 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
+- 2026-06-11: `smoke:local` now verifies local moderation/admin-audit readiness when an admin smoke key is available. It reads `GET /admin/reports?limit=5` and `GET /admin/audit-logs?limit=5`, requires array shapes, and records checked/skipped summary fields; this is local evidence only and still requires production admin auth/domain/DB smoke.
 - 2026-06-11: `smoke:local` now verifies Creator Preview simulator readiness through `POST /creator/preview-chat` using `skipProvider`, requiring a usable local preview reply, `source=local`, `modelName=local/preview`, usage/prompt/warnings shape, and `creatorPreview*` summary fields; this is local evidence only and still requires live provider smoke before production.
 - 2026-06-11: `smoke:local` now verifies Creator AI draft fallback readiness through `POST /creator/ai-draft` using `imageOnly: true` and `skipImageProvider: true`, requiring fallback draft text plus placeholder image shape without using provider credits.
 - 2026-06-11: `smoke:local` now verifies local Profile/Persona readiness through `GET /me/content-settings` and `GET /me/persona`. It requires valid content rating, adult flag, persona shape, update timestamp shape, and persona length limit; predeploy source-locks the helper and summary fields.
