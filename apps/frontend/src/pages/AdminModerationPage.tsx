@@ -387,7 +387,7 @@ export function AdminModerationPage() {
                 {reports.length === 0 ? 'ยังไม่มีรายการที่ต้องดูแล' : 'ไม่พบรายงานที่ตรงกับคำค้นหา'}
               </p>
               <p className="m-0 mt-2 max-w-2xl text-sm font-bold leading-6 text-white/55">
-                ถ้าต้องการทดสอบ flow นี้ ให้ไปที่ห้องแชทหรือหน้าโปรไฟล์ตัวละครแล้วกดรายงาน ระบบจะส่งรายการมาเข้าคิวนี้ทันที
+                เมื่อมีรายงานจากห้องแชทหรือหน้าโปรไฟล์ตัวละคร ระบบจะส่งรายการมาเข้าคิวนี้ทันที
               </p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
@@ -395,7 +395,7 @@ export function AdminModerationPage() {
                 className="inline-flex min-h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-black text-slate-950 hover:bg-white/90"
                 to="/chat"
               >
-                ไปทดสอบรายงานในแชท
+                ไปสร้างรายงานจากแชท
               </Link>
               <Link
                 className="inline-flex min-h-10 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 hover:bg-white/10 hover:text-white"

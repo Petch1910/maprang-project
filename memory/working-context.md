@@ -1087,6 +1087,8 @@ Verified:
 - Metadata date sync for the 0019/0020 decision handoff uses the real current date 2026-05-26. Focused checks passed: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 - Saved chat history loading now has a bounded message window: `loadChatMessages` clamps the request limit, fetches only the latest saved messages with one extra row to detect older history, and returns the window in normal reading order. The `/chats/:id/messages` route accepts an optional `limit` query, and the frontend `fetchChatMessages` helper supports the same option.
 - Backend security audit now guards the saved-history fix from regressing: runtime Prisma `include`/`select` blocks for `messages` fail unless they use a bounded object with direct `take`, and `messages: true` is rejected in non-test backend source.
+- Admin moderation empty-state copy now reads as product guidance instead of an internal test flow: empty queues point admins to reports created from chat or character profiles, the CTA says `ไปสร้างรายงานจากแชท`, and route/menu documentation matches the same wording.
+- Admin Health local readiness copy now says the local system is ready to inspect the main paths instead of saying `ทดสอบ flow`, and frontend component contracts guard both Admin Health and moderation from regressing to the old internal wording.
 
 ## สถานะ production ปัจจุบัน
 

@@ -396,6 +396,7 @@ describe('frontend component contracts', () => {
     expect(source).not.toContain('function blockerSummary(')
     expect(source).toContain('โดเมนหน้าบ้านสเตจจิง')
     expect(source).not.toContain('โดเมนหน้าบ้านทดลอง')
+    expect(source).not.toContain('ทดสอบ flow')
   })
 
   test('app shell keeps immersive routes out of the global navigation wrapper', async () => {
@@ -443,6 +444,18 @@ describe('frontend component contracts', () => {
 
     expect(lobbySource).toContain('ตัวละครนี้ไม่พร้อมแสดงในโหมดใช้งานจริง')
     expect(lobbySource).not.toContain('ตัวละคร QA สำหรับทดสอบ')
+  })
+
+  test('moderation empty state uses product-facing report guidance', async () => {
+    const moderationSource = await Bun.file('apps/frontend/src/pages/AdminModerationPage.tsx').text()
+    const routeAuditSource = await Bun.file('apps/frontend/src/lib/routeMenuAudit.ts').text()
+
+    expect(moderationSource).toContain('เมื่อมีรายงานจากห้องแชทหรือหน้าโปรไฟล์ตัวละคร')
+    expect(moderationSource).toContain('ไปสร้างรายงานจากแชท')
+    expect(routeAuditSource).toContain('ถ้าไม่มีรายงานจะบอกวิธีสร้างรายงานจากหน้าแชทหรือหน้าโปรไฟล์ตัวละคร')
+    expect(moderationSource).not.toContain('ทดสอบ flow')
+    expect(moderationSource).not.toContain('ไปทดสอบรายงาน')
+    expect(routeAuditSource).not.toContain('ทดสอบ flow')
   })
 
   test('events inbox selector exposes only playable pending scene summaries', () => {

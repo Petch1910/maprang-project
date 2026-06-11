@@ -345,7 +345,7 @@ export function AdminHealthPage() {
             {localReadyCount}/{localChecks.length}
           </p>
           <p className="m-0 mt-1 text-sm font-bold leading-6">
-            {localReadyCount === localChecks.length ? 'ระบบในเครื่องพร้อมทดสอบ flow หลักแล้ว' : 'ยังมีค่าพื้นฐานในเครื่องที่ต้องแก้ก่อน QA'}
+            {localReadyCount === localChecks.length ? 'ระบบในเครื่องพร้อมตรวจเส้นทางหลักแล้ว' : 'ยังมีค่าพื้นฐานในเครื่องที่ต้องแก้ก่อน QA'}
           </p>
         </article>
         <article className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-amber-100">
