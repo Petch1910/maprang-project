@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Character card favorite control is now wired to the shared frontend API helper and backend favorite route instead of being a dead TODO. The reusable `CharacterCard` now uses optimistic favorite state, count updates, pending-state disable, accessible pressed labels, API failure rollback, and a non-blocking hover overlay so the heart button remains clickable. Focused verification passed: `bun run frontend:static:audit`, `bun run api:audit`, `bun run frontend:check`, `rg "TODO: Toggle favorite|Toggle favorite|not implemented|coming soon" apps/frontend/src`, and `git diff --check`.
+
 - 2026-06-11: Root documentation source-of-truth cleanup continued after the gap-completion plan. Stale files that still advertised `*PageNew`, SQLite setup, or "100% production ready" status were deleted or rewritten into current pointers: `DEPLOYMENT_GUIDE.md`, `DEPLOYMENT_CHECKLIST.md`, `ENV_SETUP_GUIDE.md`, `FINAL_DELIVERY.md`, `FINAL_STATUS.md`, `QUICK_START.md`, `HOW_TO_RUN.md`, and `QUICK_FIX_GUIDE.md`. `PROJECT_COMPLETION_SUMMARY.md` and `QA_WARNINGS_FINAL.md` are removed.
 
 - 2026-06-11: Verification after the root documentation cleanup is green. `bun run qa:repo` passed, including API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, route/menu audit 14 surfaces, backend tests 260 pass / 1183 expects, frontend build/bundle budget, docs command audit 410 refs, tests audit 63 files / 33 root scripts, and import-cycle audit 142 files / 327 edges. `deploy:status` passed with `SMOKE_API_BASE_URL=http://127.0.0.1:3001`; staging/production remain blocked only by real deployed origins, signed Supabase storage, CORS, and live chat/image provider evidence.
