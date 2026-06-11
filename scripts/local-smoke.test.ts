@@ -11,6 +11,7 @@ import {
   validateLocalChatStreamSmoke,
   validateLocalChatSmoke,
   validateLocalContentSettings,
+  validateLocalCreatorDraft,
   validateLocalPersona,
   validateLocalUsageSummary,
   validateAvatarUpload,
@@ -107,6 +108,36 @@ describe('local smoke helpers', () => {
     expect(() => validateLocalPersona({ persona: { persona: 'ยาวเกิน', updatedAt: null, maxChars: 3 } })).toThrow('ยาวเกิน')
     expect(() => validateLocalPersona({ persona: { persona: '', updatedAt: 123 as never, maxChars: 2000 } })).toThrow('updatedAt')
     expect(() => validateLocalPersona({ persona: { persona: '', updatedAt: null, maxChars: 0 } })).toThrow('maxChars')
+  })
+
+  test('validates local creator AI draft fallback shape', () => {
+    const payload = {
+      draft: {
+        name: 'มิกะ | MIKA',
+        greeting: 'มาถึงแล้วเหรอ...',
+        tags: 'roleplay, thai, slow-burn',
+      },
+      image: {
+        url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%3E%3C/svg%3E',
+        provider: 'placeholder',
+        note: 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check',
+      },
+      source: 'fallback',
+      warnings: [],
+    }
+
+    expect(validateLocalCreatorDraft(payload)).toMatchObject({
+      draftName: 'มิกะ | MIKA',
+      draftGreetingChars: 16,
+      draftTagChars: 25,
+      imageProvider: 'placeholder',
+      source: 'fallback',
+      warnings: 0,
+    })
+    expect(() => validateLocalCreatorDraft({ ...payload, draft: { ...payload.draft, name: '' } })).toThrow('ยังไม่มีชื่อ')
+    expect(() => validateLocalCreatorDraft({ ...payload, image: { ...payload.image, provider: 'configured' } })).toThrow('placeholder')
+    expect(() => validateLocalCreatorDraft({ ...payload, source: 'ai' })).toThrow('fallback')
+    expect(() => validateLocalCreatorDraft({ ...payload, warnings: {} as never })).toThrow('warnings')
   })
 
   test('validates local chat runtime, reply length, model, and zero-token usage', () => {
@@ -228,6 +259,14 @@ describe('local smoke helpers', () => {
         personaMaxChars: 2000,
         personaUpdated: true,
       },
+      creatorDraft: {
+        draftName: 'มิกะ | MIKA',
+        draftGreetingChars: 16,
+        draftTagChars: 25,
+        imageProvider: 'placeholder',
+        source: 'fallback',
+        warnings: 0,
+      },
       smokeCharacter: { id: '1', name: 'มิกะ | MIKA', tags: ['qa', 'scene-ready'] },
       loreCount: 2,
       previewTurns: 3,
@@ -251,6 +290,9 @@ describe('local smoke helpers', () => {
       personaChars: 12,
       personaMaxChars: 2000,
       personaUpdated: true,
+      creatorDraftName: 'มิกะ | MIKA',
+      creatorDraftImageProvider: 'placeholder',
+      creatorDraftSource: 'fallback',
       character: 'มิกะ | MIKA',
       loreCount: 2,
       previewTurns: 3,
@@ -295,6 +337,22 @@ describe('local smoke helpers', () => {
       }
       if (path === '/me/persona') {
         return { persona: { persona: 'ชื่อ: มะปราง', updatedAt: '2026-06-11T00:00:00.000Z', maxChars: 2000 } } as never
+      }
+      if (path === '/creator/ai-draft') {
+        return {
+          draft: {
+            name: 'มิกะ | MIKA',
+            greeting: 'มาถึงแล้วเหรอ...',
+            tags: 'roleplay, thai, slow-burn',
+          },
+          image: {
+            url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%3E%3C/svg%3E',
+            provider: 'placeholder',
+            note: 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check',
+          },
+          source: 'fallback',
+          warnings: [],
+        } as never
       }
       if (path === '/characters?view=admin&limit=10') {
         return { characters: [{ id: 'mika', name: 'มิกะ | MIKA', tags: ['qa'] }] } as never
@@ -353,6 +411,7 @@ describe('local smoke helpers', () => {
       '/me/usage',
       '/me/content-settings',
       '/me/persona',
+      '/creator/ai-draft',
       '/characters?view=admin&limit=10',
       '/characters/mika/lore',
       '/relationship/preview',
@@ -379,6 +438,9 @@ describe('local smoke helpers', () => {
     expect(summary.personaChars).toBe(12)
     expect(summary.personaMaxChars).toBe(2000)
     expect(summary.personaUpdated).toBe(true)
+    expect(summary.creatorDraftName).toBe('มิกะ | MIKA')
+    expect(summary.creatorDraftImageProvider).toBe('placeholder')
+    expect(summary.creatorDraftSource).toBe('fallback')
     expect(errors).toEqual([])
   })
 
@@ -411,6 +473,22 @@ describe('local smoke helpers', () => {
       }
       if (path === '/me/persona') {
         return { persona: { persona: '', updatedAt: null, maxChars: 2000 } } as never
+      }
+      if (path === '/creator/ai-draft') {
+        return {
+          draft: {
+            name: 'มิกะ | MIKA',
+            greeting: 'มาถึงแล้วเหรอ...',
+            tags: 'roleplay, thai, slow-burn',
+          },
+          image: {
+            url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%3E%3C/svg%3E',
+            provider: 'placeholder',
+            note: 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check',
+          },
+          source: 'fallback',
+          warnings: [],
+        } as never
       }
       if (path === '/characters?view=admin&limit=10') {
         return { characters: [{ id: 'mika', name: 'มิกะ | MIKA', tags: ['qa'] }] } as never

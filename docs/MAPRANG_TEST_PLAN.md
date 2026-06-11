@@ -121,7 +121,7 @@ bun run smoke:local
 bun run e2e:smoke
 ```
 
-หมายเหตุ: `bun run smoke:local` ต้องตรวจ `GET /me/usage` เพื่อยืนยัน token balance, usage summary, กราฟ 7 วัน, และรายการกระเป๋า, ตรวจ `GET /me/content-settings` และ `GET /me/persona` เพื่อยืนยันเรตเนื้อหาและ persona limit จากนั้นต้องตรวจ local chat runtime เมื่อ backend health รายงานว่าใช้ local provider โดยยิง `POST /chat` และ `POST /chat/stream`, ตรวจว่ามี `chatId`, คำตอบยาวถึงขั้นต่ำ roleplay, stream มี delta/done event, model เป็น local runtime ที่คาดไว้, และ `totalTokens=0`
+หมายเหตุ: `bun run smoke:local` ต้องตรวจ `GET /me/usage` เพื่อยืนยัน token balance, usage summary, กราฟ 7 วัน, และรายการกระเป๋า, ตรวจ `GET /me/content-settings` และ `GET /me/persona` เพื่อยืนยันเรตเนื้อหาและ persona limit, ตรวจ `POST /creator/ai-draft` แบบ `imageOnly` + `skipImageProvider` เพื่อยืนยัน draft fallback และรูป placeholder จากนั้นต้องตรวจ local chat runtime เมื่อ backend health รายงานว่าใช้ local provider โดยยิง `POST /chat` และ `POST /chat/stream`, ตรวจว่ามี `chatId`, คำตอบยาวถึงขั้นต่ำ roleplay, stream มี delta/done event, model เป็น local runtime ที่คาดไว้, และ `totalTokens=0`
 
 หมายเหตุ: `bun run e2e:smoke` ต้องตรวจ PostgreSQL ผ่าน `apps/backend/src/db.required-check.ts` ก่อน `qa:seed` เสมอ เพื่อกัน browser smoke ทำงานต่อเมื่อ Docker/Postgres ยังไม่พร้อมหรือ DB เชื่อมต่อไม่ได้
 

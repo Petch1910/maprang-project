@@ -53,6 +53,21 @@ export type LocalPersonaPayload = {
   }
 }
 
+export type LocalCreatorDraftPayload = {
+  draft?: {
+    name?: string
+    greeting?: string
+    tags?: string
+  }
+  image?: {
+    url?: string
+    provider?: string
+    note?: string
+  }
+  source?: string
+  warnings?: unknown[]
+}
+
 export type LocalChatSmokePayload = {
   reply?: string
   chatId?: string | null
@@ -180,6 +195,25 @@ export function validateLocalPersona(payload: LocalPersonaPayload) {
   }
 }
 
+export function validateLocalCreatorDraft(payload: LocalCreatorDraftPayload) {
+  if (!payload.draft?.name) throw new Error('local creator QA draft ยังไม่มีชื่อ')
+  if (!payload.draft.greeting) throw new Error('local creator QA draft ยังไม่มีข้อความทักทาย')
+  if (!payload.draft.tags) throw new Error('local creator QA draft ยังไม่มีแท็ก')
+  if (!payload.image?.url) throw new Error('local creator QA ยังไม่มีรูปตัวอย่าง')
+  if (payload.image.provider !== 'placeholder') throw new Error(`local creator QA ต้องใช้ภาพ placeholder แต่ได้ ${payload.image.provider ?? 'missing'}`)
+  if (payload.source !== 'fallback') throw new Error(`local creator QA ต้องใช้ fallback source แต่ได้ ${payload.source ?? 'missing'}`)
+  if (!Array.isArray(payload.warnings)) throw new Error('local creator QA warnings ต้องเป็น array')
+
+  return {
+    draftName: payload.draft.name,
+    draftGreetingChars: payload.draft.greeting.length,
+    draftTagChars: payload.draft.tags.length,
+    imageProvider: payload.image.provider,
+    source: payload.source,
+    warnings: payload.warnings.length,
+  }
+}
+
 export function validateLocalChatSmoke(
   payload: LocalChatSmokePayload,
   expectedModel: string,
@@ -278,6 +312,7 @@ export function buildLocalSmokeSummary(input: {
   usage: ReturnType<typeof validateLocalUsageSummary>
   contentSettings: ReturnType<typeof validateLocalContentSettings>
   persona: ReturnType<typeof validateLocalPersona>
+  creatorDraft: ReturnType<typeof validateLocalCreatorDraft>
   smokeCharacter: SmokeCharacter
   loreCount: number
   previewTurns: number
@@ -301,6 +336,11 @@ export function buildLocalSmokeSummary(input: {
     personaChars: input.persona.personaChars,
     personaMaxChars: input.persona.personaMaxChars,
     personaUpdated: input.persona.personaUpdated,
+    creatorDraftName: input.creatorDraft.draftName,
+    creatorDraftGreetingChars: input.creatorDraft.draftGreetingChars,
+    creatorDraftImageProvider: input.creatorDraft.imageProvider,
+    creatorDraftSource: input.creatorDraft.source,
+    creatorDraftWarnings: input.creatorDraft.warnings,
     character: input.smokeCharacter.name,
     tags: input.smokeCharacter.tags,
     loreCount: input.loreCount,
@@ -360,6 +400,21 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
     const persona = validateLocalPersona(
       await jsonReader<LocalPersonaPayload>('/me/persona', {
         headers: authHeaders(),
+      }),
+    )
+    const creatorDraft = validateLocalCreatorDraft(
+      await jsonReader<LocalCreatorDraftPayload>('/creator/ai-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brief: 'สร้างตัวละครโรลเพลย์ภาษาไทยสำหรับตรวจ local smoke ให้เล่นได้ทันทีและมีบุคลิกชัด',
+          imagePrompt: 'original Thai roleplay character portrait, cinematic light, no text, no watermark',
+          imageOnly: true,
+          skipImageProvider: true,
+          current: {
+            tags: 'roleplay, thai, slow-burn, relationship-ready, scene-ready',
+          },
+        }),
       }),
     )
 
@@ -443,6 +498,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           usage,
           contentSettings,
           persona,
+          creatorDraft,
           smokeCharacter,
           loreCount: lore.loreEntries?.length ?? 0,
           previewTurns: preview.preview.turns.length,

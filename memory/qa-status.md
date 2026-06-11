@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 repo-owned QA pass after local Creator AI draft smoke guard: `bun run qa:repo` passed after `smoke:local` gained provider-free `/creator/ai-draft` fallback verification and predeploy source locks. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
+
+- 2026-06-11 local Creator AI draft smoke QA pass: `smoke:local` now checks `POST /creator/ai-draft` in provider-free mode with `imageOnly` and `skipImageProvider`. It fails if the fallback draft lacks name/greeting/tags, if image provider is not `placeholder`, if source is not `fallback`, or if warnings are not an array. Passing evidence: `bun run smoke:local:test` (13 pass / 80 expects), `bun run predeploy:check:test` (3 pass / 1182 expects), `bun run test-plan:audit`, `bun run docs:commands`, `bun run predeploy:check`, and `git diff --check`.
+
 - 2026-06-11 repo-owned QA pass after local Profile/Persona smoke guard: `bun run qa:repo` passed after `smoke:local` gained direct `/me/content-settings` and `/me/persona` verification and predeploy source locks. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
 
 - 2026-06-11 local Profile/Persona smoke QA pass: `smoke:local` now checks `GET /me/content-settings` and `GET /me/persona` before chat/runtime work and fails if profile/persona shape is missing. It requires boolean adult state, valid content rating, persona string, valid updatedAt/null, positive maxChars, and persona length within maxChars. Passing evidence: `bun run smoke:local:test` (12 pass / 72 expects), `bun run predeploy:check:test` (3 pass / 1177 expects), `bun run test-plan:audit`, `bun run docs:commands`, `bun run predeploy:check`, and `git diff --check`.
