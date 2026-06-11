@@ -5359,6 +5359,10 @@ const checks: Check[] = [
           'bun run production:check',
           'Creator Studio',
           'Moderation',
+          'หน้าประสบการณ์เต็มจอ',
+          'ไม่ถูก shell กลางครอบซ้ำ',
+          'app-mobile-nav',
+          'โหมดสว่างยังไม่รองรับ',
         ],
         'ROUTE_MENU_AUDIT.md',
       )
@@ -5417,6 +5421,11 @@ const checks: Check[] = [
         'tests/e2e/maprang-smoke.spec.ts',
       )
       requireIncludes(e2eSmoke, ['expectBackendRootIdentity', 'maprang-backend'], 'tests/e2e/maprang-smoke.spec.ts')
+      requireIncludes(
+        e2eSmoke,
+        ['expectImmersiveShell', 'app-mobile-nav', 'โหมดสว่างยังไม่รองรับ'],
+        'tests/e2e/maprang-smoke.spec.ts',
+      )
       forbidIncludes(
         e2eSmoke,
         ['Production blocker summary', 'Deploy checklist', 'Chat Sidebar', 'Prompt Inspector', 'Automated Evals', 'prompt/context', 'Platform prompt-control policy'],

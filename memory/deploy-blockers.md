@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest immersive-shell predeploy addendum: 2026-06-12 `predeploy:check` now source-locks the immersive shell rule by requiring both Route/Menu Audit and Playwright e2e source to keep the `/` and `/chat*` full-screen route contract. This improves repo-owned deploy guard coverage for frontend UX consistency; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest immersive-shell route/menu addendum: 2026-06-12 `ROUTE_MENU_AUDIT.md`, `routeMenuAuditRows`, and `route-menu-doc-check` now document and guard that `/` and `/chat*` are full-screen immersive experiences that must not be wrapped by the global shell or show unsupported light-mode copy. This improves repo-owned UX consistency and route/menu evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest fresh-DB local runtime addendum: 2026-06-12 added baseline migration `20260504170000_initial_roleplay_baseline`, verified `bunx prisma migrate reset --force` from an empty local PostgreSQL DB, reseeded QA data, and passed full `bun run qa:full` against local backend/frontend. This clears the repo-owned fresh-local-DB blocker; external blockers remain deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.

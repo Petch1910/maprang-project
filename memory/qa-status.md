@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 predeploy immersive-shell source-lock QA pass: `predeploy:check` now requires the Route/Menu Audit and e2e smoke source to preserve the immersive shell contract for `/` and `/chat*`, including `expectImmersiveShell`, `app-mobile-nav`, and the unsupported light-mode copy guard. Passing evidence: `bun run predeploy:check:test` (3 pass / 1232 expects), `bun run predeploy:check`, and full deterministic `bun run qa:repo`.
+
 - 2026-06-12 route/menu immersive-shell documentation QA pass: `ROUTE_MENU_AUDIT.md`, `routeMenuAuditRows`, and `route-menu-doc-check` now lock the product rule that `/` and `/chat*` are full-screen immersive experiences and must not be wrapped by the global shell or show unsupported light-mode copy. Passing evidence: `bun run route-menu:audit`, `bun run route-menu:audit:test` (12 pass / 20 expects), `bun run frontend:check`, `bun run docs:commands`, `bun run memory:audit`, and full deterministic `bun run qa:repo`.
 
 - 2026-06-12 browser e2e immersive-shell QA pass: Playwright now verifies `/` and `/chat*` in real browser runs do not render `app-mobile-nav` from the global shell and do not show unsupported light-mode copy. `e2e-smoke:test` source-locks the expectation in `maprang-smoke.spec.ts`. Passing evidence: `bun run e2e:smoke:test` (19 pass / 81 expects), full `bun run e2e:smoke` (4/4 desktop+mobile) with local backend `http://127.0.0.1:3001` and frontend `http://127.0.0.1:5173`, and full deterministic `bun run qa:repo`.
