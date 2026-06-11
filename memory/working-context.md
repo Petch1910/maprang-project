@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Route/Menu Audit now documents and source-locks the immersive shell rule for `/` and `/chat*`. `ROUTE_MENU_AUDIT.md` and `routeMenuAuditRows` say those routes are full-screen experiences that must not be wrapped by the middle/global shell, while `route-menu-doc-check` requires `หน้าประสบการณ์เต็มจอ`, `ไม่ถูก shell กลางครอบซ้ำ`, `app-mobile-nav`, and `โหมดสว่างยังไม่รองรับ` so the UX contract cannot drift silently.
+
 - 2026-06-12: Browser e2e now locks immersive shell behavior for `/` and `/chat*`. `maprang-smoke.spec.ts` asserts those routes do not render `app-mobile-nav` from the global app shell and do not show unsupported light-mode copy, with `e2e-smoke.test.ts` source-locking the expectation. Full `bun run e2e:smoke` passed against local backend/frontend on ports 3001/5173, and full deterministic `bun run qa:repo` passed afterward.
 
 - 2026-06-12: Frontend shell dedupe pass fixed a UX issue where immersive pages were wrapped by the global app navigation and their own page shell at the same time. `/` and `/chat*` now render as full-screen immersive routes with only their own marketplace/chat shell, the unsupported light-mode branch and theme toggle were removed, and Browser verification showed `/`, `/chat`, `/wallet`, and `/create` with no unsupported-light copy, no horizontal overflow, and no console errors. `frontend:components:test` now source-locks the immersive route branch and absence of the unsupported theme state; full deterministic `bun run qa:repo` passed afterward.
