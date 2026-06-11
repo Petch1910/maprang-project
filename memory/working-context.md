@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Wallet admin token adjustments no longer write internal beta/manual reason slugs into the user-visible ledger. `/wallet` now sends Thai production-facing reasons (`ผู้ดูแลเพิ่มโทเคน` / `ผู้ดูแลหักโทเคน`) for admin adjustments, and `frontend-component-contract` source-locks that `manual_beta_grant` / `manual_admin_debit` do not return. Focused frontend checks passed.
+
 - 2026-06-12: Local run docs now match admin smoke behavior. `START_HERE.md`, `RUN_NOW.md`, `HOW_TO_RUN.md`, and `DEPLOYMENT_QA.md` explain that local loopback smoke prefers `SMOKE_ADMIN_API_KEY` and can fall back to `ADMIN_API_KEY` from untracked `apps/backend/.env`, while staging/production still require an explicit `SMOKE_ADMIN_API_KEY` secret. Docs gates passed afterward.
 
 - 2026-06-12: Predeploy now source-locks local smoke admin-key inference. `predeploy:check` requires `scripts/smoke-helpers.ts` to keep `backendEnvAdminApiKey`, `smokeAdminApiKey`, explicit `SMOKE_ADMIN_API_KEY` priority, local-target gating, and backend `.env` fallback, and requires `scripts/smoke-helpers.test.ts` to keep both local-only and explicit-override regressions. `docs/MAPRANG_TEST_PLAN.md` now documents that local moderation/admin-audit smoke can use `SMOKE_ADMIN_API_KEY` or loopback `ADMIN_API_KEY` from `apps/backend/.env`.

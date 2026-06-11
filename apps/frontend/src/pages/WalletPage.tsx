@@ -116,7 +116,7 @@ export function WalletPage() {
     if (!summary || isAdjusting) return
     setIsAdjusting(true)
     try {
-      const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'manual_beta_grant' : 'manual_admin_debit')
+      const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'ผู้ดูแลเพิ่มโทเคน' : 'ผู้ดูแลหักโทเคน')
       setSummary((prev) =>
         prev
           ? {

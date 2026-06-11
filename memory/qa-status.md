@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 wallet ledger reason copy QA pass: `/wallet` admin token adjustments now send Thai production-facing ledger reasons instead of internal beta/manual slugs, and `frontend-component-contract` locks the source contract. Passing evidence: `bun run frontend:components:test` (16 pass / 85 expects), `bun run frontend:static:audit`, and `bun run frontend:check`.
+
 - 2026-06-12 local run-doc admin-smoke QA pass: quick-start and deployment QA docs now match the smoke helper behavior for local admin auth. They say local loopback smoke can fall back to untracked backend `.env` `ADMIN_API_KEY`, while staging/production must still set `SMOKE_ADMIN_API_KEY`. Passing evidence: `bun run docs:commands`, `bun run test-plan:audit`, `bun run predeploy:check`, and `git diff --check`.
 
 - 2026-06-12 admin-key smoke inference source-lock QA pass: `predeploy:check` now locks the helper/test snippets that keep local-only backend `.env` admin-key inference in smoke helpers. `docs/MAPRANG_TEST_PLAN.md` now matches the runtime contract for local moderation/admin-audit smoke. Passing evidence: `bun run predeploy:check:test` (3 pass / 1237 expects), `bun run predeploy:check`, `bun run test-plan:audit`, and `bun run docs:commands`.

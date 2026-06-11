@@ -424,6 +424,15 @@ describe('frontend component contracts', () => {
     expect(workspaceSource).not.toContain('visibleCharacters.length ? visibleCharacters')
   })
 
+  test('wallet admin token adjustments keep production-facing ledger reasons', async () => {
+    const walletSource = await Bun.file('apps/frontend/src/pages/WalletPage.tsx').text()
+
+    expect(walletSource).toContain('ผู้ดูแลเพิ่มโทเคน')
+    expect(walletSource).toContain('ผู้ดูแลหักโทเคน')
+    expect(walletSource).not.toContain('manual_beta_grant')
+    expect(walletSource).not.toContain('manual_admin_debit')
+  })
+
   test('events inbox selector exposes only playable pending scene summaries', () => {
     const visibleChat = chatSummaryWithPendingScene()
     const heldOnlyChat = chatSummaryWithPendingScene({
