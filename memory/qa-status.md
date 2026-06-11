@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 admin health deploy-phase contract QA pass: deploy phase ordering now has a pure frontend helper and component contract coverage. The test asserts local-only blockers are excluded from staging/production phase summaries, staging config blockers stay in `bun run staging:verify + bun run e2e:smoke`, live chat/image provider blockers stay in `bun run api:smoke:live`, and all deploy blockers roll up to `bun run production:check`. Passing evidence: `bun run frontend:components:test` (10 pass / 54 expects), `bun run frontend:static:audit`, `bun run tests:audit`, `bun run frontend:check`, and `bun run predeploy:check`.
+
 - 2026-06-11 API smoke local QA wording pass: non-live API smoke no longer reports local chat checks as `local mock`. It now uses `POST /chat local QA`, `POST /chat/stream local QA`, and `local chat QA` diagnostics, while preserving assertions for `local/mock-roleplay`, `totalTokens=0`, no provider failure, reply length, and stream deltas. README, Deployment QA, and the test-plan acceptance copy were updated. Passing evidence: `bun run api:smoke:test` (13 pass / 141 expects), `bun run docs:commands`, `bun run test-plan:audit`, and `bun run predeploy:check`.
 
 - 2026-06-11 admin health local runtime wording QA pass: user-facing/frontend runtime copy no longer says `local mock`. `SystemStatus`, Admin Health, Route/Menu Audit, and Playwright expectations now use `โหมด local QA พร้อมเล่น` / `แชท local QA` while keeping `local/mock-roleplay` only as the internal local runtime identifier. Passing evidence: `bun run frontend:static:audit`, `bun run route-menu:audit`, `bun run e2e:smoke:test` (18 pass / 77 expects), `bun run frontend:check`, `bun run predeploy:check`, and full `bun run qa:repo`.

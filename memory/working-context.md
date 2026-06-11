@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Admin Health deploy-phase contract is now locked as a repo-owned frontend component test. Added `adminHealthDeploy.ts` as a pure helper for the deploy phase order and `frontend-component-contract.test.tsx` now asserts local blockers stay out of staging/production counts, staging blockers stay in the `bun run staging:verify + bun run e2e:smoke` phase, and live chat/image provider blockers stay in the `bun run api:smoke:live` phase before `bun run production:check`. Focused verification passed: `bun run frontend:components:test` (10 pass / 54 expects), `bun run frontend:static:audit`, `bun run tests:audit`, `bun run frontend:check`, and `bun run predeploy:check`.
+
 - 2026-06-11: Frontend component contracts now lock the System Status local runtime copy. `frontend-component-contract.test.tsx` renders `SystemStatus` with a local chat provider payload and asserts `โหมด local QA พร้อมเล่น`, `แชท local QA`, and `local/mock-roleplay` are visible while `local mock` is absent. Focused verification passed: `bun run frontend:components:test` (9 pass / 38 expects), `bun run frontend:static:audit`, `bun run tests:audit`, `bun run frontend:check`, and `bun run predeploy:check`.
 
 - 2026-06-11: Frontend static audit now guards against user-facing `local mock` and `เดโม` regressions in `apps/frontend/src`. The route/menu empty state copy now says `การ์ดตัวอย่าง` instead of `การ์ดเดโม`, and `frontend-static-audit.test.ts` locks the new forbidden-copy checks. Focused verification passed: `bun run route-menu:audit`, `bun run frontend:static:audit`, `bun run frontend:static:audit:test` (40 pass / 234 expects), `bun run tests:audit`, `bun run frontend:check`, and `bun run predeploy:check`.

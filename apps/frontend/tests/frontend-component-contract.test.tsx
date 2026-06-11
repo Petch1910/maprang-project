@@ -10,6 +10,7 @@ import { MessageBubble } from '../src/components/MessageBubble'
 import { RelationshipPresetPicker } from '../src/components/RelationshipPresetPicker'
 import { ReportDialog } from '../src/components/ReportDialog'
 import { SystemStatus } from '../src/components/SystemStatus'
+import { buildDeployPhaseSteps, type DeployCheck } from '../src/lib/adminHealthDeploy'
 import type { Character, ChatMessage, HealthStatus } from '../src/lib/api'
 import type { TagAnalysis } from '../src/lib/tagAnalysis'
 
@@ -266,5 +267,66 @@ describe('frontend component contracts', () => {
     expect(html).toContain('แชท local QA')
     expect(html).toContain('local/mock-roleplay')
     expect(html).not.toContain('local mock')
+  })
+
+  test('admin health deploy phases keep local, staging, live provider, and production gates separate', () => {
+    const checks: DeployCheck[] = [
+      {
+        label: 'ฐานข้อมูล local',
+        ok: false,
+        detail: 'local database is unavailable',
+        action: 'run local database',
+        scope: 'local',
+      },
+      {
+        label: 'URL หลังบ้านของหน้าเว็บ',
+        ok: false,
+        detail: 'frontend still points at localhost',
+        action: 'set VITE_API_BASE_URL to the deployed backend origin',
+        scope: 'frontend',
+      },
+      {
+        label: 'ทดสอบแชทจริง',
+        ok: false,
+        detail: 'live chat smoke has not passed',
+        action: 'run smoke and set CHAT_PROVIDER_LIVE_VERIFIED=1',
+        scope: 'production',
+      },
+      {
+        label: 'ทดสอบสร้างรูปจริง',
+        ok: false,
+        detail: 'live image smoke has not passed',
+        action: 'run smoke and set IMAGE_GENERATION_LIVE_VERIFIED=1',
+        scope: 'production',
+      },
+      {
+        label: 'คลังรูป signed URL',
+        ok: true,
+        detail: 'storage is signed',
+        action: 'rerun storage smoke',
+        scope: 'production',
+      },
+    ]
+
+    const [staging, liveProvider, production] = buildDeployPhaseSteps(checks)
+
+    expect(staging.command).toBe('bun run staging:verify + bun run e2e:smoke')
+    expect(staging.ok).toBe(false)
+    expect(staging.detail).toContain('URL หลังบ้านของหน้าเว็บ')
+    expect(staging.detail).not.toContain('ฐานข้อมูล local')
+    expect(staging.detail).not.toContain('ทดสอบแชทจริง')
+
+    expect(liveProvider.command).toBe('bun run api:smoke:live')
+    expect(liveProvider.ok).toBe(false)
+    expect(liveProvider.detail).toContain('ทดสอบแชทจริง')
+    expect(liveProvider.detail).toContain('ทดสอบสร้างรูปจริง')
+    expect(liveProvider.detail).not.toContain('URL หลังบ้านของหน้าเว็บ')
+
+    expect(production.command).toBe('bun run production:check')
+    expect(production.ok).toBe(false)
+    expect(production.detail).toContain('URL หลังบ้านของหน้าเว็บ')
+    expect(production.detail).toContain('ทดสอบแชทจริง')
+    expect(production.detail).toContain('ทดสอบสร้างรูปจริง')
+    expect(production.detail).not.toContain('ฐานข้อมูล local')
   })
 })
