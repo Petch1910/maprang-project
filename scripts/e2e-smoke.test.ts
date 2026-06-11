@@ -20,6 +20,15 @@ const quietLogger: E2eSmokeLogger = {
   error: () => undefined,
 }
 
+const defaultSteps = e2eSmokeSteps()
+const [dbPreflightStep, qaSeedStep, playwrightStep, qaClearStep] = defaultSteps
+
+function expectFormattedStepError(errors: unknown[], step: E2eSmokeStep, index = 0) {
+  expect(errors[index]).toBeString()
+  expect(String(errors[index])).toContain(step.label)
+  expect(String(errors[index])).toContain('exit code 1')
+}
+
 describe('e2e smoke command plan', () => {
   test('locks Not Found fallback route coverage', () => {
     expect(e2eSpec).toContain('/__maprang-not-found-e2e')
@@ -27,7 +36,7 @@ describe('e2e smoke command plan', () => {
   })
 
   test('resolves local backend port from backend env when E2E_API_BASE_URL is omitted', () => {
-    const backendEnv = 'DATABASE_URL=postgresql://example\nPORT=\"3001\"\n'
+    const backendEnv = 'DATABASE_URL=postgresql://example\nPORT="3001"\n'
 
     expect(backendEnvPort(backendEnv)).toBe('3001')
     expect(resolveE2eSmokeEnv({}, backendEnv)).toMatchObject({
@@ -55,26 +64,18 @@ describe('e2e smoke command plan', () => {
   })
 
   test('runs DB preflight, seed, Playwright, then QA cleanup in order', () => {
-    expect(e2eSmokeSteps()).toEqual([
-      {
-        label: E2E_SMOKE_DB_PREFLIGHT_LABEL,
-        command: ['bun', 'src/db.required-check.ts'],
-        cwd: 'apps/backend',
-      },
-      {
-        label: 'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
-        command: ['bun', 'run', 'qa:seed'],
-      },
-      {
-        label: 'ตรวจเบราว์เซอร์ Playwright: ตรวจ routes บนเดสก์ท็อปและมือถือ',
-        command: ['bunx', 'playwright', 'test', '-c', 'playwright.config.ts'],
-      },
-      {
-        label: 'ล้างข้อมูล QA: ลบ seed ทดสอบหลังตรวจเบราว์เซอร์',
-        command: ['bun', 'run', 'qa:clear'],
-        alwaysRun: true,
-      },
+    expect(defaultSteps).toHaveLength(4)
+    expect(defaultSteps.map(({ command }) => command.join(' '))).toEqual([
+      'bun src/db.required-check.ts',
+      'bun run qa:seed',
+      'bunx playwright test -c playwright.config.ts',
+      'bun run qa:clear',
     ])
+    expect(dbPreflightStep).toMatchObject({
+      label: E2E_SMOKE_DB_PREFLIGHT_LABEL,
+      cwd: 'apps/backend',
+    })
+    expect(qaClearStep?.alwaysRun).toBe(true)
   })
 
   test('validates staging E2E target URLs before Playwright starts', async () => {
@@ -125,7 +126,7 @@ describe('e2e smoke command plan', () => {
     )
 
     expect(exitCode).toBe(0)
-    expect(seen.map(({ label }) => label)).toEqual(e2eSmokeSteps().map(({ label }) => label))
+    expect(seen.map(({ label }) => label)).toEqual(defaultSteps.map(({ label }) => label))
     for (const entry of seen) {
       expect(entry.env.E2E_BASE_URL).toBe('https://app.example.com')
       expect(entry.env.E2E_API_BASE_URL).toBe('https://api.example.com')
@@ -139,32 +140,26 @@ describe('e2e smoke command plan', () => {
     const exitCode = await runE2eSmoke(
       async (step: E2eSmokeStep) => {
         calls.push(step.label)
-        return step.label.includes('Playwright') ? 1 : 0
+        return step.command.includes('playwright') ? 1 : 0
       },
       quietLogger,
     )
 
     expect(exitCode).toBe(1)
-    expect(calls).toEqual([
-      E2E_SMOKE_DB_PREFLIGHT_LABEL,
-      'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์',
-      'ตรวจเบราว์เซอร์ Playwright: ตรวจ routes บนเดสก์ท็อปและมือถือ',
-      'ล้างข้อมูล QA: ลบ seed ทดสอบหลังตรวจเบราว์เซอร์',
-    ])
+    expect(calls).toEqual(defaultSteps.map(({ label }) => label))
   })
 
   test('formats Playwright failure output without logging raw Error objects', async () => {
     const errors: unknown[] = []
 
     const exitCode = await runE2eSmoke(
-      async (step: E2eSmokeStep) => (step.label.includes('Playwright') ? 1 : 0),
+      async (step: E2eSmokeStep) => (step.command.includes('playwright') ? 1 : 0),
       { log: () => undefined, error: (error) => errors.push(error) },
     )
 
     expect(exitCode).toBe(1)
-    expect(errors).toEqual([
-      'ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: ตรวจเบราว์เซอร์ Playwright: ตรวจ routes บนเดสก์ท็อปและมือถือ ไม่ผ่านด้วย exit code 1',
-    ])
+    expect(errors).toHaveLength(1)
+    expectFormattedStepError(errors, playwrightStep)
   })
 
   test('stops before QA seed when database preflight fails', async () => {
@@ -180,13 +175,12 @@ describe('e2e smoke command plan', () => {
     )
 
     expect(exitCode).toBe(1)
-    expect(calls).toEqual([E2E_SMOKE_DB_PREFLIGHT_LABEL])
-    expect(errors).toEqual([
-      `ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: ${E2E_SMOKE_DB_PREFLIGHT_LABEL} ไม่ผ่านด้วย exit code 1`,
-    ])
+    expect(calls).toEqual([dbPreflightStep.label])
+    expect(errors).toHaveLength(1)
+    expectFormattedStepError(errors, dbPreflightStep)
   })
 
-  test('stops before browser route check when initial seed fails', async () => {
+  test('cleans QA data before stopping when initial seed fails', async () => {
     const calls: string[] = []
     const errors: unknown[] = []
 
@@ -199,10 +193,28 @@ describe('e2e smoke command plan', () => {
     )
 
     expect(exitCode).toBe(1)
-    expect(calls).toEqual([E2E_SMOKE_DB_PREFLIGHT_LABEL, 'เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์'])
-    expect(errors).toEqual([
-      'ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: เตรียมข้อมูล QA: reset ก่อนตรวจเบราว์เซอร์ ไม่ผ่านด้วย exit code 1',
-    ])
+    expect(calls).toEqual([dbPreflightStep.label, qaSeedStep.label, qaClearStep.label])
+    expect(errors).toHaveLength(1)
+    expectFormattedStepError(errors, qaSeedStep)
+  })
+
+  test('reports cleanup failure after initial seed failure', async () => {
+    const calls: string[] = []
+    const errors: unknown[] = []
+
+    const exitCode = await runE2eSmoke(
+      async (step: E2eSmokeStep) => {
+        calls.push(step.label)
+        return step.command.includes('qa:seed') || step.command.includes('qa:clear') ? 1 : 0
+      },
+      { log: () => undefined, error: (error) => errors.push(error) },
+    )
+
+    expect(exitCode).toBe(1)
+    expect(calls).toEqual([dbPreflightStep.label, qaSeedStep.label, qaClearStep.label])
+    expect(errors).toHaveLength(2)
+    expectFormattedStepError(errors, qaSeedStep)
+    expectFormattedStepError(errors, qaClearStep, 1)
   })
 
   test('formats unknown e2e smoke errors for QA logs', () => {

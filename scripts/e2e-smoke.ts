@@ -154,9 +154,20 @@ export async function runE2eSmoke(
 
   try {
     await runStep(dbPreflight, runner, logger, runtimeEnv)
+  } catch (error) {
+    logger.error(formatE2eSmokeError(error))
+    return 1
+  }
+
+  try {
     await runStep(reset, runner, logger, runtimeEnv)
   } catch (error) {
     logger.error(formatE2eSmokeError(error))
+    try {
+      await runStep(restore, runner, logger, runtimeEnv)
+    } catch (restoreError) {
+      logger.error(formatE2eSmokeError(restoreError))
+    }
     return 1
   }
 

@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: E2E smoke seed failure cleanup is hardened. If DB preflight passes but `qa:seed` fails, the runner now attempts `qa:clear` before returning failure, and reports cleanup failure separately if cleanup also fails. `scripts/e2e-smoke.test.ts` was rewritten to assert step objects/labels instead of brittle long Thai strings, and focused coverage passed via `bun run e2e:smoke:test` (18 pass / 77 expects).
+
 - 2026-06-11: Local e2e runtime failure is now cleaner and stops earlier. `e2e:smoke` runs `apps/backend/src/db.required-check.ts` as a DB preflight before `qa:seed`, passes per-step `cwd` through the runner, and formats preflight/reset failures through the existing safe e2e diagnostic path instead of leaking a Bun stack trace. Focused tests passed via `bun run e2e:smoke:test` (17 pass / 56 expects). Repo gates also passed: `bun run qa:repo`, `bun run secrets:check`, `bun run predeploy:check`, and `git diff --check`. Runtime `bun run e2e:smoke` now fails before seed with clear Thai guidance because Docker Desktop/Postgres is not running in this environment; rerun after `docker compose up -d postgres`.
 
 - 2026-06-11: Local e2e backend-port drift is closed more fully. `e2e:smoke` resolves `E2E_API_BASE_URL` from `apps/backend/.env` `PORT` when the env is omitted and forwards the same origin as `VITE_API_BASE_URL` to seed/browser/cleanup steps, while explicit staging/deployed E2E URLs still win. README/RUN_NOW/HOW_TO_RUN now document the single chosen backend origin rule for local smoke and frontend dev. Focused e2e/test-plan/docs checks plus `qa:repo`, `secrets:check`, `predeploy:check`, and `git diff --check` passed; runtime e2e needs Docker Desktop/Postgres running before it can seed QA data.
