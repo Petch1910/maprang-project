@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 API smoke local QA wording pass: non-live API smoke no longer reports local chat checks as `local mock`. It now uses `POST /chat local QA`, `POST /chat/stream local QA`, and `local chat QA` diagnostics, while preserving assertions for `local/mock-roleplay`, `totalTokens=0`, no provider failure, reply length, and stream deltas. README, Deployment QA, and the test-plan acceptance copy were updated. Passing evidence: `bun run api:smoke:test` (13 pass / 141 expects), `bun run docs:commands`, `bun run test-plan:audit`, and `bun run predeploy:check`.
+
 - 2026-06-11 admin health local runtime wording QA pass: user-facing/frontend runtime copy no longer says `local mock`. `SystemStatus`, Admin Health, Route/Menu Audit, and Playwright expectations now use `โหมด local QA พร้อมเล่น` / `แชท local QA` while keeping `local/mock-roleplay` only as the internal local runtime identifier. Passing evidence: `bun run frontend:static:audit`, `bun run route-menu:audit`, `bun run e2e:smoke:test` (18 pass / 77 expects), `bun run frontend:check`, `bun run predeploy:check`, and full `bun run qa:repo`.
 
 - 2026-06-11 e2e seed-cleanup QA pass: after a successful DB preflight, `e2e:smoke` now attempts `qa:clear` when `qa:seed` fails, preventing partial QA seed data from being left behind. The runner logs the seed failure and, if needed, a separate cleanup failure through the safe e2e formatter. Passing evidence: `bun run e2e:smoke:test` (18 pass / 77 expects).

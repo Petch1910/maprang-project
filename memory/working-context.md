@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: API smoke local runtime labels are now aligned with the product-facing wording. Non-live smoke rows and validator errors use `POST /chat local QA`, `POST /chat/stream local QA`, and `local chat QA` instead of `local mock`, while still asserting the internal `local/mock-roleplay` runtime id, zero provider tokens, no provider failure, and long roleplay replies. README, Deployment QA, and the test plan acceptance wording were updated to match. Focused verification passed: `bun run api:smoke:test` (13 pass / 141 expects), `bun run docs:commands`, `bun run test-plan:audit`, and `bun run predeploy:check`.
+
 - 2026-06-11: Admin health/System Status local runtime wording is now product-facing instead of visible `local mock` copy. Frontend status cards and route/menu docs now say `โหมด local QA พร้อมเล่น` and `แชท local QA`, while preserving `local/mock-roleplay` as the internal QA runtime identifier for debug evidence. Updated Playwright and route/menu guards to lock the new wording. Passing verification: `bun run frontend:static:audit`, `bun run route-menu:audit`, `bun run e2e:smoke:test` (18 pass / 77 expects), `bun run frontend:check`, `bun run predeploy:check`, and full `bun run qa:repo`.
 
 - 2026-06-11: E2E smoke seed failure cleanup is hardened. If DB preflight passes but `qa:seed` fails, the runner now attempts `qa:clear` before returning failure, and reports cleanup failure separately if cleanup also fails. `scripts/e2e-smoke.test.ts` was rewritten to assert step objects/labels instead of brittle long Thai strings, and focused coverage passed via `bun run e2e:smoke:test` (18 pass / 77 expects).

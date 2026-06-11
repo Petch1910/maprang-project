@@ -266,16 +266,16 @@ function validateLocalChatSmokeResponse(
   minRoleplayReplyChars: number,
 ) {
   if (payload.usage?.providerFailure) {
-    throw new Error(`local chat mock ไม่ควรคืน providerFailure: ${payload.usage.providerFailure.code ?? 'unknown'}`)
+    throw new Error(`local chat QA ไม่ควรคืน providerFailure: ${payload.usage.providerFailure.code ?? 'unknown'}`)
   }
-  if (!payload.chatId) throw new Error('local chat mock ไม่ได้สร้าง chat id')
-  if (!payload.reply) throw new Error('local chat mock ไม่คืนคำตอบ')
+  if (!payload.chatId) throw new Error('local chat QA ไม่ได้สร้าง chat id')
+  if (!payload.reply) throw new Error('local chat QA ไม่คืนคำตอบ')
   if (payload.reply.length < minRoleplayReplyChars) {
-    throw new Error(`local chat mock ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
+    throw new Error(`local chat QA ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
   }
-  if ((payload.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat mock ต้องไม่คิดโทเคน')
+  if ((payload.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat QA ต้องไม่คิดโทเคน')
   if (payload.usage?.modelName !== expectedModel) {
-    throw new Error(`local chat mock ต้องคืน modelName=${expectedModel} แต่ได้ ${payload.usage?.modelName ?? 'missing'}`)
+    throw new Error(`local chat QA ต้องคืน modelName=${expectedModel} แต่ได้ ${payload.usage?.modelName ?? 'missing'}`)
   }
 
   return {
@@ -822,7 +822,7 @@ if (live) {
     const localModel = activeLocalChatModel(healthStatus)
     const minRoleplayReplyChars = Math.max(420, healthStatus?.model?.minRoleplayReplyChars ?? 420)
 
-    await check('POST /chat local mock', async () => {
+    await check('POST /chat local QA', async () => {
       const payload = await readJson<{
         reply?: string
         chatId?: string | null
@@ -849,7 +849,7 @@ if (live) {
       return `chatId=${result.chatId}, model=${result.modelName}, โทเคน=${result.totalTokens}, ความยาวคำตอบ=${result.replyChars}, ขั้นต่ำคำตอบโรลเพลย์=${minRoleplayReplyChars}`
     })
 
-    await check('POST /chat/stream local mock', async () => {
+    await check('POST /chat/stream local QA', async () => {
       if (!localChatId) throw new Error('ยังไม่มี local chat id ให้ใช้ต่อใน stream smoke')
 
       const events = await readStreamEvents('/chat/stream', {

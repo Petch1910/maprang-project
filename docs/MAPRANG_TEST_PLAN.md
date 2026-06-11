@@ -171,7 +171,7 @@ Production ยังไม่ถือว่าพร้อมจนกว่า
 - `bun run route-menu:audit` ผ่าน
 - เปิด browser smoke ได้ครบทั้ง desktop/mobile
 - ไม่มีไฟล์ทดลองหรือเอกสารเก่าที่ทำให้ audit fail
-- เอกสารหลักทั้งหมดชี้ไป PostgreSQL/Prisma/Bun/local mock roleplay ทางเดียวกัน
+- เอกสารหลักทั้งหมดชี้ไป PostgreSQL/Prisma/Bun/local QA roleplay ทางเดียวกัน
 
 ระบบถือว่า production-ready เมื่อ:
 
