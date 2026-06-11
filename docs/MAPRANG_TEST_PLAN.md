@@ -69,6 +69,7 @@ bun run backend:check:db:test
 - Chat local runtime ต้องตอบยาวพอสำหรับ roleplay และไม่ใช้เครดิต provider
 - Stream chat ต้องส่ง delta และ done event ได้
 - Creator AI draft ต้องมี fallback ที่บอกสถานะชัดเจนเมื่อยังไม่มี live image provider
+- Creator Preview simulator ต้องตอบ local preview ได้โดยไม่สร้าง chat จริง, คืน `source=local`, `modelName=local/preview`, usage/prompt/warnings shape ครบ, และคำตอบไม่สั้นจนใช้ทดสอบบุคลิกไม่ได้
 - Token ledger ต้องบันทึก balance และ usage ถูกต้อง
 - Report/admin actions ต้องสร้าง audit log
 - Upload/storage ต้องแยก local fallback ออกจาก Supabase signed production path
@@ -121,7 +122,7 @@ bun run smoke:local
 bun run e2e:smoke
 ```
 
-หมายเหตุ: `bun run smoke:local` ต้องตรวจ `GET /me/usage` เพื่อยืนยัน token balance, usage summary, กราฟ 7 วัน, และรายการกระเป๋า, ตรวจ `GET /me/content-settings` และ `GET /me/persona` เพื่อยืนยันเรตเนื้อหาและ persona limit, ตรวจ `POST /creator/ai-draft` แบบ `imageOnly` + `skipImageProvider` เพื่อยืนยัน draft fallback และรูป placeholder จากนั้นต้องตรวจ local chat runtime เมื่อ backend health รายงานว่าใช้ local provider โดยยิง `POST /chat` และ `POST /chat/stream`, ตรวจว่ามี `chatId`, คำตอบยาวถึงขั้นต่ำ roleplay, stream มี delta/done event, model เป็น local runtime ที่คาดไว้, และ `totalTokens=0`
+หมายเหตุ: `bun run smoke:local` ต้องตรวจ `GET /me/usage` เพื่อยืนยัน token balance, usage summary, กราฟ 7 วัน, และรายการกระเป๋า, ตรวจ `GET /me/content-settings` และ `GET /me/persona` เพื่อยืนยันเรตเนื้อหาและ persona limit, ตรวจ `POST /creator/ai-draft` แบบ `imageOnly` + `skipImageProvider` เพื่อยืนยัน draft fallback และรูป placeholder, ตรวจ `POST /creator/preview-chat` แบบ `skipProvider` เพื่อยืนยันคำตอบลองบท, `source=local`, `modelName=local/preview`, usage/prompt/warnings shape ครบ จากนั้นต้องตรวจ local chat runtime เมื่อ backend health รายงานว่าใช้ local provider โดยยิง `POST /chat` และ `POST /chat/stream`, ตรวจว่ามี `chatId`, คำตอบยาวถึงขั้นต่ำ roleplay, stream มี delta/done event, model เป็น local runtime ที่คาดไว้, และ `totalTokens=0`
 
 หมายเหตุ: `bun run e2e:smoke` ต้องตรวจ PostgreSQL ผ่าน `apps/backend/src/db.required-check.ts` ก่อน `qa:seed` เสมอ เพื่อกัน browser smoke ทำงานต่อเมื่อ Docker/Postgres ยังไม่พร้อมหรือ DB เชื่อมต่อไม่ได้
 

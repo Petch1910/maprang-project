@@ -12,6 +12,7 @@ import {
   validateLocalChatSmoke,
   validateLocalContentSettings,
   validateLocalCreatorDraft,
+  validateLocalCreatorPreview,
   validateLocalPersona,
   validateLocalUsageSummary,
   validateAvatarUpload,
@@ -138,6 +139,39 @@ describe('local smoke helpers', () => {
     expect(() => validateLocalCreatorDraft({ ...payload, image: { ...payload.image, provider: 'configured' } })).toThrow('placeholder')
     expect(() => validateLocalCreatorDraft({ ...payload, source: 'ai' })).toThrow('fallback')
     expect(() => validateLocalCreatorDraft({ ...payload, warnings: {} as never })).toThrow('warnings')
+  })
+
+  test('validates local creator preview simulator shape', () => {
+    const payload = {
+      preview: {
+        reply: 'คำตอบพรีวิวในเครื่องสำหรับลองบทก่อนเผยแพร่ '.repeat(3),
+        source: 'local',
+        modelName: 'local/preview',
+        usage: { promptTokens: 120, completionTokens: 96, totalTokens: 216 },
+        prompt: {
+          system: 'ตอบเป็นตัวละครภาษาไทยแบบโรลเพลย์',
+          user: 'เธอรอนานหรือเปล่า',
+          estimatedTokens: 120,
+        },
+        warnings: ['ใช้คำตอบพรีวิวในเครื่อง'],
+      },
+    }
+
+    expect(validateLocalCreatorPreview(payload)).toMatchObject({
+      replyChars: payload.preview.reply.length,
+      source: 'local',
+      modelName: 'local/preview',
+      promptTokens: 120,
+      completionTokens: 96,
+      totalTokens: 216,
+      estimatedTokens: 120,
+      warnings: 1,
+    })
+    expect(() => validateLocalCreatorPreview({})).toThrow('ยังไม่มี preview')
+    expect(() => validateLocalCreatorPreview({ preview: { ...payload.preview, reply: 'สั้น' } })).toThrow('สั้นเกินไป')
+    expect(() => validateLocalCreatorPreview({ preview: { ...payload.preview, source: 'ai' } })).toThrow('local source')
+    expect(() => validateLocalCreatorPreview({ preview: { ...payload.preview, modelName: 'other' } })).toThrow('local/preview')
+    expect(() => validateLocalCreatorPreview({ preview: { ...payload.preview, warnings: {} as never } })).toThrow('warnings')
   })
 
   test('validates local chat runtime, reply length, model, and zero-token usage', () => {
@@ -267,6 +301,16 @@ describe('local smoke helpers', () => {
         source: 'fallback',
         warnings: 0,
       },
+      creatorPreview: {
+        replyChars: 144,
+        source: 'local',
+        modelName: 'local/preview',
+        promptTokens: 120,
+        completionTokens: 96,
+        totalTokens: 216,
+        estimatedTokens: 120,
+        warnings: 1,
+      },
       smokeCharacter: { id: '1', name: 'มิกะ | MIKA', tags: ['qa', 'scene-ready'] },
       loreCount: 2,
       previewTurns: 3,
@@ -293,6 +337,10 @@ describe('local smoke helpers', () => {
       creatorDraftName: 'มิกะ | MIKA',
       creatorDraftImageProvider: 'placeholder',
       creatorDraftSource: 'fallback',
+      creatorPreviewReplyChars: 144,
+      creatorPreviewModel: 'local/preview',
+      creatorPreviewSource: 'local',
+      creatorPreviewTokens: 216,
       character: 'มิกะ | MIKA',
       loreCount: 2,
       previewTurns: 3,
@@ -354,6 +402,22 @@ describe('local smoke helpers', () => {
           warnings: [],
         } as never
       }
+      if (path === '/creator/preview-chat') {
+        return {
+          preview: {
+            reply: 'คำตอบพรีวิวในเครื่องสำหรับลองบทก่อนเผยแพร่ '.repeat(3),
+            source: 'local',
+            modelName: 'local/preview',
+            usage: { promptTokens: 120, completionTokens: 96, totalTokens: 216 },
+            prompt: {
+              system: 'ตอบเป็นตัวละครภาษาไทยแบบโรลเพลย์',
+              user: 'เธอรอนานหรือเปล่า',
+              estimatedTokens: 120,
+            },
+            warnings: ['ใช้คำตอบพรีวิวในเครื่อง'],
+          },
+        } as never
+      }
       if (path === '/characters?view=admin&limit=10') {
         return { characters: [{ id: 'mika', name: 'มิกะ | MIKA', tags: ['qa'] }] } as never
       }
@@ -412,6 +476,7 @@ describe('local smoke helpers', () => {
       '/me/content-settings',
       '/me/persona',
       '/creator/ai-draft',
+      '/creator/preview-chat',
       '/characters?view=admin&limit=10',
       '/characters/mika/lore',
       '/relationship/preview',
@@ -441,6 +506,10 @@ describe('local smoke helpers', () => {
     expect(summary.creatorDraftName).toBe('มิกะ | MIKA')
     expect(summary.creatorDraftImageProvider).toBe('placeholder')
     expect(summary.creatorDraftSource).toBe('fallback')
+    expect(summary.creatorPreviewModel).toBe('local/preview')
+    expect(summary.creatorPreviewSource).toBe('local')
+    expect(summary.creatorPreviewReplyChars).toBeGreaterThanOrEqual(80)
+    expect(summary.creatorPreviewTokens).toBe(216)
     expect(errors).toEqual([])
   })
 
@@ -488,6 +557,22 @@ describe('local smoke helpers', () => {
           },
           source: 'fallback',
           warnings: [],
+        } as never
+      }
+      if (path === '/creator/preview-chat') {
+        return {
+          preview: {
+            reply: 'คำตอบพรีวิวในเครื่องสำหรับลองบทก่อนเผยแพร่ '.repeat(3),
+            source: 'local',
+            modelName: 'local/preview',
+            usage: { promptTokens: 120, completionTokens: 96, totalTokens: 216 },
+            prompt: {
+              system: 'ตอบเป็นตัวละครภาษาไทยแบบโรลเพลย์',
+              user: 'เธอรอนานหรือเปล่า',
+              estimatedTokens: 120,
+            },
+            warnings: ['ใช้คำตอบพรีวิวในเครื่อง'],
+          },
         } as never
       }
       if (path === '/characters?view=admin&limit=10') {

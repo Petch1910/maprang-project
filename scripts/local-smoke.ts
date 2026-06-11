@@ -68,6 +68,25 @@ export type LocalCreatorDraftPayload = {
   warnings?: unknown[]
 }
 
+export type LocalCreatorPreviewPayload = {
+  preview?: {
+    reply?: string
+    source?: string
+    modelName?: string
+    usage?: {
+      promptTokens?: number
+      completionTokens?: number
+      totalTokens?: number
+    }
+    prompt?: {
+      system?: string
+      user?: string
+      estimatedTokens?: number
+    }
+    warnings?: unknown[]
+  }
+}
+
 export type LocalChatSmokePayload = {
   reply?: string
   chatId?: string | null
@@ -214,6 +233,36 @@ export function validateLocalCreatorDraft(payload: LocalCreatorDraftPayload) {
   }
 }
 
+export function validateLocalCreatorPreview(payload: LocalCreatorPreviewPayload) {
+  const preview = payload.preview
+  if (!preview) throw new Error('local creator preview QA ยังไม่มี preview')
+  if (!preview.reply) throw new Error('local creator preview QA ยังไม่มีคำตอบลองบท')
+  if (preview.reply.length < 80) throw new Error('local creator preview QA คำตอบลองบทสั้นเกินไป')
+  if (preview.source !== 'local') throw new Error(`local creator preview QA ต้องใช้ local source แต่ได้ ${preview.source ?? 'missing'}`)
+  if (preview.modelName !== 'local/preview') {
+    throw new Error(`local creator preview QA ต้องคืน modelName=local/preview แต่ได้ ${preview.modelName ?? 'missing'}`)
+  }
+  if (typeof preview.usage?.promptTokens !== 'number') throw new Error('local creator preview QA ยังไม่มี promptTokens')
+  if (typeof preview.usage.completionTokens !== 'number') throw new Error('local creator preview QA ยังไม่มี completionTokens')
+  if (typeof preview.usage.totalTokens !== 'number') throw new Error('local creator preview QA ยังไม่มี totalTokens')
+  if (preview.usage.totalTokens <= 0) throw new Error('local creator preview QA totalTokens ต้องมากกว่า 0 สำหรับตัวประมาณค่า')
+  if (typeof preview.prompt?.system !== 'string' || !preview.prompt.system.trim()) throw new Error('local creator preview QA ยังไม่มี system prompt')
+  if (typeof preview.prompt.user !== 'string' || !preview.prompt.user.trim()) throw new Error('local creator preview QA ยังไม่มี user prompt')
+  if (typeof preview.prompt.estimatedTokens !== 'number') throw new Error('local creator preview QA ยังไม่มี estimatedTokens')
+  if (!Array.isArray(preview.warnings)) throw new Error('local creator preview QA warnings ต้องเป็น array')
+
+  return {
+    replyChars: preview.reply.length,
+    source: preview.source,
+    modelName: preview.modelName,
+    promptTokens: preview.usage.promptTokens,
+    completionTokens: preview.usage.completionTokens,
+    totalTokens: preview.usage.totalTokens,
+    estimatedTokens: preview.prompt.estimatedTokens,
+    warnings: preview.warnings.length,
+  }
+}
+
 export function validateLocalChatSmoke(
   payload: LocalChatSmokePayload,
   expectedModel: string,
@@ -313,6 +362,7 @@ export function buildLocalSmokeSummary(input: {
   contentSettings: ReturnType<typeof validateLocalContentSettings>
   persona: ReturnType<typeof validateLocalPersona>
   creatorDraft: ReturnType<typeof validateLocalCreatorDraft>
+  creatorPreview: ReturnType<typeof validateLocalCreatorPreview>
   smokeCharacter: SmokeCharacter
   loreCount: number
   previewTurns: number
@@ -341,6 +391,11 @@ export function buildLocalSmokeSummary(input: {
     creatorDraftImageProvider: input.creatorDraft.imageProvider,
     creatorDraftSource: input.creatorDraft.source,
     creatorDraftWarnings: input.creatorDraft.warnings,
+    creatorPreviewReplyChars: input.creatorPreview.replyChars,
+    creatorPreviewModel: input.creatorPreview.modelName,
+    creatorPreviewSource: input.creatorPreview.source,
+    creatorPreviewTokens: input.creatorPreview.totalTokens,
+    creatorPreviewWarnings: input.creatorPreview.warnings,
     character: input.smokeCharacter.name,
     tags: input.smokeCharacter.tags,
     loreCount: input.loreCount,
@@ -414,6 +469,25 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           current: {
             tags: 'roleplay, thai, slow-burn, relationship-ready, scene-ready',
           },
+        }),
+      }),
+    )
+    const creatorPreview = validateLocalCreatorPreview(
+      await jsonReader<LocalCreatorPreviewPayload>('/creator/preview-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: creatorDraft.draftName,
+          description: 'ตัวละครตรวจ local smoke สำหรับลองบทก่อนเผยแพร่',
+          biography: 'ชอบบทสนทนาที่ค่อยๆ เปิดใจและมีรายละเอียดทางอารมณ์',
+          scenario: 'คาเฟ่เล็กๆ ในวันที่ฝนเริ่มตก ผู้เล่นเพิ่งเดินเข้ามาทัก',
+          systemPrompt:
+            'ตอบเป็นตัวละครภาษาไทยแบบโรลเพลย์ มีบรรยากาศ การกระทำ และความรู้สึกชัดเจน เหลือพื้นที่ให้ผู้เล่นตอบต่อ',
+          greeting: 'มาถึงแล้วเหรอ... ฝนข้างนอกแรงไหม',
+          userMessage: 'ฉันนั่งลงตรงข้ามแล้วถามว่า เธอรอนานหรือเปล่า',
+          userPersona: 'ผู้เล่นเป็นคนสุภาพ ชอบคุยช้าๆ และไม่เร่งความสัมพันธ์',
+          relationshipSeed: 'คนรู้จัก',
+          skipProvider: true,
         }),
       }),
     )
@@ -499,6 +573,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           contentSettings,
           persona,
           creatorDraft,
+          creatorPreview,
           smokeCharacter,
           loreCount: lore.loreEntries?.length ?? 0,
           previewTurns: preview.preview.turns.length,
