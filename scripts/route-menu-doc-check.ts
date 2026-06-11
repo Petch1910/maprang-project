@@ -356,6 +356,8 @@ const defaultForbiddenSnippets = [
   'handler ว่าง',
   'ข้อความ placeholder',
   'การ์ดตัวอย่างกันหน้าว่าง',
+  'มีข้อมูลทดสอบ QA',
+  'รายงานจำลองให้เช็ค',
   'text encoding',
   'mojibake',
 ]

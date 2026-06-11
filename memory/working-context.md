@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Route/Menu Audit no longer treats QA seed/demo data as normal product output for Wallet and Moderation. `/wallet` now documents real backend token/transaction data plus an explicit no-data empty state, `/moderation` now documents real report/audit-log queues plus instructions to create a report from chat for testing, and `route-menu-doc-check` forbids stale `มีข้อมูลทดสอบ QA` / `รายงานจำลองให้เช็ค` wording. Focused route/static/docs checks passed.
+
 - 2026-06-12: Backend character listing no longer returns a fallback/demo character when Prisma persistence is unavailable. `listCharacters()` and `searchCharacters()` now return an empty array without `fallbackCharacter`, matching the frontend no-demo empty-state contract. `character.validation.test.ts` source-locks this behavior, and full `bun run qa:repo` passed afterward with API audit still at 58 backend routes / 34 frontend helper calls and backend tests at 271 pass / 1223 expects.
 
 - 2026-06-12: Chat workspace no longer substitutes a client-side fallback character when backend data is empty. `fallbackCharacter` was removed from the frontend chat helper, `WorkspacePage` now starts with no selected character until real backend/QA-seed data loads, and `/chat` shows `chat-empty-character-state` with create/explore/retry actions instead of a fake chat identity. `frontend-component-contract` source-locks the no-fallback behavior, and Route/Menu Audit now documents that a new chat greeting appears only when a real backend character exists. Full `qa:repo` and Playwright `e2e:smoke` passed after this change; `qa:seed` was rerun after e2e so local manual play has QA data again.

@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest Wallet/Moderation no-QA-demo route/menu addendum: 2026-06-12 Route/Menu Audit no longer describes QA seed/demo data as normal product output for `/wallet` or `/moderation`. Both surfaces now require real backend data or explicit empty states/instructions. This improves repo-owned product-data integrity; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest backend no-fallback-character addendum: 2026-06-12 backend character list/search no longer returns a hidden fallback/demo character when Prisma persistence is unavailable. This aligns backend API behavior with the frontend empty-state contract and removes repo-owned demo data from the character runtime path; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest chat no-client-fallback addendum: 2026-06-12 `/chat` no longer substitutes a client-side fallback character when backend data is empty. The chat workspace now waits for real backend/QA-seed character data and otherwise shows a create/explore/retry empty state, with component-contract coverage and Route/Menu Audit updated. This improves repo-owned product/data integrity; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
