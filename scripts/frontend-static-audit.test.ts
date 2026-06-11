@@ -2617,18 +2617,33 @@ describe('frontend static audit', () => {
     const fixtureRoot = join(process.cwd(), 'apps/frontend/src')
     const files = [
       join(fixtureRoot, 'components/DeadPanel.tsx'),
+      join(fixtureRoot, 'components/settings/DeadNestedPanel.tsx'),
       join(fixtureRoot, 'components/LivePanel.tsx'),
+      join(fixtureRoot, 'components/settings/LiveNestedPanel.tsx'),
       join(fixtureRoot, 'pages/LivePage.tsx'),
     ]
     const contents = new Map([
       [files[0], 'export function DeadPanel() { return <section /> }'],
-      [files[1], 'export function LivePanel() { return <section /> }'],
-      [files[2], "import { LivePanel } from '../components/LivePanel'\nexport function LivePage() { return <LivePanel /> }"],
+      [files[1], 'export function DeadNestedPanel() { return <section /> }'],
+      [files[2], 'export function LivePanel() { return <section /> }'],
+      [files[3], 'export function LiveNestedPanel() { return <section /> }'],
+      [
+        files[4],
+        "import { LivePanel } from '../components/LivePanel'\nimport { LiveNestedPanel } from '../components/settings/LiveNestedPanel'\nexport function LivePage() { return <><LivePanel /><LiveNestedPanel /></> }",
+      ],
     ])
 
     const findings = await auditUnmountedFrontendComponents(files, async (file) => contents.get(file) ?? '')
+    const topLevelFindings = findings.filter((finding) => !finding.file.includes('/settings/'))
 
-    expect(findings).toEqual([
+    expect(findings).toContainEqual(
+      expect.objectContaining({
+        file: 'apps/frontend/src/components/settings/DeadNestedPanel.tsx',
+        line: 1,
+      }),
+    )
+
+    expect(topLevelFindings).toEqual([
       {
         file: 'apps/frontend/src/components/DeadPanel.tsx',
         line: 1,

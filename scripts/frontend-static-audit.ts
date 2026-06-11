@@ -1035,7 +1035,7 @@ export async function auditUnmountedFrontendComponents(
 
   return auditReferencedFrontendModules(
     frontendFiles,
-    /^apps\/frontend\/src\/components\/[^/]+\.tsx$/,
+    /^apps\/frontend\/src\/components\/(?:[^/]+\/)*[^/]+\.tsx$/,
     allowedUnmountedFrontendComponents,
     unmountedComponentMessage,
   )
