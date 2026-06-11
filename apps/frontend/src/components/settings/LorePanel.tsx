@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, Plus, Edit2, Trash2, Calendar, MapPin, Heart } from 'lucide-react'
 import { useState } from 'react'
+import fallbackAvatarUrl from '../../assets/hero.png'
 import type { Character } from '../../lib/api'
 
 interface LorePanelProps {
@@ -103,7 +104,7 @@ export function LorePanel({
               <div className="flex justify-center">
                 <div className="h-24 w-24 overflow-hidden rounded-full ring-2 ring-purple-500/30">
                   <img
-                    src={character.avatarUrl || '/placeholder-avatar.png'}
+                    src={character.avatarUrl || fallbackAvatarUrl}
                     alt={character.name}
                     className="h-full w-full object-cover"
                   />

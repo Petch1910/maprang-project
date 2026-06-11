@@ -1,6 +1,7 @@
 import { Eye, Heart, MessageCircle } from 'lucide-react'
 import { useEffect, useState, type MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import fallbackAvatarUrl from '../../assets/hero.png'
 import { setCharacterFavorite, type Character } from '../../lib/api'
 import { characterRating } from '../../lib/contentRating'
 
@@ -106,7 +107,7 @@ export function CharacterCard({
       >
         <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
           <img
-            src={character.avatarUrl || '/placeholder-avatar.png'}
+            src={character.avatarUrl || fallbackAvatarUrl}
             alt={character.name}
             className="h-full w-full object-cover transition-transform group-hover:scale-110"
           />
@@ -138,7 +139,7 @@ export function CharacterCard({
     >
       <div className={`relative overflow-hidden ${isFeatured ? 'aspect-[16/9]' : 'aspect-[3/4]'}`}>
         <img
-          src={character.avatarUrl || '/placeholder-avatar.png'}
+          src={character.avatarUrl || fallbackAvatarUrl}
           alt={character.name}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
         />

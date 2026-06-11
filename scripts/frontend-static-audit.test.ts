@@ -330,6 +330,21 @@ describe('frontend static audit', () => {
     ])
   })
 
+  test('reports missing placeholder avatar asset references', () => {
+    const findings = auditSuspiciousPatterns(
+      `
+        export function Fixture({ avatarUrl }) {
+          return <img src={avatarUrl || '/placeholder-avatar.png'} alt="" />
+        }
+      `,
+      'apps/frontend/src/components/AvatarFixture.tsx',
+    )
+
+    expect(findings.map((finding) => finding.message)).toEqual([
+      'frontend source references missing /placeholder-avatar.png; import a bundled fallback asset instead',
+    ])
+  })
+
   test('reports raw auth error classifier regressions', () => {
     expect(
       auditSuspiciousPatterns(

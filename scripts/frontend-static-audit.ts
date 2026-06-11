@@ -663,6 +663,10 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
   { pattern: /throw\s+new\s+Error\s*\(\s*(["'`])not implemented\1\s*\)/gi, message: 'frontend source ยังโยน not implemented' },
   { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบข้อความรอทำ' },
   {
+    pattern: /\/placeholder-avatar\.png\b/g,
+    message: 'frontend source references missing /placeholder-avatar.png; import a bundled fallback asset instead',
+  },
+  {
     pattern: /dangerouslySetInnerHTML\s*=/g,
     message: 'ห้ามใช้ dangerouslySetInnerHTML ใน frontend source ก่อนมี sanitizer และ review ชัดเจน',
   },
