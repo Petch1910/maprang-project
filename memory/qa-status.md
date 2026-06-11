@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
+
+- 2026-06-12 Events Inbox repo-owned QA pass: `frontend:components:test` now verifies pending-scene selector/page contracts for `/events`. It checks that playable pending scene summaries are exposed, held and QA-seed events are filtered out, and the page source keeps list/group/row hooks, `/chat/:chatId` navigation, and empty-state exits. Passing evidence: `bun run frontend:components:test` (13 pass / 67 expects), `bun run tests:audit`, `bun run predeploy:check:test` (3 pass / 1225 expects), `bun run predeploy:check`, `bun run docs:commands`, `bun run test-plan:audit`, `bun run memory:audit`, `bun run frontend:check`, and full `bun run qa:repo`.
 
 - 2026-06-11 repo-owned QA pass after local scene-runtime smoke guard: `bun run qa:repo` passed after `smoke:local` gained runtime memory verification for both local `POST /chat` and `POST /chat/stream`. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
 

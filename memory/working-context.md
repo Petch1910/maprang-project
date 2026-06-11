@@ -1,6 +1,10 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
+
+- 2026-06-12: Events Inbox pending-scene contract coverage was added to `frontend:components:test` and source-locked by `predeploy:check`. The new tests verify `selectPendingSceneSummaries`/`selectPendingSceneCount` only expose playable pending scene events, filter held and QA-seed items, preserve `/events` list/group/row test hooks, keep chat-row links pointed at `/chat/:chatId`, and keep empty-state exits to `/chat` and `/`.
+
+- 2026-06-12: Full deterministic `bun run qa:repo` passed after the Events Inbox contract addendum. The gate covered docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, import-cycle audit 139 files / 326 edges, backend tests 270 pass / 1074 expects, frontend component contracts 13 pass / 67 expects, frontend build, and bundle budget green.
 
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local scene-runtime memory coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
 

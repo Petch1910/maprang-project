@@ -11,8 +11,10 @@ import { RelationshipPresetPicker } from '../src/components/RelationshipPresetPi
 import { ReportDialog } from '../src/components/ReportDialog'
 import { SystemStatus } from '../src/components/SystemStatus'
 import { buildDeployPhaseSteps, type DeployCheck } from '../src/lib/adminHealthDeploy'
-import type { Character, ChatMessage, HealthStatus } from '../src/lib/api'
+import type { Character, ChatMessage, ChatSummary, HealthStatus } from '../src/lib/api'
 import type { TagAnalysis } from '../src/lib/tagAnalysis'
+import { selectPendingSceneCount, selectPendingSceneSummaries } from '../src/store/slices/chatsSlice'
+import type { RootState } from '../src/store/types'
 
 function render(element: ReactElement) {
   return renderToStaticMarkup(element)
@@ -110,6 +112,62 @@ const localHealthStatus: HealthStatus = {
       model: 'fallback',
     },
   },
+}
+
+function chatSummaryWithPendingScene(overrides: Partial<ChatSummary> = {}): ChatSummary {
+  return {
+    id: 'chat-visible-1',
+    title: 'มิกะรอคำตอบ',
+    characterId: 'character-visible-1',
+    characterName: 'มิกะ | MIKA',
+    lastMessageAt: '2026-06-11T00:00:00.000Z',
+    preview: 'ฉากเปิดใจพร้อมแล้ว',
+    sceneState: {
+      currentScene: '',
+      lastUserIntent: 'slow-burn',
+      mode: 'sandbox',
+      pendingEvents: [
+        {
+          code: 'soft_confession_available',
+          title: 'จังหวะเปิดใจครั้งแรก',
+          prompt: 'ชวนเธอเล่าความรู้สึกโดยไม่บังคับ',
+          priority: 30,
+          cooldownTurns: 8,
+          repeatable: false,
+          expiresAtTurn: 9,
+          status: 'pending',
+        },
+        {
+          code: 'held_scene',
+          title: 'ฉากที่เก็บไว้ก่อน',
+          prompt: 'ไม่ควรถูกนับใน inbox',
+          priority: 10,
+          expiresAtTurn: 12,
+          status: 'held',
+        },
+      ],
+      activeScene: null,
+      sceneOutcomes: [],
+      eventCooldowns: {},
+      consumedEvents: [],
+      declinedEvents: [],
+      updatedAt: '2026-06-11T00:00:00.000Z',
+    },
+    relationshipState: {
+      status: 'SOULMATE',
+    } as ChatSummary['relationshipState'],
+    ...overrides,
+  }
+}
+
+function rootStateWithChats(items: ChatSummary[]): RootState {
+  return {
+    characters: { items: [], isLoading: false, error: null },
+    chats: { items, isLoading: false, error: null },
+    content: { isAdult: true, ageGateAnswered: true, maxRating: 'restricted_18' },
+    drafts: { composerByKey: {}, personaDraft: '', personaUpdatedAt: null },
+    wallet: { tokenBalance: 1200, lowTokenThreshold: 100, isLoading: false },
+  }
 }
 
 describe('frontend component contracts', () => {
@@ -336,5 +394,58 @@ describe('frontend component contracts', () => {
     expect(source).toContain("import { buildDeployPhaseSteps, type DeployCheck } from '../lib/adminHealthDeploy'")
     expect(source).not.toContain('function buildDeployPhaseSteps(')
     expect(source).not.toContain('function blockerSummary(')
+  })
+
+  test('events inbox selector exposes only playable pending scene summaries', () => {
+    const visibleChat = chatSummaryWithPendingScene()
+    const heldOnlyChat = chatSummaryWithPendingScene({
+      id: 'chat-held-only',
+      sceneState: {
+        ...visibleChat.sceneState!,
+        pendingEvents: [
+          {
+            code: 'held_scene',
+            title: 'ฉากที่ยังไม่พร้อม',
+            prompt: 'ผู้ใช้เก็บไว้ก่อน',
+            priority: 10,
+            expiresAtTurn: 12,
+            status: 'held',
+          },
+        ],
+      },
+    })
+    const hiddenQaChat = chatSummaryWithPendingScene({
+      id: 'aaaaaaaa-1111-4111-8111-aaaaaaaa1111',
+      title: 'QA Smoke hidden',
+      characterName: 'QA Smoke Bot',
+    })
+    const state = rootStateWithChats([visibleChat, heldOnlyChat, hiddenQaChat])
+
+    expect(selectPendingSceneCount(state)).toBe(1)
+    expect(selectPendingSceneSummaries(state)).toEqual([
+      {
+        id: 'chat-visible-1:soft_confession_available',
+        chatId: 'chat-visible-1',
+        chatTitle: 'มิกะรอคำตอบ',
+        characterName: 'มิกะ | MIKA',
+        title: 'จังหวะเปิดใจครั้งแรก',
+        prompt: 'ชวนเธอเล่าความรู้สึกโดยไม่บังคับ',
+        relationshipStatus: 'SOULMATE',
+        expiresAtTurn: 9,
+      },
+    ])
+  })
+
+  test('events inbox page keeps grouping hooks, chat links, and empty-state exits', async () => {
+    const source = await Bun.file('apps/frontend/src/pages/EventsInboxPage.tsx').text()
+
+    expect(source).toContain('selectPendingSceneSummaries')
+    expect(source).toContain('data-testid="events-scene-list"')
+    expect(source).toContain('data-testid="events-scene-group"')
+    expect(source).toContain('data-testid="events-scene-row"')
+    expect(source).toContain('to={`/chat/${event.chatId}`}')
+    expect(source).toContain('to="/chat"')
+    expect(source).toContain('to="/"')
+    expect(source).toContain('ไม่พบฉากที่ตรงกับคำค้นหาตอนนี้')
   })
 })

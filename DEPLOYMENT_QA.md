@@ -10,6 +10,8 @@
 bun run qa:repo
 ```
 
+`frontend:components:test` also covers Events Inbox pending-scene selector/page contracts so `/events` keeps playable scene filtering, list/group/row hooks, `/chat/:chatId` row navigation, and readable empty-state exits aligned with `qa:repo`.
+
 `qa:repo` ครอบคลุม secrets, memory/knowledge/eval, static/security/API/menu audits, helper tests, backend tests, frontend build, และ predeploy wiring โดยไม่เรียก runtime smoke ที่ต้องมี service เปิดอยู่.
 
 `qa:repo` ยังรัน `tests:audit` และ `tests:audit:test` เพื่อกัน test orphan: ไฟล์ทดสอบใหม่ใน `scripts/` หรือ `apps/frontend/tests/` ต้องมี root script รันตรง, root `*:test` ต้องถูกเรียกจาก `qa:repo`, backend tests ต้องผ่าน `backend:check`, และ browser e2e specs ต้องอยู่หลัง `e2e:smoke`.

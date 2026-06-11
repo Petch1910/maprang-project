@@ -102,6 +102,8 @@ bun run route-menu:audit
 
 ## QA Gates
 
+Current component/unit coverage also locks the Events Inbox pending-scene selector/page contract: `/events` must expose only playable pending scene summaries, filter held/QA-seed scene events, keep list/group/row hooks, link each row back to `/chat/:chatId`, and provide readable empty-state exits.
+
 Baseline/docs:
 
 ```powershell

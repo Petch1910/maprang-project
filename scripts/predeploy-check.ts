@@ -830,6 +830,7 @@ const checks: Check[] = [
           '"frontend:storage:test"',
           '"frontend:clipboard:test"',
           '"frontend:bundle:test"',
+          '"frontend:components:test"',
           '"frontend:static:audit"',
           '"frontend:static:audit:test"',
           '"frontend:route:audit"',
@@ -872,6 +873,22 @@ const checks: Check[] = [
           '@playwright/test',
         ],
         'package.json',
+      )
+      requireIncludes(
+        await readRepoFile('apps/frontend/tests/frontend-component-contract.test.tsx'),
+        [
+          'events inbox selector exposes only playable pending scene summaries',
+          'events inbox page keeps grouping hooks, chat links, and empty-state exits',
+          'selectPendingSceneSummaries',
+          'selectPendingSceneCount',
+          'chatSummaryWithPendingScene',
+          'data-testid="events-scene-list"',
+          'data-testid="events-scene-group"',
+          'data-testid="events-scene-row"',
+          'to={`/chat/${event.chatId}`}',
+          'ไม่พบฉากที่ตรงกับคำค้นหาตอนนี้',
+        ],
+        'apps/frontend/tests/frontend-component-contract.test.tsx',
       )
       requireIncludes(
         importCycleAudit,
