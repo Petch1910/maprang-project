@@ -300,8 +300,8 @@ model Report {
   messageId   String?
 
   reporter  User       @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  character Character? @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  message   Message?   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  character Character? @relation(fields: [characterId], references: [id], onDelete: SetNull)
+  message   Message?   @relation(fields: [messageId], references: [id], onDelete: SetNull)
 
   reviewedAt DateTime?
   createdAt  DateTime  @default(now())

@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest DB/moderation addendum: 2026-06-12 `Report.character` and `Report.message` now use `onDelete: SetNull`, with migration `20260612100000_preserve_report_targets`, so moderation report records survive hard-deletion of reported characters/messages. This improves repo-owned moderation evidence and deploy migration guarding; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest Events Inbox contract addendum: 2026-06-12 full `bun run qa:repo` passed after adding `/events` pending-scene selector/page contract coverage and predeploy source locks. This improves local frontend evidence for the Events Inbox surface; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest Events Inbox route/menu addendum: 2026-06-12 full `bun run qa:repo` passed after documenting and guarding that `/events` only shows playable pending scene events and excludes held/QA seed items. This improves local route/menu evidence for Events Inbox; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.

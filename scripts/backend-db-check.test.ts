@@ -108,4 +108,23 @@ describe('backend db check command plan', () => {
     expect(migrationSql).toContain('CREATE INDEX "Message_chatId_deletedAt_createdAt_id_idx"')
     expect(migrationSql).toContain('ON "Message"("chatId", "deletedAt", "createdAt" DESC, "id" DESC)')
   })
+
+  test('keeps moderation reports when reported targets are removed', async () => {
+    const schema = await readFile(join(import.meta.dir, '../apps/backend/prisma/schema.prisma'), 'utf8')
+    const migrationSql = await readFile(
+      join(
+        import.meta.dir,
+        '../apps/backend/prisma/migrations/20260612100000_preserve_report_targets/migration.sql',
+      ),
+      'utf8',
+    )
+
+    expect(schema).toContain(
+      'character Character? @relation(fields: [characterId], references: [id], onDelete: SetNull)',
+    )
+    expect(schema).toContain('message   Message?   @relation(fields: [messageId], references: [id], onDelete: SetNull)')
+    expect(migrationSql).toContain('DROP CONSTRAINT IF EXISTS "Report_characterId_fkey"')
+    expect(migrationSql).toContain('DROP CONSTRAINT IF EXISTS "Report_messageId_fkey"')
+    expect(migrationSql).toContain('ON DELETE SET NULL ON UPDATE CASCADE')
+  })
 })

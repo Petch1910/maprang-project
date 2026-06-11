@@ -2,6 +2,12 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: DB/moderation evidence hardening preserved moderation reports when a reported character or message target is hard-deleted later. `Report.character` and `Report.message` now use `onDelete: SetNull`, the Prisma migration `20260612100000_preserve_report_targets` rewires the foreign keys, `backend-db-check.test.ts` locks the schema/migration contract, and predeploy/release handoff guards now treat this as the latest migration evidence.
+
+- 2026-06-12: Focused checks passed after preserving report targets: `bun run backend:check:db:test` (8 pass / 33 expects), `bun run release:handoff:test` (49 pass / 68 expects), `bun run predeploy:check:test` (3 pass / 1226 expects), `bun run predeploy:check`, and `bun run backend:check` (270 pass / 1074 expects; DB-backed integration cases skipped because local Postgres is not running).
+
+- 2026-06-12: Full deterministic `bun run qa:repo` passed after the DB/moderation preservation migration. The gate covered docs command audit 459 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, import-cycle audit 139 files / 326 edges, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget green.
+
 - 2026-06-12: Events Inbox pending-scene contract coverage was added to `frontend:components:test` and source-locked by `predeploy:check`. The new tests verify `selectPendingSceneSummaries`/`selectPendingSceneCount` only expose playable pending scene events, filter held and QA-seed items, preserve `/events` list/group/row test hooks, keep chat-row links pointed at `/chat/:chatId`, and keep empty-state exits to `/chat` and `/`.
 
 - 2026-06-12: Full deterministic `bun run qa:repo` passed after the Events Inbox contract addendum. The gate covered docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, import-cycle audit 139 files / 326 edges, backend tests 270 pass / 1074 expects, frontend component contracts 13 pass / 67 expects, frontend build, and bundle budget green.
@@ -56,7 +62,7 @@ Last updated: 2026-06-12
 
 - 2026-06-11: Predeploy now source-locks the latest-migration release handoff guard itself. It requires both `latestPrismaMigrationVersion` in `scripts/release-handoff-check.ts` and the test name `requires the latest migration version for deployed handoffs`, so future deploy readiness cannot silently lose the newest migration evidence check.
 
-- 2026-06-11: Release handoff validation now reads the latest Prisma migration folder from `apps/backend/prisma/migrations` and rejects filled staging/production handoffs that report an older migration. Current latest migration evidence must be `20260611143000_add_message_window_index`.
+- 2026-06-11: Release handoff validation now reads the latest Prisma migration folder from `apps/backend/prisma/migrations` and rejects filled staging/production handoffs that report an older migration. At that checkpoint the latest migration evidence was `20260611143000_add_message_window_index`.
 
 - 2026-06-11: Predeploy now explicitly requires the saved-message index migration folder `20260611143000_add_message_window_index`. This complements the schema/migration DB-check test and prevents a deploy handoff from silently losing the migration while keeping the Prisma schema index.
 
