@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 deploy-blocker no-any handoff lock QA pass: `predeploy:check` now requires `memory/deploy-blockers.md` to retain the latest backend no-any deploy guard addendum, the runtime no-any status, the predeploy source-lock wording, and the reminder that external staging/domain/storage/live-provider blockers remain. Passing evidence: `bun run predeploy:check:test` (3 pass / 1147 expects) and `bun run predeploy:check`.
+
 - 2026-06-11 backend no-any predeploy source-lock QA pass: `predeploy:check` now requires the backend security audit rule for `\bas\s+any\b`, its Thai runtime diagnostic, and the regression fixture `catches unsafe any assertions in runtime backend source` with `const metadata = transaction.metadata as any`. Passing evidence: `bun run predeploy:check:test` (3 pass / 1143 expects), `bun run predeploy:check`, `bun run security:audit:test` (39 pass / 246 expects), and `bun run security:audit`.
 
 - 2026-06-11 backend runtime no-any QA pass: removed remaining production `as any` casts from token expiry metadata parsing, token transaction metadata writes, and creator scenario route params. `backend-security-audit` now rejects `as any` in runtime backend source so the shortcut cannot return silently. Passing evidence: `bun run security:audit:test` (39 pass / 246 expects), `bun run security:audit`, `bun run backend:check` (270 pass / 1074 expects with DB suites gated when local Postgres is unavailable), and runtime `rg -n "as any" apps\backend\src --glob "!*.test.ts"` returned no matches.

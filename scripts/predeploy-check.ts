@@ -1193,6 +1193,10 @@ const checks: Check[] = [
           'aria-disabled reason guard',
           'stale documented rows',
           'routeMenuAuditRows',
+          'Latest backend no-any deploy guard addendum',
+          'backend runtime no longer has production `as any` casts',
+          'predeploy:check` now source-locks the `backend-security-audit` rule/test',
+          'does not clear external blockers',
         ],
         'memory/deploy-blockers.md',
       )
