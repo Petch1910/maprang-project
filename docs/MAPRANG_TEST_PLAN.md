@@ -121,6 +121,8 @@ bun run smoke:local
 bun run e2e:smoke
 ```
 
+หมายเหตุ: `bun run e2e:smoke` ต้องตรวจ PostgreSQL ผ่าน `apps/backend/src/db.required-check.ts` ก่อน `qa:seed` เสมอ เพื่อกัน browser smoke ทำงานต่อเมื่อ Docker/Postgres ยังไม่พร้อมหรือ DB เชื่อมต่อไม่ได้
+
 Full local:
 
 ```powershell
