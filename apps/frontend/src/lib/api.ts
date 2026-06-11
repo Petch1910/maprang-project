@@ -384,6 +384,10 @@ export type SavedChat = {
   sceneState: ChatRuntimeState['sceneState'] | null
   relationshipState: ChatRuntimeState['relationshipState'] | null
   character: Character
+  messageWindow?: {
+    limit: number
+    mayHaveMoreBefore: boolean
+  }
   messages: ChatMessage[]
 }
 
@@ -914,8 +918,11 @@ export async function fetchChats(options: { archived?: boolean } = {}) {
   return requestJson<{ chats?: ChatSummary[] }>(`/chats${query ? `?${query}` : ''}`)
 }
 
-export async function fetchChatMessages(chatId: string) {
-  return requestJson<{ chat?: SavedChat }>(`/chats/${chatId}/messages`)
+export async function fetchChatMessages(chatId: string, options: { limit?: number } = {}) {
+  const params = new URLSearchParams()
+  if (options.limit !== undefined) params.set('limit', String(options.limit))
+  const query = params.toString()
+  return requestJson<{ chat?: SavedChat }>(`/chats/${chatId}/messages${query ? `?${query}` : ''}`)
 }
 
 export async function updateChatWorldState(chatId: string, input: WorldStateInput) {

@@ -63,6 +63,9 @@ type ChatRole = 'system' | 'user' | 'assistant'
 type ChatMessage = { role: ChatRole; content: string }
 type Prisma = PrismaClient
 
+export const savedChatMessagesDefaultLimit = 200
+export const savedChatMessagesMaxLimit = 500
+
 export type SendChatInput = {
   message: string
   characterId?: string
@@ -183,6 +186,12 @@ function normalizeHistory(history?: ChatMessage[]) {
 
 function estimateMessagesTokens(messages: ChatMessage[]) {
   return estimatePromptTokens(messages.map((message) => `${message.role}: ${message.content}`).join('\n\n'))
+}
+
+export function normalizeSavedChatMessagesLimit(limit?: number | string | null) {
+  const parsed = typeof limit === 'string' ? Number.parseInt(limit, 10) : limit
+  if (typeof parsed !== 'number' || !Number.isFinite(parsed)) return savedChatMessagesDefaultLimit
+  return Math.min(Math.max(Math.trunc(parsed), 1), savedChatMessagesMaxLimit)
 }
 
 export function applyPromptBudget({
@@ -1751,9 +1760,14 @@ export function streamChat(input: SendChatInput) {
   })
 }
 
-export async function loadChatMessages(chatId: string, userId = defaultUserId) {
+export async function loadChatMessages(
+  chatId: string,
+  userId = defaultUserId,
+  options: { limit?: number | string | null } = {},
+) {
   const prisma = getPrisma()
   if (!prisma) return null
+  const limit = normalizeSavedChatMessagesLimit(options.limit)
 
   const chat = await prisma.chat.findFirst({
     where: {
@@ -1762,14 +1776,6 @@ export async function loadChatMessages(chatId: string, userId = defaultUserId) {
       deletedAt: null,
     },
     include: {
-      messages: {
-        where: {
-          deletedAt: null,
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
-      },
       character: {
         include: {
           tags: {
@@ -1784,6 +1790,17 @@ export async function loadChatMessages(chatId: string, userId = defaultUserId) {
 
   if (!chat) return null
 
+  const messageWindowRows = await prisma.message.findMany({
+    where: {
+      chatId: chat.id,
+      deletedAt: null,
+    },
+    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    take: limit + 1,
+  })
+  const mayHaveMoreBefore = messageWindowRows.length > limit
+  const messages = messageWindowRows.slice(0, limit).reverse()
+
   return {
     id: chat.id,
     title: chat.title,
@@ -1791,7 +1808,11 @@ export async function loadChatMessages(chatId: string, userId = defaultUserId) {
     sceneState: chat.sceneState,
     relationshipState: chat.relationshipState,
     character: publicCharacter(chat.character),
-    messages: chat.messages.map((message) => ({
+    messageWindow: {
+      limit,
+      mayHaveMoreBefore,
+    },
+    messages: messages.map((message) => ({
       id: message.id,
       role: message.role,
       content: message.content,

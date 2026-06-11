@@ -971,6 +971,7 @@ Verified:
 - Latest full `qa:repo` pass after decision command/heading audit hardening: docs command audit 334 refs, test coverage audit 60 files / 33 root test scripts, eval 3 scenarios, import-cycle audit 123 files / 293 edges, API audit 48 backend routes + 34 frontend helper calls, route/menu audit 14 surfaces, backend tests 177 pass / 609 expects, frontend route audit 13 routes, frontend build, and bundle budget pass. DB persistence suites still skip only because local Postgres is not running.
 - Decision `0019-audit-decision-command-references.md` wording now points future decision additions to the dynamic predeploy heading audit contract in decision `0020-discover-decision-markdown-heading-files.md` instead of mentioning a hardcoded predeploy list. Focused checks passed: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 - Metadata date sync for the 0019/0020 decision handoff uses the real current date 2026-05-26. Focused checks passed: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
+- Saved chat history loading now has a bounded message window: `loadChatMessages` clamps the request limit, fetches only the latest saved messages with one extra row to detect older history, and returns the window in normal reading order. The `/chats/:id/messages` route accepts an optional `limit` query, and the frontend `fetchChatMessages` helper supports the same option.
 
 ## สถานะ production ปัจจุบัน
 

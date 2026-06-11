@@ -1,6 +1,16 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { CharacterStatus, MessageRole, Visibility } from '@prisma/client'
-import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, updateChatTitle } from './chat.service'
+import {
+  archiveChat,
+  deleteChat,
+  listChats,
+  loadChatMessages,
+  normalizeSavedChatMessagesLimit,
+  restoreChat,
+  savedChatMessagesDefaultLimit,
+  savedChatMessagesMaxLimit,
+  updateChatTitle,
+} from './chat.service'
 import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
 import { loadChatWorldState, updateChatWorldState } from './world-state.service'
@@ -69,6 +79,14 @@ describe('chat archive persistence', () => {
     await cleanup()
   })
 
+  test('clamps saved chat message windows before querying persistence', () => {
+    expect(normalizeSavedChatMessagesLimit()).toBe(savedChatMessagesDefaultLimit)
+    expect(normalizeSavedChatMessagesLimit('abc')).toBe(savedChatMessagesDefaultLimit)
+    expect(normalizeSavedChatMessagesLimit(0)).toBe(1)
+    expect(normalizeSavedChatMessagesLimit('12')).toBe(12)
+    expect(normalizeSavedChatMessagesLimit(savedChatMessagesMaxLimit + 100)).toBe(savedChatMessagesMaxLimit)
+  })
+
   test('moves chats between active and archived lists, then restores them', async () => {
     if (!(await shouldRunDbTest())) return
 
@@ -124,6 +142,43 @@ describe('chat archive persistence', () => {
       isArchived: false,
       deletedAt: null,
     })
+  })
+
+  test('loads only the latest saved message window in reading order for large chats', async () => {
+    if (!(await shouldRunDbTest())) return
+
+    const chat = await createTestChat(ownerUserId)
+    await prisma!.message.deleteMany({ where: { chatId: chat.id } })
+
+    const startedAt = new Date('2026-01-01T00:00:00.000Z')
+    await prisma!.message.createMany({
+      data: Array.from({ length: 240 }, (_, index) => ({
+        chatId: chat.id,
+        role: index % 2 === 0 ? MessageRole.user : MessageRole.assistant,
+        content: `${testPrefix} History message ${String(index).padStart(3, '0')}`,
+        createdAt: new Date(startedAt.getTime() + index * 1000),
+      })),
+    })
+
+    const loaded = await loadChatMessages(chat.id, ownerUserId)
+    expect(loaded?.messageWindow).toEqual({
+      limit: savedChatMessagesDefaultLimit,
+      mayHaveMoreBefore: true,
+    })
+    expect(loaded?.messages).toHaveLength(savedChatMessagesDefaultLimit)
+    expect(loaded?.messages[0]?.content).toBe(`${testPrefix} History message 040`)
+    expect(loaded?.messages.at(-1)?.content).toBe(`${testPrefix} History message 239`)
+
+    const shortWindow = await loadChatMessages(chat.id, ownerUserId, { limit: 3 })
+    expect(shortWindow?.messageWindow).toEqual({
+      limit: 3,
+      mayHaveMoreBefore: true,
+    })
+    expect(shortWindow?.messages.map((message) => message.content)).toEqual([
+      `${testPrefix} History message 237`,
+      `${testPrefix} History message 238`,
+      `${testPrefix} History message 239`,
+    ])
   })
 
   test('persists world state only for the chat owner', async () => {

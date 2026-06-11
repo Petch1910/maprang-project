@@ -112,13 +112,13 @@ export const chatRoutes = new Elysia()
   )
   .get(
     '/chats/:id/messages',
-    async ({ params, request, set }) => {
+    async ({ params, query, request, set }) => {
       const prisma = requireDatabase(set)
       if (!prisma) return routeErrorResponse('database_not_configured')
       const invalidId = rejectInvalidUuid(params.id, set, 'invalid_chat_id')
       if (invalidId) return invalidId
 
-      const chat = await loadChatMessages(params.id, await resolveRequestUserId(request))
+      const chat = await loadChatMessages(params.id, await resolveRequestUserId(request), { limit: query.limit })
       if (!chat) {
         set.status = 404
         return routeErrorResponse('chat_not_found')
@@ -129,6 +129,9 @@ export const chatRoutes = new Elysia()
     {
       params: t.Object({
         id: t.String(),
+      }),
+      query: t.Object({
+        limit: t.Optional(t.String()),
       }),
     },
   )
