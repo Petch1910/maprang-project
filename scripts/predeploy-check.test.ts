@@ -1149,6 +1149,8 @@ describe('predeploy check wiring', () => {
 
     expect(packageJson.scripts?.['predeploy:check:test']).toBe('bun test scripts/predeploy-check.test.ts')
     expect(qaLocalOnlyCommands).toContain('bun run qa:repo')
+    expect(qaLocalOnlyCommands).toContain('bun run qa:seed')
+    expect(qaLocalOnlyCommands.indexOf('bun run qa:seed')).toBeLessThan(qaLocalOnlyCommands.indexOf('bun run smoke:doctor'))
     expect(qaLocalOnlyCommands).toContain('bun run smoke:doctor')
     expect(qaLocalOnlyCommands).toContain('bun run smoke:local')
     expect(qaLocalOnlyCommands).toContain('bun run api:smoke')

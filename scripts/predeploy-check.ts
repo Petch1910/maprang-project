@@ -1023,8 +1023,11 @@ const checks: Check[] = [
       if (/(^|&&\s*)bun run (?:smoke:local|api:smoke|e2e:smoke)(?:\s|&&|$)/.test(qaRepo)) {
         throw new Error('package.json qa:repo ต้องไม่เรียก runtime smoke ที่ต้องมี backend/Postgres หรือ browser จริง')
       }
-      if (!qaLocalOnlyCommands.includes('bun run qa:repo') || !qaLocalOnlyCommands.includes('bun run smoke:doctor') || !qaLocalOnlyCommands.includes('bun run smoke:local') || !qaLocalOnlyCommands.includes('bun run api:smoke')) {
-        throw new Error('package.json qa:local ต้องต่อจาก qa:repo แล้วค่อยรัน runtime smoke สำหรับ backend/Postgres จริง')
+      if (!qaLocalOnlyCommands.includes('bun run qa:repo') || !qaLocalOnlyCommands.includes('bun run qa:seed') || !qaLocalOnlyCommands.includes('bun run smoke:doctor') || !qaLocalOnlyCommands.includes('bun run smoke:local') || !qaLocalOnlyCommands.includes('bun run api:smoke')) {
+        throw new Error('package.json qa:local ต้องต่อจาก qa:repo แล้ว seed QA data ก่อนรัน runtime smoke สำหรับ backend/Postgres จริง')
+      }
+      if (qaLocalOnlyCommands.indexOf('bun run qa:seed') > qaLocalOnlyCommands.indexOf('bun run smoke:doctor')) {
+        throw new Error('package.json qa:local ต้องรัน qa:seed ก่อน smoke:doctor เพื่อให้ smoke runtime มีตัวละคร/แชทจำลองพร้อมตรวจ')
       }
       if (!qaLocalCommands.includes('bun run secrets:patterns:test')) {
         throw new Error('package.json qa:local ต้องรัน secrets:patterns:test เพื่อจับ regression ของ secret pattern กลาง')

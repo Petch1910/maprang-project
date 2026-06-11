@@ -190,7 +190,7 @@ bun run qa:repo
 bun run qa:local
 ```
 
-`qa:local` เริ่มจาก `qa:repo` เสมอ แล้วค่อยต่อ `smoke:doctor`, `smoke:local`, และ `api:smoke` เฉพาะส่วน runtime ที่ต้องมี backend/Postgres เปิดอยู่จริง เพื่อลดรายการเช็คซ้ำและกัน QA gate drift ระยะยาว.
+`qa:local` เริ่มจาก `qa:repo` เสมอ แล้วรัน `qa:seed` เพื่อเตรียม QA seed data ก่อนค่อยต่อ `smoke:doctor`, `smoke:local`, และ `api:smoke` เฉพาะส่วน runtime ที่ต้องมี backend/Postgres เปิดอยู่จริง เพื่อลดรายการเช็คซ้ำและกัน QA gate drift ระยะยาว.
 
 ใช้คำสั่งนี้เป็น local readiness gate ปกติ. มันตรวจ secrets, regression tests สำหรับ secret-pattern, memory/knowledge audits, deterministic prompt/context evals, API route coverage mapping, import-cycle architecture audit, deploy/predeploy wiring, backend tests, frontend build, backend root identity, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, avatar upload, และ local chat normal/stream runtime เมื่อ backend ใช้ `CHAT_PROVIDER=local` หรือ local fallback. Local API smoke ยังข้าม external image provider สำหรับ creator draft checks เพื่อให้ routine QA deterministic; live avatar generation จะตรวจเฉพาะใน `api:smoke:live`, `smoke:image:live`, หรือ `production:check`.
 ถ้า backend health รายงาน `chatRuntimeProvider=local`, `api:smoke` จะยิง `POST /chat local QA` และ `POST /chat/stream local QA` จริง พร้อมตรวจว่าใช้ `local/mock-roleplay`, `totalTokens=0`, ไม่มี provider failure, และคำตอบยาวพอสำหรับ roleplay ก่อนยังคงข้ามเฉพาะ live provider routes ที่ต้องใช้ staging/production.

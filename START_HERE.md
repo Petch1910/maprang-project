@@ -76,6 +76,7 @@ bun run tests:audit
 ถ้ามี backend และ database รันอยู่ ให้ตรวจ local playable flow:
 
 ```powershell
+bun run qa:seed
 bun run smoke:doctor
 bun run smoke:local
 bun run e2e:smoke

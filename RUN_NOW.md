@@ -50,6 +50,7 @@ Frontend local URL: `http://127.0.0.1:5173`
 
 ```powershell
 cd C:\Users\Phet\Documents\Codex\2026-05-04\use-github-to-debug-my-project\maprang-project
+bun run qa:seed
 bun run smoke:doctor
 bun run smoke:local
 bun run e2e:smoke

@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 local QA seed-gate QA pass: `qa:local` now seeds QA data before runtime smoke so local checks no longer fail when a healthy DB is empty. Passing evidence: initial `smoke:local`/`api:smoke` failed before seed with missing QA characters, then `bun run qa:seed && bun run smoke:local && bun run api:smoke` passed, `bun run qa:local` passed end-to-end, and `bun run e2e:smoke` passed 4/4 desktop+mobile before reseeding local data for the open app.
+
 - 2026-06-12 predeploy immersive-shell source-lock QA pass: `predeploy:check` now requires the Route/Menu Audit and e2e smoke source to preserve the immersive shell contract for `/` and `/chat*`, including `expectImmersiveShell`, `app-mobile-nav`, and the unsupported light-mode copy guard. Passing evidence: `bun run predeploy:check:test` (3 pass / 1232 expects), `bun run predeploy:check`, and full deterministic `bun run qa:repo`.
 
 - 2026-06-12 route/menu immersive-shell documentation QA pass: `ROUTE_MENU_AUDIT.md`, `routeMenuAuditRows`, and `route-menu-doc-check` now lock the product rule that `/` and `/chat*` are full-screen immersive experiences and must not be wrapped by the global shell or show unsupported light-mode copy. Passing evidence: `bun run route-menu:audit`, `bun run route-menu:audit:test` (12 pass / 20 expects), `bun run frontend:check`, `bun run docs:commands`, `bun run memory:audit`, and full deterministic `bun run qa:repo`.

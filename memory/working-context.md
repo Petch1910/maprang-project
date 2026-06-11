@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Local runtime gate now seeds QA data before smoke. `qa:local` runs `qa:repo && qa:seed && smoke:doctor && smoke:local && api:smoke`, with `predeploy:check` source-locking both the presence and ordering of `qa:seed` before `smoke:doctor`. This closes the runtime hole where `smoke:local` and `api:smoke` could fail on an otherwise healthy local backend because the database had no QA characters/chats.
+
 - 2026-06-12: `predeploy:check` now source-locks the immersive shell rule in addition to Route/Menu Audit and Playwright e2e. It requires `ROUTE_MENU_AUDIT.md` to keep `หน้าประสบการณ์เต็มจอ`, `ไม่ถูก shell กลางครอบซ้ำ`, `app-mobile-nav`, and `โหมดสว่างยังไม่รองรับ`, and requires `tests/e2e/maprang-smoke.spec.ts` to keep `expectImmersiveShell`, `app-mobile-nav`, and the unsupported light-mode copy guard.
 
 - 2026-06-12: Route/Menu Audit now documents and source-locks the immersive shell rule for `/` and `/chat*`. `ROUTE_MENU_AUDIT.md` and `routeMenuAuditRows` say those routes are full-screen experiences that must not be wrapped by the middle/global shell, while `route-menu-doc-check` requires `หน้าประสบการณ์เต็มจอ`, `ไม่ถูก shell กลางครอบซ้ำ`, `app-mobile-nav`, and `โหมดสว่างยังไม่รองรับ` so the UX contract cannot drift silently.
