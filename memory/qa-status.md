@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 backend runtime no-any QA pass: removed remaining production `as any` casts from token expiry metadata parsing, token transaction metadata writes, and creator scenario route params. `backend-security-audit` now rejects `as any` in runtime backend source so the shortcut cannot return silently. Passing evidence: `bun run security:audit:test` (39 pass / 246 expects), `bun run security:audit`, `bun run backend:check` (270 pass / 1074 expects with DB suites gated when local Postgres is unavailable), and runtime `rg -n "as any" apps\backend\src --glob "!*.test.ts"` returned no matches.
+
 - 2026-06-11 predeploy release-handoff source-lock QA pass: `predeploy:check` now source-locks the release handoff checker to require `latestPrismaMigrationVersion` and the regression test name `requires the latest migration version for deployed handoffs`. This prevents the latest-migration deploy guard from being removed while predeploy still reports green. Passing evidence: `bun run predeploy:check:test` (3 pass / 1139 expects), `bun run predeploy:check`, `bun run release:handoff:test` (49 pass / 68 expects), `bun run secrets:check`, and `git diff --check`.
 
 - 2026-06-11 release handoff latest-migration QA pass: filled staging/production release handoffs now must record the latest Prisma migration folder from `apps/backend/prisma/migrations`, currently `20260611143000_add_message_window_index`, instead of accepting any old migration-looking value. This keeps release evidence aligned with the saved-message DB index migration. Passing evidence: `bun run release:handoff:test` (49 pass / 68 expects), `bun run release:handoff:check`, and `bun run predeploy:check:test`.

@@ -70,6 +70,14 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches unsafe any assertions in runtime backend source', () => {
+    const messages = messagesFor(`
+      const metadata = transaction.metadata as any
+    `, 'token-expiry.service.ts')
+
+    expect(messages).toContain('ห้ามใช้ as any ใน runtime backend; ให้ใช้ type guard, schema, หรือ Prisma JSON type ที่ชัดเจนแทน.')
+  })
+
   test('catches unbounded Prisma messages includes in runtime source', () => {
     const messages = messagesFor(`
       await prisma.chat.findFirst({

@@ -10,6 +10,29 @@ export type TokenExpiryNotification = {
   message: string
 }
 
+type PromotionalTokenMetadata = {
+  expiryDate?: string
+  expired?: boolean
+  expiredAt?: string
+  [key: string]: unknown
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function readPromotionalTokenMetadata(value: unknown): PromotionalTokenMetadata {
+  if (!isRecord(value)) return {}
+  return value
+}
+
+function readExpiryDate(metadata: PromotionalTokenMetadata): Date | null {
+  if (typeof metadata.expiryDate !== 'string') return null
+  const expiryDate = new Date(metadata.expiryDate)
+  if (Number.isNaN(expiryDate.getTime())) return null
+  return expiryDate
+}
+
 /**
  * Expire promotional tokens that have passed their expiry date
  * Called by cron job daily
@@ -55,10 +78,9 @@ export async function expirePromotionalTokens(): Promise<{
 
   for (const transaction of allPromotionalTransactions) {
     // Check if metadata has expiryDate
-    const metadata = transaction.metadata as any
-    if (!metadata?.expiryDate) continue
-
-    const expiryDate = new Date(metadata.expiryDate)
+    const metadata = readPromotionalTokenMetadata(transaction.metadata)
+    const expiryDate = readExpiryDate(metadata)
+    if (!expiryDate) continue
     if (expiryDate > now) continue // Not expired yet
 
     // Check if already marked as expired
@@ -131,10 +153,11 @@ export async function getExpiringTokens(userId: string, daysAhead: number = 7) {
   // Filter and map transactions with expiry dates
   const expiringTokens = transactions
     .map((tx) => {
-      const metadata = tx.metadata as any
-      if (!metadata?.expiryDate || metadata.expired) return null
+      const metadata = readPromotionalTokenMetadata(tx.metadata)
+      if (metadata.expired) return null
 
-      const expiryDate = new Date(metadata.expiryDate)
+      const expiryDate = readExpiryDate(metadata)
+      if (!expiryDate) return null
       if (expiryDate < new Date() || expiryDate > futureDate) return null
 
       const daysRemaining = Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
@@ -193,10 +216,11 @@ export async function notifyExpiringTokens(daysAhead: number): Promise<{
 
   // Filter transactions expiring on this specific day
   const expiringTransactions = transactions.filter((tx) => {
-    const metadata = tx.metadata as any
-    if (!metadata?.expiryDate || metadata.expired) return false
+    const metadata = readPromotionalTokenMetadata(tx.metadata)
+    if (metadata.expired) return false
 
-    const expiryDate = new Date(metadata.expiryDate)
+    const expiryDate = readExpiryDate(metadata)
+    if (!expiryDate) return false
     return expiryDate >= startDate && expiryDate <= endDate
   })
 

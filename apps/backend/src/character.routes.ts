@@ -12,6 +12,8 @@ import {
   getAllCategories,
   getBasicTestScenarios,
   getComprehensiveTestScenarios,
+  type ScenarioCategory,
+  type ScenarioTemplate,
 } from './scenario-templates'
 import { requireDatabase } from './db'
 import {
@@ -45,6 +47,17 @@ const statusSchema = t.Union([
   t.Literal('REJECTED'),
   t.Literal('ARCHIVED'),
 ])
+const scenarioCategorySchema = t.Union([
+  t.Literal('greeting'),
+  t.Literal('conversation'),
+  t.Literal('emotional'),
+  t.Literal('conflict'),
+  t.Literal('roleplay'),
+  t.Literal('relationship'),
+  t.Literal('personality'),
+  t.Literal('knowledge'),
+])
+const scenarioDifficultySchema = t.Union([t.Literal('easy'), t.Literal('medium'), t.Literal('hard')])
 
 const characterBody = t.Object({
   name: t.String({ minLength: 1 }),
@@ -174,17 +187,17 @@ export const characterRoutes = new Elysia()
   .get('/creator/scenarios', () => ({ scenarios: scenarioTemplates }))
   .get('/creator/scenarios/categories', () => ({ categories: getAllCategories() }))
   .get('/creator/scenarios/category/:category', ({ params }) => ({
-    scenarios: getScenariosByCategory(params.category as any),
+    scenarios: getScenariosByCategory(params.category as ScenarioCategory),
   }), {
     params: t.Object({
-      category: t.String(),
+      category: scenarioCategorySchema,
     }),
   })
   .get('/creator/scenarios/difficulty/:difficulty', ({ params }) => ({
-    scenarios: getScenariosByDifficulty(params.difficulty as any),
+    scenarios: getScenariosByDifficulty(params.difficulty as ScenarioTemplate['difficulty']),
   }), {
     params: t.Object({
-      difficulty: t.Union([t.Literal('easy'), t.Literal('medium'), t.Literal('hard')]),
+      difficulty: scenarioDifficultySchema,
     }),
   })
   .get('/creator/scenarios/preset/basic', () => ({ scenarios: getBasicTestScenarios() }))

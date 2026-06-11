@@ -1,4 +1,4 @@
-import { TokenTransactionType } from '@prisma/client'
+import { TokenTransactionType, type Prisma } from '@prisma/client'
 import { getPrisma } from './db'
 
 export type TokenTransactionInput = {
@@ -6,7 +6,7 @@ export type TokenTransactionInput = {
   type: TokenTransactionType
   amount: number
   reason?: string
-  metadata?: Record<string, unknown>
+  metadata?: Prisma.InputJsonObject
   usageId?: string
 }
 
@@ -281,7 +281,7 @@ export async function createTokenTransaction(input: TokenTransactionInput): Prom
         amount: input.amount,
         balanceAfter: nextBalance,
         reason: input.reason?.trim() || null,
-        metadata: (input.metadata as any) ?? undefined,
+        metadata: input.metadata ?? undefined,
       },
     })
   })

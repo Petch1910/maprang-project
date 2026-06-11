@@ -352,6 +352,10 @@ type BackendRouteCall = {
 
 const patterns = [
   {
+    pattern: /\bas\s+any\b/g,
+    message: 'ห้ามใช้ as any ใน runtime backend; ให้ใช้ type guard, schema, หรือ Prisma JSON type ที่ชัดเจนแทน.',
+  },
+  {
     pattern: consoleObjectAliasPattern,
     message:
       'backend source ห้าม alias console object; ให้เรียก safe summary helper ตรงๆ เพื่อให้ audit ตาม raw error object ได้',
