@@ -29,7 +29,7 @@ import {
   type WorldStateInput,
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
-import { createGreeting, fallbackCharacter } from '../lib/chat'
+import { createGreeting } from '../lib/chat'
 import { canShowQaSeedData, filterVisibleCharacters, isQaSeedCharacter } from '../lib/qaSeedVisibility'
 import { relationshipSeedLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -134,6 +134,64 @@ function defaultRelationshipState(): ChatRuntimeState['relationshipState'] {
   }
 }
 
+function EmptyChatWorkspace({
+  isLoading,
+  note,
+  onCreateCharacter,
+  onExplore,
+  onRetry,
+}: {
+  isLoading: boolean
+  note: string
+  onCreateCharacter: () => void
+  onExplore: () => void
+  onRetry: () => void
+}) {
+  return (
+    <main className="grid h-svh place-items-center overflow-hidden bg-[#0c0c0f] px-4 text-white">
+      <section
+        className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/6 p-6 text-center shadow-[0_30px_90px_rgba(0,0,0,0.36)] backdrop-blur-xl"
+        data-testid="chat-empty-character-state"
+      >
+        <p className="m-0 text-xs font-black tracking-[0.2em] text-orange-200/75 uppercase">Maprang Chat</p>
+        <h1 className="m-0 mt-3 text-2xl font-black text-white sm:text-3xl">ยังไม่มีตัวละครพร้อมเริ่มแชท</h1>
+        <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-white/62">
+          {isLoading
+            ? 'กำลังโหลดข้อมูลจริงจากระบบหลังบ้าน...'
+            : 'หน้าแชทจะไม่ใช้ตัวละครที่ไม่ได้มาจากระบบหลังบ้านแทนข้อมูลจริง ถ้ายังไม่มีตัวละคร ให้สร้างตัวละครหรือกลับไปสำรวจก่อน'}
+        </p>
+        {note && <p className="mt-4 rounded-xl border border-white/10 bg-black/28 px-4 py-3 text-sm font-bold text-white/68">{note}</p>}
+        <div className="mt-5 grid gap-2 sm:grid-cols-3">
+          <button
+            className="min-h-11 rounded-xl bg-orange-500 px-4 text-sm font-black text-white transition hover:bg-orange-400"
+            onClick={onCreateCharacter}
+            type="button"
+          >
+            สร้างตัวละคร
+          </button>
+          <button
+            className="min-h-11 rounded-xl border border-white/10 bg-white/7 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white"
+            onClick={onExplore}
+            type="button"
+          >
+            กลับไปสำรวจ
+          </button>
+          <button
+            aria-disabled={isLoading}
+            className="min-h-11 rounded-xl border border-white/10 bg-white/7 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isLoading}
+            onClick={onRetry}
+            title={isLoading ? 'กำลังโหลดข้อมูลจริงจากระบบหลังบ้าน' : 'โหลดข้อมูลตัวละครอีกครั้ง'}
+            type="button"
+          >
+            รีเฟรช
+          </button>
+        </div>
+      </section>
+    </main>
+  )
+}
+
 export function WorkspacePage() {
   const reduxDispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -143,14 +201,15 @@ export function WorkspacePage() {
   const relationshipSeed = searchParams.get('relationship_seed')
   const relationshipSeedName = relationshipSeedLabel(relationshipSeed)
   const [message, setMessage] = useState('')
-  const [character, setCharacter] = useState<Character>(fallbackCharacter)
-  const [characters, setCharacters] = useState<Character[]>([fallbackCharacter])
+  const [character, setCharacter] = useState<Character | null>(null)
+  const [characters, setCharacters] = useState<Character[]>([])
   const [chatId, setChatId] = useState<string | null>(null)
-  const [chatLog, setChatLog] = useState<ChatMessage[]>([createGreeting(fallbackCharacter)])
+  const [chatLog, setChatLog] = useState<ChatMessage[]>([])
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>([])
   const [lastUsage, setLastUsage] = useState<ChatUsage | null>(null)
   const [runtimeState, setRuntimeState] = useState<ChatRuntimeState | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isBooting, setIsBooting] = useState(true)
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [isWorldStateSaving, setIsWorldStateSaving] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -159,7 +218,7 @@ export function WorkspacePage() {
   const [connectionNote, setConnectionNote] = useState('กำลังโหลดตัวละครจากฐานข้อมูล...')
   const chatEndRef = useRef<HTMLDivElement>(null)
   const lastUsageChatIdRef = useRef<string | null>(null)
-  const draftKey = chatId ? `chat:${chatId}` : `character:${character.id}`
+  const draftKey = chatId ? `chat:${chatId}` : `character:${character?.id ?? 'none'}`
   const savedDraft = useAppSelector(selectComposerDraft(draftKey))
   const personaDraft = useAppSelector(selectPersonaDraft)
   const contentSettings = useAppSelector(selectContentSettings)
@@ -225,9 +284,8 @@ export function WorkspacePage() {
   const loadCharacters = useCallback(async (filters: CharacterListFilters = { view: 'admin', sort: 'popular', limit: 40 }) => {
     const data = await fetchCharacters(filters)
     const visibleCharacters = filterVisibleCharacters(data.characters ?? [])
-    const loadedCharacters = visibleCharacters.length ? visibleCharacters : [fallbackCharacter]
-    setCharacters(loadedCharacters)
-    return loadedCharacters
+    setCharacters(visibleCharacters)
+    return visibleCharacters
   }, [])
 
   const refreshWorkspaceAuth = useCallback(async () => {
@@ -245,11 +303,11 @@ export function WorkspacePage() {
     await refreshWorkspaceAuth()
     await loadHealthStatus()
     const loadedCharacters = await loadCharacters()
-    const nextCharacter = loadedCharacters.find((item) => item.id === character.id) ?? loadedCharacters[0] ?? fallbackCharacter
+    const nextCharacter = loadedCharacters.find((item) => item.id === character?.id) ?? loadedCharacters[0] ?? null
     setCharacter(nextCharacter)
     setChatId(null)
     setRuntimeState(null)
-    setChatLog([createGreeting(nextCharacter)])
+    setChatLog(nextCharacter ? [createGreeting(nextCharacter)] : [])
     await loadChatHistory()
     await loadUsageSummary()
   }
@@ -274,6 +332,11 @@ export function WorkspacePage() {
   }
 
   const startNewChat = () => {
+    if (!character) {
+      setConnectionNote('ยังไม่มีตัวละครจริงให้เริ่มแชท สร้างตัวละครหรือเลือกจากหน้าสำรวจก่อน')
+      navigate('/create')
+      return
+    }
     setChatId(null)
     lastUsageChatIdRef.current = null
     setLastUsage(null)
@@ -332,6 +395,7 @@ export function WorkspacePage() {
 
   useEffect(() => {
     async function boot() {
+      setIsBooting(true)
       if (routeChatId) {
         setIsLoading(true)
         setConnectionNote('กำลังโหลดแชทที่บันทึกไว้...')
@@ -342,20 +406,27 @@ export function WorkspacePage() {
       try {
         const loadedCharacters = await loadCharacters()
         if (!routeChatId) {
-          const firstCharacter = loadedCharacters.find((item) => item.id === routeCharacterId) ?? loadedCharacters[0] ?? fallbackCharacter
+          const firstCharacter = loadedCharacters.find((item) => item.id === routeCharacterId) ?? loadedCharacters[0] ?? null
           setCharacter(firstCharacter)
-          setChatLog([
-            createGreeting(firstCharacter),
-            ...(relationshipSeed
+          setChatLog(
+            firstCharacter
               ? [
-                  {
-                    id: crypto.randomUUID(),
-                    role: 'assistant' as const,
-                    content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeedName} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
-                  },
+                  createGreeting(firstCharacter),
+                  ...(relationshipSeed
+                    ? [
+                        {
+                          id: crypto.randomUUID(),
+                          role: 'assistant' as const,
+                          content: `เลือกจุดเริ่มต้นความสัมพันธ์: ${relationshipSeedName} แชทนี้จะเริ่มจากสัญญาอารมณ์นี้`,
+                        },
+                      ]
+                    : []),
                 ]
-              : []),
-          ])
+              : [],
+          )
+          if (!firstCharacter) {
+            setConnectionNote('ยังไม่มีตัวละครจริงในระบบสำหรับเริ่มแชท สร้างตัวละครหรือเปิด QA seed ก่อนทดสอบ')
+          }
         }
       } catch (error) {
         logUnexpectedWorkspaceError('โหลดตัวละครไม่สำเร็จ:', error)
@@ -365,6 +436,7 @@ export function WorkspacePage() {
       await loadChatHistory()
       await loadUsageSummary()
       if (routeChatId) await openChat(routeChatId)
+      setIsBooting(false)
     }
 
     void boot()
@@ -420,7 +492,7 @@ export function WorkspacePage() {
     try {
       const data = await setCharacterFavorite(characterId, favorite)
       setCharacters((prev) => prev.map((item) => (item.id === data.character.id ? data.character : item)))
-      if (character.id === data.character.id) setCharacter(data.character)
+      if (character?.id === data.character.id) setCharacter(data.character)
       setConnectionNote(favorite ? `เพิ่ม ${data.character.name} ในรายการโปรดแล้ว` : `นำ ${data.character.name} ออกจากรายการโปรดแล้ว`)
     } catch (error) {
       logUnexpectedWorkspaceError('อัปเดตรายการโปรดไม่สำเร็จ:', error)
@@ -429,6 +501,10 @@ export function WorkspacePage() {
   }
 
   const sendMessage = async (value = message) => {
+    if (!character) {
+      setConnectionNote('ยังไม่มีตัวละครจริงให้ส่งข้อความ เลือกตัวละครจากหน้าสำรวจหรือสร้างตัวละครก่อน')
+      return
+    }
     const currentMsg = value.trim()
     if (!currentMsg || isLoading) return
 
@@ -631,6 +707,7 @@ export function WorkspacePage() {
   }
 
   const openMessageReport = (chat: ChatMessage) => {
+    if (!character) return
     if (isLoading || chat.role === 'system' || !chat.content.trim()) return
     setReportTarget({
       targetType: 'MESSAGE',
@@ -642,7 +719,7 @@ export function WorkspacePage() {
   }
 
   const openCharacterReport = () => {
-    if (!character.id) return
+    if (!character?.id) return
     setReportTarget({
       targetType: 'CHARACTER',
       title: character.name,
@@ -652,6 +729,7 @@ export function WorkspacePage() {
   }
 
   const reportMessage = async ({ reason, details }: ReportDialogSubmit) => {
+    if (!character) return
     if (!reportTarget || isReporting) return
     setIsReporting(true)
     setConnectionNote(reportTarget.targetType === 'CHARACTER' ? 'กำลังส่งรายงานตัวละคร...' : 'กำลังส่งรายงานข้อความ...')
@@ -690,6 +768,25 @@ export function WorkspacePage() {
     } finally {
       setIsReporting(false)
     }
+  }
+
+  if (!character) {
+    return (
+      <EmptyChatWorkspace
+        isLoading={isBooting || isLoading}
+        note={connectionNote}
+        onCreateCharacter={() => navigate('/create')}
+        onExplore={() => navigate('/')}
+        onRetry={() => {
+          void loadCharacters().then((loadedCharacters) => {
+            const nextCharacter = loadedCharacters[0] ?? null
+            setCharacter(nextCharacter)
+            setChatLog(nextCharacter ? [createGreeting(nextCharacter)] : [])
+            setConnectionNote(nextCharacter ? `เลือก ${nextCharacter.name} แล้ว` : 'ยังไม่มีตัวละครจริงในระบบสำหรับเริ่มแชท')
+          })
+        }}
+      />
+    )
   }
 
   return (

@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 Chat no-client-fallback QA pass: `/chat` no longer creates a frontend fallback character when the backend returns no visible characters. The chat workspace now shows an explicit empty state with create/explore/retry actions until real backend or QA-seed data exists, and the component contract locks `fallbackCharacter` out of `WorkspacePage` and `lib/chat.ts`. Passing evidence: `bun run frontend:components:test` (15 pass / 81 expects), `bun run frontend:static:audit`, `bun run route-menu:audit`, `bun run frontend:check`, full `bun run qa:repo`, and `bun run e2e:smoke` (4/4 desktop+mobile). `bun run qa:seed` was run after browser smoke to restore local QA data for manual play.
+
 - 2026-06-12 Explore no-demo route/menu QA pass: `ROUTE_MENU_AUDIT.md` now says the `/` empty state uses a create-character CTA when no real characters exist, and `route-menu-doc-check` rejects stale `การ์ดตัวอย่างกันหน้าว่าง` wording. Passing evidence: `bun run route-menu:audit`, `bun run route-menu:audit:test` (12 pass / 20 expects), and `bun run frontend:route:audit`.
 
 - 2026-06-12 smoke/deploy local-port QA pass: shared smoke helpers now read `PORT` from `apps/backend/.env` when `SMOKE_API_BASE_URL` is omitted, keeping smoke/deploy CLIs aligned with local backend port overrides. Passing evidence: `bun run smoke:helpers:test` (11 pass / 43 expects), `bun run deploy:status -- --json` returned `ok=true`, `apiBaseUrl=http://127.0.0.1:3001`, `databaseConnected=true`, `chatRuntimeProvider=local`, `stagingBlockerCount=4`, and `productionBlockerCount=5`, and full deterministic `bun run qa:repo` passed.

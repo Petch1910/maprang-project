@@ -412,6 +412,18 @@ describe('frontend component contracts', () => {
     expect(source).not.toContain('initialDarkMode')
   })
 
+  test('workspace chat does not substitute a client-side character when backend data is empty', async () => {
+    const workspaceSource = await Bun.file('apps/frontend/src/pages/WorkspacePage.tsx').text()
+    const chatHelperSource = await Bun.file('apps/frontend/src/lib/chat.ts').text()
+
+    expect(workspaceSource).not.toContain('fallbackCharacter')
+    expect(chatHelperSource).not.toContain('fallbackCharacter')
+    expect(workspaceSource).toContain('data-testid="chat-empty-character-state"')
+    expect(workspaceSource).toContain('หน้าแชทจะไม่ใช้ตัวละครที่ไม่ได้มาจากระบบหลังบ้านแทนข้อมูลจริง')
+    expect(workspaceSource).toContain("setCharacters(visibleCharacters)")
+    expect(workspaceSource).not.toContain('visibleCharacters.length ? visibleCharacters')
+  })
+
   test('events inbox selector exposes only playable pending scene summaries', () => {
     const visibleChat = chatSummaryWithPendingScene()
     const heldOnlyChat = chatSummaryWithPendingScene({
