@@ -10,6 +10,7 @@ import {
   runLocalSmoke,
   validateLocalChatStreamSmoke,
   validateLocalChatSmoke,
+  validateLocalUsageSummary,
   validateAvatarUpload,
   type LocalSmokeJsonReader,
 } from './local-smoke'
@@ -52,6 +53,38 @@ describe('local smoke helpers', () => {
     expect(() => validateBackendRootIdentity({ ok: true, service: 'maprang-backend' })).not.toThrow()
     expect(() => validateBackendRootIdentity({ ok: false, service: 'maprang-backend' })).toThrow('ok=false')
     expect(() => validateBackendRootIdentity({ ok: true, service: 'other-service' })).toThrow('ชื่อ service ไม่ถูกต้อง')
+  })
+
+  test('validates local wallet and usage summary shape', () => {
+    const payload = {
+      user: { tokenBalance: 1200 },
+      usage: {
+        totalCost: '0.0000',
+        byModel: [{ model: 'local/mock-roleplay' }],
+        daily: Array.from({ length: 7 }, (_, index) => ({ date: `2026-06-${index + 1}`, tokens: 0 })),
+        estimate: { averageTokensPerRequest: 420, estimatedRemainingRequests: 2 },
+      },
+      wallet: { transactions: [{ id: 'tx-1' }] },
+    }
+
+    expect(validateLocalUsageSummary(payload)).toMatchObject({
+      tokenBalance: 1200,
+      totalCost: '0.0000',
+      usageModels: 1,
+      usageDailyDays: 7,
+      averageTokensPerRequest: 420,
+      estimatedRemainingRequests: 2,
+      walletTransactions: 1,
+    })
+    expect(() => validateLocalUsageSummary({ ...payload, user: {} })).toThrow('tokenBalance')
+    expect(() => validateLocalUsageSummary({ ...payload, usage: { ...payload.usage, daily: [] } })).toThrow('กราฟ usage 7 วัน')
+    expect(() =>
+      validateLocalUsageSummary({
+        ...payload,
+        usage: { ...payload.usage, estimate: { averageTokensPerRequest: 420, estimatedRemainingRequests: 'many' as never } },
+      }),
+    ).toThrow('estimatedRemainingRequests')
+    expect(() => validateLocalUsageSummary({ ...payload, wallet: { transactions: {} as never } })).toThrow('รายการกระเป๋า')
   })
 
   test('validates local chat runtime, reply length, model, and zero-token usage', () => {
@@ -155,6 +188,15 @@ describe('local smoke helpers', () => {
         checks: { databaseConnected: true, openRouterConfigured: true },
         security: { avatarStorage: 'supabase' },
       },
+      usage: {
+        tokenBalance: 1200,
+        totalCost: '0.0000',
+        usageModels: 1,
+        usageDailyDays: 7,
+        averageTokensPerRequest: 420,
+        estimatedRemainingRequests: 2,
+        walletTransactions: 1,
+      },
       smokeCharacter: { id: '1', name: 'มิกะ | MIKA', tags: ['qa', 'scene-ready'] },
       loreCount: 2,
       previewTurns: 3,
@@ -170,6 +212,9 @@ describe('local smoke helpers', () => {
     expect(summary).toMatchObject({
       ok: true,
       avatarStorage: 'supabase',
+      tokenBalance: 1200,
+      usageDailyDays: 7,
+      walletTransactions: 1,
       character: 'มิกะ | MIKA',
       loreCount: 2,
       previewTurns: 3,
@@ -195,6 +240,18 @@ describe('local smoke helpers', () => {
             minRoleplayReplyChars: 420,
             chatProvider: { activeRuntimeProvider: 'local', localModel: 'local/mock-roleplay' },
           },
+        } as never
+      }
+      if (path === '/me/usage') {
+        return {
+          user: { tokenBalance: 1200 },
+          usage: {
+            totalCost: '0.0000',
+            byModel: [{ model: 'local/mock-roleplay' }],
+            daily: Array.from({ length: 7 }, (_, index) => ({ date: `2026-06-${index + 1}`, tokens: 0 })),
+            estimate: { averageTokensPerRequest: 420, estimatedRemainingRequests: 2 },
+          },
+          wallet: { transactions: [{ id: 'tx-1' }] },
         } as never
       }
       if (path === '/characters?view=admin&limit=10') {
@@ -251,6 +308,7 @@ describe('local smoke helpers', () => {
     expect(calls).toEqual([
       '/',
       '/health',
+      '/me/usage',
       '/characters?view=admin&limit=10',
       '/characters/mika/lore',
       '/relationship/preview',
@@ -269,6 +327,9 @@ describe('local smoke helpers', () => {
     expect(summary.streamReplyChars).toBe(440)
     expect(summary.streamTokens).toBe(0)
     expect(summary.streamEvents).toBe(3)
+    expect(summary.tokenBalance).toBe(1200)
+    expect(summary.usageDailyDays).toBe(7)
+    expect(summary.walletTransactions).toBe(1)
     expect(errors).toEqual([])
   })
 
@@ -282,6 +343,18 @@ describe('local smoke helpers', () => {
           ok: true,
           checks: { databaseConnected: true, openRouterConfigured: true },
           security: { avatarStorage: 'supabase' },
+        } as never
+      }
+      if (path === '/me/usage') {
+        return {
+          user: { tokenBalance: 1200 },
+          usage: {
+            totalCost: '0.0000',
+            byModel: [],
+            daily: Array.from({ length: 7 }, (_, index) => ({ date: `2026-06-${index + 1}`, tokens: 0 })),
+            estimate: { averageTokensPerRequest: 420, estimatedRemainingRequests: 2 },
+          },
+          wallet: { transactions: [] },
         } as never
       }
       if (path === '/characters?view=admin&limit=10') {

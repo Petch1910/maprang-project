@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest local Wallet/Usage smoke addendum: 2026-06-11 `smoke:local` now verifies `GET /me/usage` before chat/runtime checks. It requires token balance, usage summary, a 7-day usage graph, estimate fields, and wallet transaction array shape. This improves repo-owned local wallet/accounting evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest repo-owned QA addendum after local stream smoke: 2026-06-11 `bun run qa:repo` passed after `smoke:local` gained direct `POST /chat/stream` verification. This confirms the committed local baseline remains green; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest local smoke stream-chat addendum: 2026-06-11 `smoke:local` now verifies `POST /chat/stream` when backend health reports local provider. It requires SSE delta content, a done event with `chatId`, expected local model, a roleplay reply at the configured minimum or 420 chars, and zero provider tokens. This improves repo-owned local streaming/playability evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.

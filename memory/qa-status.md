@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 repo-owned QA pass after local Wallet/Usage smoke guard: `bun run qa:repo` passed after `smoke:local` gained direct `/me/usage` verification and predeploy source locks. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
+
+- 2026-06-11 local Wallet/Usage smoke QA pass: `smoke:local` now checks `GET /me/usage` before chat/runtime work and fails if wallet/accounting shape is missing. It requires token balance, usage cost, usage-by-model array, 7-day daily usage graph, estimate fields, and wallet transactions array shape. Passing evidence: `bun run smoke:local:test` (11 pass / 59 expects), `bun run predeploy:check:test` (3 pass / 1170 expects), `bun run test-plan:audit`, `bun run predeploy:check`, `bun run docs:commands`, and `git diff --check`.
+
 - 2026-06-11 repo-owned QA pass after local stream smoke guard: `bun run qa:repo` passed after `smoke:local` gained direct `/chat/stream` verification and predeploy source locks. The gate covered 67 test files / 35 root test scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget. This keeps local baseline green while production still needs real staging/domain/provider credentials.
 
 - 2026-06-11 local stream chat-runtime QA pass: `smoke:local` now checks local streaming chat directly when backend health reports local runtime. It requires `POST /chat/stream` to produce SSE delta content, a done event with `chatId`, expected local model name, reply length at least `MODEL_MIN_ROLEPLAY_REPLY_CHARS` or 420, and `totalTokens=0`. `predeploy:check` source-locks the stream parser/reader/validator snippets and local summary fields so local smoke cannot drift back to normal-chat-only coverage. Passing evidence: `bun run smoke:local:test` (10 pass / 51 expects) and `bun run predeploy:check:test` (3 pass / 1164 expects).

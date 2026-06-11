@@ -27,6 +27,17 @@ export type HealthPayload = {
 
 export type SmokeCharacter = { id: string; name: string; tags: string[] }
 
+export type LocalUsageSummaryPayload = {
+  user?: { tokenBalance?: number }
+  usage?: {
+    totalCost?: string
+    byModel?: unknown[]
+    daily?: unknown[]
+    estimate?: { averageTokensPerRequest?: number; estimatedRemainingRequests?: number | null }
+  }
+  wallet?: { transactions?: unknown[] }
+}
+
 export type LocalChatSmokePayload = {
   reply?: string
   chatId?: string | null
@@ -92,6 +103,34 @@ export function activeLocalChatModel(health: HealthPayload) {
 
 export function localRoleplayReplyMinimum(health: HealthPayload) {
   return Math.max(420, health.model?.minRoleplayReplyChars ?? 420)
+}
+
+export function validateLocalUsageSummary(payload: LocalUsageSummaryPayload) {
+  if (typeof payload.user?.tokenBalance !== 'number') throw new Error('local wallet QA ยังไม่มี tokenBalance')
+  if (typeof payload.usage?.totalCost !== 'string') throw new Error('local wallet QA ยังไม่มี totalCost')
+  if (!Array.isArray(payload.usage.byModel)) throw new Error('local wallet QA ยังไม่มี usage.byModel')
+  if (!Array.isArray(payload.usage.daily) || payload.usage.daily.length !== 7) {
+    throw new Error('local wallet QA ต้องคืนกราฟ usage 7 วัน')
+  }
+  if (typeof payload.usage.estimate?.averageTokensPerRequest !== 'number') {
+    throw new Error('local wallet QA ยังไม่มี usage estimate')
+  }
+  if (payload.usage.estimate.estimatedRemainingRequests !== null && typeof payload.usage.estimate.estimatedRemainingRequests !== 'number') {
+    throw new Error('local wallet QA estimatedRemainingRequests ต้องเป็นตัวเลขหรือ null')
+  }
+  if (payload.wallet?.transactions !== undefined && !Array.isArray(payload.wallet.transactions)) {
+    throw new Error('local wallet QA รายการกระเป๋าต้องเป็น array')
+  }
+
+  return {
+    tokenBalance: payload.user.tokenBalance,
+    totalCost: payload.usage.totalCost,
+    usageModels: payload.usage.byModel.length,
+    usageDailyDays: payload.usage.daily.length,
+    averageTokensPerRequest: payload.usage.estimate.averageTokensPerRequest,
+    estimatedRemainingRequests: payload.usage.estimate.estimatedRemainingRequests ?? null,
+    walletTransactions: payload.wallet?.transactions?.length ?? 0,
+  }
 }
 
 export function validateLocalChatSmoke(
@@ -189,6 +228,7 @@ export function validateLocalChatStreamSmoke(
 export function buildLocalSmokeSummary(input: {
   apiBaseUrl: string
   health: HealthPayload
+  usage: ReturnType<typeof validateLocalUsageSummary>
   smokeCharacter: SmokeCharacter
   loreCount: number
   previewTurns: number
@@ -202,6 +242,11 @@ export function buildLocalSmokeSummary(input: {
     databaseConnected: input.health.checks.databaseConnected,
     openRouterConfigured: input.health.checks.openRouterConfigured,
     avatarStorage: input.health.security.avatarStorage,
+    tokenBalance: input.usage.tokenBalance,
+    usageTotalCost: input.usage.totalCost,
+    usageDailyDays: input.usage.usageDailyDays,
+    usageModels: input.usage.usageModels,
+    walletTransactions: input.usage.walletTransactions,
     character: input.smokeCharacter.name,
     tags: input.smokeCharacter.tags,
     loreCount: input.loreCount,
@@ -247,6 +292,12 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
     if (!health.ok || !health.checks.databaseConnected) {
       throw new Error('ตรวจสุขภาพระบบหลังบ้านไม่ผ่าน')
     }
+
+    const usage = validateLocalUsageSummary(
+      await jsonReader<LocalUsageSummaryPayload>('/me/usage', {
+        headers: authHeaders(),
+      }),
+    )
 
     const characters = await jsonReader<{
       characters?: SmokeCharacter[]
@@ -325,6 +376,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
         buildLocalSmokeSummary({
           apiBaseUrl: currentApiBaseUrl,
           health,
+          usage,
           smokeCharacter,
           loreCount: lore.loreEntries?.length ?? 0,
           previewTurns: preview.preview.turns.length,

@@ -31,6 +31,7 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
+- 2026-06-11: `smoke:local` now verifies local Wallet/Usage readiness through `GET /me/usage` before chat checks. It requires token balance, total cost, usage-by-model, 7-day usage graph, estimate fields, and wallet transactions array shape; predeploy source-locks the helper and summary fields.
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after local stream-chat smoke was added to `smoke:local`. Repo-owned local baseline is green; production blockers remain external deployed HTTPS origins, production CORS/domain, production/staging DB smoke, signed Supabase `avatars`, live chat smoke, and live image smoke.
 - 2026-06-11: `smoke:local` now also checks local stream chat when `/health` reports local runtime. It posts to `/chat/stream`, requires SSE delta content, a done event with `chatId`, roleplay reply length at the configured minimum or 420 chars, expected local model name, and `totalTokens=0`; predeploy source-locks the stream parser/reader/validator and stream summary fields.
 - 2026-06-11: `smoke:local` now checks local chat runtime directly when `/health` reports local runtime. It posts to `/chat`, requires `chatId`, roleplay reply length at the configured minimum or 420 chars, expected local model name, and `totalTokens=0`; predeploy source-locks this guard.
