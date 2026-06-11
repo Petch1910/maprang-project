@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  backendEnvAdminApiKey,
   backendEnvPort,
   buildSmokeAuthHeaders,
   deployedSmokeTargetIssues,
@@ -10,6 +11,7 @@ import {
   formatUnknownDiagnosticText,
   formatPayload,
   smokeApiBaseUrl,
+  smokeAdminApiKey,
   smokeTargetIssuesForDeployedGate,
   smokeTargetIsLocal,
   tryParseJson,
@@ -23,7 +25,7 @@ describe('smoke helpers', () => {
     expect(smokeTargetIsLocal(smokeApiBaseUrl(env, ''))).toBe(true)
     expect(smokeTargetIsLocal('http://0.0.0.0:3000')).toBe(true)
     expect(smokeTargetIsLocal('http://[::1]:3000/health')).toBe(true)
-    expect(buildSmokeAuthHeaders(env)).toEqual({ 'x-user-id': 'dev-user' })
+    expect(buildSmokeAuthHeaders(env, true, '')).toEqual({ 'x-user-id': 'dev-user' })
   })
 
   test('resolves local backend port from backend env when SMOKE_API_BASE_URL is omitted', () => {
@@ -32,6 +34,34 @@ describe('smoke helpers', () => {
     expect(backendEnvPort(backendEnv)).toBe('3001')
     expect(smokeApiBaseUrl({}, backendEnv)).toBe('http://127.0.0.1:3001')
     expect(smokeApiBaseUrl({ SMOKE_API_BASE_URL: 'https://api.example.com' }, backendEnv)).toBe('https://api.example.com')
+  })
+
+  test('resolves local admin smoke key from backend env only for loopback targets', () => {
+    const backendEnv = [
+      'DATABASE_URL=postgresql://example',
+      'ADMIN_API_KEY="backend-local-admin-key"',
+      'PORT=3001',
+    ].join('\n')
+
+    expect(backendEnvAdminApiKey(backendEnv)).toBe('backend-local-admin-key')
+    expect(smokeAdminApiKey({}, true, backendEnv)).toBe('backend-local-admin-key')
+    expect(smokeAdminApiKey({}, false, backendEnv)).toBe('')
+    expect(buildSmokeAuthHeaders({}, true, backendEnv)).toEqual({
+      'x-user-id': 'dev-user',
+      'x-admin-key': 'backend-local-admin-key',
+    })
+    expect(buildSmokeAuthHeaders({ SMOKE_API_BASE_URL: 'https://api.example.com' }, false, backendEnv)).toEqual({})
+  })
+
+  test('prefers explicit smoke admin key over backend env', () => {
+    const backendEnv = "ADMIN_API_KEY='backend-local-admin-key'\n"
+
+    expect(smokeAdminApiKey({ SMOKE_ADMIN_API_KEY: ' "explicit-admin-key" ' }, true, backendEnv)).toBe(
+      'explicit-admin-key',
+    )
+    expect(buildSmokeAuthHeaders({ SMOKE_ADMIN_API_KEY: 'explicit-admin-key' }, true, backendEnv)['x-admin-key']).toBe(
+      'explicit-admin-key',
+    )
   })
 
   test('does not impersonate a user by default against deployed targets', () => {

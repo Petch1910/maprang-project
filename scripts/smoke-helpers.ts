@@ -39,6 +39,17 @@ export function backendEnvPort(envText: string) {
   return ''
 }
 
+export function backendEnvAdminApiKey(envText: string) {
+  for (const rawLine of envText.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line || line.startsWith('#')) continue
+    const match = line.match(/^(?:export\s+)?ADMIN_API_KEY\s*=\s*(.+)$/)
+    if (!match?.[1]) continue
+    return unquoteEnvValue(match[1])
+  }
+  return ''
+}
+
 function readBackendEnvText() {
   try {
     return readFileSync(backendEnvPath, 'utf8')
@@ -99,11 +110,26 @@ export function smokeTargetIssuesForDeployedGate(baseUrl: string, localTarget: b
 export const apiBaseUrl = smokeApiBaseUrl()
 export const isLocalSmokeTarget = smokeTargetIsLocal(apiBaseUrl)
 
-export function buildSmokeAuthHeaders(env: SmokeEnv = process.env, localTarget = smokeTargetIsLocal(smokeApiBaseUrl(env))) {
+export function smokeAdminApiKey(
+  env: SmokeEnv = process.env,
+  localTarget = smokeTargetIsLocal(smokeApiBaseUrl(env)),
+  backendEnvText = readBackendEnvText(),
+) {
+  const explicitAdminKey = env.SMOKE_ADMIN_API_KEY?.trim()
+  if (explicitAdminKey) return unquoteEnvValue(explicitAdminKey)
+  if (!localTarget) return ''
+  return backendEnvAdminApiKey(backendEnvText)
+}
+
+export function buildSmokeAuthHeaders(
+  env: SmokeEnv = process.env,
+  localTarget = smokeTargetIsLocal(smokeApiBaseUrl(env)),
+  backendEnvText = readBackendEnvText(),
+) {
   const headers: Record<string, string> = {}
   const userId = env.SMOKE_USER_ID ?? (localTarget ? 'dev-user' : '')
   const accessToken = env.SMOKE_ACCESS_TOKEN
-  const adminKey = env.SMOKE_ADMIN_API_KEY
+  const adminKey = smokeAdminApiKey(env, localTarget, backendEnvText)
 
   if (userId) headers['x-user-id'] = userId
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`

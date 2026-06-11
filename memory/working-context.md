@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Local smoke admin-key inference is now closed. Shared smoke helpers can read `ADMIN_API_KEY` from the untracked `apps/backend/.env` only when the smoke target is loopback/local, while explicit `SMOKE_ADMIN_API_KEY` still wins and deployed targets never reuse the local backend key. `bun run qa:local` passed afterward with `moderationReports=5`, `moderationAuditLogs=5`, and `moderationSkippedReason=null`, so local moderation/admin-audit runtime coverage is no longer skipped on this machine. This does not clear external staging/production blockers because deployed smoke must still pass with a real `SMOKE_ADMIN_API_KEY` secret.
+
 - 2026-06-12: Full local runtime gate passed after the no-demo data cleanup checkpoints. `bun run qa:local` reseeded QA data, smoke doctor connected to backend `http://127.0.0.1:3001`, verified DB connected, local/mock-roleplay chat runtime, wallet/profile/persona, Creator AI draft fallback image, Creator preview, normal and stream chat, saved chat message window, world state, upload, API smoke, backend tests, frontend build, and bundle budget. Production blockers remain external: deployed HTTPS origins, production CORS/domain, Supabase signed `avatars`, live chat smoke, and live image provider.
 
 - 2026-06-12: Route/Menu Audit no longer treats QA seed/demo data as normal product output for Wallet and Moderation. `/wallet` now documents real backend token/transaction data plus an explicit no-data empty state, `/moderation` now documents real report/audit-log queues plus instructions to create a report from chat for testing, and `route-menu-doc-check` forbids stale `มีข้อมูลทดสอบ QA` / `รายงานจำลองให้เช็ค` wording. Focused route/static/docs checks passed.
