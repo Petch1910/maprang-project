@@ -355,6 +355,7 @@ const defaultForbiddenSnippets = [
   'horizontal overflow',
   'handler ว่าง',
   'ข้อความ placeholder',
+  'การ์ดตัวอย่างกันหน้าว่าง',
   'text encoding',
   'mojibake',
 ]

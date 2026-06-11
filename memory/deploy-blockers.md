@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest Explore no-demo route/menu addendum: 2026-06-12 `/` route/menu documentation now matches the real Explore empty state: no real characters means a create-character CTA, not demo/sample character cards. `route-menu-doc-check` rejects stale `การ์ดตัวอย่างกันหน้าว่าง` wording. This improves repo-owned product/design consistency; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest smoke/deploy local-port addendum: 2026-06-12 shared smoke helpers now read `PORT` from `apps/backend/.env` when `SMOKE_API_BASE_URL` is omitted. This clears a repo-owned local operator gap where `deploy:status` could falsely report backend-down at `127.0.0.1:3000` while the actual local backend was healthy on `3001`; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest full-local reseed addendum: 2026-06-12 `qa:full` now runs `qa:seed` after `e2e:smoke`, and `predeploy:check` source-locks that order because browser smoke clears QA seed data at the end. This clears a repo-owned local usability gap where a successful full QA run could leave the local app empty; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.

@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Explore Route/Menu Audit no longer describes demo/sample cards as the empty-state fallback. `ROUTE_MENU_AUDIT.md` now matches the actual Explore implementation: when there are no real published characters, the page shows an empty state with a create-character CTA instead of sample character cards. `route-menu-doc-check` now forbids the stale phrase `การ์ดตัวอย่างกันหน้าว่าง` so the route/menu contract cannot drift back toward demo data.
+
 - 2026-06-12: Smoke/deploy CLIs now infer the local backend port from `apps/backend/.env` when `SMOKE_API_BASE_URL` is omitted. `smokeApiBaseUrl` reads `PORT` like browser e2e already did, so `deploy:status`, `smoke:doctor`, `smoke:local`, and `api:smoke` no longer default to `127.0.0.1:3000` when the running local backend uses `PORT=3001`. Verified `bun run smoke:helpers:test` and `bun run deploy:status -- --json`, which returned `apiBaseUrl=http://127.0.0.1:3001` and real staging/production blockers instead of a false backend-down error.
 
 - 2026-06-12: Full local QA now restores QA seed data after browser smoke. `qa:full` runs `qa:local && e2e:smoke && qa:seed`, and `predeploy:check` source-locks that `qa:seed` stays after `e2e:smoke` because Playwright clears seed data at the end. Verified full `bun run qa:full` against local backend/frontend passed, then `GET /characters` still returned 3 QA characters, so the local app stays populated and playable after a full verification run instead of leaving Explore/Chats empty.
