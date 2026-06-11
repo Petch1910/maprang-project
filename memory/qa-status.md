@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 admin-key smoke inference source-lock QA pass: `predeploy:check` now locks the helper/test snippets that keep local-only backend `.env` admin-key inference in smoke helpers. `docs/MAPRANG_TEST_PLAN.md` now matches the runtime contract for local moderation/admin-audit smoke. Passing evidence: `bun run predeploy:check:test` (3 pass / 1237 expects), `bun run predeploy:check`, `bun run test-plan:audit`, and `bun run docs:commands`.
+
 - 2026-06-12 local admin-key smoke inference QA pass: shared smoke helpers now use `SMOKE_ADMIN_API_KEY` first, then fall back to the untracked backend `.env` `ADMIN_API_KEY` only for loopback smoke targets. Deployed smoke targets never reuse the local backend key. Passing evidence: `bun test scripts/smoke-helpers.test.ts` (13 pass / 50 expects), `bun run smoke:local:test` (18 pass / 125 expects), `bun run predeploy:check`, `bun run qa:repo`, and full `bun run qa:local`, whose runtime summary showed `moderationReports=5`, `moderationAuditLogs=5`, and `moderationSkippedReason=null`.
 
 - 2026-06-12 Local playable runtime QA pass after no-demo cleanup: `bun run qa:local` passed end-to-end. Evidence included QA seed restored, smoke doctor green on `http://127.0.0.1:3001`, DB connected, API route audit 58/34, local normal chat reply 1085 chars, stream reply 1039 chars, pending scene event, relationship status `SOULMATE`, saved chat/message-window checks, world-state round trip, wallet/profile/persona checks, Creator AI draft fallback image, Creator preview, upload, API smoke live-provider skips only, backend 271 pass / 1223 expects, frontend build, and bundle budget green.

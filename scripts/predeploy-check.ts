@@ -2028,6 +2028,28 @@ const checks: Check[] = [
         'scripts/local-smoke.test.ts',
       )
       requireIncludes(
+        await readRepoFile('scripts/smoke-helpers.ts'),
+        [
+          'backendEnvAdminApiKey',
+          'smokeAdminApiKey',
+          'env.SMOKE_ADMIN_API_KEY?.trim()',
+          'if (!localTarget) return',
+          'return backendEnvAdminApiKey(backendEnvText)',
+        ],
+        'scripts/smoke-helpers.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/smoke-helpers.test.ts'),
+        [
+          'resolves local admin smoke key from backend env only for loopback targets',
+          'prefers explicit smoke admin key over backend env',
+          'backendEnvAdminApiKey(backendEnv)',
+          'smokeAdminApiKey({}, false, backendEnv)',
+          "SMOKE_API_BASE_URL: 'https://api.example.com'",
+        ],
+        'scripts/smoke-helpers.test.ts',
+      )
+      requireIncludes(
         await readRepoFile('scripts/local-smoke.ts'),
         [
           'validateBackendRootIdentity',
