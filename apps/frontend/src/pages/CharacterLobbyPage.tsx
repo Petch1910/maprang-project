@@ -79,7 +79,8 @@ function contractSeedsFromPresets(presets: RelationshipPreset[]) {
 
 export function CharacterLobbyPage() {
   const dispatch = useAppDispatch()
-  const { characterId } = useParams()
+  const params = useParams<{ id?: string; characterId?: string }>()
+  const characterId = params.characterId ?? params.id
   const characters = useAppSelector(selectExploreCharacters)
   const content = useAppSelector(selectContentSettings)
   const [contractSeeds, setContractSeeds] = useState<RelationshipContractSeed[]>(fallbackRelationshipSeeds)

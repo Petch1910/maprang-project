@@ -27,9 +27,10 @@ function timeAgo(date: Date | string): string {
 export function ChatHistoryList({ chats, activeChat, onSelectChat, onNewChat }: ChatHistoryListProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredChats = chats.filter((chat) =>
-    chat.character.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredChats = chats.filter((chat) => {
+    const characterName = chat.character?.name ?? chat.characterName ?? chat.title
+    return characterName.toLowerCase().includes(searchQuery.toLowerCase())
+  })
 
   return (
     <div className="flex h-full flex-col">
@@ -76,6 +77,11 @@ export function ChatHistoryList({ chats, activeChat, onSelectChat, onNewChat }: 
         ) : (
           <div className="space-y-1">
             {filteredChats.map((chat) => (
+              (() => {
+                const characterName = chat.character?.name ?? chat.characterName ?? 'ตัวละคร'
+                const avatarUrl = chat.character?.avatarUrl || '/placeholder-avatar.png'
+                const lastActiveAt = chat.lastMessageAt ?? chat.updatedAt ?? chat.createdAt ?? new Date().toISOString()
+                return (
               <button
                 type="button"
                 key={chat.id}
@@ -99,8 +105,8 @@ export function ChatHistoryList({ chats, activeChat, onSelectChat, onNewChat }: 
                   {/* Avatar */}
                   <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-slate-700">
                     <img
-                      src={chat.character.avatarUrl || '/placeholder-avatar.png'}
-                      alt={chat.character.name}
+                      src={avatarUrl}
+                      alt={characterName}
                       className="h-full w-full object-cover"
                     />
                   </div>
@@ -109,10 +115,10 @@ export function ChatHistoryList({ chats, activeChat, onSelectChat, onNewChat }: 
                   <div className="flex-1 overflow-hidden">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="truncate font-medium text-slate-100">
-                        {chat.character.name}
+                        {characterName}
                       </h3>
                       <span className="flex-shrink-0 text-xs text-slate-400">
-                        {timeAgo(chat.lastMessageAt || chat.createdAt)}
+                        {timeAgo(lastActiveAt)}
                       </span>
                     </div>
 
@@ -142,6 +148,8 @@ export function ChatHistoryList({ chats, activeChat, onSelectChat, onNewChat }: 
                   </div>
                 )}
               </button>
+                )
+              })()
             ))}
           </div>
         )}

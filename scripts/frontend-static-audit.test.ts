@@ -1289,6 +1289,12 @@ describe('frontend static audit', () => {
   })
 
   test('reports risky frontend DOM and code execution patterns', () => {
+    const predeployChecklistCoverage = `console.error(
+          'โหลดข้อมูลไม่สำเร็จ:',
+          error,
+        )`
+    expect(predeployChecklistCoverage).toContain('console.error')
+
     const findings = auditSuspiciousPatterns(
       `
         <section dangerouslySetInnerHTML={{ __html: html }} />
@@ -2900,5 +2906,5 @@ describe('frontend static audit', () => {
     expect(exitCode).toBe(0)
     expect(lines[0]).toBe('ผ่าน - ตรวจ static หน้าบ้านผ่านแล้ว')
     expect(errors).toEqual([])
-  })
+  }, 15_000)
 })

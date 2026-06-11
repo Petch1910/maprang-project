@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Eye, Star } from 'lucide-react'
+import { Heart, MessageCircle, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import type { Character } from '../../lib/api'
 import { characterRating } from '../../lib/contentRating'

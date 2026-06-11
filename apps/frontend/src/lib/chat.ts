@@ -21,6 +21,8 @@ export const fallbackCharacter: Character = {
   promptVersion: 1,
   tags: ['thai', 'assistant', 'friendly'],
   chatCount: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 }
 
 export function createGreeting(character: Character): ChatMessage {

@@ -1,17 +1,13 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import {
-  Activity,
   Bell,
   Coins,
   Compass,
-  FileSearch,
-  FlaskConical,
   MessageCircle,
   Moon,
   PlusCircle,
   SearchX,
-  ShieldCheck,
   Sun,
   UserRound,
   Menu,
@@ -26,19 +22,19 @@ import { loadWalletSummary, selectTokenBalance, selectWalletLoading } from './st
 import { loadPersonaDraft } from './store/slices/draftsSlice'
 import { safeGetStorageItem, safeSetStorageItem } from './lib/safeStorage'
 
-const loadCreatorStudioPage = () => import('./pages/CreatorStudioPageNew').then((module) => ({ default: module.CreatorStudioPage }))
-const loadChatRoomPage = () => import('./pages/ChatRoomPageNew').then((module) => ({ default: module.ChatRoomPageNew }))
-const loadEventsInboxPage = () => import('./pages/EventsInboxPageNew').then((module) => ({ default: module.EventsInboxPage }))
-const loadMyChatsPage = () => import('./pages/MyChatsPageNew').then((module) => ({ default: module.MyChatsPage }))
+const loadCreatorStudioPage = () => import('./pages/CreatorStudioPage').then((module) => ({ default: module.CreatorStudioPage }))
+const loadChatRoomPage = () => import('./pages/WorkspacePage').then((module) => ({ default: module.WorkspacePage }))
+const loadEventsInboxPage = () => import('./pages/EventsInboxPage').then((module) => ({ default: module.EventsInboxPage }))
+const loadMyChatsPage = () => import('./pages/MyChatsPage').then((module) => ({ default: module.MyChatsPage }))
 const loadAdminModerationPage = () => import('./pages/AdminModerationPage').then((module) => ({ default: module.AdminModerationPage }))
 const loadAdminHealthPage = () => import('./pages/AdminHealthPage').then((module) => ({ default: module.AdminHealthPage }))
 const loadAdminPromptInspectorPage = () =>
   import('./pages/AdminPromptInspectorPage').then((module) => ({ default: module.AdminPromptInspectorPage }))
 const loadAdminEvalsPage = () => import('./pages/AdminEvalsPage').then((module) => ({ default: module.AdminEvalsPage }))
-const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPageNew').then((module) => ({ default: module.CharacterLobbyPage }))
-const loadExplorePage = () => import('./pages/ExplorePageNew').then((module) => ({ default: module.ExplorePage }))
-const loadProfilePage = () => import('./pages/ProfilePageNew').then((module) => ({ default: module.ProfilePage }))
-const loadWalletPage = () => import('./pages/WalletPageNew').then((module) => ({ default: module.WalletPageNew }))
+const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPage').then((module) => ({ default: module.CharacterLobbyPage }))
+const loadExplorePage = () => import('./pages/ExplorePage').then((module) => ({ default: module.ExplorePage }))
+const loadProfilePage = () => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage }))
+const loadWalletPage = () => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage }))
 
 const CreatorStudioPage = lazy(loadCreatorStudioPage)
 const ChatRoomPage = lazy(loadChatRoomPage)
@@ -60,13 +56,6 @@ const primaryNavItems = [
   { to: '/profile', label: 'โปรไฟล์', icon: UserRound },
 ]
 
-const adminNavItems = [
-  { to: '/moderation', label: 'ดูแลรายงาน', icon: ShieldCheck },
-  { to: '/admin/health', label: 'ตรวจระบบ', icon: Activity },
-  { to: '/admin/prompt-inspector', label: 'ตรวจพรอมป์', icon: FileSearch },
-  { to: '/admin/evals', label: 'ทดสอบคุณภาพ', icon: FlaskConical },
-]
-
 const routePreloads: Record<string, () => Promise<unknown>> = {
   '/': loadExplorePage,
   '/chats': loadMyChatsPage,
@@ -75,6 +64,9 @@ const routePreloads: Record<string, () => Promise<unknown>> = {
   '/wallet': loadWalletPage,
   '/events': loadEventsInboxPage,
   '/moderation': loadAdminModerationPage,
+  '/admin/health': loadAdminHealthPage,
+  '/admin/prompt-inspector': loadAdminPromptInspectorPage,
+  '/admin/evals': loadAdminEvalsPage,
 }
 
 function NotFoundPage() {
@@ -154,7 +146,8 @@ function App() {
       <Routes>
         <Route element={<ExplorePage />} path="/" />
         <Route element={<MyChatsPage />} path="/chats" />
-        <Route element={<ChatRoomPage />} path="/chat/:id" />
+        <Route element={<ChatRoomPage />} path="/chat" />
+        <Route element={<ChatRoomPage />} path="/chat/:chatId" />
         <Route element={<CreatorStudioPage />} path="/create" />
         <Route element={<ProfilePage />} path="/profile" />
         <Route element={<WalletPage />} path="/wallet" />
@@ -309,16 +302,20 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="min-h-[calc(100vh-4rem)]">{appRoutes}</main>
+      <main className="min-h-[calc(100vh-4rem)] pb-20 md:pb-0">{appRoutes}</main>
 
       {/* Bottom Tab Navigation (Mobile Only) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-900/98 backdrop-blur-xl md:hidden">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-900/98 backdrop-blur-xl md:hidden"
+        data-testid="app-mobile-nav"
+      >
         <div className="flex items-center justify-around px-2 py-2">
           {primaryNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === '/'}
+              data-testid={`app-mobile-nav-${item.to === '/' ? 'home' : item.to.slice(1)}`}
               onTouchStart={() => preloadRoute(item.to)}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-xs font-bold transition ${

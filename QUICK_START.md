@@ -1,66 +1,33 @@
-# 🎯 QUICK START - ทำตามนี้เลย!
+# Quick Start
 
-## ✅ วิธีรันแบบง่ายสุด (5 นาที)
+Use [RUN_NOW.md](RUN_NOW.md) for the canonical quick local path.
 
----
+Short version:
 
-## 📋 ก่อนเริ่ม ต้องมี:
-- ✅ Bun installed (`bun --version`)
-- ✅ Git cloned โปรเจกต์แล้ว
-- ✅ เปิด 2 Terminal tabs
-
----
-
-## 🚀 ครั้งแรก (Setup):
-
-### 1. Backend Setup
-```bash
+```powershell
+docker compose up -d
 cd apps/backend
-bun install
 bunx prisma generate
-bunx prisma migrate dev
-```
-กด Enter เมื่อถามชื่อ migration
-
-### 2. Frontend Setup  
-```bash
-cd apps/frontend
-bun install
-```
-
----
-
-## ▶️ รันโปรเจกต์:
-
-### Terminal 1 - Backend
-```bash
-cd apps/backend
+bunx prisma migrate deploy
+bun prisma/seed.ts
 bun run dev
 ```
-รอจนเห็น: **"Server listening on port 3001"** ✅
 
-### Terminal 2 - Frontend
-```bash
+In another terminal:
+
+```powershell
 cd apps/frontend
 bun run dev
 ```
-เห็น: **"Local: http://localhost:5173"** ✅
 
-### เปิดเบราว์เซอร์
-**http://localhost:5173** ✅
+Open `http://127.0.0.1:5173`.
 
----
+If your backend `.env` uses a non-default port such as `3001`, set `VITE_API_BASE_URL` in `apps/frontend/.env` to the same backend URL and restart the frontend.
 
-## ✅ ตรวจสอบ:
-```bash
-curl http://localhost:3001/api/health
+Verify from the repo root:
+
+```powershell
+bun run smoke:doctor
+bun run smoke:local
+bun run e2e:smoke
 ```
-ได้: `{"status":"ok"}` = Backend รันแล้ว! ✅
-
----
-
-## 🎉 เสร็จแล้ว!
-
-**ครั้งถัดไป:** แค่รัน Terminal 1 + 2 ใหม่ (ไม่ต้อง setup)
-
-**มีปัญหา?** อ่าน HOW_TO_RUN.md

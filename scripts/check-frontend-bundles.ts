@@ -31,7 +31,7 @@ export function formatKb(bytes: number) {
 
 export function evaluateFrontendBundleBudgets(sizes: BundleSize[], budget: BundleBudget = budgets) {
   const mainIndex = sizes.find((item) => /^index-[\w-]+\.js$/.test(item.file))
-  const chatRoom = sizes.find((item) => /^ChatRoomPage-[\w-]+\.js$/.test(item.file))
+  const chatRoom = sizes.find((item) => /^(?:ChatRoomPage|WorkspacePage)-[\w-]+\.js$/.test(item.file))
   const oversized = sizes.filter((item) => kb(item.bytes) > budget.anyChunkKb)
   const failures: string[] = []
 
@@ -42,9 +42,9 @@ export function evaluateFrontendBundleBudgets(sizes: BundleSize[], budget: Bundl
   }
 
   if (!chatRoom) {
-    failures.push('ไม่พบ chunk หน้า ChatRoomPage; โค้ด chat/workspace อาจถูกรวมเข้า bundle หลัก')
+    failures.push('ไม่พบ chunk หน้าแชท (ChatRoomPage/WorkspacePage); โค้ด chat/workspace อาจถูกรวมเข้า bundle หลัก')
   } else if (kb(chatRoom.bytes) > budget.chatRoomKb) {
-    failures.push(`chunk หน้า ChatRoomPage มีขนาด ${formatKb(chatRoom.bytes)}, ต้องไม่เกิน ${budget.chatRoomKb}KB`)
+    failures.push(`chunk หน้าแชทมีขนาด ${formatKb(chatRoom.bytes)}, ต้องไม่เกิน ${budget.chatRoomKb}KB`)
   }
 
   if (oversized.length > 0) {

@@ -1,132 +1,58 @@
-# ⚡ QUICK FIX - Character Loading Issue
+# Quick Fix Guide
 
-## ปัญหา: "โหลดรายการตัวละครไม่ได้"
+Use this file for current repo fixes only. The supported baseline is PostgreSQL + Prisma + Bun.
 
----
+## Backend Not Reachable
 
-## ✅ Solution (ทำตามลำดับ)
+1. Start PostgreSQL:
 
-### 1️⃣ สร้างไฟล์ .env สำหรับ Backend
+```powershell
+docker compose up -d
+```
 
-```bash
+2. Start backend:
+
+```powershell
 cd apps/backend
-```
-
-สร้างไฟล์ `.env` ด้วยเนื้อหานี้:
-```env
-DATABASE_URL="file:./dev.db"
-PORT=3001
-NODE_ENV=development
-```
-
-### 2️⃣ สร้างไฟล์ .env สำหรับ Frontend
-
-```bash
-cd apps/frontend
-```
-
-สร้างไฟล์ `.env` ด้วยเนื้อหานี้:
-```env
-VITE_API_URL=http://localhost:3001
-```
-
-### 3️⃣ Setup Database
-
-```bash
-cd apps/backend
-bun install
 bunx prisma generate
-bunx prisma migrate dev
-```
-
-กด Enter เมื่อถามชื่อ migration
-
-### 4️⃣ Start Backend (Terminal 1)
-
-```bash
-cd apps/backend
+bunx prisma migrate deploy
 bun run dev
 ```
 
-**ต้องเห็นข้อความนี้:**
-```
-✓ Database connected
-✓ Server listening on port 3001
-```
+3. If backend uses a non-default port, set the same URL in frontend:
 
-### 5️⃣ Start Frontend (Terminal 2)
-
-```bash
-cd apps/frontend
-bun run dev
+```env
+VITE_API_BASE_URL=http://127.0.0.1:3001
 ```
 
-**ต้องเห็นข้อความนี้:**
-```
-Local: http://localhost:5173
-```
+Restart the frontend after changing env files.
 
-### 6️⃣ เปิดเบราว์เซอร์
+## Frontend Route Or Menu Feels Broken
 
-ไปที่: http://localhost:5173 (ไม่ใช่ 5174)
+Run the static gates from repo root:
 
----
-
-## 🔍 ตรวจสอบว่า Backend รันอยู่
-
-```bash
-curl http://localhost:3001/api/health
+```powershell
+bun run frontend:static:audit
+bun run frontend:route:audit
+bun run route-menu:audit
+bun run e2e:smoke
 ```
 
-**ต้องได้:**
-```json
-{"status":"ok"}
+## API Contract Drift
+
+Run:
+
+```powershell
+bun run api:audit
+bun run api:smoke
 ```
 
----
+If `api:audit` fails, fix `apps/frontend/src/lib/api.ts` or the backend route declarations so they match.
 
-## ❌ ถ้ายังไม่ได้
+## Full Local Confidence
 
-### Problem: "ECONNREFUSED"
-**Fix:** Backend ยังไม่รัน → ทำข้อ 4️⃣
-
-### Problem: "Database not found"
-**Fix:** ทำข้อ 3️⃣ ใหม่
-
-### Problem: Port 3001 in use
-**Fix:** ปิดโปรแกรมที่ใช้ port 3001
-
-```bash
-# Windows
-netstat -ano | findstr :3001
-taskkill /PID <PID> /F
-
-# หรือเปลี่ยน port ใน .env
-PORT=3002
+```powershell
+bun run qa:full
 ```
 
----
-
-## 📋 Checklist
-
-- [ ] สร้าง apps/backend/.env แล้ว
-- [ ] สร้าง apps/frontend/.env แล้ว
-- [ ] Run `bunx prisma migrate dev` แล้ว
-- [ ] Backend รันอยู่ (Terminal 1)
-- [ ] Frontend รันอยู่ (Terminal 2)
-- [ ] curl health endpoint ได้
-- [ ] เปิด http://localhost:5173
-
----
-
-## 🎯 Expected Result
-
-เมื่อทำครบทุกขั้นตอน:
-- ✅ Backend รันที่ port 3001
-- ✅ Frontend รันที่ port 5173
-- ✅ Characters โหลดได้
-- ✅ ทุกอย่างทำงาน
-
----
-
-**หากยังมีปัญหา แจ้งข้อความ error ที่เห็นมาได้เลยค่ะ!** 🔧
+If a blocker requires real domains, Supabase, production DB, or live providers, record it as a staging/production blocker instead of treating local mock mode as proof.

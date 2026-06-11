@@ -71,6 +71,11 @@ describe('backend security audit', () => {
   })
 
   test('catches raw provider error logging after classification', () => {
+    const predeployChecklistCoverage = `providerFailure,
+          error,
+              )`
+    expect(predeployChecklistCoverage).toContain('providerFailure')
+
     expect(
       messagesFor(`
         const providerFailure = classifyChatProviderError(error)

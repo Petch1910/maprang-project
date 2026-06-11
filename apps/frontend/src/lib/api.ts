@@ -47,7 +47,7 @@ async function readErrorPayload(response: Response) {
     .catch(() => null)
 }
 
-async function readApiJson<T>(path: string, response: Response): Promise<T> {
+export async function readApiJson<T>(path: string, response: Response): Promise<T> {
   try {
     return (await response.json()) as T
   } catch {
@@ -134,22 +134,24 @@ export type ChatRole = 'user' | 'assistant' | 'system'
 
 export type ChatMessage = {
   id: string
+  chatId?: string
   role: ChatRole
   content: string
+  createdAt?: string | Date
 }
 
 export type Character = {
   id: string
   name: string
-  avatarUrl: string | null
+  avatarUrl?: string | null
   tagline: string | null
-  description: string | null
-  biography: string | null
-  scenario: string | null
-  systemPrompt: string
-  compactPrompt: string | null
-  characterAnchor: string | null
-  constraints: string | null
+  description?: string | null
+  biography?: string | null
+  scenario?: string | null
+  systemPrompt?: string
+  compactPrompt?: string | null
+  characterAnchor?: string | null
+  constraints?: string | null
   greeting: string | null
   status?: 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'REJECTED' | 'ARCHIVED'
   visibility?: 'PUBLIC' | 'UNLISTED' | 'PRIVATE'
@@ -163,19 +165,42 @@ export type Character = {
   viewCount?: number
   favoriteCount?: number
   isFavorite?: boolean
+  createdAt: string | Date
+  updatedAt: string | Date
+  creatorId?: string
+  persona?: string | null
   tags: string[]
-    chatCount: number
-    contentRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
-  }
+  chatCount: number
+  contentRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
+}
 
 export type ChatSummary = {
   id: string
   title: string
   characterId: string
   characterName: string
+  character?: Character
   lastMessageAt: string
+  createdAt?: string
+  updatedAt?: string
   preview: string
+  lastMessage?: {
+    role: ChatRole
+    content: string
+    createdAt?: string
+  } | null
   isArchived?: boolean
+  archivedAt?: string | null
+  messageCount?: number
+  unreadCount?: number
+  relationship?: {
+    current?: string
+    status?: string
+    tier?: string
+    affinity?: number
+    trust?: number
+    intimacy?: number
+  } | null
   sceneState?: ChatRuntimeState['sceneState'] | null
   relationshipState?: ChatRuntimeState['relationshipState'] | null
 }
@@ -617,7 +642,7 @@ export function apiStreamConnectTimeoutMs() {
   return 60_000
 }
 
-async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+export async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const timeoutMs = apiRequestTimeoutMs(path, init)
   const controller = init?.signal ? null : new AbortController()
   const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null

@@ -1,74 +1,30 @@
-# 🎉 PROJECT 100% COMPLETE - FINAL STATUS
+# Current Status
 
-## ✅ Everything is Ready!
+Maprang AI is locally playable and the repo-owned QA gates are green for the current baseline.
 
----
+This does not mean production is complete. Staging and production still require real external infrastructure and live-provider smoke evidence.
 
-## 📦 What's Been Done:
+## Local Ready
 
-### 1. Complete UI Redesign ✅
-- 8/8 pages modernized
-- Zero QA warnings
-- Production ready
+- Frontend routes and menu surfaces are audited.
+- Backend route contract is audited against frontend API helpers.
+- Local/mock roleplay mode supports local chat testing without a live provider.
+- Browser smoke covers the core desktop and mobile flows.
+- PostgreSQL + Prisma is the database baseline.
 
-### 2. Files Created ✅
-- ✅ `apps/backend/.env` (DATABASE_URL, PORT)
-- ✅ `apps/frontend/.env` (VITE_API_URL)
-- ✅ All documentation files
+## Still Required Before Production
 
-### 3. Documentation ✅
-- START_HERE.md - คำแนะนำเริ่มต้น
-- QUICK_FIX_GUIDE.md - แก้ปัญหา
-- DEPLOYMENT_GUIDE.md - Deploy production
-- ENV_SETUP_GUIDE.md - Setup environment
+- Deployed HTTPS backend URL.
+- Deployed HTTPS frontend URL.
+- Real `CORS_ORIGINS` for the deployed frontend.
+- Production or staging PostgreSQL database migration and smoke evidence.
+- Supabase project with private `avatars` bucket and signed URL checks.
+- Live chat provider smoke.
+- Live image provider smoke.
 
----
+## Source Of Truth
 
-## 🚀 HOW TO RUN (3 Steps):
-
-### Step 1: Setup Database (ทำครั้งเดียว)
-```bash
-cd apps/backend
-bun install
-bunx prisma generate
-bunx prisma migrate dev
-```
-
-### Step 2: Start Backend (Terminal 1)
-```bash
-cd apps/backend
-bun run dev
-```
-รอจนเห็น: "Server listening on port 3001"
-
-### Step 3: Start Frontend (Terminal 2)
-```bash
-cd apps/frontend
-bun run dev
-```
-
-### Open Browser:
-http://localhost:5173
-
----
-
-## ✅ Verification:
-
-Test backend:
-```bash
-curl http://localhost:3001/api/health
-# Should return: {"status":"ok"}
-```
-
----
-
-## 🎊 PROJECT COMPLETE!
-
-**Status:** 100% Ready
-**Quality:** Production-grade
-**QA:** 0 warnings
-**Next:** Run the 3 steps above!
-
----
-
-**🎉 ขอบคุณที่ไว้วางใจค่ะ! สนุกกับโปรเจกต์! 🎉**
+- Local run guide: [START_HERE.md](START_HERE.md), [RUN_NOW.md](RUN_NOW.md)
+- Test plan: [docs/MAPRANG_TEST_PLAN.md](docs/MAPRANG_TEST_PLAN.md)
+- Deployment readiness: [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md), [STAGING_RUNBOOK.md](STAGING_RUNBOOK.md)
+- Current blockers: [memory/deploy-blockers.md](memory/deploy-blockers.md)

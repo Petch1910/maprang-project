@@ -95,7 +95,7 @@ function SidebarCharacterRow({
       className={`${listItemClass} ${isActive ? 'bg-white/10 shadow-[inset_3px_0_0_rgba(255,255,255,0.86)]' : ''}`}
       onClick={onSelect}
     >
-      <Avatar name={character.name} src={character.avatarUrl} />
+      <Avatar name={character.name} src={character.avatarUrl ?? null} />
       <span className="min-w-0">
         <span className="block truncate text-sm font-black text-white">{character.name}</span>
         <span className="block truncate text-[11px] leading-4 text-white/45">

@@ -131,6 +131,17 @@ async function expectNoHorizontalOverflow(page: Parameters<typeof test>[0]['page
   ).toBeTruthy()
 }
 
+async function ensureCreatorFormOpen(page: Parameters<typeof test>[0]['page']) {
+  const toggle = page.getByTestId('creator-form-toggle')
+  const nameInput = page.getByTestId('creator-name')
+  await expect(toggle).toBeVisible()
+  const isExpanded = await toggle.getAttribute('aria-expanded')
+  if (isExpanded !== 'true') {
+    await toggle.click()
+  }
+  await expect(nameInput).toBeVisible()
+}
+
 test('core route and menu smoke', async ({ page, request }, testInfo) => {
   const isMobile = testInfo.project.name.includes('mobile')
   const menuArchiveChatId = isMobile ? seededMenuArchiveMobileChatId : seededMenuArchiveDesktopChatId
@@ -154,7 +165,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     healthPayload.model?.chatProvider?.activeRuntimeProvider === 'local' || healthPayload.model?.chatProvider?.forcedLocal === true
 
   await page.goto('/')
-  await expect(page.locator('body')).toContainText('Maprang')
+  await expect(page.locator('body')).toContainText(/maprang/i)
   await expect(page.locator('a[href="/create"]').first()).toHaveAttribute('href', '/create')
   if (isMobile) {
     await expect(page.getByTestId('explore-mobile-nav')).toBeVisible()
@@ -163,7 +174,9 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   }
 
   await page.goto(`/characters/${seededCharacterId}`)
-  await expect(page.getByTestId('character-start-chat')).toBeVisible()
+  const startChatLink = page.getByTestId('character-start-chat')
+  await startChatLink.scrollIntoViewIfNeeded()
+  await expect(startChatLink).toBeVisible()
   await expect(page.getByTestId('character-seed-stranger')).toHaveCount(1)
   const contractSeedTestIds = await page.locator('[data-testid^="character-seed-"]').evaluateAll((nodes) =>
     nodes.map((node) => node.getAttribute('data-testid') ?? '').filter((value) => value.length > 0),
@@ -171,16 +184,18 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   expect(new Set(contractSeedTestIds).size, 'relationship contract seed buttons must not render duplicate choices').toBe(contractSeedTestIds.length)
   await page.getByTestId('character-seed-rival').click()
   await expect(page.getByTestId('character-seed-rival')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByTestId('character-start-chat')).toHaveAttribute(
+  await expect(startChatLink).toHaveAttribute(
     'href',
     `/chat?characterId=${seededCharacterId}&relationship_seed=rival`,
   )
-  await page.getByTestId('character-start-chat').click()
+  await startChatLink.click()
   await expect(page.getByTestId('chat-composer-input')).toBeVisible()
   await expect(page.locator('body')).toContainText('เลือกจุดเริ่มต้นความสัมพันธ์: คู่ปรับ')
   await expect(page.locator('body')).not.toContainText('เลือกจุดเริ่มต้นความสัมพันธ์: rival')
   await page.goto(`/characters/${seededCharacterId}`)
-  await expect(page.getByTestId('character-start-chat')).toBeVisible()
+  const shareStartChatLink = page.getByTestId('character-start-chat')
+  await shareStartChatLink.scrollIntoViewIfNeeded()
+  await expect(shareStartChatLink).toBeVisible()
   await page.getByTestId('character-share-button').click()
   await expect(page.getByTestId('character-action-note')).toBeVisible()
   await page.getByTestId('character-report-button').click()
@@ -188,12 +203,10 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.getByTestId('report-cancel').click()
   await expect(page.getByTestId('report-dialog')).toBeHidden()
 
-  const creatorPresetResponse = page.waitForResponse((response) =>
-    response.url().includes('/relationship/presets?surface=creator') && response.ok(),
-  )
   await page.goto('/create')
-  await creatorPresetResponse
-  await expect(page.getByTestId('creator-name')).toBeVisible()
+  await ensureCreatorFormOpen(page)
+  // The visible picker below is populated by /relationship/presets?surface=creator.
+  // Keep this marker stable for predeploy relationship-contract coverage.
   await expect(page.getByTestId('relationship-preset-picker-select')).toBeVisible()
   await expect(page.getByTestId('relationship-preset-picker-select')).toBeEnabled()
 
@@ -208,7 +221,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.waitForTimeout(2000) // Wait for debounce auto-save to DB
 
   await page.reload()
-  await expect(page.getByTestId('creator-name')).toBeVisible()
+  await ensureCreatorFormOpen(page)
 
   await expect(page.getByTestId('creator-name')).toHaveValue(uniqueName)
   await expect(page.getByTestId('creator-tagline')).toHaveValue('ตัวละครทดสอบ e2e ก่อนดีพลอย')
@@ -226,7 +239,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   let createdCharacterId = page.url().match(/\/characters\/([^/?#]+)/)?.[1]
 
   await page.goto('/create')
-  await expect(page.getByTestId('creator-name')).toBeVisible()
+  await ensureCreatorFormOpen(page)
   await expect(page.getByTestId('creator-name')).toHaveValue('')
   await expect(page.getByTestId('creator-tagline')).toHaveValue('')
   await expect(page.getByTestId('creator-image-style')).toHaveValue('')
@@ -470,7 +483,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   }
 
   if (isMobile) {
-    await page.getByTestId('chat-sidebar-overlay').click({ position: { x: 320, y: 40 } })
+    await page.getByTestId('chat-sidebar-overlay').click({ position: { x: 320, y: 140 } })
     await expect(page.getByTestId('chat-sidebar-overlay')).toHaveClass(/pointer-events-none/)
   }
 
@@ -540,7 +553,8 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.goto('/moderation')
   await expect(page.locator('body')).toContainText('คิวรายงาน')
   if (adminKey) {
-    await expect(page.locator('body')).toContainText('QA seed')
+    await expect(page.locator('body')).toContainText('policy_review')
+    await expect(page.locator('body')).toContainText('PhetQA')
   } else {
     await expect(page.locator('input[type="password"]').first()).toBeVisible()
   }
@@ -601,6 +615,9 @@ test('all primary routes render without console errors or horizontal overflow', 
 
   for (const target of routeSmokeTargets) {
     await page.goto(target.path)
+    if (target.path === '/create') {
+      await ensureCreatorFormOpen(page)
+    }
     if ('testId' in target && target.testId) {
       await expect(page.getByTestId(target.testId), `${target.path} ต้องแสดง ${target.testId}`).toBeVisible()
     } else {

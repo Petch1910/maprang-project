@@ -509,6 +509,8 @@ export function CharacterCreateForm({
     <section className="overflow-hidden rounded-lg border border-white/10 bg-[#18181d]/90 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
       <button
         className="flex min-h-12 w-full items-center justify-between gap-3 border-b border-white/10 bg-white/5 px-4 text-left text-sm font-black text-white transition hover:bg-white/8 sm:px-5"
+        aria-controls="creator-form-panel"
+        aria-expanded={isOpen}
         data-testid="creator-form-toggle"
         onClick={() => setIsOpen((value) => !value)}
         type="button"
@@ -524,7 +526,7 @@ export function CharacterCreateForm({
       </button>
 
       {isOpen && (
-        <div className="divide-y divide-white/10">
+        <div className="divide-y divide-white/10" id="creator-form-panel">
           <div className="grid gap-4 p-4 sm:p-5">
             <SectionHeader
               detail="เริ่มจากภาพเหมือนที่ผู้ใช้คุ้นกับ Khuiai แล้วให้ Maprang ช่วยคิดรายละเอียดต่อ"

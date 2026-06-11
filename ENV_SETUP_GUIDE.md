@@ -1,188 +1,71 @@
-# 🔐 Environment Variables Setup Guide
+# Environment Setup Guide
 
-## ⚠️ Important: .env Files Not Included in Git
+This file is a short pointer for the current repo baseline. For the full local run path, use [START_HERE.md](START_HERE.md) and [RUN_NOW.md](RUN_NOW.md).
 
-ไฟล์ `.env` **ไม่ได้ถูก commit** เพราะเหตุผลความปลอดภัย (อยู่ใน .gitignore)
+## Current Stack
 
-คุณต้อง**สร้างเองจาก templates**
+- Frontend: React 19, Vite, Redux Toolkit
+- Backend: Bun, Elysia, Prisma
+- Database: PostgreSQL
+- Local chat mode: `local/mock-roleplay`
+- Production auth/storage: Supabase JWT and private `avatars` bucket with signed URLs
 
----
+Do not use old SQLite instructions for this repo. PostgreSQL is the supported baseline.
 
-## 🚀 Quick Setup
+## Backend Env
 
-### 1. Backend (.env)
+Create `apps/backend/.env` from `apps/backend/.env.example`.
 
-```bash
-cd apps/backend
-cp .env.example .env
-```
+Minimum local values:
 
-**แก้ไขไฟล์ .env:**
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/maprang"
-# หรือใช้ SQLite สำหรับ development:
-# DATABASE_URL="file:./dev.db"
-
-PORT=3001
 NODE_ENV=development
+PORT=3000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/maprang?schema=public
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+OPENROUTER_MODEL=local/mock-roleplay
+ADMIN_API_KEY=replace-with-long-random-admin-key
 ```
 
-### 2. Frontend (.env)
+Production/staging also require real provider and storage values:
 
-```bash
-cd apps/frontend
-cp .env.example .env
-```
-
-**แก้ไขไฟล์ .env:**
 ```env
-VITE_API_URL=http://localhost:3001
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_JWT_ISSUER=https://your-project.supabase.co/auth/v1
+SUPABASE_SERVICE_ROLE_KEY=replace-with-service-role-key
+SUPABASE_STORAGE_BUCKET=avatars
+SUPABASE_STORAGE_ACCESS=signed
+SUPABASE_SIGNED_URL_EXPIRES_IN=3600
+OPENROUTER_API_KEY=replace-with-live-chat-provider-key
+IMAGE_GENERATION_API_KEY=replace-with-live-image-provider-key
 ```
 
----
+## Frontend Env
 
-## 📋 Required Variables
+Create `apps/frontend/.env` from `apps/frontend/.env.example`.
 
-### Backend (REQUIRED)
-- ✅ `DATABASE_URL` - Database connection string
-- ✅ `PORT` - Backend port (default: 3001)
-
-### Frontend (REQUIRED)
-- ✅ `VITE_API_URL` - Backend API URL
-
-### Optional Variables
-- `JWT_SECRET` - For authentication (if implemented)
-- `OPENAI_API_KEY` - For AI features (if used)
-- `NODE_ENV` - Environment (development/production)
-
----
-
-## 🗄️ Database Setup
-
-### Option 1: SQLite (Easiest for Development)
-
-**Backend .env:**
 ```env
-DATABASE_URL="file:./dev.db"
+VITE_API_BASE_URL=http://127.0.0.1:3000
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=replace-with-anon-key
 ```
 
-**Initialize:**
-```bash
-cd apps/backend
-bunx prisma migrate dev
-bunx prisma generate
+If the local backend uses a different port, update `VITE_API_BASE_URL` and restart the frontend.
+
+## Verify
+
+From the repo root:
+
+```powershell
+bun run secrets:check
+bun run smoke:doctor
+bun run smoke:local
+bun run e2e:smoke
 ```
 
-### Option 2: PostgreSQL (Production)
+Production readiness is not proven by local mock mode. Use:
 
-**Backend .env:**
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/maprang"
+```powershell
+bun run staging:verify
+bun run production:check
 ```
-
-**Setup Database:**
-```bash
-# Create database
-createdb maprang
-
-# Run migrations
-cd apps/backend
-bunx prisma migrate deploy
-bunx prisma generate
-```
-
----
-
-## ✅ Verify Setup
-
-### Test Backend
-```bash
-cd apps/backend
-bun run dev
-
-# Should see:
-# ✓ Database connected
-# ✓ Server listening on port 3001
-```
-
-### Test Frontend
-```bash
-cd apps/frontend
-bun run dev
-
-# Should see:
-# Local: http://localhost:5173
-```
-
-### Test Connection
-```bash
-curl http://localhost:3001/api/health
-# Should return: {"status":"ok"}
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Error: "DATABASE_URL not found"
-**Fix:** Create `.env` file in `apps/backend/`
-
-### Error: "VITE_API_URL not defined"
-**Fix:** Create `.env` file in `apps/frontend/`
-
-### Error: "Database connection failed"
-**Fix:** Check `DATABASE_URL` is correct
-
-### Error: "Port 3001 already in use"
-**Fix:** Change `PORT` in backend `.env`
-
----
-
-## 🔒 Security Notes
-
-### ⚠️ NEVER Commit:
-- `.env` files
-- Database credentials
-- API keys
-- Secrets
-
-### ✅ ALWAYS Commit:
-- `.env.example` templates
-- Documentation
-- Setup instructions
-
----
-
-## 📝 Production Environment Variables
-
-### Backend (Production)
-```env
-DATABASE_URL="your-production-database-url"
-PORT=3001
-NODE_ENV=production
-ALLOWED_ORIGINS="https://yourdomain.com"
-```
-
-### Frontend (Production)
-```env
-VITE_API_URL=https://api.yourdomain.com
-VITE_ENABLE_DEBUG=false
-VITE_ENABLE_ANALYTICS=true
-```
-
----
-
-## 🎯 Quick Start Checklist
-
-- [ ] Copy `.env.example` to `.env` in backend
-- [ ] Copy `.env.example` to `.env` in frontend
-- [ ] Set `DATABASE_URL` in backend `.env`
-- [ ] Set `VITE_API_URL` in frontend `.env`
-- [ ] Run `bunx prisma migrate dev` in backend
-- [ ] Start backend: `bun run dev`
-- [ ] Start frontend: `bun run dev`
-- [ ] Open http://localhost:5173
-
----
-
-**🎉 Environment setup complete! You're ready to develop! 🎉**

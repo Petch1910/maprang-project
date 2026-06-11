@@ -236,44 +236,45 @@ async function verifySupabaseJwtWithAuthServer(token: string) {
   } satisfies SupabaseJwtPayload
 }
 
-async function syncSupabaseUser(payload: SupabaseJwtPayload) {
-  if (!payload.sub || !payload.email) return payload.sub
+async function syncSupabaseUser(payload: SupabaseJwtPayload & { sub: string }): Promise<string> {
+  const userId = payload.sub
+  if (!payload.email) return userId
 
   const prisma = getPrisma()
-  if (!prisma) return payload.sub
+  if (!prisma) return userId
 
   const metadata = payload.user_metadata ?? {}
   const role = payload.app_metadata?.role === 'admin' || payload.app_metadata?.app_role === 'admin' ? Role.ADMIN : Role.USER
   await prisma.user.upsert({
-    where: { id: payload.sub },
+    where: { id: userId },
     update: {
       email: payload.email,
       username: metadata.username ?? metadata.preferred_username ?? metadata.name ?? undefined,
       role,
     },
     create: {
-      id: payload.sub,
+      id: userId,
       email: payload.email,
       username: metadata.username ?? metadata.preferred_username ?? metadata.name ?? null,
       role,
     },
   })
 
-  return payload.sub
+  return userId
 }
 
-export function requestUserId(request: Request, fallback?: string) {
+export function requestUserId(request: Request, fallback?: string): string {
   const requestedUserId = request.headers.get('x-user-id')?.trim()
   if (isUuid(requestedUserId)) return requestedUserId
 
   return fallback ?? defaultUserId
 }
 
-export async function resolveRequestUserId(request: Request, fallback?: string) {
+export async function resolveRequestUserId(request: Request, fallback?: string): Promise<string> {
   const token = bearerToken(request)
   if (token && supabaseIssuer()) {
     const payload = (await verifySupabaseJwt(token)) ?? (await verifySupabaseJwtWithAuthServer(token))
-    if (payload?.sub) return syncSupabaseUser(payload)
+    if (payload?.sub) return syncSupabaseUser({ ...payload, sub: payload.sub })
     if (strictAuthEnabled()) {
       throw new AuthError('invalid_auth_token', authErrorMessages.invalidAuthToken)
     }

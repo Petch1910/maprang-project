@@ -5,14 +5,14 @@ describe('frontend bundle budget check', () => {
   test('passes when main, chat, and lazy chunks stay under budget', () => {
     const result = evaluateFrontendBundleBudgets([
       { file: 'index-abc123.js', bytes: 300 * 1024 },
-      { file: 'ChatRoomPage-def456.js', bytes: 220 * 1024 },
+      { file: 'WorkspacePage-def456.js', bytes: 220 * 1024 },
       { file: 'WalletPage-ghi789.js', bytes: 40 * 1024 },
     ])
 
     expect(result.failures).toEqual([])
     expect(result.mainIndex?.file).toBe('index-abc123.js')
-    expect(result.chatRoom?.file).toBe('ChatRoomPage-def456.js')
-    expect(result.largest.map((item) => item.file)).toEqual(['index-abc123.js', 'ChatRoomPage-def456.js', 'WalletPage-ghi789.js'])
+    expect(result.chatRoom?.file).toBe('WorkspacePage-def456.js')
+    expect(result.largest.map((item) => item.file)).toEqual(['index-abc123.js', 'WorkspacePage-def456.js', 'WalletPage-ghi789.js'])
   })
 
   test('reports missing split chunks and oversized bundles', () => {
@@ -26,7 +26,7 @@ describe('frontend bundle budget check', () => {
 
     expect(result.failures).toEqual([
       'bundle หลักมีขนาด 120.0KB, ต้องไม่เกิน 100KB',
-      'ไม่พบ chunk หน้า ChatRoomPage; โค้ด chat/workspace อาจถูกรวมเข้า bundle หลัก',
+      'ไม่พบ chunk หน้าแชท (ChatRoomPage/WorkspacePage); โค้ด chat/workspace อาจถูกรวมเข้า bundle หลัก',
       'พบ chunk ฝั่งหน้าบ้านที่ใหญ่เกินกำหนด: Everything-huge.js 160.0KB',
     ])
   })
@@ -43,7 +43,7 @@ describe('frontend bundle budget check', () => {
       (line) => errors.push(line),
       async () => [
         { file: 'index-abc123.js', bytes: 300 * 1024 },
-        { file: 'ChatRoomPage-def456.js', bytes: 220 * 1024 },
+        { file: 'WorkspacePage-def456.js', bytes: 220 * 1024 },
         { file: 'WalletPage-ghi789.js', bytes: 40 * 1024 },
       ],
     )

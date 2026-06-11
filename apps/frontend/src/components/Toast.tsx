@@ -1,49 +1,8 @@
 import { useEffect, useState } from 'react'
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react'
+import { toastStore, type Toast } from './toastStore'
 
-type ToastType = 'success' | 'error' | 'info' | 'warning'
-
-interface Toast {
-  id: string
-  type: ToastType
-  message: string
-  duration?: number
-}
-
-const toastStore: {
-  toasts: Toast[]
-  listeners: Set<(toasts: Toast[]) => void>
-  add: (toast: Omit<Toast, 'id'>) => void
-  remove: (id: string) => void
-} = {
-  toasts: [],
-  listeners: new Set(),
-  add(toast) {
-    const id = `toast-${Date.now()}-${Math.random()}`
-    const newToast = { ...toast, id }
-    this.toasts = [...this.toasts, newToast]
-    this.listeners.forEach((listener) => listener(this.toasts))
-
-    // Auto remove after duration
-    const duration = toast.duration ?? 3000
-    if (duration > 0) {
-      setTimeout(() => this.remove(id), duration)
-    }
-  },
-  remove(id) {
-    this.toasts = this.toasts.filter((t) => t.id !== id)
-    this.listeners.forEach((listener) => listener(this.toasts))
-  },
-}
-
-export function toast(message: string, type: ToastType = 'info', duration?: number) {
-  toastStore.add({ type, message, duration })
-}
-
-toast.success = (message: string, duration?: number) => toast(message, 'success', duration)
-toast.error = (message: string, duration?: number) => toast(message, 'error', duration)
-toast.info = (message: string, duration?: number) => toast(message, 'info', duration)
-toast.warning = (message: string, duration?: number) => toast(message, 'warning', duration)
+type ToastType = Toast['type']
 
 export function ToastContainer() {
   const [toasts, setToasts] = useState<Toast[]>([])
