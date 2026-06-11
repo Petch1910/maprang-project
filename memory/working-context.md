@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Predeploy now source-locks the backend runtime no-any guard. `predeploy:check` requires the backend security audit rule for `\bas\s+any\b`, its Thai diagnostic, and the regression fixture `catches unsafe any assertions in runtime backend source`, so deploy readiness cannot silently lose the no-any runtime guard. Focused verification passed through `predeploy:check:test`, `predeploy:check`, `security:audit:test`, and `security:audit`.
+
 - 2026-06-11: Runtime backend source no longer has production `as any` casts. Token expiry now reads promotional token metadata through a small record/type guard and ignores invalid expiry dates, token transaction metadata uses Prisma JSON typing directly, creator scenario routes validate category/difficulty params through Elysia literal schemas, and `backend-security-audit` now fails runtime source if `as any` is reintroduced.
 
 - 2026-06-11: Predeploy now source-locks the latest-migration release handoff guard itself. It requires both `latestPrismaMigrationVersion` in `scripts/release-handoff-check.ts` and the test name `requires the latest migration version for deployed handoffs`, so future deploy readiness cannot silently lose the newest migration evidence check.

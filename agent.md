@@ -31,6 +31,7 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
+- 2026-06-11: `predeploy:check` now source-locks the backend runtime no-any guard. It requires the `\bas\s+any\b` security audit rule, the Thai diagnostic for runtime `as any`, and the regression fixture `catches unsafe any assertions in runtime backend source`, so deploy readiness cannot silently lose the no-any backend guard.
 - 2026-06-11: Runtime backend no longer keeps production `as any` casts. Token expiry metadata, token transaction metadata, and creator scenario route params now use typed guards/schemas, and `backend-security-audit` rejects `as any` in runtime backend source.
 - 2026-06-11: `predeploy:check` now source-locks the latest-migration release handoff guard. It requires `latestPrismaMigrationVersion` in `scripts/release-handoff-check.ts` and the regression test `requires the latest migration version for deployed handoffs`, so deploy readiness cannot silently drop the newest Prisma migration evidence check.
 - 2026-06-11: Filled staging/production release handoffs must now report the latest Prisma migration folder from `apps/backend/prisma/migrations`; current latest is `20260611143000_add_message_window_index`.

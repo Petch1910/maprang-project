@@ -2116,6 +2116,8 @@ const checks: Check[] = [
           'route throw raw error object',
           'collectKnownRouteErrorMessages',
           'runBackendSecurityAudit',
+          '\\bas\\s+any\\b',
+          'ห้ามใช้ as any ใน runtime backend',
           '$queryRawUnsafe',
         ],
         'scripts/backend-security-audit.ts',
@@ -2134,6 +2136,8 @@ const checks: Check[] = [
         await readRepoFile('scripts/backend-security-audit.test.ts'),
         [
           'collects direct source-file targets and skips test fixtures',
+          'catches unsafe any assertions in runtime backend source',
+          'const metadata = transaction.metadata as any',
           'catches unsafe raw SQL helpers',
           'prisma . $queryRawUnsafe',
           'prisma . $executeRawUnsafe',
