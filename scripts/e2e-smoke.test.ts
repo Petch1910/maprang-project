@@ -35,6 +35,13 @@ describe('e2e smoke command plan', () => {
     expect(e2eSpec).toContain('not-found-page')
   })
 
+  test('locks immersive shell coverage for explore and chat routes', () => {
+    expect(e2eSpec).toContain('expectImmersiveShell')
+    expect(e2eSpec).toContain('app-mobile-nav')
+    expect(e2eSpec).toContain('โหมดสว่างยังไม่รองรับ')
+    expect(e2eSpec).toContain("target.path === '/' || target.path.startsWith('/chat')")
+  })
+
   test('resolves local backend port from backend env when E2E_API_BASE_URL is omitted', () => {
     const backendEnv = 'DATABASE_URL=postgresql://example\nPORT="3001"\n'
 

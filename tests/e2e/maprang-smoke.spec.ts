@@ -134,6 +134,11 @@ async function expectNoHorizontalOverflow(page: Parameters<typeof test>[0]['page
   ).toBeTruthy()
 }
 
+async function expectImmersiveShell(page: Parameters<typeof test>[0]['page'], path: string) {
+  await expect(page.getByTestId('app-mobile-nav'), `${path} ต้องไม่ถูก global mobile nav ครอบซ้ำ`).toHaveCount(0)
+  await expect(page.locator('body'), `${path} ต้องไม่แสดงหน้าโหมดสว่างที่ยังไม่รองรับ`).not.toContainText('โหมดสว่างยังไม่รองรับ')
+}
+
 async function ensureCreatorFormOpen(page: Parameters<typeof test>[0]['page']) {
   const toggle = page.getByTestId('creator-form-toggle')
   const nameInput = page.getByTestId('creator-name')
@@ -168,6 +173,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     healthPayload.model?.chatProvider?.activeRuntimeProvider === 'local' || healthPayload.model?.chatProvider?.forcedLocal === true
 
   await page.goto('/')
+  await expectImmersiveShell(page, '/')
   await expect(page.locator('body')).toContainText(/maprang/i)
   await expect(page.locator('a[href="/create"]').first()).toHaveAttribute('href', '/create')
   if (isMobile) {
@@ -382,6 +388,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.getByTestId(`my-chat-menu-${myChatsBulkDeleteChatId}`)).toBeHidden()
 
   await page.goto(`/chat/${seededChatId}`)
+  await expectImmersiveShell(page, `/chat/${seededChatId}`)
   await expect(page.getByTestId('chat-composer-input')).toBeVisible()
   await expect(page.getByTestId('chat-character-stage')).toHaveCount(0)
 
@@ -620,6 +627,9 @@ test('all primary routes render without console errors or horizontal overflow', 
     await page.goto(target.path)
     if (target.path === '/create') {
       await ensureCreatorFormOpen(page)
+    }
+    if (target.path === '/' || target.path.startsWith('/chat')) {
+      await expectImmersiveShell(page, target.path)
     }
     if (target.testId) {
       await expect(page.getByTestId(target.testId), `${target.path} ต้องแสดง ${target.testId}`).toBeVisible()
