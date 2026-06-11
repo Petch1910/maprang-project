@@ -556,7 +556,7 @@ export function AdminHealthPage() {
         <p className="m-0 font-black">ด่านสเตจจิงก่อนโปรดักชัน</p>
         <p className="m-0 mt-1 font-bold text-amber-100/78">
           ใช้ Supabase project จริงสำหรับสเตจจิง, bucket avatars แบบ private + signed URL, ระบบหลังบ้านบน Render/Railway,
-          โดเมนหน้าบ้านทดลอง, CORS โดเมนจริง แล้วรัน `bun run qa:full` และ `bun run production:check` กับ URL สเตจจิง
+          โดเมนหน้าบ้านสเตจจิง, CORS โดเมนจริง แล้วรัน `bun run qa:full` และ `bun run production:check` กับ URL สเตจจิง
           ก่อนปล่อยโปรดักชัน
         </p>
       </section>

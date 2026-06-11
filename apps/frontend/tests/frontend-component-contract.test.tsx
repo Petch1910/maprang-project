@@ -394,6 +394,8 @@ describe('frontend component contracts', () => {
     expect(source).toContain("import { buildDeployPhaseSteps, type DeployCheck } from '../lib/adminHealthDeploy'")
     expect(source).not.toContain('function buildDeployPhaseSteps(')
     expect(source).not.toContain('function blockerSummary(')
+    expect(source).toContain('โดเมนหน้าบ้านสเตจจิง')
+    expect(source).not.toContain('โดเมนหน้าบ้านทดลอง')
   })
 
   test('app shell keeps immersive routes out of the global navigation wrapper', async () => {

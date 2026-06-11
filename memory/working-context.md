@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Admin Health staging copy no longer calls the frontend domain a trial/demo domain. The visible release guidance now says `โดเมนหน้าบ้านสเตจจิง`, and `frontend-component-contract` locks the Admin Health source against `โดเมนหน้าบ้านทดลอง`. Focused frontend checks passed.
+
 - 2026-06-12: Wallet admin token adjustments no longer write internal beta/manual reason slugs into the user-visible ledger. `/wallet` now sends Thai production-facing reasons (`ผู้ดูแลเพิ่มโทเคน` / `ผู้ดูแลหักโทเคน`) for admin adjustments, and `frontend-component-contract` source-locks that `manual_beta_grant` / `manual_admin_debit` do not return. Focused frontend checks passed.
 
 - 2026-06-12: Local run docs now match admin smoke behavior. `START_HERE.md`, `RUN_NOW.md`, `HOW_TO_RUN.md`, and `DEPLOYMENT_QA.md` explain that local loopback smoke prefers `SMOKE_ADMIN_API_KEY` and can fall back to `ADMIN_API_KEY` from untracked `apps/backend/.env`, while staging/production still require an explicit `SMOKE_ADMIN_API_KEY` secret. Docs gates passed afterward.
