@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test'
-import { checkReleaseHandoffContent, collectReleaseHandoffCheckResult, runReleaseHandoffCheck } from './release-handoff-check'
+import {
+  checkReleaseHandoffContent,
+  collectReleaseHandoffCheckResult,
+  latestPrismaMigrationVersion,
+  runReleaseHandoffCheck,
+} from './release-handoff-check'
 
 const filledHandoff = [
   '# แม่แบบส่งมอบ release',
@@ -27,7 +32,7 @@ const filledHandoff = [
   '- Database host/provider: managed postgres',
   '- คำสั่ง migration: bunx prisma migrate deploy',
   '- ผล migration: pass',
-  '- Prisma migration version: 20260513103000_add_lore_parent_index',
+  '- Prisma migration version: 20260611143000_add_message_window_index',
   '',
   '## ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
   '- โหมด auth: supabase-jwt',
@@ -487,7 +492,7 @@ describe('release handoff check', () => {
     const productionUnsafe = filledHandoff
       .replace('- คำสั่ง migration: bunx prisma migrate deploy', '- คำสั่ง migration: prisma db push')
       .replace('- ผล migration: pass', '- ผล migration: fail')
-      .replace('- Prisma migration version: 20260513103000_add_lore_parent_index', '- Prisma migration version: latest')
+      .replace('- Prisma migration version: 20260611143000_add_message_window_index', '- Prisma migration version: latest')
     const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
 
     expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
@@ -503,6 +508,18 @@ describe('release handoff check', () => {
         'staging release handoff ต้องมีผล migration ผ่าน',
         'staging release handoff ต้องมี Prisma migration version เป็นชื่อ migration จริง',
       ]),
+    )
+  })
+
+  test('requires the latest migration version for deployed handoffs', () => {
+    expect(latestPrismaMigrationVersion).toBe('20260611143000_add_message_window_index')
+    const stale = filledHandoff.replace(
+      '- Prisma migration version: 20260611143000_add_message_window_index',
+      '- Prisma migration version: 20260513103000_add_lore_parent_index',
+    )
+
+    expect(checkReleaseHandoffContent(stale, { requireFilled: true })).toContain(
+      `production release handoff ต้องระบุ Prisma migration version ล่าสุด: ${latestPrismaMigrationVersion}`,
     )
   })
 
@@ -525,7 +542,7 @@ describe('release handoff check', () => {
       .replace('- Database host/provider: managed postgres\n', '- DB note: Database host/provider: managed postgres\n')
       .replace('- คำสั่ง migration: bunx prisma migrate deploy\n', '')
       .replace('- ผล migration: pass\n', '')
-      .replace('- Prisma migration version: 20260513103000_add_lore_parent_index\n', '')
+      .replace('- Prisma migration version: 20260611143000_add_message_window_index\n', '')
 
     expect(checkReleaseHandoffContent(stale)).toEqual(
       expect.arrayContaining([

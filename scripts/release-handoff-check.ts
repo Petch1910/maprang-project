@@ -1,9 +1,24 @@
+import { readdirSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { secretPatterns } from './secret-patterns'
 
 const root = join(import.meta.dir, '..')
 const file = join(root, 'RELEASE_HANDOFF.md')
+export const latestPrismaMigrationVersion = latestPrismaMigration()
+
+function latestPrismaMigration() {
+  try {
+    return (
+      readdirSync(join(root, 'apps/backend/prisma/migrations'))
+        .filter((name) => /^\d{14}_[a-z0-9_]+$/.test(name))
+        .sort()
+        .at(-1) ?? ''
+    )
+  } catch {
+    return ''
+  }
+}
 
 const requiredSections = [
   'แม่แบบส่งมอบ release',
@@ -396,6 +411,9 @@ function validateDeployedMigrationResults(content: string, findings: string[]) {
   const version = fieldValue(content, 'Prisma migration version')
   if (version && !/^\d{14}_[a-z0-9_]+$/.test(version)) {
     findings.push(`${environment} release handoff ต้องมี Prisma migration version เป็นชื่อ migration จริง`)
+  }
+  if (version && /^\d{14}_[a-z0-9_]+$/.test(version) && latestPrismaMigrationVersion && version !== latestPrismaMigrationVersion) {
+    findings.push(`${environment} release handoff ต้องระบุ Prisma migration version ล่าสุด: ${latestPrismaMigrationVersion}`)
   }
 }
 
