@@ -21,9 +21,10 @@ const completeTestPlan = [
   'fallback image',
   '14',
   '13 product surfaces',
+  'Route source: App.tsx declares 14 routes; test plan groups them into 13 product surfaces.',
   '`/`',
   '`/characters/:id`',
-  '`/chat`, `/chat/:id`',
+  '`/chat`, `/chat/:chatId`',
   '`/chats`',
   '`/create`',
   '`/events`',
@@ -112,6 +113,25 @@ describe('Maprang test plan audit', () => {
         'docs/MAPRANG_TEST_PLAN.md still contains stale/current-source-forbidden snippet: Hono',
         'docs/MAPRANG_TEST_PLAN.md still contains stale/current-source-forbidden snippet: CreatorStudioPageNew',
         'START_HERE.md still contains stale/current-source-forbidden snippet: Drizzle',
+      ]),
+    )
+  })
+
+  test('rejects test plans that drift from App.tsx routes', () => {
+    const result = auditMaprangTestPlan({
+      testPlan: completeTestPlan.replace('`/admin/evals`', '').replace('App.tsx declares 14 routes', 'App.tsx declares 13 routes'),
+      runbooks: {
+        'START_HERE.md': completeRunbook,
+        'RUN_NOW.md': completeRunbook,
+        'HOW_TO_RUN.md': completeRunbook,
+      },
+      appRoutes: ['/', '/admin/evals'],
+    })
+
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        'docs/MAPRANG_TEST_PLAN.md missing current App.tsx route source line: Route source: App.tsx declares 2 routes; test plan groups them into 13 product surfaces.',
+        'docs/MAPRANG_TEST_PLAN.md missing App.tsx route token: `/admin/evals`',
       ]),
     )
   })

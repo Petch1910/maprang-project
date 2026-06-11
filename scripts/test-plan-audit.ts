@@ -1,9 +1,11 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { collectRoutesFromApp } from './frontend-route-audit'
 
 const root = join(import.meta.dir, '..')
 
 const testPlanPath = 'docs/MAPRANG_TEST_PLAN.md'
+const appPath = 'apps/frontend/src/App.tsx'
 
 const requiredTestPlanSnippets = [
   'React 19',
@@ -21,9 +23,10 @@ const requiredTestPlanSnippets = [
   'fallback image',
   '14',
   '13 product surfaces',
+  'Route source: App.tsx declares 14 routes; test plan groups them into 13 product surfaces.',
   '`/`',
   '`/characters/:id`',
-  '`/chat`, `/chat/:id`',
+  '`/chat`, `/chat/:chatId`',
   '`/chats`',
   '`/create`',
   '`/events`',
@@ -100,6 +103,7 @@ const runbookFiles = ['START_HERE.md', 'RUN_NOW.md', 'HOW_TO_RUN.md']
 export type TestPlanAuditInput = {
   testPlan: string
   runbooks: Record<string, string>
+  appRoutes?: string[]
 }
 
 export type TestPlanAuditResult = {
@@ -117,6 +121,10 @@ function includesEvery(content: string, snippets: string[]) {
 
 function findForbidden(content: string, snippets: string[]) {
   return snippets.filter((snippet) => content.includes(snippet))
+}
+
+function routeToken(route: string) {
+  return `\`${route}\``
 }
 
 export function auditMaprangTestPlan(input: TestPlanAuditInput): TestPlanAuditResult {
@@ -139,6 +147,20 @@ export function auditMaprangTestPlan(input: TestPlanAuditInput): TestPlanAuditRe
     }
   }
 
+  if (input.appRoutes) {
+    const sourceLine = `Route source: App.tsx declares ${input.appRoutes.length} routes; test plan groups them into 13 product surfaces.`
+    if (!input.testPlan.includes(sourceLine)) {
+      findings.push(`${testPlanPath} missing current App.tsx route source line: ${sourceLine}`)
+    }
+
+    for (const route of input.appRoutes) {
+      const token = routeToken(route)
+      if (!input.testPlan.includes(token)) {
+        findings.push(`${testPlanPath} missing App.tsx route token: ${token}`)
+      }
+    }
+  }
+
   return {
     checkedFiles: 1 + Object.keys(input.runbooks).length,
     findings,
@@ -153,6 +175,7 @@ export async function collectMaprangTestPlanAuditResult(): Promise<TestPlanAudit
   return auditMaprangTestPlan({
     testPlan: await readRepoFile(testPlanPath),
     runbooks,
+    appRoutes: collectRoutesFromApp(await readRepoFile(appPath)),
   })
 }
 
