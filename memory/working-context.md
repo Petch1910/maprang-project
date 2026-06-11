@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Frontend component contracts now lock the System Status local runtime copy. `frontend-component-contract.test.tsx` renders `SystemStatus` with a local chat provider payload and asserts `โหมด local QA พร้อมเล่น`, `แชท local QA`, and `local/mock-roleplay` are visible while `local mock` is absent. Focused verification passed: `bun run frontend:components:test` (9 pass / 38 expects), `bun run frontend:static:audit`, `bun run tests:audit`, `bun run frontend:check`, and `bun run predeploy:check`.
+
 - 2026-06-11: Frontend static audit now guards against user-facing `local mock` and `เดโม` regressions in `apps/frontend/src`. The route/menu empty state copy now says `การ์ดตัวอย่าง` instead of `การ์ดเดโม`, and `frontend-static-audit.test.ts` locks the new forbidden-copy checks. Focused verification passed: `bun run route-menu:audit`, `bun run frontend:static:audit`, `bun run frontend:static:audit:test` (40 pass / 234 expects), `bun run tests:audit`, `bun run frontend:check`, and `bun run predeploy:check`.
 
 - 2026-06-11: API smoke local runtime labels are now aligned with the product-facing wording. Non-live smoke rows and validator errors use `POST /chat local QA`, `POST /chat/stream local QA`, and `local chat QA` instead of `local mock`, while still asserting the internal `local/mock-roleplay` runtime id, zero provider tokens, no provider failure, and long roleplay replies. README, Deployment QA, and the test plan acceptance wording were updated to match. Focused verification passed: `bun run api:smoke:test` (13 pass / 141 expects), `bun run docs:commands`, `bun run test-plan:audit`, and `bun run predeploy:check`.

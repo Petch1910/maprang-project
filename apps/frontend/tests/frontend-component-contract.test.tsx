@@ -9,7 +9,8 @@ import { CreatorReadinessPanel } from '../src/components/CreatorReadinessPanel'
 import { MessageBubble } from '../src/components/MessageBubble'
 import { RelationshipPresetPicker } from '../src/components/RelationshipPresetPicker'
 import { ReportDialog } from '../src/components/ReportDialog'
-import type { Character, ChatMessage } from '../src/lib/api'
+import { SystemStatus } from '../src/components/SystemStatus'
+import type { Character, ChatMessage, HealthStatus } from '../src/lib/api'
 import type { TagAnalysis } from '../src/lib/tagAnalysis'
 
 function render(element: ReactElement) {
@@ -46,6 +47,68 @@ const readyAnalysis: TagAnalysis = {
   safety: ['green-flag'],
   unknown: [],
   issues: [],
+}
+
+const localHealthStatus: HealthStatus = {
+  ok: true,
+  service: 'maprang-backend',
+  checks: {
+    databaseConfigured: true,
+    databaseConnected: true,
+    openRouterConfigured: false,
+    imageGenerationConfigured: false,
+    adminAuthConfigured: true,
+    supabaseAuthConfigured: false,
+  },
+  security: {
+    corsOrigins: ['http://127.0.0.1:5173'],
+    authMode: 'local-dev-header',
+    adminGuard: 'api-key',
+    avatarStorage: 'local',
+    avatarStorageAccess: 'local',
+    signedUrlExpiresIn: null,
+  },
+  knowledge: {
+    structured: {
+      ok: true,
+      fileCount: 5,
+      missing: [],
+      errors: [],
+      files: [],
+    },
+  },
+  env: {
+    mode: 'development',
+    missingRequired: [],
+    missingRecommended: [],
+    invalid: [],
+  },
+  databaseError: null,
+  timestamp: '2026-06-11T00:00:00.000Z',
+  model: {
+    name: 'local runtime',
+    inputCostPer1M: 0,
+    outputCostPer1M: 0,
+    maxInputChars: 4000,
+    minTokenBalanceForChat: 1,
+    chatProvider: {
+      configured: false,
+      liveVerified: false,
+      productionReady: false,
+      status: 'missing_provider',
+      localFallbackEnabled: true,
+      forcedLocal: true,
+      activeRuntimeProvider: 'local',
+      localModel: 'local/mock-roleplay',
+    },
+    imageGeneration: {
+      configured: false,
+      liveVerified: false,
+      productionReady: false,
+      status: 'missing_provider',
+      model: 'fallback',
+    },
+  },
 }
 
 describe('frontend component contracts', () => {
@@ -189,5 +252,19 @@ describe('frontend component contracts', () => {
     expect(open).toContain('data-testid="creator-submit"')
     expect(open).toContain('aria-disabled="true"')
     expect(open).toContain('disabled=""')
+  })
+
+  test('system status presents local runtime as local QA without mock wording', () => {
+    const html = render(
+      createElement(SystemStatus, {
+        healthStatus: localHealthStatus,
+        onRefresh: async () => undefined,
+      }),
+    )
+
+    expect(html).toContain('โหมด local QA พร้อมเล่น')
+    expect(html).toContain('แชท local QA')
+    expect(html).toContain('local/mock-roleplay')
+    expect(html).not.toContain('local mock')
   })
 })
