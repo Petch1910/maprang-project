@@ -128,6 +128,7 @@ export type LocalCreatorPreviewPayload = {
 export type LocalChatSmokePayload = {
   reply?: string
   chatId?: string | null
+  memory?: LocalRuntimeMemoryPayload
   usage?: {
     totalTokens?: number
     modelName?: string
@@ -137,8 +138,21 @@ export type LocalChatSmokePayload = {
 
 export type LocalChatSmokeStreamEvent =
   | { type: 'delta'; content?: string }
-  | { type: 'done'; chatId?: string | null; usage?: LocalChatSmokePayload['usage'] }
+  | { type: 'done'; chatId?: string | null; usage?: LocalChatSmokePayload['usage']; memory?: LocalRuntimeMemoryPayload }
   | { type: 'error'; message?: string }
+
+export type LocalRuntimeMemoryPayload = {
+  sceneState?: {
+    mode?: string
+    pendingEvents?: unknown[]
+    activeScene?: unknown
+    sceneOutcomes?: unknown[]
+  }
+  relationshipState?: {
+    status?: string
+    events?: unknown[]
+  }
+}
 
 export type AvatarUploadPayload = {
   url: string
@@ -356,10 +370,38 @@ export function validateLocalCreatorPreview(payload: LocalCreatorPreviewPayload)
   }
 }
 
+export function validateLocalRuntimeSceneState(memory: LocalRuntimeMemoryPayload | undefined, expectedMinimumPendingEvents = 0) {
+  if (!memory?.sceneState) throw new Error('local runtime QA ยังไม่มี sceneState')
+  if (memory.sceneState.mode !== 'sandbox' && memory.sceneState.mode !== 'scene') {
+    throw new Error(`local runtime QA sceneState.mode ไม่ถูกต้อง: ${memory.sceneState.mode ?? 'missing'}`)
+  }
+  if (!Array.isArray(memory.sceneState.pendingEvents)) throw new Error('local runtime QA pendingEvents ต้องเป็น array')
+  if (memory.sceneState.pendingEvents.length < expectedMinimumPendingEvents) {
+    throw new Error(`local runtime QA pendingEvents น้อยกว่า ${expectedMinimumPendingEvents}`)
+  }
+  if (memory.sceneState.activeScene !== null && typeof memory.sceneState.activeScene !== 'object') {
+    throw new Error('local runtime QA activeScene ต้องเป็น object หรือ null')
+  }
+  if (memory.sceneState.sceneOutcomes !== undefined && !Array.isArray(memory.sceneState.sceneOutcomes)) {
+    throw new Error('local runtime QA sceneOutcomes ต้องเป็น array')
+  }
+  if (!memory.relationshipState) throw new Error('local runtime QA ยังไม่มี relationshipState')
+  if (!memory.relationshipState.status) throw new Error('local runtime QA relationshipState ยังไม่มี status')
+  if (!Array.isArray(memory.relationshipState.events)) throw new Error('local runtime QA relationship events ต้องเป็น array')
+
+  return {
+    sceneMode: memory.sceneState.mode,
+    pendingEvents: memory.sceneState.pendingEvents.length,
+    relationshipStatus: memory.relationshipState.status,
+    relationshipEvents: memory.relationshipState.events.length,
+  }
+}
+
 export function validateLocalChatSmoke(
   payload: LocalChatSmokePayload,
   expectedModel: string,
   minRoleplayReplyChars: number,
+  expectedMinimumPendingEvents = 0,
 ) {
   if (payload.usage?.providerFailure) {
     throw new Error(`local chat QA ไม่ควรคืน providerFailure: ${payload.usage.providerFailure.code ?? 'unknown'}`)
@@ -373,12 +415,14 @@ export function validateLocalChatSmoke(
   if (payload.usage?.modelName !== expectedModel) {
     throw new Error(`local chat QA ต้องคืน modelName=${expectedModel} แต่ได้ ${payload.usage?.modelName ?? 'missing'}`)
   }
+  const runtime = validateLocalRuntimeSceneState(payload.memory, expectedMinimumPendingEvents)
 
   return {
     chatId: payload.chatId,
     replyChars: payload.reply.length,
     totalTokens: payload.usage?.totalTokens ?? 0,
     modelName: payload.usage?.modelName ?? expectedModel,
+    ...runtime,
   }
 }
 
@@ -416,6 +460,7 @@ export function validateLocalChatStreamSmoke(
   events: LocalChatSmokeStreamEvent[],
   expectedModel: string,
   minRoleplayReplyChars: number,
+  expectedMinimumPendingEvents = 0,
 ) {
   const reply = events
     .filter((event): event is Extract<LocalChatSmokeStreamEvent, { type: 'delta' }> => event.type === 'delta')
@@ -438,6 +483,7 @@ export function validateLocalChatStreamSmoke(
   if (reply.length < minRoleplayReplyChars) {
     throw new Error(`local chat stream ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
   }
+  const runtime = validateLocalRuntimeSceneState(done.memory, expectedMinimumPendingEvents)
 
   return {
     chatId: done.chatId,
@@ -445,6 +491,7 @@ export function validateLocalChatStreamSmoke(
     totalTokens: done.usage?.totalTokens ?? 0,
     modelName: done.usage?.modelName ?? expectedModel,
     eventCount: events.length,
+    ...runtime,
   }
 }
 
@@ -505,11 +552,16 @@ export function buildLocalSmokeSummary(input: {
     chatModel: input.chat?.modelName ?? null,
     chatReplyChars: input.chat?.replyChars ?? 0,
     chatTokens: input.chat?.totalTokens ?? 0,
+    chatSceneMode: input.chat?.sceneMode ?? null,
+    chatPendingEvents: input.chat?.pendingEvents ?? 0,
+    chatRelationshipStatus: input.chat?.relationshipStatus ?? null,
+    chatRelationshipEvents: input.chat?.relationshipEvents ?? 0,
     streamChatId: input.stream?.chatId ?? null,
     streamModel: input.stream?.modelName ?? null,
     streamReplyChars: input.stream?.replyChars ?? 0,
     streamTokens: input.stream?.totalTokens ?? 0,
     streamEvents: input.stream?.eventCount ?? 0,
+    streamPendingEvents: input.stream?.pendingEvents ?? 0,
     savedChats: input.savedChats.chats,
     savedChatFound: input.savedChats.foundExpectedChat,
     savedChatMessages: input.savedMessages?.messages ?? 0,
@@ -647,14 +699,14 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
           characterId: smokeCharacter.id,
-          relationshipSeed: 'stranger',
+          relationshipSeed: 'soulmate',
           maxRating: 'restricted_18',
           history: [],
           message:
             'ฉันเข้ามาในคาเฟ่ช่วงฝนตกแล้วทักเธอด้วยน้ำเสียงเกรงใจ ช่วยตอบเป็นฉากโรลเพลย์ภาษาไทยที่มีบรรยากาศ ความรู้สึก การกระทำ และเหลือพื้นที่ให้ฉันตอบต่อ',
         }),
       })
-      chat = validateLocalChatSmoke(chatPayload, expectedModel, minRoleplayReplyChars)
+      chat = validateLocalChatSmoke(chatPayload, expectedModel, minRoleplayReplyChars, 1)
 
       const streamEvents = await streamReader('/chat/stream', {
         method: 'POST',
@@ -662,14 +714,14 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
         body: JSON.stringify({
           chatId: chat.chatId,
           characterId: smokeCharacter.id,
-          relationshipSeed: 'stranger',
+          relationshipSeed: 'soulmate',
           maxRating: 'restricted_18',
           history: [],
           message:
             'ต่อฉากเดิมแบบสตรีม ให้เห็นจังหวะการตอบและบรรยากาศ โดยไม่เรียกผู้ให้บริการจริง',
         }),
       })
-      stream = validateLocalChatStreamSmoke(streamEvents, expectedModel, minRoleplayReplyChars)
+      stream = validateLocalChatStreamSmoke(streamEvents, expectedModel, minRoleplayReplyChars, 1)
     }
 
     const savedChats = validateLocalSavedChats(

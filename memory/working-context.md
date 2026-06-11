@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local scene-runtime memory coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
+
+- 2026-06-11: `smoke:local` now verifies local scene-runtime readiness from both normal chat and stream chat. It uses relationship seed `soulmate`, requires runtime memory with `sceneState.mode`, at least one pending scene event, `relationshipState.status`, and `relationshipState.events`, and writes `chatSceneMode`, `chatPendingEvents`, `chatRelationshipStatus`, `chatRelationshipEvents`, and `streamPendingEvents` into the summary. Focused checks passed: `smoke:local:test` (18 pass / 125 expects), `predeploy:check:test` (3 pass / 1218 expects), `docs:commands`, `test-plan:audit`, `predeploy:check`, `memory:audit`, `qa:repo`, and `git diff --check`.
+
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after adding chat world-state coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
 
 - 2026-06-11: `smoke:local` now verifies chat world-state runtime readiness after local chat creation. It patches `PATCH /chats/:id/world-state`, reads `GET /chats/:id/world-state`, requires the returned `chatId`, location, mood, and `sceneNotes` array to round-trip, and writes `worldStateLocation`, `worldStateMood`, and `worldStateSceneNotes` into the summary. Focused checks passed: `smoke:local:test` (17 pass / 115 expects), `predeploy:check:test` (3 pass / 1210 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, `memory:audit`, `qa:repo`, and `git diff --check`.

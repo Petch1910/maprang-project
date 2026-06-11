@@ -15,6 +15,7 @@ import {
   validateLocalCreatorDraft,
   validateLocalCreatorPreview,
   validateLocalPersona,
+  validateLocalRuntimeSceneState,
   validateLocalSavedChatMessages,
   validateLocalSavedChats,
   validateLocalUsageSummary,
@@ -23,6 +24,19 @@ import {
   type LocalSmokeJsonReader,
 } from './local-smoke'
 import { validateBackendRootIdentity } from './smoke-helpers'
+
+const runtimeMemory = {
+  sceneState: {
+    mode: 'sandbox',
+    pendingEvents: [{ code: 'soft_confession_available', title: 'จังหวะเปิดใจ' }],
+    activeScene: null,
+    sceneOutcomes: [],
+  },
+  relationshipState: {
+    status: 'SOULMATE',
+    events: [{ code: 'soft_confession_available' }],
+  },
+}
 
 describe('local smoke helpers', () => {
   test('prefers MIKA, then Maprang, then the first available character', () => {
@@ -254,6 +268,23 @@ describe('local smoke helpers', () => {
     expect(() => validateLocalCreatorPreview({ preview: { ...payload.preview, warnings: {} as never } })).toThrow('warnings')
   })
 
+  test('validates local runtime scene and relationship state shape', () => {
+    expect(validateLocalRuntimeSceneState(runtimeMemory, 1)).toMatchObject({
+      sceneMode: 'sandbox',
+      pendingEvents: 1,
+      relationshipStatus: 'SOULMATE',
+      relationshipEvents: 1,
+    })
+    expect(() => validateLocalRuntimeSceneState(undefined, 1)).toThrow('sceneState')
+    expect(() => validateLocalRuntimeSceneState({ ...runtimeMemory, sceneState: { ...runtimeMemory.sceneState, mode: 'broken' } }, 1)).toThrow(
+      'sceneState.mode',
+    )
+    expect(() =>
+      validateLocalRuntimeSceneState({ ...runtimeMemory, sceneState: { ...runtimeMemory.sceneState, pendingEvents: [] } }, 1),
+    ).toThrow('pendingEvents')
+    expect(() => validateLocalRuntimeSceneState({ sceneState: runtimeMemory.sceneState }, 1)).toThrow('relationshipState')
+  })
+
   test('validates local chat runtime, reply length, model, and zero-token usage', () => {
     const health = {
       ok: true,
@@ -273,12 +304,21 @@ describe('local smoke helpers', () => {
         {
           chatId: 'chat-1',
           reply: 'ก'.repeat(451),
+          memory: runtimeMemory,
           usage: { totalTokens: 0, modelName: 'local/custom-roleplay' },
         },
         'local/custom-roleplay',
         450,
+        1,
       ),
-    ).toMatchObject({ chatId: 'chat-1', replyChars: 451, totalTokens: 0, modelName: 'local/custom-roleplay' })
+    ).toMatchObject({
+      chatId: 'chat-1',
+      replyChars: 451,
+      totalTokens: 0,
+      modelName: 'local/custom-roleplay',
+      pendingEvents: 1,
+      relationshipStatus: 'SOULMATE',
+    })
 
     expect(() =>
       validateLocalChatSmoke(
@@ -296,6 +336,7 @@ describe('local smoke helpers', () => {
         {
           chatId: 'chat-1',
           reply: 'ก'.repeat(451),
+          memory: runtimeMemory,
           usage: { totalTokens: 12, modelName: 'local/custom-roleplay' },
         },
         'local/custom-roleplay',
@@ -311,7 +352,7 @@ describe('local smoke helpers', () => {
       '',
       `data: ${JSON.stringify({ type: 'delta', content: 'ข'.repeat(230) })}`,
       '',
-      `data: ${JSON.stringify({ type: 'done', chatId: 'chat-1', usage: { totalTokens: 0, modelName: 'local/mock-roleplay' } })}`,
+      `data: ${JSON.stringify({ type: 'done', chatId: 'chat-1', usage: { totalTokens: 0, modelName: 'local/mock-roleplay' }, memory: runtimeMemory })}`,
       '',
     ].join('\n')
     const events = parseLocalSmokeStreamEvents(raw)
@@ -323,13 +364,14 @@ describe('local smoke helpers', () => {
       totalTokens: 0,
       modelName: 'local/mock-roleplay',
       eventCount: 3,
+      pendingEvents: 1,
     })
     expect(() => parseLocalSmokeStreamEvents('data: {broken')).toThrow('stream event')
     expect(() =>
       validateLocalChatStreamSmoke(
         [
           { type: 'delta', content: 'สั้น' },
-          { type: 'done', chatId: 'chat-1', usage: { totalTokens: 0, modelName: 'local/mock-roleplay' } },
+          { type: 'done', chatId: 'chat-1', usage: { totalTokens: 0, modelName: 'local/mock-roleplay' }, memory: runtimeMemory },
         ],
         'local/mock-roleplay',
         420,
@@ -339,7 +381,7 @@ describe('local smoke helpers', () => {
       validateLocalChatStreamSmoke(
         [
           { type: 'delta', content: 'ก'.repeat(430) },
-          { type: 'done', chatId: 'chat-1', usage: { totalTokens: 1, modelName: 'local/mock-roleplay' } },
+          { type: 'done', chatId: 'chat-1', usage: { totalTokens: 1, modelName: 'local/mock-roleplay' }, memory: runtimeMemory },
         ],
         'local/mock-roleplay',
         420,
@@ -399,6 +441,27 @@ describe('local smoke helpers', () => {
       smokeCharacter: { id: '1', name: 'มิกะ | MIKA', tags: ['qa', 'scene-ready'] },
       loreCount: 2,
       previewTurns: 3,
+      chat: {
+        chatId: 'chat-1',
+        replyChars: 451,
+        totalTokens: 0,
+        modelName: 'local/mock-roleplay',
+        sceneMode: 'sandbox',
+        pendingEvents: 1,
+        relationshipStatus: 'SOULMATE',
+        relationshipEvents: 1,
+      },
+      stream: {
+        chatId: 'chat-1',
+        replyChars: 460,
+        totalTokens: 0,
+        modelName: 'local/mock-roleplay',
+        eventCount: 3,
+        sceneMode: 'sandbox',
+        pendingEvents: 1,
+        relationshipStatus: 'SOULMATE',
+        relationshipEvents: 1,
+      },
       savedChats: {
         chats: 1,
         foundExpectedChat: true,
@@ -446,6 +509,11 @@ describe('local smoke helpers', () => {
       character: 'มิกะ | MIKA',
       loreCount: 2,
       previewTurns: 3,
+      chatSceneMode: 'sandbox',
+      chatPendingEvents: 1,
+      chatRelationshipStatus: 'SOULMATE',
+      chatRelationshipEvents: 1,
+      streamPendingEvents: 1,
       savedChats: 1,
       savedChatFound: true,
       savedChatMessages: 1,
@@ -539,6 +607,7 @@ describe('local smoke helpers', () => {
         return {
           chatId: 'chat-1',
           reply: 'ก'.repeat(430),
+          memory: runtimeMemory,
           usage: { totalTokens: 0, modelName: 'local/mock-roleplay' },
         } as never
       }
@@ -586,6 +655,7 @@ describe('local smoke helpers', () => {
           type: 'done' as const,
           chatId: 'chat-1',
           usage: { totalTokens: 0, modelName: 'local/mock-roleplay' },
+          memory: runtimeMemory,
         },
       ]
     }
@@ -632,11 +702,16 @@ describe('local smoke helpers', () => {
     expect(summary.chatModel).toBe('local/mock-roleplay')
     expect(summary.chatReplyChars).toBe(430)
     expect(summary.chatTokens).toBe(0)
+    expect(summary.chatSceneMode).toBe('sandbox')
+    expect(summary.chatPendingEvents).toBe(1)
+    expect(summary.chatRelationshipStatus).toBe('SOULMATE')
+    expect(summary.chatRelationshipEvents).toBe(1)
     expect(streamCalls).toEqual(['/chat/stream'])
     expect(summary.streamModel).toBe('local/mock-roleplay')
     expect(summary.streamReplyChars).toBe(440)
     expect(summary.streamTokens).toBe(0)
     expect(summary.streamEvents).toBe(3)
+    expect(summary.streamPendingEvents).toBe(1)
     expect(summary.savedChats).toBe(1)
     expect(summary.savedChatFound).toBe(true)
     expect(summary.savedChatMessages).toBe(1)
