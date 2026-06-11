@@ -80,6 +80,17 @@ export type LocalSavedChatMessagesPayload = {
   }
 }
 
+export type LocalWorldStatePayload = {
+  chatId?: string
+  worldState?: {
+    timeOfDay?: string
+    location?: string
+    weather?: string
+    mood?: string
+    sceneNotes?: unknown[]
+  }
+}
+
 export type LocalCreatorDraftPayload = {
   draft?: {
     name?: string
@@ -282,6 +293,20 @@ export function validateLocalSavedChatMessages(payload: LocalSavedChatMessagesPa
   }
 }
 
+export function validateLocalWorldState(payload: LocalWorldStatePayload, expectedChatId: string, expectedLocation: string) {
+  if (payload.chatId !== expectedChatId) throw new Error('local world state QA คืน chat id ไม่ตรงกับที่ขอ')
+  if (!payload.worldState) throw new Error('local world state QA ยังไม่มี worldState')
+  if (payload.worldState.location !== expectedLocation) throw new Error('local world state QA location ไม่ตรงกับที่บันทึก')
+  if (!payload.worldState.mood) throw new Error('local world state QA ยังไม่มี mood')
+  if (!Array.isArray(payload.worldState.sceneNotes)) throw new Error('local world state QA sceneNotes ต้องเป็น array')
+
+  return {
+    location: payload.worldState.location,
+    mood: payload.worldState.mood,
+    sceneNotes: payload.worldState.sceneNotes.length,
+  }
+}
+
 export function validateLocalCreatorDraft(payload: LocalCreatorDraftPayload) {
   if (!payload.draft?.name) throw new Error('local creator QA draft ยังไม่มีชื่อ')
   if (!payload.draft.greeting) throw new Error('local creator QA draft ยังไม่มีข้อความทักทาย')
@@ -440,6 +465,7 @@ export function buildLocalSmokeSummary(input: {
   stream?: ReturnType<typeof validateLocalChatStreamSmoke> | null
   savedChats: ReturnType<typeof validateLocalSavedChats>
   savedMessages?: ReturnType<typeof validateLocalSavedChatMessages> | null
+  worldState?: ReturnType<typeof validateLocalWorldState> | null
   upload: AvatarUploadPayload
 }) {
   return {
@@ -489,6 +515,9 @@ export function buildLocalSmokeSummary(input: {
     savedChatMessages: input.savedMessages?.messages ?? 0,
     savedChatMessageWindowLimit: input.savedMessages?.messageWindowLimit ?? null,
     savedChatMayHaveMoreBefore: input.savedMessages?.mayHaveMoreBefore ?? null,
+    worldStateLocation: input.worldState?.location ?? null,
+    worldStateMood: input.worldState?.mood ?? null,
+    worldStateSceneNotes: input.worldState?.sceneNotes ?? 0,
     uploadProvider: input.upload.provider,
     uploadAccess: input.upload.access,
   }
@@ -658,6 +687,33 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           5,
         )
       : null
+    const worldStateLocation = 'local-smoke-room'
+    const worldState = chat?.chatId
+      ? validateLocalWorldState(
+          await jsonReader<LocalWorldStatePayload>(`/chats/${chat.chatId}/world-state`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ...currentAuthHeaders },
+            body: JSON.stringify({
+              timeOfDay: 'local smoke evening',
+              location: worldStateLocation,
+              weather: 'ฝนหยุดแล้ว',
+              mood: 'นิ่งและพร้อมทดสอบ',
+              sceneNotes: ['local smoke ยืนยัน world state หลังสร้างแชท'],
+            }),
+          }),
+          chat.chatId,
+          worldStateLocation,
+        )
+      : null
+    if (chat?.chatId) {
+      validateLocalWorldState(
+        await jsonReader<LocalWorldStatePayload>(`/chats/${chat.chatId}/world-state`, {
+          headers: currentAuthHeaders,
+        }),
+        chat.chatId,
+        worldStateLocation,
+      )
+    }
 
     const form = new FormData()
     form.append('file', new File([new Uint8Array([137, 80, 78, 71])], 'qa.png', { type: 'image/png' }))
@@ -693,6 +749,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           stream,
           savedChats,
           savedMessages,
+          worldState,
           upload,
         }),
         null,

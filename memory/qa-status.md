@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 repo-owned QA pass after local world-state smoke guard: `bun run qa:repo` passed after `smoke:local` gained `/chats/:id/world-state` patch/read verification after local chat creation. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
+
+- 2026-06-11 local world-state smoke QA pass: `smoke:local` now checks `PATCH /chats/:id/world-state` and `GET /chats/:id/world-state` after local chat creation. It fails if the returned chat id does not match, if location/mood are missing or drift, or if `sceneNotes` is not an array. Passing evidence: `bun run smoke:local:test` (17 pass / 115 expects), `bun run predeploy:check:test` (3 pass / 1210 expects), `bun run test-plan:audit`, `bun run docs:commands`, `bun run predeploy:check`, `bun run memory:audit`, `bun run qa:repo`, and `git diff --check`.
+
 - 2026-06-11 repo-owned QA pass after local saved-chat smoke guard: `bun run qa:repo` passed after `smoke:local` gained `/chats` and `/chats/:id/messages?limit=5` verification after local chat creation. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
 
 - 2026-06-11 local saved-chat smoke QA pass: `smoke:local` now checks that the local chat it just created appears in `GET /chats`, then checks `GET /chats/:id/messages?limit=5` for bounded `messageWindow` metadata. Passing evidence: `bun run smoke:local:test` (16 pass / 107 expects), `bun run predeploy:check:test` (3 pass / 1204 expects), `bun run test-plan:audit`, `bun run docs:commands`, `bun run predeploy:check`, `bun run memory:audit`, and `git diff --check`.

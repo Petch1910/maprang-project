@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest local world-state smoke addendum: 2026-06-11 `smoke:local` now verifies `PATCH /chats/:id/world-state` and `GET /chats/:id/world-state` after local chat creation, requiring saved location/mood/sceneNotes to round-trip. This improves repo-owned local scene/universe continuity evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest local saved-chat smoke addendum: 2026-06-11 `smoke:local` now verifies `GET /chats` and `GET /chats/:id/messages?limit=5` after local chat creation, requiring the created chat in the saved-chat list and bounded message-window metadata. This improves repo-owned local My Chats/playability evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest local moderation smoke addendum: 2026-06-11 `smoke:local` now verifies `GET /admin/reports?limit=5` and `GET /admin/audit-logs?limit=5` when an admin smoke key is available, requiring report and audit-log array shapes plus checked/skipped summary fields. This improves repo-owned local moderation/admin-audit evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.

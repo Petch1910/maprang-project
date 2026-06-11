@@ -31,6 +31,7 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
+- 2026-06-11: `smoke:local` now verifies chat world-state runtime readiness after local chat creation. It patches and reads `GET/PATCH /chats/:id/world-state`, requiring saved location/mood/sceneNotes to round-trip for scene/universe continuity.
 - 2026-06-11: `smoke:local` now verifies saved-chat runtime readiness after local chat creation. It reads `GET /chats` and `GET /chats/:id/messages?limit=5`, requires the created chat in the saved list, and validates bounded `messageWindow` metadata.
 - 2026-06-11: `smoke:local` now verifies local moderation/admin-audit readiness when an admin smoke key is available. It reads `GET /admin/reports?limit=5` and `GET /admin/audit-logs?limit=5`, requires array shapes, and records checked/skipped summary fields; this is local evidence only and still requires production admin auth/domain/DB smoke.
 - 2026-06-11: `smoke:local` now verifies Creator Preview simulator readiness through `POST /creator/preview-chat` using `skipProvider`, requiring a usable local preview reply, `source=local`, `modelName=local/preview`, usage/prompt/warnings shape, and `creatorPreview*` summary fields; this is local evidence only and still requires live provider smoke before production.

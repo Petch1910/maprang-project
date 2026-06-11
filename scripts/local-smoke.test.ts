@@ -18,6 +18,7 @@ import {
   validateLocalSavedChatMessages,
   validateLocalSavedChats,
   validateLocalUsageSummary,
+  validateLocalWorldState,
   validateAvatarUpload,
   type LocalSmokeJsonReader,
 } from './local-smoke'
@@ -161,6 +162,33 @@ describe('local smoke helpers', () => {
         5,
       ),
     ).toThrow('เกิน window limit')
+  })
+
+  test('validates local world state shape', () => {
+    const payload = {
+      chatId: 'chat-1',
+      worldState: {
+        timeOfDay: 'เย็น',
+        location: 'local-smoke-room',
+        weather: 'ฝนหยุดแล้ว',
+        mood: 'นิ่งและพร้อมทดสอบ',
+        sceneNotes: ['note-1'],
+      },
+    }
+
+    expect(validateLocalWorldState(payload, 'chat-1', 'local-smoke-room')).toMatchObject({
+      location: 'local-smoke-room',
+      mood: 'นิ่งและพร้อมทดสอบ',
+      sceneNotes: 1,
+    })
+    expect(() => validateLocalWorldState({ ...payload, chatId: 'other-chat' }, 'chat-1', 'local-smoke-room')).toThrow('chat id')
+    expect(() => validateLocalWorldState({ chatId: 'chat-1' }, 'chat-1', 'local-smoke-room')).toThrow('worldState')
+    expect(() =>
+      validateLocalWorldState({ ...payload, worldState: { ...payload.worldState, location: 'wrong' } }, 'chat-1', 'local-smoke-room'),
+    ).toThrow('location')
+    expect(() =>
+      validateLocalWorldState({ ...payload, worldState: { ...payload.worldState, sceneNotes: {} as never } }, 'chat-1', 'local-smoke-room'),
+    ).toThrow('sceneNotes')
   })
 
   test('validates local creator AI draft fallback shape', () => {
@@ -380,6 +408,11 @@ describe('local smoke helpers', () => {
         messageWindowLimit: 5,
         mayHaveMoreBefore: false,
       },
+      worldState: {
+        location: 'local-smoke-room',
+        mood: 'นิ่งและพร้อมทดสอบ',
+        sceneNotes: 1,
+      },
       upload: {
         url: 'http://127.0.0.1:3000/uploads/avatars/avatar.png',
         filename: 'avatar.png',
@@ -418,6 +451,9 @@ describe('local smoke helpers', () => {
       savedChatMessages: 1,
       savedChatMessageWindowLimit: 5,
       savedChatMayHaveMoreBefore: false,
+      worldStateLocation: 'local-smoke-room',
+      worldStateMood: 'นิ่งและพร้อมทดสอบ',
+      worldStateSceneNotes: 1,
       uploadAccess: 'signed',
     })
   })
@@ -518,6 +554,18 @@ describe('local smoke helpers', () => {
           },
         } as never
       }
+      if (path === '/chats/chat-1/world-state') {
+        return {
+          chatId: 'chat-1',
+          worldState: {
+            timeOfDay: 'local smoke evening',
+            location: 'local-smoke-room',
+            weather: 'ฝนหยุดแล้ว',
+            mood: 'นิ่งและพร้อมทดสอบ',
+            sceneNotes: ['local smoke ยืนยัน world state หลังสร้างแชท'],
+          },
+        } as never
+      }
       if (path === '/uploads/avatar') {
         return {
           url: 'http://127.0.0.1:3000/uploads/avatars/avatar.png',
@@ -573,6 +621,8 @@ describe('local smoke helpers', () => {
       '/chat',
       '/chats',
       '/chats/chat-1/messages?limit=5',
+      '/chats/chat-1/world-state',
+      '/chats/chat-1/world-state',
       '/uploads/avatar',
     ])
     expect(cleaned).toEqual(['avatar.png'])
@@ -592,6 +642,9 @@ describe('local smoke helpers', () => {
     expect(summary.savedChatMessages).toBe(1)
     expect(summary.savedChatMessageWindowLimit).toBe(5)
     expect(summary.savedChatMayHaveMoreBefore).toBe(false)
+    expect(summary.worldStateLocation).toBe('local-smoke-room')
+    expect(summary.worldStateMood).toBe('นิ่งและพร้อมทดสอบ')
+    expect(summary.worldStateSceneNotes).toBe(1)
     expect(summary.tokenBalance).toBe(1200)
     expect(summary.usageDailyDays).toBe(7)
     expect(summary.walletTransactions).toBe(1)

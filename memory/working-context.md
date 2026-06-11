@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Full deterministic `bun run qa:repo` passed after adding chat world-state coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
+
+- 2026-06-11: `smoke:local` now verifies chat world-state runtime readiness after local chat creation. It patches `PATCH /chats/:id/world-state`, reads `GET /chats/:id/world-state`, requires the returned `chatId`, location, mood, and `sceneNotes` array to round-trip, and writes `worldStateLocation`, `worldStateMood`, and `worldStateSceneNotes` into the summary. Focused checks passed: `smoke:local:test` (17 pass / 115 expects), `predeploy:check:test` (3 pass / 1210 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, `memory:audit`, `qa:repo`, and `git diff --check`.
+
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after adding saved-chat list/message-window coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
 
 - 2026-06-11: `smoke:local` now verifies saved-chat runtime readiness after local chat creation. It reads `GET /chats` and `GET /chats/:id/messages?limit=5`, requires the created chat to appear in the saved-chat list, requires `messageWindow.limit=5`, requires boolean `mayHaveMoreBefore`, and fails if messages exceed the requested window. Focused checks passed: `smoke:local:test` (16 pass / 107 expects), `predeploy:check:test` (3 pass / 1204 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, `memory:audit`, and `git diff --check`.
