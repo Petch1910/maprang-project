@@ -3,6 +3,7 @@ import { createElement, type ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
 import { CharacterCard } from '../src/components/character/CharacterCard'
+import { CharacterCreateForm } from '../src/components/CharacterCreateForm'
 import { Composer } from '../src/components/Composer'
 import { CreatorReadinessPanel } from '../src/components/CreatorReadinessPanel'
 import { MessageBubble } from '../src/components/MessageBubble'
@@ -160,5 +161,33 @@ describe('frontend component contracts', () => {
     expect(html).toContain('92%')
     expect(html).toContain('2')
     expect(html).toContain('1')
+  })
+
+  test('creator form exposes core fields and disabled submit reason before required data exists', () => {
+    const closed = render(
+      createElement(CharacterCreateForm, {
+        isSaving: false,
+        onCreate: async () => true,
+      }),
+    )
+    const open = render(
+      createElement(CharacterCreateForm, {
+        defaultOpen: true,
+        isSaving: false,
+        onCreate: async () => true,
+        onDraftStatusChange: () => undefined,
+      }),
+    )
+
+    expect(closed).toContain('data-testid="creator-form-toggle"')
+    expect(closed).toContain('aria-expanded="false"')
+    expect(closed).not.toContain('data-testid="creator-submit"')
+    expect(open).toContain('aria-expanded="true"')
+    expect(open).toContain('data-testid="creator-name"')
+    expect(open).toContain('data-testid="creator-system-prompt"')
+    expect(open).toContain('data-testid="creator-tags"')
+    expect(open).toContain('data-testid="creator-submit"')
+    expect(open).toContain('aria-disabled="true"')
+    expect(open).toContain('disabled=""')
   })
 })
