@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest backend no-any deploy guard addendum: 2026-06-11 backend runtime no longer has production `as any` casts, and `predeploy:check` now source-locks the `backend-security-audit` rule/test that rejects `as any` in runtime backend source. This improves repo-owned deploy safety; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest saved-message DB index addendum: 2026-06-11 saved chat window queries now have a matching Postgres/Prisma index, `Message_chatId_deletedAt_createdAt_id_idx`, on `(chatId, deletedAt, createdAt DESC, id DESC)` with migration and DB-check regression coverage. This improves local/staging database performance safety for large saved chats; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest API smoke saved-history addendum: 2026-06-11 saved-message smoke now requests `GET /chats/:id/messages?limit=5` and asserts `messageWindow.limit`, `messageWindow.mayHaveMoreBefore`, and returned message count. This improves local/runtime evidence for bounded chat history; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
