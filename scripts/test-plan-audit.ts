@@ -59,6 +59,7 @@ const requiredTestPlanSnippets = [
   'bun run test-plan:audit',
   'bun run frontend:static:audit',
   'bun run frontend:route:audit',
+  'bun run frontend:components:test',
   'bun run frontend:check',
   'bun run api:audit',
   'bun run backend:check',

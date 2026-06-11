@@ -78,6 +78,7 @@ bun run backend:check:db:test
 ```powershell
 bun run frontend:static:audit
 bun run frontend:route:audit
+bun run frontend:components:test
 bun run frontend:check
 bun run route-menu:audit
 ```
