@@ -11,7 +11,14 @@ import {
   parseApiSmokeStreamEvents,
   tryParseJson,
 } from './api-smoke-helpers'
-import { buildApiSmokeSummary, formatApiSmokeStatus, runApiSmoke, type ApiSmokeResult } from './api-smoke'
+import {
+  buildApiSmokeSummary,
+  formatApiSmokeStatus,
+  normalizeApiSmokeAdminKey,
+  parseApiSmokeAdminKeyLine,
+  runApiSmoke,
+  type ApiSmokeResult,
+} from './api-smoke'
 
 const root = join(import.meta.dir, '..')
 
@@ -25,6 +32,19 @@ describe('api smoke helpers', () => {
     expect(formatApiSmokeStatus('warn')).toBe('เตือน')
     expect(formatApiSmokeStatus('fail')).toBe('ไม่ผ่าน')
     expect(formatApiSmokeStatus('skip')).toBe('ข้าม')
+  })
+
+  test('normalizes quoted admin key values like dotenv before admin smoke requests', () => {
+    expect(normalizeApiSmokeAdminKey(' "quoted-admin-key" ')).toBe('quoted-admin-key')
+    expect(normalizeApiSmokeAdminKey(" 'single-quoted-admin-key' ")).toBe('single-quoted-admin-key')
+    expect(normalizeApiSmokeAdminKey('plain-admin-key')).toBe('plain-admin-key')
+    expect(normalizeApiSmokeAdminKey('   ')).toBeNull()
+
+    expect(parseApiSmokeAdminKeyLine('ADMIN_API_KEY="quoted-admin-key"')).toBe('quoted-admin-key')
+    expect(parseApiSmokeAdminKeyLine("  ADMIN_API_KEY='single-quoted-admin-key'  ")).toBe(
+      'single-quoted-admin-key',
+    )
+    expect(parseApiSmokeAdminKeyLine('OPENROUTER_API_KEY="not-admin"')).toBeNull()
   })
 
   test('keeps API smoke diagnostics Thai-first', async () => {

@@ -225,6 +225,24 @@ function apiChatSmokeEvidence({
 
 const fallbackLocalChatModel = 'local/mock-roleplay'
 
+export function normalizeApiSmokeAdminKey(value: string | null | undefined) {
+  const trimmed = value?.trim()
+  if (!trimmed) return null
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim() || null
+  }
+  return trimmed
+}
+
+export function parseApiSmokeAdminKeyLine(line: string | null | undefined) {
+  const trimmed = line?.trim()
+  if (!trimmed?.startsWith('ADMIN_API_KEY=')) return null
+  return normalizeApiSmokeAdminKey(trimmed.slice('ADMIN_API_KEY='.length))
+}
+
 function activeLocalChatModel(health: HealthSmokePayload | null) {
   return health?.model?.chatProvider?.localModel ?? fallbackLocalChatModel
 }
@@ -1305,8 +1323,10 @@ function assertExpectedErrorPayload(
 }
 
 async function loadAdminKey() {
-  if (process.env.SMOKE_ADMIN_API_KEY) return process.env.SMOKE_ADMIN_API_KEY
-  if (process.env.ADMIN_API_KEY) return process.env.ADMIN_API_KEY
+  const smokeAdminKey = normalizeApiSmokeAdminKey(process.env.SMOKE_ADMIN_API_KEY)
+  if (smokeAdminKey) return smokeAdminKey
+  const adminKey = normalizeApiSmokeAdminKey(process.env.ADMIN_API_KEY)
+  if (adminKey) return adminKey
 
   try {
     const envPath = join(import.meta.dir, '..', 'apps', 'backend', '.env')
@@ -1314,7 +1334,7 @@ async function loadAdminKey() {
     const line = envFile
       .split(/\r?\n/)
       .find((item) => item.trim().startsWith('ADMIN_API_KEY='))
-    return line?.replace(/^ADMIN_API_KEY=/, '').trim() || null
+    return parseApiSmokeAdminKeyLine(line)
   } catch {
     return null
   }
