@@ -37,7 +37,7 @@ export type PreviewChatInput = {
 
 export type PreviewChatResult = {
   reply: string
-  source: 'ai' | 'mock'
+  source: 'ai' | 'local'
   modelName: string
   usage: {
     promptTokens: number
@@ -113,15 +113,15 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
 
   // Local preview reply if provider is skipped
   if (input.skipProvider || !process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY === 'missing-openrouter-key') {
-    const mockReply = generateLocalPreviewReply(input.name, input.userMessage)
+    const localReply = generateLocalPreviewReply(input.name, input.userMessage)
     return {
-      reply: mockReply,
-      source: 'mock',
-      modelName: 'local/preview-mock',
+      reply: localReply,
+      source: 'local',
+      modelName: 'local/preview',
       usage: {
         promptTokens: estimatedTokens,
-        completionTokens: mockReply.length,
-        totalTokens: estimatedTokens + mockReply.length,
+        completionTokens: localReply.length,
+        totalTokens: estimatedTokens + localReply.length,
       },
       prompt: {
         system: redactSensitiveText(systemPrompt).text,
@@ -167,15 +167,15 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
   } catch (error) {
     warnings.push(providerFailureWarning(error))
 
-    const mockReply = generateLocalPreviewReply(input.name, input.userMessage)
+    const localReply = generateLocalPreviewReply(input.name, input.userMessage)
     return {
-      reply: mockReply,
-      source: 'mock',
-      modelName: 'local/preview-fallback',
+      reply: localReply,
+      source: 'local',
+      modelName: 'local/preview',
       usage: {
         promptTokens: estimatedTokens,
-        completionTokens: mockReply.length,
-        totalTokens: estimatedTokens + mockReply.length,
+        completionTokens: localReply.length,
+        totalTokens: estimatedTokens + localReply.length,
       },
       prompt: {
         system: redactSensitiveText(systemPrompt).text,

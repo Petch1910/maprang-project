@@ -93,8 +93,8 @@ describe('creator-preview.service', () => {
     test('should have correct result structure', () => {
       const result = {
         reply: 'สวัสดีค่ะ',
-        source: 'mock' as const,
-        modelName: 'local/preview-mock',
+        source: 'local' as const,
+        modelName: 'local/preview',
         usage: {
           promptTokens: 100,
           completionTokens: 50,
@@ -110,7 +110,8 @@ describe('creator-preview.service', () => {
       }
 
       expect(result.reply).toBe('สวัสดีค่ะ')
-      expect(result.source).toBe('mock')
+      expect(result.source).toBe('local')
+      expect(result.modelName).toBe('local/preview')
       expect(result.usage.totalTokens).toBe(150)
       expect(Array.isArray(result.warnings)).toBe(true)
     })
@@ -202,12 +203,16 @@ describe('creator-preview.service', () => {
         skipProvider: true,
       })
 
-      expect(result.source).toBe('mock')
+      expect(result.source).toBe('local')
+      expect(result.modelName).toBe('local/preview')
       expect(result.reply).toContain('คำตอบพรีวิวในเครื่องสำหรับลองบทก่อนเผยแพร่')
       expect(result.reply).toContain('พรอมป์')
       expect(result.reply).not.toContain('mock response')
       expect(result.reply).not.toContain('Preview Chat')
       expect(result.reply).not.toContain('prompt')
+      expect(result.source).not.toContain('mock')
+      expect(result.modelName).not.toContain('mock')
+      expect(result.modelName).not.toContain('fallback')
       expect(result.warnings.join('\n')).toContain('คำตอบพรีวิวในเครื่อง')
       expect(result.warnings.join('\n')).not.toContain('mock response')
     })
