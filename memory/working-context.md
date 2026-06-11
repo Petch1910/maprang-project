@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Full local runtime gate passed after the no-demo data cleanup checkpoints. `bun run qa:local` reseeded QA data, smoke doctor connected to backend `http://127.0.0.1:3001`, verified DB connected, local/mock-roleplay chat runtime, wallet/profile/persona, Creator AI draft fallback image, Creator preview, normal and stream chat, saved chat message window, world state, upload, API smoke, backend tests, frontend build, and bundle budget. Production blockers remain external: deployed HTTPS origins, production CORS/domain, Supabase signed `avatars`, live chat smoke, and live image provider.
+
 - 2026-06-12: Route/Menu Audit no longer treats QA seed/demo data as normal product output for Wallet and Moderation. `/wallet` now documents real backend token/transaction data plus an explicit no-data empty state, `/moderation` now documents real report/audit-log queues plus instructions to create a report from chat for testing, and `route-menu-doc-check` forbids stale `มีข้อมูลทดสอบ QA` / `รายงานจำลองให้เช็ค` wording. Focused route/static/docs checks passed.
 
 - 2026-06-12: Backend character listing no longer returns a fallback/demo character when Prisma persistence is unavailable. `listCharacters()` and `searchCharacters()` now return an empty array without `fallbackCharacter`, matching the frontend no-demo empty-state contract. `character.validation.test.ts` source-locks this behavior, and full `bun run qa:repo` passed afterward with API audit still at 58 backend routes / 34 frontend helper calls and backend tests at 271 pass / 1223 expects.

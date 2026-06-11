@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 Local playable runtime QA pass after no-demo cleanup: `bun run qa:local` passed end-to-end. Evidence included QA seed restored, smoke doctor green on `http://127.0.0.1:3001`, DB connected, API route audit 58/34, local normal chat reply 1085 chars, stream reply 1039 chars, pending scene event, relationship status `SOULMATE`, saved chat/message-window checks, world-state round trip, wallet/profile/persona checks, Creator AI draft fallback image, Creator preview, upload, API smoke live-provider skips only, backend 271 pass / 1223 expects, frontend build, and bundle budget green.
+
 - 2026-06-12 Wallet/Moderation no-QA-demo route/menu QA pass: `ROUTE_MENU_AUDIT.md` and `routeMenuAuditRows` now describe `/wallet` and `/moderation` as real backend-data surfaces, not QA-seed/demo-data surfaces. `route-menu-doc-check` now rejects stale `มีข้อมูลทดสอบ QA` and `รายงานจำลองให้เช็ค` wording. Passing evidence: `bun run route-menu:audit`, `bun run route-menu:audit:test` (12 pass / 20 expects), `bun run frontend:route:audit`, `bun run frontend:static:audit`, and `bun run docs:commands`.
 
 - 2026-06-12 Backend no-fallback-character QA pass: `listCharacters()` and `searchCharacters()` now return `[]` when Prisma persistence is unavailable instead of returning a hidden fallback/demo character. `character.validation.test.ts` source-locks the removal of `fallbackCharacter` and `return [fallbackCharacter()]`. Passing evidence: `bun run backend:check` (271 pass / 1223 expects), `bun run security:audit`, `bun run tests:audit`, `bun run api:audit`, `bun run frontend:static:audit`, and full `bun run qa:repo`.
