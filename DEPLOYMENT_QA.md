@@ -37,6 +37,8 @@ bun run api:audit
 
 `api:audit` อ่าน backend route files และ `apps/frontend/src/lib/api.ts` แล้วจะ fail ถ้ามี backend route ที่ยังไม่มี documented automated/manual coverage path หรือมี frontend helper ที่เรียก `requestJson`/`fetch(API_BASE_URL...)` ไปยัง method/path ที่ backend ไม่ได้ประกาศไว้. มันตั้งใจแยกจาก `api:smoke`: audit ตอบคำถามว่า “ทุก endpoint ถูกนับใน coverage และ frontend เรียก route ที่มีอยู่จริงแล้วหรือยัง?” ส่วน smoke ตอบว่า “runtime paths สำคัญยังทำงานตอนนี้ไหม?” Coverage entry ต้องมีคุณภาพพอด้วย: admin route ต้องมี `admin-smoke`, live-provider route เช่น `POST /chat`, `POST /chat/stream`, และ `POST /creator/ai-draft` ต้องมี `live-smoke`, `manual-production` ห้ามเป็น coverage เดี่ยว, และ coverage note ต้องไม่ว่าง; failure จะแสดง weak coverage reason ต่อ route.
 
+ถ้าไม่ได้ตั้ง `SMOKE_API_BASE_URL`, smoke/deploy CLIs จะอ่าน `PORT` จาก `apps/backend/.env` ให้อัตโนมัติสำหรับ local runtime เช่น `PORT=3001`; staging/production ยังต้องตั้ง `SMOKE_API_BASE_URL` เป็น deployed HTTPS backend origin เองเสมอ.
+
 ถ้าต้องการตรวจ imports ของ app, QA script, seed, และ e2e source ว่ามี circular dependencies หรือไม่:
 
 ```bash

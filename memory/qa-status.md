@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 smoke/deploy local-port QA pass: shared smoke helpers now read `PORT` from `apps/backend/.env` when `SMOKE_API_BASE_URL` is omitted, keeping smoke/deploy CLIs aligned with local backend port overrides. Passing evidence: `bun run smoke:helpers:test` (11 pass / 43 expects), `bun run deploy:status -- --json` returned `ok=true`, `apiBaseUrl=http://127.0.0.1:3001`, `databaseConnected=true`, `chatRuntimeProvider=local`, `stagingBlockerCount=4`, and `productionBlockerCount=5`, and full deterministic `bun run qa:repo` passed.
+
 - 2026-06-12 full-local reseed guard QA pass: `qa:full` now re-runs `qa:seed` after `e2e:smoke`, and predeploy tests lock the ordering so browser smoke cannot leave the local app empty. Passing evidence: `bun run predeploy:check:test` (3 pass / 1237 expects), `bun run predeploy:check`, `bun run docs:commands` (464 references), `bun run test-plan:audit`, `bun run memory:audit`, `bun run secrets:check`, `git diff --check`, and full `bun run qa:full` against local backend `http://127.0.0.1:3001` plus frontend `http://127.0.0.1:5173`. Post-gate API verification returned 3 QA characters from `GET /characters`, confirming the local app stays populated after the full gate.
 
 - 2026-06-12 local QA seed-gate QA pass: `qa:local` now seeds QA data before runtime smoke so local checks no longer fail when a healthy DB is empty. Passing evidence: initial `smoke:local`/`api:smoke` failed before seed with missing QA characters, then `bun run qa:seed && bun run smoke:local && bun run api:smoke` passed, `bun run qa:local` passed end-to-end, and `bun run e2e:smoke` passed 4/4 desktop+mobile before reseeding local data for the open app.

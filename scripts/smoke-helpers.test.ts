@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  backendEnvPort,
   buildSmokeAuthHeaders,
   deployedSmokeTargetIssues,
   formatDiagnosticText,
@@ -18,11 +19,19 @@ import {
 describe('smoke helpers', () => {
   test('defaults to local backend and local smoke user', () => {
     const env = {}
-    expect(smokeApiBaseUrl(env)).toBe('http://127.0.0.1:3000')
-    expect(smokeTargetIsLocal(smokeApiBaseUrl(env))).toBe(true)
+    expect(smokeApiBaseUrl(env, '')).toBe('http://127.0.0.1:3000')
+    expect(smokeTargetIsLocal(smokeApiBaseUrl(env, ''))).toBe(true)
     expect(smokeTargetIsLocal('http://0.0.0.0:3000')).toBe(true)
     expect(smokeTargetIsLocal('http://[::1]:3000/health')).toBe(true)
     expect(buildSmokeAuthHeaders(env)).toEqual({ 'x-user-id': 'dev-user' })
+  })
+
+  test('resolves local backend port from backend env when SMOKE_API_BASE_URL is omitted', () => {
+    const backendEnv = 'DATABASE_URL=postgresql://example\nPORT="3001"\n'
+
+    expect(backendEnvPort(backendEnv)).toBe('3001')
+    expect(smokeApiBaseUrl({}, backendEnv)).toBe('http://127.0.0.1:3001')
+    expect(smokeApiBaseUrl({ SMOKE_API_BASE_URL: 'https://api.example.com' }, backendEnv)).toBe('https://api.example.com')
   })
 
   test('does not impersonate a user by default against deployed targets', () => {

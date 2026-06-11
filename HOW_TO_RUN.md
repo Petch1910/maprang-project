@@ -31,7 +31,7 @@ Expected URLs:
 - Backend: `http://127.0.0.1:3000` unless `apps/backend/.env` overrides `PORT`
 - Frontend: `http://127.0.0.1:5173`
 
-When backend `PORT` is overridden, use that backend origin for `SMOKE_API_BASE_URL` and frontend `VITE_API_BASE_URL`. `bun run e2e:smoke` reads `PORT` from `apps/backend/.env` when `E2E_API_BASE_URL` is not set.
+When backend `PORT` is overridden, use that backend origin for frontend `VITE_API_BASE_URL`. Smoke/deploy CLIs (`smoke:doctor`, `api:smoke`, `deploy:status`) read `PORT` from `apps/backend/.env` when `SMOKE_API_BASE_URL` is not set, and `bun run e2e:smoke` reads the same file when `E2E_API_BASE_URL` is not set.
 
 Verification:
 

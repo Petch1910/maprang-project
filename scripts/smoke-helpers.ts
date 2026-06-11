@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { redactSensitiveText } from '../apps/backend/src/redaction'
 
 export type SmokeEnv = {
@@ -12,8 +14,44 @@ export type RootIdentityPayload = {
   service?: string
 }
 
-export function smokeApiBaseUrl(env: SmokeEnv = process.env) {
-  return env.SMOKE_API_BASE_URL ?? 'http://127.0.0.1:3000'
+export const backendEnvPath = join(import.meta.dir, '..', 'apps/backend/.env')
+
+function unquoteEnvValue(value: string) {
+  const trimmed = value.trim()
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim()
+  }
+  return trimmed
+}
+
+export function backendEnvPort(envText: string) {
+  for (const rawLine of envText.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line || line.startsWith('#')) continue
+    const match = line.match(/^PORT\s*=\s*(.+)$/)
+    if (!match?.[1]) continue
+    const port = unquoteEnvValue(match[1])
+    if (/^\d+$/.test(port)) return port
+  }
+  return ''
+}
+
+function readBackendEnvText() {
+  try {
+    return readFileSync(backendEnvPath, 'utf8')
+  } catch {
+    return ''
+  }
+}
+
+export function smokeApiBaseUrl(env: SmokeEnv = process.env, backendEnvText = readBackendEnvText()) {
+  const explicitBaseUrl = env.SMOKE_API_BASE_URL?.trim()
+  if (explicitBaseUrl) return explicitBaseUrl
+  const backendPort = backendEnvPort(backendEnvText)
+  return backendPort ? `http://127.0.0.1:${backendPort}` : 'http://127.0.0.1:3000'
 }
 
 export function smokeTargetIsLocal(baseUrl: string) {
