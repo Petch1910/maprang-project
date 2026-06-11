@@ -370,7 +370,7 @@ export function WorkspacePage() {
       const data = await fetchChatMessages(id, { limit: savedChatMessageWindowLimit })
       if (!data.chat) return
       if (isQaSeedCharacter(data.chat.character) && !canShowQaSeedData()) {
-        setConnectionNote('แชท QA สำหรับทดสอบถูกซ่อนในโหมดใช้งานจริง')
+        setConnectionNote('แชทนี้ไม่พร้อมแสดงในโหมดใช้งานจริง')
         navigate('/chat', { replace: true })
         return
       }
@@ -425,7 +425,7 @@ export function WorkspacePage() {
               : [],
           )
           if (!firstCharacter) {
-            setConnectionNote('ยังไม่มีตัวละครจริงในระบบสำหรับเริ่มแชท สร้างตัวละครหรือเปิด QA seed ก่อนทดสอบ')
+            setConnectionNote('ยังไม่มีตัวละครสำหรับเริ่มแชท สร้างตัวละครใหม่หรือกลับไปเลือกจากหน้าสำรวจก่อน')
           }
         }
       } catch (error) {

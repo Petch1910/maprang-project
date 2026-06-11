@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 public runtime copy QA pass: `/chat`, Character Lobby, and `/wallet` no longer expose QA seed/test-phase wording in public-facing runtime messages. Source contracts lock out `เปิด QA seed`, `แชท QA สำหรับทดสอบ`, `ตัวละคร QA สำหรับทดสอบ`, and `ช่วงทดสอบก่อนเชื่อมระบบชำระเงินจริง`. Passing evidence: source search left those strings only in test assertions, `bun run frontend:components:test` (17 pass / 92 expects), `bun run frontend:static:audit`, and `bun run frontend:check`.
+
 - 2026-06-12 admin-health staging copy QA pass: `/admin/health` now says `โดเมนหน้าบ้านสเตจจิง` instead of `โดเมนหน้าบ้านทดลอง`, and the component contract locks that wording. Passing evidence: `bun run frontend:components:test` (16 pass / 87 expects), `bun run frontend:static:audit`, and `bun run frontend:check`.
 
 - 2026-06-12 wallet ledger reason copy QA pass: `/wallet` admin token adjustments now send Thai production-facing ledger reasons instead of internal beta/manual slugs, and `frontend-component-contract` locks the source contract. Passing evidence: `bun run frontend:components:test` (16 pass / 85 expects), `bun run frontend:static:audit`, and `bun run frontend:check`.

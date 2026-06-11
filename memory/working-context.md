@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Public-facing runtime copy no longer tells normal users to open QA seed or shows QA-only hidden-character wording. `/chat` now tells users to create/select a real character when no character is available, hidden QA chats/characters now say the item is not ready in production mode, and `/wallet` admin copy now describes campaign/support/ledger maintenance instead of a test-before-payment phase. `frontend-component-contract` locks these strings out of public source. Focused frontend checks passed.
+
 - 2026-06-12: Admin Health staging copy no longer calls the frontend domain a trial/demo domain. The visible release guidance now says `โดเมนหน้าบ้านสเตจจิง`, and `frontend-component-contract` locks the Admin Health source against `โดเมนหน้าบ้านทดลอง`. Focused frontend checks passed.
 
 - 2026-06-12: Wallet admin token adjustments no longer write internal beta/manual reason slugs into the user-visible ledger. `/wallet` now sends Thai production-facing reasons (`ผู้ดูแลเพิ่มโทเคน` / `ผู้ดูแลหักโทเคน`) for admin adjustments, and `frontend-component-contract` source-locks that `manual_beta_grant` / `manual_admin_debit` do not return. Focused frontend checks passed.

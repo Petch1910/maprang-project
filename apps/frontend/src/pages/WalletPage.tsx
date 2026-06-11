@@ -364,7 +364,7 @@ export function WalletPage() {
           <div>
             <p className="m-0 text-sm font-black text-white">ปรับโทเคนโดยผู้ดูแล</p>
             <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/55">
-              ใช้สำหรับช่วงทดสอบก่อนเชื่อมระบบชำระเงินจริงหรือโปรโมชันจริง
+              ใช้ดูแลยอดโทเคนของบัญชีปัจจุบันสำหรับแคมเปญ เครดิตช่วยเหลือ หรือการแก้ไขรายการ
             </p>
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">

@@ -424,6 +424,8 @@ describe('frontend component contracts', () => {
     expect(workspaceSource).toContain('หน้าแชทจะไม่ใช้ตัวละครที่ไม่ได้มาจากระบบหลังบ้านแทนข้อมูลจริง')
     expect(workspaceSource).toContain("setCharacters(visibleCharacters)")
     expect(workspaceSource).not.toContain('visibleCharacters.length ? visibleCharacters')
+    expect(workspaceSource).not.toContain('เปิด QA seed')
+    expect(workspaceSource).not.toContain('แชท QA สำหรับทดสอบ')
   })
 
   test('wallet admin token adjustments keep production-facing ledger reasons', async () => {
@@ -433,6 +435,14 @@ describe('frontend component contracts', () => {
     expect(walletSource).toContain('ผู้ดูแลหักโทเคน')
     expect(walletSource).not.toContain('manual_beta_grant')
     expect(walletSource).not.toContain('manual_admin_debit')
+    expect(walletSource).not.toContain('ช่วงทดสอบก่อนเชื่อมระบบชำระเงินจริง')
+  })
+
+  test('character lobby hides unavailable characters with product-facing copy', async () => {
+    const lobbySource = await Bun.file('apps/frontend/src/pages/CharacterLobbyPage.tsx').text()
+
+    expect(lobbySource).toContain('ตัวละครนี้ไม่พร้อมแสดงในโหมดใช้งานจริง')
+    expect(lobbySource).not.toContain('ตัวละคร QA สำหรับทดสอบ')
   })
 
   test('events inbox selector exposes only playable pending scene summaries', () => {

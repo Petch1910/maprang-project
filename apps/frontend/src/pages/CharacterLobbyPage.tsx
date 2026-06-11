@@ -134,7 +134,7 @@ export function CharacterLobbyPage() {
         if (cancelled) return
         if (isQaSeedCharacter(data.character) && !canShowQaSeedData()) {
           setDetailCharacter(null)
-          setDetailError('ตัวละคร QA สำหรับทดสอบถูกซ่อนในโหมดใช้งานจริง')
+          setDetailError('ตัวละครนี้ไม่พร้อมแสดงในโหมดใช้งานจริง')
           return
         }
         setDetailCharacter(data.character)
