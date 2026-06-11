@@ -124,7 +124,10 @@ export function auditTestCoverage(input: TestCoverageAuditInput): TestCoverageAu
 
   for (const file of testFiles) {
     const knownScope =
-      file.startsWith('scripts/') || file.startsWith('apps/backend/src/') || file.startsWith('tests/e2e/')
+      file.startsWith('scripts/') ||
+      file.startsWith('apps/backend/src/') ||
+      file.startsWith('apps/frontend/tests/') ||
+      file.startsWith('tests/e2e/')
     if (!knownScope) {
       findings.push(`${file} เป็น test scope ใหม่ ต้องเพิ่ม coverage rule หรือ package script ให้ชัดเจน`)
     }
