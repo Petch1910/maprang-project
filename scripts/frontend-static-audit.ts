@@ -657,6 +657,8 @@ export const suspiciousPatterns: Array<{ pattern: RegExp; message: string; allow
   { pattern: /onSubmit\s*=\s*\{\s*\(\)\s*=>\s*undefined\s*\}/g, message: 'ฟอร์มมี onSubmit คืน undefined' },
   { pattern: /throw\s+new\s+Error\s*\(\s*(["'`])not implemented\1\s*\)/gi, message: 'frontend source ยังโยน not implemented' },
   { pattern: /\bcoming soon\b/gi, message: 'พบข้อความ coming soon แบบข้อความรอทำ' },
+  { pattern: /\blocal\s+mock\b/gi, message: 'พบข้อความ local mock ใน frontend source; ใช้ "โหมด local QA" แทนสำหรับข้อความผู้ใช้' },
+  { pattern: /เดโม/g, message: 'พบคำว่าเดโมใน frontend source; ใช้ "ตัวอย่าง" หรือ "จำลอง" ที่ชัดเจนกว่า' },
   {
     pattern: /\/placeholder-avatar\.png\b/g,
     message: 'frontend source references missing /placeholder-avatar.png; import a bundled fallback asset instead',

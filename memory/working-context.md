@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Frontend static audit now guards against user-facing `local mock` and `เดโม` regressions in `apps/frontend/src`. The route/menu empty state copy now says `การ์ดตัวอย่าง` instead of `การ์ดเดโม`, and `frontend-static-audit.test.ts` locks the new forbidden-copy checks. Focused verification passed: `bun run route-menu:audit`, `bun run frontend:static:audit`, `bun run frontend:static:audit:test` (40 pass / 234 expects), `bun run tests:audit`, `bun run frontend:check`, and `bun run predeploy:check`.
+
 - 2026-06-11: API smoke local runtime labels are now aligned with the product-facing wording. Non-live smoke rows and validator errors use `POST /chat local QA`, `POST /chat/stream local QA`, and `local chat QA` instead of `local mock`, while still asserting the internal `local/mock-roleplay` runtime id, zero provider tokens, no provider failure, and long roleplay replies. README, Deployment QA, and the test plan acceptance wording were updated to match. Focused verification passed: `bun run api:smoke:test` (13 pass / 141 expects), `bun run docs:commands`, `bun run test-plan:audit`, and `bun run predeploy:check`.
 
 - 2026-06-11: Admin health/System Status local runtime wording is now product-facing instead of visible `local mock` copy. Frontend status cards and route/menu docs now say `โหมด local QA พร้อมเล่น` and `แชท local QA`, while preserving `local/mock-roleplay` as the internal QA runtime identifier for debug evidence. Updated Playwright and route/menu guards to lock the new wording. Passing verification: `bun run frontend:static:audit`, `bun run route-menu:audit`, `bun run e2e:smoke:test` (18 pass / 77 expects), `bun run frontend:check`, `bun run predeploy:check`, and full `bun run qa:repo`.

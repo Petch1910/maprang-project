@@ -2723,6 +2723,8 @@ describe('frontend static audit', () => {
     const findings = auditSuspiciousPatterns(
       [
         '<p>เร็วๆ นี้</p>',
+        '<p>local mock พร้อมเล่น</p>',
+        '<p>การ์ดเดโม</p>',
         '<p>broken\uFFFDtext</p>',
         '<p>\u0e40\u0e18\u2022\u0e40\u0e19\u0089องเปิดเมนู</p>',
       ].join('\n'),
@@ -2732,6 +2734,8 @@ describe('frontend static audit', () => {
     expect(findings.map((finding) => finding.message)).toEqual(
       expect.arrayContaining([
         'พบข้อความไทยแนวเร็วๆนี้ที่เป็นข้อความรอทำ',
+        'พบข้อความ local mock ใน frontend source; ใช้ "โหมด local QA" แทนสำหรับข้อความผู้ใช้',
+        'พบคำว่าเดโมใน frontend source; ใช้ "ตัวอย่าง" หรือ "จำลอง" ที่ชัดเจนกว่า',
         'พบ replacement character อาจเป็น encoding เสีย',
         'พบ C1 control character อาจเป็น mojibake',
         'พบลำดับตัวอักษรไทยที่มักเป็น UTF-8 mojibake',
