@@ -61,6 +61,25 @@ export type LocalAdminAuditLogsPayload = {
   logs?: unknown[]
 }
 
+export type LocalSavedChatsPayload = {
+  chats?: Array<{
+    id?: string
+    title?: string | null
+    isArchived?: boolean
+  }>
+}
+
+export type LocalSavedChatMessagesPayload = {
+  chat?: {
+    id?: string
+    messages?: unknown[]
+    messageWindow?: {
+      limit?: number
+      mayHaveMoreBefore?: boolean
+    }
+  }
+}
+
 export type LocalCreatorDraftPayload = {
   draft?: {
     name?: string
@@ -232,6 +251,37 @@ export function validateLocalAdminModerationSnapshot(reportsPayload: LocalAdminR
   }
 }
 
+export function validateLocalSavedChats(payload: LocalSavedChatsPayload, expectedChatId?: string | null) {
+  if (!Array.isArray(payload.chats)) throw new Error('local saved chats QA ยังไม่มี chats array')
+  if (expectedChatId && !payload.chats.some((chat) => chat.id === expectedChatId)) {
+    throw new Error('local saved chats QA ไม่พบแชทที่เพิ่งสร้างในรายการแชท')
+  }
+
+  return {
+    chats: payload.chats.length,
+    foundExpectedChat: expectedChatId ? payload.chats.some((chat) => chat.id === expectedChatId) : false,
+  }
+}
+
+export function validateLocalSavedChatMessages(payload: LocalSavedChatMessagesPayload, expectedChatId: string, expectedLimit: number) {
+  const chat = payload.chat
+  if (!chat) throw new Error('local saved chat messages QA ยังไม่มี chat')
+  if (chat.id !== expectedChatId) throw new Error('local saved chat messages QA คืน chat id ไม่ตรงกับที่ขอ')
+  if (!Array.isArray(chat.messages)) throw new Error('local saved chat messages QA ยังไม่มี messages array')
+  if (!chat.messageWindow) throw new Error('local saved chat messages QA ยังไม่มี messageWindow')
+  if (chat.messageWindow.limit !== expectedLimit) throw new Error('local saved chat messages QA messageWindow limit ไม่ตรงกับที่ขอ')
+  if (typeof chat.messageWindow.mayHaveMoreBefore !== 'boolean') {
+    throw new Error('local saved chat messages QA ยังไม่มี mayHaveMoreBefore')
+  }
+  if (chat.messages.length > expectedLimit) throw new Error('local saved chat messages QA messages เกิน window limit')
+
+  return {
+    messages: chat.messages.length,
+    messageWindowLimit: chat.messageWindow.limit,
+    mayHaveMoreBefore: chat.messageWindow.mayHaveMoreBefore,
+  }
+}
+
 export function validateLocalCreatorDraft(payload: LocalCreatorDraftPayload) {
   if (!payload.draft?.name) throw new Error('local creator QA draft ยังไม่มีชื่อ')
   if (!payload.draft.greeting) throw new Error('local creator QA draft ยังไม่มีข้อความทักทาย')
@@ -388,6 +438,8 @@ export function buildLocalSmokeSummary(input: {
   previewTurns: number
   chat?: ReturnType<typeof validateLocalChatSmoke> | null
   stream?: ReturnType<typeof validateLocalChatStreamSmoke> | null
+  savedChats: ReturnType<typeof validateLocalSavedChats>
+  savedMessages?: ReturnType<typeof validateLocalSavedChatMessages> | null
   upload: AvatarUploadPayload
 }) {
   return {
@@ -432,6 +484,11 @@ export function buildLocalSmokeSummary(input: {
     streamReplyChars: input.stream?.replyChars ?? 0,
     streamTokens: input.stream?.totalTokens ?? 0,
     streamEvents: input.stream?.eventCount ?? 0,
+    savedChats: input.savedChats.chats,
+    savedChatFound: input.savedChats.foundExpectedChat,
+    savedChatMessages: input.savedMessages?.messages ?? 0,
+    savedChatMessageWindowLimit: input.savedMessages?.messageWindowLimit ?? null,
+    savedChatMayHaveMoreBefore: input.savedMessages?.mayHaveMoreBefore ?? null,
     uploadProvider: input.upload.provider,
     uploadAccess: input.upload.access,
   }
@@ -586,6 +643,22 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
       stream = validateLocalChatStreamSmoke(streamEvents, expectedModel, minRoleplayReplyChars)
     }
 
+    const savedChats = validateLocalSavedChats(
+      await jsonReader<LocalSavedChatsPayload>('/chats', {
+        headers: currentAuthHeaders,
+      }),
+      chat?.chatId,
+    )
+    const savedMessages = chat?.chatId
+      ? validateLocalSavedChatMessages(
+          await jsonReader<LocalSavedChatMessagesPayload>(`/chats/${chat.chatId}/messages?limit=5`, {
+            headers: currentAuthHeaders,
+          }),
+          chat.chatId,
+          5,
+        )
+      : null
+
     const form = new FormData()
     form.append('file', new File([new Uint8Array([137, 80, 78, 71])], 'qa.png', { type: 'image/png' }))
 
@@ -618,6 +691,8 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           previewTurns: preview.preview.turns.length,
           chat,
           stream,
+          savedChats,
+          savedMessages,
           upload,
         }),
         null,

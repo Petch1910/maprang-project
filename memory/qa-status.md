@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 repo-owned QA pass after local saved-chat smoke guard: `bun run qa:repo` passed after `smoke:local` gained `/chats` and `/chats/:id/messages?limit=5` verification after local chat creation. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
+
+- 2026-06-11 local saved-chat smoke QA pass: `smoke:local` now checks that the local chat it just created appears in `GET /chats`, then checks `GET /chats/:id/messages?limit=5` for bounded `messageWindow` metadata. Passing evidence: `bun run smoke:local:test` (16 pass / 107 expects), `bun run predeploy:check:test` (3 pass / 1204 expects), `bun run test-plan:audit`, `bun run docs:commands`, `bun run predeploy:check`, `bun run memory:audit`, and `git diff --check`.
+
 - 2026-06-11 repo-owned QA pass after local moderation smoke guard: `bun run qa:repo` passed after `smoke:local` gained admin-key-gated `/admin/reports?limit=5` and `/admin/audit-logs?limit=5` snapshot verification. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
 
 - 2026-06-11 local moderation smoke QA pass: `smoke:local` now checks moderation/admin-audit snapshots when an admin smoke key is available. It fails if report or audit-log payloads are not arrays, and it records `moderationSkippedReason=missing-admin-smoke-key` when the admin key is absent. Passing evidence: `bun run smoke:local:test` (15 pass / 96 expects), `bun run predeploy:check:test` (3 pass / 1196 expects), `bun run test-plan:audit`, `bun run docs:commands`, `bun run predeploy:check`, `bun run memory:audit`, and `git diff --check`.

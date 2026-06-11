@@ -15,6 +15,8 @@ import {
   validateLocalCreatorDraft,
   validateLocalCreatorPreview,
   validateLocalPersona,
+  validateLocalSavedChatMessages,
+  validateLocalSavedChats,
   validateLocalUsageSummary,
   validateAvatarUpload,
   type LocalSmokeJsonReader,
@@ -119,6 +121,46 @@ describe('local smoke helpers', () => {
     })
     expect(() => validateLocalAdminModerationSnapshot({}, { logs: [] })).toThrow('reports array')
     expect(() => validateLocalAdminModerationSnapshot({ reports: [] }, {})).toThrow('audit logs array')
+  })
+
+  test('validates local saved chats and message window shape', () => {
+    expect(validateLocalSavedChats({ chats: [{ id: 'chat-1', title: 'คาเฟ่', isArchived: false }] }, 'chat-1')).toMatchObject({
+      chats: 1,
+      foundExpectedChat: true,
+    })
+    expect(
+      validateLocalSavedChatMessages(
+        {
+          chat: {
+            id: 'chat-1',
+            messages: [{ id: 'message-1' }],
+            messageWindow: { limit: 5, mayHaveMoreBefore: false },
+          },
+        },
+        'chat-1',
+        5,
+      ),
+    ).toMatchObject({
+      messages: 1,
+      messageWindowLimit: 5,
+      mayHaveMoreBefore: false,
+    })
+    expect(() => validateLocalSavedChats({})).toThrow('chats array')
+    expect(() => validateLocalSavedChats({ chats: [] }, 'chat-1')).toThrow('ไม่พบแชท')
+    expect(() => validateLocalSavedChatMessages({}, 'chat-1', 5)).toThrow('ยังไม่มี chat')
+    expect(() =>
+      validateLocalSavedChatMessages(
+        {
+          chat: {
+            id: 'chat-1',
+            messages: Array.from({ length: 6 }, (_, index) => ({ id: `m-${index}` })),
+            messageWindow: { limit: 5, mayHaveMoreBefore: false },
+          },
+        },
+        'chat-1',
+        5,
+      ),
+    ).toThrow('เกิน window limit')
   })
 
   test('validates local creator AI draft fallback shape', () => {
@@ -329,6 +371,15 @@ describe('local smoke helpers', () => {
       smokeCharacter: { id: '1', name: 'มิกะ | MIKA', tags: ['qa', 'scene-ready'] },
       loreCount: 2,
       previewTurns: 3,
+      savedChats: {
+        chats: 1,
+        foundExpectedChat: true,
+      },
+      savedMessages: {
+        messages: 1,
+        messageWindowLimit: 5,
+        mayHaveMoreBefore: false,
+      },
       upload: {
         url: 'http://127.0.0.1:3000/uploads/avatars/avatar.png',
         filename: 'avatar.png',
@@ -362,6 +413,11 @@ describe('local smoke helpers', () => {
       character: 'มิกะ | MIKA',
       loreCount: 2,
       previewTurns: 3,
+      savedChats: 1,
+      savedChatFound: true,
+      savedChatMessages: 1,
+      savedChatMessageWindowLimit: 5,
+      savedChatMayHaveMoreBefore: false,
       uploadAccess: 'signed',
     })
   })
@@ -450,6 +506,18 @@ describe('local smoke helpers', () => {
           usage: { totalTokens: 0, modelName: 'local/mock-roleplay' },
         } as never
       }
+      if (path === '/chats') {
+        return { chats: [{ id: 'chat-1', title: 'คาเฟ่', isArchived: false }] } as never
+      }
+      if (path === '/chats/chat-1/messages?limit=5') {
+        return {
+          chat: {
+            id: 'chat-1',
+            messages: [{ id: 'message-1' }],
+            messageWindow: { limit: 5, mayHaveMoreBefore: false },
+          },
+        } as never
+      }
       if (path === '/uploads/avatar') {
         return {
           url: 'http://127.0.0.1:3000/uploads/avatars/avatar.png',
@@ -503,6 +571,8 @@ describe('local smoke helpers', () => {
       '/characters/mika/lore',
       '/relationship/preview',
       '/chat',
+      '/chats',
+      '/chats/chat-1/messages?limit=5',
       '/uploads/avatar',
     ])
     expect(cleaned).toEqual(['avatar.png'])
@@ -517,6 +587,11 @@ describe('local smoke helpers', () => {
     expect(summary.streamReplyChars).toBe(440)
     expect(summary.streamTokens).toBe(0)
     expect(summary.streamEvents).toBe(3)
+    expect(summary.savedChats).toBe(1)
+    expect(summary.savedChatFound).toBe(true)
+    expect(summary.savedChatMessages).toBe(1)
+    expect(summary.savedChatMessageWindowLimit).toBe(5)
+    expect(summary.savedChatMayHaveMoreBefore).toBe(false)
     expect(summary.tokenBalance).toBe(1200)
     expect(summary.usageDailyDays).toBe(7)
     expect(summary.walletTransactions).toBe(1)

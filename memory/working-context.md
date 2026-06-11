@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Full deterministic `bun run qa:repo` passed after adding saved-chat list/message-window coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
+
+- 2026-06-11: `smoke:local` now verifies saved-chat runtime readiness after local chat creation. It reads `GET /chats` and `GET /chats/:id/messages?limit=5`, requires the created chat to appear in the saved-chat list, requires `messageWindow.limit=5`, requires boolean `mayHaveMoreBefore`, and fails if messages exceed the requested window. Focused checks passed: `smoke:local:test` (16 pass / 107 expects), `predeploy:check:test` (3 pass / 1204 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, `memory:audit`, and `git diff --check`.
+
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local moderation/admin-audit snapshot coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
 
 - 2026-06-11: `smoke:local` now verifies local moderation/admin-audit readiness when an admin smoke key is available. It reads `GET /admin/reports?limit=5` and `GET /admin/audit-logs?limit=5`, requires report/audit-log arrays, and writes `moderationReports`, `moderationAuditLogs`, or `moderationSkippedReason=missing-admin-smoke-key` into the summary. Focused checks passed: `smoke:local:test` (15 pass / 96 expects), `predeploy:check:test` (3 pass / 1196 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, `memory:audit`, and `git diff --check`.
