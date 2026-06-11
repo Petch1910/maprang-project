@@ -576,7 +576,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
   await expect(page.locator('body')).toContainText('Runtime แชท')
   if (expectsLocalChatRuntime) {
-    await expect(page.locator('body')).toContainText('local mock พร้อมเล่น')
+    await expect(page.locator('body')).toContainText('โหมด local QA พร้อมเล่น')
     await expect(page.locator('body')).toContainText('แชท local สำหรับ QA')
     await expect(page.locator('body')).toContainText('local/mock-roleplay')
   }

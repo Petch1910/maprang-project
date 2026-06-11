@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 admin health local runtime wording QA pass: user-facing/frontend runtime copy no longer says `local mock`. `SystemStatus`, Admin Health, Route/Menu Audit, and Playwright expectations now use `โหมด local QA พร้อมเล่น` / `แชท local QA` while keeping `local/mock-roleplay` only as the internal local runtime identifier. Passing evidence: `bun run frontend:static:audit`, `bun run route-menu:audit`, `bun run e2e:smoke:test` (18 pass / 77 expects), `bun run frontend:check`, `bun run predeploy:check`, and full `bun run qa:repo`.
+
 - 2026-06-11 e2e seed-cleanup QA pass: after a successful DB preflight, `e2e:smoke` now attempts `qa:clear` when `qa:seed` fails, preventing partial QA seed data from being left behind. The runner logs the seed failure and, if needed, a separate cleanup failure through the safe e2e formatter. Passing evidence: `bun run e2e:smoke:test` (18 pass / 77 expects).
 
 - 2026-06-11 e2e DB preflight QA pass: `e2e:smoke` now checks PostgreSQL readiness with `apps/backend/src/db.required-check.ts` before `qa:seed`, so a missing Docker/Postgres service fails before browser setup or seed mutation. The runner also returns formatted Thai-first e2e diagnostics for DB preflight/reset failures instead of leaking raw stack traces. Passing evidence: `bun run e2e:smoke:test` (17 pass / 56 expects), `bun run qa:repo`, `bun run secrets:check`, `bun run predeploy:check`, and `git diff --check`. Runtime `bun run e2e:smoke` still exits 1 in this environment because Docker Desktop/Postgres is not running, but now stops cleanly before `qa:seed` with the DB fix guidance.

@@ -50,12 +50,12 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
   const chatStatusLabel = chatProductionReady
     ? 'ยืนยันแล้ว'
     : chatRuntimeIsLocal
-      ? 'local mock พร้อมเล่น'
+      ? 'โหมด local QA พร้อมเล่น'
       : checks?.openRouterConfigured
         ? 'ตั้งค่าแล้ว รอทดสอบจริง'
         : 'ยังขาด'
   const chatRuntimeLabel = chatRuntimeIsLocal
-    ? `local mock${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
+    ? `โหมด local QA${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
     : chatProvider?.activeRuntimeProvider === 'openrouter'
       ? 'OpenRouter'
       : chatProvider?.activeRuntimeProvider ?? 'ยังไม่ทราบ'
@@ -172,7 +172,7 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
             {healthStatus.model.chatProvider?.status && <span>แชท {providerStatusLabel(healthStatus.model.chatProvider.status)}</span>}
             {healthStatus.model.chatProvider?.activeRuntimeProvider && <span>runtime {chatRuntimeLabel}</span>}
             {healthStatus.model.chatProvider?.localFallbackEnabled && (
-              <span>local fallback {healthStatus.model.chatProvider.localModel ?? 'local/mock-roleplay'}</span>
+              <span>แชท local QA {healthStatus.model.chatProvider.localModel ?? 'local/mock-roleplay'}</span>
             )}
             <span>รูป {healthStatus.model.imageGeneration?.model ?? 'ยังไม่ตั้งค่า'}</span>
             {healthStatus.model.imageGeneration?.status && (

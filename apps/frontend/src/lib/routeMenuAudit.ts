@@ -111,7 +111,7 @@ export const routeMenuAuditRows: RouteMenuAuditRow[] = [
     route: '/admin/health',
     control: 'รีเฟรชสถานะ, เช็กลิสต์ดีพลอย, ตรวจเส้นทาง/เมนู, เช็กลิสต์สเตจจิง, ลิงก์ตรวจพรอมป์, ลิงก์ทดสอบคุณภาพ',
     result:
-      'เห็นความพร้อมของ DB, AI, Runtime แชท, Supabase, พื้นที่เก็บรูปแบบลิงก์ลงชื่อ, CORS, การตรวจเส้นทาง และขั้นต่อไปของแต่ละตัวกั้นในหน้าเดียว; ลำดับงานก่อนปล่อยจริงแยกสเตจจิง, live provider และโปรดักชันพร้อมคำสั่ง bun run staging:verify + bun run e2e:smoke, bun run api:smoke:live และ bun run production:check; local runtime จะแสดง local mock พร้อมเล่น, แชท local สำหรับ QA, และ local/mock-roleplay พร้อมไปตัวตรวจพรอมป์และชุดทดสอบอัตโนมัติได้',
+      'เห็นความพร้อมของ DB, AI, Runtime แชท, Supabase, พื้นที่เก็บรูปแบบลิงก์ลงชื่อ, CORS, การตรวจเส้นทาง และขั้นต่อไปของแต่ละตัวกั้นในหน้าเดียว; ลำดับงานก่อนปล่อยจริงแยกสเตจจิง, live provider และโปรดักชันพร้อมคำสั่ง bun run staging:verify + bun run e2e:smoke, bun run api:smoke:live และ bun run production:check; local runtime จะแสดงโหมด local QA พร้อมเล่น, แชท local สำหรับ QA, และ local/mock-roleplay พร้อมไปตัวตรวจพรอมป์และชุดทดสอบอัตโนมัติได้',
     disabledReason: 'ปุ่มรีเฟรชหัวหน้าและการ์ดสถานะระบบถูกปิดเฉพาะตอนโหลดสถานะและมี title ว่ากำลังโหลดสถานะระบบ; ลิงก์ตรวจพรอมป์/ชุดทดสอบยังเปิดได้',
     emptyState: 'ถ้าระบบหลังบ้านล่มจะแสดงสถานะไม่พร้อมและรายการที่ต้องแก้',
     status: 'ready',

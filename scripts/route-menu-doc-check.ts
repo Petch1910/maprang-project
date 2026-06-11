@@ -325,7 +325,7 @@ const defaultRequiredSnippets = [
   'ปุ่มรีเฟรชหัวหน้าและการ์ดสถานะระบบ',
   'ลิงก์ตรวจพรอมป์/ชุดทดสอบยังเปิดได้',
   'Runtime แชท',
-  'local mock พร้อมเล่น',
+  'โหมด local QA พร้อมเล่น',
   'แชท local สำหรับ QA',
   'local/mock-roleplay',
   'bun run staging:verify + bun run e2e:smoke',

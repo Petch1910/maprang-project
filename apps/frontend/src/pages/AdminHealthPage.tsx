@@ -75,7 +75,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
   const chatRuntimeIsLocal = chatProvider?.activeRuntimeProvider === 'local' || chatProvider?.forcedLocal === true
   const chatRuntimeLabel = chatRuntimeIsLocal
-    ? `${chatProvider?.localModel ?? 'local/mock-roleplay'}${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
+    ? `โหมด local QA (${chatProvider?.localModel ?? 'local/mock-roleplay'})${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
     : chatProvider?.activeRuntimeProvider === 'openrouter'
       ? 'OpenRouter'
       : chatProvider?.activeRuntimeProvider ?? 'ยังไม่ทราบ'
@@ -123,7 +123,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       action: checks?.openRouterConfigured
         ? 'รัน bun run smoke:chat กับสเตจจิงเพื่อยืนยันผู้ให้บริการจริง'
         : chatRuntimeIsLocal
-          ? 'ใช้ local mock ต่อสำหรับ QA ได้ แต่ก่อน deploy ต้องตั้ง OPENROUTER_API_KEY และรัน live smoke'
+          ? 'ใช้โหมด local QA ต่อได้ แต่ก่อน deploy ต้องตั้ง OPENROUTER_API_KEY และรัน live smoke'
           : 'ตั้ง OPENROUTER_API_KEY ที่ขึ้นต้น sk-or- ใน secret ของโฮสต์หลังบ้าน',
       scope: 'local',
     },
@@ -133,7 +133,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail: chatRuntimeIsLocal
         ? `runtime ตอนนี้ใช้ ${chatRuntimeLabel}; api:smoke ตรวจ normal chat และ stream chat ได้โดยไม่ใช้เครดิตผู้ให้บริการ`
         : chatProvider?.localFallbackEnabled
-          ? `local fallback เปิดอยู่ แต่ runtime ตอนนี้เป็น ${chatRuntimeLabel}`
+          ? `โหมด local สำรองเปิดอยู่ แต่ runtime ตอนนี้เป็น ${chatRuntimeLabel}`
           : 'ยังไม่ได้เปิด local chat provider สำหรับการเล่นทดสอบในเครื่อง',
       action: chatRuntimeIsLocal
         ? 'ใช้ bun run api:smoke หรือ bun run qa:local เพื่อตรวจแชท local normal/stream ซ้ำได้'
