@@ -789,6 +789,53 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
   return findings
 }
 
+function propertyNameText(name: ts.PropertyName) {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) return name.text
+  return null
+}
+
+function objectLiteralHasDirectProperty(objectLiteral: ts.ObjectLiteralExpression, propertyName: string) {
+  return objectLiteral.properties.some((property) => {
+    if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property)) return false
+    return propertyNameText(property.name) === propertyName
+  })
+}
+
+function hasIncludeOrSelectAncestor(node: ts.Node) {
+  let current: ts.Node | undefined = node.parent
+  while (current) {
+    if (ts.isPropertyAssignment(current)) {
+      const name = propertyNameText(current.name)
+      if (name === 'include' || name === 'select') return true
+    }
+    current = current.parent
+  }
+  return false
+}
+
+function collectUnboundedMessagesIncludeFindings(file: string, content: string) {
+  const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+  const findings: BackendSecurityFinding[] = []
+  const message =
+    'Prisma include/select messages ต้องจำกัดด้วย take; ห้ามโหลดประวัติแชททั้งหมดใน runtime backend.'
+
+  function visit(node: ts.Node) {
+    if (ts.isPropertyAssignment(node) && propertyNameText(node.name) === 'messages' && hasIncludeOrSelectAncestor(node)) {
+      const initializer = node.initializer
+      if (initializer.kind === ts.SyntaxKind.TrueKeyword) {
+        findings.push({ file, line: lineFor(content, node.getStart(sourceFile)), message })
+      } else if (ts.isObjectLiteralExpression(initializer) && !objectLiteralHasDirectProperty(initializer, 'take')) {
+        findings.push({ file, line: lineFor(content, node.getStart(sourceFile)), message })
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return findings
+}
+
 export function collectBackendSecurityFindingsFromSource(file: string, content: string): BackendSecurityFinding[] {
   const findings: BackendSecurityFinding[] = []
 
@@ -801,6 +848,8 @@ export function collectBackendSecurityFindingsFromSource(file: string, content: 
       })
     }
   }
+
+  findings.push(...collectUnboundedMessagesIncludeFindings(file, content))
 
   for (const match of content.matchAll(rawResponseJsonPattern)) {
     if (isInsideAllowedRawResponseJsonReader(content, match.index ?? 0)) continue

@@ -972,6 +972,7 @@ Verified:
 - Decision `0019-audit-decision-command-references.md` wording now points future decision additions to the dynamic predeploy heading audit contract in decision `0020-discover-decision-markdown-heading-files.md` instead of mentioning a hardcoded predeploy list. Focused checks passed: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 - Metadata date sync for the 0019/0020 decision handoff uses the real current date 2026-05-26. Focused checks passed: `bun run docs:commands`, `bun run memory:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 - Saved chat history loading now has a bounded message window: `loadChatMessages` clamps the request limit, fetches only the latest saved messages with one extra row to detect older history, and returns the window in normal reading order. The `/chats/:id/messages` route accepts an optional `limit` query, and the frontend `fetchChatMessages` helper supports the same option.
+- Backend security audit now guards the saved-history fix from regressing: runtime Prisma `include`/`select` blocks for `messages` fail unless they use a bounded object with direct `take`, and `messages: true` is rejected in non-test backend source.
 
 ## สถานะ production ปัจจุบัน
 

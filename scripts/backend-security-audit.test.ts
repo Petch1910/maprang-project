@@ -70,6 +70,42 @@ describe('backend security audit', () => {
     ).toEqual([])
   })
 
+  test('catches unbounded Prisma messages includes in runtime source', () => {
+    const messages = messagesFor(`
+      await prisma.chat.findFirst({
+        include: {
+          messages: true,
+          character: true,
+        },
+      })
+
+      await prisma.chat.findMany({
+        include: {
+          messages: {
+            where: { deletedAt: null },
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      })
+    `, 'chat.service.ts')
+
+    expect(messages.filter((message) => message.includes('messages ต้องจำกัดด้วย take'))).toHaveLength(2)
+
+    expect(
+      messagesFor(`
+        await prisma.chat.findMany({
+          include: {
+            messages: {
+              where: { deletedAt: null },
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+            },
+          },
+        })
+      `, 'chat.service.ts'),
+    ).toEqual([])
+  })
+
   test('catches raw provider error logging after classification', () => {
     const predeployChecklistCoverage = `providerFailure,
           error,
