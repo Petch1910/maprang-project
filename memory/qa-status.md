@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11 repo-owned QA pass after local Profile/Persona smoke guard: `bun run qa:repo` passed after `smoke:local` gained direct `/me/content-settings` and `/me/persona` verification and predeploy source locks. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
+
+- 2026-06-11 local Profile/Persona smoke QA pass: `smoke:local` now checks `GET /me/content-settings` and `GET /me/persona` before chat/runtime work and fails if profile/persona shape is missing. It requires boolean adult state, valid content rating, persona string, valid updatedAt/null, positive maxChars, and persona length within maxChars. Passing evidence: `bun run smoke:local:test` (12 pass / 72 expects), `bun run predeploy:check:test` (3 pass / 1177 expects), `bun run test-plan:audit`, `bun run docs:commands`, `bun run predeploy:check`, and `git diff --check`.
+
 - 2026-06-11 repo-owned QA pass after local Wallet/Usage smoke guard: `bun run qa:repo` passed after `smoke:local` gained direct `/me/usage` verification and predeploy source locks. The gate covered docs command audit 457 refs, test coverage audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend production build, and bundle budget.
 
 - 2026-06-11 local Wallet/Usage smoke QA pass: `smoke:local` now checks `GET /me/usage` before chat/runtime work and fails if wallet/accounting shape is missing. It requires token balance, usage cost, usage-by-model array, 7-day daily usage graph, estimate fields, and wallet transactions array shape. Passing evidence: `bun run smoke:local:test` (11 pass / 59 expects), `bun run predeploy:check:test` (3 pass / 1170 expects), `bun run test-plan:audit`, `bun run predeploy:check`, `bun run docs:commands`, and `git diff --check`.

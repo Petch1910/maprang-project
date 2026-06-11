@@ -38,6 +38,21 @@ export type LocalUsageSummaryPayload = {
   wallet?: { transactions?: unknown[] }
 }
 
+export type LocalContentSettingsPayload = {
+  contentSettings?: {
+    isAdult?: boolean
+    maxRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18' | string
+  }
+}
+
+export type LocalPersonaPayload = {
+  persona?: {
+    persona?: string
+    updatedAt?: string | null
+    maxChars?: number
+  }
+}
+
 export type LocalChatSmokePayload = {
   reply?: string
   chatId?: string | null
@@ -130,6 +145,38 @@ export function validateLocalUsageSummary(payload: LocalUsageSummaryPayload) {
     averageTokensPerRequest: payload.usage.estimate.averageTokensPerRequest,
     estimatedRemainingRequests: payload.usage.estimate.estimatedRemainingRequests ?? null,
     walletTransactions: payload.wallet?.transactions?.length ?? 0,
+  }
+}
+
+export function validateLocalContentSettings(payload: LocalContentSettingsPayload) {
+  const settings = payload.contentSettings
+  if (!settings) throw new Error('local profile QA ยังไม่มี contentSettings')
+  if (typeof settings.isAdult !== 'boolean') throw new Error('local profile QA contentSettings.isAdult ต้องเป็น boolean')
+  if (!settings.maxRating) throw new Error('local profile QA ยังไม่มี maxRating')
+  const allowedRatings = new Set(['general', 'teen_romance', 'mature_18', 'restricted_18'])
+  if (!allowedRatings.has(settings.maxRating)) throw new Error(`local profile QA maxRating ไม่ถูกต้อง: ${settings.maxRating}`)
+
+  return {
+    isAdult: settings.isAdult,
+    maxRating: settings.maxRating,
+  }
+}
+
+export function validateLocalPersona(payload: LocalPersonaPayload) {
+  const persona = payload.persona
+  if (!persona) throw new Error('local profile QA ยังไม่มี persona')
+  if (typeof persona.persona !== 'string') throw new Error('local profile QA persona ต้องเป็น string')
+  if (persona.updatedAt !== null && persona.updatedAt !== undefined && typeof persona.updatedAt !== 'string') {
+    throw new Error('local profile QA persona.updatedAt ต้องเป็น string หรือ null')
+  }
+  if (typeof persona.maxChars !== 'number') throw new Error('local profile QA persona.maxChars ต้องเป็น number')
+  if (persona.maxChars < 1) throw new Error('local profile QA persona.maxChars ต้องมากกว่า 0')
+  if (persona.persona.length > persona.maxChars) throw new Error('local profile QA persona ยาวเกิน maxChars')
+
+  return {
+    personaChars: persona.persona.length,
+    personaMaxChars: persona.maxChars,
+    personaUpdated: Boolean(persona.updatedAt),
   }
 }
 
@@ -229,6 +276,8 @@ export function buildLocalSmokeSummary(input: {
   apiBaseUrl: string
   health: HealthPayload
   usage: ReturnType<typeof validateLocalUsageSummary>
+  contentSettings: ReturnType<typeof validateLocalContentSettings>
+  persona: ReturnType<typeof validateLocalPersona>
   smokeCharacter: SmokeCharacter
   loreCount: number
   previewTurns: number
@@ -247,6 +296,11 @@ export function buildLocalSmokeSummary(input: {
     usageDailyDays: input.usage.usageDailyDays,
     usageModels: input.usage.usageModels,
     walletTransactions: input.usage.walletTransactions,
+    contentMaxRating: input.contentSettings.maxRating,
+    contentIsAdult: input.contentSettings.isAdult,
+    personaChars: input.persona.personaChars,
+    personaMaxChars: input.persona.personaMaxChars,
+    personaUpdated: input.persona.personaUpdated,
     character: input.smokeCharacter.name,
     tags: input.smokeCharacter.tags,
     loreCount: input.loreCount,
@@ -295,6 +349,16 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
 
     const usage = validateLocalUsageSummary(
       await jsonReader<LocalUsageSummaryPayload>('/me/usage', {
+        headers: authHeaders(),
+      }),
+    )
+    const contentSettings = validateLocalContentSettings(
+      await jsonReader<LocalContentSettingsPayload>('/me/content-settings', {
+        headers: authHeaders(),
+      }),
+    )
+    const persona = validateLocalPersona(
+      await jsonReader<LocalPersonaPayload>('/me/persona', {
         headers: authHeaders(),
       }),
     )
@@ -377,6 +441,8 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           apiBaseUrl: currentApiBaseUrl,
           health,
           usage,
+          contentSettings,
+          persona,
           smokeCharacter,
           loreCount: lore.loreEntries?.length ?? 0,
           previewTurns: preview.preview.turns.length,

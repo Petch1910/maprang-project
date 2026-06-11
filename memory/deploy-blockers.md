@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest local Profile/Persona smoke addendum: 2026-06-11 `smoke:local` now verifies `GET /me/content-settings` and `GET /me/persona` before chat/runtime checks. It requires valid content rating, adult flag, persona shape, update timestamp shape, and persona length limit. This improves repo-owned local profile/persona evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest local Wallet/Usage smoke addendum: 2026-06-11 `smoke:local` now verifies `GET /me/usage` before chat/runtime checks. It requires token balance, usage summary, a 7-day usage graph, estimate fields, and wallet transaction array shape. This improves repo-owned local wallet/accounting evidence; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest repo-owned QA addendum after local stream smoke: 2026-06-11 `bun run qa:repo` passed after `smoke:local` gained direct `POST /chat/stream` verification. This confirms the committed local baseline remains green; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.

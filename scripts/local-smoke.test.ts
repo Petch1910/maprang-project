@@ -10,6 +10,8 @@ import {
   runLocalSmoke,
   validateLocalChatStreamSmoke,
   validateLocalChatSmoke,
+  validateLocalContentSettings,
+  validateLocalPersona,
   validateLocalUsageSummary,
   validateAvatarUpload,
   type LocalSmokeJsonReader,
@@ -85,6 +87,26 @@ describe('local smoke helpers', () => {
       }),
     ).toThrow('estimatedRemainingRequests')
     expect(() => validateLocalUsageSummary({ ...payload, wallet: { transactions: {} as never } })).toThrow('รายการกระเป๋า')
+  })
+
+  test('validates local profile content settings and persona shape', () => {
+    expect(validateLocalContentSettings({ contentSettings: { isAdult: true, maxRating: 'restricted_18' } })).toMatchObject({
+      isAdult: true,
+      maxRating: 'restricted_18',
+    })
+    expect(validateLocalPersona({ persona: { persona: 'ชื่อ: มะปราง', updatedAt: '2026-06-11T00:00:00.000Z', maxChars: 2000 } })).toMatchObject({
+      personaChars: 12,
+      personaMaxChars: 2000,
+      personaUpdated: true,
+    })
+    expect(() => validateLocalContentSettings({})).toThrow('contentSettings')
+    expect(() => validateLocalContentSettings({ contentSettings: { isAdult: 'yes' as never, maxRating: 'teen_romance' } })).toThrow(
+      'isAdult',
+    )
+    expect(() => validateLocalContentSettings({ contentSettings: { isAdult: false, maxRating: 'unknown' } })).toThrow('maxRating')
+    expect(() => validateLocalPersona({ persona: { persona: 'ยาวเกิน', updatedAt: null, maxChars: 3 } })).toThrow('ยาวเกิน')
+    expect(() => validateLocalPersona({ persona: { persona: '', updatedAt: 123 as never, maxChars: 2000 } })).toThrow('updatedAt')
+    expect(() => validateLocalPersona({ persona: { persona: '', updatedAt: null, maxChars: 0 } })).toThrow('maxChars')
   })
 
   test('validates local chat runtime, reply length, model, and zero-token usage', () => {
@@ -197,6 +219,15 @@ describe('local smoke helpers', () => {
         estimatedRemainingRequests: 2,
         walletTransactions: 1,
       },
+      contentSettings: {
+        isAdult: true,
+        maxRating: 'restricted_18',
+      },
+      persona: {
+        personaChars: 12,
+        personaMaxChars: 2000,
+        personaUpdated: true,
+      },
       smokeCharacter: { id: '1', name: 'มิกะ | MIKA', tags: ['qa', 'scene-ready'] },
       loreCount: 2,
       previewTurns: 3,
@@ -215,6 +246,11 @@ describe('local smoke helpers', () => {
       tokenBalance: 1200,
       usageDailyDays: 7,
       walletTransactions: 1,
+      contentMaxRating: 'restricted_18',
+      contentIsAdult: true,
+      personaChars: 12,
+      personaMaxChars: 2000,
+      personaUpdated: true,
       character: 'มิกะ | MIKA',
       loreCount: 2,
       previewTurns: 3,
@@ -253,6 +289,12 @@ describe('local smoke helpers', () => {
           },
           wallet: { transactions: [{ id: 'tx-1' }] },
         } as never
+      }
+      if (path === '/me/content-settings') {
+        return { contentSettings: { isAdult: true, maxRating: 'restricted_18' } } as never
+      }
+      if (path === '/me/persona') {
+        return { persona: { persona: 'ชื่อ: มะปราง', updatedAt: '2026-06-11T00:00:00.000Z', maxChars: 2000 } } as never
       }
       if (path === '/characters?view=admin&limit=10') {
         return { characters: [{ id: 'mika', name: 'มิกะ | MIKA', tags: ['qa'] }] } as never
@@ -309,6 +351,8 @@ describe('local smoke helpers', () => {
       '/',
       '/health',
       '/me/usage',
+      '/me/content-settings',
+      '/me/persona',
       '/characters?view=admin&limit=10',
       '/characters/mika/lore',
       '/relationship/preview',
@@ -330,6 +374,11 @@ describe('local smoke helpers', () => {
     expect(summary.tokenBalance).toBe(1200)
     expect(summary.usageDailyDays).toBe(7)
     expect(summary.walletTransactions).toBe(1)
+    expect(summary.contentMaxRating).toBe('restricted_18')
+    expect(summary.contentIsAdult).toBe(true)
+    expect(summary.personaChars).toBe(12)
+    expect(summary.personaMaxChars).toBe(2000)
+    expect(summary.personaUpdated).toBe(true)
     expect(errors).toEqual([])
   })
 
@@ -356,6 +405,12 @@ describe('local smoke helpers', () => {
           },
           wallet: { transactions: [] },
         } as never
+      }
+      if (path === '/me/content-settings') {
+        return { contentSettings: { isAdult: false, maxRating: 'teen_romance' } } as never
+      }
+      if (path === '/me/persona') {
+        return { persona: { persona: '', updatedAt: null, maxChars: 2000 } } as never
       }
       if (path === '/characters?view=admin&limit=10') {
         return { characters: [{ id: 'mika', name: 'มิกะ | MIKA', tags: ['qa'] }] } as never

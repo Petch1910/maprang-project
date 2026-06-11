@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local Profile/Persona coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
+
+- 2026-06-11: `smoke:local` now verifies local Profile/Persona readiness through `GET /me/content-settings` and `GET /me/persona`. It requires content settings with boolean `isAdult`, valid `maxRating`, persona string, valid `updatedAt`, positive `maxChars`, and persona length within limit. The local smoke JSON summary now prints `contentMaxRating`, `contentIsAdult`, `personaChars`, `personaMaxChars`, and `personaUpdated`, and `predeploy:check` source-locks these snippets. Focused checks passed: `smoke:local:test` (12 pass / 72 expects), `predeploy:check:test` (3 pass / 1177 expects), `test-plan:audit`, `docs:commands`, `predeploy:check`, and `git diff --check`.
+
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local Wallet/Usage coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
 
 - 2026-06-11: `smoke:local` now verifies local Wallet/Usage readiness through `GET /me/usage` before chat checks. It requires `tokenBalance`, `totalCost`, `usage.byModel`, a 7-day `usage.daily` graph, numeric/null `estimatedRemainingRequests`, and array wallet transactions. The local smoke JSON summary now prints `tokenBalance`, `usageTotalCost`, `usageDailyDays`, `usageModels`, and `walletTransactions`, and `predeploy:check` source-locks these snippets. Focused checks passed: `smoke:local:test` (11 pass / 59 expects), `predeploy:check:test` (3 pass / 1170 expects), `test-plan:audit`, `predeploy:check`, `docs:commands`, and `git diff --check`.
