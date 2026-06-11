@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { formatUnknownDiagnosticText, smokeTargetIsLocal } from './smoke-helpers'
 
 export type E2eSmokeStep = {
@@ -9,6 +11,52 @@ export type E2eSmokeStep = {
 export type E2eSmokeLogger = Pick<typeof console, 'log' | 'error'>
 export type E2eSmokeEnv = Record<string, string | undefined>
 export type E2eSmokeRunner = (step: E2eSmokeStep, env: E2eSmokeEnv) => Promise<number>
+
+const backendEnvPath = join(import.meta.dir, '..', 'apps/backend/.env')
+
+function unquoteEnvValue(value: string) {
+  const trimmed = value.trim()
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim()
+  }
+  return trimmed
+}
+
+export function backendEnvPort(envText: string) {
+  for (const rawLine of envText.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line || line.startsWith('#')) continue
+    const match = line.match(/^PORT\s*=\s*(.+)$/)
+    if (!match?.[1]) continue
+    const port = unquoteEnvValue(match[1])
+    if (/^\d+$/.test(port)) return port
+  }
+  return ''
+}
+
+export function resolveE2eSmokeEnv(env: E2eSmokeEnv = process.env, backendEnvText = ''): E2eSmokeEnv {
+  const backendPort = env.E2E_API_BASE_URL ? '' : backendEnvPort(backendEnvText)
+  const e2eApiBaseUrl = env.E2E_API_BASE_URL ?? (backendPort ? `http://127.0.0.1:${backendPort}` : 'http://127.0.0.1:3000')
+  const e2eBaseUrl = env.E2E_BASE_URL ?? 'http://127.0.0.1:5173'
+
+  return {
+    ...env,
+    E2E_BASE_URL: e2eBaseUrl,
+    E2E_API_BASE_URL: e2eApiBaseUrl,
+    VITE_API_BASE_URL: env.VITE_API_BASE_URL ?? e2eApiBaseUrl,
+  }
+}
+
+async function readBackendEnvText() {
+  try {
+    return await readFile(backendEnvPath, 'utf8')
+  } catch {
+    return ''
+  }
+}
 
 function e2eUrlIssues(name: string, value: string) {
   const issues: string[] = []
@@ -29,9 +77,10 @@ function e2eUrlIssues(name: string, value: string) {
 }
 
 export function e2eSmokeTargetIssues(env: E2eSmokeEnv = process.env) {
+  const resolvedEnv = resolveE2eSmokeEnv(env)
   const targets = [
-    ['E2E_BASE_URL', env.E2E_BASE_URL ?? 'http://127.0.0.1:5173'],
-    ['E2E_API_BASE_URL', env.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'],
+    ['E2E_BASE_URL', resolvedEnv.E2E_BASE_URL ?? 'http://127.0.0.1:5173'],
+    ['E2E_API_BASE_URL', resolvedEnv.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'],
   ] as const
 
   return targets.flatMap(([name, value]) => e2eUrlIssues(name, value))
@@ -84,7 +133,8 @@ export async function runE2eSmoke(
 ) {
   const [reset, browserSmoke, restore] = steps
   if (!reset || !browserSmoke || !restore) throw new Error('e2e smoke ต้องมีขั้น reset, ตรวจเบราว์เซอร์, และ restore')
-  const targetIssues = e2eSmokeTargetIssues(env)
+  const runtimeEnv = resolveE2eSmokeEnv(env, await readBackendEnvText())
+  const targetIssues = e2eSmokeTargetIssues(runtimeEnv)
   if (targetIssues.length > 0) {
     logger.error(`ตรวจเบราว์เซอร์ e2e ไม่ผ่าน: ${targetIssues.join('; ')}`)
     return 1
@@ -92,16 +142,16 @@ export async function runE2eSmoke(
 
   let exitCode = 0
 
-  await runStep(reset, runner, logger, env)
+  await runStep(reset, runner, logger, runtimeEnv)
 
   try {
-    await runStep(browserSmoke, runner, logger, env)
+    await runStep(browserSmoke, runner, logger, runtimeEnv)
   } catch (error) {
     exitCode = 1
     logger.error(formatE2eSmokeError(error))
   } finally {
     try {
-      await runStep(restore, runner, logger, env)
+      await runStep(restore, runner, logger, runtimeEnv)
     } catch (error) {
       exitCode = 1
       logger.error(formatE2eSmokeError(error))

@@ -2,9 +2,11 @@ import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
+  backendEnvPort,
   e2eSmokeSteps,
   e2eSmokeTargetIssues,
   formatE2eSmokeError,
+  resolveE2eSmokeEnv,
   runE2eSmoke,
   type E2eSmokeLogger,
   type E2eSmokeStep,
@@ -21,6 +23,34 @@ describe('e2e smoke command plan', () => {
   test('locks Not Found fallback route coverage', () => {
     expect(e2eSpec).toContain('/__maprang-not-found-e2e')
     expect(e2eSpec).toContain('not-found-page')
+  })
+
+  test('resolves local backend port from backend env when E2E_API_BASE_URL is omitted', () => {
+    const backendEnv = 'DATABASE_URL=postgresql://example\nPORT=\"3001\"\n'
+
+    expect(backendEnvPort(backendEnv)).toBe('3001')
+    expect(resolveE2eSmokeEnv({}, backendEnv)).toMatchObject({
+      E2E_BASE_URL: 'http://127.0.0.1:5173',
+      E2E_API_BASE_URL: 'http://127.0.0.1:3001',
+      VITE_API_BASE_URL: 'http://127.0.0.1:3001',
+    })
+  })
+
+  test('keeps explicit deployed E2E targets ahead of backend env port inference', () => {
+    expect(
+      resolveE2eSmokeEnv(
+        {
+          E2E_BASE_URL: 'https://app.example.com',
+          E2E_API_BASE_URL: 'https://api.example.com',
+          VITE_API_BASE_URL: 'https://api.example.com',
+        },
+        'PORT=3001',
+      ),
+    ).toMatchObject({
+      E2E_BASE_URL: 'https://app.example.com',
+      E2E_API_BASE_URL: 'https://api.example.com',
+      VITE_API_BASE_URL: 'https://api.example.com',
+    })
   })
 
   test('runs seed, Playwright, then QA cleanup in order', () => {

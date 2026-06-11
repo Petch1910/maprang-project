@@ -48,6 +48,8 @@ bun run dev
 $env:SMOKE_API_BASE_URL="http://127.0.0.1:3001"
 ```
 
+`bun run e2e:smoke` จะอ่าน `PORT` จาก `apps/backend/.env` ให้อัตโนมัติเมื่อยังไม่ได้ตั้ง `E2E_API_BASE_URL`; ถ้าตรวจ staging/deployed URL ให้ตั้ง `E2E_API_BASE_URL` เป็น backend origin จริงเสมอ.
+
 4. รัน frontend
 
 ```powershell

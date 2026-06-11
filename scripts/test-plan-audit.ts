@@ -87,6 +87,9 @@ const requiredRunbookSnippets = [
   'Prisma',
   'Bun',
   'local/mock-roleplay',
+  'SMOKE_API_BASE_URL',
+  'VITE_API_BASE_URL',
+  'E2E_API_BASE_URL',
 ]
 
 const forbiddenCurrentSourceSnippets = [

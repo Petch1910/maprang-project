@@ -54,8 +54,11 @@ bun run dev --host 127.0.0.1
 ```
 
 Frontend: `http://127.0.0.1:5173`
+Backend default: `http://127.0.0.1:3000`
 Backend health: `http://127.0.0.1:3000/health`
 Backend readiness: `http://127.0.0.1:3000/ready`
+
+ถ้า `apps/backend/.env` ตั้ง `PORT` เป็นพอร์ตอื่น ให้ใช้ backend origin นั้นแทนทุกจุดและตั้ง `VITE_API_BASE_URL` ใน `apps/frontend/.env` ให้ตรงกันก่อน restart frontend. `bun run e2e:smoke` จะอ่าน `PORT` จาก `apps/backend/.env` ให้เองเมื่อยังไม่ได้ตั้ง `E2E_API_BASE_URL`.
 
 ## เครื่องมืออ่านโค้ดในเครื่อง (Local Codebase Intelligence)
 
@@ -192,7 +195,7 @@ bun run qa:local
 ใช้คำสั่งนี้เป็น local readiness gate ปกติ. มันตรวจ secrets, regression tests สำหรับ secret-pattern, memory/knowledge audits, deterministic prompt/context evals, API route coverage mapping, import-cycle architecture audit, deploy/predeploy wiring, backend tests, frontend build, backend root identity, backend health, database connectivity, seeded data, relationship preview, temporary character/lore runtime flows, avatar upload, และ local chat normal/stream runtime เมื่อ backend ใช้ `CHAT_PROVIDER=local` หรือ local fallback. Local API smoke ยังข้าม external image provider สำหรับ creator draft checks เพื่อให้ routine QA deterministic; live avatar generation จะตรวจเฉพาะใน `api:smoke:live`, `smoke:image:live`, หรือ `production:check`.
 ถ้า backend health รายงาน `chatRuntimeProvider=local`, `api:smoke` จะยิง `POST /chat local mock` และ `POST /chat/stream local mock` จริง พร้อมตรวจว่าใช้ `local/mock-roleplay`, `totalTokens=0`, ไม่มี provider failure, และคำตอบยาวพอสำหรับ roleplay ก่อนยังคงข้ามเฉพาะ live provider routes ที่ต้องใช้ staging/production.
 `smoke:doctor` และ `deploy:status --json` จะโชว์ field ชุดเดียวกันเพื่อ handoff ให้ชัด: `chatRuntimeProvider`, `chatLocalFallbackEnabled`, `chatForcedLocal`, และ `chatLocalModel`. ถ้าเห็น `chatRuntimeProvider=local` หรือ `chatForcedLocal=true` แปลว่า local เล่นได้โดยไม่ใช้เครดิต provider แต่ยังห้ามนับเป็น live-provider verification สำหรับ staging/production.
-ขั้น local smoke ท้าย ๆ ต้องมี Docker Desktop/Postgres ที่รันอยู่ และ backend ต้องตอบที่ `http://127.0.0.1:3000`; ถ้า Docker หยุดหรือ backend ยังไม่ได้ start, `smoke:doctor` จะ fail ก่อน API smoke จะรัน.
+ขั้น local smoke ท้าย ๆ ต้องมี Docker Desktop/Postgres ที่รันอยู่ และ backend ต้องตอบที่ backend origin ที่เลือกไว้. ค่า default คือ `http://127.0.0.1:3000`; ถ้า `.env` override `PORT` ให้ตั้ง `SMOKE_API_BASE_URL` และ `VITE_API_BASE_URL` ให้ตรงกัน. `e2e:smoke` จะอ่าน `PORT` จาก backend `.env` ให้เองเมื่อไม่ได้ตั้ง `E2E_API_BASE_URL`.
 มันยัง audit project memory vault และ runtime knowledge packs เพื่อไม่ให้ long-running context เสีย required files หรือมี secret-shaped values หลุดเข้าไปเงียบ ๆ.
 ด่านตรวจ secrets จะละเว้น untracked local env files สำหรับ development ปกติ แต่จะ reject tracked `.env` หรือ `.env.*` files ก่อน commit/CI.
 
