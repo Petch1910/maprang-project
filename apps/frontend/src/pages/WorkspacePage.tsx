@@ -43,6 +43,8 @@ type WorkspaceReportTarget =
   | (ReportDialogTarget & { targetType: 'MESSAGE'; messageId: string; role: ChatMessage['role'] })
   | (ReportDialogTarget & { targetType: 'CHARACTER'; characterId: string })
 
+const savedChatMessageWindowLimit = 120
+
 function apiErrorMessage(error: unknown, fallback: string) {
   if (!(error instanceof ApiError)) return fallback
   if (error.status === 401) return 'กรุณาเข้าสู่ระบบใหม่ เซสชันอาจหมดอายุแล้ว'
@@ -302,7 +304,7 @@ export function WorkspacePage() {
   const openChat = useCallback(async (id: string) => {
     setIsLoading(true)
     try {
-      const data = await fetchChatMessages(id)
+      const data = await fetchChatMessages(id, { limit: savedChatMessageWindowLimit })
       if (!data.chat) return
       if (isQaSeedCharacter(data.chat.character) && !canShowQaSeedData()) {
         setConnectionNote('แชท QA สำหรับทดสอบถูกซ่อนในโหมดใช้งานจริง')
@@ -613,7 +615,7 @@ export function WorkspacePage() {
 
   const syncOpenChatMessages = async (id: string) => {
     try {
-      const data = await fetchChatMessages(id)
+      const data = await fetchChatMessages(id, { limit: savedChatMessageWindowLimit })
       if (!data.chat) return
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
       setRuntimeState({

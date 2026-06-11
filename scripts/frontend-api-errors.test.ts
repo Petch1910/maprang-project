@@ -27,6 +27,13 @@ describe('frontend API errors', () => {
     expect(source).toContain('apiStreamConnectTimeoutMs')
   })
 
+  test('loads saved chat messages through a bounded frontend window', () => {
+    const source = readFileSync('apps/frontend/src/pages/WorkspacePage.tsx', 'utf8')
+    expect(source).toContain('const savedChatMessageWindowLimit = 120')
+    expect(source.match(/fetchChatMessages\(id,\s*\{\s*limit:\s*savedChatMessageWindowLimit\s*\}/g)?.length ?? 0).toBe(2)
+    expect(source).not.toContain('fetchChatMessages(id)')
+  })
+
   test('sanitizes frontend error text before classification', () => {
     const openRouterKey = `sk-or-v1-${'1234567890abcdef'.repeat(2)}`
     const databaseUrl = 'postgresql://user:secret-password@db.example.com:5432/maprang?sslmode=require'

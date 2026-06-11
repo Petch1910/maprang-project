@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Frontend saved-chat loading now uses the bounded message window explicitly. `WorkspacePage` defines `savedChatMessageWindowLimit = 120` and passes it to both `openChat` and `syncOpenChatMessages`; `frontend-api-errors.test.ts` locks those call sites so the chat room does not drift back to default-history loading. Focused frontend gates passed.
+
 - 2026-06-11: API smoke now locks saved-message-window metadata. The saved chat messages smoke uses `/messages?limit=5`, requires `messageWindow.limit === 5`, requires boolean `messageWindow.mayHaveMoreBefore`, and fails if the returned `messages` array exceeds the requested window. Focused verification passed through `api:smoke:test`, API audit, static/security audit, predeploy, secrets, and diff checks.
 
 - 2026-06-11: Saved chat history is now bounded at the service/API layer. `loadChatMessages` clamps requested limits, returns the latest window in reading order, includes `messageWindow` metadata, and no longer loads the entire Prisma `messages` relation for saved chats. `GET /chats/:id/messages` accepts an optional `limit` query, and frontend API types expose the window metadata. Backend security audit now has an AST guard that fails runtime source when Prisma `include/select` uses `messages` without a direct `take`. Verification passed through focused chat persistence/security tests plus full `bun run qa:repo`; production blockers remain external staging/domain/storage/live-provider evidence.
