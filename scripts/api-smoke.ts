@@ -981,12 +981,22 @@ if (activeChats.length > 0) {
   })
 
   await check('GET /chats/:id/messages', async () => {
-    const payload = await readJson<{ chat?: { id?: string; messages?: unknown[] } }>(`/chats/${activeChats[0].id}/messages`, {
+    const payload = await readJson<{
+      chat?: {
+        id?: string
+        messages?: unknown[]
+        messageWindow?: { limit?: number; mayHaveMoreBefore?: boolean }
+      }
+    }>(`/chats/${activeChats[0].id}/messages?limit=5`, {
       headers: authHeaders,
     })
     if (payload.chat?.id !== activeChats[0].id) throw new Error('API คืนแชทไม่ตรงกับที่ขอ')
     if (!Array.isArray(payload.chat.messages)) throw new Error('ยังไม่มี messages array')
-    return `${payload.chat.messages.length} messages`
+    if (!payload.chat.messageWindow) throw new Error('ยังไม่มี messageWindow สำหรับประวัติแชทแบบแบ่งช่วง')
+    if (payload.chat.messageWindow.limit !== 5) throw new Error(`messageWindow limit ไม่ตรงกับที่ขอ: ${payload.chat.messageWindow.limit}`)
+    if (typeof payload.chat.messageWindow.mayHaveMoreBefore !== 'boolean') throw new Error('messageWindow ยังไม่มี mayHaveMoreBefore')
+    if (payload.chat.messages.length > payload.chat.messageWindow.limit) throw new Error('messages เกิน window limit ที่ขอ')
+    return `${payload.chat.messages.length} messages, limit=${payload.chat.messageWindow.limit}, moreBefore=${payload.chat.messageWindow.mayHaveMoreBefore}`
   })
 
   await check('PATCH/GET /chats/:id/world-state', async () => {
