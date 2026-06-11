@@ -18,7 +18,9 @@ const seededMyChatsBulkDeleteDesktopChatId = 'ffffffff-1111-4111-8111-ffffffff11
 const seededMyChatsBulkDeleteMobileChatId = 'ffffffff-2222-4222-8222-ffffffff2222'
 const adminKey = process.env.E2E_ADMIN_API_KEY ?? process.env.SMOKE_ADMIN_API_KEY ?? ''
 
-const routeSmokeTargets = [
+type RouteSmokeTarget = { path: string } & ({ text: string; testId?: never } | { testId: string; text?: never })
+
+const routeSmokeTargets: RouteSmokeTarget[] = [
   { path: '/', text: 'Maprang' },
   { path: `/characters/${seededCharacterId}`, text: 'สัญญาความสัมพันธ์' },
   { path: `/chat/${seededChatId}`, testId: 'chat-composer-input' },
@@ -31,6 +33,7 @@ const routeSmokeTargets = [
   { path: '/admin/health', text: 'ตรวจเส้นทาง/เมนู' },
   { path: '/admin/prompt-inspector', text: adminKey ? 'ตรวจพรอมป์ก่อนยิงโมเดล' : 'ADMIN_API_KEY' },
   { path: '/admin/evals', text: adminKey ? 'ทดสอบคุณภาพพรอมป์และบริบท' : 'ADMIN_API_KEY' },
+  { path: '/__maprang-not-found-e2e', testId: 'not-found-page' },
 ]
 
 function persistedReduxState() {
@@ -618,7 +621,7 @@ test('all primary routes render without console errors or horizontal overflow', 
     if (target.path === '/create') {
       await ensureCreatorFormOpen(page)
     }
-    if ('testId' in target && target.testId) {
+    if (target.testId) {
       await expect(page.getByTestId(target.testId), `${target.path} ต้องแสดง ${target.testId}`).toBeVisible()
     } else {
       await expect(page.locator('body'), `${target.path} ต้องแสดงข้อความที่คาดไว้`).toContainText(target.text)

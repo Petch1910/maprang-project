@@ -1,4 +1,6 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import {
   e2eSmokeSteps,
   e2eSmokeTargetIssues,
@@ -8,12 +10,19 @@ import {
   type E2eSmokeStep,
 } from './e2e-smoke'
 
+const e2eSpec = readFileSync(join(import.meta.dir, '..', 'tests/e2e/maprang-smoke.spec.ts'), 'utf8')
+
 const quietLogger: E2eSmokeLogger = {
   log: () => undefined,
   error: () => undefined,
 }
 
 describe('e2e smoke command plan', () => {
+  test('locks Not Found fallback route coverage', () => {
+    expect(e2eSpec).toContain('/__maprang-not-found-e2e')
+    expect(e2eSpec).toContain('not-found-page')
+  })
+
   test('runs seed, Playwright, then QA cleanup in order', () => {
     expect(e2eSmokeSteps()).toEqual([
       {

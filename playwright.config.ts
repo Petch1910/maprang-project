@@ -18,14 +18,30 @@ export function isLocalE2eUrl(value: string) {
   }
 }
 
+function e2eUrlPort(value: string, fallback: string) {
+  try {
+    return new URL(value).port || fallback
+  } catch {
+    return fallback
+  }
+}
+
 export function buildPlaywrightWebServers(env: PlaywrightSmokeEnv = process.env) {
   const { frontendUrl, backendUrl } = playwrightSmokeTargetUrls(env)
   const backendOrigin = backendUrl.replace(/\/+$/, '')
-  const webServers: Array<{ command: string; url: string; reuseExistingServer: boolean; timeout: number }> = []
+  const backendPort = e2eUrlPort(backendUrl, '3000')
+  const webServers: Array<{
+    command: string
+    url: string
+    reuseExistingServer: boolean
+    timeout: number
+    env?: Record<string, string>
+  }> = []
 
   if (isLocalE2eUrl(backendUrl)) {
     webServers.push({
       command: 'cd apps/backend && bun run dev',
+      env: { PORT: backendPort },
       url: `${backendOrigin}/health`,
       reuseExistingServer: true,
       timeout: 120_000,
@@ -35,6 +51,7 @@ export function buildPlaywrightWebServers(env: PlaywrightSmokeEnv = process.env)
   if (isLocalE2eUrl(frontendUrl)) {
     webServers.push({
       command: 'cd apps/frontend && bun run dev -- --host 127.0.0.1',
+      env: { VITE_API_BASE_URL: backendOrigin },
       url: frontendUrl,
       reuseExistingServer: true,
       timeout: 120_000,

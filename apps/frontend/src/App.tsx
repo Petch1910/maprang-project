@@ -71,7 +71,10 @@ const routePreloads: Record<string, () => Promise<unknown>> = {
 
 function NotFoundPage() {
   return (
-    <main className="grid min-h-screen place-items-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-6 text-white">
+    <main
+      className="grid min-h-screen place-items-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-6 text-white"
+      data-testid="not-found-page"
+    >
       <section className="text-center">
         <SearchX className="mx-auto h-20 w-20 text-purple-400" />
         <h1 className="mt-6 text-4xl font-black">ไม่พบหน้านี้</h1>

@@ -18,6 +18,9 @@ describe('Playwright e2e target config', () => {
         url: 'http://127.0.0.1:5173',
       },
     ])
+    const localWebServers = buildPlaywrightWebServers({})
+    expect(localWebServers[0]?.env).toEqual({ PORT: '3000' })
+    expect(localWebServers[1]?.env).toEqual({ VITE_API_BASE_URL: 'http://127.0.0.1:3000' })
   })
 
   test('does not start local dev servers for deployed staging targets', () => {
@@ -41,6 +44,11 @@ describe('Playwright e2e target config', () => {
         url: 'http://localhost:3000/health',
       },
     ])
+    const localBackendOnCustomPort = buildPlaywrightWebServers({
+      E2E_BASE_URL: 'https://app.example.com',
+      E2E_API_BASE_URL: 'http://localhost:3001/',
+    })
+    expect(localBackendOnCustomPort[0]?.env).toEqual({ PORT: '3001' })
   })
 
   test('detects loopback hosts without treating deployed domains as local', () => {
