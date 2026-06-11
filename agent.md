@@ -31,6 +31,7 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
+- 2026-06-11: `smoke:local` now checks local chat runtime directly when `/health` reports local runtime. It posts to `/chat`, requires `chatId`, roleplay reply length at the configured minimum or 420 chars, expected local model name, and `totalTokens=0`; predeploy source-locks this guard.
 - 2026-06-11: `predeploy:check` now source-locks the frontend central API helper rule from `frontend-static-audit`. Future frontend API calls must stay behind `apps/frontend/src/lib/api.ts`; direct `fetch` outside that helper is rejected by audit and protected by predeploy snippets.
 - 2026-06-11: `predeploy:check` now also source-locks the deploy-blocker handoff note for the backend no-any guard. It requires `memory/deploy-blockers.md` to retain `Latest backend no-any deploy guard addendum`, no-any runtime status, predeploy source-lock wording, and the external-blocker warning.
 - 2026-06-11: `predeploy:check` now source-locks the backend runtime no-any guard. It requires the `\bas\s+any\b` security audit rule, the Thai diagnostic for runtime `as any`, and the regression fixture `catches unsafe any assertions in runtime backend source`, so deploy readiness cannot silently lose the no-any backend guard.

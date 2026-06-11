@@ -1,9 +1,13 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  activeLocalChatModel,
   buildLocalSmokeSummary,
   formatLocalSmokeCaughtError,
+  hasLocalChatRuntime,
+  localRoleplayReplyMinimum,
   pickSmokeCharacter,
   runLocalSmoke,
+  validateLocalChatSmoke,
   validateAvatarUpload,
   type LocalSmokeJsonReader,
 } from './local-smoke'
@@ -46,6 +50,56 @@ describe('local smoke helpers', () => {
     expect(() => validateBackendRootIdentity({ ok: true, service: 'maprang-backend' })).not.toThrow()
     expect(() => validateBackendRootIdentity({ ok: false, service: 'maprang-backend' })).toThrow('ok=false')
     expect(() => validateBackendRootIdentity({ ok: true, service: 'other-service' })).toThrow('ชื่อ service ไม่ถูกต้อง')
+  })
+
+  test('validates local chat runtime, reply length, model, and zero-token usage', () => {
+    const health = {
+      ok: true,
+      checks: { databaseConnected: true, openRouterConfigured: false },
+      security: { avatarStorage: 'local' as const },
+      model: {
+        minRoleplayReplyChars: 450,
+        chatProvider: { activeRuntimeProvider: 'local', localModel: 'local/custom-roleplay' },
+      },
+    }
+
+    expect(hasLocalChatRuntime(health)).toBe(true)
+    expect(activeLocalChatModel(health)).toBe('local/custom-roleplay')
+    expect(localRoleplayReplyMinimum(health)).toBe(450)
+    expect(
+      validateLocalChatSmoke(
+        {
+          chatId: 'chat-1',
+          reply: 'ก'.repeat(451),
+          usage: { totalTokens: 0, modelName: 'local/custom-roleplay' },
+        },
+        'local/custom-roleplay',
+        450,
+      ),
+    ).toMatchObject({ chatId: 'chat-1', replyChars: 451, totalTokens: 0, modelName: 'local/custom-roleplay' })
+
+    expect(() =>
+      validateLocalChatSmoke(
+        {
+          chatId: 'chat-1',
+          reply: 'สั้น',
+          usage: { totalTokens: 0, modelName: 'local/custom-roleplay' },
+        },
+        'local/custom-roleplay',
+        450,
+      ),
+    ).toThrow('ตอบสั้นเกินไป')
+    expect(() =>
+      validateLocalChatSmoke(
+        {
+          chatId: 'chat-1',
+          reply: 'ก'.repeat(451),
+          usage: { totalTokens: 12, modelName: 'local/custom-roleplay' },
+        },
+        'local/custom-roleplay',
+        450,
+      ),
+    ).toThrow('ต้องไม่คิดโทเคน')
   })
 
   test('formats local smoke summary fields used by QA logs', () => {
@@ -91,6 +145,10 @@ describe('local smoke helpers', () => {
           ok: true,
           checks: { databaseConnected: true, openRouterConfigured: true },
           security: { avatarStorage: 'local' },
+          model: {
+            minRoleplayReplyChars: 420,
+            chatProvider: { activeRuntimeProvider: 'local', localModel: 'local/mock-roleplay' },
+          },
         } as never
       }
       if (path === '/characters?view=admin&limit=10') {
@@ -98,6 +156,13 @@ describe('local smoke helpers', () => {
       }
       if (path === '/characters/mika/lore') return { loreEntries: [{ id: 'lore-1', keyword: 'cafe' }] } as never
       if (path === '/relationship/preview') return { preview: { turns: ['a', 'b'] } } as never
+      if (path === '/chat') {
+        return {
+          chatId: 'chat-1',
+          reply: 'ก'.repeat(430),
+          usage: { totalTokens: 0, modelName: 'local/mock-roleplay' },
+        } as never
+      }
       if (path === '/uploads/avatar') {
         return {
           url: 'http://127.0.0.1:3000/uploads/avatars/avatar.png',
@@ -124,11 +189,22 @@ describe('local smoke helpers', () => {
 
     const summary = JSON.parse(lines.join('\n'))
     expect(exitCode).toBe(0)
-    expect(calls).toEqual(['/', '/health', '/characters?view=admin&limit=10', '/characters/mika/lore', '/relationship/preview', '/uploads/avatar'])
+    expect(calls).toEqual([
+      '/',
+      '/health',
+      '/characters?view=admin&limit=10',
+      '/characters/mika/lore',
+      '/relationship/preview',
+      '/chat',
+      '/uploads/avatar',
+    ])
     expect(cleaned).toEqual(['avatar.png'])
     expect(summary.character).toBe('มิกะ | MIKA')
     expect(summary.loreCount).toBe(1)
     expect(summary.previewTurns).toBe(2)
+    expect(summary.chatModel).toBe('local/mock-roleplay')
+    expect(summary.chatReplyChars).toBe(430)
+    expect(summary.chatTokens).toBe(0)
     expect(errors).toEqual([])
   })
 

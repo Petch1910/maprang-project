@@ -14,9 +14,27 @@ export type HealthPayload = {
   ok: boolean
   checks: { databaseConnected: boolean; openRouterConfigured: boolean }
   security: { avatarStorage: 'local' | 'supabase' }
+  model?: {
+    minRoleplayReplyChars?: number
+    chatProvider?: {
+      activeRuntimeProvider?: string
+      forcedLocal?: boolean
+      localModel?: string
+    }
+  }
 }
 
 export type SmokeCharacter = { id: string; name: string; tags: string[] }
+
+export type LocalChatSmokePayload = {
+  reply?: string
+  chatId?: string | null
+  usage?: {
+    totalTokens?: number
+    modelName?: string
+    providerFailure?: { code?: string; retryable?: boolean; userMessage?: string }
+  }
+}
 
 export type AvatarUploadPayload = {
   url: string
@@ -55,12 +73,52 @@ export function validateAvatarUpload(upload: AvatarUploadPayload, baseUrl: strin
   }
 }
 
+export function hasLocalChatRuntime(health: HealthPayload) {
+  const provider = health.model?.chatProvider
+  return provider?.activeRuntimeProvider === 'local' || provider?.forcedLocal === true
+}
+
+export function activeLocalChatModel(health: HealthPayload) {
+  return health.model?.chatProvider?.localModel || 'local/mock-roleplay'
+}
+
+export function localRoleplayReplyMinimum(health: HealthPayload) {
+  return Math.max(420, health.model?.minRoleplayReplyChars ?? 420)
+}
+
+export function validateLocalChatSmoke(
+  payload: LocalChatSmokePayload,
+  expectedModel: string,
+  minRoleplayReplyChars: number,
+) {
+  if (payload.usage?.providerFailure) {
+    throw new Error(`local chat QA ไม่ควรคืน providerFailure: ${payload.usage.providerFailure.code ?? 'unknown'}`)
+  }
+  if (!payload.chatId) throw new Error('local chat QA ไม่ได้สร้าง chat id')
+  if (!payload.reply) throw new Error('local chat QA ไม่คืนคำตอบ')
+  if (payload.reply.length < minRoleplayReplyChars) {
+    throw new Error(`local chat QA ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
+  }
+  if ((payload.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat QA ต้องไม่คิดโทเคน')
+  if (payload.usage?.modelName !== expectedModel) {
+    throw new Error(`local chat QA ต้องคืน modelName=${expectedModel} แต่ได้ ${payload.usage?.modelName ?? 'missing'}`)
+  }
+
+  return {
+    chatId: payload.chatId,
+    replyChars: payload.reply.length,
+    totalTokens: payload.usage?.totalTokens ?? 0,
+    modelName: payload.usage?.modelName ?? expectedModel,
+  }
+}
+
 export function buildLocalSmokeSummary(input: {
   apiBaseUrl: string
   health: HealthPayload
   smokeCharacter: SmokeCharacter
   loreCount: number
   previewTurns: number
+  chat?: ReturnType<typeof validateLocalChatSmoke> | null
   upload: AvatarUploadPayload
 }) {
   return {
@@ -73,6 +131,10 @@ export function buildLocalSmokeSummary(input: {
     tags: input.smokeCharacter.tags,
     loreCount: input.loreCount,
     previewTurns: input.previewTurns,
+    chatId: input.chat?.chatId ?? null,
+    chatModel: input.chat?.modelName ?? null,
+    chatReplyChars: input.chat?.replyChars ?? 0,
+    chatTokens: input.chat?.totalTokens ?? 0,
     uploadProvider: input.upload.provider,
     uploadAccess: input.upload.access,
   }
@@ -127,6 +189,25 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
 
     if (!preview.preview?.turns?.length) throw new Error('ตัวอย่างความสัมพันธ์ไม่คืน turn ทดสอบ')
 
+    let chat: ReturnType<typeof validateLocalChatSmoke> | null = null
+    if (hasLocalChatRuntime(health)) {
+      const expectedModel = activeLocalChatModel(health)
+      const minRoleplayReplyChars = localRoleplayReplyMinimum(health)
+      const chatPayload = await jsonReader<LocalChatSmokePayload>('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({
+          characterId: smokeCharacter.id,
+          relationshipSeed: 'stranger',
+          maxRating: 'restricted_18',
+          history: [],
+          message:
+            'ฉันเข้ามาในคาเฟ่ช่วงฝนตกแล้วทักเธอด้วยน้ำเสียงเกรงใจ ช่วยตอบเป็นฉากโรลเพลย์ภาษาไทยที่มีบรรยากาศ ความรู้สึก การกระทำ และเหลือพื้นที่ให้ฉันตอบต่อ',
+        }),
+      })
+      chat = validateLocalChatSmoke(chatPayload, expectedModel, minRoleplayReplyChars)
+    }
+
     const form = new FormData()
     form.append('file', new File([new Uint8Array([137, 80, 78, 71])], 'qa.png', { type: 'image/png' }))
 
@@ -150,6 +231,7 @@ export async function runLocalSmoke(options: LocalSmokeRunnerOptions = {}) {
           smokeCharacter,
           loreCount: lore.loreEntries?.length ?? 0,
           previewTurns: preview.preview.turns.length,
+          chat,
           upload,
         }),
         null,

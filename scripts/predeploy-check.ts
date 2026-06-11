@@ -1933,12 +1933,37 @@ const checks: Check[] = [
       )
       requireIncludes(
         await readRepoFile('scripts/local-smoke.test.ts'),
-        ['prefers MIKA', 'validates backend root identity before deeper smoke work', 'validates avatar upload shape', 'formats local smoke summary', 'formats object-shaped local smoke errors without stringifying raw objects', 'runs local smoke through an importable runner'],
+        [
+          'prefers MIKA',
+          'validates backend root identity before deeper smoke work',
+          'validates avatar upload shape',
+          'validates local chat runtime, reply length, model, and zero-token usage',
+          'ตอบสั้นเกินไป',
+          'ต้องไม่คิดโทเคน',
+          'formats local smoke summary',
+          'formats object-shaped local smoke errors without stringifying raw objects',
+          'runs local smoke through an importable runner',
+          "'/chat'",
+          'chatReplyChars',
+          'chatTokens',
+        ],
         'scripts/local-smoke.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/local-smoke.ts'),
-        ['validateBackendRootIdentity', 'formatUnknownDiagnosticText', 'LocalSmokeRunnerOptions', 'runLocalSmoke', 'if (import.meta.main) process.exit(await runLocalSmoke())'],
+        [
+          'validateBackendRootIdentity',
+          'formatUnknownDiagnosticText',
+          'LocalSmokeRunnerOptions',
+          'validateLocalChatSmoke',
+          'hasLocalChatRuntime',
+          'localRoleplayReplyMinimum',
+          "'/chat'",
+          'chatReplyChars',
+          'chatTokens',
+          'runLocalSmoke',
+          'if (import.meta.main) process.exit(await runLocalSmoke())',
+        ],
         'scripts/local-smoke.ts',
       )
       requireIncludes(
