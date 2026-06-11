@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Predeploy now source-locks the latest-migration release handoff guard itself. It requires both `latestPrismaMigrationVersion` in `scripts/release-handoff-check.ts` and the test name `requires the latest migration version for deployed handoffs`, so future deploy readiness cannot silently lose the newest migration evidence check.
+
 - 2026-06-11: Release handoff validation now reads the latest Prisma migration folder from `apps/backend/prisma/migrations` and rejects filled staging/production handoffs that report an older migration. Current latest migration evidence must be `20260611143000_add_message_window_index`.
 
 - 2026-06-11: Predeploy now explicitly requires the saved-message index migration folder `20260611143000_add_message_window_index`. This complements the schema/migration DB-check test and prevents a deploy handoff from silently losing the migration while keeping the Prisma schema index.
