@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-11
 
+- 2026-06-11: Saved-message window reads now have a matching Postgres index. `Message_chatId_deletedAt_createdAt_id_idx` covers `chatId`, `deletedAt`, `createdAt DESC`, and `id DESC`, matching the `loadChatMessages` latest-window query. A Prisma migration adds the index and `backend-db-check.test.ts` now fails if either schema or migration coverage drifts. Focused DB/backend/predeploy/secrets/diff gates passed.
+
 - 2026-06-11: Frontend saved-chat loading now uses the bounded message window explicitly. `WorkspacePage` defines `savedChatMessageWindowLimit = 120` and passes it to both `openChat` and `syncOpenChatMessages`; `frontend-api-errors.test.ts` locks those call sites so the chat room does not drift back to default-history loading. Focused frontend gates passed.
 
 - 2026-06-11: API smoke now locks saved-message-window metadata. The saved chat messages smoke uses `/messages?limit=5`, requires `messageWindow.limit === 5`, requires boolean `messageWindow.mayHaveMoreBefore`, and fails if the returned `messages` array exceeds the requested window. Focused verification passed through `api:smoke:test`, API audit, static/security audit, predeploy, secrets, and diff checks.

@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
 import { summarizeDatabaseError } from '../apps/backend/src/db.required-check'
@@ -84,5 +84,28 @@ describe('backend db check command plan', () => {
     expect(message).toContain('[REDACTED_SECRET]')
     expect(message).not.toContain('super-secret')
     expect(message).not.toContain(fakeDatabaseUrl)
+  })
+
+  test('keeps a database index for saved chat message windows', async () => {
+    const schema = await readFile(join(import.meta.dir, '../apps/backend/prisma/schema.prisma'), 'utf8')
+    const migrationsDir = join(import.meta.dir, '../apps/backend/prisma/migrations')
+    const migrationNames = await readdir(migrationsDir)
+    const migrationSql = (
+      await Promise.all(
+        migrationNames.map(async (name) => {
+          try {
+            return await readFile(join(migrationsDir, name, 'migration.sql'), 'utf8')
+          } catch {
+            return ''
+          }
+        }),
+      )
+    ).join('\n')
+
+    expect(schema).toContain(
+      '@@index([chatId, deletedAt, createdAt(sort: Desc), id(sort: Desc)], map: "Message_chatId_deletedAt_createdAt_id_idx")',
+    )
+    expect(migrationSql).toContain('CREATE INDEX "Message_chatId_deletedAt_createdAt_id_idx"')
+    expect(migrationSql).toContain('ON "Message"("chatId", "deletedAt", "createdAt" DESC, "id" DESC)')
   })
 })

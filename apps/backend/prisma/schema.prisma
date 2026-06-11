@@ -208,6 +208,7 @@ model Message {
   updatedAt DateTime  @updatedAt
 
   @@index([chatId, createdAt(sort: Asc)])
+  @@index([chatId, deletedAt, createdAt(sort: Desc), id(sort: Desc)], map: "Message_chatId_deletedAt_createdAt_id_idx")
   @@index([deletedAt])
 }
 
