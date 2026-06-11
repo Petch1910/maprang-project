@@ -1005,9 +1005,11 @@ const checks: Check[] = [
       const qaLive = packageJson.scripts?.['qa:live'] ?? ''
       const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
       const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
+      const qaFull = packageJson.scripts?.['qa:full'] ?? ''
       const qaRepoCommands = splitPackageScriptCommands(qaRepo)
       const qaLocalOnlyCommands = splitPackageScriptCommands(qaLocal)
       const qaLocalCommands = splitPackageScriptCommands(qaRepo, qaLocal)
+      const qaFullCommands = splitPackageScriptCommands(qaFull)
       const stagingCheck = packageJson.scripts?.['staging:check'] ?? ''
       const stagingVerify = packageJson.scripts?.['staging:verify'] ?? ''
       const productionCheck = packageJson.scripts?.['production:check'] ?? ''
@@ -1130,6 +1132,12 @@ const checks: Check[] = [
       }
       if (!qaLocalCommands.includes('bun run predeploy:check:test')) {
         throw new Error('package.json qa:local ต้องรัน predeploy:check:test เพื่อจับ regression ของการผูก predeploy guard')
+      }
+      if (!qaFullCommands.includes('bun run e2e:smoke') || !qaFullCommands.includes('bun run qa:seed')) {
+        throw new Error('package.json qa:full ต้องรัน e2e:smoke แล้ว seed QA data กลับท้ายงานเพื่อให้ local app พร้อมเล่นหลัง browser smoke')
+      }
+      if (qaFullCommands.indexOf('bun run qa:seed') < qaFullCommands.indexOf('bun run e2e:smoke')) {
+        throw new Error('package.json qa:full ต้องรัน qa:seed หลัง e2e:smoke เพราะ e2e จะล้าง seed ท้ายงาน')
       }
       if (!stagingCheck.includes('qa:full') || !stagingCheck.includes('supabase:storage:check') || !stagingCheck.includes('--require-admin')) {
         throw new Error('package.json staging:check ต้องครอบ qa:full, Supabase storage และ admin API smoke')

@@ -1136,7 +1136,12 @@ describe('predeploy check wiring', () => {
 
     const qaRepo = packageJson.scripts?.['qa:repo'] ?? ''
     const qaLocal = packageJson.scripts?.['qa:local'] ?? ''
+    const qaFull = packageJson.scripts?.['qa:full'] ?? ''
     const qaLocalOnlyCommands = qaLocal
+      .split(/\s*&&\s*/)
+      .map((command) => command.trim())
+      .filter(Boolean)
+    const qaFullCommands = qaFull
       .split(/\s*&&\s*/)
       .map((command) => command.trim())
       .filter(Boolean)
@@ -1154,6 +1159,9 @@ describe('predeploy check wiring', () => {
     expect(qaLocalOnlyCommands).toContain('bun run smoke:doctor')
     expect(qaLocalOnlyCommands).toContain('bun run smoke:local')
     expect(qaLocalOnlyCommands).toContain('bun run api:smoke')
+    expect(qaFullCommands).toContain('bun run e2e:smoke')
+    expect(qaFullCommands).toContain('bun run qa:seed')
+    expect(qaFullCommands.indexOf('bun run qa:seed')).toBeGreaterThan(qaFullCommands.indexOf('bun run e2e:smoke'))
     expect(qaLocalCommands).toContain('bun run predeploy:check:test')
     expect(qaLocalCommands).toContain('bun run docs:commands')
     expect(qaLocalCommands).toContain('bun run docs:commands:test')

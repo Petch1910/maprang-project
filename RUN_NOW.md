@@ -62,4 +62,6 @@ bun run e2e:smoke
 bun run qa:full
 ```
 
+`qa:full` จะรัน browser smoke แล้ว `qa:seed` กลับท้ายงานอีกครั้ง เพราะ `e2e:smoke` ล้าง QA seed ตอนจบเสมอ เพื่อให้ local app ยังมีตัวละคร/แชทจำลองพร้อมเล่นหลังตรวจครบชุด
+
 หมายเหตุ: local/dev ใช้ `local/mock-roleplay` ได้ แต่ staging/production ต้องรัน live provider smoke แยกเสมอ

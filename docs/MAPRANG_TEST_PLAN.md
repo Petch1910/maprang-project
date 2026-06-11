@@ -140,6 +140,8 @@ Full local:
 bun run qa:full
 ```
 
+หมายเหตุ: `bun run qa:full` รัน `e2e:smoke` แล้วตามด้วย `qa:seed` อีกครั้ง เพราะ browser smoke ล้าง seed data ตอนจบ เพื่อให้ local app ยังมีข้อมูล QA พร้อมเล่นหลัง full gate ผ่าน
+
 DB-focused local:
 
 ```powershell

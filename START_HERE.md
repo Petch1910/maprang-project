@@ -91,7 +91,7 @@ bun run qa:repo
 bun run qa:full
 ```
 
-`qa:full` จะครอบ repo-owned checks และ browser smoke แต่ยังไม่แทน staging/production live smoke
+`qa:full` จะครอบ repo-owned checks และ browser smoke แล้ว seed QA data กลับท้ายงานอีกครั้งเพื่อให้ local app ยังพร้อมเล่นหลัง e2e; มันยังไม่แทน staging/production live smoke
 
 ## ก่อน staging และ production
 

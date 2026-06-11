@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest full-local reseed addendum: 2026-06-12 `qa:full` now runs `qa:seed` after `e2e:smoke`, and `predeploy:check` source-locks that order because browser smoke clears QA seed data at the end. This clears a repo-owned local usability gap where a successful full QA run could leave the local app empty; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest local QA seed-gate addendum: 2026-06-12 `qa:local` now runs `qa:seed` before runtime smoke, and `predeploy:check` source-locks that ordering so an empty local PostgreSQL database does not make `smoke:local`/`api:smoke` fail for missing QA characters. This clears a repo-owned local runtime usability gap; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest immersive-shell predeploy addendum: 2026-06-12 `predeploy:check` now source-locks the immersive shell rule by requiring both Route/Menu Audit and Playwright e2e source to keep the `/` and `/chat*` full-screen route contract. This improves repo-owned deploy guard coverage for frontend UX consistency; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
