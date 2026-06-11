@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import { CharacterStatus } from '@prisma/client'
 import { characterRoutes } from './character.routes'
 import { reviewCharacterQuality } from './character.service'
@@ -97,6 +98,14 @@ describe('character quality relationship validation', () => {
 })
 
 describe('relationship route endpoints', () => {
+  test('does not provide backend fallback/demo characters when persistence is unavailable', () => {
+    const source = readFileSync(new URL('./character.service.ts', import.meta.url), 'utf8')
+
+    expect(source).not.toContain('fallbackCharacter')
+    expect(source).not.toContain('return [fallbackCharacter()]')
+    expect(source).toContain('if (!prisma) return []')
+  })
+
   test('returns Thai-first messages when character persistence is unavailable', async () => {
     const previousDatabaseUrl = process.env.DATABASE_URL
     delete process.env.DATABASE_URL

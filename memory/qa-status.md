@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 Backend no-fallback-character QA pass: `listCharacters()` and `searchCharacters()` now return `[]` when Prisma persistence is unavailable instead of returning a hidden fallback/demo character. `character.validation.test.ts` source-locks the removal of `fallbackCharacter` and `return [fallbackCharacter()]`. Passing evidence: `bun run backend:check` (271 pass / 1223 expects), `bun run security:audit`, `bun run tests:audit`, `bun run api:audit`, `bun run frontend:static:audit`, and full `bun run qa:repo`.
+
 - 2026-06-12 Chat no-client-fallback QA pass: `/chat` no longer creates a frontend fallback character when the backend returns no visible characters. The chat workspace now shows an explicit empty state with create/explore/retry actions until real backend or QA-seed data exists, and the component contract locks `fallbackCharacter` out of `WorkspacePage` and `lib/chat.ts`. Passing evidence: `bun run frontend:components:test` (15 pass / 81 expects), `bun run frontend:static:audit`, `bun run route-menu:audit`, `bun run frontend:check`, full `bun run qa:repo`, and `bun run e2e:smoke` (4/4 desktop+mobile). `bun run qa:seed` was run after browser smoke to restore local QA data for manual play.
 
 - 2026-06-12 Explore no-demo route/menu QA pass: `ROUTE_MENU_AUDIT.md` now says the `/` empty state uses a create-character CTA when no real characters exist, and `route-menu-doc-check` rejects stale `การ์ดตัวอย่างกันหน้าว่าง` wording. Passing evidence: `bun run route-menu:audit`, `bun run route-menu:audit:test` (12 pass / 20 expects), and `bun run frontend:route:audit`.

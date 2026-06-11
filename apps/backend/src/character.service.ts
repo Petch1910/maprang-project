@@ -1,5 +1,5 @@
 import { CharacterStatus, type Prisma, type Visibility } from '@prisma/client'
-import { defaultCharacterId, defaultSystemPrompt, defaultUserId } from './config'
+import { defaultSystemPrompt, defaultUserId } from './config'
 import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentRating } from './content-rating'
 import { getPrisma } from './db'
 import { validateRelationshipTags } from './relationship.engine'
@@ -75,34 +75,6 @@ export function publicCharacter(
   }
 }
 
-export function fallbackCharacter() {
-  return {
-    id: defaultCharacterId,
-    name: 'น้องมะปราง',
-    avatarUrl: null,
-    tagline: 'ผู้ช่วย AI ภาษาไทยที่คุยง่ายและช่วยคิดงานได้จริง',
-    description: 'AI ผู้ช่วยภาษาไทยที่พร้อมดูแลคุณทุกเรื่อง',
-    biography: null,
-    scenario: null,
-    systemPrompt: defaultSystemPrompt,
-    compactPrompt: 'มะปราง: ผู้ช่วย AI ภาษาไทย โทนอ่อนโยน สุภาพ ตอบชัด ใช้งานได้จริง',
-    characterAnchor: null,
-    constraints: null,
-    greeting: 'สวัสดีค่ะ วันนี้มะปรางมีอะไรให้ช่วยไหมคะ?',
-    status: CharacterStatus.PUBLISHED,
-    visibility: 'PUBLIC',
-    qualityScore: 90,
-    qualityNotes: null,
-    publishedAt: null,
-    promptVersion: 1,
-    viewCount: 0,
-    chatCount: 0,
-    tags: ['thai', 'assistant', 'friendly'],
-    favoriteCount: 0,
-    isFavorite: false,
-  }
-}
-
 function normalizeTags(tags?: string[]) {
   return [...new Set((tags ?? []).map((tag) => tag.trim().toLowerCase()).filter(Boolean))]
 }
@@ -168,14 +140,14 @@ export async function loadCharacter(characterId: string, viewerUserId = defaultU
 
 export async function listCharacters(view: 'public' | 'admin' = 'public') {
   const prisma = getPrisma()
-  if (!prisma) return [fallbackCharacter()]
+  if (!prisma) return []
 
   return searchCharacters({ view })
 }
 
 export async function searchCharacters(options: CharacterListOptions = {}) {
   const prisma = getPrisma()
-  if (!prisma) return [fallbackCharacter()]
+  if (!prisma) return []
 
   const view = options.view ?? 'public'
   const isAdminView = view === 'admin'
