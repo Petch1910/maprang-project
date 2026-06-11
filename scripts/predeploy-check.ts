@@ -540,6 +540,7 @@ const checks: Check[] = [
     run: async () => {
       const migrations = await readdir(join(root, 'apps/backend/prisma/migrations'))
       const required = [
+        '20260504170000_initial_roleplay_baseline',
         '20260506113000_reports',
         '20260506123000_admin_audit_logs',
         '20260506160000_token_transactions',

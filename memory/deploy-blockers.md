@@ -1,5 +1,7 @@
 # ตัวกั้นก่อน deploy
 
+Latest fresh-DB local runtime addendum: 2026-06-12 added baseline migration `20260504170000_initial_roleplay_baseline`, verified `bunx prisma migrate reset --force` from an empty local PostgreSQL DB, reseeded QA data, and passed full `bun run qa:full` against local backend/frontend. This clears the repo-owned fresh-local-DB blocker; external blockers remain deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
+
 Latest DB/moderation addendum: 2026-06-12 `Report.character` and `Report.message` now use `onDelete: SetNull`, with migration `20260612100000_preserve_report_targets`, so moderation report records survive hard-deletion of reported characters/messages. This improves repo-owned moderation evidence and deploy migration guarding; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.
 
 Latest Events Inbox contract addendum: 2026-06-12 full `bun run qa:repo` passed after adding `/events` pending-scene selector/page contract coverage and predeploy source locks. This improves local frontend evidence for the Events Inbox surface; it does not clear external blockers: deployed HTTPS backend/frontend URLs, production CORS/domain, production/staging DB smoke, Supabase signed `avatars` verification, live chat smoke, and live image smoke.

@@ -39,6 +39,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('returns structured JSON when health cannot be read after root identity passes')
     expect(predeploy).toContain('rootIdentity.ok=false')
     expect(predeploy).toContain('memory/production/checklist.md')
+    expect(predeploy).toContain('20260504170000_initial_roleplay_baseline')
     expect(predeploy).toContain('20260611143000_add_message_window_index')
     expect(predeploy).toContain('20260612100000_preserve_report_targets')
     expect(predeploy).toContain('decision `0023` dangerous link protocol contract')

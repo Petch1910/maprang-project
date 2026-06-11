@@ -2,6 +2,10 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Fresh local PostgreSQL migration readiness is now fixed. Added baseline migration `20260504170000_initial_roleplay_baseline` so `bunx prisma migrate reset --force` can apply the complete migration chain from an empty DB before the existing `20260504183000_character_schema_upgrade`. `backend-db-check.test.ts` and `predeploy:check` now lock the baseline migration so fresh DB setup cannot silently regress.
+
+- 2026-06-12: Full runtime `bun run qa:full` passed with `SMOKE_API_BASE_URL=http://127.0.0.1:3001`, `E2E_API_BASE_URL=http://127.0.0.1:3001`, `VITE_API_BASE_URL=http://127.0.0.1:3001`, and `E2E_BASE_URL=http://127.0.0.1:5173` after starting local backend/frontend, starting Docker Postgres, applying all migrations from scratch, and seeding QA data. Runtime evidence included smoke doctor green, local smoke green, API smoke green, Playwright e2e green, backend tests 270 pass / 1220 expects with DB-backed cases active, and frontend build/bundle budget green.
+
 - 2026-06-12: DB/moderation evidence hardening preserved moderation reports when a reported character or message target is hard-deleted later. `Report.character` and `Report.message` now use `onDelete: SetNull`, the Prisma migration `20260612100000_preserve_report_targets` rewires the foreign keys, `backend-db-check.test.ts` locks the schema/migration contract, and predeploy/release handoff guards now treat this as the latest migration evidence.
 
 - 2026-06-12: Focused checks passed after preserving report targets: `bun run backend:check:db:test` (8 pass / 33 expects), `bun run release:handoff:test` (49 pass / 68 expects), `bun run predeploy:check:test` (3 pass / 1226 expects), `bun run predeploy:check`, and `bun run backend:check` (270 pass / 1074 expects; DB-backed integration cases skipped because local Postgres is not running).

@@ -109,6 +109,25 @@ describe('backend db check command plan', () => {
     expect(migrationSql).toContain('ON "Message"("chatId", "deletedAt", "createdAt" DESC, "id" DESC)')
   })
 
+  test('keeps a fresh database baseline before schema upgrade migrations', async () => {
+    const migrationSql = await readFile(
+      join(
+        import.meta.dir,
+        '../apps/backend/prisma/migrations/20260504170000_initial_roleplay_baseline/migration.sql',
+      ),
+      'utf8',
+    )
+
+    expect(migrationSql).toContain('CREATE TABLE "User"')
+    expect(migrationSql).toContain('CREATE TABLE "Character"')
+    expect(migrationSql).toContain('"tags" TEXT[]')
+    expect(migrationSql).toContain('CREATE TABLE "Chat"')
+    expect(migrationSql).toContain('CREATE TABLE "Message"')
+    expect(migrationSql).toContain('CREATE INDEX "Character_visibility_chatCount_idx"')
+    expect(migrationSql).toContain('CREATE INDEX "Chat_userId_isArchived_updatedAt_idx"')
+    expect(migrationSql).toContain('CREATE INDEX "Message_chatId_id_idx"')
+  })
+
   test('keeps moderation reports when reported targets are removed', async () => {
     const schema = await readFile(join(import.meta.dir, '../apps/backend/prisma/schema.prisma'), 'utf8')
     const migrationSql = await readFile(
