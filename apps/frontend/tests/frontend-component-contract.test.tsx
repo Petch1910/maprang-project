@@ -329,4 +329,12 @@ describe('frontend component contracts', () => {
     expect(production.detail).toContain('ทดสอบสร้างรูปจริง')
     expect(production.detail).not.toContain('ฐานข้อมูล local')
   })
+
+  test('admin health page uses the shared deploy phase helper instead of a local duplicate', async () => {
+    const source = await Bun.file('apps/frontend/src/pages/AdminHealthPage.tsx').text()
+
+    expect(source).toContain("import { buildDeployPhaseSteps, type DeployCheck } from '../lib/adminHealthDeploy'")
+    expect(source).not.toContain('function buildDeployPhaseSteps(')
+    expect(source).not.toContain('function blockerSummary(')
+  })
 })
