@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { previewCharacterChat, providerFailureWarning } from './creator-preview.service'
 
 describe('creator-preview.service', () => {
   describe('PreviewChatInput validation', () => {
@@ -29,18 +30,18 @@ describe('creator-preview.service', () => {
     })
   })
 
-  describe('Mock reply generation', () => {
-    test('should generate mock reply with character name', () => {
+  describe('Local preview reply generation', () => {
+    test('should generate preview reply with character name', () => {
       const characterName = 'มายะ'
       const userMessage = 'สวัสดี'
-      const mockReply = `สวัสดีค่ะ! ฉันคือ ${characterName} ยินดีที่ได้รู้จักนะคะ`
-      expect(mockReply.includes(characterName)).toBe(true)
+      const previewReply = `สวัสดีค่ะ! ฉันคือ ${characterName} ยินดีที่ได้รู้จักนะคะ`
+      expect(previewReply.includes(characterName)).toBe(true)
     })
 
-    test('should include user message in mock reply', () => {
+    test('should include user message in preview reply', () => {
       const userMessage = 'วันนี้อากาศดีจัง'
-      const mockReply = `ข้อความของคุณ: "${userMessage}"`
-      expect(mockReply.includes(userMessage)).toBe(true)
+      const previewReply = `ข้อความของคุณ: "${userMessage}"`
+      expect(previewReply.includes(userMessage)).toBe(true)
     })
 
     test('should select greeting based on message length', () => {
@@ -155,10 +156,10 @@ describe('creator-preview.service', () => {
       expect(warnings[0]).toContain('ว่าง')
     })
 
-    test('should fallback to mock on provider error', () => {
+    test('should use local preview on provider error', () => {
       const hasApiKey = process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== 'missing-openrouter-key'
-      const shouldUseMock = !hasApiKey
-      expect(typeof shouldUseMock).toBe('boolean')
+      const shouldUseLocalPreview = !hasApiKey
+      expect(typeof shouldUseLocalPreview).toBe('boolean')
     })
 
     test('should retry on provider failure', async () => {
@@ -189,6 +190,35 @@ describe('creator-preview.service', () => {
       }
 
       expect(attempts).toBe(maxRetries)
+    })
+  })
+
+  describe('Local preview UX', () => {
+    test('returns Thai-first local preview copy without mock wording when provider is skipped', async () => {
+      const result = await previewCharacterChat({
+        name: 'มายะ',
+        systemPrompt: 'คุณคือมายะ พูดสุภาพและอบอุ่น',
+        userMessage: 'วันนี้เหนื่อยมากเลย',
+        skipProvider: true,
+      })
+
+      expect(result.source).toBe('mock')
+      expect(result.reply).toContain('คำตอบพรีวิวในเครื่องสำหรับลองบทก่อนเผยแพร่')
+      expect(result.reply).toContain('พรอมป์')
+      expect(result.reply).not.toContain('mock response')
+      expect(result.reply).not.toContain('Preview Chat')
+      expect(result.reply).not.toContain('prompt')
+      expect(result.warnings.join('\n')).toContain('คำตอบพรีวิวในเครื่อง')
+      expect(result.warnings.join('\n')).not.toContain('mock response')
+    })
+
+    test('redacts secret-shaped provider failures before returning a warning', () => {
+      const fakeKey = ['sk', 'or', 'v1', '1234567890abcdef1234567890abcdef1234567890abcdef'].join('-')
+      const warning = providerFailureWarning(new Error(`provider rejected OPENROUTER_API_KEY=${fakeKey}`))
+
+      expect(warning).toContain('เรียกผู้ให้บริการแชทไม่สำเร็จ')
+      expect(warning).toContain('คำตอบพรีวิวในเครื่อง')
+      expect(warning).not.toContain(fakeKey)
     })
   })
 

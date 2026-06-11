@@ -111,9 +111,9 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
   // Estimate tokens
   const estimatedTokens = estimatePromptTokens(systemPrompt + '\n\n' + userPrompt)
 
-  // Mock response if provider is skipped
+  // Local preview reply if provider is skipped
   if (input.skipProvider || !process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY === 'missing-openrouter-key') {
-    const mockReply = generateMockReply(input.name, input.userMessage)
+    const mockReply = generateLocalPreviewReply(input.name, input.userMessage)
     return {
       reply: mockReply,
       source: 'mock',
@@ -128,7 +128,7 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
         user: userPrompt,
         estimatedTokens,
       },
-      warnings: [...warnings, 'ใช้ mock response เพราะไม่มี API key'],
+      warnings: [...warnings, 'ใช้คำตอบพรีวิวในเครื่อง เพราะยังไม่ได้ตั้งค่า API key สำหรับผู้ให้บริการแชท'],
       timestamp,
     }
   }
@@ -165,9 +165,9 @@ export async function previewCharacterChat(input: PreviewChatInput): Promise<Pre
       timestamp,
     }
   } catch (error) {
-    warnings.push(`เรียก AI provider ล้มเหลว: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    warnings.push(providerFailureWarning(error))
 
-    const mockReply = generateMockReply(input.name, input.userMessage)
+    const mockReply = generateLocalPreviewReply(input.name, input.userMessage)
     return {
       reply: mockReply,
       source: 'mock',
@@ -213,7 +213,7 @@ async function callProviderWithRetry(
   throw lastError || new Error('Provider call failed')
 }
 
-function generateMockReply(characterName: string, userMessage: string): string {
+function generateLocalPreviewReply(characterName: string, userMessage: string): string {
   const greetings = [
     `สวัสดีค่ะ! ฉันคือ ${characterName} ยินดีที่ได้รู้จักนะคะ`,
     `ว้าว เรื่องที่คุณเล่ามาน่าสนใจมากเลยนะ`,
@@ -224,7 +224,13 @@ function generateMockReply(characterName: string, userMessage: string): string {
   const messageLength = userMessage.length
   const selectedGreeting = greetings[messageLength % greetings.length]
 
-  return `${selectedGreeting}\n\n[นี่คือ mock response สำหรับทดสอบ Preview Chat]\n\nในโหมด preview จริง คุณจะเห็นการตอบกลับที่สมจริงจาก AI ตามบุคลิกและ prompt ที่คุณกำหนดไว้ค่ะ\n\nข้อความของคุณ: "${userMessage}"`
+  return `${selectedGreeting}\n\n[คำตอบพรีวิวในเครื่องสำหรับลองบทก่อนเผยแพร่]\n\nเมื่อเชื่อมต่อผู้ให้บริการแชทจริง ระบบจะตอบตามบุคลิก สถานการณ์ และพรอมป์ที่คุณกำหนดไว้ละเอียดขึ้นค่ะ\n\nข้อความของคุณ: "${userMessage}"`
+}
+
+export function providerFailureWarning(error: unknown) {
+  const raw = error instanceof Error ? error.message : String(error || 'provider unavailable')
+  const safe = redactSensitiveText(raw).text.trim()
+  return `เรียกผู้ให้บริการแชทไม่สำเร็จ จึงใช้คำตอบพรีวิวในเครื่องแทน${safe ? ` (${safe.slice(0, 160)})` : ''}`
 }
 
 /**
