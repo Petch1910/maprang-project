@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Local run docs now match admin smoke behavior. `START_HERE.md`, `RUN_NOW.md`, `HOW_TO_RUN.md`, and `DEPLOYMENT_QA.md` explain that local loopback smoke prefers `SMOKE_ADMIN_API_KEY` and can fall back to `ADMIN_API_KEY` from untracked `apps/backend/.env`, while staging/production still require an explicit `SMOKE_ADMIN_API_KEY` secret. Docs gates passed afterward.
+
 - 2026-06-12: Predeploy now source-locks local smoke admin-key inference. `predeploy:check` requires `scripts/smoke-helpers.ts` to keep `backendEnvAdminApiKey`, `smokeAdminApiKey`, explicit `SMOKE_ADMIN_API_KEY` priority, local-target gating, and backend `.env` fallback, and requires `scripts/smoke-helpers.test.ts` to keep both local-only and explicit-override regressions. `docs/MAPRANG_TEST_PLAN.md` now documents that local moderation/admin-audit smoke can use `SMOKE_ADMIN_API_KEY` or loopback `ADMIN_API_KEY` from `apps/backend/.env`.
 
 - 2026-06-12: Local smoke admin-key inference is now closed. Shared smoke helpers can read `ADMIN_API_KEY` from the untracked `apps/backend/.env` only when the smoke target is loopback/local, while explicit `SMOKE_ADMIN_API_KEY` still wins and deployed targets never reuse the local backend key. `bun run qa:local` passed afterward with `moderationReports=5`, `moderationAuditLogs=5`, and `moderationSkippedReason=null`, so local moderation/admin-audit runtime coverage is no longer skipped on this machine. This does not clear external staging/production blockers because deployed smoke must still pass with a real `SMOKE_ADMIN_API_KEY` secret.

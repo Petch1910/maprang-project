@@ -35,6 +35,8 @@ $env:SMOKE_API_BASE_URL="http://127.0.0.1:3001"
 
 `bun run smoke:doctor`, `bun run api:smoke`, `bun run deploy:status`, และ `bun run e2e:smoke` จะอ่าน `PORT` จาก `apps/backend/.env` ให้อัตโนมัติเมื่อยังไม่ได้ตั้ง smoke/e2e backend URL; ถ้ารันกับ staging/deployed URL ให้ตั้ง `SMOKE_API_BASE_URL` หรือ `E2E_API_BASE_URL` เองเสมอ.
 
+สำหรับ local loopback smoke ถ้าไม่ได้ตั้ง `SMOKE_ADMIN_API_KEY` ระบบจะอ่าน `ADMIN_API_KEY` จาก `apps/backend/.env` เพื่อเช็ค moderation/admin audit ได้ แต่ staging/production ต้องตั้ง `SMOKE_ADMIN_API_KEY` เป็น secret จริงเสมอ.
+
 ## 4. Start frontend
 
 ```powershell
