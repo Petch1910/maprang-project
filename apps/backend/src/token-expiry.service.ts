@@ -1,6 +1,15 @@
 import { getPrisma } from './db'
 import { recordTokenTransaction } from './token.service'
 
+export type TokenExpiryNotification = {
+  userId: string
+  email: string | null
+  amount: number
+  daysAhead: number
+  title: string
+  message: string
+}
+
 /**
  * Expire promotional tokens that have passed their expiry date
  * Called by cron job daily
@@ -151,6 +160,7 @@ export async function getExpiringTokens(userId: string, daysAhead: number = 7) {
 export async function notifyExpiringTokens(daysAhead: number): Promise<{
   notifiedUsers: number
   totalExpiringTokens: number
+  notifications: TokenExpiryNotification[]
 }> {
   const prisma = getPrisma()
   if (!prisma) {
@@ -191,20 +201,51 @@ export async function notifyExpiringTokens(daysAhead: number): Promise<{
   })
 
   // Group by user
-  const userTokens = new Map<string, number>()
+  const userTokens = new Map<string, { amount: number; email: string | null }>()
   for (const tx of expiringTransactions) {
-    const current = userTokens.get(tx.userId) || 0
-    userTokens.set(tx.userId, current + tx.amount)
+    const current = userTokens.get(tx.userId)
+    userTokens.set(tx.userId, {
+      amount: (current?.amount ?? 0) + tx.amount,
+      email: current?.email ?? tx.user.email ?? null,
+    })
   }
 
-  // TODO: Send actual notifications (email, in-app, etc.)
-  // For now, just log the notification intent
-  console.log(
-    `[Token Expiry] ${daysAhead} days notice: ${userTokens.size} users with ${Array.from(userTokens.values()).reduce((a, b) => a + b, 0)} expiring tokens`
-  )
+  const notifications = buildTokenExpiryNotifications(userTokens, daysAhead)
 
   return {
-    notifiedUsers: userTokens.size,
-    totalExpiringTokens: Array.from(userTokens.values()).reduce((a, b) => a + b, 0),
+    notifiedUsers: notifications.length,
+    totalExpiringTokens: notifications.reduce((total, item) => total + item.amount, 0),
+    notifications,
   }
+}
+
+export function buildTokenExpiryNotifications(
+  userTokens: Map<string, { amount: number; email?: string | null }>,
+  daysAhead: number,
+): TokenExpiryNotification[] {
+  return Array.from(userTokens.entries())
+    .map(([userId, token]) => {
+      const amount = Math.max(0, Math.floor(token.amount))
+      if (amount <= 0) return null
+
+      return {
+        userId,
+        email: token.email ?? null,
+        amount,
+        daysAhead,
+        title: tokenExpiryNotificationTitle(daysAhead),
+        message: tokenExpiryNotificationMessage(amount, daysAhead),
+      }
+    })
+    .filter((item): item is TokenExpiryNotification => item !== null)
+}
+
+function tokenExpiryNotificationTitle(daysAhead: number) {
+  if (daysAhead <= 1) return 'โทเคนโปรโมชันจะหมดอายุพรุ่งนี้'
+  return `โทเคนโปรโมชันจะหมดอายุใน ${daysAhead} วัน`
+}
+
+function tokenExpiryNotificationMessage(amount: number, daysAhead: number) {
+  const when = daysAhead <= 1 ? 'พรุ่งนี้' : `ในอีก ${daysAhead} วัน`
+  return `คุณมีโทเคนโปรโมชัน ${amount} โทเคนที่จะหมดอายุ${when} ใช้ก่อนหมดอายุเพื่อไม่ให้เสียสิทธิ์`
 }
