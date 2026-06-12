@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Added `bun run secrets:history` for Git history secret auditing. The scanner reuses repo secret patterns, reports only commit/file/pattern/change without printing secret values, and is covered by `secrets:history:test`, `tests:audit`, and `predeploy:check`. Running it on the current repository correctly reports historical Claude Code key exposure in `.claude/settings.json`; the key still must be rotated/revoked outside the repo and history rewrite should be considered before public access.
+
 - 2026-06-12: `.claude/settings.json` is no longer tracked by the repo and is ignored alongside `.claude/settings.local.json`. Both Claude settings files are treated as local-only by the secret scanner and will be flagged if tracked again, leaving personal provider/base-url/permission settings on the developer machine instead of in project source.
 
 - 2026-06-12: `predeploy:check` now source-locks the Claude Code secret scanner hardening. It requires `isLocalOnlyConfigPath`, `.claude/settings.json`, `.claude/settings.local.json`, `tracked local-only tool settings`, `Claude Code key`, `ccsk-`, and the matching regression tests, so the repo cannot silently lose protection for local Claude settings or `ccsk-...` provider keys.

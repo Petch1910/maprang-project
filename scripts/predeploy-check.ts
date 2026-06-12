@@ -90,6 +90,8 @@ const requiredFiles = [
   'scripts/e2e-smoke.test.ts',
   'scripts/playwright-config.test.ts',
   'scripts/check-secrets.test.ts',
+  'scripts/check-secret-history.ts',
+  'scripts/check-secret-history.test.ts',
   'scripts/secret-patterns.ts',
   'scripts/secret-patterns.test.ts',
   'scripts/supabase-storage-setup.ts',
@@ -603,6 +605,8 @@ const checks: Check[] = [
       const test = await readRepoFile('scripts/release-handoff-check.test.ts')
       const checkSecrets = await readRepoFile('scripts/check-secrets.ts')
       const checkSecretsTest = await readRepoFile('scripts/check-secrets.test.ts')
+      const checkSecretHistory = await readRepoFile('scripts/check-secret-history.ts')
+      const checkSecretHistoryTest = await readRepoFile('scripts/check-secret-history.test.ts')
       const secretPatterns = await readRepoFile('scripts/secret-patterns.ts')
       const secretPatternsTest = await readRepoFile('scripts/secret-patterns.test.ts')
       requireIncludes(
@@ -789,6 +793,23 @@ const checks: Check[] = [
         'scripts/check-secrets.test.ts',
       )
       requireIncludes(
+        checkSecretHistory,
+        [
+          'collectSecretHistoryFindingsFromGitLog',
+          'runSecretHistoryCheck',
+          'ไม่พิมพ์ค่า secret',
+          'rotate/revoke key',
+          'rewrite history',
+          'if (import.meta.main) process.exit(await runSecretHistoryCheck())',
+        ],
+        'scripts/check-secret-history.ts',
+      )
+      requireIncludes(
+        checkSecretHistoryTest,
+        ['detects secret patterns in added and removed diff lines without returning secret values', 'caps runner output and does not print secret values'],
+        'scripts/check-secret-history.test.ts',
+      )
+      requireIncludes(
         secretPatterns,
         ['Anthropic key', 'Claude Code key', 'ccsk-', 'Hugging Face token', 'Stripe live secret key', 'GitHub token', 'Google API key', 'Slack token', 'Private key block'],
         'scripts/secret-patterns.ts',
@@ -865,6 +886,8 @@ const checks: Check[] = [
           '"release:handoff:test"',
           '"secrets:check:test"',
           '"secrets:patterns:test"',
+          '"secrets:history"',
+          '"secrets:history:test"',
           '"qa:seed"',
           '"e2e:smoke"',
           '"qa:repo"',

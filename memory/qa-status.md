@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 Git history secret audit tooling pass: added `bun run secrets:history` and `secrets:history:test`. The history scanner parses Git patch history, reports only commit/file/pattern/change, and never prints secret values. Focused evidence: `bun run secrets:history:test`, `bun run tests:audit`, `bun run secrets:check`, and `git diff --check`. Manual `bun run secrets:history` correctly fails on historical `.claude/settings.json` Claude Code key exposure, so the external action remains rotate/revoke the old key and consider history rewrite before public access.
+
 - 2026-06-12 Claude settings untrack QA pass: `.claude/settings.json` was removed from tracked source with `git rm --cached`, `.gitignore` now ignores both `.claude/settings.json` and `.claude/settings.local.json`, and the secret scanner treats both paths as local-only while still flagging either path if tracked again.
 
 - 2026-06-12 predeploy source-lock QA pass for Claude Code secret scanning: `predeploy:check` now requires the scanner/source tests to keep `isLocalOnlyConfigPath`, `.claude/settings.json`, `.claude/settings.local.json`, `tracked local-only tool settings`, `Claude Code key`, `ccsk-`, and `fakeClaudeCodeKey`. Passing evidence: `bun run predeploy:check:test` (3 pass / 1238 expects), `bun run predeploy:check`, `bun run secrets:patterns:test`, and `bun run secrets:check:test`.
