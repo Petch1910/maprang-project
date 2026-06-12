@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 production checklist baseline-sync QA pass: deploy-blocker and production checklist source locks now require the current 2026-06-12 local-gate evidence instead of old 2026-06-05/06 handoff metrics. Passing evidence: `bun run predeploy:check:test` (3 pass / 1238 expects), `bun run memory:audit` (38 Markdown files), `bun run docs:commands` (471 refs), `bun run predeploy:check`, and `git diff --check`. External blockers remain deployed HTTPS backend/frontend URLs, production CORS/domain, Supabase signed `avatars`, live chat smoke, live image smoke, and deployed secrets.
+
 - 2026-06-12 full local QA pass after local roleplay smoke label cleanup: `bun run qa:local` passed against local backend `http://127.0.0.1:3001`. Evidence included QA seed restored, smoke doctor green, local wallet/profile/moderation/creator/runtime smoke green, API smoke 34 pass / 2 live-provider skips / 0 fail with `POST /chat local roleplay QA` labels, backend tests 271 pass / 1226 expects, frontend build passed, and bundle budget stayed green. External blockers remain staging/production HTTPS URLs, production CORS/domain, Supabase signed `avatars`, live chat smoke, and live image provider.
 
 - 2026-06-12 runtime API smoke pass after local roleplay label rename: HTTP `bun run api:smoke` passed against local backend `http://127.0.0.1:3001` with 34 pass / 2 live-provider skips / 0 warn / 0 fail. The real smoke output now shows `POST /chat local roleplay QA` and `POST /chat/stream local roleplay QA`, normal reply length 1085, stream delta chars 1039, `model=local/mock-roleplay`, and `totalTokens=0`.
