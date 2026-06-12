@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Full runtime `bun run qa:local` passed after the local roleplay smoke-label cleanup. Local backend remained healthy on `http://127.0.0.1:3001`, QA seed was restored, local wallet/profile/moderation/creator/runtime smoke passed, API smoke used the new `local roleplay QA` labels, backend tests stayed 271 pass / 1226 expects, and frontend build/bundle budget stayed green.
+
 - 2026-06-12: Runtime HTTP `bun run api:smoke` passed after the local roleplay label rename. Local backend `http://127.0.0.1:3001` reported 34 pass / 2 live-provider skips / 0 warn / 0 fail, and the normal/stream chat rows now print the `local roleplay QA` labels.
 
 - 2026-06-12: API/local smoke labels now use `local roleplay QA` instead of the older `local chat QA` wording. README and Deployment QA describe `POST /chat local roleplay QA` / `POST /chat/stream local roleplay QA`, matching the script check labels and Thai diagnostics.
