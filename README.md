@@ -98,7 +98,7 @@ bun run deploy:status
 bun scripts/deploy-status.ts --json
 ```
 
-JSON output มี field top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` สำหรับ automation พร้อมรายละเอียด `readiness` และ `nextSteps` ตามลำดับ. ถ้า root identity หรือ `/health` อ่านไม่ได้ JSON จะยังคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ dashboard/CI อ่านสาเหตุได้โดยไม่ต้อง parse stderr.
+JSON output มี field top-level `stagingReady`, `stagingBlockers`, `stagingBlockerCount`, `stagingFixes`, `productionReady`, `productionBlockers`, `productionBlockerCount`, และ `productionFixes` สำหรับ automation พร้อมรายละเอียด `readiness` และ `nextSteps` ตามลำดับ. ถ้า root identity หรือ `/health` อ่านไม่ได้ JSON จะยังคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ dashboard/CI อ่านสาเหตุได้โดยไม่ต้อง parse stderr.
 
 ## ชั้นความรู้ (Knowledge Layer)
 

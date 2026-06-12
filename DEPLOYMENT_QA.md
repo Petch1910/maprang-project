@@ -102,7 +102,7 @@ bun run deploy:status
 bun scripts/deploy-status.ts --json
 ```
 
-JSON response มี fields top-level `stagingReady`, `stagingBlockerCount`, `productionReady`, และ `productionBlockerCount` เพื่อให้ automation ไม่ต้อง parse nested readiness details. ถ้า root identity หรือ `/health` อ่านไม่ได้ JSON จะยังคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ dashboard/CI อ่านสาเหตุได้โดยไม่ต้อง parse stderr.
+JSON response มี fields top-level `stagingReady`, `stagingBlockers`, `stagingBlockerCount`, `stagingFixes`, `productionReady`, `productionBlockers`, `productionBlockerCount`, และ `productionFixes` เพื่อให้ automation ไม่ต้อง parse nested readiness details. ถ้า root identity หรือ `/health` อ่านไม่ได้ JSON จะยังคืน `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false` เพื่อให้ dashboard/CI อ่านสาเหตุได้โดยไม่ต้อง parse stderr.
 เมื่อ backend ตอบ `/health` ได้ JSON จะมี `health.chatRuntimeProvider`, `health.chatLocalFallbackEnabled`, `health.chatForcedLocal`, และ `health.chatLocalModel` เพื่อให้ dashboard แยกโหมดในเครื่อง/local roleplay QA ออกจาก live provider verification.
 
 readiness rules ด้านล่างมี deterministic self-test:

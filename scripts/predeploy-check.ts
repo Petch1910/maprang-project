@@ -1580,7 +1580,11 @@ const checks: Check[] = [
           'buildProductionNextDeploySteps',
           '--json',
           'stagingBlockerCount',
+          'stagingBlockers',
+          'stagingFixes',
           'productionBlockerCount',
+          'productionBlockers',
+          'productionFixes',
           'stagingNextSteps',
           'productionNextSteps',
           'สถานะ deploy Maprang',
@@ -1719,7 +1723,17 @@ const checks: Check[] = [
       ]
       requireIncludes(
         deploymentQa,
-        ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', ...localRuntimeFieldSnippets, ...adminHealthRunbookSnippets],
+        [
+          'bun run deploy:status',
+          'bun scripts/deploy-status.ts --json',
+          'rootIdentity.ok=false',
+          'stagingBlockers',
+          'stagingFixes',
+          'productionBlockers',
+          'productionFixes',
+          ...localRuntimeFieldSnippets,
+          ...adminHealthRunbookSnippets,
+        ],
         'DEPLOYMENT_QA.md',
       )
       requireIncludes(
@@ -1728,6 +1742,10 @@ const checks: Check[] = [
           'bun run deploy:status',
           '`staging:verify` จะพิมพ์',
           'stagingBlockerCount',
+          'stagingBlockers',
+          'stagingFixes',
+          'productionBlockers',
+          'productionFixes',
           'rootIdentity.ok=false',
           'สรุป blocker และ next steps',
           ...localRuntimeFieldSnippets,
@@ -1737,12 +1755,31 @@ const checks: Check[] = [
       )
       requireIncludes(
         stagingRunbook,
-        ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false', 'bun run staging:verify', 'bun run production:check', ...adminHealthRunbookSnippets],
+        [
+          'bun run deploy:status',
+          'bun scripts/deploy-status.ts --json',
+          'rootIdentity.ok=false',
+          'stagingBlockers',
+          'stagingFixes',
+          'productionBlockers',
+          'productionFixes',
+          'bun run staging:verify',
+          'bun run production:check',
+          ...adminHealthRunbookSnippets,
+        ],
         'STAGING_RUNBOOK.md',
       )
       requireIncludes(
         await readRepoFile('memory/production/checklist.md'),
-        ['bun run deploy:status', 'bun scripts/deploy-status.ts --json', 'rootIdentity.ok=false'],
+        [
+          'bun run deploy:status',
+          'bun scripts/deploy-status.ts --json',
+          'rootIdentity.ok=false',
+          'stagingBlockers',
+          'stagingFixes',
+          'productionBlockers',
+          'productionFixes',
+        ],
         'memory/production/checklist.md',
       )
     },

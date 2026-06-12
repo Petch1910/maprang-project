@@ -23,9 +23,13 @@ type DeployStatusPayload = {
   ok: boolean
   apiBaseUrl: string
   stagingReady: boolean
+  stagingBlockers: string[]
   stagingBlockerCount: number
+  stagingFixes: string[]
   productionReady: boolean
+  productionBlockers: string[]
   productionBlockerCount: number
+  productionFixes: string[]
   health: {
     backend: boolean
     databaseConfigured: boolean
@@ -89,9 +93,13 @@ export function buildDeployStatusPayload(
     ok: failures.length === 0,
     apiBaseUrl: options.apiBaseUrl,
     stagingReady: readiness.stagingReady,
+    stagingBlockers: readiness.stagingBlockers,
     stagingBlockerCount: readiness.stagingBlockers.length,
+    stagingFixes: readiness.stagingFixes,
     productionReady: readiness.productionReady,
+    productionBlockers: readiness.productionBlockers,
     productionBlockerCount: readiness.productionBlockers.length,
+    productionFixes: readiness.productionFixes,
     health: {
       backend: health.ok,
       databaseConfigured: health.checks.databaseConfigured,

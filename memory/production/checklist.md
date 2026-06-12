@@ -129,7 +129,7 @@ Repo-owned decision lock: decision `0027` namespace reflection guard contract pl
 - ตรวจ bucket `avatars` แบบ private signed URL.
 - รัน `bun run deploy:doctor -- --backend-env <backend-env> --frontend-env <frontend-env>` ก่อนชี้ smoke ไป staging.
 - รัน `bun run deploy:status` เพื่อยืนยันว่า blocker และ next steps แสดงชัด.
-- ถ้าต้องส่งผลเข้า CI/dashboard ให้ใช้ `bun scripts/deploy-status.ts --json`; กรณี root identity หรือ `/health` อ่านไม่ได้ ต้องเห็น `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false`.
+- ถ้าต้องส่งผลเข้า CI/dashboard ให้ใช้ `bun scripts/deploy-status.ts --json`; ต้องเห็น top-level `stagingBlockers`, `stagingFixes`, `productionBlockers`, และ `productionFixes`; กรณี root identity หรือ `/health` อ่านไม่ได้ ต้องเห็น `ok=false`, `failures`, `nextSteps`, และ `rootIdentity.ok=false`.
 - รัน `bun run staging:check`.
 - หลังมี staging domains แล้ว ให้รัน `bun run staging:verify` พร้อม `SMOKE_API_BASE_URL` และ `SMOKE_ADMIN_API_KEY`.
 - รัน smoke ผู้ให้บริการจริงตามลำดับ.

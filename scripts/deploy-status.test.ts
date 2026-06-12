@@ -60,9 +60,13 @@ describe('deploy status formatting', () => {
 
     expect(payload.ok).toBe(true)
     expect(payload.stagingReady).toBe(true)
+    expect(payload.stagingBlockers).toEqual([])
     expect(payload.stagingBlockerCount).toBe(0)
+    expect(payload.stagingFixes).toEqual([])
     expect(payload.productionReady).toBe(true)
+    expect(payload.productionBlockers).toEqual([])
     expect(payload.productionBlockerCount).toBe(0)
+    expect(payload.productionFixes).toEqual([])
     expect(payload.health.chatStatus).toBe('verified')
     expect(payload.health.chatRuntimeProvider).toBe('openrouter')
     expect(payload.health.chatLocalFallbackEnabled).toBe(false)
@@ -158,6 +162,10 @@ describe('deploy status formatting', () => {
     expect(payload.ok).toBe(true)
     expect(payload.stagingReady).toBe(false)
     expect(payload.productionReady).toBe(false)
+    expect(payload.stagingBlockers).toEqual(payload.readiness.stagingBlockers)
+    expect(payload.stagingFixes).toEqual(payload.readiness.stagingFixes)
+    expect(payload.productionBlockers).toEqual(payload.readiness.productionBlockers)
+    expect(payload.productionFixes).toEqual(payload.readiness.productionFixes)
     expect(payload.readiness.productionBlockers).toContain(
       'production env ไม่ถูกต้อง: MODEL_MIN_ROLEPLAY_REPLY_CHARS ต้องไม่น้อยกว่า 320 สำหรับคำตอบ roleplay ใน production',
     )
