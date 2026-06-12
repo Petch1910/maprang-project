@@ -70,7 +70,7 @@ bun run backend:check:db:test
 - Stream chat ต้องส่ง delta และ done event ได้
 - Saved chats ต้องคืนรายการแชทและ message window แบบจำกัดช่วงหลัง local chat สร้างห้องแล้ว
 - Chat world state ต้อง patch/get ได้หลัง local chat สร้างห้องแล้ว เพื่อรองรับ scene/universe continuity
-- Creator AI draft ต้องมี fallback ที่บอกสถานะชัดเจนเมื่อยังไม่มี live image provider
+- Creator AI draft ต้องมีภาพร่างระบบที่บอกสถานะชัดเจนเมื่อยังไม่มี live image provider
 - Creator Preview simulator ต้องตอบ local preview ได้โดยไม่สร้าง chat จริง, คืน `source=local`, `modelName=local/preview`, usage/prompt/warnings shape ครบ, และคำตอบไม่สั้นจนใช้ทดสอบบุคลิกไม่ได้
 - Token ledger ต้องบันทึก balance และ usage ถูกต้อง
 - Report/admin actions ต้องสร้าง audit log
@@ -98,7 +98,7 @@ bun run route-menu:audit
 - API error ต้องผ่าน helper กลางและไม่โชว์ raw technical error
 - UI ใช้ธีมเดียวกันเป็น dark-first และไม่มี horizontal overflow
 - Component/unit coverage ต้องครอบ core UI อย่างน้อย: chat composer, message bubble, character card, relationship picker, report dialog, และ creator readiness/form flow
-- E2E smoke ต้องตรวจ state สำคัญ ไม่ใช่แค่ render route: create draft, AI draft fallback/live flag, chat send local, chat menu actions, report, wallet, moderation, admin health, และ mobile viewport
+- E2E smoke ต้องตรวจ state สำคัญ ไม่ใช่แค่ render route: create draft, AI draft system-draft/live flag, chat send local, chat menu actions, report, wallet, moderation, admin health, และ mobile viewport
 
 ## QA Gates
 

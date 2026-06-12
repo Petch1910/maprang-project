@@ -47,7 +47,7 @@ const completeTestPlan = [
   'report dialog',
   'creator readiness/form flow',
   'create draft',
-  'AI draft fallback/live flag',
+  'AI draft system-draft/live flag',
   'chat send local',
   'chat menu actions',
   'report',
