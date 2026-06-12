@@ -22,6 +22,7 @@ const requiredFiles = [
   'ROUTE_MENU_AUDIT.md',
   'SECURITY_CHECKLIST.md',
   'STAGING_RUNBOOK.md',
+  'render.yaml',
   'knowledge/README.md',
   'knowledge/raw/README.md',
   'knowledge/wiki/INDEX.md',
@@ -517,6 +518,7 @@ const checks: Check[] = [
     run: async () => {
       const backend = await readRepoFile('apps/backend/Dockerfile')
       const frontend = await readRepoFile('apps/frontend/Dockerfile')
+      const renderBlueprint = await readRepoFile('render.yaml')
       requireIncludes(backend, ['COPY knowledge ./knowledge', 'RUN bunx prisma generate', 'EXPOSE 3000', 'CMD ["bun", "run", "start"]'], 'apps/backend/Dockerfile')
       requireIncludes(
         frontend,
@@ -531,6 +533,34 @@ const checks: Check[] = [
           'EXPOSE 80',
         ],
         'apps/frontend/Dockerfile',
+      )
+      requireIncludes(
+        renderBlueprint,
+        [
+          'name: maprang-postgres',
+          'type: web',
+          'name: maprang-backend',
+          'env: docker',
+          'dockerfilePath: ./apps/backend/Dockerfile',
+          'healthCheckPath: /ready',
+          'fromDatabase:',
+          'property: connectionString',
+          'type: static',
+          'name: maprang-frontend',
+          'rootDir: apps/frontend',
+          'buildCommand: bun install --frozen-lockfile && bun run build',
+          'staticPublishPath: dist',
+          'STORAGE_PROVIDER',
+          'value: supabase',
+          'SUPABASE_STORAGE_BUCKET',
+          'value: avatars',
+          'SUPABASE_STORAGE_ACCESS',
+          'value: signed',
+          'CHAT_PROVIDER_LIVE_VERIFIED',
+          'IMAGE_GENERATION_LIVE_VERIFIED',
+          'sync: false',
+        ],
+        'render.yaml',
       )
     },
   },
