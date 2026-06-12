@@ -139,7 +139,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('worldStateLocation')
     expect(predeploy).toContain('worldStateMood')
     expect(predeploy).toContain('worldStateSceneNotes')
-    expect(predeploy).toContain('validates local creator AI draft fallback shape')
+    expect(predeploy).toContain('validates local creator AI draft system-draft shape')
     expect(predeploy).toContain('validateLocalCreatorDraft')
     expect(predeploy).toContain("'/creator/ai-draft'")
     expect(predeploy).toContain('creatorDraftImageProvider')

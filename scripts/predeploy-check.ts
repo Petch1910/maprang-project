@@ -1972,7 +1972,7 @@ const checks: Check[] = [
           'validates local moderation reports and audit log snapshot shape',
           'validates local saved chats and message window shape',
           'validates local world state shape',
-          'validates local creator AI draft fallback shape',
+          'validates local creator AI draft system-draft shape',
           'validates local creator preview simulator shape',
           'validates local runtime scene and relationship state shape',
           'validates local chat runtime, reply length, model, and zero-token usage',

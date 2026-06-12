@@ -205,7 +205,7 @@ describe('local smoke helpers', () => {
     ).toThrow('sceneNotes')
   })
 
-  test('validates local creator AI draft fallback shape', () => {
+  test('validates local creator AI draft system-draft shape', () => {
     const payload = {
       draft: {
         name: 'มิกะ | MIKA',
