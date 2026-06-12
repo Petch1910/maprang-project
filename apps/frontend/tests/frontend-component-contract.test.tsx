@@ -468,7 +468,9 @@ describe('frontend component contracts', () => {
     const lobbySource = await Bun.file('apps/frontend/src/pages/CharacterLobbyPage.tsx').text()
 
     expect(lobbySource).toContain('ตัวละครนี้ไม่พร้อมแสดงในโหมดใช้งานจริง')
+    expect(lobbySource).toContain('โทนอารมณ์เริ่มต้น')
     expect(lobbySource).not.toContain('ตัวละคร QA สำหรับทดสอบ')
+    expect(lobbySource).not.toContain('ตัวอย่างโทนอารมณ์')
   })
 
   test('saved chat cards avoid demo-like empty preview copy', async () => {

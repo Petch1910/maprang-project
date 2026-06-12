@@ -328,7 +328,7 @@ export function CharacterLobbyPage() {
                 ))}
               </div>
               <div className="mt-4 rounded-2xl border border-white/10 bg-black/22 p-4">
-                <p className="text-sm font-black text-white/45">ตัวอย่างโทนอารมณ์</p>
+                <p className="text-sm font-black text-white/45">โทนอารมณ์เริ่มต้น</p>
                 <p className="mt-1 text-lg font-black text-white">{seed.tone}</p>
               </div>
             </section>
