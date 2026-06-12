@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Saved-chat empty preview copy is now production-facing. `/chats` cards show `ยังไม่มีข้อความล่าสุด` when a chat has no preview instead of demo-like `ยังไม่มีตัวอย่างข้อความ`, and `frontend-component-contract` locks the old phrase out of `MyChatsPage`.
+
 - 2026-06-12: Image-generation copy is now aligned across frontend, backend diagnostics, smoke/deploy CLIs, and docs. Product-facing surfaces use `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of demo-like `ภาพตัวอย่าง` or provider-debug wording, and frontend component contracts blacklist the old visible phrases across Creator Studio, Workspace, System Status, and Route/Menu Audit sources.
 
 - 2026-06-12: Backend Creator Draft API now uses the same product-facing system-draft image wording as the frontend and docs. Missing or failed live image generation returns notes/warnings with `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of temporary/demo/provider-debug copy, while machine evidence still keeps stable `provider=placeholder` and `source=fallback` values for smoke/release tooling.

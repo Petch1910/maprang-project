@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 saved-chat empty preview copy QA pass: `/chats` no longer says `ยังไม่มีตัวอย่างข้อความ` when a saved chat has no preview. It now uses `ยังไม่มีข้อความล่าสุด`, with component-contract coverage. Passing evidence: `bun run frontend:components:test` (20 pass / 116 expects), `bun run frontend:static:audit`, `bun run frontend:check`, `bun run secrets:check`, and `git diff --check`.
+
 - 2026-06-12 image-generation copy consistency QA pass: frontend runtime/admin copy, backend Creator Draft diagnostics, smoke/deploy CLI messages, and docs now use `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of demo-like image/provider wording. Source search leaves `ภาพตัวอย่าง` / `ผู้ให้บริการสร้างรูปจริง` only in blacklist tests. Passing evidence: `bun run frontend:components:test` (19 pass / 112 expects), `bun run frontend:static:audit`, `bun test apps/backend/src/creator-draft.service.test.ts` (16 pass / 72 expects), `bun run api:smoke:test` (13 pass / 145 expects), `bun run smoke:image:test` (11 pass / 51 expects), `bun run smoke:local:test` (18 pass / 125 expects), `bun run predeploy:check`, `bun run frontend:check`, and full `bun run qa:repo` (backend tests 271 pass / 1226 expects).
 
 - 2026-06-12 backend Creator Draft image-copy QA pass: `/creator/ai-draft` now returns system-draft image notes and warnings with `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of temporary/demo/provider-debug copy. Passing evidence: `bun test apps/backend/src/creator-draft.service.test.ts` (16 pass / 72 expects), `bun run api:audit` (58 backend routes / 34 frontend helper calls), `bun run api:smoke:test` (13 pass / 145 expects), and full `bun run qa:repo` (backend tests 271 pass / 1226 expects, frontend route/static/build/bundle gates green).
