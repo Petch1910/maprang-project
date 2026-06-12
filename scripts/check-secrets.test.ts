@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
-import { collectSecretFindings, isUnsafeTrackedEnvPath, runSecretsCheck, shouldCheckSecretPath } from './check-secrets'
+import { collectSecretFindings, isLocalOnlyConfigPath, isUnsafeTrackedEnvPath, runSecretsCheck, shouldCheckSecretPath } from './check-secrets'
 
 const root = join(process.cwd(), '.secret-scan-test-root')
 
@@ -45,6 +45,18 @@ describe('committed secret scan path rules', () => {
     ).toBe(true)
     expect(
       shouldCheckSecretPath(join(root, 'public/avatar.png'), {
+        rootDir: root,
+        selfRelativePath: 'scripts/check-secrets.ts',
+      }),
+    ).toBe(false)
+  })
+
+  test('skips ignored local-only tool settings from working-file scans', () => {
+    expect(isLocalOnlyConfigPath('.claude/settings.local.json')).toBe(true)
+    expect(isLocalOnlyConfigPath('nested/.claude/settings.local.json')).toBe(true)
+    expect(isLocalOnlyConfigPath('.claude/settings.json')).toBe(false)
+    expect(
+      shouldCheckSecretPath(join(root, '.claude/settings.local.json'), {
         rootDir: root,
         selfRelativePath: 'scripts/check-secrets.ts',
       }),

@@ -16,6 +16,11 @@ const committedSecretPatterns = [
 
 export type SecretFinding = { file: string; name: string }
 
+export function isLocalOnlyConfigPath(path: string) {
+  const normalized = path.replaceAll('\\', '/')
+  return normalized === '.claude/settings.local.json' || normalized.endsWith('/.claude/settings.local.json')
+}
+
 export function isUnsafeTrackedEnvPath(path: string) {
   const normalized = path.replaceAll('\\', '/')
   const fileName = normalized.split('/').pop() ?? normalized
@@ -33,6 +38,7 @@ export function shouldCheckSecretPath(
   const selfRelativePath = options.selfRelativePath ?? selfFile
   const normalized = path.replaceAll('\\', '/')
   if (isUnsafeTrackedEnvPath(normalized)) return false
+  if (isLocalOnlyConfigPath(normalized)) return false
   const relativePath = relative(rootDir, path).replaceAll('\\', '/')
   if (relativePath === selfRelativePath.replaceAll('\\', '/')) return false
   if (normalized.includes('/.env')) return true
@@ -81,6 +87,9 @@ export async function collectSecretFindings(): Promise<SecretFinding[]> {
     }
   }
   for (const file of await gitTrackedFiles()) {
+    if (isLocalOnlyConfigPath(file)) {
+      findings.push({ file, name: 'tracked local-only tool settings' })
+    }
     if (isUnsafeTrackedEnvPath(file)) {
       findings.push({ file, name: 'tracked env file ที่ไม่ควร commit' })
     }

@@ -2,7 +2,7 @@
 
 Last updated: 2026-06-12
 
-- 2026-06-12: Removed a committed Claude Code provider key from tracked `.claude/settings.json`, ignored `.claude/settings.local.json`, and added `ccsk-...` detection to the repo secret scanner. `bun test scripts/secret-patterns.test.ts scripts/check-secrets.test.ts`, `bun run secrets:check`, and full `bun run qa:repo` passed after the change. The exposed key must be treated as rotated/revoked outside the repo if it was ever active.
+- 2026-06-12: Removed a committed Claude Code provider key from tracked `.claude/settings.json`, ignored `.claude/settings.local.json`, skipped that local-only file from working-file scans, and added `ccsk-...` detection to the repo secret scanner. `bun test scripts/secret-patterns.test.ts scripts/check-secrets.test.ts`, `bun run secrets:check`, and full `bun run qa:repo` passed after the change. The exposed key must be treated as rotated/revoked outside the repo if it was ever active.
 
 - 2026-06-12: `deploy:status --json` now exposes top-level `stagingBlockers`, `stagingFixes`, `productionBlockers`, and `productionFixes` arrays in addition to the existing readiness counts and nested readiness object. This is a repo-owned handoff improvement for CI/dashboard parsing only; the actual staging/production blockers remain the same external deployed HTTPS/CORS/Supabase signed storage/live-provider/image-provider evidence.
 
