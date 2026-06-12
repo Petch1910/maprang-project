@@ -2,7 +2,9 @@
 
 Last updated: 2026-06-12
 
-- 2026-06-12 predeploy source-lock QA pass for Claude Code secret scanning: `predeploy:check` now requires the scanner/source tests to keep `isLocalOnlyConfigPath`, `.claude/settings.local.json`, `tracked local-only tool settings`, `Claude Code key`, `ccsk-`, and `fakeClaudeCodeKey`. Passing evidence: `bun run predeploy:check:test` (3 pass / 1238 expects), `bun run predeploy:check`, `bun run secrets:patterns:test`, and `bun run secrets:check:test`.
+- 2026-06-12 Claude settings untrack QA pass: `.claude/settings.json` was removed from tracked source with `git rm --cached`, `.gitignore` now ignores both `.claude/settings.json` and `.claude/settings.local.json`, and the secret scanner treats both paths as local-only while still flagging either path if tracked again.
+
+- 2026-06-12 predeploy source-lock QA pass for Claude Code secret scanning: `predeploy:check` now requires the scanner/source tests to keep `isLocalOnlyConfigPath`, `.claude/settings.json`, `.claude/settings.local.json`, `tracked local-only tool settings`, `Claude Code key`, `ccsk-`, and `fakeClaudeCodeKey`. Passing evidence: `bun run predeploy:check:test` (3 pass / 1238 expects), `bun run predeploy:check`, `bun run secrets:patterns:test`, and `bun run secrets:check:test`.
 
 - 2026-06-12 secret scanner hardening QA pass: removed a committed Claude Code provider key from tracked `.claude/settings.json`, ignored `.claude/settings.local.json`, skipped that local-only file from working-file scans, and added `Claude Code key` detection for `ccsk-...` tokens to `repoSecretPatterns`. Passing evidence: `bun test scripts/secret-patterns.test.ts scripts/check-secrets.test.ts` (9 pass / 28 expects), `bun run secrets:check`, `bun run predeploy:check`, `bun run docs:commands`, `bun run memory:audit`, `git diff --check`, and full `bun run qa:repo` (backend 271 pass / 1226 expects, frontend build/bundle green). The removed key should be rotated/revoked outside the repo.
 

@@ -776,6 +776,7 @@ const checks: Check[] = [
           'runSecretsCheck',
           'SecretFinding',
           'isLocalOnlyConfigPath',
+          '.claude/settings.json',
           '.claude/settings.local.json',
           'tracked local-only tool settings',
           'if (import.meta.main) process.exit(await runSecretsCheck())',

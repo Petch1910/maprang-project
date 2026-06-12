@@ -18,7 +18,12 @@ export type SecretFinding = { file: string; name: string }
 
 export function isLocalOnlyConfigPath(path: string) {
   const normalized = path.replaceAll('\\', '/')
-  return normalized === '.claude/settings.local.json' || normalized.endsWith('/.claude/settings.local.json')
+  return (
+    normalized === '.claude/settings.json' ||
+    normalized === '.claude/settings.local.json' ||
+    normalized.endsWith('/.claude/settings.json') ||
+    normalized.endsWith('/.claude/settings.local.json')
+  )
 }
 
 export function isUnsafeTrackedEnvPath(path: string) {

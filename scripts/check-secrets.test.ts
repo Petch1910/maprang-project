@@ -52,11 +52,19 @@ describe('committed secret scan path rules', () => {
   })
 
   test('skips ignored local-only tool settings from working-file scans', () => {
+    expect(isLocalOnlyConfigPath('.claude/settings.json')).toBe(true)
     expect(isLocalOnlyConfigPath('.claude/settings.local.json')).toBe(true)
+    expect(isLocalOnlyConfigPath('nested/.claude/settings.json')).toBe(true)
     expect(isLocalOnlyConfigPath('nested/.claude/settings.local.json')).toBe(true)
-    expect(isLocalOnlyConfigPath('.claude/settings.json')).toBe(false)
+    expect(isLocalOnlyConfigPath('.claude/project.json')).toBe(false)
     expect(
       shouldCheckSecretPath(join(root, '.claude/settings.local.json'), {
+        rootDir: root,
+        selfRelativePath: 'scripts/check-secrets.ts',
+      }),
+    ).toBe(false)
+    expect(
+      shouldCheckSecretPath(join(root, '.claude/settings.json'), {
         rootDir: root,
         selfRelativePath: 'scripts/check-secrets.ts',
       }),

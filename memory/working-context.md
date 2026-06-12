@@ -2,7 +2,9 @@
 
 Last updated: 2026-06-12
 
-- 2026-06-12: `predeploy:check` now source-locks the Claude Code secret scanner hardening. It requires `isLocalOnlyConfigPath`, `.claude/settings.local.json`, `tracked local-only tool settings`, `Claude Code key`, `ccsk-`, and the matching regression tests, so the repo cannot silently lose protection for local Claude settings or `ccsk-...` provider keys.
+- 2026-06-12: `.claude/settings.json` is no longer tracked by the repo and is ignored alongside `.claude/settings.local.json`. Both Claude settings files are treated as local-only by the secret scanner and will be flagged if tracked again, leaving personal provider/base-url/permission settings on the developer machine instead of in project source.
+
+- 2026-06-12: `predeploy:check` now source-locks the Claude Code secret scanner hardening. It requires `isLocalOnlyConfigPath`, `.claude/settings.json`, `.claude/settings.local.json`, `tracked local-only tool settings`, `Claude Code key`, `ccsk-`, and the matching regression tests, so the repo cannot silently lose protection for local Claude settings or `ccsk-...` provider keys.
 
 - 2026-06-12: Removed a committed Claude Code provider key from tracked `.claude/settings.json`, ignored `.claude/settings.local.json`, skipped that local-only file from working-file scans, and added `ccsk-...` detection to the repo secret scanner. `bun test scripts/secret-patterns.test.ts scripts/check-secrets.test.ts`, `bun run secrets:check`, and full `bun run qa:repo` passed after the change. The exposed key must be treated as rotated/revoked outside the repo if it was ever active.
 
