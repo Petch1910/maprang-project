@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Handoff docs now describe local chat evidence as local roleplay runtime evidence instead of current-facing `local mock` wording. This keeps agent/deploy/checklist text aligned with the product-facing copy cleanup while preserving `local/mock-roleplay` only where it is machine/runtime evidence.
+
 - 2026-06-12: Frontend static-audit diagnostics now point developers toward the current product-facing local-runtime wording. The `local mock` finding recommends `โหมดในเครื่อง`, not the superseded `โหมด local QA` phrase, and the regression test was updated with it.
 
 - 2026-06-12: Memory notes now clarify the local-runtime copy lineage. Older Admin Health/System Status checkpoints that mentioned debug-facing local labels are marked as superseded by the current product-facing copy (`โหมดในเครื่องพร้อมเล่น` / `แชทในเครื่องพร้อมใช้`), and `local/mock-roleplay` is kept only as internal CLI/model evidence.

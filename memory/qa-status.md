@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 handoff local-roleplay wording cleanup pass: `agent.md`, `memory/deploy-blockers.md`, and `memory/production/checklist.md` now describe the local runtime as local roleplay evidence instead of current-facing `local mock` wording. Passing evidence: `bun run memory:audit`, `bun run docs:commands`, `bun run predeploy:check`, and `git diff --check`.
+
 - 2026-06-12 frontend static-audit runtime-copy diagnostic pass: the `local mock` frontend-source finding now recommends product-facing `โหมดในเครื่อง` wording instead of the superseded `โหมด local QA` phrasing. Passing evidence: `bun run frontend:static:audit:test` (40 pass / 234 expects), `bun run frontend:static:audit`, `bun run tests:audit`, `bun run predeploy:check`, `bun run secrets:check`, and `git diff --check`.
 
 - 2026-06-12 memory copy lineage cleanup pass: historical notes that still described old Admin Health debug labels as current UI were clarified as superseded checkpoints. Current source of truth remains product-facing local readiness copy (`โหมดในเครื่องพร้อมเล่น` / `แชทในเครื่องพร้อมใช้`), while `local/mock-roleplay` is internal CLI/model evidence only. Passing evidence: `bun run memory:audit`, `bun run docs:commands`, `bun run secrets:check`, `bun run predeploy:check`, and `git diff --check`.
