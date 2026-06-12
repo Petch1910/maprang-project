@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Character Lobby relationship contract copy is now less demo-like. The seed mood panel label changed from `ตัวอย่างโทนอารมณ์` to `โทนอารมณ์เริ่มต้น`, and `frontend-component-contract` keeps the old sample wording from returning.
+
 - 2026-06-12: Saved-chat empty preview copy is now production-facing. `/chats` cards show `ยังไม่มีข้อความล่าสุด` when a chat has no preview instead of demo-like `ยังไม่มีตัวอย่างข้อความ`, and `frontend-component-contract` locks the old phrase out of `MyChatsPage`.
 
 - 2026-06-12: Image-generation copy is now aligned across frontend, backend diagnostics, smoke/deploy CLIs, and docs. Product-facing surfaces use `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of demo-like `ภาพตัวอย่าง` or provider-debug wording, and frontend component contracts blacklist the old visible phrases across Creator Studio, Workspace, System Status, and Route/Menu Audit sources.
