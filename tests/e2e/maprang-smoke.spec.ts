@@ -583,9 +583,11 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
   await expect(page.locator('body')).toContainText('Runtime แชท')
   if (expectsLocalChatRuntime) {
-    await expect(page.locator('body')).toContainText('โหมด local QA พร้อมเล่น')
-    await expect(page.locator('body')).toContainText('แชท local สำหรับ QA')
-    await expect(page.locator('body')).toContainText('local/mock-roleplay')
+    await expect(page.locator('body')).toContainText('โหมดในเครื่องพร้อมเล่น')
+    await expect(page.locator('body')).toContainText('แชทในเครื่องพร้อมใช้')
+    await expect(page.locator('body')).not.toContainText('โหมด local QA พร้อมเล่น')
+    await expect(page.locator('body')).not.toContainText('แชท local สำหรับ QA')
+    await expect(page.locator('body')).not.toContainText('local/mock-roleplay')
   }
   await expect(page.locator('body')).toContainText('ตรวจเส้นทาง/เมนู')
   await expect(page.locator('body')).toContainText('แถบแชท')
