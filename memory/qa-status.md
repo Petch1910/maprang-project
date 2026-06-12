@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 local roleplay smoke label cleanup pass: API/local smoke labels and diagnostics now use `local roleplay QA` instead of the older `local chat QA` / `POST /chat local QA` wording, and README/Deployment QA match the new labels. Passing evidence: `bun run api:smoke:test` (13 pass / 145 expects), `bun run smoke:local:test` (18 pass / 125 expects), `bun run docs:commands`, `bun run predeploy:check`, `bun run secrets:check`, `git diff --check`, and source scan found no old `POST /chat local QA` / `local chat QA` labels in the touched scripts/docs.
+
 - 2026-06-12 full deterministic repo QA pass after local-runtime wording cleanup: `bun run qa:repo` passed with secrets, memory/knowledge/docs/test-plan/test-coverage/eval/security/import/API/frontend/route-menu/smoke-helper/deploy/predeploy/backend/frontend gates green. API audit stayed at 58 backend routes / 34 frontend helper calls, backend tests stayed 271 pass / 1226 expects, frontend route audit stayed 14 routes, frontend build passed, and bundle budget stayed under limits.
 
 - 2026-06-12 handoff local-roleplay wording cleanup pass: `agent.md`, `memory/deploy-blockers.md`, and `memory/production/checklist.md` now describe the local runtime as local roleplay evidence instead of current-facing `local mock` wording. Passing evidence: `bun run memory:audit`, `bun run docs:commands`, `bun run predeploy:check`, and `git diff --check`.

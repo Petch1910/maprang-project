@@ -404,16 +404,16 @@ export function validateLocalChatSmoke(
   expectedMinimumPendingEvents = 0,
 ) {
   if (payload.usage?.providerFailure) {
-    throw new Error(`local chat QA ไม่ควรคืน providerFailure: ${payload.usage.providerFailure.code ?? 'unknown'}`)
+    throw new Error(`local roleplay QA ไม่ควรคืน providerFailure: ${payload.usage.providerFailure.code ?? 'unknown'}`)
   }
-  if (!payload.chatId) throw new Error('local chat QA ไม่ได้สร้าง chat id')
-  if (!payload.reply) throw new Error('local chat QA ไม่คืนคำตอบ')
+  if (!payload.chatId) throw new Error('local roleplay QA ไม่ได้สร้าง chat id')
+  if (!payload.reply) throw new Error('local roleplay QA ไม่คืนคำตอบ')
   if (payload.reply.length < minRoleplayReplyChars) {
-    throw new Error(`local chat QA ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
+    throw new Error(`local roleplay QA ตอบสั้นเกินไป ต้องมีอย่างน้อย ${minRoleplayReplyChars} ตัวอักษร`)
   }
-  if ((payload.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat QA ต้องไม่คิดโทเคน')
+  if ((payload.usage?.totalTokens ?? -1) !== 0) throw new Error('local roleplay QA ต้องไม่คิดโทเคน')
   if (payload.usage?.modelName !== expectedModel) {
-    throw new Error(`local chat QA ต้องคืน modelName=${expectedModel} แต่ได้ ${payload.usage?.modelName ?? 'missing'}`)
+    throw new Error(`local roleplay QA ต้องคืน modelName=${expectedModel} แต่ได้ ${payload.usage?.modelName ?? 'missing'}`)
   }
   const runtime = validateLocalRuntimeSceneState(payload.memory, expectedMinimumPendingEvents)
 
