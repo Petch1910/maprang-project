@@ -771,22 +771,30 @@ const checks: Check[] = [
       requireIncludes(test, ['requires production e2e smoke targets to match deployed origins', 'requires staging e2e smoke targets to match deployed origins', 'E2E_BASE_URL', 'E2E_API_BASE_URL'], 'scripts/release-handoff-check.test.ts')
       requireIncludes(
         checkSecrets,
-        ['collectSecretFindings', 'runSecretsCheck', 'SecretFinding', 'if (import.meta.main) process.exit(await runSecretsCheck())'],
+        [
+          'collectSecretFindings',
+          'runSecretsCheck',
+          'SecretFinding',
+          'isLocalOnlyConfigPath',
+          '.claude/settings.local.json',
+          'tracked local-only tool settings',
+          'if (import.meta.main) process.exit(await runSecretsCheck())',
+        ],
         'scripts/check-secrets.ts',
       )
       requireIncludes(
         checkSecretsTest,
-        ['tracked real env files', 'runs the committed secret scan through an importable runner'],
+        ['tracked real env files', 'skips ignored local-only tool settings from working-file scans', 'runs the committed secret scan through an importable runner'],
         'scripts/check-secrets.test.ts',
       )
       requireIncludes(
         secretPatterns,
-        ['Anthropic key', 'Hugging Face token', 'Stripe live secret key', 'GitHub token', 'Google API key', 'Slack token', 'Private key block'],
+        ['Anthropic key', 'Claude Code key', 'ccsk-', 'Hugging Face token', 'Stripe live secret key', 'GitHub token', 'Google API key', 'Slack token', 'Private key block'],
         'scripts/secret-patterns.ts',
       )
       requireIncludes(
         secretPatternsTest,
-        ['Anthropic key', 'Hugging Face token', 'Stripe live secret key', 'repo scan allows placeholder docs', 'handoff and memory scans inherit repo secret coverage'],
+        ['Anthropic key', 'Claude Code key', 'fakeClaudeCodeKey', 'Hugging Face token', 'Stripe live secret key', 'repo scan allows placeholder docs', 'handoff and memory scans inherit repo secret coverage'],
         'scripts/secret-patterns.test.ts',
       )
     },
