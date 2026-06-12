@@ -420,6 +420,8 @@ describe('frontend component contracts', () => {
     expect(source).toContain('โดเมนหน้าบ้านสเตจจิง')
     expect(source).not.toContain('โดเมนหน้าบ้านทดลอง')
     expect(source).not.toContain('ทดสอบ flow')
+    expect(source).toContain('ยังมีรายการต้องตรวจในเช็กลิสต์ด้านล่างก่อนเปิดใช้งานจริง')
+    expect(source).not.toContain('ยังไม่พร้อมเต็ม')
   })
 
   test('app shell keeps immersive routes out of the global navigation wrapper', async () => {

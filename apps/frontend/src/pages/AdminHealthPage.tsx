@@ -260,7 +260,7 @@ export function AdminHealthPage() {
     try {
       const data = await fetchHealthStatus()
       setHealthStatus(data)
-      setNote(data.ok ? 'โหลดสถานะระบบแล้ว' : 'ระบบหลังบ้านยังไม่พร้อมเต็ม ต้องดูเช็กลิสต์ด้านล่าง')
+      setNote(data.ok ? 'โหลดสถานะระบบแล้ว' : 'ยังมีรายการต้องตรวจในเช็กลิสต์ด้านล่างก่อนเปิดใช้งานจริง')
     } catch {
       setHealthStatus(null)
       setNote('ติดต่อสถานะระบบหลังบ้านไม่ได้ ตรวจว่าระบบหลังบ้านเปิดอยู่และ VITE_API_BASE_URL ถูกต้อง')
