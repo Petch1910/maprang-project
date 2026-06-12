@@ -31,6 +31,8 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - `firebase-basics` -> มาตรฐานการเชื่อมต่อและรักษาความปลอดภัยฐานข้อมูลกรณีระบบใช้ Firebase
 สถานะล่าสุดที่ต้องจำ:
 
+- 2026-06-12: Local-runtime wording lineage is clarified. Current UI/source-of-truth copy is `โหมดในเครื่องพร้อมเล่น` / `แชทในเครื่องพร้อมใช้`; `local/mock-roleplay` remains internal CLI/model evidence only. Memory, QA notes, handoff docs, and frontend static-audit diagnostics now point developers away from the superseded `โหมด local QA` wording.
+- 2026-06-12: Latest repo-owned documentation gates passed after the local-runtime wording cleanup: `bun run memory:audit`, `bun run docs:commands`, `bun run predeploy:check`, `bun run secrets:check`, `bun run frontend:static:audit:test`, `bun run frontend:static:audit`, `bun run tests:audit`, and `git diff --check`.
 - 2026-06-12: Fresh local DB setup is fixed. Baseline migration `20260504170000_initial_roleplay_baseline` lets an empty PostgreSQL DB apply the full migration chain before `20260504183000_character_schema_upgrade`; `backend:check:db:test` and `predeploy:check` source-lock the baseline.
 - 2026-06-12: Full runtime `bun run qa:full` passed against local backend `http://127.0.0.1:3001` and frontend `http://127.0.0.1:5173` after Docker Postgres migration reset and QA seed; smoke doctor, local smoke, API smoke, Playwright e2e, backend tests with DB-backed cases, and frontend build all passed.
 - 2026-06-12: Backend `.env.example` now matches root `docker-compose.yml` for fresh local setup and enables `CHAT_PROVIDER=local`, so new local installs do not start from a placeholder DB URL.
