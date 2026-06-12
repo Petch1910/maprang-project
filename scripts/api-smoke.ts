@@ -299,17 +299,17 @@ function validateLocalChatSmokeStream(
   const error = events.find((event): event is Extract<StreamSmokeEvent, { type: 'error' }> => event.type === 'error')
   const done = events.find((event): event is Extract<StreamSmokeEvent, { type: 'done' }> => event.type === 'done')
 
-  if (error?.message) throw new Error(`local chat stream คืน error: ${error.message}`)
-  if (!done) throw new Error('local chat stream ไม่คืน event ปิดท้าย')
-  if (!done.chatId) throw new Error('local chat stream ไม่คืน chat id')
+  if (error?.message) throw new Error(`local roleplay stream คืน error: ${error.message}`)
+  if (!done) throw new Error('local roleplay stream ไม่คืน event ปิดท้าย')
+  if (!done.chatId) throw new Error('local roleplay stream ไม่คืน chat id')
   if (done.usage?.providerFailure) {
-    throw new Error(`local chat stream ไม่ควรคืน providerFailure: ${done.usage.providerFailure.code ?? 'unknown'}`)
+    throw new Error(`local roleplay stream ไม่ควรคืน providerFailure: ${done.usage.providerFailure.code ?? 'unknown'}`)
   }
-  if ((done.usage?.totalTokens ?? -1) !== 0) throw new Error('local chat stream ต้องไม่คิดโทเคน')
+  if ((done.usage?.totalTokens ?? -1) !== 0) throw new Error('local roleplay stream ต้องไม่คิดโทเคน')
   if (done.usage?.modelName !== expectedModel) {
-    throw new Error(`local chat stream ต้องคืน modelName=${expectedModel} แต่ได้ ${done.usage?.modelName ?? 'missing'}`)
+    throw new Error(`local roleplay stream ต้องคืน modelName=${expectedModel} แต่ได้ ${done.usage?.modelName ?? 'missing'}`)
   }
-  if (reply.length < minReplyChars) throw new Error(`local chat stream คืนคำตอบสั้นเกินไป: ${reply}`)
+  if (reply.length < minReplyChars) throw new Error(`local roleplay stream คืนคำตอบสั้นเกินไป: ${reply}`)
 
   return {
     chatId: done.chatId,

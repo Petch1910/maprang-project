@@ -69,7 +69,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).toContain('POST /chat local roleplay QA')
     expect(apiSmoke).toContain('POST /chat/stream local roleplay QA')
     expect(apiSmoke).toContain('local roleplay QA ต้องไม่คิดโทเคน')
-    expect(apiSmoke).toContain('local chat stream ต้องไม่คิดโทเคน')
+    expect(apiSmoke).toContain('local roleplay stream ต้องไม่คิดโทเคน')
     expect(apiSmoke).toContain('local/mock-roleplay')
     expect(apiSmoke).toContain('สตรีมไม่คืน validation delta ภาษาไทย')
     expect(apiSmoke).toContain('เส้นทางตรวจ validation ของสตรีมไม่ควรใช้โทเคน')

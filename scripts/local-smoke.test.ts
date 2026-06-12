@@ -345,7 +345,7 @@ describe('local smoke helpers', () => {
     ).toThrow('ต้องไม่คิดโทเคน')
   })
 
-  test('validates local chat stream events, reply length, model, and zero-token usage', () => {
+  test('validates local roleplay stream events, reply length, model, and zero-token usage', () => {
     const raw = [
       'event: delta',
       `data: ${JSON.stringify({ type: 'delta', content: 'ก'.repeat(230) })}`,
