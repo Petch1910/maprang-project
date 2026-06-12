@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Removed a committed Claude Code provider key from tracked `.claude/settings.json`, ignored `.claude/settings.local.json`, and added `ccsk-...` detection to the repo secret scanner. `bun test scripts/secret-patterns.test.ts scripts/check-secrets.test.ts`, `bun run secrets:check`, and full `bun run qa:repo` passed after the change. The exposed key must be treated as rotated/revoked outside the repo if it was ever active.
+
 - 2026-06-12: `deploy:status --json` now exposes top-level `stagingBlockers`, `stagingFixes`, `productionBlockers`, and `productionFixes` arrays in addition to the existing readiness counts and nested readiness object. This is a repo-owned handoff improvement for CI/dashboard parsing only; the actual staging/production blockers remain the same external deployed HTTPS/CORS/Supabase signed storage/live-provider/image-provider evidence.
 
 - 2026-06-12: Full runtime `bun run qa:local` passed again after the production checklist baseline sync handoff. Local backend stayed healthy on `http://127.0.0.1:3001`; runtime smoke covered QA seed, DB, wallet/profile/persona, moderation/admin audit, Creator AI draft fallback image, Creator Preview, normal chat, stream chat, saved chat window, world state, upload, API smoke, backend tests 271 pass / 1226 expects, frontend build, and bundle budget. `bun run deploy:status -- --json` still reports stagingReady=false and productionReady=false only because external deployed HTTPS/CORS/Supabase signed storage/live-provider/image-provider evidence is missing.

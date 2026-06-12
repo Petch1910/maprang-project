@@ -3,7 +3,6 @@
   "cleanupPeriodDays": 30,
   "env": {
     "ANTHROPIC_BASE_URL": "https://api.maxplus-ai.cc",
-    "ANTHROPIC_API_KEY": "ccsk-2bef390a97b3f7cf2ce92bba792176c5f16984033edc308a040fd9d590cbe6af",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_ATTRIBUTION_HEADER": "0"
   },

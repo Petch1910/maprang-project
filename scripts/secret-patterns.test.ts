@@ -11,6 +11,7 @@ describe('secret pattern sets', () => {
     const fakeOpenRouterKey = ['sk', 'or', 'v1', 'a'.repeat(32)].join('-')
     const fakeOpenAiProjectKey = ['sk', 'proj', 'b'.repeat(32)].join('-')
     const fakeAnthropicKey = ['sk', 'ant', 'c'.repeat(32)].join('-')
+    const fakeClaudeCodeKey = `ccsk-${'a1'.repeat(32)}`
     const fakeHuggingFaceToken = `hf_${'d'.repeat(32)}`
     const fakeStripeLiveSecret = `sk_live_${'e'.repeat(32)}`
     const fakeGithubToken = `ghp_${'c'.repeat(36)}`
@@ -21,6 +22,7 @@ describe('secret pattern sets', () => {
       fakeOpenRouterKey,
       fakeOpenAiProjectKey,
       fakeAnthropicKey,
+      fakeClaudeCodeKey,
       fakeHuggingFaceToken,
       fakeStripeLiveSecret,
       fakeGithubToken,
@@ -34,6 +36,7 @@ describe('secret pattern sets', () => {
         'OpenRouter key',
         'OpenAI project key',
         'Anthropic key',
+        'Claude Code key',
         'Hugging Face token',
         'Stripe live secret key',
         'GitHub token',
