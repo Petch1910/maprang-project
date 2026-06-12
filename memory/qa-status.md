@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 backend Creator Draft image-copy QA pass: `/creator/ai-draft` now returns system-draft image notes and warnings with `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of temporary/demo/provider-debug copy. Passing evidence: `bun test apps/backend/src/creator-draft.service.test.ts` (16 pass / 72 expects), `bun run api:audit` (58 backend routes / 34 frontend helper calls), `bun run api:smoke:test` (13 pass / 145 expects), and full `bun run qa:repo` (backend tests 271 pass / 1226 expects, frontend route/static/build/bundle gates green).
+
 - 2026-06-12 public runtime copy QA pass: `/chat`, Character Lobby, and `/wallet` no longer expose QA seed/test-phase wording in public-facing runtime messages. Source contracts lock out `เปิด QA seed`, `แชท QA สำหรับทดสอบ`, `ตัวละคร QA สำหรับทดสอบ`, and `ช่วงทดสอบก่อนเชื่อมระบบชำระเงินจริง`. Passing evidence: source search left those strings only in test assertions, `bun run frontend:components:test` (17 pass / 92 expects), `bun run frontend:static:audit`, and `bun run frontend:check`.
 
 - 2026-06-12 admin-health staging copy QA pass: `/admin/health` now says `โดเมนหน้าบ้านสเตจจิง` instead of `โดเมนหน้าบ้านทดลอง`, and the component contract locks that wording. Passing evidence: `bun run frontend:components:test` (16 pass / 87 expects), `bun run frontend:static:audit`, and `bun run frontend:check`.

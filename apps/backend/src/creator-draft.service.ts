@@ -502,7 +502,7 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
     } catch (error) {
       const reason = error instanceof Error ? friendlyImageFailureReason(error.message) : 'ไม่ทราบสาเหตุ'
       imageFailureReason = reason
-      warnings.push(`สร้างรูปด้วยผู้ให้บริการสร้างรูปไม่สำเร็จ จึงใช้ภาพตัวอย่างระบบ: ${reason}`)
+      warnings.push(`สร้างรูปด้วยระบบสร้างรูปจริงไม่สำเร็จ จึงใช้ภาพร่างระบบ: ${reason}`)
     }
   }
 
@@ -513,17 +513,17 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
           url: configuredImage,
           provider: 'configured',
           prompt: imagePrompt,
-          note: 'สร้างรูปจากผู้ให้บริการสร้างรูปที่ตั้งค่าไว้แล้ว',
+          note: 'สร้างรูปจากระบบสร้างรูปที่ตั้งค่าไว้แล้ว',
         }
       : {
           url: buildGeneratedAvatarDataUrl(imagePrompt),
           provider: 'placeholder',
           prompt: imagePrompt,
           note: safeInput.skipImageProvider
-            ? 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check จึงใช้ภาพตัวอย่างระบบชั่วคราว'
+            ? 'ข้ามระบบสร้างรูปจริงสำหรับ smoke/dev check จึงใช้ภาพร่างระบบสำหรับจัดฟอร์ม'
             : shouldUseImageProvider
-            ? `ตั้งค่าผู้ให้บริการสร้างรูปแล้ว แต่สร้างรูปไม่สำเร็จ${imageFailureReason ? `: ${imageFailureReason}` : ''} จึงใช้ภาพตัวอย่างระบบชั่วคราว`
-            : 'ยังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูปจริง จึงใช้ภาพตัวอย่างระบบชั่วคราว',
+            ? `เชื่อมระบบสร้างรูปจริงแล้ว แต่สร้างรูปไม่สำเร็จ${imageFailureReason ? `: ${imageFailureReason}` : ''} จึงใช้ภาพร่างระบบสำหรับจัดฟอร์ม`
+            : 'ยังไม่ได้เชื่อมระบบสร้างรูปจริง จึงใช้ภาพร่างระบบสำหรับจัดฟอร์ม',
         },
     source,
     modelName,

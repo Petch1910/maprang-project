@@ -82,7 +82,7 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
   'POST /creator/ai-draft': {
     owner: 'creator',
     coverage: ['smoke', 'live-smoke', 'backend-test'],
-    note: 'api-smoke ตรวจเนื้อหาร่าง; smoke:image:live ตรวจผู้ให้บริการสร้างรูปจริงเมื่อวงเงินและโควตาพร้อม',
+    note: 'api-smoke ตรวจเนื้อหาร่าง; smoke:image:live ตรวจระบบสร้างรูปจริงเมื่อวงเงินและโควตาพร้อม',
   },
   'POST /creator/preview-chat': {
     owner: 'creator',

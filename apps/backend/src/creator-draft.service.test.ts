@@ -82,7 +82,8 @@ describe('creator AI draft', () => {
     expect(result.draft.name).toBe('ลูน่า | LUNA')
     expect(result.draft.systemPrompt).toContain('ลูน่า')
     expect(result.image.provider).toBe('placeholder')
-    expect(result.image.note).toContain('ยังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูป')
+    expect(result.image.note).toContain('ยังไม่ได้เชื่อมระบบสร้างรูปจริง')
+    expect(result.image.note).toContain('ภาพร่างระบบ')
     expect(result.image.url.startsWith('data:image/svg+xml')).toBe(true)
   })
 
@@ -507,6 +508,7 @@ describe('creator AI draft', () => {
       expect(fetchCalled).toBe(false)
       expect(result.image.provider).toBe('placeholder')
       expect(result.image.note).toContain('smoke/dev')
+      expect(result.image.note).toContain('ภาพร่างระบบ')
       expect(result.warnings.some((warning) => warning.includes('image provider'))).toBe(false)
     } finally {
       restoreEnvValue('IMAGE_GENERATION_API_KEY', previousImageKey)
@@ -552,8 +554,9 @@ describe('creator AI draft', () => {
       )
 
       expect(result.image.provider).toBe('placeholder')
-      expect(result.image.note).toContain('ตั้งค่าผู้ให้บริการสร้างรูปแล้ว')
-      expect(result.warnings.some((warning) => warning.includes('ผู้ให้บริการสร้างรูป') && warning.includes('400'))).toBe(true)
+      expect(result.image.note).toContain('เชื่อมระบบสร้างรูปจริงแล้ว')
+      expect(result.image.note).toContain('ภาพร่างระบบ')
+      expect(result.warnings.some((warning) => warning.includes('ระบบสร้างรูปจริง') && warning.includes('400'))).toBe(true)
     } finally {
       restoreOpenRouterKey(previousOpenRouterKey)
       if (previousImageKey === undefined) delete process.env.IMAGE_GENERATION_API_KEY
