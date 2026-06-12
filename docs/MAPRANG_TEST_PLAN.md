@@ -11,7 +11,7 @@ Last updated: 2026-06-11
 - Auth: local dev header ในเครื่อง, Supabase JWT สำหรับ production
 - Storage: local fallback ในเครื่อง, Supabase Storage `avatars` แบบ signed URL สำหรับ production
 - AI chat: `local/mock-roleplay` ใน local QA, OpenRouter/live provider สำหรับ staging/production
-- AI image: fallback image ใน local ถ้าไม่มี provider, live image provider ต้อง verified ก่อน production
+- AI image: system draft image ใน local ถ้าไม่มี provider, live image provider ต้อง verified ก่อน production
 
 ## Status Taxonomy
 

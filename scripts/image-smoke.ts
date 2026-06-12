@@ -93,7 +93,7 @@ export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   if (draft.image?.provider !== 'configured') {
     const warnings = draft.warnings?.filter(Boolean).join('; ')
     const issue = warnings || draft.image?.note || 'ไม่มีรายละเอียดจากผู้ให้บริการสร้างรูป'
-    return `ตรวจสร้างรูปจริงกลับไปใช้ภาพตัวอย่างระบบ: ${issue}${providerFailureHint(issue)}`
+    return `ตรวจสร้างรูปจริงกลับไปใช้ภาพร่างระบบ: ${issue}${providerFailureHint(issue)}`
   }
 
   if (!draft.image.url) {

@@ -56,6 +56,11 @@ describe('image smoke helpers', () => {
       liveImageDraftFailure({
         image: { provider: 'placeholder', note: 'billing_hard_limit_reached' },
       }),
+    ).toContain('ภาพร่างระบบ')
+    expect(
+      liveImageDraftFailure({
+        image: { provider: 'placeholder', note: 'billing_hard_limit_reached' },
+      }),
     ).toContain('เพดานวงเงิน')
 
     expect(liveImageDraftFailure({ image: { provider: 'configured' } })).toBe(

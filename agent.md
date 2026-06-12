@@ -43,7 +43,7 @@ Active Embedded Skills (Google Cloud & Agent Skills)
 - 2026-06-11: `smoke:local` now verifies saved-chat runtime readiness after local chat creation. It reads `GET /chats` and `GET /chats/:id/messages?limit=5`, requires the created chat in the saved list, and validates bounded `messageWindow` metadata.
 - 2026-06-11: `smoke:local` now verifies local moderation/admin-audit readiness when an admin smoke key is available. It reads `GET /admin/reports?limit=5` and `GET /admin/audit-logs?limit=5`, requires array shapes, and records checked/skipped summary fields; this is local evidence only and still requires production admin auth/domain/DB smoke.
 - 2026-06-11: `smoke:local` now verifies Creator Preview simulator readiness through `POST /creator/preview-chat` using `skipProvider`, requiring a usable local preview reply, `source=local`, `modelName=local/preview`, usage/prompt/warnings shape, and `creatorPreview*` summary fields; this is local evidence only and still requires live provider smoke before production.
-- 2026-06-11: `smoke:local` now verifies Creator AI draft fallback readiness through `POST /creator/ai-draft` using `imageOnly: true` and `skipImageProvider: true`, requiring fallback draft text plus placeholder image shape without using provider credits.
+- 2026-06-11: `smoke:local` now verifies Creator AI draft system-draft readiness through `POST /creator/ai-draft` using `imageOnly: true` and `skipImageProvider: true`, requiring local draft text plus system-draft image shape (`provider=placeholder`, `source=fallback`) without using provider credits.
 - 2026-06-11: `smoke:local` now verifies local Profile/Persona readiness through `GET /me/content-settings` and `GET /me/persona`. It requires valid content rating, adult flag, persona shape, update timestamp shape, and persona length limit; predeploy source-locks the helper and summary fields.
 - 2026-06-11: `smoke:local` now verifies local Wallet/Usage readiness through `GET /me/usage` before chat checks. It requires token balance, total cost, usage-by-model, 7-day usage graph, estimate fields, and wallet transactions array shape; predeploy source-locks the helper and summary fields.
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after local stream-chat smoke was added to `smoke:local`. Repo-owned local baseline is green; production blockers remain external deployed HTTPS origins, production CORS/domain, production/staging DB smoke, signed Supabase `avatars`, live chat smoke, and live image smoke.
@@ -217,7 +217,7 @@ Backend:
 - Auth: Supabase JWT ใน production, local fallback เฉพาะ dev/test
 - Storage: Supabase Storage signed URL สำหรับ production avatar
 - AI chat: OpenRouter-compatible provider
-- Image generation: ผู้ให้บริการรูปภาพที่ตั้งค่าไว้ หรือภาพตัวอย่างสำรองเฉพาะ local/dev
+- Image generation: ผู้ให้บริการรูปภาพที่ตั้งค่าไว้ หรือภาพร่างระบบเฉพาะ local/dev
 
 Frontend:
 

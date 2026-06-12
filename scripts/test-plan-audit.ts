@@ -20,7 +20,7 @@ const requiredTestPlanSnippets = [
   'signed URL',
   'local/mock-roleplay',
   'OpenRouter/live provider',
-  'fallback image',
+  'system draft image',
   '14',
   '13 product surfaces',
   'Route source: App.tsx declares 14 routes; test plan groups them into 13 product surfaces.',

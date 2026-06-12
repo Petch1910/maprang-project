@@ -60,6 +60,8 @@ Last updated: 2026-06-12
 
 - 2026-06-12: README, Production Setup, and smoke doctor image-provider warnings now use the same Creator Studio draft/form-building wording as the frontend. Missing live image generation is still a production blocker, but local/dev fallback is described as a usable system draft instead of a temporary demo image.
 
+- 2026-06-12: Test plan, agent handoff, deploy blockers, and live image smoke failure output now use `system draft image` / `ภาพร่างระบบ` for local image fallback language. Machine evidence still preserves `provider=placeholder` and `source=fallback` where API smoke and release handoff need stable values.
+
 - 2026-06-11: Full deterministic `bun run qa:repo` passed after adding local scene-runtime memory coverage to `smoke:local`. Repo-owned local baseline remains green with docs command audit 457 refs, tests audit 67 files / 35 root scripts, API audit 58 backend routes / 34 frontend helper calls, frontend route audit 14 routes, backend tests 270 pass / 1074 expects, frontend build, and bundle budget green.
 
 - 2026-06-11: `smoke:local` now verifies local scene-runtime readiness from both normal chat and stream chat. It uses relationship seed `soulmate`, requires runtime memory with `sceneState.mode`, at least one pending scene event, `relationshipState.status`, and `relationshipState.events`, and writes `chatSceneMode`, `chatPendingEvents`, `chatRelationshipStatus`, `chatRelationshipEvents`, and `streamPendingEvents` into the summary. Focused checks passed: `smoke:local:test` (18 pass / 125 expects), `predeploy:check:test` (3 pass / 1218 expects), `docs:commands`, `test-plan:audit`, `predeploy:check`, `memory:audit`, `qa:repo`, and `git diff --check`.

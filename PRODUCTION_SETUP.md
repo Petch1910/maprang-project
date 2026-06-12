@@ -61,7 +61,7 @@ bun -e "const b=new Uint8Array(32);crypto.getRandomValues(b);console.log([...b].
 
 สำหรับ production ให้ตั้งค่า OpenAI image key จริงก่อนเปิด Creator Studio ให้ผู้ใช้ทั่วไป backend จะเรียก OpenAI Images endpoint แล้วอัปโหลด avatar ที่สร้างผ่าน pipeline เก็บรูปชุดเดียวกับระบบ avatar.
 การมี image key อย่างเดียวไม่พอสำหรับ production readiness เพราะ billing หรือ quota ของผู้ให้บริการยัง fail ได้ ให้รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging หรือ production ก่อน `api:smoke:live` อาจเตือนว่า `/ready` ยังรอ chat/image live verification ซึ่งเป็นเรื่องปกติของรอบตรวจแรกก่อนตั้ง flag ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image call ผ่านเท่านั้น แล้ว rerun production gate สุดท้าย.
-ถ้าการทดสอบสร้างรูปจริงรายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` จุดแก้อยู่ที่บัญชีผู้ให้บริการสร้างรูป: เพิ่มหรือรีเซ็ตวงเงิน/โควตา แล้ว rerun live smoke เดิม ให้คง `IMAGE_GENERATION_LIVE_VERIFIED=0` จนกว่ารอบ rerun จะคืนรูปที่สร้างจริงแบบ configured แทนภาพตัวอย่างระบบ.
+ถ้าการทดสอบสร้างรูปจริงรายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` จุดแก้อยู่ที่บัญชีผู้ให้บริการสร้างรูป: เพิ่มหรือรีเซ็ตวงเงิน/โควตา แล้ว rerun live smoke เดิม ให้คง `IMAGE_GENERATION_LIVE_VERIFIED=0` จนกว่ารอบ rerun จะคืนรูปที่สร้างจริงแบบ configured แทนภาพร่างระบบ.
 
 หลังเพิ่ม backend env แล้ว ให้ตรวจค่าด้วย:
 
@@ -200,7 +200,7 @@ Workflow นี้ยังต้องมี `SMOKE_ADMIN_API_KEY` เพื่
 
 `smoke:chat` และ provider gate รวมอย่าง `api:smoke:live` จะเช็ก wallet ของผู้ใช้ smoke ก่อนเรียก OpenRouter ให้คงยอดผู้ใช้ smoke ไว้สูงกว่า `SMOKE_MIN_TOKEN_BALANCE_FOR_CHAT` ค่าเริ่มต้น `1000` หรือปรับ threshold ถ้า prompt ทดสอบหนักกว่าเดิม ถ้า backend คืน `usage.providerFailure` แปลว่า route ติดต่อได้แล้ว แต่ live provider path ยังถูกบล็อกอยู่ ให้ตรวจเครดิต/โควตา OpenRouter, สิทธิ์โมเดล, ความถูกต้องของ key, การเชื่อมต่อออกไป OpenRouter, และ log ระบบหลังบ้านก่อน deploy.
 
-`smoke:image` ตรวจ image provider configuration โดยค่าเริ่มต้นจะไม่ใช้เครดิตสร้างรูป. ถ้าต้องการสร้าง avatar จริง 1 รูปบน staging/production ให้รัน `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1 bun run smoke:image`; คำสั่งนี้จะเรียก `/creator/ai-draft` และล้มถ้า Creator Studio fallback ไปใช้ภาพตัวอย่างระบบ.
+`smoke:image` ตรวจ image provider configuration โดยค่าเริ่มต้นจะไม่ใช้เครดิตสร้างรูป. ถ้าต้องการสร้าง avatar จริง 1 รูปบน staging/production ให้รัน `bun run smoke:image:live` หรือ `SMOKE_IMAGE_LIVE=1 bun run smoke:image`; คำสั่งนี้จะเรียก `/creator/ai-draft` และล้มถ้า Creator Studio กลับไปใช้ภาพร่างระบบ.
 
 สำหรับ production ให้ใช้ `SMOKE_ACCESS_TOKEN` จริงสำหรับ user flows และตั้ง `SMOKE_ADMIN_API_KEY` เสมอสำหรับ admin smoke checks. ถ้าใช้ `SMOKE_USER_ID` แทน access token ต้องตั้ง `SMOKE_ADMIN_API_KEY` ด้วย เพื่อให้ backend มอง header-based user id เป็น admin-only smoke path ไม่ใช่ public authentication.
 
