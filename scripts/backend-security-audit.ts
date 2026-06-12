@@ -747,7 +747,7 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
         findings.push({
           file,
           line: lineFor(content, openingBraceIndex + 1 + blockDetailIndex),
-          message: 'route response เธซเนเธฒเธกเธชเนเธ raw error.message เนเธ detail; เนเธเน safeRouteErrorSummary เธซเธฃเธทเธญเธเนเธญเธเธงเธฒเธกเธ—เธตเนเธเธงเธเธเธธเธกเนเธ”เน.',
+          message: 'route response ห้ามส่ง raw error.message ใน detail; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
         })
       }
 
@@ -756,7 +756,7 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
         findings.push({
           file,
           line: lineFor(content, openingBraceIndex + 1 + blockDetailIndex),
-          message: 'route response เธซเนเธฒเธกเธชเนเธ raw error detail เธ•เธฃเธเน; เนเธเน safeRouteErrorSummary เธซเธฃเธทเธญเธเนเธญเธเธงเธฒเธกเธ—เธตเนเธเธงเธเธเธธเธกเนเธ”เน.',
+          message: 'route response ห้ามส่ง raw error detail ตรงๆ; ใช้ safeRouteErrorSummary หรือข้อความที่ควบคุมได้.',
         })
       }
 
@@ -765,7 +765,7 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
         findings.push({
           file,
           line: lineFor(content, openingBraceIndex + 1 + blockAuthIndex),
-          message: 'เธซเนเธฒเธกเธเธฃเธฐเธเธญเธ AuthError response เธเธฒเธ error.code/error.message เธ•เธฃเธเน; เนเธเน authErrorResponse(error) เน€เธเธทเนเธญเธเธธเธกเธเนเธญเธเธงเธฒเธก public.',
+          message: 'ห้ามประกอบ AuthError response จาก error.code/error.message ตรงๆ; ใช้ authErrorResponse(error) เพื่อคุมข้อความ public.',
         })
       }
 
@@ -775,7 +775,7 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
           findings.push({
             file,
             line: lineFor(content, openingBraceIndex + 1 + blockLogIndex),
-            message: 'route log raw error object เธ•เธฃเธเน เนเธกเนเนเธ”เน; เนเธเน safeRouteErrorSummary เน€เธเธทเนเธญเธเธฑเธเธเนเธญเธกเธนเธฅเธฅเธฑเธเธซเธฅเธธเธ” log.',
+            message: 'route log raw error object ตรงๆ ไม่ได้; ใช้ safeRouteErrorSummary เพื่อกันข้อมูลลับหลุด log.',
           })
         }
       }
@@ -785,7 +785,7 @@ function collectRawRouteCatchMessageFindings(file: string, content: string) {
         findings.push({
           file,
           line: lineFor(content, openingBraceIndex + 1 + blockThrowIndex),
-          message: 'route throw raw error object เธ•เธฃเธเน เนเธกเนเนเธ”เน; เธเธทเธ routeErrorResponse เธซเธฃเธทเธญ response เธ—เธตเนเธเธงเธเธเธธเธกเธเนเธญเธเธงเธฒเธกเนเธ”เน.',
+          message: 'route throw raw error object ตรงๆ ไม่ได้; คืน routeErrorResponse หรือ response ที่ควบคุมข้อความได้.',
         })
       }
     }

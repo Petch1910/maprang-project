@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Cleaned repo utility code by deleting the unused broad-write `scripts/fix-qa-issues.mjs` helper and replacing mojibake backend security-audit diagnostics with readable Thai messages. Focused checks passed: `bun run security:audit:test`, `bun run security:audit`, `bun run tests:audit`, `bun run predeploy:check`, `bun run docs:commands`, `bun run secrets:check`, and `git diff --check`.
+
 - 2026-06-12: Added `docs/REPO_STRUCTURE.md` as a short operator map for product code, QA automation, runtime knowledge, deployment files, product documentation, root config, and the current external deploy blockers. Focused checks passed: `bun run docs:commands`, `bun run secrets:check`, and `git diff --check`.
 
 - 2026-06-12: `predeploy:check` now source-locks the Render Blueprint. It requires `render.yaml` to keep the Render Postgres, backend Docker service, frontend static site, `/ready` health check, backend Dockerfile path, frontend build/publish config, Supabase signed avatar defaults, live-provider verification flags, and `sync: false` secret fields.

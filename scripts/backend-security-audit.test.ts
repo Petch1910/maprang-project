@@ -2458,7 +2458,7 @@ describe('backend security audit', () => {
             try {
               return await sendChat()
             } catch (err) {
-              return { error: String ( err ), message: 'เนเธเธ—เนเธกเนเธชเธณเน€เธฃเนเธ' }
+              return { error: String ( err ), message: 'แชทไม่สำเร็จ' }
             }
           })
       `, 'chat.routes.ts'),
