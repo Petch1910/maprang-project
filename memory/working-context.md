@@ -846,7 +846,7 @@ Verified:
 - Latest direct `deploy:status` also fails at backend root preflight for the same reason: `http://127.0.0.1:3000` is not running.
 - Backend tests pass: 157 pass, 0 fail, 507 expects.
 - Frontend deploy check passes.
-- Local API smoke current baseline passes: 34 pass, 0 fail, 2 live provider skips, with local chat normal/stream mock verified when backend runtime is local.
+- Local API smoke current baseline passes: 34 pass, 0 fail, 2 live provider skips, with local roleplay normal/stream verified when backend runtime is local.
 - Playwright e2e smoke passes on desktop and mobile: 4 pass, 0 fail.
 - Local Postgres is reachable through Docker and migrations are applied.
 - Frontend UI pass added mobile Explore bottom nav and real Chat read-mode behavior.
