@@ -42,6 +42,17 @@ describe('e2e smoke command plan', () => {
     expect(e2eSpec).toContain("target.path === '/' || target.path.startsWith('/chat')")
   })
 
+  test('locks product-facing local runtime copy in admin health e2e coverage', () => {
+    expect(e2eSpec).toContain('โหมดในเครื่องพร้อมเล่น')
+    expect(e2eSpec).toContain('แชทในเครื่องพร้อมใช้')
+    expect(e2eSpec).toContain("not.toContainText('โหมด local QA พร้อมเล่น')")
+    expect(e2eSpec).toContain("not.toContainText('แชท local สำหรับ QA')")
+    expect(e2eSpec).toContain("not.toContainText('local/mock-roleplay')")
+    expect(e2eSpec).not.toContain(")).toContainText('โหมด local QA พร้อมเล่น')")
+    expect(e2eSpec).not.toContain(")).toContainText('แชท local สำหรับ QA')")
+    expect(e2eSpec).not.toContain(")).toContainText('local/mock-roleplay')")
+  })
+
   test('resolves local backend port from backend env when E2E_API_BASE_URL is omitted', () => {
     const backendEnv = 'DATABASE_URL=postgresql://example\nPORT="3001"\n'
 
