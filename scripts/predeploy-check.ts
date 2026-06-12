@@ -1976,7 +1976,7 @@ const checks: Check[] = [
           'validates local creator preview simulator shape',
           'validates local runtime scene and relationship state shape',
           'validates local chat runtime, reply length, model, and zero-token usage',
-          'validates local chat stream events, reply length, model, and zero-token usage',
+          'validates local roleplay stream events, reply length, model, and zero-token usage',
           'ตอบสั้นเกินไป',
           'ต้องไม่คิดโทเคน',
           'formats local smoke summary',

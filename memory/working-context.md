@@ -1153,3 +1153,4 @@ Verified:
 - Local eval fixture และ evaluator diagnostics ใน `eval.service.ts` เป็น Thai-first แล้ว ทั้งตัวละครทดสอบ, required/forbidden/lore checks, section order, และ token budget details.
 - `evals/README.md` และ metadata ของ `evals/promptfoo.roleplay.yaml` ใช้คำอธิบาย Thai-first แล้ว โดยยังคงชื่อเครื่องมือ `Promptfoo`, commands, และชื่อไฟล์เดิมเพื่อให้ค้นหา/รันได้เหมือนเดิม.
 - 2026-06-12 local roleplay stream diagnostics are aligned with the local runtime naming: `scripts/api-smoke.ts`, `scripts/local-smoke.ts`, and their smoke tests now say `local roleplay stream`; focused smoke helper tests and whitespace check passed.
+- 2026-06-12 predeploy guard is synced to the same local roleplay stream naming, so `predeploy:check` now verifies the current `scripts/local-smoke.test.ts` test title instead of the stale local-chat stream title.

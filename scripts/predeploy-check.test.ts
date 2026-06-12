@@ -155,7 +155,7 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('validateLocalRuntimeSceneState')
     expect(predeploy).toContain("relationshipSeed: 'soulmate'")
     expect(predeploy).toContain('validates local chat runtime, reply length, model, and zero-token usage')
-    expect(predeploy).toContain('validates local chat stream events, reply length, model, and zero-token usage')
+    expect(predeploy).toContain('validates local roleplay stream events, reply length, model, and zero-token usage')
     expect(predeploy).toContain('validateLocalChatSmoke')
     expect(predeploy).toContain('validateLocalChatStreamSmoke')
     expect(predeploy).toContain('parseLocalSmokeStreamEvents')
