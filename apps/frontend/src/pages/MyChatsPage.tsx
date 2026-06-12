@@ -545,7 +545,7 @@ export function MyChatsPage() {
                       <span className="min-w-0 max-w-full truncate">{chat.title || chat.characterName}</span>
                     </p>
                     <p className="mt-1 line-clamp-2 break-words text-sm font-semibold leading-6 text-white/52 [overflow-wrap:anywhere]">
-                      {chat.preview ? displayMessageContent(chat.preview) : 'ยังไม่มีตัวอย่างข้อความ'}
+                      {chat.preview ? displayMessageContent(chat.preview) : 'ยังไม่มีข้อความล่าสุด'}
                     </p>
                   </div>
                   <div className="absolute right-0 top-0 z-30 flex flex-none items-center gap-2">

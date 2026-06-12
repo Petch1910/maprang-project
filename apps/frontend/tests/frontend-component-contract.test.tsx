@@ -471,6 +471,13 @@ describe('frontend component contracts', () => {
     expect(lobbySource).not.toContain('ตัวละคร QA สำหรับทดสอบ')
   })
 
+  test('saved chat cards avoid demo-like empty preview copy', async () => {
+    const myChatsSource = await Bun.file('apps/frontend/src/pages/MyChatsPage.tsx').text()
+
+    expect(myChatsSource).toContain('ยังไม่มีข้อความล่าสุด')
+    expect(myChatsSource).not.toContain('ยังไม่มีตัวอย่างข้อความ')
+  })
+
   test('moderation empty state uses product-facing report guidance', async () => {
     const moderationSource = await Bun.file('apps/frontend/src/pages/AdminModerationPage.tsx').text()
     const routeAuditSource = await Bun.file('apps/frontend/src/lib/routeMenuAudit.ts').text()
