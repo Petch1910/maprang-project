@@ -134,7 +134,7 @@ describe('smoke doctor report', () => {
     )
 
     expect(report.warnings).toContain(
-      'คำเตือน: ยังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูป Creator Studio จะใช้ภาพตัวอย่างชั่วคราว',
+      'คำเตือน: ยังไม่ได้เชื่อมระบบสร้างรูปจริง Creator Studio จะใช้ภาพร่างระบบสำหรับจัดฟอร์ม',
     )
   })
 
