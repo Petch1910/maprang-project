@@ -369,7 +369,7 @@ export function CharacterCreateForm({
     setNote(
       overwrite
         ? 'สร้างเนื้อหาใหม่จากรูปและเขียนทับดราฟต์แล้ว'
-        : `${nextIsPlaceholder ? 'ภาพตัวอย่างระบบพร้อมแล้ว' : 'รูปพร้อมแล้ว'} ระบบเติมเนื้อหาตั้งต้นให้ในช่องที่ยังว่าง`,
+        : `${nextIsPlaceholder ? 'ภาพร่างระบบพร้อมแล้ว' : 'รูปพร้อมแล้ว'} ระบบเติมเนื้อหาตั้งต้นให้ในช่องที่ยังว่าง`,
     )
   }
 
@@ -402,11 +402,11 @@ export function CharacterCreateForm({
 
     setHasImageDraft(true)
     setLastImageSignal(result.image.prompt)
-    const contentStatus = result.source === 'ai' ? 'เนื้อหาสร้างจาก AI แล้ว' : 'ใช้ดราฟต์สำรองเพราะโมเดลเนื้อหาไม่พร้อม'
+    const contentStatus = result.source === 'ai' ? 'เนื้อหาสร้างจาก AI แล้ว' : 'ระบบช่วยร่างเนื้อหาในเครื่องให้ก่อน'
     const imageStatus =
       result.image.provider === 'configured'
-        ? 'รูปถูกสร้างจากผู้ให้บริการสร้างรูปจริง'
-        : result.image.note || 'รูปยังเป็นภาพตัวอย่างระบบ เพราะผู้ให้บริการสร้างรูปยังสร้างรูปจริงไม่สำเร็จ'
+        ? 'รูปถูกสร้างจากระบบสร้างรูปแล้ว'
+        : result.image.note || 'รูปตอนนี้เป็นภาพร่างระบบ ใช้จัดฟอร์มและคิดบุคลิกต่อได้'
     const warningText = result.warnings.length > 0 ? ` (${result.warnings.join(', ')})` : ''
     setNote(`${contentStatus} - ${imageStatus}${warningText}`)
   }
@@ -455,7 +455,7 @@ export function CharacterCreateForm({
       const imageUrl = buildGeneratedAvatarDataUrl({ imagePrompt: source })
       setLastImageSignal(source)
       applyImageDraft({ imagePrompt: source, imageUrl }, true)
-      setNote('เรียก AI ไม่สำเร็จ จึงสร้างภาพตัวอย่างให้ก่อน')
+      setNote('ระบบสร้างร่างในเครื่องให้ก่อน คุณแก้รายละเอียดต่อได้ทันที')
     } finally {
       setIsGeneratingDraft(false)
     }
@@ -654,7 +654,7 @@ export function CharacterCreateForm({
                 </div>
 
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs font-bold leading-5 text-white/52">
-                  กด AI สร้างรูป + เนื้อหาเพื่อให้ระบบหลังบ้านช่วยร่างตัวละคร ถ้ายังไม่ได้ตั้งค่าผู้ให้บริการสร้างรูปจริง ระบบจะแสดงภาพตัวอย่างชั่วคราวและบอกสถานะให้เห็นชัด
+                  กด AI สร้างรูป + เนื้อหาเพื่อให้ระบบช่วยร่างตัวละคร ถ้ายังไม่ได้เชื่อมระบบสร้างรูปจริง ระบบจะแสดงภาพร่างสำหรับจัดฟอร์มและคิดบุคลิกต่อได้ทันที
                 </div>
 
                 <FieldBlock
@@ -675,8 +675,8 @@ export function CharacterCreateForm({
                     <div className="grid min-h-11 gap-2 rounded-lg border border-orange-300/25 bg-orange-500/12 px-3 py-2 text-sm text-orange-50 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                       <span className="min-w-0 font-bold sm:truncate">
                         {avatarSource === 'placeholder'
-                          ? 'ภาพตัวอย่างระบบ (ยังไม่ใช่รูป AI จริง)'
-                          : 'รูปจากผู้ให้บริการสร้างรูป (เก็บเป็น URL ระบบแล้ว)'}
+                          ? 'ภาพร่างระบบสำหรับจัดฟอร์ม'
+                          : 'รูปจากระบบสร้างรูป (เก็บเป็น URL แล้ว)'}
                       </span>
                       <button
                         className="inline-flex min-h-9 items-center justify-center rounded-md border border-orange-200/25 bg-orange-200/12 px-2.5 py-1 text-xs font-black text-orange-50 transition hover:bg-orange-200/18"
@@ -714,7 +714,7 @@ export function CharacterCreateForm({
                     <p className="m-0 flex items-center gap-2 text-sm font-black text-orange-50">
                       <Sparkles size={16} />
                       {isPlaceholderGeneratedAvatar
-                        ? 'ภาพตัวอย่างพร้อม ให้ระบบคิดเนื้อหาต่อ'
+                        ? 'ภาพร่างพร้อม ให้ระบบคิดเนื้อหาต่อ'
                         : isGeneratedAvatar
                           ? 'รูป AI พร้อม ให้ระบบคิดเนื้อหาต่อ'
                           : 'รูปพร้อมแล้ว ให้ระบบคิดเนื้อหาให้เลย'}

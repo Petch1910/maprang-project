@@ -119,15 +119,15 @@ export function CreatorStudioPage() {
         ready: draftStatus.hasAvatar,
         title:
           draftStatus.avatarSource === 'placeholder'
-            ? 'รูปตัวอย่างพร้อม'
+            ? 'ภาพร่างพร้อม'
             : draftStatus.avatarSource === 'provider'
               ? 'รูป AI พร้อม'
               : 'รูปพร้อม',
         detail:
           draftStatus.avatarSource === 'placeholder'
-            ? 'ตอนนี้เป็นภาพตัวอย่างระบบ ใช้ดราฟต์ได้ แต่ก่อนใช้งานจริงควรตั้งค่าผู้ให้บริการสร้างรูป'
+            ? 'ตอนนี้เป็นภาพร่างระบบ ใช้จัดฟอร์มและพัฒนาบุคลิกต่อได้ ก่อนเผยแพร่สาธารณะค่อยเชื่อมระบบสร้างรูปจริง'
             : draftStatus.avatarSource === 'provider'
-              ? 'ได้รูปจากผู้ให้บริการสร้างรูป และระบบช่วยร่างเนื้อหาแล้ว'
+              ? 'ได้รูปจากระบบสร้างรูป และระบบช่วยร่างเนื้อหาแล้ว'
               : draftStatus.draftGeneratedFromImage
                 ? 'มีรูปและระบบช่วยร่างเนื้อหาแล้ว'
                 : 'ใส่รูปเพื่อให้หน้าการ์ดและหน้าล็อบบี้ดูน่ากด',

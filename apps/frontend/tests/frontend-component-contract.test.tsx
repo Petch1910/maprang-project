@@ -313,6 +313,23 @@ describe('frontend component contracts', () => {
     expect(open).toContain('disabled=""')
   })
 
+  test('creator studio image draft copy stays product-facing', async () => {
+    const formSource = await Bun.file('apps/frontend/src/components/CharacterCreateForm.tsx').text()
+    const pageSource = await Bun.file('apps/frontend/src/pages/CreatorStudioPage.tsx').text()
+    const routeAuditSource = await Bun.file('apps/frontend/src/lib/routeMenuAudit.ts').text()
+    const combinedSource = `${formSource}\n${pageSource}\n${routeAuditSource}`
+
+    expect(formSource).toContain('ภาพร่างสำหรับจัดฟอร์ม')
+    expect(formSource).toContain('ระบบช่วยร่างเนื้อหาในเครื่องให้ก่อน')
+    expect(pageSource).toContain('ภาพร่างพร้อม')
+    expect(routeAuditSource).toContain('ภาพร่างระบบแทนพร้อมบอกสถานะ')
+    expect(combinedSource).not.toContain('ภาพตัวอย่างชั่วคราว')
+    expect(combinedSource).not.toContain('ยังไม่ใช่รูป AI จริง')
+    expect(combinedSource).not.toContain('ผู้ให้บริการสร้างรูปจริง')
+    expect(combinedSource).not.toContain('ดราฟต์สำรองเพราะโมเดลเนื้อหาไม่พร้อม')
+    expect(combinedSource).not.toContain('เรียก AI ไม่สำเร็จ')
+  })
+
   test('system status presents local runtime without debug provider wording', () => {
     const html = render(
       createElement(SystemStatus, {
