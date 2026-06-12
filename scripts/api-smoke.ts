@@ -698,7 +698,7 @@ await warnable('POST /creator/ai-draft', async () => {
     if (!live) {
       return {
         ok: true,
-        detail: `${detail}; ข้ามผู้ให้บริการสร้างรูปสำหรับการตรวจในเครื่อง`,
+        detail: `${detail}; ข้ามระบบสร้างรูปจริงสำหรับการตรวจในเครื่อง`,
       }
     }
     return {

@@ -360,15 +360,15 @@ function friendlyImageFailureReason(message: string) {
   const status = safeMessage.match(/(?:returned|ตอบกลับ)\s+(\d{3})/i)?.[1]
   const suffix = status ? ` (HTTP ${status})` : ''
   if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
-    return `ผู้ให้บริการสร้างรูปติดเพดานวงเงิน${suffix}: เพิ่มหรือรีเซ็ตวงเงิน/เพดานใช้จ่ายของผู้ให้บริการสร้างรูป แล้วรัน smoke:image:live อีกครั้ง`
+    return `ระบบสร้างรูปจริงติดเพดานวงเงิน${suffix}: เพิ่มหรือรีเซ็ตวงเงิน/เพดานใช้จ่ายของระบบสร้างรูปจริง แล้วรัน smoke:image:live อีกครั้ง`
   }
   if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
-    return `โควตาผู้ให้บริการสร้างรูปไม่พร้อม${suffix}: เติมเครดิตหรือเพิ่มโควตาของผู้ให้บริการสร้างรูป แล้วรัน smoke:image:live อีกครั้ง`
+    return `โควตาระบบสร้างรูปจริงไม่พร้อม${suffix}: เติมเครดิตหรือเพิ่มโควตาของระบบสร้างรูปจริง แล้วรัน smoke:image:live อีกครั้ง`
   }
   if (normalized.includes('invalid_api_key') || normalized.includes('incorrect api key') || normalized.includes('unauthorized')) {
-    return `คีย์ผู้ให้บริการสร้างรูปไม่ถูกต้อง${suffix}: เปลี่ยน IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY เป็นคีย์สำหรับระบบหลังบ้านที่ถูกต้อง`
+    return `คีย์ระบบสร้างรูปจริงไม่ถูกต้อง${suffix}: เปลี่ยน IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY เป็นคีย์สำหรับระบบหลังบ้านที่ถูกต้อง`
   }
-  return `ผู้ให้บริการสร้างรูปตอบกลับผิดพลาด${suffix}${safeMessage ? `: ${clip(safeMessage, 140)}` : ''}`
+  return `ระบบสร้างรูปจริงตอบกลับผิดพลาด${suffix}${safeMessage ? `: ${clip(safeMessage, 140)}` : ''}`
 }
 
 function safeFailureDetail(error: unknown, max = 160) {
@@ -380,7 +380,7 @@ async function readImageProviderJson(response: Response) {
   try {
     return (await response.json()) as { data?: Array<{ b64_json?: string; url?: string }> }
   } catch {
-    throw new Error('ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง')
+    throw new Error('ระบบสร้างรูปจริงตอบกลับ JSON ไม่ถูกต้อง')
   }
 }
 
@@ -414,7 +414,7 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
 
   if (!response.ok) {
     const detail = redactSensitiveText(await response.text().catch(() => '')).text
-    throw new Error(`ผู้ให้บริการสร้างรูปตอบกลับ ${response.status}${detail ? `: ${clip(detail, 180)}` : ''}`)
+    throw new Error(`ระบบสร้างรูปจริงตอบกลับ ${response.status}${detail ? `: ${clip(detail, 180)}` : ''}`)
   }
   const payload = await readImageProviderJson(response)
   const image = payload.data?.[0]
@@ -430,15 +430,15 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
   }
   if (image?.url && origin) {
     const imageResponse = await fetch(image.url)
-    if (!imageResponse.ok) throw new Error(`ดาวน์โหลด URL จากผู้ให้บริการสร้างรูปตอบกลับ ${imageResponse.status}`)
+    if (!imageResponse.ok) throw new Error(`ดาวน์โหลด URL จากระบบสร้างรูปจริงตอบกลับ ${imageResponse.status}`)
     const contentType = imageResponse.headers.get('Content-Type') || 'image/png'
     const bytes = new Uint8Array(await imageResponse.arrayBuffer())
     const uploaded = await uploadAvatarBytes({ bytes, contentType, origin })
     if (uploaded.ok) return uploaded.url
-    throw new Error('อัปโหลดรูปตัวละครไม่สำเร็จหลังได้คำตอบจากผู้ให้บริการสร้างรูป')
+    throw new Error('อัปโหลดรูปตัวละครไม่สำเร็จหลังได้คำตอบจากระบบสร้างรูปจริง')
   }
   if (image?.url) return image.url
-  throw new Error('คำตอบจากผู้ให้บริการสร้างรูปไม่มีข้อมูลรูปภาพ')
+  throw new Error('คำตอบจากระบบสร้างรูปจริงไม่มีข้อมูลรูปภาพ')
 }
 
 export async function generateCreatorDraft(input: CreatorDraftInput, completion: CompletionFn = defaultCompletion): Promise<CreatorDraftResult> {

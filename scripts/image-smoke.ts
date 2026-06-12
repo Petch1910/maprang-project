@@ -61,10 +61,10 @@ export function shouldRunLiveImageSmoke(argv = process.argv, env = process.env) 
 export function providerFailureHint(message: string) {
   const normalized = message.toLowerCase()
   if (normalized.includes('billing_hard_limit_reached') || normalized.includes('billing hard limit')) {
-    return ' | วิธีแก้: เพิ่มหรือรีเซ็ตเพดานวงเงินของผู้ให้บริการสร้างรูป แล้วรัน `bun run smoke:image:live` ใหม่'
+    return ' | วิธีแก้: เพิ่มหรือรีเซ็ตเพดานวงเงินของระบบสร้างรูปจริง แล้วรัน `bun run smoke:image:live` ใหม่'
   }
   if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
-    return ' | วิธีแก้: เติมเครดิต/โควตาของผู้ให้บริการสร้างรูป แล้วรัน `bun run smoke:image:live` ใหม่'
+    return ' | วิธีแก้: เติมเครดิต/โควตาของระบบสร้างรูปจริง แล้วรัน `bun run smoke:image:live` ใหม่'
   }
   if (normalized.includes('401') || normalized.includes('403') || normalized.includes('invalid api key')) {
     return ' | วิธีแก้: เปลี่ยน IMAGE_GENERATION_API_KEY/OPENAI_API_KEY เป็นคีย์ฝั่งระบบหลังบ้านสำหรับสร้างรูปที่ถูกต้อง'
@@ -92,7 +92,7 @@ export function buildSkippedImageSmokePayload(health: ImageSmokeHealthPayload, b
 export function liveImageDraftFailure(draft: CreatorDraftPayload) {
   if (draft.image?.provider !== 'configured') {
     const warnings = draft.warnings?.filter(Boolean).join('; ')
-    const issue = warnings || draft.image?.note || 'ไม่มีรายละเอียดจากผู้ให้บริการสร้างรูป'
+    const issue = warnings || draft.image?.note || 'ไม่มีรายละเอียดจากระบบสร้างรูปจริง'
     return `ตรวจสร้างรูปจริงกลับไปใช้ภาพร่างระบบ: ${issue}${providerFailureHint(issue)}`
   }
 
@@ -171,7 +171,7 @@ export async function runImageSmoke(options: ImageSmokeRunnerOptions = {}) {
 
   if (!imageConfigured) {
     writeError(
-      'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่าบนระบบหลังบ้าน ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ก่อนตรวจโปรดักชัน',
+      'ระบบสร้างรูปจริงยังไม่ได้ตั้งค่าบนระบบหลังบ้าน ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ก่อนตรวจโปรดักชัน',
     )
     return 1
   }

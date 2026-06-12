@@ -197,7 +197,7 @@ export function evaluateDeployReadiness(
   }
   if (!(health.checks.imageGenerationConfigured ?? health.model?.imageGeneration?.configured)) {
     addProductionBlocker(
-      'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่า',
+      'ระบบสร้างรูปจริงยังไม่ได้ตั้งค่า',
       'ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ใน secrets ของระบบหลังบ้าน',
     )
   } else if (!(health.model?.imageGeneration?.productionReady ?? health.model?.imageGeneration?.liveVerified)) {

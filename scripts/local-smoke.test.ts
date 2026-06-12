@@ -215,7 +215,7 @@ describe('local smoke helpers', () => {
       image: {
         url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%3E%3C/svg%3E',
         provider: 'placeholder',
-        note: 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check',
+        note: 'ข้ามระบบสร้างรูปจริงสำหรับ smoke/dev check',
       },
       source: 'fallback',
       warnings: [],
@@ -576,7 +576,7 @@ describe('local smoke helpers', () => {
           image: {
             url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%3E%3C/svg%3E',
             provider: 'placeholder',
-            note: 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check',
+            note: 'ข้ามระบบสร้างรูปจริงสำหรับ smoke/dev check',
           },
           source: 'fallback',
           warnings: [],
@@ -781,7 +781,7 @@ describe('local smoke helpers', () => {
           image: {
             url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%3E%3C/svg%3E',
             provider: 'placeholder',
-            note: 'ข้ามผู้ให้บริการสร้างรูปสำหรับ smoke/dev check',
+            note: 'ข้ามระบบสร้างรูปจริงสำหรับ smoke/dev check',
           },
           source: 'fallback',
           warnings: [],

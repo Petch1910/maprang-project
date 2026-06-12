@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Image-generation copy is now aligned across frontend, backend diagnostics, smoke/deploy CLIs, and docs. Product-facing surfaces use `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of demo-like `ภาพตัวอย่าง` or provider-debug wording, and frontend component contracts blacklist the old visible phrases across Creator Studio, Workspace, System Status, and Route/Menu Audit sources.
+
 - 2026-06-12: Backend Creator Draft API now uses the same product-facing system-draft image wording as the frontend and docs. Missing or failed live image generation returns notes/warnings with `ภาพร่างระบบ` / `ระบบสร้างรูปจริง` instead of temporary/demo/provider-debug copy, while machine evidence still keeps stable `provider=placeholder` and `source=fallback` values for smoke/release tooling.
 
 - 2026-06-12: Public-facing runtime copy no longer tells normal users to open QA seed or shows QA-only hidden-character wording. `/chat` now tells users to create/select a real character when no character is available, hidden QA chats/characters now say the item is not ready in production mode, and `/wallet` admin copy now describes campaign/support/ledger maintenance instead of a test-before-payment phase. `frontend-component-contract` locks these strings out of public source. Focused frontend checks passed.

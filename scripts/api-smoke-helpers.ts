@@ -16,7 +16,7 @@ export function assertMachineReadableErrorCode(payload: { error?: unknown }, lab
 
 export function creatorImageIssue(payload: { image?: { note?: string }; warnings?: string[] }) {
   const warnings = payload.warnings?.filter(Boolean).join('; ')
-  const issue = warnings || payload.image?.note || 'ผู้ให้บริการสร้างรูปไม่ได้คืนรูปที่สร้างเสร็จแล้ว'
+  const issue = warnings || payload.image?.note || 'ระบบสร้างรูปจริงไม่ได้คืนรูปที่สร้างเสร็จแล้ว'
   return `${issue}${providerFailureHint(issue)}`
 }
 

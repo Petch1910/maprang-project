@@ -160,7 +160,7 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
       detail:
         checks?.imageGenerationConfigured || imageGeneration?.configured
           ? `ตั้งค่า ${imageGeneration?.model ?? 'ผู้ให้บริการ'} แล้ว สถานะ ${imageGeneration?.status ?? 'needs_live_smoke'} ต้องผ่านการทดสอบจริงเพื่อยืนยันวงเงิน/โควตาก่อนใช้งานจริง`
-          : 'ยังใช้ภาพตัวอย่างสำรอง ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อนใช้งานจริง',
+          : 'ยังใช้ภาพร่างระบบ ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อนใช้งานจริง',
       action:
         checks?.imageGenerationConfigured || imageGeneration?.configured
           ? 'รัน bun run smoke:image:live เพื่อยืนยันว่าผู้ให้บริการสร้างภาพจริง'
@@ -304,7 +304,7 @@ export function AdminHealthPage() {
               ตรวจความพร้อมก่อนสเตจจิง/โปรดักชัน
             </h1>
             <p className="m-0 mt-2 max-w-3xl text-sm font-bold leading-6 text-white/58">
-              หน้านี้รวมสถานะระบบหลังบ้าน ค่าแวดล้อม Supabase พื้นที่เก็บรูปแบบ signed URL ผู้ให้บริการสร้างรูป และการตรวจเส้นทาง/เมนู
+              หน้านี้รวมสถานะระบบหลังบ้าน ค่าแวดล้อม Supabase พื้นที่เก็บรูปแบบ signed URL ระบบสร้างรูปจริง และการตรวจเส้นทาง/เมนู
               เพื่อกันปุ่มหลอกหรือ config พลาดก่อน deploy จริง
             </p>
           </div>

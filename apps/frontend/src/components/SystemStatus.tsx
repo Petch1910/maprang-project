@@ -59,7 +59,7 @@ export function SystemStatus({ healthStatus, isLoading = false, onRefresh }: Sys
     : chatProvider?.activeRuntimeProvider === 'openrouter'
       ? 'OpenRouter'
       : chatProvider?.activeRuntimeProvider ?? 'ยังไม่ทราบ'
-  const imageStatusLabel = imageProductionReady ? 'ยืนยันแล้ว' : imageConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ยังใช้ภาพตัวอย่าง'
+  const imageStatusLabel = imageProductionReady ? 'ยืนยันแล้ว' : imageConfigured ? 'ตั้งค่าแล้ว รอทดสอบจริง' : 'ใช้ภาพร่างระบบ'
   const refreshDisabledReason = isLoading ? 'กำลังโหลดสถานะระบบ' : ''
 
   return (

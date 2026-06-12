@@ -63,7 +63,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).toContain('apiImageSmokeEvidence(payload, imageElapsedMs)')
     expect(apiSmoke).toContain('liveImageDraftFailure(payload)')
     expect(apiSmoke).toContain('source ของ live image smoke ต้องเป็น ai')
-    expect(apiSmoke).toContain('ข้ามผู้ให้บริการสร้างรูปสำหรับการตรวจในเครื่อง')
+    expect(apiSmoke).toContain('ข้ามระบบสร้างรูปจริงสำหรับการตรวจในเครื่อง')
     expect(apiSmoke).toContain('chat validation ไม่ควรคืน chatId')
     expect(apiSmoke).toContain('เส้นทางตรวจ validation ของแชทไม่ควรใช้โทเคน')
     expect(apiSmoke).toContain('POST /chat local QA')
@@ -116,7 +116,7 @@ describe('api smoke helpers', () => {
     expect(apiSmoke).not.toContain('source=${payload.source')
     expect(apiSmoke).not.toContain('image=${imageProvider}')
     expect(apiSmoke).not.toContain('ข้าม provider สำหรับ local smoke')
-    expect(apiSmoke).not.toContain('ข้ามผู้ให้บริการสร้างรูปสำหรับ local smoke')
+    expect(apiSmoke).not.toContain('ข้ามระบบสร้างรูปจริงสำหรับ local smoke')
     expect(apiSmoke).not.toContain('ข้าม live model call')
     expect(apiSmoke).not.toContain('local eval ไม่ผ่าน')
     expect(apiSmoke).not.toContain('ยังไม่มี local eval scenarios')
@@ -179,7 +179,7 @@ describe('api smoke helpers', () => {
     expect(creatorImageIssue({ image: { note: '403 invalid api key' } })).toContain(
       'คีย์ฝั่งระบบหลังบ้านสำหรับสร้างรูปที่ถูกต้อง',
     )
-    expect(creatorImageIssue({})).toBe('ผู้ให้บริการสร้างรูปไม่ได้คืนรูปที่สร้างเสร็จแล้ว')
+    expect(creatorImageIssue({})).toBe('ระบบสร้างรูปจริงไม่ได้คืนรูปที่สร้างเสร็จแล้ว')
   })
 
   test('parses JSON safely for API smoke response helpers', () => {

@@ -317,12 +317,17 @@ describe('frontend component contracts', () => {
     const formSource = await Bun.file('apps/frontend/src/components/CharacterCreateForm.tsx').text()
     const pageSource = await Bun.file('apps/frontend/src/pages/CreatorStudioPage.tsx').text()
     const routeAuditSource = await Bun.file('apps/frontend/src/lib/routeMenuAudit.ts').text()
-    const combinedSource = `${formSource}\n${pageSource}\n${routeAuditSource}`
+    const workspaceSource = await Bun.file('apps/frontend/src/pages/WorkspacePage.tsx').text()
+    const systemStatusSource = await Bun.file('apps/frontend/src/components/SystemStatus.tsx').text()
+    const combinedSource = `${formSource}\n${pageSource}\n${routeAuditSource}\n${workspaceSource}\n${systemStatusSource}`
 
     expect(formSource).toContain('ภาพร่างสำหรับจัดฟอร์ม')
     expect(formSource).toContain('ระบบช่วยร่างเนื้อหาในเครื่องให้ก่อน')
     expect(pageSource).toContain('ภาพร่างพร้อม')
     expect(routeAuditSource).toContain('ภาพร่างระบบแทนพร้อมบอกสถานะ')
+    expect(workspaceSource).toContain('ระบบสร้างรูปจริงยังไม่พร้อม')
+    expect(systemStatusSource).toContain('ใช้ภาพร่างระบบ')
+    expect(combinedSource).not.toContain('ภาพตัวอย่าง')
     expect(combinedSource).not.toContain('ภาพตัวอย่างชั่วคราว')
     expect(combinedSource).not.toContain('ยังไม่ใช่รูป AI จริง')
     expect(combinedSource).not.toContain('ผู้ให้บริการสร้างรูปจริง')

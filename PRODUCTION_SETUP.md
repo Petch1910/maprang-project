@@ -61,7 +61,7 @@ bun -e "const b=new Uint8Array(32);crypto.getRandomValues(b);console.log([...b].
 
 สำหรับ production ให้ตั้งค่า OpenAI image key จริงก่อนเปิด Creator Studio ให้ผู้ใช้ทั่วไป backend จะเรียก OpenAI Images endpoint แล้วอัปโหลด avatar ที่สร้างผ่าน pipeline เก็บรูปชุดเดียวกับระบบ avatar.
 การมี image key อย่างเดียวไม่พอสำหรับ production readiness เพราะ billing หรือ quota ของผู้ให้บริการยัง fail ได้ ให้รัน `bun run smoke:image:live` หรือ `bun run api:smoke:live` กับ staging หรือ production ก่อน `api:smoke:live` อาจเตือนว่า `/ready` ยังรอ chat/image live verification ซึ่งเป็นเรื่องปกติของรอบตรวจแรกก่อนตั้ง flag ตั้ง `IMAGE_GENERATION_LIVE_VERIFIED=1` หลัง live image call ผ่านเท่านั้น แล้ว rerun production gate สุดท้าย.
-ถ้าการทดสอบสร้างรูปจริงรายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` จุดแก้อยู่ที่บัญชีผู้ให้บริการสร้างรูป: เพิ่มหรือรีเซ็ตวงเงิน/โควตา แล้ว rerun live smoke เดิม ให้คง `IMAGE_GENERATION_LIVE_VERIFIED=0` จนกว่ารอบ rerun จะคืนรูปที่สร้างจริงแบบ configured แทนภาพร่างระบบ.
+ถ้าการทดสอบสร้างรูปจริงรายงาน `billing_hard_limit_reached`, `billing hard limit`, หรือ `insufficient_quota` จุดแก้อยู่ที่บัญชีระบบสร้างรูปจริง: เพิ่มหรือรีเซ็ตวงเงิน/โควตา แล้ว rerun live smoke เดิม ให้คง `IMAGE_GENERATION_LIVE_VERIFIED=0` จนกว่ารอบ rerun จะคืนรูปที่สร้างจริงแบบ configured แทนภาพร่างระบบ.
 
 หลังเพิ่ม backend env แล้ว ให้ตรวจค่าด้วย:
 

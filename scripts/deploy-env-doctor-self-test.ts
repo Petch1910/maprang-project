@@ -157,7 +157,7 @@ try {
   if (shortKey.exitCode === 0) {
     throw new Error('short key env ควรทำให้ deploy doctor ไม่ผ่าน')
   }
-  const expectedShortKeyMessages = ['OpenRouter key ดูสั้นผิดปกติ', 'คีย์ผู้ให้บริการสร้างรูปดูสั้นผิดปกติ']
+  const expectedShortKeyMessages = ['OpenRouter key ดูสั้นผิดปกติ', 'คีย์ระบบสร้างรูปจริงดูสั้นผิดปกติ']
   for (const message of expectedShortKeyMessages) {
     if (!shortKey.output.includes(message)) {
       throw new Error(`ผลลัพธ์ short key ยังไม่มีข้อความที่คาดไว้: ${message}\n${shortKey.output}`)

@@ -605,7 +605,7 @@ describe('creator AI draft', () => {
 
       const returnedText = `${result.image.note}\n${result.warnings.join('\n')}`
       expect(result.image.provider).toBe('placeholder')
-      expect(returnedText).toContain('ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง')
+      expect(returnedText).toContain('ระบบสร้างรูปจริงตอบกลับ JSON ไม่ถูกต้อง')
       expect(returnedText).not.toContain('Unexpected')
       expect(returnedText).not.toContain('SyntaxError')
     } finally {
@@ -712,8 +712,8 @@ describe('creator AI draft', () => {
       )
 
       expect(result.image.provider).toBe('placeholder')
-      expect(result.image.note).toContain('ผู้ให้บริการสร้างรูปติดเพดานวงเงิน')
-      expect(result.warnings.some((warning) => warning.includes('ผู้ให้บริการสร้างรูปติดเพดานวงเงิน'))).toBe(true)
+      expect(result.image.note).toContain('ระบบสร้างรูปจริงติดเพดานวงเงิน')
+      expect(result.warnings.some((warning) => warning.includes('ระบบสร้างรูปจริงติดเพดานวงเงิน'))).toBe(true)
       expect(result.warnings.some((warning) => warning.includes('smoke:image:live'))).toBe(true)
     } finally {
       restoreOpenRouterKey(previousOpenRouterKey)

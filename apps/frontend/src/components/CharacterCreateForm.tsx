@@ -625,7 +625,7 @@ export function CharacterCreateForm({
                         setStoredAvatarSource('none')
                         setHasImageDraft(false)
                         setLastImageSignal('')
-                        setNote('ล้างภาพตัวอย่างแล้ว วางลิงก์รูปจริงได้เลย')
+                        setNote('ล้างภาพร่างระบบแล้ว วางลิงก์รูปจริงได้เลย')
                         return
                       }
                       avatarUrlInputRef.current?.focus()
@@ -685,7 +685,7 @@ export function CharacterCreateForm({
                           setStoredAvatarSource('none')
                           setHasImageDraft(false)
                           setLastImageSignal('')
-                          setNote('ล้างภาพตัวอย่างแล้ว วางลิงก์รูปจริงได้เลย')
+                          setNote('ล้างภาพร่างระบบแล้ว วางลิงก์รูปจริงได้เลย')
                         }}
                         type="button"
                       >

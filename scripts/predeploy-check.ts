@@ -5299,7 +5299,7 @@ const checks: Check[] = [
       )
       requireIncludes(
         creatorDraft,
-        ['redactSensitiveText', 'creatorDraftRetryRawMessage', 'creatorDraftRetryMessage', 'safeFailureDetail', 'readImageProviderJson', 'friendlyImageFailureReason', 'ผู้ให้บริการสร้างรูปตอบกลับ JSON ไม่ถูกต้อง', 'โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์'],
+        ['redactSensitiveText', 'creatorDraftRetryRawMessage', 'creatorDraftRetryMessage', 'safeFailureDetail', 'readImageProviderJson', 'friendlyImageFailureReason', 'ระบบสร้างรูปจริงตอบกลับ JSON ไม่ถูกต้อง', 'โมเดลคืน JSON สำหรับดราฟต์ตัวละครไม่ถูกต้องหรือไม่สมบูรณ์'],
         'apps/backend/src/creator-draft.service.ts',
       )
       forbidIncludes(

@@ -72,7 +72,7 @@ describe('image smoke helpers', () => {
       }),
     ).toBe('ตรวจสร้างรูปจริงได้ SVG ตัวอย่างในเครื่องแทนรูปจริงจากผู้ให้บริการ')
     expect(liveImageDraftFailure({ image: { provider: 'placeholder' } })).toContain(
-      'ไม่มีรายละเอียดจากผู้ให้บริการสร้างรูป',
+      'ไม่มีรายละเอียดจากระบบสร้างรูปจริง',
     )
     expect(liveImageDraftFailure({ image: { provider: 'placeholder' } })).not.toContain('ตรวจรูป smoke')
   })
@@ -164,7 +164,7 @@ describe('image smoke helpers', () => {
 
     expect(exitCode).toBe(1)
     expect(lines).toEqual([])
-    expect(errors.join('\n')).toContain('ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่าบนระบบหลังบ้าน')
+    expect(errors.join('\n')).toContain('ระบบสร้างรูปจริงยังไม่ได้ตั้งค่าบนระบบหลังบ้าน')
     expect(errors.join('\n')).toContain('IMAGE_GENERATION_API_KEY')
     expect(errors.join('\n')).toContain('ก่อนตรวจโปรดักชัน')
     expect(errors.join('\n')).not.toContain('ก่อนตรวจ production')

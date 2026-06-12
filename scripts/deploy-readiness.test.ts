@@ -300,7 +300,7 @@ describe('deploy readiness evaluation', () => {
         'CORS_ORIGINS ว่าง เป็น local ไม่ใช่ https หรือไม่ใช่ origin ล้วน',
         'คลังความรู้ structured ยังไม่ผ่าน',
         'OPENROUTER_API_KEY ยังไม่ได้ตั้งค่า',
-        'ผู้ให้บริการสร้างรูปยังไม่ได้ตั้งค่า',
+        'ระบบสร้างรูปจริงยังไม่ได้ตั้งค่า',
         'DATABASE_URL ยังไม่ได้ตั้งค่า',
         'production env ไม่ถูกต้อง: CORS_ORIGINS ต้องเป็น https origin ใน production',
       ]),
