@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Frontend static-audit diagnostics now point developers toward the current product-facing local-runtime wording. The `local mock` finding recommends `โหมดในเครื่อง`, not the superseded `โหมด local QA` phrase, and the regression test was updated with it.
+
 - 2026-06-12: Memory notes now clarify the local-runtime copy lineage. Older Admin Health/System Status checkpoints that mentioned debug-facing local labels are marked as superseded by the current product-facing copy (`โหมดในเครื่องพร้อมเล่น` / `แชทในเครื่องพร้อมใช้`), and `local/mock-roleplay` is kept only as internal CLI/model evidence.
 
 - 2026-06-12: Character Lobby relationship contract copy is now less demo-like. The seed mood panel label changed from `ตัวอย่างโทนอารมณ์` to `โทนอารมณ์เริ่มต้น`, and `frontend-component-contract` keeps the old sample wording from returning.

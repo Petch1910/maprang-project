@@ -2734,7 +2734,7 @@ describe('frontend static audit', () => {
     expect(findings.map((finding) => finding.message)).toEqual(
       expect.arrayContaining([
         'พบข้อความไทยแนวเร็วๆนี้ที่เป็นข้อความรอทำ',
-        'พบข้อความ local mock ใน frontend source; ใช้ "โหมด local QA" แทนสำหรับข้อความผู้ใช้',
+        'พบข้อความ local mock ใน frontend source; ใช้ "โหมดในเครื่อง" แทนสำหรับข้อความผู้ใช้',
         'พบคำว่าเดโมใน frontend source; ใช้ "ตัวอย่าง" หรือ "จำลอง" ที่ชัดเจนกว่า',
         'พบ replacement character อาจเป็น encoding เสีย',
         'พบ C1 control character อาจเป็น mojibake',
