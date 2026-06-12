@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12: Added `docs/REPO_STRUCTURE.md` as a short operator map for product code, QA automation, runtime knowledge, deployment files, product documentation, root config, and the current external deploy blockers. Focused checks passed: `bun run docs:commands`, `bun run secrets:check`, and `git diff --check`.
+
 - 2026-06-12: `predeploy:check` now source-locks the Render Blueprint. It requires `render.yaml` to keep the Render Postgres, backend Docker service, frontend static site, `/ready` health check, backend Dockerfile path, frontend build/publish config, Supabase signed avatar defaults, live-provider verification flags, and `sync: false` secret fields.
 
 - 2026-06-12: Added `render.yaml` as a Render Blueprint for `maprang-backend`, `maprang-frontend`, and `maprang-postgres`. The blueprint keeps real secrets as `sync: false`, wires backend Docker, frontend static hosting, private signed avatar storage defaults, and live-provider verification flags defaulting to `0`. Focused checks passed: `bun run secrets:check`, `bun run docs:commands`, `bun run predeploy:check`, and `git diff --check`. Runtime staging attempts still block externally because local env points at placeholder Supabase, local backend URL, local avatar storage, missing image provider, and no deployed HTTPS origins yet.
