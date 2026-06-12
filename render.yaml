@@ -1,0 +1,102 @@
+databases:
+  - name: maprang-postgres
+    plan: starter
+    databaseName: maprang
+    user: maprang
+
+services:
+  - type: web
+    name: maprang-backend
+    env: docker
+    plan: starter
+    dockerContext: .
+    dockerfilePath: ./apps/backend/Dockerfile
+    healthCheckPath: /ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: maprang-postgres
+          property: connectionString
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: google/gemini-2.0-flash-001
+      - key: MODEL_INPUT_COST_PER_1M
+        value: "0.1"
+      - key: MODEL_OUTPUT_COST_PER_1M
+        value: "0.4"
+      - key: MAX_INPUT_CHARS
+        value: "4000"
+      - key: MIN_TOKEN_BALANCE_FOR_CHAT
+        value: "1"
+      - key: MODEL_TEMPERATURE
+        value: "0.9"
+      - key: MODEL_MAX_OUTPUT_TOKENS
+        value: "1600"
+      - key: MODEL_MIN_ROLEPLAY_REPLY_CHARS
+        value: "420"
+      - key: CHAT_PROVIDER_RETRY_ATTEMPTS
+        value: "2"
+      - key: CHAT_PROVIDER_RETRY_DELAY_MS
+        value: "750"
+      - key: CREATOR_DRAFT_RETRY_ATTEMPTS
+        value: "2"
+      - key: CREATOR_DRAFT_RETRY_DELAY_MS
+        value: "750"
+      - key: IMAGE_GENERATION_API_KEY
+        sync: false
+      - key: IMAGE_GENERATION_MODEL
+        value: gpt-image-1.5
+      - key: IMAGE_GENERATION_SIZE
+        value: 1024x1536
+      - key: IMAGE_GENERATION_QUALITY
+        value: medium
+      - key: IMAGE_GENERATION_OUTPUT_FORMAT
+        value: webp
+      - key: IMAGE_GENERATION_OUTPUT_COMPRESSION
+        value: "85"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ADMIN_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_JWT_ISSUER
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: STORAGE_PROVIDER
+        value: supabase
+      - key: SUPABASE_STORAGE_BUCKET
+        value: avatars
+      - key: SUPABASE_STORAGE_ACCESS
+        value: signed
+      - key: SUPABASE_SIGNED_URL_EXPIRES_IN
+        value: "3600"
+      - key: CHAT_PROVIDER_LIVE_VERIFIED
+        value: "0"
+      - key: IMAGE_GENERATION_LIVE_VERIFIED
+        value: "0"
+
+  - type: static
+    name: maprang-frontend
+    rootDir: apps/frontend
+    buildCommand: bun install --frozen-lockfile && bun run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

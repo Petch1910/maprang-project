@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 Render Blueprint deploy-prep QA pass: added `render.yaml` with backend Docker service, frontend static site, managed Postgres, signed Supabase avatar defaults, and `sync: false` for real secrets. Passing evidence: `bun run secrets:check`, `bun run docs:commands`, `bun run predeploy:check`, and `git diff --check`. Runtime deploy commands were attempted: `supabase:storage:setup` failed because env still points at placeholder Supabase, `smoke:image:live` failed because backend image provider is not configured, and `staging:verify` failed because `SMOKE_API_BASE_URL` is still local. These are external account/env blockers, not repo code blockers.
+
 - 2026-06-12 Git history secret audit tooling pass: added `bun run secrets:history` and `secrets:history:test`. The history scanner parses Git patch history, reports only commit/file/pattern/change, and never prints secret values. Focused evidence: `bun run secrets:history:test`, `bun run tests:audit`, `bun run secrets:check`, and `git diff --check`. Manual `bun run secrets:history` correctly fails on historical `.claude/settings.json` Claude Code key exposure, so the external action remains rotate/revoke the old key and consider history rewrite before public access.
 
 - 2026-06-12 Claude settings untrack QA pass: `.claude/settings.json` was removed from tracked source with `git rm --cached`, `.gitignore` now ignores both `.claude/settings.json` and `.claude/settings.local.json`, and the secret scanner treats both paths as local-only while still flagging either path if tracked again.

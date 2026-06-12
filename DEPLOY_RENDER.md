@@ -2,6 +2,13 @@
 
 เส้นทางนี้เหมาะเป็นเส้นทาง production แรก เพราะ Render โฮสต์ backend แบบ Docker service, frontend static site, และ managed Postgres ได้ในที่เดียว.
 
+ถ้าต้องการเริ่มเร็ว ใช้ Blueprint จากไฟล์ `render.yaml` ที่ root repo ได้เลย ไฟล์นี้เตรียม `maprang-backend`, `maprang-frontend`, และ `maprang-postgres` ไว้ให้แล้ว โดยค่า secret ทุกตัวตั้งเป็น `sync: false` เพื่อให้กรอกใน Render dashboard เองและไม่หลุดเข้า Git.
+
+หลัง Blueprint สร้าง service แล้วต้องกลับมาแก้ 2 ค่านี้ให้ตรง domain จริง:
+
+- backend `CORS_ORIGINS` = frontend HTTPS origin แบบ exact
+- frontend `VITE_API_BASE_URL` = backend HTTPS origin
+
 ## ขั้นที่ 1 สร้าง Postgres
 
 สร้าง Render Postgres database แล้วคัดลอก external connection string.
