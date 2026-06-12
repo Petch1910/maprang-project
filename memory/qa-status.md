@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-12
 
+- 2026-06-12 full deterministic repo QA pass after saved-chat and relationship-contract copy polish: `bun run qa:repo` passed with secrets, memory/knowledge/docs/test-plan/test-coverage/eval/security/import/API/route-menu/predeploy gates green, API audit at 58 backend routes / 34 frontend helper calls, backend tests 271 pass / 1226 expects, frontend route/static/build/bundle gates green, and component contracts still at 20 pass / 118 expects. External blockers remain deployed HTTPS origins, production CORS/domain, Supabase signed `avatars`, live chat smoke, and live image provider.
+
 - 2026-06-12 character-lobby relationship mood copy QA pass: Relationship Contract now labels the selected seed panel as `โทนอารมณ์เริ่มต้น` instead of `ตัวอย่างโทนอารมณ์`, with component-contract coverage. Passing evidence: `bun run frontend:components:test` (20 pass / 118 expects), `bun run frontend:static:audit`, `bun run frontend:check`, `bun run secrets:check`, and `git diff --check`.
 
 - 2026-06-12 saved-chat empty preview copy QA pass: `/chats` no longer says `ยังไม่มีตัวอย่างข้อความ` when a saved chat has no preview. It now uses `ยังไม่มีข้อความล่าสุด`, with component-contract coverage. Passing evidence: `bun run frontend:components:test` (20 pass / 116 expects), `bun run frontend:static:audit`, `bun run frontend:check`, `bun run secrets:check`, and `git diff --check`.
