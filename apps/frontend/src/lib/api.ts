@@ -123,11 +123,29 @@ function authHeaders() {
   const adminKey = localValue('maprang:adminKey')
   const accessToken = localValue('maprang:accessToken')
   const shouldSendLocalUserId = import.meta.env.DEV || Boolean(adminKey)
+
+  const bypassEnabled = localValue('maprang:bypassEnabled') === 'true'
+  const customApiKey = localValue('maprang:customApiKey')?.trim()
+  const customApiProvider = localValue('maprang:customApiProvider')?.trim()
+
+  const bypassHeaders = bypassEnabled && customApiKey ? {
+    'x-user-api-key': customApiKey,
+    ...(customApiProvider ? { 'x-user-api-provider': customApiProvider } : {}),
+  } : {}
+
   return {
     ...(shouldSendLocalUserId ? { 'x-user-id': userId } : {}),
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...(adminKey ? { 'x-admin-key': adminKey } : {}),
+    ...bypassHeaders,
   }
+}
+
+export async function testConnection(apiKey: string, provider: string) {
+  return requestJson<{ ok: boolean; message: string }>('/chat/test-key', {
+    method: 'POST',
+    body: JSON.stringify({ apiKey: apiKey.trim(), provider }),
+  })
 }
 
 export type ChatRole = 'user' | 'assistant' | 'system'

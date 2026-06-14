@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { requireDatabase } from './db'
-import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, sendChat, streamChat, updateChatTitle } from './chat.service'
+import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, sendChat, streamChat, updateChatTitle, testUserApiKey } from './chat.service'
 import { AuthError, authErrorResponse, isUuid, resolveRequestUserId } from './security'
 import { rejectInvalidUuid, routeErrorResponse, safeRouteErrorSummary } from './route-guards'
 import { loadChatWorldState, updateChatWorldState } from './world-state.service'
@@ -60,7 +60,14 @@ export const chatRoutes = new Elysia()
     '/chat',
     async ({ body, request, set }) => {
       try {
-        return await sendChat({ ...body, userId: await resolveRequestUserId(request) })
+        const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
+        const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+        return await sendChat({
+          ...body,
+          userId: await resolveRequestUserId(request),
+          userApiKey,
+          userApiProvider,
+        })
       } catch (error) {
         if (error instanceof AuthError) {
           set.status = 401
@@ -85,13 +92,23 @@ export const chatRoutes = new Elysia()
     '/chat/stream',
     async ({ body, request, set }) => {
       try {
-        return new Response(streamChat({ ...body, userId: await resolveRequestUserId(request) }), {
-          headers: {
-            'Content-Type': 'text/event-stream; charset=utf-8',
-            'Cache-Control': 'no-cache, no-transform',
-            Connection: 'keep-alive',
-          },
-        })
+        const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
+        const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+        return new Response(
+          streamChat({
+            ...body,
+            userId: await resolveRequestUserId(request),
+            userApiKey,
+            userApiProvider,
+          }),
+          {
+            headers: {
+              'Content-Type': 'text/event-stream; charset=utf-8',
+              'Cache-Control': 'no-cache, no-transform',
+              Connection: 'keep-alive',
+            },
+          }
+        )
       } catch (error) {
         if (error instanceof AuthError) {
           set.status = 401
@@ -109,6 +126,27 @@ export const chatRoutes = new Elysia()
     {
       body: chatBody,
     },
+  )
+  .post(
+    '/chat/test-key',
+    async ({ body, set }) => {
+      try {
+        const result = await testUserApiKey(body.apiKey, body.provider)
+        if (!result.ok) {
+          set.status = 400
+        }
+        return result
+      } catch (error) {
+        set.status = 500
+        return { ok: false, message: error instanceof Error ? error.message : 'Error testing connection' }
+      }
+    },
+    {
+      body: t.Object({
+        apiKey: t.String({ minLength: 1 }),
+        provider: t.String(),
+      }),
+    }
   )
   .get(
     '/chats/:id/messages',

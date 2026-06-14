@@ -19,9 +19,9 @@ const completeTestPlan = [
   'local/mock-roleplay',
   'OpenRouter/live provider',
   'system draft image',
-  '14',
+  '15',
   '13 product surfaces',
-  'Route source: App.tsx declares 14 routes; test plan groups them into 13 product surfaces.',
+  'Route source: App.tsx declares 15 routes; test plan groups them into 13 product surfaces.',
   '`/`',
   '`/characters/:id`',
   '`/chat`, `/chat/:chatId`',
@@ -119,7 +119,7 @@ describe('Maprang test plan audit', () => {
 
   test('rejects test plans that drift from App.tsx routes', () => {
     const result = auditMaprangTestPlan({
-      testPlan: completeTestPlan.replace('`/admin/evals`', '').replace('App.tsx declares 14 routes', 'App.tsx declares 13 routes'),
+      testPlan: completeTestPlan.replace('`/admin/evals`', '').replace('App.tsx declares 15 routes', 'App.tsx declares 14 routes'),
       runbooks: {
         'START_HERE.md': completeRunbook,
         'RUN_NOW.md': completeRunbook,

@@ -29,9 +29,9 @@ Last updated: 2026-06-11
 
 Route ที่ต้องตรวจใน browser smoke:
 
-Route source: App.tsx declares 14 routes; test plan groups them into 13 product surfaces.
+Route source: App.tsx declares 15 routes; test plan groups them into 13 product surfaces.
 
-หมายเหตุ: `App.tsx` ประกาศ route จริง 14 รายการ เพราะแยก `/chat` และ `/chat/:chatId` ออกจากกัน แต่ในแผนทดสอบให้นับเป็น 13 product surfaces โดยรวมสอง route นี้เป็นพื้นผิว "ห้องแชท" เดียวกัน การรัน `bun run frontend:route:audit` ต้องเห็น 14 รายการและไม่มี finding
+หมายเหตุ: `App.tsx` ประกาศ route จริง 15 รายการ เพราะแยก `/chat` และ `/chat/:chatId` ออกจากกัน แต่ในแผนทดสอบให้นับเป็น 13 product surfaces โดยรวมสอง route นี้เป็นพื้นผิว "ห้องแชท" เดียวกัน การรัน `bun run frontend:route:audit` ต้องเห็น 15 รายการและไม่มี finding
 
 | Route | Purpose | Required status |
 | --- | --- | --- |
@@ -40,6 +40,7 @@ Route source: App.tsx declares 14 routes; test plan groups them into 13 product 
 | `/chat`, `/chat/:chatId` | ห้องแชท, scene mode, report, world state | local ready |
 | `/chats` | กล่องแชท, เมนูสามจุด, bulk actions | local ready |
 | `/create` | Creator Studio, AI draft, upload, preview simulator | local ready |
+| `/ai-creator` | หน้าจอออกแบบภาพร่างระบบประมวลผลผ่านสิทธิ์ผู้ให้บริการคีย์ตรง | local ready |
 | `/events` | Pending events inbox | local ready |
 | `/profile` | Persona, content mode, account state | local ready |
 | `/wallet` | Token balance, usage, admin adjustment guard | local ready |

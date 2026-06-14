@@ -32,6 +32,7 @@ const loadCharacterLobbyPage = () => import('./pages/CharacterLobbyPage').then((
 const loadExplorePage = () => import('./pages/ExplorePage').then((module) => ({ default: module.ExplorePage }))
 const loadProfilePage = () => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage }))
 const loadWalletPage = () => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage }))
+const loadAICreatorPage = () => import('./pages/AICreatorPage').then((module) => ({ default: module.AICreatorPage }))
 
 const CreatorStudioPage = lazy(loadCreatorStudioPage)
 const ChatRoomPage = lazy(loadChatRoomPage)
@@ -45,6 +46,7 @@ const CharacterLobbyPage = lazy(loadCharacterLobbyPage)
 const ExplorePage = lazy(loadExplorePage)
 const ProfilePage = lazy(loadProfilePage)
 const WalletPage = lazy(loadWalletPage)
+const AICreatorPage = lazy(loadAICreatorPage)
 
 const primaryNavItems = [
   { to: '/', label: 'สำรวจ', icon: Compass },
@@ -60,6 +62,7 @@ const routePreloads: Record<string, () => Promise<unknown>> = {
   '/profile': loadProfilePage,
   '/wallet': loadWalletPage,
   '/events': loadEventsInboxPage,
+  '/ai-creator': loadAICreatorPage,
   '/moderation': loadAdminModerationPage,
   '/admin/health': loadAdminHealthPage,
   '/admin/prompt-inspector': loadAdminPromptInspectorPage,
@@ -138,6 +141,7 @@ function App() {
         <Route element={<ProfilePage />} path="/profile" />
         <Route element={<WalletPage />} path="/wallet" />
         <Route element={<EventsInboxPage />} path="/events" />
+        <Route element={<AICreatorPage />} path="/ai-creator" />
         <Route element={<CharacterLobbyPage />} path="/characters/:id" />
         <Route element={<AdminModerationPage />} path="/moderation" />
         <Route element={<AdminHealthPage />} path="/admin/health" />

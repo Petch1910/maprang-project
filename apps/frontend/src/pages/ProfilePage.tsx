@@ -7,6 +7,7 @@ import { loadContentSettings, saveContentSettings, selectContentSettings } from 
 import { loadPersonaDraft, savePersonaDraft, savePersonaDraftToCloud, selectPersonaDraft, selectPersonaUpdatedAt } from '../store/slices/draftsSlice'
 import { loadWalletSummary, selectIsLowToken, selectTokenBalance } from '../store/slices/walletSlice'
 import { safeGetStorageItem, safeSetStorageItem } from '../lib/safeStorage'
+import { testConnection } from '../lib/api'
 
 const personaTemplate = [
   'ชื่อ:',
@@ -65,6 +66,43 @@ export function ProfilePage() {
   const [contentNote, setContentNote] = useState('')
   const [isContentSaving, setIsContentSaving] = useState(false)
   const [personaNote, setPersonaNote] = useState('')
+  const [bypassEnabled, setBypassEnabled] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return safeGetStorageItem(window.localStorage, 'maprang:bypassEnabled') === 'true'
+  })
+  const [customApiKey, setCustomApiKey] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return safeGetStorageItem(window.localStorage, 'maprang:customApiKey') || ''
+  })
+  const [customApiProvider, setCustomApiProvider] = useState(() => {
+    if (typeof window === 'undefined') return 'openrouter'
+    return safeGetStorageItem(window.localStorage, 'maprang:customApiProvider') || 'openrouter'
+  })
+  const [isTesting, setIsTesting] = useState(false)
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null)
+
+  const saveSettings = (enabled: boolean, key: string, provider: string) => {
+    if (typeof window === 'undefined') return
+    safeSetStorageItem(window.localStorage, 'maprang:bypassEnabled', String(enabled))
+    safeSetStorageItem(window.localStorage, 'maprang:customApiKey', key.trim())
+    safeSetStorageItem(window.localStorage, 'maprang:customApiProvider', provider)
+  }
+
+  const handleTestConnection = async () => {
+    if (!customApiKey.trim()) return
+    setIsTesting(true)
+    setTestResult(null)
+    try {
+      const res = await testConnection(customApiKey, customApiProvider)
+      setTestResult(res)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'การเชื่อมต่อล้มเหลว'
+      setTestResult({ ok: false, message: msg })
+    } finally {
+      setIsTesting(false)
+    }
+  }
+
   const personaSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const personaLength = personaDraft.trim().length
   const personaPreview = useMemo(() => {
@@ -242,6 +280,91 @@ export function ProfilePage() {
               {contentNote}
             </p>
           )}
+        </section>
+
+        <section className="mt-5 rounded-lg maprang-glass p-5">
+          <h2 className="text-xl font-black text-white flex items-center gap-2">
+            ⚙️ โหมดนักพัฒนา & ผู้ทดสอบระบบ
+          </h2>
+          <p className="mt-1 text-sm font-bold leading-6 text-white/55">
+            ตั้งค่า API Key ส่วนตัวเพื่อทดสอบระบบสนทนาและการสร้างรูปภาพโดยไม่มีค่าใช้จ่ายเหรียญโทเคน
+          </p>
+
+          <div className="mt-4 space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded border-white/10 bg-black/20 text-indigo-600 focus:ring-indigo-500"
+                checked={bypassEnabled}
+                onChange={(e) => {
+                  setBypassEnabled(e.target.checked)
+                  saveSettings(e.target.checked, customApiKey, customApiProvider)
+                }}
+              />
+              <span className="text-sm font-bold text-white/80">เปิดใช้งานโหมดผู้ทดสอบระบบ (Bypass Token System)</span>
+            </label>
+
+            {bypassEnabled && (
+              <div className="space-y-4 pt-4 border-t border-white/5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-xs font-black text-white/68">ผู้ให้บริการ (Provider)</span>
+                    <select
+                      className="mt-1 block w-full rounded-lg border border-white/10 bg-black/40 p-2 text-sm font-bold text-white outline-none focus:border-purple-500"
+                      value={customApiProvider}
+                      onChange={(e) => {
+                        setCustomApiProvider(e.target.value)
+                        saveSettings(bypassEnabled, customApiKey, e.target.value)
+                      }}
+                    >
+                      <option value="openrouter">OpenRouter (แนะนำ)</option>
+                      <option value="openai">OpenAI (Direct API)</option>
+                      <option value="gemini">Gemini (Direct API)</option>
+                    </select>
+                  </label>
+
+                  <label className="block">
+                    <span className="text-xs font-black text-white/68">API Key ส่วนตัว</span>
+                    <input
+                      type="password"
+                      placeholder="sk-..."
+                      className="mt-1 block w-full rounded-lg border border-white/10 bg-black/40 p-2 text-sm font-bold text-white outline-none focus:border-purple-500"
+                      value={customApiKey}
+                      onChange={(e) => {
+                        setCustomApiKey(e.target.value)
+                      }}
+                      onBlur={() => {
+                        const trimmed = customApiKey.trim()
+                        setCustomApiKey(trimmed)
+                        saveSettings(bypassEnabled, trimmed, customApiProvider)
+                      }}
+                    />
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="min-h-10 rounded-lg bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 px-4 text-xs font-black text-white transition disabled:opacity-50"
+                    onClick={handleTestConnection}
+                    disabled={isTesting || !customApiKey.trim()}
+                    title="กรุณากรอก API Key เพื่อทดสอบการเชื่อมต่อ"
+                  >
+                    {isTesting ? 'กำลังทดสอบ...' : 'ทดสอบการเชื่อมต่อ (Test Connection)'}
+                  </button>
+                  {testResult && (
+                    <span className={`text-xs font-bold ${testResult.ok ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {testResult.message}
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-[11px] font-bold text-white/35 flex items-center gap-1">
+                  🔒 Privacy Lock: API Key จะถูกบันทึกไว้ที่เบราว์เซอร์ (LocalStorage) ของท่านเท่านั้น โดยจะไม่บันทึกเข้าสู่เซิร์ฟเวอร์หลักอย่างเด็ดขาด
+                </p>
+              </div>
+            )}
+          </div>
         </section>
       </section>
 

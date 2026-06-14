@@ -1,6 +1,8 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-06-12
+Last updated: 2026-06-15
+
+- 2026-06-15: Maprang AI Fusion & key-bypass compilation scope QA pass: Fixed a TypeScript compiler lexical scoping error in `chat.service.ts` inside `streamChat` function by hoisting `activeModelName` definition above the try-catch block. Verified everything compiles and passes all checks via `bun run qa:repo` (all 271 backend unit tests, static audits, route audits, ESLint checks, TypeScript compiler, and Vite production bundle tests are passing green). Integrated route `/ai-creator`, implemented Bounded Window history pagination (12-20 items), cleaned UX terminology, and added Developer Settings with `.trim()` input validation.
 
 - 2026-06-12: Cleaned repo utility code by deleting the unused broad-write `scripts/fix-qa-issues.mjs` helper and replacing mojibake backend security-audit diagnostics with readable Thai messages. Focused checks passed: `bun run security:audit:test`, `bun run security:audit`, `bun run tests:audit`, `bun run predeploy:check`, `bun run docs:commands`, `bun run secrets:check`, and `git diff --check`.
 

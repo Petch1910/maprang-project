@@ -219,6 +219,11 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['smoke', 'live-smoke', 'backend-test', 'manual-production'],
     note: 'api-smoke ตรวจรูปแบบ SSE บนเส้นทาง validation โดยไม่ใช้โทเคนผู้ให้บริการ; api:smoke:live ตรวจสตรีมจริงกับผู้ให้บริการ; backend runtime test ตรวจ guard เดียวกัน; staging QA ตรวจ UX สตรีมจริงก่อนปล่อย',
   },
+  'POST /chat/test-key': {
+    owner: 'chat',
+    coverage: ['smoke', 'backend-test'],
+    note: 'ตรวจทดสอบการใช้คีย์ของผู้ใช้เพื่อจำลองติดต่อผู้ให้บริการจากหน้าตั้งค่า Profile โดยไม่หักโทเคน',
+  },
   'GET /chats/:id/messages': {
     owner: 'chat',
     coverage: ['smoke', 'e2e', 'backend-test'],

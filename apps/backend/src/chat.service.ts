@@ -75,6 +75,8 @@ export type SendChatInput = {
   maxRating?: ContentRating
   userId?: string
   history?: ChatMessage[]
+  userApiKey?: string
+  userApiProvider?: string
 }
 
 type CompletionUsage = {
@@ -422,12 +424,76 @@ async function withChatProviderRetry<T>(callProvider: () => Promise<T>) {
   throw lastError
 }
 
-async function createChatCompletion(params: ChatCompletionCreateParamsNonStreaming) {
-  return withChatProviderRetry(() => openai.chat.completions.create(params))
+function getOpenAIClient(userApiKey?: string, userApiProvider?: string) {
+  if (userApiKey) {
+    let baseURL = 'https://openrouter.ai/api/v1'
+    if (userApiProvider === 'openai') {
+      baseURL = 'https://api.openai.com/v1'
+    } else if (userApiProvider === 'gemini') {
+      baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai'
+    }
+    return new OpenAI({
+      baseURL,
+      apiKey: userApiKey,
+    })
+  }
+  return openai
 }
 
-async function createChatCompletionStream(params: ChatCompletionCreateParamsStreaming) {
-  return withChatProviderRetry(() => openai.chat.completions.create(params))
+function getModelForProvider(provider?: string, defaultModel: string = modelName) {
+  if (provider === 'openai') {
+    return 'gpt-4o-mini'
+  }
+  if (provider === 'gemini') {
+    return 'gemini-1.5-flash'
+  }
+  return defaultModel
+}
+
+export async function testUserApiKey(apiKey: string, provider: string) {
+  try {
+    let baseURL = 'https://openrouter.ai/api/v1'
+    let model = modelName
+    if (provider === 'openai') {
+      baseURL = 'https://api.openai.com/v1'
+      model = 'gpt-4o-mini'
+    } else if (provider === 'gemini') {
+      baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai'
+      model = 'gemini-1.5-flash'
+    }
+
+    const client = new OpenAI({ baseURL, apiKey })
+    const response = await client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: 'ping' }],
+      max_tokens: 5,
+    })
+    if (response.choices?.[0]) {
+      return { ok: true, message: 'เชื่อมต่อสำเร็จ' }
+    }
+    return { ok: false, message: 'ไม่พบคำตอบจากผู้ให้บริการ' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return { ok: false, message }
+  }
+}
+
+async function createChatCompletion(
+  params: ChatCompletionCreateParamsNonStreaming,
+  userApiKey?: string,
+  userApiProvider?: string
+) {
+  const client = getOpenAIClient(userApiKey, userApiProvider)
+  return withChatProviderRetry(() => client.chat.completions.create(params))
+}
+
+async function createChatCompletionStream(
+  params: ChatCompletionCreateParamsStreaming,
+  userApiKey?: string,
+  userApiProvider?: string
+) {
+  const client = getOpenAIClient(userApiKey, userApiProvider)
+  return withChatProviderRetry(() => client.chat.completions.create(params))
 }
 
 function userAskedForBriefReply(message: string) {
@@ -706,18 +772,23 @@ async function extendShortRoleplayReply({
   messages,
   reply,
   userMessage,
+  userApiKey,
+  userApiProvider,
 }: {
   character: CharacterWithTags | null
   messages: ChatMessage[]
   reply: string
   userMessage: string
+  userApiKey?: string
+  userApiProvider?: string
 }) {
   if (!shouldExtendShortRoleplayReply({ character, reply, userMessage })) {
     return { reply, usage: fallbackUsage(), extended: false }
   }
 
+  const activeModelName = getModelForProvider(userApiProvider, modelName)
   const completion = await createChatCompletion({
-    model: modelName,
+    model: activeModelName,
     messages: [
       ...messages,
       { role: 'assistant', content: reply },
@@ -725,7 +796,7 @@ async function extendShortRoleplayReply({
     ],
     max_tokens: Math.min(modelMaxOutputTokens, 1100),
     temperature: Math.min(modelTemperature + 0.1, 2),
-  })
+  }, userApiKey, userApiProvider)
   const continuation = completion.choices[0]?.message?.content?.trim() ?? ''
 
   return {
@@ -1076,6 +1147,7 @@ async function persistChatTurn({
   promptBudget,
   relationshipSeed,
   modelLabel = modelName,
+  bypassTokens = false,
 }: {
   prisma: Prisma
   chatId?: string
@@ -1088,6 +1160,7 @@ async function persistChatTurn({
   promptBudget?: PromptBudget
   relationshipSeed?: string
   modelLabel?: string
+  bypassTokens?: boolean
 }): Promise<PersistResult> {
   const chat = await findOrCreateChat({
     prisma,
@@ -1161,7 +1234,7 @@ async function persistChatTurn({
   })
 
   let tokenBalance: number | null = null
-  if (usage.totalTokens > 0) {
+  if (usage.totalTokens > 0 && !bypassTokens) {
     const usageRecord = await prisma.usage.create({
       data: {
         userId,
@@ -1348,8 +1421,9 @@ export async function sendChat(input: SendChatInput) {
   }
   const chatCharacter = character as CharacterWithTags
 
+  const hasUserApiKey = Boolean(input.userApiKey)
   const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
-  if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
+  if (!hasUserApiKey && tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
     return {
       reply: chatReplyMessages.insufficientTokens,
       chatId: responseChatId(input.chatId),
@@ -1404,12 +1478,13 @@ export async function sendChat(input: SendChatInput) {
     })
   }
 
+  const activeModelName = getModelForProvider(input.userApiProvider, modelName)
   const completion = await createChatCompletion({
-    model: modelName,
+    model: activeModelName,
     messages,
     max_tokens: modelMaxOutputTokens,
     temperature: modelTemperature,
-  }).catch((error): { providerFailure: ChatProviderFailure } => {
+  }, input.userApiKey, input.userApiProvider).catch((error): { providerFailure: ChatProviderFailure } => {
     const providerFailure = classifyChatProviderError(error)
     return {
       providerFailure,
@@ -1436,7 +1511,7 @@ export async function sendChat(input: SendChatInput) {
       chatId: responseChatId(input.chatId),
       usage: {
         ...fallbackUsage(),
-        modelName,
+        modelName: activeModelName,
         contextLoreCount: loreEntries.length,
         tokenBalance,
         promptBudget,
@@ -1452,6 +1527,8 @@ export async function sendChat(input: SendChatInput) {
     messages,
     reply,
     userMessage: input.message,
+    userApiKey: input.userApiKey,
+    userApiProvider: input.userApiProvider,
   }).catch((error): { reply: string; usage: CompletionUsage; extended: false } => {
     console.warn('ต่อคำตอบเล่นบทไม่สำเร็จ:', classifyChatProviderError(error))
     return { reply, usage: fallbackUsage(), extended: false }
@@ -1473,6 +1550,8 @@ export async function sendChat(input: SendChatInput) {
           loreKeywords,
           promptBudget,
           relationshipSeed: input.relationshipSeed,
+          modelLabel: activeModelName,
+          bypassTokens: hasUserApiKey,
         })
       : {
           chatId: responseChatId(input.chatId),
@@ -1494,7 +1573,7 @@ export async function sendChat(input: SendChatInput) {
     memory: persistResult.memory,
     usage: {
       ...usage,
-      modelName,
+      modelName: activeModelName,
       contextLoreCount: loreKeywords.length,
       tokenBalance: persistResult.tokenBalance,
       promptBudget,
@@ -1515,6 +1594,7 @@ export function streamChat(input: SendChatInput) {
       let streamTokenBalance: number | null = null
       let streamPromptBudget: PromptBudget | undefined
       let streamContextLoreCount = 0
+      const activeModelName = getModelForProvider(input.userApiProvider, modelName)
 
       try {
         if (validationError) {
@@ -1552,7 +1632,8 @@ export function streamChat(input: SendChatInput) {
 
         const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
         streamTokenBalance = tokenBalance
-        if (tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
+        const hasUserApiKey = Boolean(input.userApiKey)
+        if (!hasUserApiKey && tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
           const reply = chatReplyMessages.insufficientTokens
           send({ type: 'delta', content: reply })
           send({
@@ -1626,7 +1707,7 @@ export function streamChat(input: SendChatInput) {
 
         try {
           const stream = await createChatCompletionStream({
-            model: modelName,
+            model: activeModelName,
             messages,
             max_tokens: modelMaxOutputTokens,
             stream: true,
@@ -1634,7 +1715,7 @@ export function streamChat(input: SendChatInput) {
               include_usage: true,
             },
             temperature: modelTemperature,
-          })
+          }, input.userApiKey, input.userApiProvider)
 
           for await (const chunk of stream) {
             const delta = chunk.choices[0]?.delta?.content ?? ''
@@ -1683,6 +1764,8 @@ export function streamChat(input: SendChatInput) {
           messages,
           reply: trimmedReply,
           userMessage: input.message,
+          userApiKey: input.userApiKey,
+          userApiProvider: input.userApiProvider,
         }).catch((error): { reply: string; usage: CompletionUsage; extended: false } => {
           console.warn('ต่อสตรีมคำตอบเล่นบทไม่สำเร็จ:', classifyChatProviderError(error))
           return { reply: trimmedReply, usage: fallbackUsage(), extended: false }
@@ -1706,6 +1789,8 @@ export function streamChat(input: SendChatInput) {
                 loreKeywords,
                 promptBudget,
                 relationshipSeed: input.relationshipSeed,
+                modelLabel: activeModelName,
+                bypassTokens: hasUserApiKey,
               })
             : {
                 chatId: responseChatId(input.chatId),
@@ -1726,7 +1811,7 @@ export function streamChat(input: SendChatInput) {
           chatId: persistResult.chatId,
           usage: {
             ...usage,
-            modelName,
+            modelName: activeModelName,
             contextLoreCount: loreKeywords.length,
             tokenBalance: persistResult.tokenBalance,
             promptBudget,
@@ -1746,7 +1831,7 @@ export function streamChat(input: SendChatInput) {
           chatId: responseChatId(input.chatId),
           usage: {
             ...fallbackUsage(),
-            modelName,
+            modelName: activeModelName,
             contextLoreCount: streamContextLoreCount,
             tokenBalance: streamTokenBalance,
             promptBudget: streamPromptBudget,

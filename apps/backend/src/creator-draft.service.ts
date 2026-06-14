@@ -52,6 +52,8 @@ export type CreatorDraftInput = {
   imageOnly?: boolean
   skipImageProvider?: boolean
   imageStyle?: string
+  userApiKey?: string
+  userApiProvider?: string
 }
 
 export type CreatorDraftResult = {
@@ -384,10 +386,10 @@ async function readImageProviderJson(response: Response) {
   }
 }
 
-async function generateConfiguredImage(prompt: string, origin?: string) {
-  const apiKey = process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY
+async function generateConfiguredImage(prompt: string, origin?: string, userApiKey?: string, userApiProvider?: string) {
+  const apiKey = userApiKey || process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY
   if (!apiKey) return null
-  const model = process.env.IMAGE_GENERATION_MODEL || 'gpt-image-1.5'
+  const model = userApiKey ? 'dall-e-3' : (process.env.IMAGE_GENERATION_MODEL || 'gpt-image-1.5')
   const isGptImageModel = model.startsWith('gpt-image') || model === 'chatgpt-image-latest'
   const body: Record<string, unknown> = {
     model,
@@ -401,9 +403,15 @@ async function generateConfiguredImage(prompt: string, origin?: string) {
     body.output_format = process.env.IMAGE_GENERATION_OUTPUT_FORMAT || 'webp'
   } else if (model === 'dall-e-2') {
     body.response_format = 'b64_json'
+  } else if (model === 'dall-e-3') {
+    body.response_format = 'url'
   }
 
-  const response = await fetch('https://api.openai.com/v1/images/generations', {
+  const endpoint = userApiKey && userApiProvider === 'openrouter'
+    ? 'https://openrouter.ai/api/v1/images/generations'
+    : 'https://api.openai.com/v1/images/generations'
+
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -450,19 +458,41 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
     imageOnly: input.imageOnly,
     skipImageProvider: input.skipImageProvider,
     imageStyle: clip(input.imageStyle || '', 100),
+    userApiKey: input.userApiKey,
+    userApiProvider: input.userApiProvider,
   }
   const fallback = fallbackDraft(safeInput)
   const warnings: string[] = []
   let draft = fallback
   let source: CreatorDraftResult['source'] = 'fallback'
 
+  let completionFn = completion
+  if (safeInput.userApiKey) {
+    let baseURL = 'https://openrouter.ai/api/v1'
+    let model = modelName
+    if (safeInput.userApiProvider === 'openai') {
+      baseURL = 'https://api.openai.com/v1'
+      model = 'gpt-4o-mini'
+    } else if (safeInput.userApiProvider === 'gemini') {
+      baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai'
+      model = 'gemini-1.5-flash'
+    }
+    const client = new OpenAI({ baseURL, apiKey: safeInput.userApiKey })
+    completionFn = async (messages) => {
+      return client.chat.completions.create({
+        model,
+        messages,
+      })
+    }
+  }
+
   if (safeInput.imageOnly) {
     draft = normalizeDraft(safeInput.current || {}, fallback)
     source = 'fallback'
-  } else if (process.env.OPENROUTER_API_KEY) {
+  } else if (safeInput.userApiKey || process.env.OPENROUTER_API_KEY) {
     try {
       draft = await buildAiDraftWithRetry(
-        completion,
+        completionFn,
         [
           {
             role: 'system',
@@ -479,7 +509,7 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
       warnings.push(`สร้างเนื้อหาด้วยโมเดลไม่สำเร็จ จึงใช้ดราฟต์สำรองในเครื่อง: ${reason}`)
     }
   } else {
-    warnings.push('ยังไม่ได้ตั้งค่า OPENROUTER_API_KEY จึงใช้ดราฟต์สำรองในเครื่อง')
+    warnings.push('ยังไม่ได้ตั้งค่า OPENROUTER_API_KEY หรือ User API Key จึงใช้ดราฟต์สำรองในเครื่อง')
   }
 
   const imagePrompt = [
@@ -491,14 +521,14 @@ export async function generateCreatorDraft(input: CreatorDraftInput, completion:
   ]
     .filter(Boolean)
     .join(', ')
-  const hasImageProvider = Boolean(process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY)
+  const hasImageProvider = Boolean(safeInput.userApiKey || process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY)
   const shouldUseImageProvider = hasImageProvider && !safeInput.skipImageProvider
   let configuredImage: string | null = null
   let imageFailureReason: string | null = null
 
   if (shouldUseImageProvider) {
     try {
-      configuredImage = await generateConfiguredImage(imagePrompt, safeInput.origin)
+      configuredImage = await generateConfiguredImage(imagePrompt, safeInput.origin, safeInput.userApiKey, safeInput.userApiProvider)
     } catch (error) {
       const reason = error instanceof Error ? friendlyImageFailureReason(error.message) : 'ไม่ทราบสาเหตุ'
       imageFailureReason = reason

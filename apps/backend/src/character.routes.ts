@@ -143,7 +143,16 @@ export const characterRoutes = new Elysia()
       payload: t.Any(),
     }),
   })
-  .post('/creator/ai-draft', ({ body, request }) => generateCreatorDraft({ ...body, origin: new URL(request.url).origin }), {
+  .post('/creator/ai-draft', ({ body, request }) => {
+    const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
+    const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+    return generateCreatorDraft({
+      ...body,
+      origin: new URL(request.url).origin,
+      userApiKey,
+      userApiProvider,
+    })
+  }, {
     body: creatorDraftBody,
   })
   .post(

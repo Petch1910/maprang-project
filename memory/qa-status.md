@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-06-12
+Last updated: 2026-06-15
+
+- 2026-06-15 Maprang AI Fusion & key-bypass compilation scope QA pass: Resolved `chat.service.ts` scoping compiler error by hoisting `activeModelName` definition inside `streamChat`. Ran full `bun run qa:repo` which compiles and passes all 271 backend unit tests, static audits, route audits, ESLint checks, TypeScript type-checking, and Vite production build with bundle budgets green. Registered route `/ai-creator`, implemented Bounded Window history pagination, cleaned UX terminology, and added Developer Settings with sanitization and CORS header `x-user-api-key`.
 
 - 2026-06-12 Render Blueprint predeploy guard pass: `predeploy:check` now requires `render.yaml` and locks the backend Docker service, frontend static site, managed Postgres, `/ready` health check, Supabase signed avatar defaults, live-provider verification flags, and `sync: false` secret fields.
 
