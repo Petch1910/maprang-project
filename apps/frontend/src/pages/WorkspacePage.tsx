@@ -148,9 +148,9 @@ function EmptyChatWorkspace({
   onRetry: () => void
 }) {
   return (
-    <main className="grid h-svh place-items-center overflow-hidden bg-[#0c0c0f] px-4 text-white">
+    <main className="grid h-svh place-items-center overflow-hidden bg-[#080a1a] px-4 text-white">
       <section
-        className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/6 p-6 text-center shadow-[0_30px_90px_rgba(0,0,0,0.36)] backdrop-blur-xl"
+        className="w-full max-w-xl rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/80 p-6 text-center shadow-[0_30px_90px_rgba(0,0,0,0.36)] backdrop-blur-xl"
         data-testid="chat-empty-character-state"
       >
         <p className="m-0 text-xs font-black tracking-[0.2em] text-orange-200/75 uppercase">Maprang Chat</p>
@@ -790,7 +790,7 @@ export function WorkspacePage() {
   }
 
   return (
-    <main className="grid h-svh grid-cols-1 overflow-hidden bg-[#111113] text-white md:grid-cols-[246px_minmax(0,1fr)]">
+    <main className="grid h-svh grid-cols-1 overflow-hidden bg-[#18182f] text-white md:grid-cols-[246px_minmax(0,1fr)]">
       <Sidebar
         character={character}
         characters={characters}

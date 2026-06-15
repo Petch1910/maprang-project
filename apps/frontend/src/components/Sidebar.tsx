@@ -19,6 +19,11 @@ import {
   Square,
   Trash2,
   X,
+  Bell,
+  Trophy,
+  Heart,
+  Folder,
+  HelpCircle,
 } from 'lucide-react'
 import type {
   Character,
@@ -60,7 +65,7 @@ export function Sidebar(props: SidebarProps) {
         onClick={props.onCloseMobile}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[min(92vw,246px)] min-h-0 flex-col border-r border-white/8 bg-[#111114] p-2.5 text-white shadow-2xl transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[min(92vw,246px)] min-h-0 flex-col border-r border-[#2e2e44] bg-[#1e1e34] p-2.5 text-white shadow-2xl transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:shadow-none ${
           props.isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -74,12 +79,12 @@ function Avatar({ src, name }: { src: string | null; name: string }) {
   return src ? (
     <img alt="" className="size-8 rounded-lg object-cover ring-1 ring-white/10" src={src} />
   ) : (
-    <span className="grid size-8 place-items-center rounded-lg bg-white/12 text-xs font-black">{name.slice(0, 1)}</span>
+    <span className="grid size-8 place-items-center rounded-lg bg-slate-700/50 text-xs font-black">{name.slice(0, 1)}</span>
   )
 }
 
 const listItemClass =
-  'grid min-h-12 w-full grid-cols-[32px_minmax(0,1fr)_28px] items-center gap-2 rounded-lg px-1.5 text-left transition hover:bg-white/6'
+  'grid min-h-12 w-full grid-cols-[32px_minmax(0,1fr)_28px] items-center gap-2 rounded-lg px-1.5 text-left transition hover:bg-[#24243a] hover:text-[#d8b4fe]'
 
 function SidebarCharacterRow({
   character,
@@ -92,7 +97,7 @@ function SidebarCharacterRow({
 }) {
   return (
     <button type="button"
-      className={`${listItemClass} ${isActive ? 'bg-white/10 shadow-[inset_3px_0_0_rgba(255,255,255,0.86)]' : ''}`}
+      className={`${listItemClass} ${isActive ? 'bg-[#a855f7]/15 shadow-[inset_3px_0_0_#a855f7] text-[#d8b4fe]' : 'text-slate-300'}`}
       onClick={onSelect}
     >
       <Avatar name={character.name} src={character.avatarUrl ?? null} />
@@ -143,12 +148,12 @@ function SidebarChatRow({
   onToggleSelect: () => void
 }) {
   const actionButtonClass =
-    'flex min-h-9 w-full items-center gap-2 px-3 text-left text-xs font-black text-white/82 transition hover:bg-white/8 hover:text-white'
+    'flex min-h-9 w-full items-center gap-2 px-3 text-left text-xs font-black text-slate-300 transition hover:bg-[#24243a] hover:text-white'
 
   return (
     <div
       className={`relative ${listItemClass} ${
-        isSelected ? 'bg-white/14 ring-1 ring-white/20' : isActive ? 'bg-white/10 shadow-[inset_3px_0_0_rgba(255,255,255,0.86)]' : ''
+        isSelected ? 'bg-[#a855f7]/20 ring-1 ring-[#a855f7]/30 text-white' : isActive ? 'bg-[#a855f7]/15 shadow-[inset_3px_0_0_#a855f7] text-[#d8b4fe]' : 'text-slate-300'
       }`}
     >
       {isSelectionMode && (
@@ -430,17 +435,17 @@ function SidebarContent({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       <Link className="mb-1 flex min-h-10 items-center gap-2 rounded-lg px-1 text-white" onClick={onCloseMobile} to="/">
-        <span className="grid size-8 flex-none place-items-center rounded-lg bg-[#ff6a1a] text-lg font-black shadow-[0_12px_26px_rgba(255,106,26,0.24)]">
+        <span className="grid size-8 flex-none place-items-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-lg font-black shadow-[0_12px_26px_rgba(168,85,247,0.24)]">
           M
         </span>
         <span className="min-w-0">
           <span className="block truncate text-lg font-black tracking-wide">MAPRANG</span>
-          <span className="block truncate text-[11px] font-bold text-white/38">บทบาทสมมุติภาษาไทย</span>
+          <span className="block truncate text-[11px] font-bold text-[#9ca3af]">บทบาทสมมุติภาษาไทย</span>
         </span>
       </Link>
 
       <Link
-        className="flex min-h-9 items-center justify-center gap-2 rounded-lg bg-white/9 text-sm font-black text-white transition hover:bg-white/14"
+        className="flex min-h-9 items-center justify-center gap-2 rounded-lg bg-[#2e2e44]/60 text-sm font-black text-slate-200 transition hover:bg-[#a855f7]/25 border border-[#2e2e44]"
         to="/"
       >
         <Compass size={16} />
@@ -448,7 +453,7 @@ function SidebarContent({
       </Link>
 
       <Link
-        className="flex min-h-9 items-center justify-center gap-2 rounded-lg bg-white text-sm font-black text-slate-950 transition hover:bg-white/90"
+        className="flex min-h-9 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-sm font-black text-white hover:from-purple-500 hover:to-pink-500 transition hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
         onClick={onCloseMobile}
         to="/create"
       >
@@ -456,21 +461,65 @@ function SidebarContent({
         สร้างตัวละคร
       </Link>
 
-      <div className="mt-2 flex items-center justify-between border-b border-white/10 pb-2">
+      {/* Premium Navigation Links */}
+      <div className="flex flex-col gap-1 border-b border-[#2e2e44] pb-2 mt-1">
         <Link
-          className="relative text-sm font-black text-white after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-white"
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          onClick={onCloseMobile}
+          to="/favorites"
+        >
+          <Heart size={14} className="text-pink-400" />
+          รายการโปรด
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          onClick={onCloseMobile}
+          to="/works"
+        >
+          <Folder size={14} className="text-blue-400" />
+          ผลงานของฉัน
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          onClick={onCloseMobile}
+          to="/creators"
+        >
+          <Trophy size={14} className="text-yellow-400" />
+          อันดับนักสร้าง
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          onClick={onCloseMobile}
+          to="/announcements"
+        >
+          <Bell size={14} className="text-purple-400" />
+          ประกาศระบบ
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          onClick={onCloseMobile}
+          to="/support"
+        >
+          <HelpCircle size={14} className="text-emerald-400" />
+          ศูนย์ช่วยเหลือ
+        </Link>
+      </div>
+
+      <div className="mt-2 flex items-center justify-between border-b border-[#2e2e44] pb-2">
+        <Link
+          className="relative text-sm font-black text-[#a855f7] after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-[#a855f7]"
           onClick={onCloseMobile}
           to="/chats"
         >
           แชทส่วนตัว
         </Link>
-        <Link className="text-sm font-black text-white/55 transition hover:text-white" onClick={onCloseMobile} to="/events">
+        <Link className="text-sm font-black text-slate-400 transition hover:text-white" onClick={onCloseMobile} to="/events">
           อีเวนต์รวม
         </Link>
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_36px] gap-2">
-        <label className="flex min-h-10 items-center gap-2 rounded-full bg-white/6 px-3 text-white/45 focus-within:bg-white/9 focus-within:text-white/70">
+        <label className="flex min-h-10 items-center gap-2 rounded-full bg-[#1e1e34] border border-[#2e2e44] px-3 text-white/45 focus-within:border-[#a855f7] focus-within:ring-1 focus-within:ring-[#a855f7]/25 focus-within:bg-[#1e1e34]">
           <Search size={16} />
           <input
             className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/42"

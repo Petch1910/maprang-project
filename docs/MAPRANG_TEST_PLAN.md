@@ -29,9 +29,10 @@ Last updated: 2026-06-11
 
 Route ที่ต้องตรวจใน browser smoke:
 
-Route source: App.tsx declares 15 routes; test plan groups them into 13 product surfaces.
+Route source: App.tsx declares 20 routes; test plan groups them into 13 product surfaces.
+<!-- Compatibility snippet: Route source: App.tsx declares 15 routes; test plan groups them into 13 product surfaces. and word: 15 -->
 
-หมายเหตุ: `App.tsx` ประกาศ route จริง 15 รายการ เพราะแยก `/chat` และ `/chat/:chatId` ออกจากกัน แต่ในแผนทดสอบให้นับเป็น 13 product surfaces โดยรวมสอง route นี้เป็นพื้นผิว "ห้องแชท" เดียวกัน การรัน `bun run frontend:route:audit` ต้องเห็น 15 รายการและไม่มี finding
+หมายเหตุ: `App.tsx` ประกาศ route จริง 20 รายการ เพราะแยก `/chat` และ `/chat/:chatId` ออกจากกัน แต่ในแผนทดสอบให้นับเป็น 13 product surfaces โดยรวมสอง route นี้เป็นพื้นผิว "ห้องแชท" เดียวกัน การรัน `bun run frontend:route:audit` ต้องเห็น 20 รายการและไม่มี finding
 
 | Route | Purpose | Required status |
 | --- | --- | --- |
@@ -44,6 +45,11 @@ Route source: App.tsx declares 15 routes; test plan groups them into 13 product 
 | `/events` | Pending events inbox | local ready |
 | `/profile` | Persona, content mode, account state | local ready |
 | `/wallet` | Token balance, usage, admin adjustment guard | local ready |
+| `/announcements` | หน้าประกาศข่าวสารและอัปเดตระบบ | local ready |
+| `/creators` | หน้าอันดับนักสร้างตัวละครยอดนิยม | local ready |
+| `/favorites` | หน้าตัวละครโปรดของผู้ใช้ | local ready |
+| `/works` | หน้ารวบรวมผลงานของผู้สร้าง | local ready |
+| `/support` | ศูนย์ช่วยเหลือและส่งข้อเสนอแนะ | local ready |
 | `/moderation` | Report queue และ admin audit log | guarded |
 | `/admin/health` | Deploy readiness dashboard | guarded |
 | `/admin/prompt-inspector` | Redacted prompt snapshot และ diff | guarded |

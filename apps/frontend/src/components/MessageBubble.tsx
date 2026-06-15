@@ -44,8 +44,8 @@ export function MessageBubble({
       <div
         className={`group min-w-0 max-w-[min(720px,78%)] px-4 py-3 text-sm leading-7 shadow-[0_18px_46px_rgba(0,0,0,0.24)] ${
           isUser
-            ? 'rounded-2xl rounded-br-md bg-white text-slate-950'
-            : 'markdown-body rounded-2xl rounded-bl-md border border-white/10 bg-[#1b1c21]/86 text-white backdrop-blur-xl'
+            ? 'rounded-2xl rounded-br-md bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-[0_4px_12px_rgba(168,85,247,0.2)]'
+            : 'markdown-body rounded-2xl rounded-bl-md border border-[#2e2e44] bg-[#1e1e34]/90 text-slate-100 backdrop-blur-xl'
         }`}
       >
         {isUser ? (
@@ -71,7 +71,7 @@ export function MessageBubble({
       </div>
 
       {isUser && (
-        <div className="mb-1 grid size-8 flex-none place-items-center rounded-lg bg-white text-[10px] font-black text-slate-950 shadow-[0_10px_26px_rgba(0,0,0,0.22)]">
+        <div className="mb-1 grid size-8 flex-none place-items-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-[10px] font-black text-white shadow-[0_4px_12px_rgba(168,85,247,0.2)]">
           คุณ
         </div>
       )}

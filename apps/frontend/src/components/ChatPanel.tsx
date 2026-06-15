@@ -715,12 +715,12 @@ function RightRail({
   }
 
   return (
-    <aside className="hidden h-svh min-h-0 overflow-hidden border-l border-white/8 bg-[#111114]/96 p-4 text-white shadow-[inset_1px_0_0_rgba(255,255,255,0.03)] lg:flex lg:flex-col">
+    <aside className="hidden h-svh min-h-0 overflow-hidden border-l border-[#2e2e44] bg-[#1e1e34]/95 p-4 text-white shadow-[inset_1px_0_0_rgba(255,255,255,0.03)] backdrop-blur-xl lg:flex lg:flex-col">
       <div className="flex items-start gap-3">
         {character.avatarUrl ? (
           <img alt="" className="size-12 rounded-xl object-cover ring-1 ring-white/12" src={character.avatarUrl} />
         ) : (
-          <div className="grid size-12 place-items-center rounded-xl border border-white/10 bg-linear-to-br from-indigo-500 via-violet-600 to-fuchsia-500 text-sm font-black">
+          <div className="grid size-12 place-items-center rounded-xl border border-[#2e2e44] bg-linear-to-br from-indigo-500 via-violet-600 to-fuchsia-500 text-sm font-black">
             {characterInitial(character.name)}
           </div>
         )}
@@ -733,8 +733,8 @@ function RightRail({
       <p className="mt-4 line-clamp-3 text-sm leading-6 text-white/55">{displayCharacterSummary(character)}</p>
 
       <button
-        className={`mt-4 min-h-9 rounded-lg border border-white/10 text-sm font-black text-white transition ${
-          isSoundOn ? 'bg-emerald-500/20 text-emerald-100' : 'bg-white/6 hover:bg-white/10'
+        className={`mt-4 min-h-9 rounded-lg border border-[#2e2e44] text-sm font-black text-white transition ${
+          isSoundOn ? 'bg-emerald-500/20 text-emerald-100' : 'bg-[#1e1e34]/50 hover:bg-[#24243a]'
         }`}
         onClick={() => {
           setIsSoundOn((value) => !value)
@@ -778,7 +778,7 @@ function RightRail({
       </div>
       {notice && <p className="m-0 mt-2 rounded-lg bg-white/8 px-3 py-2 text-xs font-bold text-white/72">{notice}</p>}
 
-      <div className="mt-4 rounded-xl border border-white/10 bg-white/6 p-3">
+      <div className="mt-4 rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50 p-3">
         <p className="m-0 text-xs font-black text-white/45">ความสัมพันธ์</p>
         <div className="mt-2 flex items-center justify-between gap-3">
           <span className="text-sm font-black">{relationshipStatusLabel(relationship?.status)}</span>
@@ -792,7 +792,7 @@ function RightRail({
       </div>
 
       <button type="button"
-        className="mt-4 min-h-10 rounded-lg bg-white text-sm font-black text-slate-950 shadow-[0_14px_34px_rgba(255,255,255,0.08)] transition hover:bg-white/90"
+        className="mt-4 min-h-10 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-sm font-black text-white shadow-[0_4px_12px_rgba(168,85,247,0.3)] transition hover:from-purple-500 hover:to-pink-500"
         onClick={onStartNewChat}
       >
         แชทใหม่
@@ -800,7 +800,7 @@ function RightRail({
 
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
         <p className="mb-2 text-xs font-black text-white/35">ตั้งค่าตัวละคร</p>
-        <div className="mb-3 space-y-3 rounded-xl border border-white/10 bg-white/6 p-3">
+        <div className="mb-3 space-y-3 rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50 p-3">
           <p className="m-0 text-xs font-black text-white/45">
             {menuItems.find((item) => item.key === activePanel)?.label ?? 'รายละเอียด'}
           </p>
@@ -893,13 +893,13 @@ export function ChatPanel({
   }, [character.id, chatId])
 
   return (
-    <section className="grid h-svh min-w-0 grid-cols-1 overflow-hidden bg-[#0c0c0f] lg:grid-cols-[minmax(0,1fr)_300px]">
+    <section className="grid h-svh min-w-0 grid-cols-1 overflow-hidden bg-[#080a1a] lg:grid-cols-[minmax(0,1fr)_300px]">
       <div
         className={`relative grid min-h-0 grid-rows-[auto_1fr_auto] overflow-hidden transition duration-300 ${isSceneMode ? 'shadow-[inset_0_0_0_9999px_rgba(0,0,0,0.22)]' : ''}`}
         style={{
           backgroundImage: hasAvatarBackdrop
             ? `linear-gradient(90deg,rgba(7,7,9,0.88),rgba(7,7,9,0.38) 48%,rgba(7,7,9,0.84)), linear-gradient(180deg,rgba(0,0,0,0.36),rgba(0,0,0,0.82)), url(${backdropUrl})`
-            : `radial-gradient(circle at 50% 8%,rgba(129,92,246,0.26),transparent 30%), radial-gradient(circle at 12% 78%,rgba(244,114,182,0.18),transparent 28%), linear-gradient(135deg,rgba(16,16,20,0.86),rgba(6,6,9,0.96)), url(${backdropUrl})`,
+            : `radial-gradient(circle at 50% 8%,rgba(129,92,246,0.26),transparent 30%), radial-gradient(circle at 12% 78%,rgba(244,114,182,0.18),transparent 28%), linear-gradient(135deg,rgba(24,24,47,0.86),rgba(8,10,26,0.96)), url(${backdropUrl})`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
         }}
@@ -907,7 +907,7 @@ export function ChatPanel({
         <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_72%,rgba(0,0,0,0.42))]" />
         <div className="pointer-events-none absolute inset-x-10 top-20 z-0 h-px bg-linear-to-r from-transparent via-white/14 to-transparent" />
 
-        <header className="relative z-20 flex min-h-16 items-center gap-2 border-b border-white/8 bg-black/30 px-3 py-2 backdrop-blur-2xl sm:gap-3 sm:px-4">
+        <header className="relative z-20 flex min-h-16 items-center gap-2 border-b border-[#2e2e44] bg-[#1e1e34]/30 px-3 py-2 backdrop-blur-2xl sm:gap-3 sm:px-4">
           <button type="button"
             aria-label="เปิดเมนูแชท"
             className="grid size-9 flex-none place-items-center rounded-lg border border-white/10 bg-black/35 text-white md:hidden"
@@ -997,7 +997,7 @@ export function ChatPanel({
                 <MoreHorizontal size={18} />
               </button>
               {isMobileActionsOpen && (
-                <div className="absolute right-0 top-10 z-30 w-52 rounded-xl border border-white/10 bg-[#15151a] p-1.5 text-sm font-bold text-white shadow-[0_20px_70px_rgba(0,0,0,0.65)]">
+                <div className="absolute right-0 top-10 z-30 w-52 rounded-xl border border-[#2e2e44] bg-[#1e1e34] p-1.5 text-sm font-bold text-white shadow-[0_20px_70px_rgba(0,0,0,0.65)]">
                   <button
                     className="flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-left text-white/76 hover:bg-white/8 hover:text-white"
                     data-testid="chat-mobile-start-new"

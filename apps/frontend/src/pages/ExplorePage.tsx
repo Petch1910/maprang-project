@@ -7,14 +7,18 @@ import {
   Coins,
   Compass,
   Dice5,
+  Folder,
   Gamepad2,
   Globe2,
+  Heart,
+  HelpCircle,
   MessageCircle,
   Plus,
   PlusCircle,
   Search,
   Settings,
   Sparkles,
+  Trophy,
   UserRound,
   WandSparkles,
   X,
@@ -127,19 +131,66 @@ function Sidebar({
 
   return (
     <aside className="hidden h-svh min-h-0 w-[246px] flex-col border-r border-[#2e2e44] bg-[#1e1e34] p-2.5 text-white md:flex">
-      <div className="flex items-center gap-2 px-1 pb-2">
-        <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-[#8b5cf6] to-[#a855f7] text-lg font-black">M</span>
-        <span className="text-lg font-black tracking-wide">MAPRANG</span>
-      </div>
+      <Link className="mb-1 flex min-h-10 items-center gap-2 rounded-lg px-1 text-white" to="/">
+        <span className="grid size-8 flex-none place-items-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-lg font-black shadow-[0_12px_26px_rgba(168,85,247,0.24)]">
+          M
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-lg font-black tracking-wide">MAPRANG</span>
+          <span className="block truncate text-[11px] font-bold text-[#9ca3af]">บทบาทสมมุติภาษาไทย</span>
+        </span>
+      </Link>
 
       <Link className="flex min-h-9 items-center justify-center gap-2 rounded-md bg-[#2e2e44]/60 text-sm font-black hover:bg-[#a855f7]/25 text-slate-200 border border-[#2e2e44]" to="/">
         <Compass size={16} />
         ไปหน้าหลัก
       </Link>
-      <Link className="mt-2 flex min-h-9 items-center justify-center gap-2 rounded-md bg-[#a855f7] text-sm font-black text-white hover:bg-[#a855f7]/90 shadow-[0_4px_12px_rgba(168,85,247,0.3)]" to="/create">
+      <Link
+        className="mt-2 flex min-h-9 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-sm font-black text-white hover:from-purple-500 hover:to-pink-500 transition hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+        to="/create"
+      >
         <Plus size={16} />
         สร้างตัวละคร
       </Link>
+
+      {/* Premium Navigation Links */}
+      <div className="flex flex-col gap-1 border-b border-[#2e2e44] pb-2 mt-1">
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          to="/favorites"
+        >
+          <Heart size={14} className="text-pink-400" />
+          รายการโปรด
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          to="/works"
+        >
+          <Folder size={14} className="text-blue-400" />
+          ผลงานของฉัน
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          to="/creators"
+        >
+          <Trophy size={14} className="text-yellow-400" />
+          อันดับนักสร้าง
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          to="/announcements"
+        >
+          <Bell size={14} className="text-purple-400" />
+          ประกาศระบบ
+        </Link>
+        <Link
+          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          to="/support"
+        >
+          <HelpCircle size={14} className="text-emerald-400" />
+          ศูนย์ช่วยเหลือ
+        </Link>
+      </div>
 
       <div className="mt-4 flex items-center justify-between border-b border-[#2e2e44] pb-2">
         <Link className="relative text-sm font-black text-[#a855f7] after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-[#a855f7]" to="/chats">

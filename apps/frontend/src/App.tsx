@@ -10,6 +10,10 @@ import {
   UserRound,
   Menu,
   X,
+  Trophy,
+  Heart,
+  Folder,
+  HelpCircle,
 } from 'lucide-react'
 import { AgeGate } from './components/AgeGate'
 import { ToastContainer } from './components/Toast'
@@ -33,6 +37,11 @@ const loadExplorePage = () => import('./pages/ExplorePage').then((module) => ({ 
 const loadProfilePage = () => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage }))
 const loadWalletPage = () => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage }))
 const loadAICreatorPage = () => import('./pages/AICreatorPage').then((module) => ({ default: module.AICreatorPage }))
+const loadAnnouncementsPage = () => import('./pages/AnnouncementsPage').then((module) => ({ default: module.AnnouncementsPage }))
+const loadCreatorsPage = () => import('./pages/CreatorsPage').then((module) => ({ default: module.CreatorsPage }))
+const loadFavoritesPage = () => import('./pages/FavoritesPage').then((module) => ({ default: module.FavoritesPage }))
+const loadWorksPage = () => import('./pages/WorksPage').then((module) => ({ default: module.WorksPage }))
+const loadSupportPage = () => import('./pages/SupportPage').then((module) => ({ default: module.SupportPage }))
 
 const CreatorStudioPage = lazy(loadCreatorStudioPage)
 const ChatRoomPage = lazy(loadChatRoomPage)
@@ -47,12 +56,39 @@ const ExplorePage = lazy(loadExplorePage)
 const ProfilePage = lazy(loadProfilePage)
 const WalletPage = lazy(loadWalletPage)
 const AICreatorPage = lazy(loadAICreatorPage)
+const AnnouncementsPage = lazy(loadAnnouncementsPage)
+const CreatorsPage = lazy(loadCreatorsPage)
+const FavoritesPage = lazy(loadFavoritesPage)
+const WorksPage = lazy(loadWorksPage)
+const SupportPage = lazy(loadSupportPage)
 
 const primaryNavItems = [
   { to: '/', label: 'สำรวจ', icon: Compass },
   { to: '/chats', label: 'แชท', icon: MessageCircle },
   { to: '/create', label: 'สร้าง', icon: PlusCircle },
   { to: '/profile', label: 'โปรไฟล์', icon: UserRound },
+]
+
+const desktopNavItems = [
+  { to: '/', label: 'สำรวจ', icon: Compass },
+  { to: '/chats', label: 'แชท', icon: MessageCircle },
+  { to: '/create', label: 'สร้าง', icon: PlusCircle },
+  { to: '/favorites', label: 'รายการโปรด', icon: Heart },
+  { to: '/works', label: 'ผลงาน', icon: Folder },
+  { to: '/creators', label: 'ผู้สร้าง', icon: Trophy },
+  { to: '/profile', label: 'โปรไฟล์', icon: UserRound },
+]
+
+const mobileDropdownNavItems = [
+  { to: '/', label: 'สำรวจ', icon: Compass },
+  { to: '/chats', label: 'แชท', icon: MessageCircle },
+  { to: '/create', label: 'สร้าง', icon: PlusCircle },
+  { to: '/favorites', label: 'รายการโปรด', icon: Heart },
+  { to: '/works', label: 'ผลงานของฉัน', icon: Folder },
+  { to: '/creators', label: 'อันดับนักสร้าง', icon: Trophy },
+  { to: '/announcements', label: 'ประกาศข่าวสาร', icon: Bell },
+  { to: '/support', label: 'ติดต่อช่วยเหลือ', icon: HelpCircle },
+  { to: '/profile', label: 'โปรไฟล์ & ตั้งค่า', icon: UserRound },
 ]
 
 const routePreloads: Record<string, () => Promise<unknown>> = {
@@ -67,6 +103,11 @@ const routePreloads: Record<string, () => Promise<unknown>> = {
   '/admin/health': loadAdminHealthPage,
   '/admin/prompt-inspector': loadAdminPromptInspectorPage,
   '/admin/evals': loadAdminEvalsPage,
+  '/announcements': loadAnnouncementsPage,
+  '/creators': loadCreatorsPage,
+  '/favorites': loadFavoritesPage,
+  '/works': loadWorksPage,
+  '/support': loadSupportPage,
 }
 
 function NotFoundPage() {
@@ -147,6 +188,11 @@ function App() {
         <Route element={<AdminHealthPage />} path="/admin/health" />
         <Route element={<AdminPromptInspectorPage />} path="/admin/prompt-inspector" />
         <Route element={<AdminEvalsPage />} path="/admin/evals" />
+        <Route element={<AnnouncementsPage />} path="/announcements" />
+        <Route element={<CreatorsPage />} path="/creators" />
+        <Route element={<FavoritesPage />} path="/favorites" />
+        <Route element={<WorksPage />} path="/works" />
+        <Route element={<SupportPage />} path="/support" />
         <Route element={<NotFoundPage />} path="*" />
       </Routes>
     </Suspense>
@@ -160,7 +206,7 @@ function App() {
 
   if (isImmersiveRoute) {
     return (
-      <div className="min-h-screen bg-[#111113] text-white">
+      <div className="min-h-screen bg-[#18182f] text-white">
         <AgeGate />
         {appRoutes}
         <ToastContainer />
@@ -169,7 +215,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080A1A] text-white">
+    <div className="min-h-screen bg-[#18182f] text-white">
       <AgeGate />
 
       {/* Modern Top Navigation */}
@@ -189,7 +235,7 @@ function App() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-2">
-              {primaryNavItems.map((item) => (
+              {desktopNavItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
@@ -252,7 +298,7 @@ function App() {
         {showMobileMenu && (
           <div className="border-t border-[#2e2e44] bg-[#1e1e34]/98 backdrop-blur-xl md:hidden">
             <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
-              {primaryNavItems.map((item) => (
+              {mobileDropdownNavItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
