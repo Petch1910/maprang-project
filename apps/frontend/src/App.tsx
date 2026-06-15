@@ -124,9 +124,9 @@ function App() {
   const appRoutes = (
     <Suspense
       fallback={
-        <div className="grid min-h-screen place-items-center bg-slate-900">
+        <div className="grid min-h-screen place-items-center bg-[#080A1A]">
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent" />
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#a855f7] border-t-transparent" />
             <p className="mt-4 text-slate-400">กำลังโหลด...</p>
           </div>
         </div>
@@ -169,11 +169,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-[#080A1A] text-white">
       <AgeGate />
 
       {/* Modern Top Navigation */}
-      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-[#2e2e44] bg-[#1e1e34]/95 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -198,8 +198,8 @@ function App() {
                   className={({ isActive }) =>
                     `flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
                       isActive
-                        ? 'bg-purple-600 text-white'
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        ? 'bg-[#a855f7] text-white shadow-[0_4px_12px_rgba(168,85,247,0.3)]'
+                        : 'text-slate-400 hover:bg-[#2e2e44] hover:text-white'
                     }`
                   }
                 >
@@ -224,7 +224,7 @@ function App() {
               {/* Events (with badge) */}
               <NavLink
                 to="/events"
-                className="relative rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="relative rounded-lg p-2 text-slate-400 transition hover:bg-[#2e2e44] hover:text-white"
                 title="อีเวนต์"
               >
                 <Bell className="h-5 w-5" />
@@ -239,7 +239,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="md:hidden rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="md:hidden rounded-lg p-2 text-slate-400 transition hover:bg-[#2e2e44] hover:text-white"
                 aria-label="เมนู"
               >
                 {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -250,7 +250,7 @@ function App() {
 
         {/* Mobile Menu Dropdown */}
         {showMobileMenu && (
-          <div className="border-t border-slate-800 bg-slate-900/98 backdrop-blur-xl md:hidden">
+          <div className="border-t border-[#2e2e44] bg-[#1e1e34]/98 backdrop-blur-xl md:hidden">
             <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
               {primaryNavItems.map((item) => (
                 <NavLink
@@ -260,8 +260,8 @@ function App() {
                   className={({ isActive }) =>
                     `flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition ${
                       isActive
-                        ? 'bg-purple-600 text-white'
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        ? 'bg-[#a855f7] text-white shadow-[0_4px_12px_rgba(168,85,247,0.3)]'
+                        : 'text-slate-400 hover:bg-[#2e2e44] hover:text-white'
                     }`
                   }
                 >
@@ -279,7 +279,7 @@ function App() {
 
       {/* Bottom Tab Navigation (Mobile Only) */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-900/98 backdrop-blur-xl md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#2e2e44] bg-[#1e1e34]/98 backdrop-blur-xl md:hidden"
         data-testid="app-mobile-nav"
       >
         <div className="flex items-center justify-around px-2 py-2">
@@ -292,7 +292,7 @@ function App() {
               onTouchStart={() => preloadRoute(item.to)}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-xs font-bold transition ${
-                  isActive ? 'text-purple-400' : 'text-slate-500'
+                  isActive ? 'text-[#a855f7]' : 'text-slate-500'
                 }`
               }
             >
