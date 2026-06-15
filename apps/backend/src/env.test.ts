@@ -1,7 +1,11 @@
-import { afterEach, describe, expect, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { validateRuntimeEnv } from './env'
 
 const originalEnv = { ...process.env }
+
+beforeEach(() => {
+  delete process.env.OPENROUTER_BASE_URL
+})
 
 afterEach(() => {
   process.env = { ...originalEnv }
@@ -14,6 +18,7 @@ function jwtWithRole(role: string) {
 }
 
 function setCompleteProductionEnv() {
+  delete process.env.OPENROUTER_BASE_URL
   process.env.NODE_ENV = 'production'
   process.env.DATABASE_URL = 'postgresql://maprang_app:prod-secret@db.example.net:5432/maprang?sslmode=require'
   process.env.OPENROUTER_API_KEY = 'sk-or-realistic'
