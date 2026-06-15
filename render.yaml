@@ -84,8 +84,9 @@ services:
       - key: IMAGE_GENERATION_LIVE_VERIFIED
         value: "0"
 
-  - type: static
+  - type: web
     name: maprang-frontend
+    runtime: static
     rootDir: apps/frontend
     buildCommand: bun install --frozen-lockfile && bun run build
     staticPublishPath: dist
