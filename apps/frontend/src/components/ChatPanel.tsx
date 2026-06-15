@@ -523,8 +523,59 @@ function RightRail({
                 value={worldDraft.mood}
               />
             </label>
-            <label className="space-y-1 text-xs font-black text-white/55">
-              <span>โน้ตฉาก</span>
+            <div className="space-y-1 text-xs font-black text-white/55">
+              <div className="flex items-center justify-between">
+                <span>โน้ตฉาก</span>
+                <select
+                  aria-disabled={Boolean(worldStateFieldDisabledReason)}
+                  className="max-w-[160px] truncate rounded border border-white/10 bg-black/40 px-1.5 py-0.5 text-[11px] font-bold text-white/70 outline-none focus:border-amber-400/70"
+                  disabled={Boolean(worldStateFieldDisabledReason)}
+                  onChange={(event) => {
+                    const selectedVal = event.target.value
+                    if (!selectedVal) return
+                    setWorldDraft((value) => {
+                      const currentNotes = value.sceneNotes.trim()
+                      const lines = currentNotes ? currentNotes.split('\n') : []
+                      if (lines.length >= 5) {
+                        return value
+                      }
+                      const updatedNotes = currentNotes ? `${currentNotes}\n${selectedVal}` : selectedVal
+                      return { ...value, sceneNotes: updatedNotes }
+                    })
+                    event.target.value = '' // Reset selector
+                  }}
+                  title={worldStateFieldDisabledReason || 'คีย์ลัดคำสั่ง OOC'}
+                >
+                  <option value="">+ คีย์ลัดคำสั่ง OOC</option>
+                  <option value="(ooc:ตอบกลับมาโดยบรรยายแบบนิยายโดยละเอียด บรรยากาศ อารมณ์ความรู้สึกเขาการกระทำ ใช้การบรรยาย POV เป็นกลาง โดยบรรยายในมุมเขาฝ่ายเดียวและสีหน้าของ{{char}} ยาว >1500 อักขระ และบรรยายให้จบไม่ตัดประโยค เมื่อบรรยายหรือแสดงการกระทำให้ใช้ *บรรยาย/การกระทำ*)">
+                    นิยายละเอียด (>1500 อักขระ)
+                  </option>
+                  <option value="(ooc:ให้บอทบรรยายยาวๆ แต่ใช้บทพูดสั้นๆ เท่านั้นในทุกการตอบกลับ)">
+                    บรรยายยาว บทพูดสั้น
+                  </option>
+                  <option value="(ooc:บรรยายและตอบกลับแค่มุมมองของ{{char}}เพียงฝ่ายเดียว)">
+                    มุมมองเดี่ยวของ {{char}}
+                  </option>
+                  <option value="(ooc:ระบุเวลาเป็นตัวเลข, สถานที่บนหัวข้อความ)">
+                    ระบุเวลาและสถานที่
+                  </option>
+                  <option value="(ooc:การบรรยายต้องมีความคิดในใจของ{{char}}เสมอ)">
+                    บรรยายความคิดในใจ
+                  </option>
+                  <option value="(ooc:ให้เข้าใจว่า{{user}}อาจเป็นชายหรือหญิงตามบริบท หาก{{user}}ใช้ &quot;ผม&quot; ถือว่าเป็นผู้ชาย หากใช้ &quot;ฉัน/หนู&quot; ถือว่าเป็นผู้หญิง และเลือกสรรพนามที่ตรงกับเนื้อเรื่อง)">
+                    กำหนดเพศผู้เล่นตามบริบท
+                  </option>
+                  <option value="(ooc:ไม่ให้การบรรยายบอทใช้ข้อความเดิมซ้ำ)">
+                    ลดการตอบซ้ำวนไปวนมา
+                  </option>
+                  <option value="(ooc:ไม่ต้องบรรยายบทของ{{user}})">
+                    ไม่โรลแทนผู้ใช้ (ห้ามตอบแทน)
+                  </option>
+                  <option value="(ooc:บรรยายบทพูดตัวละครอื่นด้วย)">
+                    บรรยายบทพูดตัวละครอื่น
+                  </option>
+                </select>
+              </div>
               <textarea
                 className="min-h-20 w-full resize-none rounded-lg border border-white/10 bg-black/24 px-3 py-2 text-sm font-bold leading-6 text-white outline-none focus:border-orange-300/45"
                 aria-disabled={Boolean(worldStateFieldDisabledReason)}
@@ -535,7 +586,7 @@ function RightRail({
                 title={worldStateFieldDisabledReason || 'เพิ่มโน้ตฉาก'}
                 value={worldDraft.sceneNotes}
               />
-            </label>
+            </div>
           </div>
           <button
             className="min-h-9 w-full rounded-lg bg-white px-3 text-xs font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
