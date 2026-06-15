@@ -38,11 +38,11 @@ export function RelationshipPreviewPanel({
   }
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs leading-relaxed text-white/62">
+    <div className="rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50 p-3 text-xs leading-relaxed text-[#9ca3af]">
       <div className="flex items-center justify-between gap-2">
         <strong className="text-white">พรีวิวสำหรับครีเอเตอร์</strong>
         <button type="button"
-          className="min-h-8 rounded-full border border-white/10 bg-white/7 px-3 font-bold text-white/72 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
+          className="min-h-8 rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 font-bold text-[#9ca3af] transition hover:bg-[#24243a] hover:text-white disabled:opacity-60"
           aria-disabled={isLoading}
           disabled={isLoading}
           onClick={runPreview}
@@ -52,13 +52,13 @@ export function RelationshipPreviewPanel({
         </button>
       </div>
       <textarea
-        className="mt-2 min-h-24 w-full resize-y rounded-lg border border-white/10 bg-black/22 px-2 py-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-orange-400/70 focus:ring-4 focus:ring-orange-500/10"
+        className="mt-2 min-h-24 w-full resize-y rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 py-2 text-xs text-white outline-none placeholder:text-white/30 focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/20"
         value={script}
         onChange={(event) => setScript(event.target.value)}
         placeholder="ใส่ข้อความจำลองของผู้ใช้ บรรทัดละ 1 เทิร์น"
       />
 
-      {error && <p className="mt-2 mb-0 rounded-lg border border-red-300/25 bg-red-500/12 p-2 font-bold text-red-100">{error}</p>}
+      {error && <p className="mt-2 mb-0 rounded-xl border border-red-500/20 bg-red-500/10 p-2 font-bold text-red-300">{error}</p>}
 
       {preview && (
         <div className="mt-2 space-y-2">
@@ -67,20 +67,20 @@ export function RelationshipPreviewPanel({
           </p>
           {preview.validationIssues.map((issue) => (
             <p
-              className={`m-0 font-bold ${issue.level === 'danger' ? 'text-red-200' : 'text-amber-100'}`}
+              className={`m-0 font-bold ${issue.level === 'danger' ? 'text-red-400' : 'text-amber-400'}`}
               key={issue.code}
             >
               {issue.message}
             </p>
           ))}
           {preview.turns.map((turn) => (
-            <div className="rounded-lg border border-white/10 bg-black/18 p-2" key={turn.turn}>
+            <div className="rounded-xl border border-[#2e2e44] bg-[#1e1e34]/50 p-3" key={turn.turn}>
               <strong className="text-white">เทิร์น {turn.turn}</strong>
-              <p className="m-0">{turn.message}</p>
-              <p className="m-0">
+              <p className="m-0 text-white/80">{turn.message}</p>
+              <p className="m-0 text-white/50 mt-1">
                 {relationshipStatusLabel(turn.status)} / {relationshipTierLabel(turn.tier)} / {turn.tone} | ผูกพัน {turn.stats.affinity}, ไว้ใจ {turn.stats.trust}
               </p>
-              {turn.events.length > 0 && <p className="m-0">จังหวะเรื่อง: {turn.events.map((event) => event.label).join(', ')}</p>}
+              {turn.events.length > 0 && <p className="m-0 text-[#d8b4fe] mt-1">จังหวะเรื่อง: {turn.events.map((event) => event.label).join(', ')}</p>}
             </div>
           ))}
         </div>
