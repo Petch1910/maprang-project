@@ -4,16 +4,16 @@ Use this checklist with [STAGING_RUNBOOK.md](STAGING_RUNBOOK.md), [PRODUCTION_SE
 
 ## Local Gate
 
-- [ ] `bun run secrets:check`
-- [ ] `bun run docs:commands`
-- [ ] `bun run frontend:static:audit`
-- [ ] `bun run frontend:route:audit`
-- [ ] `bun run route-menu:audit`
-- [ ] `bun run api:audit`
-- [ ] `bun run backend:check`
-- [ ] `bun run backend:check:db:test`
-- [ ] `bun run qa:full`
-- [ ] `git diff --check`
+- [x] `bun run secrets:check`
+- [x] `bun run docs:commands`
+- [x] `bun run frontend:static:audit`
+- [x] `bun run frontend:route:audit`
+- [x] `bun run route-menu:audit`
+- [x] `bun run api:audit`
+- [x] `bun run backend:check`
+- [x] `bun run backend:check:db:test`
+- [x] `bun run qa:full`
+- [x] `git diff --check`
 
 ## Staging Gate
 
