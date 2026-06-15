@@ -38,7 +38,7 @@ const worldStateBody = t.Object({
   location: t.Optional(t.String({ maxLength: 120 })),
   weather: t.Optional(t.String({ maxLength: 80 })),
   mood: t.Optional(t.String({ maxLength: 80 })),
-  sceneNotes: t.Optional(t.Array(t.String({ maxLength: 180 }), { maxItems: 5 })),
+  sceneNotes: t.Optional(t.Array(t.String({ maxLength: 300 }), { maxItems: 5 })),
 })
 
 export const chatRoutes = new Elysia()

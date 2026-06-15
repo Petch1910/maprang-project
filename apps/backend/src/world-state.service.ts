@@ -27,7 +27,7 @@ const stringLimits = {
   location: 120,
   weather: 80,
   mood: 80,
-  sceneNote: 180,
+  sceneNote: 300,
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

@@ -40,6 +40,6 @@ describe('world state prompt', () => {
     expect(worldState.weather).toBe('')
     expect(worldState.mood).toBe('เงียบ นิ่ง')
     expect(worldState.sceneNotes).toHaveLength(5)
-    expect(worldState.sceneNotes.every((note) => note.length <= 180)).toBe(true)
+    expect(worldState.sceneNotes.every((note) => note.length <= 300)).toBe(true)
   })
 })
