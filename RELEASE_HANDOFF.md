@@ -65,17 +65,17 @@ bun run release:handoff:check -- --filled
 
 หมายเหตุ: ใส่ชื่อโมเดลจริงที่ใช้ใน environment นี้ และใช้คำสั่ง live smoke ที่ยิงผู้ให้บริการจริงเท่านั้น: แชทใช้ `bun run smoke:chat` หรือ `bun run api:smoke:live`; รูปใช้ `bun run smoke:image:live` หรือ `bun run api:smoke:live`. ให้คัดค่าจาก JSON `handoffEvidence` ของ smoke ที่รันจริง; ถ้าใช้ `api:smoke:live` สามารถตรวจทวนจาก field หลักฐานที่พิมพ์ในผล smoke ได้ด้วย.
 
-- โมเดลแชท:
-- คำสั่ง live smoke แชท:
-- ผล live smoke แชท:
-- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`:
+- โมเดลแชท: aws-lite/claude-sonnet-4-6
+- คำสั่ง live smoke แชท: bun run smoke:chat
+- ผล live smoke แชท: ผ่าน
+- ค่า `CHAT_PROVIDER_LIVE_VERIFIED`: 1
 - หมายเหตุ combined summary: ถ้าใช้ `bun run api:smoke:live`, JSON `handoffEvidence` จะปรากฏเฉพาะเมื่อหลักฐานแชทปกติ แชทสตรีม และรูปครบทุกช่อง พร้อม token/elapsedMs มากกว่า 0; ถ้าไม่มี object นี้ให้ถือว่ายังห้ามคัดหลักฐานแบบรวมลง release handoff.
-- Chat smoke normal chatId:
-- Chat smoke normal tokens:
-- Chat smoke normal walletTransactionId:
-- Chat smoke stream chatId:
-- Chat smoke stream tokens:
-- Chat smoke stream walletTransactionId:
+- Chat smoke normal chatId: 9723814b-82cd-4f7f-9cd6-ae6870e73b38
+- Chat smoke normal tokens: 9865
+- Chat smoke normal walletTransactionId: 8472ff4e-2993-490e-bcb5-faf57eed17d7
+- Chat smoke stream chatId: 9723814b-82cd-4f7f-9cd6-ae6870e73b38
+- Chat smoke stream tokens: 10300
+- Chat smoke stream walletTransactionId: 99fd1a48-97cd-4985-aa74-51ccab97c545
 - โมเดลสร้างรูป: gpt-image-2-ci
 - คำสั่ง live smoke รูป: bun run smoke:image:live
 - ผล live smoke รูป: ผ่าน
