@@ -23,6 +23,8 @@ services:
           property: connectionString
       - key: OPENROUTER_API_KEY
         sync: false
+      - key: OPENROUTER_BASE_URL
+        value: https://openrouter.ai/api/v1
       - key: OPENROUTER_MODEL
         value: google/gemini-2.0-flash-001
       - key: MODEL_INPUT_COST_PER_1M

@@ -3,6 +3,7 @@ export const defaultCharacterId = 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
 export const serverHost = process.env.HOST || '0.0.0.0'
 export const serverPort = Number(process.env.PORT ?? 3000)
 export const modelName = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001'
+export const openrouterBaseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1'
 export const modelInputCostPer1M = Number(process.env.MODEL_INPUT_COST_PER_1M ?? 0)
 export const modelOutputCostPer1M = Number(process.env.MODEL_OUTPUT_COST_PER_1M ?? 0)
 function numberEnv(name: string, fallback: number) {

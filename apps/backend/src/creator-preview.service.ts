@@ -1,13 +1,13 @@
 import { MessageRole } from '@prisma/client'
 import OpenAI from 'openai'
 import type { ChatCompletion } from 'openai/resources/chat/completions'
-import { modelName, modelMaxOutputTokens, modelTemperature, chatProviderRetryAttempts, chatProviderRetryDelayMs } from './config'
+import { modelName, modelMaxOutputTokens, modelTemperature, chatProviderRetryAttempts, chatProviderRetryDelayMs, openrouterBaseUrl } from './config'
 import { buildContextPrompt, loadRelevantLore, promptControlPolicy, type LoreForContext } from './context.service'
 import { estimatePromptTokens } from './prompt-inspector.service'
 import { redactSensitiveText } from './redaction'
 
 const openRouter = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
+  baseURL: openrouterBaseUrl,
   apiKey: process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
 })
 

@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
 import OpenAI from 'openai'
 import type { ChatCompletion } from 'openai/resources/chat/completions'
-import { creatorDraftRetryAttempts, creatorDraftRetryDelayMs, modelName } from './config'
+import { creatorDraftRetryAttempts, creatorDraftRetryDelayMs, modelName, openrouterBaseUrl } from './config'
 import { uploadAvatarBytes } from './storage.service'
 import { getPrisma } from './db'
 import { buildCreatorKnowledgePrompt } from './knowledge.service'
@@ -72,7 +72,7 @@ export type CreatorDraftResult = {
 type CompletionFn = (messages: Array<{ role: 'system' | 'user'; content: string }>) => Promise<ChatCompletion>
 
 const openRouter = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
+  baseURL: openrouterBaseUrl,
   apiKey: process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
 })
 

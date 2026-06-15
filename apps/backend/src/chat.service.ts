@@ -19,6 +19,7 @@ import {
   modelInputCostPer1M,
   modelMinRoleplayReplyChars,
   modelName,
+  openrouterBaseUrl,
   modelOutputCostPer1M,
   modelTemperature,
   promptBudgetTokens,
@@ -55,7 +56,7 @@ import {
 import { buildWorldStatePrompt, coerceWorldState, type WorldState } from './world-state.service'
 
 const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
+  baseURL: openrouterBaseUrl,
   apiKey: process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
 })
 
@@ -426,7 +427,7 @@ async function withChatProviderRetry<T>(callProvider: () => Promise<T>) {
 
 function getOpenAIClient(userApiKey?: string, userApiProvider?: string) {
   if (userApiKey) {
-    let baseURL = 'https://openrouter.ai/api/v1'
+    let baseURL = openrouterBaseUrl
     if (userApiProvider === 'openai') {
       baseURL = 'https://api.openai.com/v1'
     } else if (userApiProvider === 'gemini') {
@@ -452,7 +453,7 @@ function getModelForProvider(provider?: string, defaultModel: string = modelName
 
 export async function testUserApiKey(apiKey: string, provider: string) {
   try {
-    let baseURL = 'https://openrouter.ai/api/v1'
+    let baseURL = openrouterBaseUrl
     let model = modelName
     if (provider === 'openai') {
       baseURL = 'https://api.openai.com/v1'

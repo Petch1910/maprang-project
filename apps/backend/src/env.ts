@@ -107,11 +107,22 @@ function invalidProductionValues() {
     invalid.push('ADMIN_API_KEY ต้องยาวอย่างน้อย 32 ตัวอักษร')
   }
 
-  if (present('OPENROUTER_API_KEY') && process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-proj-')) {
+  const isDefaultOpenRouter = !process.env.OPENROUTER_BASE_URL || process.env.OPENROUTER_BASE_URL.trim().includes('openrouter.ai')
+  if (present('OPENROUTER_API_KEY') && isDefaultOpenRouter && process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-proj-')) {
     invalid.push('OPENROUTER_API_KEY ดูเหมือนเป็น OpenAI project key ไม่ใช่ OpenRouter key')
   }
-  if (present('OPENROUTER_API_KEY') && !process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-or-')) {
+  if (present('OPENROUTER_API_KEY') && isDefaultOpenRouter && !process.env.OPENROUTER_API_KEY!.trim().startsWith('sk-or-')) {
     invalid.push('OPENROUTER_API_KEY ต้องเป็น OpenRouter key ที่ขึ้นต้นด้วย sk-or-')
+  }
+  if (present('OPENROUTER_BASE_URL')) {
+    try {
+      const u = new URL(process.env.OPENROUTER_BASE_URL!.trim())
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+        invalid.push('OPENROUTER_BASE_URL ต้องเป็น URL ที่ขึ้นต้นด้วย http:// หรือ https://')
+      }
+    } catch {
+      invalid.push('OPENROUTER_BASE_URL ต้องเป็น URL ที่ถูกต้อง')
+    }
   }
   if (present('IMAGE_GENERATION_API_KEY') && process.env.IMAGE_GENERATION_API_KEY!.trim().startsWith('sk-or-')) {
     invalid.push('IMAGE_GENERATION_API_KEY ดูเหมือนเป็น OpenRouter key ไม่ใช่ OpenAI image key')
