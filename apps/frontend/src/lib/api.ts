@@ -138,6 +138,7 @@ function authHeaders() {
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...(adminKey ? { 'x-admin-key': adminKey } : {}),
     ...bypassHeaders,
+    'ngrok-skip-browser-warning': '69420',
   }
 }
 

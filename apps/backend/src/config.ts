@@ -4,6 +4,25 @@ export const serverHost = process.env.HOST || '0.0.0.0'
 export const serverPort = Number(process.env.PORT ?? 3000)
 export const modelName = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001'
 export const openrouterBaseUrl = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1'
+
+// Wire format for the default chat provider. 'openai' talks to /chat/completions (OpenAI/OpenRouter).
+// 'anthropic' talks to /messages (Anthropic Messages API, e.g. MaxPlus AI AWS pools).
+// When unset, auto-detect from the model id: aws-lite/* or claude* implies Anthropic.
+function resolveChatApiFormat(): 'openai' | 'anthropic' {
+  const explicit = process.env.CHAT_API_FORMAT?.trim().toLowerCase()
+  if (explicit === 'anthropic' || explicit === 'openai') return explicit
+  const lowerModel = modelName.toLowerCase()
+  if (lowerModel.startsWith('aws-lite/') || lowerModel.startsWith('claude')) return 'anthropic'
+  return 'openai'
+}
+export const chatApiFormat = resolveChatApiFormat()
+export const anthropicVersion = process.env.ANTHROPIC_VERSION || '2023-06-01'
+
+// Base URL for the server-side image generation provider (OpenAI Images API-compatible).
+// Defaults to OpenAI; set to an OpenAI-compatible proxy (e.g. MaxPlus AI) to route elsewhere.
+export const imageGenerationBaseUrl = (
+  process.env.IMAGE_GENERATION_BASE_URL || 'https://api.openai.com/v1'
+).replace(/\/+$/, '')
 export const modelInputCostPer1M = Number(process.env.MODEL_INPUT_COST_PER_1M ?? 0)
 export const modelOutputCostPer1M = Number(process.env.MODEL_OUTPUT_COST_PER_1M ?? 0)
 function numberEnv(name: string, fallback: number) {

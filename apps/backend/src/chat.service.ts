@@ -8,6 +8,8 @@ import type {
 import { loadCharacter, publicCharacter } from './character.service'
 import type { CharacterWithTags } from './character.types'
 import {
+  anthropicVersion,
+  chatApiFormat,
   chatProviderRetryAttempts,
   chatProviderRetryDelayMs,
   defaultCharacterId,
@@ -26,6 +28,10 @@ import {
   promptHistoryMaxMessages,
 } from './config'
 import { contentRatingFromTags, normalizeMaxRating, ratingAllowed, type ContentRating } from './content-rating'
+import {
+  createAnthropicCompletion,
+  createAnthropicCompletionStream,
+} from './anthropic-provider'
 import { buildContextPrompt, loadRelevantLore, promptControlPolicy } from './context.service'
 import { getPrisma } from './db'
 import { estimatePromptTokens } from './prompt-inspector.service'
@@ -497,6 +503,124 @@ async function createChatCompletionStream(
   return withChatProviderRetry(() => client.chat.completions.create(params))
 }
 
+type NormalizedCompletion = { content: string; usage: CompletionUsage }
+type NormalizedStreamChunk = { delta: string; usage: CompletionUsage | null }
+
+// The default provider (no per-user key) uses the Anthropic Messages API when CHAT_API_FORMAT
+// resolves to 'anthropic'. Per-user keys always use the OpenAI-compatible path.
+function shouldUseAnthropic(userApiKey?: string) {
+  return chatApiFormat === 'anthropic' && !userApiKey
+}
+
+type NormalizedCompletionParams = {
+  model: string
+  messages: ChatMessage[]
+  max_tokens: number
+  temperature: number
+}
+
+async function generateChatCompletion(
+  params: NormalizedCompletionParams,
+  userApiKey?: string,
+  userApiProvider?: string
+): Promise<NormalizedCompletion> {
+  if (shouldUseAnthropic(userApiKey)) {
+    const result = await withChatProviderRetry(() =>
+      createAnthropicCompletion(
+        {
+          model: params.model,
+          messages: params.messages,
+          maxTokens: params.max_tokens,
+          temperature: params.temperature,
+        },
+        process.env.OPENROUTER_API_KEY ?? '',
+        openrouterBaseUrl,
+        anthropicVersion,
+      ),
+    )
+    return {
+      content: result.content,
+      usage: {
+        promptTokens: result.usage.promptTokens,
+        completionTokens: result.usage.completionTokens,
+        totalTokens: result.usage.totalTokens,
+        cost: calculateCost(result.usage.promptTokens, result.usage.completionTokens),
+      },
+    }
+  }
+
+  const completion = await createChatCompletion(
+    { model: params.model, messages: params.messages, max_tokens: params.max_tokens, temperature: params.temperature },
+    userApiKey,
+    userApiProvider,
+  )
+  return {
+    content: completion.choices[0]?.message?.content?.trim() ?? '',
+    usage: usageFromCompletion(completion),
+  }
+}
+
+async function* generateChatCompletionStream(
+  params: NormalizedCompletionParams,
+  userApiKey?: string,
+  userApiProvider?: string
+): AsyncGenerator<NormalizedStreamChunk> {
+  if (shouldUseAnthropic(userApiKey)) {
+    const stream = await withChatProviderRetry(async () =>
+      createAnthropicCompletionStream(
+        {
+          model: params.model,
+          messages: params.messages,
+          maxTokens: params.max_tokens,
+          temperature: params.temperature,
+        },
+        process.env.OPENROUTER_API_KEY ?? '',
+        openrouterBaseUrl,
+        anthropicVersion,
+      ),
+    )
+    for await (const chunk of stream) {
+      yield {
+        delta: chunk.delta,
+        usage: chunk.usage
+          ? {
+              promptTokens: chunk.usage.promptTokens,
+              completionTokens: chunk.usage.completionTokens,
+              totalTokens: chunk.usage.totalTokens,
+              cost: calculateCost(chunk.usage.promptTokens, chunk.usage.completionTokens),
+            }
+          : null,
+      }
+    }
+    return
+  }
+
+  const stream = await createChatCompletionStream(
+    {
+      model: params.model,
+      messages: params.messages,
+      max_tokens: params.max_tokens,
+      temperature: params.temperature,
+      stream: true,
+      stream_options: { include_usage: true },
+    },
+    userApiKey,
+    userApiProvider,
+  )
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content ?? ''
+    const usage = chunk.usage
+      ? {
+          promptTokens: chunk.usage.prompt_tokens ?? 0,
+          completionTokens: chunk.usage.completion_tokens ?? 0,
+          totalTokens: chunk.usage.total_tokens ?? 0,
+          cost: calculateCost(chunk.usage.prompt_tokens ?? 0, chunk.usage.completion_tokens ?? 0),
+        }
+      : null
+    yield { delta, usage }
+  }
+}
+
 function userAskedForBriefReply(message: string) {
   const normalized = message.toLowerCase()
   return [
@@ -788,7 +912,7 @@ async function extendShortRoleplayReply({
   }
 
   const activeModelName = getModelForProvider(userApiProvider, modelName)
-  const completion = await createChatCompletion({
+  const completion = await generateChatCompletion({
     model: activeModelName,
     messages: [
       ...messages,
@@ -798,11 +922,11 @@ async function extendShortRoleplayReply({
     max_tokens: Math.min(modelMaxOutputTokens, 1100),
     temperature: Math.min(modelTemperature + 0.1, 2),
   }, userApiKey, userApiProvider)
-  const continuation = completion.choices[0]?.message?.content?.trim() ?? ''
+  const continuation = completion.content.trim()
 
   return {
     reply: appendRoleplayContinuation(reply, continuation),
-    usage: usageFromCompletion(completion),
+    usage: completion.usage,
     extended: continuation.length > 0,
   }
 }
@@ -1480,7 +1604,7 @@ export async function sendChat(input: SendChatInput) {
   }
 
   const activeModelName = getModelForProvider(input.userApiProvider, modelName)
-  const completion = await createChatCompletion({
+  const completion = await generateChatCompletion({
     model: activeModelName,
     messages,
     max_tokens: modelMaxOutputTokens,
@@ -1494,6 +1618,7 @@ export async function sendChat(input: SendChatInput) {
 
   if ('providerFailure' in completion) {
     if (localChatProviderEnabled()) {
+      console.warn('แชทผู้ให้บริการหลักล้มเหลว ใช้ระบบสำรองในเครื่องแทน:', completion.providerFailure)
       return completeLocalChatTurn({
         prisma,
         chatId: input.chatId,
@@ -1521,8 +1646,8 @@ export async function sendChat(input: SendChatInput) {
     }
   }
 
-  let reply = completion.choices[0]?.message?.content?.trim() || chatReplyMessages.emptyProviderReply
-  let usage = usageFromCompletion(completion)
+  let reply = completion.content.trim() || chatReplyMessages.emptyProviderReply
+  let usage = completion.usage
   const extension = await extendShortRoleplayReply({
     character,
     messages,
@@ -1707,35 +1832,26 @@ export function streamChat(input: SendChatInput) {
         let usage = fallbackUsage()
 
         try {
-          const stream = await createChatCompletionStream({
+          const stream = generateChatCompletionStream({
             model: activeModelName,
             messages,
             max_tokens: modelMaxOutputTokens,
-            stream: true,
-            stream_options: {
-              include_usage: true,
-            },
             temperature: modelTemperature,
           }, input.userApiKey, input.userApiProvider)
 
           for await (const chunk of stream) {
-            const delta = chunk.choices[0]?.delta?.content ?? ''
-            if (delta) {
-              reply += delta
-              send({ type: 'delta', content: delta })
+            if (chunk.delta) {
+              reply += chunk.delta
+              send({ type: 'delta', content: chunk.delta })
             }
 
             if (chunk.usage) {
-              usage = {
-                promptTokens: chunk.usage.prompt_tokens ?? 0,
-                completionTokens: chunk.usage.completion_tokens ?? 0,
-                totalTokens: chunk.usage.total_tokens ?? 0,
-                cost: calculateCost(chunk.usage.prompt_tokens ?? 0, chunk.usage.completion_tokens ?? 0),
-              }
+              usage = chunk.usage
             }
           }
         } catch (error) {
           if (!localChatProviderEnabled()) throw error
+          console.warn('สตรีมแชทผู้ให้บริการหลักล้มเหลว ใช้ระบบสำรองในเครื่องแทน:', classifyChatProviderError(error))
           const localResult = await completeLocalChatTurn({
             prisma,
             chatId: input.chatId,

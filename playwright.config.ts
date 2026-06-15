@@ -80,6 +80,9 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    extraHTTPHeaders: {
+      'ngrok-skip-browser-warning': '69420',
+    },
   },
   ...(webServers.length > 0 ? { webServer: webServers } : {}),
   projects: [

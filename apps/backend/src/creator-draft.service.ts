@@ -1,11 +1,12 @@
 import { Buffer } from 'node:buffer'
 import OpenAI from 'openai'
 import type { ChatCompletion } from 'openai/resources/chat/completions'
-import { creatorDraftRetryAttempts, creatorDraftRetryDelayMs, modelName, openrouterBaseUrl } from './config'
+import { creatorDraftRetryAttempts, creatorDraftRetryDelayMs, imageGenerationBaseUrl, modelName, openrouterBaseUrl, chatApiFormat, anthropicVersion } from './config'
 import { uploadAvatarBytes } from './storage.service'
 import { getPrisma } from './db'
 import { buildCreatorKnowledgePrompt } from './knowledge.service'
 import { redactSensitiveText } from './redaction'
+import { createAnthropicCompletion } from './anthropic-provider'
 
 export async function getCreatorDraft(userId: string) {
   const prisma = getPrisma()
@@ -350,6 +351,46 @@ function draftPrompt(input: CreatorDraftInput) {
 }
 
 async function defaultCompletion(messages: Array<{ role: 'system' | 'user'; content: string }>) {
+  if (chatApiFormat === 'anthropic') {
+    const result = await createAnthropicCompletion(
+      {
+        model: modelName,
+        messages: messages.map((m) => ({
+          role: m.role === 'system' ? 'system' : 'user',
+          content: m.content,
+        })),
+        maxTokens: 1600,
+        temperature: 0.85,
+      },
+      process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
+      openrouterBaseUrl,
+      anthropicVersion,
+    )
+    return {
+      id: 'draft-' + Date.now(),
+      object: 'chat.completion',
+      created: Math.floor(Date.now() / 1000),
+      model: modelName,
+      choices: [
+        {
+          index: 0,
+          finish_reason: 'stop',
+          message: {
+            role: 'assistant',
+            content: result.content,
+            refusal: null,
+          },
+          logprobs: null,
+        },
+      ],
+      usage: {
+        prompt_tokens: result.usage.promptTokens,
+        completion_tokens: result.usage.completionTokens,
+        total_tokens: result.usage.totalTokens,
+      },
+    } as unknown as ChatCompletion
+  }
+
   return openRouter.chat.completions.create({
     model: modelName,
     messages,
@@ -407,9 +448,15 @@ async function generateConfiguredImage(prompt: string, origin?: string, userApiK
     body.response_format = 'url'
   }
 
+  // OpenAI-compatible image providers (e.g. MaxPlus AI Gen Image pool) accept response_format
+  // to return base64 directly, which we need to persist the avatar without a second fetch.
+  if (!userApiKey && process.env.IMAGE_GENERATION_RESPONSE_FORMAT) {
+    body.response_format = process.env.IMAGE_GENERATION_RESPONSE_FORMAT
+  }
+
   const endpoint = userApiKey && userApiProvider === 'openrouter'
     ? 'https://openrouter.ai/api/v1/images/generations'
-    : 'https://api.openai.com/v1/images/generations'
+    : `${imageGenerationBaseUrl.replace(/\/+$/, '')}/images/generations`
 
   const response = await fetch(endpoint, {
     method: 'POST',

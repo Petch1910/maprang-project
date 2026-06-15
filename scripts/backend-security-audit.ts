@@ -204,6 +204,7 @@ const routePromiseObjectAliasMessage = 'route ห้าม alias Promise object;
 const rawResponseJsonMessage = 'ห้าม parse response.json() ตรงใน runtime backend; ให้แยกเป็น read...Payload helper ที่ห่อ JSON พังเป็นข้อความไทยก่อน.'
 const rawResponseTextMessage = 'ห้ามอ่าน response.text() จาก provider/Supabase แล้วใช้ตรงใน runtime backend; ต้องผ่าน redactSensitiveText ก่อนนำไป log หรือคืนเป็น diagnostic.'
 const allowedRawResponseJsonReaders = [
+  'readAnthropicMessagePayload',
   'readImageProviderJson',
   'readSupabaseJwksPayload',
   'readSupabaseSignedUrlPayload',

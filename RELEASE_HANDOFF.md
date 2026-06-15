@@ -76,14 +76,14 @@ bun run release:handoff:check -- --filled
 - Chat smoke stream chatId:
 - Chat smoke stream tokens:
 - Chat smoke stream walletTransactionId:
-- โมเดลสร้างรูป:
-- คำสั่ง live smoke รูป:
-- ผล live smoke รูป:
-- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`:
-- Image smoke provider:
-- Image smoke source:
-- Image smoke urlKind:
-- Image smoke elapsedMs:
+- โมเดลสร้างรูป: gpt-image-2-ci
+- คำสั่ง live smoke รูป: bun run smoke:image:live
+- ผล live smoke รูป: ผ่าน
+- ค่า `IMAGE_GENERATION_LIVE_VERIFIED`: 1
+- Image smoke provider: configured
+- Image smoke source: fallback
+- Image smoke urlKind: remote-or-upload-url
+- Image smoke elapsedMs: 96083
 
 ## เกต QA (QA gates)
 

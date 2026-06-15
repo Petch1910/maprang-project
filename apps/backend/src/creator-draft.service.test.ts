@@ -409,6 +409,7 @@ describe('creator AI draft', () => {
     const previousImageModel = process.env.IMAGE_GENERATION_MODEL
     const previousImageQuality = process.env.IMAGE_GENERATION_QUALITY
     const previousImageCompression = process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION
+    const previousImageResponseFormat = process.env.IMAGE_GENERATION_RESPONSE_FORMAT
     const previousFetch = globalThis.fetch
     let requestBody: Record<string, unknown> | undefined
     let uploadedPath: string | undefined
@@ -418,6 +419,7 @@ describe('creator AI draft', () => {
     process.env.IMAGE_GENERATION_MODEL = 'gpt-image-1.5'
     process.env.IMAGE_GENERATION_QUALITY = 'medium'
     process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION = '85'
+    delete process.env.IMAGE_GENERATION_RESPONSE_FORMAT
     globalThis.fetch = (async (input, init) => {
       const url = String(input)
       if (url.includes('/storage/v1/object/')) {
@@ -473,6 +475,8 @@ describe('creator AI draft', () => {
       else process.env.IMAGE_GENERATION_QUALITY = previousImageQuality
       if (previousImageCompression === undefined) delete process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION
       else process.env.IMAGE_GENERATION_OUTPUT_COMPRESSION = previousImageCompression
+      if (previousImageResponseFormat === undefined) delete process.env.IMAGE_GENERATION_RESPONSE_FORMAT
+      else process.env.IMAGE_GENERATION_RESPONSE_FORMAT = previousImageResponseFormat
       globalThis.fetch = previousFetch
       if (uploadedPath) await rm(uploadedPath, { force: true })
     }

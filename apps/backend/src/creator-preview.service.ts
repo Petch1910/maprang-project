@@ -1,10 +1,11 @@
 import { MessageRole } from '@prisma/client'
 import OpenAI from 'openai'
 import type { ChatCompletion } from 'openai/resources/chat/completions'
-import { modelName, modelMaxOutputTokens, modelTemperature, chatProviderRetryAttempts, chatProviderRetryDelayMs, openrouterBaseUrl } from './config'
+import { modelName, modelMaxOutputTokens, modelTemperature, chatProviderRetryAttempts, chatProviderRetryDelayMs, openrouterBaseUrl, chatApiFormat, anthropicVersion } from './config'
 import { buildContextPrompt, loadRelevantLore, promptControlPolicy, type LoreForContext } from './context.service'
 import { estimatePromptTokens } from './prompt-inspector.service'
 import { redactSensitiveText } from './redaction'
+import { createAnthropicCompletion } from './anthropic-provider'
 
 const openRouter = new OpenAI({
   baseURL: openrouterBaseUrl,
@@ -195,6 +196,46 @@ async function callProviderWithRetry(
 
   for (let attempt = 0; attempt < chatProviderRetryAttempts; attempt++) {
     try {
+      if (chatApiFormat === 'anthropic') {
+        const result = await createAnthropicCompletion(
+          {
+            model: modelName,
+            messages: messages.map((m) => ({
+              role: m.role === 'system' ? 'system' : 'user',
+              content: m.content,
+            })),
+            maxTokens: modelMaxOutputTokens,
+            temperature: modelTemperature,
+          },
+          process.env.OPENROUTER_API_KEY || 'missing-openrouter-key',
+          openrouterBaseUrl,
+          anthropicVersion,
+        )
+        return {
+          id: 'preview-' + Date.now(),
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: modelName,
+          choices: [
+            {
+              index: 0,
+              finish_reason: 'stop',
+              message: {
+                role: 'assistant',
+                content: result.content,
+                refusal: null,
+              },
+              logprobs: null,
+            },
+          ],
+          usage: {
+            prompt_tokens: result.usage.promptTokens,
+            completion_tokens: result.usage.completionTokens,
+            total_tokens: result.usage.totalTokens,
+          },
+        } as unknown as ChatCompletion
+      }
+
       const completion = await openRouter.chat.completions.create({
         model: modelName,
         messages,
