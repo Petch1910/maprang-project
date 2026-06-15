@@ -1,6 +1,8 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-06-15
+Last updated: 2026-06-16
+
+- 2026-06-16: Resolved Creator Studio live provider blockers and completed release handoff verification. Integrated the Anthropic Messages API adapter (`anthropic-provider.ts`) for Creator AI Draft and Creator Preview Chat services under the `CHAT_API_FORMAT="anthropic"` configuration (MaxPlus AI format) to fix HTTP 409 conflicts. This also resolved downstream Cloudflare 524 timeouts. Ran and successfully verified both live image smoke test (`bun run smoke:image:live`) and live chat smoke test (`bun run smoke:chat`) against the live MaxPlus AI provider. Updated `RELEASE_HANDOFF.md` with the corresponding `handoffEvidence` and set `CHAT_PROVIDER_LIVE_VERIFIED=1` and `IMAGE_GENERATION_LIVE_VERIFIED=1` in `apps/backend/.env`. All repository-owned quality gates (`bun run qa:repo`) passed 100% green.
 
 - 2026-06-15: Maprang AI Fusion & key-bypass compilation scope QA pass: Fixed a TypeScript compiler lexical scoping error in `chat.service.ts` inside `streamChat` function by hoisting `activeModelName` definition above the try-catch block. Verified everything compiles and passes all checks via `bun run qa:repo` (all 271 backend unit tests, static audits, route audits, ESLint checks, TypeScript compiler, and Vite production bundle tests are passing green). Integrated route `/ai-creator`, implemented Bounded Window history pagination (12-20 items), cleaned UX terminology, and added Developer Settings with `.trim()` input validation.
 
