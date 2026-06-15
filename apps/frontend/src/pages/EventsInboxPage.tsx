@@ -12,9 +12,9 @@ import {
 
 const eventTones = [
   {
-    border: 'border-l-orange-400',
-    icon: 'bg-orange-400/12 text-orange-200',
-    chip: 'bg-orange-400/14 text-orange-100',
+    border: 'border-l-[#a855f7]',
+    icon: 'bg-[#a855f7]/12 text-[#d8b4fe]',
+    chip: 'bg-[#a855f7]/14 text-[#d8b4fe]',
   },
   {
     border: 'border-l-sky-400',
@@ -92,7 +92,7 @@ export function EventsInboxPage() {
         </div>
         <button
           aria-disabled={isLoading}
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#2e2e44] bg-[#1e1e34] px-4 text-sm font-black text-white/78 transition hover:border-[#a855f7]/50 hover:bg-[#a855f7]/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
           disabled={isLoading}
           onClick={() => dispatch(loadChatSummaries())}
           title={isLoading ? 'กำลังโหลดกล่องอีเวนต์ รอให้เสร็จก่อนรีเฟรช' : 'รีเฟรชกล่องอีเวนต์'}
@@ -103,8 +103,8 @@ export function EventsInboxPage() {
         </button>
       </div>
 
-      <section className="grid gap-3 rounded-lg border border-white/10 bg-[#18181d]/92 p-3 shadow-[0_22px_70px_rgba(0,0,0,0.22)] md:grid-cols-[minmax(0,1fr)_auto]">
-        <label className="flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-black/22 px-3 text-white/42 transition focus-within:border-orange-400/45 focus-within:bg-black/32">
+      <section className="grid gap-3 rounded-lg border border-[#2e2e44] bg-[#1e1e34]/92 p-3 shadow-[0_22px_70px_rgba(0,0,0,0.22)] md:grid-cols-[minmax(0,1fr)_auto]">
+        <label className="flex min-h-11 items-center gap-2 rounded-lg border border-[#2e2e44] bg-[#080a1a]/40 px-3 text-white/42 transition focus-within:border-[#a855f7]/45 focus-within:bg-[#080a1a]/60">
           <Search size={17} />
           <input
             className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/35"
@@ -113,13 +113,13 @@ export function EventsInboxPage() {
             value={search}
           />
         </label>
-        <div className="flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-xs font-black text-white/58">
+        <div className="flex min-h-11 items-center justify-center rounded-lg border border-[#2e2e44] bg-[#080a1a]/40 px-4 text-xs font-black text-white/58">
           แสดง {visibleEvents.length.toLocaleString()} จาก {events.length.toLocaleString()} ฉาก
         </div>
       </section>
 
       {error && (
-        <div className="rounded-lg border border-orange-300/20 bg-orange-400/10 p-4 text-sm font-bold text-orange-100">
+        <div className="rounded-lg border border-purple-500/20 bg-purple-500/10 p-4 text-sm font-bold text-purple-200">
           โหลดอีเวนต์ไม่ได้
         </div>
       )}
@@ -131,18 +131,18 @@ export function EventsInboxPage() {
           ))}
         </div>
       ) : visibleEvents.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-white/14 bg-[#18181d]/82 p-6 text-white/58 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="rounded-lg border border-dashed border-[#2e2e44] bg-[#1e1e34]/82 p-6 text-white/58 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
           <p className="m-0 text-sm font-bold leading-6">
             {events.length === 0
               ? 'ยังไม่มีฉากที่รออยู่ คุยต่อในห้องแชทจนกว่าเงื่อนไขความสัมพันธ์จะพร้อม แล้วระบบจะแจ้งเตือนก่อนเข้าสู่ฉากสำคัญ'
               : 'ไม่พบฉากที่ตรงกับคำค้นหาตอนนี้'}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link className="inline-flex min-h-10 items-center rounded-lg bg-white px-4 text-sm font-black text-slate-950" to="/chat">
+            <Link className="inline-flex min-h-10 items-center rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90" to="/chat">
               ไปห้องแชท
             </Link>
             <Link
-              className="inline-flex min-h-10 items-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+              className="inline-flex min-h-10 items-center rounded-lg border border-[#2e2e44] bg-[#080a1a]/40 px-4 text-sm font-black text-white/76 transition hover:border-[#a855f7]/50 hover:bg-[#a855f7]/10 hover:text-white"
               to="/"
             >
               เลือกตัวละครใหม่
@@ -155,11 +155,11 @@ export function EventsInboxPage() {
             const tone = eventTones[index % eventTones.length]
             return (
               <section
-                className={`overflow-hidden rounded-lg border border-l-4 border-white/10 ${tone.border} bg-[#18181d]/90 text-white shadow-[0_18px_58px_rgba(0,0,0,0.2)]`}
+                className={`overflow-hidden rounded-lg border border-l-4 border-[#2e2e44] ${tone.border} bg-[#1e1e34] text-white shadow-[0_18px_58px_rgba(0,0,0,0.2)]`}
                 data-testid="events-scene-group"
                 key={group.key}
               >
-                <div className="grid gap-3 border-b border-white/8 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                <div className="grid gap-3 border-b border-[#2e2e44]/60 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div className="flex min-w-0 gap-3">
                     <span className={`mt-0.5 grid size-10 flex-none place-items-center rounded-lg ${tone.icon}`}>
                       <Sparkles size={18} />
@@ -175,15 +175,15 @@ export function EventsInboxPage() {
                       <p className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-white/58">{group.prompt}</p>
                     </div>
                   </div>
-                  <div className="rounded-lg border border-white/10 bg-white/6 px-3 py-2 text-center text-xs font-black text-white/62">
+                  <div className="rounded-lg border border-[#2e2e44] bg-[#080a1a]/30 px-3 py-2 text-center text-xs font-black text-white/62">
                     {group.events.length.toLocaleString()} แชทที่พร้อมเข้า
                   </div>
                 </div>
 
-                <div className="divide-y divide-white/8">
+                <div className="divide-y divide-[#2e2e44]/60">
                   {group.events.map((event) => (
                     <Link
-                      className="group grid gap-3 px-4 py-3 text-white transition hover:bg-white/6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                      className="group grid gap-3 px-4 py-3 text-white transition duration-200 hover:bg-[#a855f7]/6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
                       data-testid="events-scene-row"
                       key={event.id}
                       to={`/chat/${event.chatId}`}
@@ -201,7 +201,7 @@ export function EventsInboxPage() {
                           </span>
                         </p>
                       </div>
-                      <span className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-white px-3 text-xs font-black text-slate-950 transition group-hover:translate-x-0.5">
+                      <span className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-white px-3 text-xs font-black text-slate-950 transition duration-200 group-hover:bg-[#a855f7] group-hover:text-white group-hover:translate-x-0.5">
                         เปิดแชท <ArrowRight size={14} />
                       </span>
                     </Link>
