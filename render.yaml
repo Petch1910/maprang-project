@@ -1,6 +1,6 @@
 databases:
   - name: maprang-postgres
-    plan: starter
+    plan: free
     databaseName: maprang
     user: maprang
 
@@ -8,7 +8,7 @@ services:
   - type: web
     name: maprang-backend
     env: docker
-    plan: starter
+    plan: free
     dockerContext: .
     dockerfilePath: ./apps/backend/Dockerfile
     healthCheckPath: /ready
