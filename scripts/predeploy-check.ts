@@ -545,7 +545,7 @@ const checks: Check[] = [
           'healthCheckPath: /ready',
           'fromDatabase:',
           'property: connectionString',
-          'type: static',
+          'runtime: static',
           'name: maprang-frontend',
           'rootDir: apps/frontend',
           'buildCommand: bun install --frozen-lockfile && bun run build',
