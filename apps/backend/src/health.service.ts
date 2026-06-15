@@ -1,7 +1,7 @@
 import { getPrisma } from './db'
 import {
   adminAuthConfigured,
-  allowedOrigins,
+  configuredCorsOrigins,
   chatProviderRetryAttempts,
   chatProviderRetryDelayMs,
   creatorDraftRetryAttempts,
@@ -183,7 +183,7 @@ export async function loadHealthStatus() {
       },
     },
     security: {
-      corsOrigins: allowedOrigins,
+      corsOrigins: configuredCorsOrigins,
       authMode: supabaseAuthConfigured ? 'supabase-jwt' : 'local-dev-header',
       adminGuard: adminAuthConfigured ? 'api-key' : 'disabled',
       avatarStorage: storageProvider,

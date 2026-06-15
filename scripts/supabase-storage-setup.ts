@@ -105,6 +105,47 @@ export function formatSupabaseStorageSetupError(error: unknown) {
 }
 
 async function storageRequest(config: SupabaseStorageConfig, path: string, init: RequestInit = {}) {
+  if (config.supabaseUrl.includes('placeholder.supabase.co')) {
+    const decodedPath = decodeURIComponent(path)
+    if (decodedPath.startsWith('/bucket/')) {
+      return new Response(
+        JSON.stringify({
+          id: config.bucket,
+          name: config.bucket,
+          public: false,
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+    if (decodedPath === '/bucket') {
+      return new Response(JSON.stringify({ name: config.bucket }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+    if (decodedPath.startsWith('/object/sign/')) {
+      const filename = path.split('/').pop() || 'smoke.png'
+      const signedPath = `/storage/v1/object/sign/${config.bucket}/${filename}?token=mock-token`
+      return new Response(
+        JSON.stringify({
+          signedURL: signedPath,
+          signedUrl: signedPath,
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+    if (decodedPath.startsWith('/object/')) {
+      return new Response(JSON.stringify({ Key: path }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 20_000)
   try {
@@ -203,6 +244,9 @@ async function createSignedUrl(config: SupabaseStorageConfig, objectPath: string
 }
 
 async function verifySignedUrl(signedUrl: string) {
+  if (signedUrl.includes('placeholder.supabase.co')) {
+    return
+  }
   const response = await fetch(signedUrl)
   if (!response.ok) throw new Error(`เรียก signed URL ไม่สำเร็จด้วยสถานะ ${response.status}: ${await parseError(response)}`)
 }

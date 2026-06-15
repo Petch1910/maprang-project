@@ -61,10 +61,22 @@ export const maxInputChars = Number(process.env.MAX_INPUT_CHARS ?? 4000)
 export const minTokenBalanceForChat = Number(process.env.MIN_TOKEN_BALANCE_FOR_CHAT ?? 1)
 export const imageGenerationConfigured = Boolean(process.env.IMAGE_GENERATION_API_KEY || process.env.OPENAI_API_KEY)
 export const imageGenerationModel = process.env.IMAGE_GENERATION_MODEL || 'gpt-image-1.5'
-export const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173')
+export const configuredCorsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean)
+export const allowedOrigins =
+  process.env.NODE_ENV !== 'production'
+    ? Array.from(
+        new Set([
+          ...configuredCorsOrigins,
+          'http://localhost:5173',
+          'http://127.0.0.1:5173',
+          'http://localhost:5174',
+          'http://127.0.0.1:5174',
+        ]),
+      )
+    : configuredCorsOrigins
 export const supabaseAuthConfigured = Boolean(process.env.SUPABASE_URL || process.env.SUPABASE_JWT_ISSUER)
 export const adminAuthConfigured = Boolean(process.env.ADMIN_API_KEY)
 export const supabaseStorageConfigured = Boolean(
