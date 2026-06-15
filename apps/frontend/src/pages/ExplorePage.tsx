@@ -506,7 +506,7 @@ export function ExplorePage() {
             <div className="hidden items-center gap-2 rounded-full bg-[#ffb000]/10 border border-[#ffb000]/20 px-3 py-2 text-sm font-black text-[#ffb000] xl:flex">
               <Coins size={16} />
               <span>{tokenBalance.toLocaleString()} คอยน์</span>
-              <Link className="ml-2 rounded-full bg-white px-4 py-1 text-xs text-slate-950" to="/wallet">เติม</Link>
+              <Link className="ml-2 rounded-full bg-white px-4 py-1 text-xs text-slate-950" to="/wallet">จัดการ</Link>
             </div>
             <button type="button"
               className="hidden size-12 place-items-center rounded-md bg-[#a855f7] text-white shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:bg-[#a855f7]/95 transition duration-200 lg:grid"

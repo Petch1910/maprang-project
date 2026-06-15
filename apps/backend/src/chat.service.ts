@@ -118,7 +118,7 @@ export const chatReplyMessages = {
   characterUnavailable: 'ตัวละครนี้เป็นส่วนตัวหรือยังไม่พร้อมให้แชท',
   ratingTooHigh: (rating: ContentRating) =>
     `ตัวละครนี้อยู่ในเรต ${contentRatingLabels[rating]} กรุณาเปิดโหมดเนื้อหาที่สูงกว่าก่อนเริ่มแชท`,
-  insufficientTokens: 'โทเคนของบัญชีนี้ไม่พอ กรุณาเติมโควตาก่อนคุยต่อ',
+  insufficientTokens: 'โทเคนของบัญชีนี้ไม่พอ กรุณาติดต่อผู้ดูแลระบบหรือรับสิทธิ์เพิ่มโทเคนเพื่อใช้งานต่อ',
   emptyProviderReply: 'มะปรางยังสร้างคำตอบไม่ได้ในตอนนี้ ลองส่งข้อความอีกครั้งนะ',
 }
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useState, type RefObject } from 'react'
 import {
   Archive,
   BookOpen,
@@ -1063,14 +1063,14 @@ export function ChatPanel({
             >
               <span>
                 {isOutOfTokens
-                  ? 'โทเคนหมดแล้ว เติมก่อนส่งข้อความเพื่อให้ AI ตอบได้'
-                  : `โทเคนเหลือน้อย: ${tokenBalance.toLocaleString()} ควรเติมก่อนเล่นฉากยาว`}
+                  ? 'โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อใช้งานแชท AI'
+                  : `โทเคนเหลือน้อย: ${tokenBalance.toLocaleString()} ควรเพิ่มโทเคนหากเล่นฉากยาว`}
               </span>
               <button type="button"
                 className="min-h-8 rounded-lg bg-white px-3 text-[11px] font-black text-slate-950"
                 onClick={onOpenWallet}
               >
-                เติมโทเคน
+                กระเป๋าโทเคน
               </button>
             </div>
           )}
@@ -1081,7 +1081,7 @@ export function ChatPanel({
               message={message}
               onMessageChange={onMessageChange}
               onSubmit={() => onSendMessage()}
-              sendDisabledReason="โทเคนหมดแล้ว เติมก่อนส่งข้อความ"
+              sendDisabledReason="โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อส่งข้อความ"
             />
           </div>
           <p className="m-0 pb-2 text-center text-[11px] font-bold text-white/30">อย่าลืม: ทุกสิ่งที่ตัวละครพูดเป็นการแต่งเรื่อง</p>
