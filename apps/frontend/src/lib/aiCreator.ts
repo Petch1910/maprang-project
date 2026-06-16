@@ -26,6 +26,7 @@ export type AiCreatorGeneratedItem = {
   motionTemplate?: string
   timestamp: number
   isFavorite?: boolean
+  visibility?: 'private' | 'public' | 'unlisted' | string
   response: CreatorAiDraftResponse
 }
 
@@ -111,6 +112,7 @@ export type AiCreatorGenerationJobSnapshot = {
     kind: 'image' | 'video'
     url: string | null
     isFavorite?: boolean
+    visibility?: string
     createdAt?: string
   }>
 }
@@ -461,6 +463,7 @@ export function createAiCreatorItemsFromGenerationJobs(
           style: job.templateId,
           timestamp: Number.isFinite(timestamp) ? timestamp : getAiCreatorTimestamp(),
           isFavorite: output.isFavorite,
+          visibility: output.visibility,
           response: buildGenerationJobDraftResponse(job, output),
         }
       }),

@@ -7,6 +7,7 @@ import { AiCreatorHistoryGallery } from '../components/ai-creator/AiCreatorHisto
 import { AiCreatorHistoryDetailDialog } from '../components/ai-creator/AiCreatorHistoryDetailDialog'
 import { AiCreatorPublicGalleryPanel } from '../components/ai-creator/AiCreatorPublicGalleryPanel'
 import { AiCreatorResultPreview } from '../components/ai-creator/AiCreatorResultPreview'
+import { ReportDialog, type ReportDialogSubmit } from '../components/ReportDialog'
 import {
   generateCreatorAiDraft,
   updateCreatorDraft,
@@ -19,6 +20,10 @@ import {
   fetchGenerationOutputDownload,
   retryGenerationJob,
   unfavoriteGenerationOutput,
+  publishGenerationOutput,
+  unpublishGenerationOutput,
+  fetchPublicGallery,
+  reportGenerationOutput,
   type CreatorAiDraftResponse,
   type Character,
 } from '../lib/api'
@@ -45,6 +50,7 @@ import {
   saveAiCreatorItemToCreatorDraft,
   saveAiCreatorItemToCreatorCoverDraft,
   toggleAiCreatorHistoryFavorite,
+  getAiCreatorTimestamp,
   validateAiCreatorUploadSlot,
   writeAiCreatorHistory,
   type AiCreatorDownloadLinkSnapshot,
@@ -99,12 +105,17 @@ export function AICreatorPage() {
   const [downloadLinks, setDownloadLinks] = useState<Record<string, AiCreatorDownloadLinkSnapshot>>({})
   const [retryingItemId, setRetryingItemId] = useState<string | null>(null)
 
+
   // History stored in LocalStorage
   const [history, setHistory] = useState<AiCreatorGeneratedItem[]>(() => {
     if (typeof window === 'undefined') return []
     return readAiCreatorHistory(window.localStorage)
   })
   const [backendHistory, setBackendHistory] = useState<AiCreatorGeneratedItem[]>([])
+  const [publicHistory, setPublicHistory] = useState<AiCreatorGeneratedItem[]>([])
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [reportTarget, setReportTarget] = useState<AiCreatorGeneratedItem | null>(null)
+  const [isReporting, setIsReporting] = useState(false)
 
   // Pagination & Filter States
   const [currentPage, setCurrentPage] = useState(1)
@@ -142,6 +153,42 @@ export function AICreatorPage() {
     return () => {
       active = false
     }
+  }, [])
+
+  const loadPublicGallery = () => {
+    fetchPublicGallery(24)
+      .then((res) => {
+        const mapped = res.outputs.map((out) => ({
+          id: `public-${out.id}`,
+          backendJobId: out.jobId,
+          backendOutputId: out.id,
+          librarySource: 'backend' as const,
+          type: out.kind,
+          url: out.url || '',
+          prompt: out.prompt || '',
+          brief: '',
+          style: out.kind === 'image' ? (out.templateId || '') : '',
+          motionTemplate: out.kind === 'video' ? (out.templateId || '') : undefined,
+          timestamp: Date.parse(out.createdAt) || getAiCreatorTimestamp(),
+          isFavorite: out.isFavorite,
+          visibility: out.visibility,
+          response: {
+            draft: {
+              name: 'Public Generation',
+              systemPrompt: out.prompt || '',
+              avatarUrl: '', coverUrl: '', tagline: '', description: '', biography: '', scenario: '', greeting: '', exampleDialog: '', compactPrompt: '', characterAnchor: '', constraints: '', promptVersion: 1
+            }
+          }
+        }))
+        setPublicHistory(mapped as unknown as AiCreatorGeneratedItem[])
+      })
+      .catch((err) => {
+        logUnexpectedError('โหลด Public Gallery ไม่สำเร็จ', err)
+      })
+  }
+
+  useEffect(() => {
+    loadPublicGallery()
   }, [])
 
   const saveHistory = (newHistory: AiCreatorGeneratedItem[]) => {
@@ -281,10 +328,28 @@ export function AICreatorPage() {
       setVideoPrompt(item.prompt)
       setVideoDuration(item.duration || 5)
       setVideoTemplate(item.motionTemplate || AI_CREATOR_VIDEO_DEFAULT_TEMPLATE)
+      
+      if (item.librarySource === 'backend' && item.url) {
+        setReferenceVideo(item.url)
+        setReferenceVideoMeta({
+          name: 'แกลเลอรีสาธารณะ (Video)',
+          typeLabel: 'Video Reference',
+          sizeLabel: 'Remote',
+        })
+      }
     } else {
       setActiveTab('image')
       setImagePrompt(item.prompt)
       setImageStyle(item.style)
+      
+      if (item.librarySource === 'backend' && item.url) {
+        setReferenceImage(item.url)
+        setReferenceImageMeta({
+          name: 'แกลเลอรีสาธารณะ (Image)',
+          typeLabel: 'Image Reference',
+          sizeLabel: 'Remote',
+        })
+      }
     }
   }
 
@@ -328,6 +393,24 @@ export function AICreatorPage() {
     setCurrentPage((page) => Math.min(page, nextTotalPages))
   }
 
+  const handleReportSubmit = async (input: ReportDialogSubmit) => {
+    if (!reportTarget) return
+    setIsReporting(true)
+    try {
+      await reportGenerationOutput(reportTarget.id, input.reason, input.details)
+      setStatusMessage('ส่งรายงานสำเร็จ ผู้ดูแลระบบจะตรวจสอบต่อไป')
+      setReportTarget(null)
+      // Hide from UI optimistically or let user wait for admin review
+      setPublicHistory((prev) => prev.filter((item) => item.id !== reportTarget.id))
+      setDetailItem(null)
+    } catch (err) {
+      logUnexpectedError('ส่งรายงานไม่สำเร็จ', err)
+      setStatusMessage('เกิดข้อผิดพลาดในการส่งรายงาน')
+    } finally {
+      setIsReporting(false)
+    }
+  }
+
   const toggleHistoryFavorite = (itemId: string) => {
     const backendItem = backendHistory.find((item) => item.id === itemId)
     if (backendItem?.backendOutputId) {
@@ -359,6 +442,34 @@ export function AICreatorPage() {
     if (lastResult?.id === itemId) setLastResult(nextItem)
     if (detailItem?.id === itemId) setDetailItem(nextItem)
     setStatusMessage(nextItem?.isFavorite ? 'เพิ่มชิ้นงานเข้ารายการโปรดแล้ว' : 'นำชิ้นงานออกจากรายการโปรดแล้ว')
+  }
+
+  const toggleHistoryPublish = async (item: AiCreatorGeneratedItem) => {
+    if (item.librarySource !== 'backend' || !item.backendOutputId) return
+    setIsPublishing(true)
+    const isPublic = item.visibility === 'public'
+    
+    try {
+      const request = isPublic
+        ? unpublishGenerationOutput(item.backendOutputId)
+        : publishGenerationOutput(item.backendOutputId)
+        
+      const res = await request
+      
+      const updateVisibility = (items: AiCreatorGeneratedItem[]) =>
+        items.map((it) => (it.backendOutputId === item.backendOutputId ? { ...it, visibility: res.output.visibility } : it))
+        
+      setBackendHistory(updateVisibility)
+      if (lastResult?.id === item.id) setLastResult({ ...item, visibility: res.output.visibility })
+      if (detailItem?.id === item.id) setDetailItem({ ...item, visibility: res.output.visibility })
+      setStatusMessage(res.output.visibility === 'public' ? 'เผยแพร่ผลงานสู่สาธารณะแล้ว' : 'ยกเลิกการเผยแพร่ผลงานแล้ว')
+      loadPublicGallery() // refresh
+    } catch (err) {
+      logUnexpectedError('ปรับสถานะเผยแพร่ไม่สำเร็จ', err)
+      setStatusMessage(err instanceof ApiError ? err.message : 'ปรับสถานะเผยแพร่ไม่สำเร็จ กรุณาลองใหม่')
+    } finally {
+      setIsPublishing(false)
+    }
   }
 
   const clearHistory = () => {
@@ -659,9 +770,12 @@ export function AICreatorPage() {
 
         <AiCreatorPublicGalleryPanel
           privateItemCount={combinedHistory.length}
+          publicItems={publicHistory}
+          onOpenItem={handleOpenHistoryDetail}
+          onReuseItem={handleReuseFromHistory}
           onCreateFocus={() => {
             setActiveTab('image')
-            setStatusMessage('แกลเลอรีสาธารณะยังปิดไว้ ใช้ My Library ส่วนตัวและสร้างชิ้นงานใหม่ได้จากแผงด้านบน')
+            setStatusMessage('สร้างชิ้นงานใหม่ได้จากแผงด้านบน')
           }}
         />
 
@@ -678,9 +792,28 @@ export function AICreatorPage() {
           onCopySystemPrompt={handleCopyHistorySystemPrompt}
           onDownload={(item) => void handleDownloadHistoryItem(item)}
           onRetry={(item) => void handleRetryHistoryItem(item)}
+          onTogglePublish={toggleHistoryPublish}
+          onReport={(item) => setReportTarget(item)}
           downloadLink={detailItem ? downloadLinks[detailItem.id] ?? null : null}
           downloadingItemId={downloadingItemId}
           retryingItemId={retryingItemId}
+          isPublishing={isPublishing}
+        />
+
+        <ReportDialog
+          isOpen={!!reportTarget}
+          isSubmitting={isReporting}
+          target={
+            reportTarget
+              ? {
+                  targetType: 'GENERATION_OUTPUT',
+                  title: reportTarget.response.draft.name,
+                  preview: `Prompt: ${reportTarget.prompt}\nBrief: ${reportTarget.brief}`,
+                }
+              : null
+          }
+          onClose={() => setReportTarget(null)}
+          onSubmit={handleReportSubmit}
         />
       </div>
     </div>

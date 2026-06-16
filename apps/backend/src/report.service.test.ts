@@ -17,6 +17,13 @@ describe('report validation', () => {
         reason: 'unsafe message',
       }),
     ).toBe('message_id_required')
+
+    expect(
+      validateReportInput({
+        targetType: ReportTargetType.GENERATION_OUTPUT,
+        reason: 'unsafe output',
+      }),
+    ).toBe('generation_output_id_required')
   })
 
   test('accepts valid report input', () => {
@@ -45,11 +52,20 @@ describe('report validation', () => {
         reason: 'unsafe message',
       }),
     ).toBe('invalid_message_id')
+
+    expect(
+      validateReportInput({
+        targetType: ReportTargetType.GENERATION_OUTPUT,
+        generationOutputId: "' OR 1=1 --",
+        reason: 'unsafe output',
+      }),
+    ).toBe('invalid_generation_output_id')
   })
 
   test('validates admin report actions', () => {
     expect(validateReportAdminAction('HIDE_CHARACTER')).toBeNull()
     expect(validateReportAdminAction('ARCHIVE_MESSAGE')).toBeNull()
+    expect(validateReportAdminAction('HIDE_GENERATION_OUTPUT')).toBeNull()
     expect(validateReportAdminAction('BANANA')).toBe('invalid_report_action')
   })
 })

@@ -34,6 +34,7 @@ enum MessageRole {
 enum ReportTargetType {
   CHARACTER
   MESSAGE
+  GENERATION_OUTPUT
 }
 
 enum ReportStatus {
@@ -47,6 +48,7 @@ enum AdminAuditAction {
   REPORT_STATUS_UPDATE
   HIDE_CHARACTER
   ARCHIVE_MESSAGE
+  HIDE_GENERATION_OUTPUT
   TOKEN_ADJUSTMENT
 }
 
@@ -318,13 +320,15 @@ model Report {
   status     ReportStatus     @default(PENDING)
   metadata   Json?
 
-  reporterId  String  @db.Uuid
-  characterId String? @db.Uuid
-  messageId   String?
+  reporterId         String  @db.Uuid
+  characterId        String? @db.Uuid
+  messageId          String?
+  generationOutputId String? @db.Uuid
 
-  reporter  User       @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  character Character? @relation(fields: [characterId], references: [id], onDelete: SetNull)
-  message   Message?   @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  reporter         User              @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  character        Character?        @relation(fields: [characterId], references: [id], onDelete: SetNull)
+  message          Message?          @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  generationOutput GenerationOutput? @relation(fields: [generationOutputId], references: [id], onDelete: SetNull)
 
   reviewedAt DateTime?
   createdAt  DateTime  @default(now())
@@ -335,6 +339,7 @@ model Report {
   @@index([reporterId, createdAt(sort: Desc)])
   @@index([characterId])
   @@index([messageId])
+  @@index([generationOutputId])
 }
 
 model AdminAuditLog {
@@ -372,7 +377,7 @@ model GenerationJob {
   status     GenerationJobStatus @default(BLOCKED)
   source     String              @default("local-safe-preflight")
 
-  prompt      String  @db.Text
+  prompt      String   @db.Text
   imageInputs String[]
   videoInputs String[]
 
@@ -394,18 +399,19 @@ model GenerationJob {
 }
 
 model GenerationOutput {
-  id        String                     @id @default(uuid()) @db.Uuid
-  jobId     String                     @db.Uuid
-  userId    String                     @db.Uuid
-  kind      GenerationOutputKind
-  url       String?
+  id         String                     @id @default(uuid()) @db.Uuid
+  jobId      String                     @db.Uuid
+  userId     String                     @db.Uuid
+  kind       GenerationOutputKind
+  url        String?
   storageKey String?
   visibility GenerationOutputVisibility @default(PRIVATE)
   isFavorite Boolean                    @default(false)
   metadata   Json?
 
-  job  GenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job     GenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports Report[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

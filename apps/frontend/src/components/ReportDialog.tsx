@@ -30,7 +30,10 @@ const reasons = [
 ]
 
 function targetLabel(targetType: ReportTargetType) {
-  return targetType === 'CHARACTER' ? 'ตัวละคร' : 'ข้อความ'
+  if (targetType === 'CHARACTER') return 'ตัวละคร'
+  if (targetType === 'MESSAGE') return 'ข้อความ'
+  if (targetType === 'GENERATION_OUTPUT') return 'ผลงานสร้าง'
+  return 'เนื้อหา'
 }
 
 export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, onSubmit }: ReportDialogProps) {

@@ -42,7 +42,7 @@ git diff --check
 
 For code, API, or UI changes, also run the narrow test for the touched area. Use `bun run qa:repo` for deterministic repo-owned checks that do not need a running backend/Postgres, and use `bun run qa:local` or `bun run e2e:smoke` when behavior or route coverage changes and runtime services are available.
 
-## การ Commit และ Push (Commit And Push)
+## การ commit และ push (Commit And Push)
 
 When a coherent task is complete, commit it with a focused message, push the current branch, and leave `git status --short` clean.
 

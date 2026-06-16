@@ -51,11 +51,12 @@ function statusLabel(status: ReportStatus | '') {
 }
 
 function targetLabel(targetType: ReportTargetType | '') {
-  const labels: Record<ReportTargetType, string> = {
+  const targetTypeLabel: Record<ReportTargetType, string> = {
     CHARACTER: 'ตัวละคร',
     MESSAGE: 'ข้อความ',
+    GENERATION_OUTPUT: 'ผลงานสร้าง',
   }
-  return targetType ? labels[targetType] : 'ทุกประเภท'
+  return targetType ? targetTypeLabel[targetType] : 'ทุกประเภท'
 }
 
 function getApiErrorStatus(error: unknown) {

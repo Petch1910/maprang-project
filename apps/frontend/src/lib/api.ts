@@ -718,6 +718,18 @@ export async function fetchCharacters(filters: CharacterListFilters = { view: 'p
   return requestJson<{ characters?: Character[] }>(`/characters?${params.toString()}`)
 }
 
+export async function reportGenerationOutput(generationOutputId: string, reason: string, details?: string) {
+  return requestJson<{ report: Report }>('/reports', {
+    method: 'POST',
+    body: JSON.stringify({
+      targetType: 'GENERATION_OUTPUT',
+      generationOutputId,
+      reason,
+      details,
+    }),
+  })
+}
+
 export async function fetchCharacter(characterId: string) {
   return requestJson<{ character: Character }>(`/characters/${characterId}`)
 }
@@ -1002,6 +1014,40 @@ export async function deleteGenerationOutput(outputId: string) {
   })
 }
 
+export async function publishGenerationOutput(outputId: string) {
+  return requestJson<{
+    output: GenerationJobOutput
+    persisted: boolean
+  }>(`/generation/gallery/${outputId}/publish`, {
+    method: 'POST',
+  })
+}
+
+export async function unpublishGenerationOutput(outputId: string) {
+  return requestJson<{
+    output: GenerationJobOutput
+    persisted: boolean
+  }>(`/generation/gallery/${outputId}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function fetchPublicGallery(limit = 20) {
+  const params = new URLSearchParams()
+  params.set('limit', String(limit))
+  return requestJson<{
+    outputs: Array<GenerationJobOutput & { prompt?: string, templateId?: string, mode?: string, brief?: string }>
+    persisted: boolean
+  }>(`/generation/gallery?${params.toString()}`)
+}
+
+export async function fetchPublicGalleryItem(outputId: string) {
+  return requestJson<{
+    output: GenerationJobOutput & { prompt?: string, templateId?: string, mode?: string, brief?: string }
+    persisted: boolean
+  }>(`/generation/gallery/${outputId}`)
+}
+
 export async function fetchCreatorDraft() {
   return requestJson<{ draft: unknown }>('/creator/draft')
 }
@@ -1109,7 +1155,7 @@ export async function updateChatTitle(chatId: string, title: string) {
   })
 }
 
-export type ReportTargetType = 'CHARACTER' | 'MESSAGE'
+export type ReportTargetType = 'CHARACTER' | 'MESSAGE' | 'GENERATION_OUTPUT'
 export type ReportStatus = 'PENDING' | 'REVIEWED' | 'RESOLVED' | 'REJECTED'
 export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE'
 export type AdminAuditAction = 'REPORT_STATUS_UPDATE' | 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE' | 'TOKEN_ADJUSTMENT'
@@ -1160,6 +1206,7 @@ export async function createReport(input: {
   targetType: ReportTargetType
   characterId?: string
   messageId?: string
+  generationOutputId?: string
   reason: string
   details?: string
   metadata?: Record<string, unknown>

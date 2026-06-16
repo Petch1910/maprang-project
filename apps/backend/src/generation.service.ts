@@ -546,6 +546,135 @@ export async function setGenerationOutputFavoriteForUser(input: {
   }
 }
 
+export async function setGenerationOutputVisibilityForUser(input: {
+  userId: string
+  outputId: string
+  visibility: GenerationOutputVisibility
+  prisma?: PrismaClient | null
+}) {
+  const prisma = input.prisma === undefined ? getPrisma() : input.prisma
+  if (!prisma) return { output: null, persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+
+  try {
+    const result = await prisma.generationOutput.updateMany({
+      where: { id: input.outputId, userId: input.userId },
+      data: { visibility: input.visibility },
+    })
+    if (result.count === 0) return { output: null, persisted: true }
+
+    const output = await prisma.generationOutput.findFirst({
+      where: { id: input.outputId, userId: input.userId },
+    })
+    return { output: output ? publicGenerationOutput(output) : null, persisted: true }
+  } catch (error) {
+    if (shouldThrowPersistenceError()) throw error
+    return { output: null, persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+  }
+}
+
+export async function listPublicGenerationOutputs(input: {
+  limit?: number
+  prisma?: PrismaClient | null
+  resolveStorageObjectUrl?: typeof resolveStorageObjectUrl
+}) {
+  const prisma = input.prisma === undefined ? getPrisma() : input.prisma
+  if (!prisma) return { outputs: [], persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+
+  try {
+    const records = await prisma.generationOutput.findMany({
+      where: { visibility: 'PUBLIC' },
+      orderBy: { createdAt: 'desc' },
+      take: clampGenerationListLimit(input.limit),
+      include: {
+        job: {
+          select: {
+            prompt: true,
+            templateId: true,
+            mode: true,
+          }
+        }
+      }
+    })
+
+    const resolveObjectUrl = input.resolveStorageObjectUrl ?? resolveStorageObjectUrl
+    
+    const outputs = await Promise.all(records.map(async (record) => {
+      let resolvedUrl = record.url
+      if (record.storageKey && !resolvedUrl) {
+        try {
+          const resolved = await resolveObjectUrl(record.storageKey)
+          resolvedUrl = resolved.url
+        } catch {
+          // fallback to null if storage unavailable
+        }
+      }
+      return {
+        ...publicGenerationOutput(record),
+        url: resolvedUrl,
+        prompt: record.job?.prompt,
+        templateId: record.job?.templateId,
+        mode: record.job?.mode,
+      }
+    }))
+
+    return { outputs, persisted: true }
+  } catch (error) {
+    if (shouldThrowPersistenceError()) throw error
+    return { outputs: [], persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+  }
+}
+
+export async function getPublicGenerationOutput(input: {
+  outputId: string
+  prisma?: PrismaClient | null
+  resolveStorageObjectUrl?: typeof resolveStorageObjectUrl
+}) {
+  const prisma = input.prisma === undefined ? getPrisma() : input.prisma
+  if (!prisma) return { output: null, persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+
+  try {
+    const record = await prisma.generationOutput.findFirst({
+      where: { id: input.outputId, visibility: 'PUBLIC' },
+      include: {
+        job: {
+          select: {
+            prompt: true,
+            templateId: true,
+            mode: true,
+          }
+        }
+      }
+    })
+    
+    if (!record) return { output: null, persisted: true }
+
+    let resolvedUrl = record.url
+    if (record.storageKey && !resolvedUrl) {
+      try {
+        const resolveObjectUrl = input.resolveStorageObjectUrl ?? resolveStorageObjectUrl
+        const resolved = await resolveObjectUrl(record.storageKey)
+        resolvedUrl = resolved.url
+      } catch {
+        // fallback to null if storage unavailable
+      }
+    }
+
+    return { 
+      output: {
+        ...publicGenerationOutput(record),
+        url: resolvedUrl,
+        prompt: record.job?.prompt,
+        templateId: record.job?.templateId,
+        mode: record.job?.mode,
+      }, 
+      persisted: true 
+    }
+  } catch (error) {
+    if (shouldThrowPersistenceError()) throw error
+    return { output: null, persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+  }
+}
+
 export async function getGenerationOutputDownloadForUser(input: {
   userId: string
   outputId: string

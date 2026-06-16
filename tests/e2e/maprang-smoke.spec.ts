@@ -382,16 +382,30 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   })
   await expect(page.getByTestId('ai-creator-status')).toBeVisible()
   await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
-  const publicGalleryActions = page.locator('[data-testid^="ai-creator-public-action-"]')
-  await expect(publicGalleryActions).toHaveCount(3)
-  expect(
-    await publicGalleryActions.evaluateAll((nodes) =>
-      nodes.every((node) => node instanceof HTMLButtonElement && node.disabled && node.title.length > 0),
-    ),
-    'public gallery actions must stay disabled with clear reasons until public contract is implemented',
-  ).toBe(true)
-  await page.getByTestId('ai-creator-public-create-focus').click()
+  await page.getByTestId(`ai-creator-library-open-${backendLibraryItemId}`).click()
+  await expect(page.getByTestId(`ai-creator-library-detail-dialog-${backendLibraryItemId}`)).toBeVisible()
+  const publishButton = page.getByTestId(`ai-creator-library-detail-publish-${backendLibraryItemId}`)
+  // Read current state before toggling so the assertion works regardless of prior run
+  const wasPublished = (await publishButton.getAttribute('aria-pressed')) === 'true'
+  await publishButton.click()
+  // After click the pressed state must have flipped
+  await expect(publishButton).toHaveAttribute('aria-pressed', wasPublished ? 'false' : 'true')
+  // If we just unpublished, publish again so the public gallery reuse test can proceed
+  if (wasPublished) {
+    await publishButton.click()
+    await expect(publishButton).toHaveAttribute('aria-pressed', 'true')
+  }
+  await page.keyboard.press('Escape')
+  await expect(page.getByTestId(`ai-creator-library-detail-dialog-${backendLibraryItemId}`)).toBeHidden()
+
+  // Wait for public gallery to refresh with the newly published item
+  const publicGalleryReuseButton = page.getByTestId(`ai-creator-public-action-reuse-public-88888888-1111-4111-8111-888888888888`)
+  await expect(publicGalleryReuseButton).toBeVisible()
+  await publicGalleryReuseButton.click()
+
+  // Verify reuse populates the form (image item → image tab active, prompt filled)
   await expect(page.getByTestId('ai-creator-tab-image')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByTestId('ai-creator-image-prompt')).not.toHaveValue('')
 
   await page.goto('/chats')
   await expect(page.locator('body')).toContainText('แชท')

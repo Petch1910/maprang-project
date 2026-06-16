@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BookOpen, Copy, Download, Image as ImageIcon, RefreshCcw, RotateCcw, Star, Trash2, X } from 'lucide-react'
+import { BookOpen, Copy, Download, Flag, Image as ImageIcon, RefreshCcw, RotateCcw, Sparkles, Star, Trash2, X } from 'lucide-react'
 import {
   getAiCreatorDownloadActionState,
   getAiCreatorDownloadLinkNotice,
@@ -19,9 +19,12 @@ type AiCreatorHistoryDetailDialogProps = {
   onCopySystemPrompt: (item: AiCreatorGeneratedItem) => void
   onDownload: (item: AiCreatorGeneratedItem) => void
   onRetry: (item: AiCreatorGeneratedItem) => void
+  onTogglePublish?: (item: AiCreatorGeneratedItem) => void
+  onReport?: (item: AiCreatorGeneratedItem) => void
   downloadLink?: AiCreatorDownloadLinkSnapshot | null
   downloadingItemId?: string | null
   retryingItemId?: string | null
+  isPublishing?: boolean
 }
 
 function formatGeneratedTime(timestamp: number) {
@@ -43,9 +46,12 @@ export function AiCreatorHistoryDetailDialog({
   onCopySystemPrompt,
   onDownload,
   onRetry,
+  onTogglePublish,
+  onReport,
   downloadLink,
   downloadingItemId,
   retryingItemId,
+  isPublishing,
 }: AiCreatorHistoryDetailDialogProps) {
   useEffect(() => {
     if (!item) return undefined
@@ -67,6 +73,7 @@ export function AiCreatorHistoryDetailDialog({
   const retryState = getAiCreatorRetryActionState(item)
   const isDownloading = downloadingItemId === item.id
   const isRetrying = retryingItemId === item.id
+  const isPublic = item.visibility === 'public'
   const downloadLabel =
     !isDownloading && downloadNotice?.state === 'signed-expired' ? 'รีเฟรชลิงก์' : downloadState.label
 
@@ -194,6 +201,34 @@ export function AiCreatorHistoryDetailDialog({
                 <RefreshCcw size={14} />
                 {isRetrying ? 'กำลังสร้างซ้ำ' : retryState.label}
               </button>
+              {onTogglePublish && item.librarySource === 'backend' && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-publish-${item.id}`}
+                  className={`justify-center ${
+                    isPublic ? 'missai-button-primary' : 'missai-button-secondary'
+                  } ${isPublishing ? 'opacity-60' : ''}`}
+                  disabled={isPublishing}
+                  onClick={() => onTogglePublish(item)}
+                  title={isPublic ? 'เลิกเผยแพร่ผลงานนี้' : 'เผยแพร่ผลงานนี้ลง Public Gallery'}
+                  aria-pressed={isPublic}
+                >
+                  <Sparkles size={14} fill={isPublic ? 'currentColor' : 'none'} />
+                  {isPublishing ? 'กำลังดำเนินการ' : (isPublic ? 'เผยแพร่แล้ว' : 'เผยแพร่สาธารณะ')}
+                </button>
+              )}
+              {onReport && item.id.startsWith('public-') && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-report-${item.id}`}
+                  className="missai-button-danger justify-center"
+                  onClick={() => onReport(item)}
+                  title="รายงานผลงานสร้างที่ไม่เหมาะสม"
+                >
+                  <Flag size={14} />
+                  รายงาน
+                </button>
+              )}
               <button
                 type="button"
                 data-testid={`ai-creator-library-detail-delete-${item.id}`}

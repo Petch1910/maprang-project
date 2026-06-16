@@ -5,14 +5,14 @@ import { applyReportAdminAction, createReport, listReports, updateReportStatus, 
 import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
 import { requireAdminApiKey, resolveRequestUserId } from './security'
 
-const reportTargetTypeSchema = t.Union([t.Literal('CHARACTER'), t.Literal('MESSAGE')])
+const reportTargetTypeSchema = t.Union([t.Literal('CHARACTER'), t.Literal('MESSAGE'), t.Literal('GENERATION_OUTPUT')])
 const reportStatusSchema = t.Union([
   t.Literal('PENDING'),
   t.Literal('REVIEWED'),
   t.Literal('RESOLVED'),
   t.Literal('REJECTED'),
 ])
-const reportAdminActionSchema = t.Union([t.Literal('HIDE_CHARACTER'), t.Literal('ARCHIVE_MESSAGE')])
+const reportAdminActionSchema = t.Union([t.Literal('HIDE_CHARACTER'), t.Literal('ARCHIVE_MESSAGE'), t.Literal('HIDE_GENERATION_OUTPUT')])
 
 export const reportRoutes = new Elysia()
   .post(
@@ -26,6 +26,7 @@ export const reportRoutes = new Elysia()
           targetType: body.targetType as ReportTargetType,
           characterId: body.characterId,
           messageId: body.messageId,
+          generationOutputId: body.generationOutputId,
           reason: body.reason,
           details: body.details,
           metadata: body.metadata as Record<string, unknown> | undefined,
@@ -48,6 +49,7 @@ export const reportRoutes = new Elysia()
         targetType: reportTargetTypeSchema,
         characterId: t.Optional(t.String()),
         messageId: t.Optional(t.String()),
+        generationOutputId: t.Optional(t.String()),
         reason: t.String({ minLength: 1 }),
         details: t.Optional(t.String()),
         metadata: t.Optional(t.Record(t.String(), t.Unknown())),

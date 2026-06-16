@@ -134,6 +134,26 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['backend-test'],
     note: 'generation.routes.test.ts และ generation.persistence.test.ts ตรวจ owner-only delete mutation โดยไม่ลบ output ของผู้ใช้อื่น',
   },
+  'GET /generation/gallery': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ public gallery list',
+  },
+  'GET /generation/gallery/:id': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ public gallery detail',
+  },
+  'POST /generation/gallery/:id/publish': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ publish mutation',
+  },
+  'DELETE /generation/gallery/:id': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ unpublish mutation',
+  },
   'GET /creator/scenarios': {
     owner: 'creator',
     coverage: ['backend-test'],

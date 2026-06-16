@@ -8,6 +8,7 @@ export type CreateReportInput = {
   targetType: ReportTargetType
   characterId?: string
   messageId?: string
+  generationOutputId?: string
   reason: string
   details?: string | null
   metadata?: Record<string, unknown> | null
@@ -19,7 +20,7 @@ export type ReportListOptions = {
   limit?: number
 }
 
-export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE'
+export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE' | 'HIDE_GENERATION_OUTPUT'
 
 function sanitizeReason(reason: string) {
   return reason.trim().slice(0, 80)
@@ -35,8 +36,10 @@ export function validateReportInput(input: CreateReportInput) {
   if (!reason) return 'reason_required'
   if (input.targetType === ReportTargetType.CHARACTER && !input.characterId) return 'character_id_required'
   if (input.targetType === ReportTargetType.MESSAGE && !input.messageId) return 'message_id_required'
+  if (input.targetType === ReportTargetType.GENERATION_OUTPUT && !input.generationOutputId) return 'generation_output_id_required'
   if (input.characterId && !isUuid(input.characterId)) return 'invalid_character_id'
   if (input.messageId && !isSafeRecordId(input.messageId)) return 'invalid_message_id'
+  if (input.generationOutputId && !isUuid(input.generationOutputId)) return 'invalid_generation_output_id'
   return null
 }
 
@@ -78,11 +81,23 @@ export async function createReport(input: CreateReportInput, reporterId = defaul
     input.characterId ??= message.chat.characterId
   }
 
+  if (input.generationOutputId) {
+    const generationOutput = await prisma.generationOutput.findFirst({
+      where: {
+        id: input.generationOutputId,
+        visibility: Visibility.PUBLIC,
+      },
+      select: { id: true },
+    })
+    if (!generationOutput) return { error: 'generation_output_not_found' }
+  }
+
   const report = await prisma.report.create({
     data: {
       targetType: input.targetType,
       characterId: input.characterId ?? null,
       messageId: input.messageId ?? null,
+      generationOutputId: input.generationOutputId ?? null,
       reporterId,
       reason: sanitizeReason(input.reason),
       details: sanitizeDetails(input.details),
@@ -91,6 +106,7 @@ export async function createReport(input: CreateReportInput, reporterId = defaul
     include: {
       character: { select: { id: true, name: true } },
       message: { select: { id: true, role: true, content: true, chatId: true } },
+      generationOutput: { select: { id: true, kind: true, url: true, visibility: true } },
     },
   })
 
@@ -112,6 +128,7 @@ export async function listReports(options: ReportListOptions = {}) {
     include: {
       character: { select: { id: true, name: true, status: true, visibility: true } },
       message: { select: { id: true, role: true, content: true, chatId: true } },
+      generationOutput: { select: { id: true, kind: true, url: true, visibility: true } },
       reporter: { select: { id: true, email: true, username: true } },
     },
   })
@@ -133,6 +150,7 @@ export async function updateReportStatus(reportId: string, status: ReportStatus,
       include: {
         character: { select: { id: true, name: true, status: true, visibility: true } },
         message: { select: { id: true, role: true, content: true, chatId: true } },
+        generationOutput: { select: { id: true, kind: true, url: true, visibility: true } },
         reporter: { select: { id: true, email: true, username: true } },
       },
     })
@@ -148,6 +166,7 @@ export async function updateReportStatus(reportId: string, status: ReportStatus,
           targetType: report.targetType,
           characterId: report.characterId,
           messageId: report.messageId,
+          generationOutputId: report.generationOutputId,
         },
       },
       tx,
@@ -158,7 +177,7 @@ export async function updateReportStatus(reportId: string, status: ReportStatus,
 }
 
 export function validateReportAdminAction(action: string) {
-  if (action !== 'HIDE_CHARACTER' && action !== 'ARCHIVE_MESSAGE') return 'invalid_report_action'
+  if (action !== 'HIDE_CHARACTER' && action !== 'ARCHIVE_MESSAGE' && action !== 'HIDE_GENERATION_OUTPUT') return 'invalid_report_action'
   return null
 }
 
@@ -176,6 +195,7 @@ export async function applyReportAdminAction(reportId: string, action: ReportAdm
         id: true,
         characterId: true,
         messageId: true,
+        generationOutputId: true,
       },
     })
     if (!report) return { error: 'report_not_found' }
@@ -222,6 +242,26 @@ export async function applyReportAdminAction(reportId: string, action: ReportAdm
       )
     }
 
+    if (action === 'HIDE_GENERATION_OUTPUT') {
+      if (!report.generationOutputId) return { error: 'generation_output_report_required' }
+      await tx.generationOutput.update({
+        where: { id: report.generationOutputId },
+        data: {
+          visibility: Visibility.PRIVATE,
+        },
+      })
+      await createAdminAuditLog(
+        {
+          action: AdminAuditAction.HIDE_GENERATION_OUTPUT,
+          targetType: 'GENERATION_OUTPUT',
+          targetId: report.generationOutputId,
+          actorUserId,
+          metadata: { reportId },
+        },
+        tx,
+      )
+    }
+
     const updatedReport = await tx.report.update({
       where: { id: reportId },
       data: {
@@ -231,6 +271,7 @@ export async function applyReportAdminAction(reportId: string, action: ReportAdm
       include: {
         character: { select: { id: true, name: true, status: true, visibility: true } },
         message: { select: { id: true, role: true, content: true, chatId: true, deletedAt: true } },
+        generationOutput: { select: { id: true, kind: true, url: true, visibility: true } },
         reporter: { select: { id: true, email: true, username: true } },
       },
     })
@@ -248,11 +289,13 @@ function publicReport(report: {
   reporterId: string
   characterId: string | null
   messageId: string | null
+  generationOutputId: string | null
   createdAt: Date
   updatedAt: Date
   reviewedAt: Date | null
   character?: unknown
   message?: unknown
+  generationOutput?: unknown
   reporter?: unknown
 }) {
   return {
@@ -264,8 +307,10 @@ function publicReport(report: {
     reporterId: report.reporterId,
     characterId: report.characterId,
     messageId: report.messageId,
+    generationOutputId: report.generationOutputId,
     character: report.character,
     message: report.message,
+    generationOutput: report.generationOutput,
     reporter: report.reporter,
     reviewedAt: report.reviewedAt,
     createdAt: report.createdAt,

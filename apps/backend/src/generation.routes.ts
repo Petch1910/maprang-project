@@ -8,6 +8,9 @@ import {
   listGenerationTemplates,
   retryGenerationJobForUser,
   setGenerationOutputFavoriteForUser,
+  setGenerationOutputVisibilityForUser,
+  listPublicGenerationOutputs,
+  getPublicGenerationOutput,
   validateGenerationJobInput,
 } from './generation.service'
 import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
@@ -243,6 +246,104 @@ export const generationRoutes = new Elysia()
     return {
       ok: true,
       deleted: true,
+      persisted: result.persisted,
+    }
+  })
+  .post('/generation/gallery/:id/publish', async ({ params, request, set }) => {
+    if (!hasRequestIdentity(request)) {
+      set.status = 401
+      return routeErrorResponse('unauthorized')
+    }
+
+    const invalidId = rejectInvalidUuid(params.id, set, 'invalid_id')
+    if (invalidId) return invalidId
+
+    const result = await setGenerationOutputVisibilityForUser({
+      userId: await resolveRequestUserId(request),
+      outputId: params.id,
+      visibility: 'PUBLIC',
+    })
+    
+    if (!result.output) {
+      set.status = 404
+      return {
+        ...routeErrorResponse('generation_output_not_found'),
+        persisted: result.persisted,
+        persistenceWarning: result.persistenceWarning,
+      }
+    }
+
+    return {
+      output: result.output,
+      persisted: result.persisted,
+    }
+  })
+  .delete('/generation/gallery/:id', async ({ params, request, set }) => {
+    if (!hasRequestIdentity(request)) {
+      set.status = 401
+      return routeErrorResponse('unauthorized')
+    }
+
+    const invalidId = rejectInvalidUuid(params.id, set, 'invalid_id')
+    if (invalidId) return invalidId
+
+    const result = await setGenerationOutputVisibilityForUser({
+      userId: await resolveRequestUserId(request),
+      outputId: params.id,
+      visibility: 'PRIVATE',
+    })
+    
+    if (!result.output) {
+      set.status = 404
+      return {
+        ...routeErrorResponse('generation_output_not_found'),
+        persisted: result.persisted,
+        persistenceWarning: result.persistenceWarning,
+      }
+    }
+
+    return {
+      output: result.output,
+      persisted: result.persisted,
+    }
+  })
+  .get(
+    '/generation/gallery',
+    async ({ query }) => {
+      const result = await listPublicGenerationOutputs({
+        limit: query.limit ? Number(query.limit) : undefined,
+      })
+
+      return {
+        outputs: result.outputs,
+        persisted: result.persisted,
+        persistenceWarning: result.persistenceWarning,
+      }
+    },
+    {
+      query: t.Object({
+        limit: t.Optional(t.String()),
+      }),
+    },
+  )
+  .get('/generation/gallery/:id', async ({ params, set }) => {
+    const invalidId = rejectInvalidUuid(params.id, set, 'invalid_id')
+    if (invalidId) return invalidId
+
+    const result = await getPublicGenerationOutput({
+      outputId: params.id,
+    })
+    if (!result.output) {
+      set.status = 404
+      return {
+        ...routeErrorResponse('generation_output_not_found'),
+        persisted: result.persisted,
+        persistenceWarning: result.persistenceWarning,
+      }
+    }
+
+    return {
+      output: result.output,
       persisted: result.persisted,
     }
   })
