@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-16
 
+- 2026-06-16 Shared Component Refactoring and Theme Alignment QA pass: Refactored Sidebar.tsx, RelationshipPreviewPanel.tsx, RelationshipPresetPicker.tsx, and CharacterCreateForm.tsx visual styling to align with the premium missai dark theme system. Aligned input borders, accordions, AI-draft triggers, select dropdowns, search focuses, and custom dialog modals to use custom HSL accents and glassy cards. Verified all repository-owned quality gates (bun run qa:repo) successfully passed with 282 tests, static audits, route audits, and frontend bundle budgets green.
+
 - 2026-06-16 Frontend Refactoring and Page Alignments QA pass: Refactored AnnouncementsPage.tsx and SupportPage.tsx to use the premium missai dark theme CSS tokens. Addressed syntax duplication and text encoding warnings by restoring and correctly editing clean files. Cleared unused Star import from FavoritesPage.tsx. All repository checks (bun run qa:repo) passed successfully, covering 282 backend tests, frontend static audits, route audits, and frontend bundle size budgets.
 
 - 2026-06-16 Staging Verification via ngrok QA pass: Configured staging CORS behavior correctly and emulated Supabase storage bucket check for `placeholder.supabase.co` in `scripts/supabase-storage-setup.ts`. Restored necessary release handoff guidelines in `RELEASE_HANDOFF.md` to satisfy template audits. Running `bun run staging:verify` with the active ngrok tunnel (`https://subplot-unworthy-exorcist.ngrok-free.dev`) successfully passed all 32 checks, and `bun run qa:repo` passed with 282 backend unit tests, frontend build, static audits, and bundle budgets 100% green.

@@ -195,19 +195,19 @@ export function CharacterLobbyPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="overflow-hidden rounded-2xl border border-[#2e2e44] bg-[#1e1e34] shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-        <div className="relative h-40 overflow-hidden bg-[radial-gradient(circle_at_20%_10%,rgba(168,85,247,0.28),transparent_32%),radial-gradient(circle_at_75%_0%,rgba(59,130,246,0.16),transparent_34%),linear-gradient(135deg,#19191f,#101014)] sm:h-60">
+      <div className="missai-card overflow-hidden rounded-3xl shadow-2xl">
+        <div className="relative h-40 overflow-hidden bg-[radial-gradient(circle_at_20%_10%,rgba(172,75,255,0.28),transparent_32%),radial-gradient(circle_at_75%_0%,rgba(249,156,0,0.1),transparent_34%),linear-gradient(135deg,#15162c,#080a1a)] sm:h-60">
           {character?.avatarUrl && (
             <>
               <img alt="" className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl" src={character.avatarUrl} />
               <div className="absolute inset-0 bg-black/62" />
             </>
           )}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#1e1e34] to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#080a1a] to-transparent" />
         </div>
         <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:p-8">
           <div className="-mt-20 space-y-4">
-            <div className="relative aspect-square overflow-hidden rounded-2xl border-4 border-[#1e1e34] bg-[#080a1a] shadow-[0_24px_64px_rgba(0,0,0,0.38)] ring-1 ring-[#2e2e44]">
+            <div className="relative aspect-square overflow-hidden rounded-2xl border-4 border-[#080a1a] bg-[#080a1a]/80 shadow-[0_24px_64px_rgba(0,0,0,0.38)] ring-1 ring-white/10">
               {character?.avatarUrl ? (
                 <img alt={`รูปตัวละคร ${character.name}`} className="h-full w-full object-cover" src={character.avatarUrl} />
               ) : (
@@ -219,7 +219,7 @@ export function CharacterLobbyPage() {
             <div className="flex gap-2">
               <button
                 aria-disabled={Boolean(reportDisabledReason)}
-                className="min-h-11 flex-1 rounded-xl border border-[#2e2e44] bg-[#2e2e44]/60 font-black text-slate-200 transition hover:bg-[#a855f7]/20 disabled:opacity-60"
+                className="min-h-11 flex-1 rounded-xl border border-white/10 bg-white/5 font-black text-slate-300 transition hover:bg-[#ac4bff]/20 hover:text-white disabled:opacity-60"
                 data-testid="character-report-button"
                 disabled={Boolean(reportDisabledReason)}
                 onClick={() => setIsReportDialogOpen(true)}
@@ -230,7 +230,7 @@ export function CharacterLobbyPage() {
               </button>
               <button
                 aria-disabled={Boolean(shareDisabledReason)}
-                className="min-h-11 flex-1 rounded-xl border border-[#2e2e44] bg-[#2e2e44]/60 font-black text-slate-200 transition hover:bg-[#a855f7]/20 disabled:opacity-60"
+                className="min-h-11 flex-1 rounded-xl border border-white/10 bg-white/5 font-black text-slate-300 transition hover:bg-[#ac4bff]/20 hover:text-white disabled:opacity-60"
                 data-testid="character-share-button"
                 disabled={Boolean(shareDisabledReason)}
                 onClick={shareCharacter}
@@ -241,7 +241,7 @@ export function CharacterLobbyPage() {
               </button>
             </div>
             {reportNote && (
-              <p className="m-0 rounded-xl border border-[#2e2e44] bg-[#080a1a]/50 p-3 text-xs font-bold text-slate-400" data-testid="character-action-note">
+              <p className="m-0 rounded-xl border border-white/10 bg-[#080a1a]/60 p-3 text-xs font-bold text-slate-400" data-testid="character-action-note">
                 {reportNote}
               </p>
             )}
@@ -249,12 +249,12 @@ export function CharacterLobbyPage() {
 
           <div className="space-y-6">
             {isLoadingDetail && !character && (
-              <section className="rounded-2xl border border-[#2e2e44] bg-[#080a1a]/40 p-4 text-sm font-bold text-slate-400">
+              <section className="rounded-2xl border border-white/10 bg-[#080a1a]/40 p-4 text-sm font-bold text-slate-400">
                 กำลังโหลดโปรไฟล์ตัวละคร...
               </section>
             )}
             {detailError && !character && (
-              <section className="rounded-2xl border border-rose-400/20 bg-rose-500/12 p-4 text-rose-100">
+              <section className="rounded-2xl border border-rose-500/20 bg-rose-500/12 p-4 text-rose-100">
                 <h2 className="text-lg font-black">เปิดตัวละครนี้ไม่ได้</h2>
                 <p className="mt-1 text-sm leading-6 text-rose-100/70">{detailError}</p>
                 <Link className="mt-3 inline-flex min-h-10 items-center rounded-full bg-rose-500 px-4 text-sm font-black text-white" to="/">
@@ -263,18 +263,18 @@ export function CharacterLobbyPage() {
               </section>
             )}
             <div>
-              <p className="text-xs font-black tracking-[0.2em] text-[#d8b4fe]/85 uppercase">ล็อบบี้ตัวละคร</p>
-              <h1 className="mt-2 text-3xl font-black text-white">{character?.name ?? 'ตัวละคร'}</h1>
+              <p className="text-xs font-black tracking-[0.2em] text-[#d9b3ff]/85 uppercase">ล็อบบี้ตัวละคร</p>
+              <h1 className="font-display mt-2 text-3xl font-black text-white">{character?.name ?? 'ตัวละคร'}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
                 {character ? displayCharacterDetail(character) : 'เลือกสัญญาความสัมพันธ์ก่อนเริ่มเส้นทางนี้'}
               </p>
               <p className="mt-2 text-xs font-bold text-white/35">รหัสตัวละคร: {characterId}</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-amber-300/14 px-2.5 py-1 text-xs font-black text-amber-100">
+                <span className="rounded-full bg-amber-300/14 px-2.5 py-1 text-xs font-black text-amber-100 border border-amber-500/10">
                   {ratingLabel(rating)}
                 </span>
                 {(character?.tags ?? []).map((tag) => (
-                  <span className="rounded-full bg-[#2e2e44] px-2.5 py-1 text-xs font-black text-[#d8b4fe]" key={tag}>
+                  <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-1 text-xs font-black text-[#d9b3ff]" key={tag}>
                     {tag}
                   </span>
                 ))}
@@ -282,13 +282,13 @@ export function CharacterLobbyPage() {
             </div>
 
             {!canView && (
-              <section className="rounded-2xl border border-amber-300/30 bg-amber-300/12 p-4 text-amber-50">
+              <section className="rounded-2xl border border-amber-300/20 bg-amber-500/10 p-4 text-amber-100">
                 <h2 className="text-lg font-black">ต้องเปิดโหมดผู้ใหญ่</h2>
-                <p className="mt-1 text-sm leading-6 text-amber-50/72">
+                <p className="mt-1 text-sm leading-6 text-amber-100/70">
                   ตัวละครนี้อยู่ในระดับ {ratingLabel(rating)} เปิดโหมดผู้ใหญ่ก่อนเริ่มเส้นทางนี้
                 </p>
                 <button
-                  className="mt-3 min-h-10 rounded-full bg-amber-300 px-4 text-sm font-black text-amber-950"
+                  className="mt-3 min-h-10 rounded-full bg-amber-400 px-4 text-sm font-black text-amber-950 transition hover:bg-amber-300"
                   onClick={() => {
                     dispatch(setAdultStatus(true))
                     dispatch(saveContentSettings({ isAdult: true, maxRating: 'restricted_18' }))
@@ -300,9 +300,9 @@ export function CharacterLobbyPage() {
               </section>
             )}
 
-            <section className="rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/50 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <section className="rounded-2xl border border-white/10 bg-[#080a1a]/40 p-5 shadow-inner">
               <h2 className="text-lg font-black text-white">สัญญาความสัมพันธ์</h2>
-              <p className="mt-1 text-sm text-white/52">เลือกจุดเริ่มต้นทางอารมณ์ก่อนส่งข้อความแรก</p>
+              <p className="mt-1 text-sm text-slate-400">เลือกจุดเริ่มต้นทางอารมณ์ก่อนส่งข้อความแรก</p>
               {(isPresetLoading || presetError) && (
                 <p className="mt-2 text-xs font-bold text-white/40">
                   {isPresetLoading ? 'กำลังเชื่อมรายการความสัมพันธ์จากระบบ...' : presetError}
@@ -314,8 +314,8 @@ export function CharacterLobbyPage() {
                     aria-pressed={seed.id === item.id}
                     className={`rounded-2xl border p-4 text-left transition ${
                       seed.id === item.id
-                        ? 'border-[#a855f7] bg-[#a855f7]/14 shadow-[0_18px_42px_rgba(168,85,247,0.2)]'
-                        : 'border-[#2e2e44] bg-[#1e1e34] hover:border-[#a855f7]/30 hover:bg-[#a855f7]/10'
+                        ? 'border-[#ac4bff] bg-[#ac4bff]/15 shadow-[0_0_15px_rgba(172,75,255,0.2)]'
+                        : 'border-white/5 bg-[#0b0d1f]/60 hover:border-[#ac4bff]/30 hover:bg-[#ac4bff]/10'
                     }`}
                     data-testid={`character-seed-${item.id}`}
                     key={item.id}
@@ -323,19 +323,19 @@ export function CharacterLobbyPage() {
                     type="button"
                   >
                     <p className="font-black text-white">{item.label}</p>
-                    <p className="mt-1 text-sm text-white/58">{item.tone}</p>
+                    <p className="mt-1 text-sm text-slate-400">{item.tone}</p>
                   </button>
                 ))}
               </div>
-              <div className="mt-4 rounded-2xl border border-[#2e2e44] bg-[#080a1a]/50 p-4">
-                <p className="text-sm font-black text-white/45">โทนอารมณ์เริ่มต้น</p>
+              <div className="mt-4 rounded-2xl border border-white/5 bg-[#0b0d1f]/80 p-4">
+                <p className="text-sm font-black text-slate-500">โทนอารมณ์เริ่มต้น</p>
                 <p className="mt-1 text-lg font-black text-white">{seed.tone}</p>
               </div>
             </section>
 
             {canStartChat && character ? (
               <Link
-                className={`block min-h-12 rounded-2xl px-5 py-3 text-center font-black text-white shadow-[0_18px_46px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 ${seed.color}`}
+                className={`block min-h-12 rounded-2xl px-5 py-3 text-center font-black text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 active:scale-[0.98] ${seed.color}`}
                 data-testid="character-start-chat"
                 to={`/chat?characterId=${character.id}&relationship_seed=${seed.id}`}
               >
@@ -343,7 +343,7 @@ export function CharacterLobbyPage() {
               </Link>
             ) : (
               <button
-                className="block min-h-12 w-full rounded-2xl bg-[#2e2e44]/50 border border-[#2e2e44]/30 px-5 py-3 text-center font-black text-slate-500 disabled:cursor-not-allowed"
+                className="block min-h-12 w-full rounded-2xl bg-[#080a1a]/60 border border-white/5 px-5 py-3 text-center font-black text-slate-500 disabled:cursor-not-allowed"
                 data-testid="character-start-chat-disabled"
                 disabled
                 title={startChatDisabledReason || 'ยังเริ่มแชทไม่ได้'}

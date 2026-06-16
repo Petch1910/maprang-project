@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-16
 
+- 2026-06-16: Refactored visual styling for Sidebar.tsx, RelationshipPreviewPanel.tsx, RelationshipPresetPicker.tsx, and CharacterCreateForm.tsx components to match the premium missai dark theme. Standardized card panels with `.missai-card` blur overlays, input borders/focus rings with custom HSL accents, step markers, AI draft triggers, list selection toolbars, and modal dialogs with immersive theme integration. Ran all repository QA tests and build checks successfully.
+
 - 2026-06-16: Refactored AnnouncementsPage and SupportPage visual styling to align with the premium missai dark theme. Resolved corrupted markup structures and clean-compiled both pages. Clean-removed unused Star icon import from FavoritesPage.tsx to satisfy TypeScript lint audits. Ran the repository quality gates (bun run qa:repo) successfully; all 282 backend tests, frontend static audits, route audits, and bundle budgets are 100% green. Pushed updates to main branch.
 
 - 2026-06-16: Resolved staging configuration blockers for ngrok staging testing. Configured `configuredCorsOrigins` in `apps/backend/src/config.ts` and `health.service.ts` to return clean origins to avoid CORS issues on staging domains. Implemented REST API interceptor in `scripts/supabase-storage-setup.ts` to mock Supabase bucket checks for `placeholder.supabase.co`. Filled and verified `RELEASE_HANDOFF.md` with all comments preserved to satisfy the `predeploy:check` template audit. Ran `bun run qa:repo` and `bun run staging:verify` end-to-end; all 32 staging verification checks and repo QA checks passed successfully.

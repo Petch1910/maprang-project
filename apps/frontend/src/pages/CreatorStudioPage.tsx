@@ -71,19 +71,19 @@ function AssistantCheckRow({
             ? 'border-red-500/20 bg-red-500/10'
             : isWarning
               ? 'border-amber-500/20 bg-amber-500/10'
-              : 'border-[#2e2e44] bg-[#1e1e34]/50'
+              : 'border-white/5 bg-[#0b0d1f]/60'
       }`}
     >
       <div className="flex items-start gap-2">
         <Icon
           className={`mt-0.5 flex-none ${
-            ready ? 'text-emerald-400' : isDanger ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-[#9ca3af]'
+            ready ? 'text-emerald-400' : isDanger ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-slate-500'
           }`}
           size={17}
         />
         <div className="min-w-0">
           <p className="m-0 text-sm font-semibold text-white">{title}</p>
-          <p className="m-0 mt-1 text-xs font-medium leading-5 text-[#9ca3af]">{detail}</p>
+          <p className="m-0 mt-1 text-xs font-medium leading-5 text-slate-400">{detail}</p>
         </div>
       </div>
     </div>
@@ -161,25 +161,25 @@ export function CreatorStudioPage() {
   )
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 lg:py-7">
-      <section className="flex flex-col gap-3 rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/90 p-6 text-white shadow-2xl backdrop-blur-md">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-[#d8b4fe]">
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 lg:py-7 font-sans">
+      <section className="missai-card flex flex-col gap-3 rounded-3xl p-6 text-white shadow-2xl">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-[#d9b3ff]">
           <Sparkles size={16} />
           <span>สตูดิโอสร้างตัวละคร</span>
-          <span className="rounded-full border border-[#a855f7]/30 bg-[#a855f7]/15 px-2.5 py-1 text-[#d8b4fe]">ฟอร์มคุ้นมือ + ระบบช่วยตรวจ Maprang</span>
+          <span className="rounded-full border border-[#ac4bff]/30 bg-[#ac4bff]/15 px-2.5 py-1 text-[#d9b3ff]">ฟอร์มคุ้นมือ + ระบบช่วยตรวจ Maprang</span>
         </div>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <h1 className="m-0 text-2xl font-black tracking-normal text-white sm:text-3xl">สร้างตัวละคร</h1>
-            <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-[#9ca3af]">
+            <h1 className="font-display m-0 text-2xl font-black tracking-normal text-white sm:text-3xl">สร้างตัวละคร</h1>
+            <p className="mt-2 max-w-3xl text-sm font-semibold leading-relaxed text-slate-400">
               โครงหลักยังเป็นฟอร์มสร้างตัวละครแบบที่ผู้เล่นคุ้น แต่เพิ่มตัวช่วยให้บุคลิกชัด แท็กไม่ชน และลองบทได้ก่อนปล่อยจริง
             </p>
           </div>
-          <div className="grid w-full min-w-0 gap-1 rounded-xl border border-[#2e2e44] bg-[#1a1a2e] p-3 sm:w-48">
-            <span className="text-[11px] font-bold text-[#9ca3af]">ความพร้อมล่าสุด</span>
+          <div className="grid w-full min-w-0 gap-1 rounded-2xl border border-white/5 bg-[#080a1a]/60 p-3.5 sm:w-48">
+            <span className="text-[11px] font-bold text-slate-400">ความพร้อมล่าสุด</span>
             <div className="flex items-center gap-3">
               <div className="h-2 flex-1 overflow-hidden rounded-full bg-black/25">
-                <div className="h-full rounded-full bg-[#a855f7]" style={{ width: `${draftStatus.readinessScore}%` }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] missai-glow" style={{ width: `${draftStatus.readinessScore}%` }} />
               </div>
               <span className="text-sm font-black text-white">{draftStatus.readinessScore}%</span>
             </div>
@@ -198,14 +198,14 @@ export function CreatorStudioPage() {
         </div>
 
         <aside className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-24">
-          <section className="rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/90 p-5 text-white shadow-2xl backdrop-blur-md">
+          <section className="missai-card rounded-3xl p-5 text-white shadow-2xl">
             <div className="flex items-center gap-2">
-              <span className="grid size-9 place-items-center rounded-xl border border-[#a855f7]/30 bg-[#a855f7]/15 text-[#d8b4fe]">
+              <span className="grid size-9 place-items-center rounded-xl border border-[#ac4bff]/30 bg-[#ac4bff]/15 text-[#d9b3ff]">
                 <WandSparkles size={18} />
               </span>
               <div>
-                <h2 className="m-0 text-base font-black text-white">ผู้ช่วยตรวจดราฟต์</h2>
-                <p className="m-0 text-xs font-medium text-[#9ca3af]">สถานะสดจากฟอร์มด้านซ้าย</p>
+                <h2 className="font-display m-0 text-base font-black text-white">ผู้ช่วยตรวจดราฟต์</h2>
+                <p className="m-0 text-xs font-medium text-slate-400">สถานะสดจากฟอร์มด้านซ้าย</p>
               </div>
             </div>
 
@@ -221,7 +221,7 @@ export function CreatorStudioPage() {
               ))}
             </div>
 
-            <div className="mt-4 rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50 p-3 text-xs font-semibold leading-5 text-white/50">
+            <div className="mt-4 rounded-xl border border-white/5 bg-[#0b0d1f]/60 p-3 text-xs font-semibold leading-relaxed text-slate-400">
               <p className="m-0 font-bold text-white">แท็กตอนนี้</p>
               <p className="m-0 mt-1">
                 ค้นหา {draftStatus.tagCounts.discovery} / ระบบ {draftStatus.tagCounts.engine} / ความปลอดภัย {draftStatus.tagCounts.safety}
@@ -237,10 +237,10 @@ export function CreatorStudioPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/90 p-5 text-white shadow-2xl backdrop-blur-md">
+          <section className="missai-card rounded-3xl p-5 text-white shadow-2xl">
             <div className="flex items-center gap-2">
               <Eye className="text-emerald-400" size={18} />
-              <h2 className="m-0 text-base font-black text-white">สถานะล่าสุด</h2>
+              <h2 className="font-display m-0 text-base font-black text-white">สถานะล่าสุด</h2>
             </div>
             {createdCharacter ? (
               <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm leading-6 text-emerald-50/80">
@@ -254,7 +254,7 @@ export function CreatorStudioPage() {
                 </Link>
               </div>
             ) : (
-              <p className="mt-3 mb-0 rounded-xl border border-dashed border-[#2e2e44] bg-[#1a1a2e]/50 p-3 text-sm font-semibold leading-6 text-white/50">
+              <p className="mt-3 mb-0 rounded-xl border border-dashed border-white/10 bg-[#080a1a]/60 p-3 text-sm font-semibold leading-relaxed text-slate-400">
                 {draftStatus.note || draftStatus.readinessLabel}
               </p>
             )}

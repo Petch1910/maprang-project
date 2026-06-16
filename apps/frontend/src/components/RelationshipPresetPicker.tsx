@@ -52,11 +52,11 @@ export function RelationshipPresetPicker({
   }
 
   return (
-    <div className="rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50 p-3 text-xs leading-relaxed text-[#9ca3af]">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <strong className="text-white">พรีเซ็ตความสัมพันธ์</strong>
+    <div className="missai-card rounded-2xl p-4 text-xs leading-relaxed text-slate-400">
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <strong className="font-display text-sm font-black text-white">พรีเซ็ตความสัมพันธ์</strong>
         <button type="button"
-          className="min-h-8 rounded-xl border border-[#a855f7]/30 bg-[#a855f7]/15 px-3 font-bold text-[#d8b4fe] transition hover:bg-[#a855f7]/25 disabled:opacity-50"
+          className="min-h-8 rounded-xl border border-[#ac4bff]/30 bg-[#ac4bff]/15 px-3.5 font-black text-[#d9b3ff] transition hover:bg-[#ac4bff]/25 disabled:opacity-50"
           aria-disabled={Boolean(applyDisabledReason)}
           disabled={Boolean(applyDisabledReason)}
           onClick={applyPreset}
@@ -67,7 +67,7 @@ export function RelationshipPresetPicker({
       </div>
       <select
         aria-disabled={Boolean(presetUnavailableReason)}
-        className="min-h-9 w-full rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 text-xs font-semibold text-white outline-none transition disabled:cursor-not-allowed disabled:opacity-55 focus:border-[#a855f7]"
+        className="min-h-9 w-full rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-xs font-semibold text-white outline-none transition disabled:cursor-not-allowed disabled:opacity-55 focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10"
         data-testid="relationship-preset-picker-select"
         disabled={Boolean(presetUnavailableReason)}
         title={presetUnavailableReason || 'เลือกพรีเซ็ตความสัมพันธ์'}
@@ -82,10 +82,10 @@ export function RelationshipPresetPicker({
         ))}
       </select>
       {presetError && (
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 p-2 text-rose-300">
+        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 p-2.5 text-rose-300">
           <span>{presetError}</span>
           <button
-            className="min-h-8 rounded-xl border border-rose-200/25 px-3 font-black text-rose-50 transition hover:bg-rose-200/10"
+            className="min-h-8 rounded-xl border border-rose-200/25 px-3.5 font-black text-rose-50 transition hover:bg-rose-200/10"
             onClick={loadPresets}
             type="button"
           >
@@ -94,12 +94,12 @@ export function RelationshipPresetPicker({
         </div>
       )}
       {!isLoading && !presetError && presets.length === 0 && (
-        <p className="mt-2 mb-0 rounded-xl border border-[#2e2e44] bg-[#1e1e34]/50 p-2 text-white/40">ยังไม่มีพรีเซ็ตความสัมพันธ์ให้เลือก</p>
+        <p className="mt-2.5 mb-0 rounded-xl border border-white/5 bg-[#0b0d1f]/40 p-3 text-slate-500">ยังไม่มีพรีเซ็ตความสัมพันธ์ให้เลือก</p>
       )}
       {selected && (
-        <div className="mt-2 rounded-xl border border-[#2e2e44] bg-[#1e1e34]/50 p-2">
-          <p className="m-0 text-white/70">{selected.description}</p>
-          <p className="mt-1 mb-0 font-bold text-[#d8b4fe]/80">{selected.tags.join(', ')}</p>
+        <div className="mt-2.5 rounded-xl border border-white/5 bg-[#0b0d1f]/60 p-3">
+          <p className="m-0 text-slate-300 leading-relaxed">{selected.description}</p>
+          <p className="mt-1.5 mb-0 font-semibold text-[#d9b3ff]">{selected.tags.join(', ')}</p>
         </div>
       )}
     </div>

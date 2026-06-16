@@ -371,10 +371,10 @@ export function AICreatorPage() {
     <div className="min-h-screen bg-[#080a1a] text-white py-8 px-4 md:px-8 font-sans">
       <div className="mx-auto max-w-7xl">
         {/* Upper bar */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-[#2e2e44] pb-6">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
           <Link
             to="/create"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e34] border border-[#2e2e44] px-4 py-2.5 text-xs font-semibold text-[#9ca3af] hover:text-white hover:bg-[#24243a] transition-all"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition-all"
           >
             <ArrowLeft size={14} />
             กลับสู่ห้องควบคุมหลัก
@@ -398,16 +398,16 @@ export function AICreatorPage() {
         <div className="grid gap-8 lg:grid-cols-12">
           {/* Left Side: Dynamic Multi-Tab Controls */}
           <section className="lg:col-span-5 space-y-6">
-            <div className="rounded-2xl bg-[#1e1e34]/90 border border-[#2e2e44] p-6 space-y-6 shadow-2xl backdrop-blur-md">
+            <div className="missai-card rounded-3xl p-6 space-y-6 shadow-2xl">
 
               {/* Categories/Tabs Switcher */}
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-[#2e2e44]">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-white/10">
                 <button
                   type="button"
                   className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
                     activeTab === 'image'
-                      ? 'bg-[#a855f7]/15 border-[#a855f7] text-[#a855f7] shadow-[0_0_12px_rgba(168,85,247,0.15)]'
-                      : 'bg-[#1e1e34] border-[#2e2e44] text-[#9ca3af] hover:text-white hover:bg-[#24243a]'
+                      ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
+                      : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
                   }`}
                   onClick={() => {
                     setActiveTab('image')
@@ -426,8 +426,8 @@ export function AICreatorPage() {
                   type="button"
                   className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
                     activeTab === 'video'
-                      ? 'bg-[#a855f7]/15 border-[#a855f7] text-[#a855f7] shadow-[0_0_12px_rgba(168,85,247,0.15)]'
-                      : 'bg-[#1e1e34] border-[#2e2e44] text-[#9ca3af] hover:text-white hover:bg-[#24243a]'
+                      ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
+                      : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
                   }`}
                   onClick={() => {
                     setActiveTab('video')
@@ -446,8 +446,8 @@ export function AICreatorPage() {
                   type="button"
                   className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
                     activeTab === 'template'
-                      ? 'bg-[#a855f7]/15 border-[#a855f7] text-[#a855f7] shadow-[0_0_12px_rgba(168,85,247,0.15)]'
-                      : 'bg-[#1e1e34] border-[#2e2e44] text-[#9ca3af] hover:text-white hover:bg-[#24243a]'
+                      ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
+                      : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
                   }`}
                   onClick={() => {
                     setActiveTab('template')
@@ -468,11 +468,11 @@ export function AICreatorPage() {
                 <div className="space-y-5">
                   {/* Targeting Character Dropdown */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
+                    <label className="block text-xs font-semibold text-slate-400">
                       เลือกตัวละครเป้าหมาย (Targeting Character)
                     </label>
                     <select
-                      className="block w-full rounded-xl border border-[#2e2e44] bg-[#1e1e34] p-3 text-xs font-semibold text-white outline-none focus:border-[#a855f7] transition-all"
+                      className="block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-3 text-xs font-semibold text-white outline-none focus:border-[#ac4bff] transition-all"
                       value={selectedCharacterId}
                       onChange={(e) => setSelectedCharacterId(e.target.value)}
                       disabled={isGenerating}
@@ -490,13 +490,13 @@ export function AICreatorPage() {
 
                   {/* Brief Input */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
+                    <label className="block text-xs font-semibold text-slate-400">
                       ปูบริบทเบื้องหลัง / ประวัติย่อของตัวละคร
                     </label>
                     <textarea
                       rows={3}
                       placeholder="เช่น: เจ้าหน้าที่ฝ่ายความมั่นคงแห่งโลกอนาคตผู้เงียบขรึม..."
-                      className="block w-full rounded-xl border border-[#2e2e44] bg-[#1e1e34] p-3.5 text-xs font-semibold text-white placeholder-white/20 outline-none focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/20 transition-all resize-none"
+                      className="block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-3.5 text-xs font-semibold text-white placeholder-white/20 outline-none focus:border-[#ac4bff] focus:ring-2 focus:ring-[#ac4bff]/20 transition-all resize-none"
                       value={brief}
                       onChange={(e) => setBrief(e.target.value)}
                       disabled={isGenerating}
@@ -511,13 +511,13 @@ export function AICreatorPage() {
               {activeTab === 'image' && (
                 <form onSubmit={handleGenerate} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
+                    <label className="block text-xs font-semibold text-slate-400">
                       รายละเอียดคำสั่งภาพที่ต้องการ (Image Prompt)
                     </label>
                     <textarea
                       rows={3}
                       placeholder="เช่น: realistic portrait, glowing holographic jacket, rain reflection, cyber fantasy..."
-                      className="block w-full rounded-xl border border-[#2e2e44] bg-[#1e1e34] p-3.5 text-xs font-semibold text-white placeholder-white/20 outline-none focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/20 transition-all resize-none"
+                      className="block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-3.5 text-xs font-semibold text-white placeholder-white/20 outline-none focus:border-[#ac4bff] focus:ring-2 focus:ring-[#ac4bff]/20 transition-all resize-none"
                       value={imagePrompt}
                       onChange={(e) => setImagePrompt(e.target.value)}
                       disabled={isGenerating}
@@ -528,7 +528,7 @@ export function AICreatorPage() {
 
                   {/* Interactive Style Selection (Chips style) */}
                   <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
+                    <label className="block text-xs font-semibold text-slate-400">
                       สไตล์และรูปแบบความพรีเมียม (Style Presets)
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -542,8 +542,8 @@ export function AICreatorPage() {
                             disabled={isGenerating}
                             className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${
                               isActive
-                                ? 'bg-[#a855f7]/15 border-[#a855f7] text-[#a855f7] shadow-[0_0_12px_rgba(168,85,247,0.15)]'
-                                : 'bg-[#1e1e34] border-[#2e2e44] text-[#9ca3af] hover:text-white hover:bg-[#24243a]'
+                                ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
+                                : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
                             }`}
                             title={`สไตล์ ${preset.label}`}
                             aria-label={`สไตล์ ${preset.label}`}
@@ -558,14 +558,14 @@ export function AICreatorPage() {
 
                   {/* Image Reference upload */}
                   <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
+                    <label className="block text-xs font-semibold text-slate-400">
                       ภาพต้นแบบอ้างอิง (Image Reference - ControlNet)
                     </label>
                     {referenceImage ? (
-                      <div className="relative rounded-xl overflow-hidden border border-[#2e2e44] bg-[#1e1e34] p-3 flex items-center justify-between">
+                      <div className="relative rounded-xl overflow-hidden border border-white/10 bg-[#080a1a]/60 p-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <img src={referenceImage} alt="Reference Preview" className="w-12 h-12 object-cover rounded-lg" />
-                          <span className="text-xs font-semibold text-[#9ca3af]">โหลดภาพอ้างอิงแล้ว.png</span>
+                          <span className="text-xs font-semibold text-slate-400">โหลดภาพอ้างอิงแล้ว.png</span>
                         </div>
                         <button
                           type="button"
@@ -578,7 +578,7 @@ export function AICreatorPage() {
                         </button>
                       </div>
                     ) : (
-                      <label className="border-2 border-dashed border-[#2e2e44] bg-[#1e1e34]/50 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-[#24243a]/50 hover:border-[#a855f7]/50 transition cursor-pointer text-center group">
+                      <label className="border-2 border-dashed border-white/10 bg-[#080a1a]/40 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-white/5 hover:border-[#ac4bff]/50 transition cursor-pointer text-center group">
                         <input
                           type="file"
                           accept="image/*"
@@ -595,8 +595,8 @@ export function AICreatorPage() {
                           title="เลือกรูปภาพอ้างอิง"
                           aria-label="เลือกรูปภาพอ้างอิง"
                         />
-                        <Upload size={24} className="text-[#6b7280] group-hover:text-[#a855f7] transition mb-2" />
-                        <span className="text-xs font-semibold text-[#9ca3af]">อัปโหลดภาพท่าทางอ้างอิง</span>
+                        <Upload size={24} className="text-[#6b7280] group-hover:text-[#ac4bff] transition mb-2" />
+                        <span className="text-xs font-semibold text-slate-400">อัปโหลดภาพท่าทางอ้างอิง</span>
                         <span className="text-[10px] text-[#6b7280] mt-1">JPG / PNG / WebP / GIF (สูงสุด 10MB)</span>
                       </label>
                     )}
@@ -604,7 +604,7 @@ export function AICreatorPage() {
 
                   <button
                     type="submit"
-                    className="w-full min-h-12 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(168,85,247,0.35)]"
+                    className="w-full min-h-12 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg missai-glow hover:brightness-110"
                     disabled={isGenerating || (!brief.trim() && !imagePrompt.trim())}
                     title="ประมวลผลข้อมูลโครงร่างตัวละคร"
                     aria-label="ประมวลผลข้อมูลโครงร่างตัวละคร"
@@ -646,14 +646,14 @@ export function AICreatorPage() {
                   {/* Duration select via Range Slider */}
                   <div className="space-y-3">
                     <div className="flex justify-between items-center mb-1">
-                      <label className="block text-xs font-semibold text-[#9ca3af]">
+                      <label className="block text-xs font-semibold text-slate-400">
                         ความยาวของชิ้นงานวิดีโอ (Duration)
                       </label>
-                      <span className="text-xs font-semibold text-white bg-[#a855f7]/20 border border-[#a855f7]/30 px-2 py-0.5 rounded-md">
+                      <span className="text-xs font-semibold text-white bg-[#ac4bff]/20 border border-[#ac4bff]/30 px-2 py-0.5 rounded-md">
                         {videoDuration} วินาที
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 bg-[#1e1e34] border border-[#2e2e44] p-3.5 rounded-xl">
+                    <div className="flex items-center gap-3 bg-[#080a1a]/60 border border-white/10 p-3.5 rounded-xl">
                       <span className="text-xs text-[#6b7280]">3s</span>
                       <input
                         type="range"
@@ -663,9 +663,9 @@ export function AICreatorPage() {
                         value={videoDuration}
                         onChange={(e) => setVideoDuration(Number(e.target.value))}
                         disabled={isGenerating}
-                        className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-[#2e2e44] accent-[#a855f7]"
+                        className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#ac4bff]"
                         style={{
-                          background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${((videoDuration - 3) / (10 - 3)) * 100}%, #2e2e44 ${((videoDuration - 3) / (10 - 3)) * 100}%, #2e2e44 100%)`
+                          background: `linear-gradient(to right, #ac4bff 0%, #ac4bff ${((videoDuration - 3) / (10 - 3)) * 100}%, rgba(255,255,255,0.1) ${((videoDuration - 3) / (10 - 3)) * 100}%, rgba(255,255,255,0.1) 100%)`
                         }}
                         title="ความยาวของชิ้นงานวิดีโอ"
                         aria-label="ความยาวของชิ้นงานวิดีโอ"
@@ -676,7 +676,7 @@ export function AICreatorPage() {
 
                   {/* Motion Template select */}
                   <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
+                    <label className="block text-xs font-semibold text-slate-400">
                       รูปแบบทิศทางขยับมุมกล้อง (Camera Motion)
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -693,8 +693,8 @@ export function AICreatorPage() {
                           disabled={isGenerating}
                           className={`py-2.5 px-3.5 rounded-xl text-[10px] font-semibold border transition-all text-left ${
                             videoTemplate === tpl.val
-                              ? 'bg-[#a855f7]/15 border-[#a855f7] text-[#a855f7] shadow-[0_0_12px_rgba(168,85,247,0.15)]'
-                              : 'bg-[#1e1e34] border-[#2e2e44] text-[#9ca3af] hover:text-white hover:bg-[#24243a]'
+                              ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
+                              : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
                           }`}
                           title={`ทิศทางกล้อง ${tpl.label}`}
                           aria-label={`ทิศทางกล้อง ${tpl.label}`}
@@ -708,14 +708,14 @@ export function AICreatorPage() {
 
                   {/* Video reference */}
                   <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
+                    <label className="block text-xs font-semibold text-slate-400">
                       วิดีโอเป้าหมายอ้างอิง (Target Video Reference)
                     </label>
                     {referenceVideo ? (
-                      <div className="relative rounded-xl overflow-hidden border border-[#2e2e44] bg-[#1e1e34] p-3 flex items-center justify-between">
+                      <div className="relative rounded-xl overflow-hidden border border-white/10 bg-[#080a1a]/60 p-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Film size={18} className="text-[#a855f7]" />
-                          <span className="text-xs font-semibold text-[#9ca3af]">อ้างอิงวิดีโอ_{videoDuration}s.mp4</span>
+                          <Film size={18} className="text-[#ac4bff]" />
+                          <span className="text-xs font-semibold text-slate-400">อ้างอิงวิดีโอ_{videoDuration}s.mp4</span>
                         </div>
                         <button
                           type="button"
@@ -728,7 +728,7 @@ export function AICreatorPage() {
                         </button>
                       </div>
                     ) : (
-                      <label className="border-2 border-dashed border-[#2e2e44] bg-[#1e1e34]/50 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-[#24243a]/50 hover:border-[#a855f7]/50 transition cursor-pointer text-center group">
+                      <label className="border-2 border-dashed border-white/10 bg-[#080a1a]/40 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-white/5 hover:border-[#ac4bff]/50 transition cursor-pointer text-center group">
                         <input
                           type="file"
                           accept="video/*"
@@ -743,8 +743,8 @@ export function AICreatorPage() {
                           title="เลือกวิดีโออ้างอิง"
                           aria-label="เลือกวิดีโออ้างอิง"
                         />
-                        <Upload size={24} className="text-[#6b7280] group-hover:text-[#a855f7] transition mb-2" />
-                        <span className="text-xs font-semibold text-[#9ca3af]">อัปโหลดวิดีโอเคลื่อนไหวอ้างอิง</span>
+                        <Upload size={24} className="text-[#6b7280] group-hover:text-[#ac4bff] transition mb-2" />
+                        <span className="text-xs font-semibold text-slate-400">อัปโหลดวิดีโอเคลื่อนไหวอ้างอิง</span>
                         <span className="text-[10px] text-[#6b7280] mt-1">MP4 / WebM / MOV (สูงสุด 50MB)</span>
                       </label>
                     )}
@@ -752,7 +752,7 @@ export function AICreatorPage() {
 
                   <button
                     type="submit"
-                    className="w-full min-h-12 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(168,85,247,0.35)]"
+                    className="w-full min-h-12 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg missai-glow hover:brightness-110"
                     disabled={isGenerating || (!brief.trim() && !videoPrompt.trim())}
                     title="ประมวลผลวิดีโอระบบ"
                     aria-label="ประมวลผลวิดีโอระบบ"
@@ -784,7 +784,7 @@ export function AICreatorPage() {
                         key={tpl.id}
                         onClick={() => void handleTemplateClick(tpl)}
                         disabled={isGenerating}
-                        className={`w-full text-left p-4 rounded-xl border border-[#2e2e44] bg-gradient-to-br ${tpl.bgClass} hover:border-[#a855f7]/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.15)] transition-all duration-300 relative overflow-hidden group`}
+                        className={`w-full text-left p-4 rounded-xl border border-white/10 bg-gradient-to-br ${tpl.bgClass} hover:border-[#ac4bff]/50 hover:shadow-[0_0_15px_rgba(172,75,255,0.15)] transition-all duration-300 relative overflow-hidden group`}
                         type="button"
                         title={`ใช้งานพรีเซ็ต ${tpl.title}`}
                       >
@@ -795,7 +795,7 @@ export function AICreatorPage() {
                           {tpl.tag}
                         </span>
                         <h4 className="text-xs font-bold text-white">{tpl.title}</h4>
-                        <p className="text-[10px] text-[#9ca3af] mt-1.5 line-clamp-2 leading-relaxed">
+                        <p className="text-[10px] text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
                           {tpl.prompt}
                         </p>
                       </button>
@@ -805,7 +805,7 @@ export function AICreatorPage() {
               )}
 
               {statusMessage && (
-                <div className="text-xs font-semibold text-[#a855f7] bg-[#a855f7]/10 border border-[#a855f7]/20 p-3.5 rounded-xl leading-relaxed flex gap-2">
+                <div className="text-xs font-semibold text-[#d9b3ff] bg-[#ac4bff]/10 border border-[#ac4bff]/20 p-3.5 rounded-xl leading-relaxed flex gap-2">
                   <span className="flex-shrink-0">ℹ️</span>
                   <span>{statusMessage}</span>
                 </div>
@@ -816,9 +816,9 @@ export function AICreatorPage() {
           {/* Right Side: Interactive Preview surface */}
           <section className="lg:col-span-7">
             {lastResult ? (
-              <div className="rounded-2xl bg-[#1e1e34]/90 border border-[#2e2e44] p-6 space-y-6 shadow-2xl backdrop-blur-md">
-                <div className="flex items-center justify-between border-b border-[#2e2e44] pb-4 flex-wrap gap-2">
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <div className="missai-card rounded-3xl p-6 space-y-6 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4 flex-wrap gap-2">
+                  <h2 className="font-display text-lg font-bold text-white flex items-center gap-2">
                     <CheckCircle2 size={18} className="text-emerald-400" />
                     {lastResult.type === 'video' ? 'วิดีโอเคลื่อนไหวจำลองสำเร็จ' : 'ภาพร่างระบบประมวลผลเสร็จสิ้น'}
                   </h2>
@@ -883,21 +883,21 @@ export function AICreatorPage() {
                         </div>
 
                         {/* Video Player Control bar */}
-                        <div className="p-3 bg-[#1e1e34]/90 backdrop-blur-md border-t border-[#2e2e44] flex flex-col gap-2.5 z-10">
+                        <div className="p-3 bg-[#080a1a]/95 backdrop-blur-md border-t border-white/10 flex flex-col gap-2.5 z-10">
                           {/* Progress slider */}
-                          <div className="h-1 bg-[#2e2e44] rounded-full overflow-hidden cursor-pointer">
+                          <div className="h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer">
                             <div
-                              className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all duration-100"
+                              className="h-full bg-gradient-to-r from-[#ac4bff] to-cyan-400 transition-all duration-100"
                               style={{ width: `${playProgress}%` }}
                             />
                           </div>
 
-                          <div className="flex items-center justify-between text-[10px] font-semibold text-[#9ca3af]">
+                          <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400">
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
                                 onClick={() => setIsPlaying(!isPlaying)}
-                                className="p-1 rounded-lg bg-[#2e2e44] hover:bg-[#24243a] text-white transition-all"
+                                className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all"
                                 title={isPlaying ? "หยุดชั่วคราว" : "เล่น"}
                                 aria-label={isPlaying ? "หยุดชั่วคราว" : "เล่น"}
                               >
@@ -906,7 +906,7 @@ export function AICreatorPage() {
                               <span>0:0{Math.floor((playProgress / 100) * videoDuration)} / 0:0{videoDuration}</span>
                             </div>
 
-                            <span className="px-2 py-0.5 rounded-lg bg-[#2e2e44] text-[9px] uppercase tracking-wider text-[#a855f7]">
+                            <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[9px] uppercase tracking-wider text-[#ac4bff]">
                               {videoDuration}s Loop
                             </span>
                           </div>
@@ -915,7 +915,7 @@ export function AICreatorPage() {
                       </div>
                     ) : (
                       /* Image Preview Layout */
-                      <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-[#2e2e44] bg-[#080a1a] relative shadow-inner">
+                      <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-white/10 bg-[#080a1a] relative shadow-inner">
                         {lastResult.url ? (
                           <img
                             src={lastResult.url}
@@ -924,14 +924,14 @@ export function AICreatorPage() {
                           />
                         ) : (
                           <div className="h-full w-full flex flex-col items-center justify-center text-[#6b7280] text-xs p-4 text-center">
-                            <ImageIcon size={42} className="mb-2 text-[#2e2e44]" />
+                            <ImageIcon size={42} className="mb-2 text-white/10" />
                             โครงร่างจำลองกรณีไม่เชื่อมต่ออินเทอร์เน็ต
                           </div>
                         )}
                       </div>
                     )}
 
-                    <div className="rounded-xl bg-[#18182f] border border-[#2e2e44] p-4 text-[11px] font-semibold text-[#9ca3af] space-y-2 leading-relaxed">
+                    <div className="rounded-xl bg-[#080a1a]/40 border border-white/10 p-4 text-[11px] font-semibold text-slate-400 space-y-2 leading-relaxed">
                       <p>⚡ รูปแบบสื่อ: <span className="text-white">{lastResult.type === 'video' ? 'วิดีโอความยาวสั่นไหวระดับสูง' : 'ภาพร่างระบบเดี่ยว'}</span></p>
                       {lastResult.type === 'video' && <p>🎬 ทิศทางมุมกล้อง: <span className="text-white">{lastResult.motionTemplate}</span></p>}
                       <p className="line-clamp-3">📝 คำอธิบายภาพรวม: <span className="text-white font-mono">{lastResult.prompt}</span></p>
@@ -941,31 +941,31 @@ export function AICreatorPage() {
                   {/* Character Metadata details */}
                   <div className="sm:col-span-7 space-y-5 max-h-[35rem] overflow-y-auto pr-1">
                     <div>
-                      <span className="text-[10px] font-bold text-[#6b7280] tracking-wider uppercase">ชื่อตัวละครร่างระบบ</span>
+                      <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">ชื่อตัวละครร่างระบบ</span>
                       <p className="text-xl font-black text-white mt-1">{lastResult.response.draft.name}</p>
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-bold text-[#6b7280] tracking-wider uppercase">คำอธิบายภาพลักษณ์</span>
-                      <p className="text-xs font-medium leading-relaxed text-[#9ca3af] mt-1">{lastResult.response.draft.description}</p>
+                      <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">คำอธิบายภาพลักษณ์</span>
+                      <p className="text-xs font-medium leading-relaxed text-slate-400 mt-1">{lastResult.response.draft.description}</p>
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-bold text-[#6b7280] tracking-wider uppercase">ข้อความทักทายแรกสุด</span>
-                      <p className="text-xs font-medium leading-relaxed border-l-2 border-[#a855f7] bg-[#a855f7]/10 p-3 rounded-r-xl text-[#d8b4fe] mt-1">
+                      <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">ข้อความทักทายแรกสุด</span>
+                      <p className="text-xs font-medium leading-relaxed border-l-2 border-[#ac4bff] bg-[#ac4bff]/10 p-3 rounded-r-xl text-[#d9b3ff] mt-1">
                         "{lastResult.response.draft.greeting}"
                       </p>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-[#6b7280] tracking-wider uppercase">
+                        <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
                           บริบทความจำเป็นระบบ (System Prompt)
                         </span>
                         <button
                           type="button"
                           onClick={handleCopySystemPrompt}
-                          className="text-[10px] font-semibold text-[#a855f7] hover:text-[#c084fc] flex items-center gap-1 transition-all"
+                          className="text-[10px] font-semibold text-[#ac4bff] hover:text-[#c084fc] flex items-center gap-1 transition-all"
                           title="คัดลอกบริบทความจำเป็นระบบ"
                         >
                           {copiedPrompt ? (
@@ -981,7 +981,7 @@ export function AICreatorPage() {
                           )}
                         </button>
                       </div>
-                      <pre className="text-[11px] font-mono leading-relaxed text-[#9ca3af] bg-[#080a1a] p-3.5 rounded-xl border border-[#2e2e44] whitespace-pre-wrap max-h-48 overflow-y-auto">
+                      <pre className="text-[11px] font-mono leading-relaxed text-slate-400 bg-[#080a1a] p-3.5 rounded-xl border border-white/10 whitespace-pre-wrap max-h-48 overflow-y-auto">
                         {lastResult.response.draft.systemPrompt}
                       </pre>
                     </div>
@@ -1027,8 +1027,8 @@ export function AICreatorPage() {
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     galleryFilter === f.val
-                      ? 'bg-[#a855f7] text-white shadow-lg'
-                      : 'text-[#9ca3af] hover:text-white'
+                      ? 'bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white shadow-lg missai-glow'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                   title={`ตัวกรอง ${f.label}`}
                   aria-label={`ตัวกรอง ${f.label}`}
@@ -1051,7 +1051,7 @@ export function AICreatorPage() {
           </div>
 
           {filteredHistory.length === 0 ? (
-            <div className="py-16 text-center text-[#6b7280] text-xs font-semibold">
+            <div className="py-16 text-center text-slate-500 text-xs font-semibold">
               ไม่มีรายการแกลเลอรีในหมวดนี้ในประวัติคอมพิวเตอร์ของคุณ
             </div>
           ) : (
@@ -1061,23 +1061,23 @@ export function AICreatorPage() {
                   <div
                     key={item.id}
                     onClick={() => handleSelectFromHistory(item)}
-                    className="group cursor-pointer rounded-xl border border-[#2e2e44] bg-[#18182f] overflow-hidden hover:border-[#a855f7]/75 hover:shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all duration-300 relative"
+                    className="group cursor-pointer rounded-xl border border-white/5 bg-[#0b0d1f]/60 overflow-hidden hover:border-[#ac4bff]/75 hover:shadow-[0_0_15px_rgba(172,75,255,0.2)] transition-all duration-300 relative"
                   >
-                    <div className="aspect-[3/4] w-full overflow-hidden bg-[#1e1e34] relative">
+                    <div className="aspect-[3/4] w-full overflow-hidden bg-[#080a1a] relative">
                       <img
                         src={item.url}
                         alt={item.response.draft.name}
                         className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
                       />
                       {item.type === 'video' && (
-                        <div className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-[#080a1a]/85 border border-[#2e2e44] text-white shadow-lg flex items-center justify-center">
-                          <Video size={12} className="text-[#a855f7]" />
+                        <div className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-[#080a1a]/85 border border-white/10 text-white shadow-lg flex items-center justify-center">
+                          <Video size={12} className="text-[#ac4bff]" />
                         </div>
                       )}
                     </div>
                     <div className="p-3">
                       <p className="text-xs font-semibold text-white truncate">{item.response.draft.name}</p>
-                      <p className="text-[10px] font-medium text-[#6b7280] truncate mt-1">{item.prompt}</p>
+                      <p className="text-[10px] font-medium text-slate-500 truncate mt-1">{item.prompt}</p>
                     </div>
                   </div>
                 ))}
@@ -1085,25 +1085,25 @@ export function AICreatorPage() {
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 pt-5 border-t border-[#2e2e44]">
+                <div className="flex items-center justify-center gap-3 pt-5 border-t border-white/10">
                   <button
                     type="button"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#1e1e34] border border-[#2e2e44] text-[#9ca3af] hover:text-white hover:bg-[#24243a] transition-all disabled:opacity-30"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
                     title="หน้าก่อนหน้า"
                     aria-label="หน้าก่อนหน้า"
                   >
                     <ChevronLeft size={16} />
                   </button>
-                  <span className="text-xs font-semibold text-[#9ca3af]">
+                  <span className="text-xs font-semibold text-slate-400">
                     หน้า {currentPage} จากทั้งหมด {totalPages}
                   </span>
                   <button
                     type="button"
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#1e1e34] border border-[#2e2e44] text-[#9ca3af] hover:text-white hover:bg-[#24243a] transition-all disabled:opacity-30"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
                     title="หน้าถัดไป"
                     aria-label="หน้าถัดไป"
                   >

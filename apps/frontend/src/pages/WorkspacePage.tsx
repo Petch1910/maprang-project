@@ -150,27 +150,27 @@ function EmptyChatWorkspace({
   return (
     <main className="grid h-svh place-items-center overflow-hidden bg-[#080a1a] px-4 text-white">
       <section
-        className="w-full max-w-xl rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/80 p-6 text-center shadow-[0_30px_90px_rgba(0,0,0,0.36)] backdrop-blur-xl"
+        className="missai-card w-full max-w-xl rounded-3xl p-8 text-center shadow-2xl"
         data-testid="chat-empty-character-state"
       >
-        <p className="m-0 text-xs font-black tracking-[0.2em] text-orange-200/75 uppercase">Maprang Chat</p>
-        <h1 className="m-0 mt-3 text-2xl font-black text-white sm:text-3xl">ยังไม่มีตัวละครพร้อมเริ่มแชท</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm font-bold leading-6 text-white/62">
+        <p className="m-0 text-xs font-black tracking-[0.2em] text-[#d9b3ff]/75 uppercase">Maprang Chat</p>
+        <h1 className="font-display m-0 mt-3.5 text-2xl font-black text-white sm:text-3xl">ยังไม่มีตัวละครพร้อมเริ่มแชท</h1>
+        <p className="mx-auto mt-4 max-w-md text-sm font-semibold leading-relaxed text-slate-400">
           {isLoading
             ? 'กำลังโหลดข้อมูลจริงจากระบบหลังบ้าน...'
             : 'หน้าแชทจะไม่ใช้ตัวละครที่ไม่ได้มาจากระบบหลังบ้านแทนข้อมูลจริง ถ้ายังไม่มีตัวละคร ให้สร้างตัวละครหรือกลับไปสำรวจก่อน'}
         </p>
-        {note && <p className="mt-4 rounded-xl border border-white/10 bg-black/28 px-4 py-3 text-sm font-bold text-white/68">{note}</p>}
-        <div className="mt-5 grid gap-2 sm:grid-cols-3">
+        {note && <p className="mt-5 rounded-2xl border border-white/5 bg-[#0b0d1f]/60 px-4 py-3 text-sm font-semibold text-slate-300">{note}</p>}
+        <div className="mt-6 grid gap-2 sm:grid-cols-3">
           <button
-            className="min-h-11 rounded-xl bg-orange-500 px-4 text-sm font-black text-white transition hover:bg-orange-400"
+            className="min-h-11 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-sm font-black text-white transition hover:brightness-110 missai-glow"
             onClick={onCreateCharacter}
             type="button"
           >
             สร้างตัวละคร
           </button>
           <button
-            className="min-h-11 rounded-xl border border-white/10 bg-white/7 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white"
+            className="min-h-11 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:bg-white/10 hover:text-white"
             onClick={onExplore}
             type="button"
           >
@@ -178,7 +178,7 @@ function EmptyChatWorkspace({
           </button>
           <button
             aria-disabled={isLoading}
-            className="min-h-11 rounded-xl border border-white/10 bg-white/7 px-4 text-sm font-black text-white/78 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading}
             onClick={onRetry}
             title={isLoading ? 'กำลังโหลดข้อมูลจริงจากระบบหลังบ้าน' : 'โหลดข้อมูลตัวละครอีกครั้ง'}

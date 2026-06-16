@@ -65,7 +65,7 @@ export function Sidebar(props: SidebarProps) {
         onClick={props.onCloseMobile}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[min(92vw,246px)] min-h-0 flex-col border-r border-[#2e2e44] bg-[#1e1e34] p-2.5 text-white shadow-2xl transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[min(92vw,246px)] min-h-0 flex-col border-r border-[#ac4bff]/10 bg-[#080a1a]/75 p-2.5 text-white shadow-2xl backdrop-blur-md transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:shadow-none ${
           props.isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -84,7 +84,7 @@ function Avatar({ src, name }: { src: string | null; name: string }) {
 }
 
 const listItemClass =
-  'grid min-h-12 w-full grid-cols-[32px_minmax(0,1fr)_28px] items-center gap-2 rounded-lg px-1.5 text-left transition hover:bg-[#24243a] hover:text-[#d8b4fe]'
+  'grid min-h-12 w-full grid-cols-[32px_minmax(0,1fr)_28px] items-center gap-2 rounded-xl px-1.5 text-left transition hover:bg-white/5 hover:text-[#d9b3ff]'
 
 function SidebarCharacterRow({
   character,
@@ -97,13 +97,13 @@ function SidebarCharacterRow({
 }) {
   return (
     <button type="button"
-      className={`${listItemClass} ${isActive ? 'bg-[#a855f7]/15 shadow-[inset_3px_0_0_#a855f7] text-[#d8b4fe]' : 'text-slate-300'}`}
+      className={`${listItemClass} ${isActive ? 'bg-[#ac4bff]/10 shadow-[inset_3px_0_0_#ac4bff] text-[#d9b3ff]' : 'text-slate-300'}`}
       onClick={onSelect}
     >
       <Avatar name={character.name} src={character.avatarUrl ?? null} />
       <span className="min-w-0">
         <span className="block truncate text-sm font-black text-white">{character.name}</span>
-        <span className="block truncate text-[11px] leading-4 text-white/45">
+        <span className="block truncate text-[11px] leading-4 text-slate-400">
           {displayCharacterSummary(character, 'พร้อมเริ่มแชท')}
         </span>
       </span>
@@ -148,12 +148,12 @@ function SidebarChatRow({
   onToggleSelect: () => void
 }) {
   const actionButtonClass =
-    'flex min-h-9 w-full items-center gap-2 px-3 text-left text-xs font-black text-slate-300 transition hover:bg-[#24243a] hover:text-white'
+    'flex min-h-9 w-full items-center gap-2 px-3 text-left text-xs font-black text-slate-300 transition hover:bg-white/5 hover:text-white'
 
   return (
     <div
       className={`relative ${listItemClass} ${
-        isSelected ? 'bg-[#a855f7]/20 ring-1 ring-[#a855f7]/30 text-white' : isActive ? 'bg-[#a855f7]/15 shadow-[inset_3px_0_0_#a855f7] text-[#d8b4fe]' : 'text-slate-300'
+        isSelected ? 'bg-[#ac4bff]/20 ring-1 ring-[#ac4bff]/30 text-white' : isActive ? 'bg-[#ac4bff]/10 shadow-[inset_3px_0_0_#ac4bff] text-[#d9b3ff]' : 'text-slate-300'
       }`}
     >
       {isSelectionMode && (
@@ -172,10 +172,10 @@ function SidebarChatRow({
         {!isSelectionMode && <Avatar name={chat.characterName} src={null} />}
         <span className="min-w-0">
           <span className="flex min-w-0 items-center gap-1.5">
-            {isPinned && <Pin className="flex-none text-amber-300" size={12} />}
+            {isPinned && <Pin className="flex-none text-[#f9c86d]" size={12} />}
             <span className="block truncate text-sm font-black text-white">{chat.title || chat.characterName}</span>
           </span>
-          <span className="block truncate text-[11px] leading-4 text-white/42">
+          <span className="block truncate text-[11px] leading-4 text-slate-400">
             {chat.preview ? displayMessageContent(chat.preview) : formatTime(chat.lastMessageAt)}
           </span>
         </span>
@@ -197,7 +197,7 @@ function SidebarChatRow({
       </button>
       {isMenuOpen && (
         <div
-          className={`absolute right-0 z-30 w-44 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-white/10 bg-[#09090b] py-1 shadow-[0_18px_42px_rgba(0,0,0,0.42)] ${
+          className={`absolute right-0 z-30 w-44 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/10 bg-[#0b0d1f]/95 py-1.5 shadow-2xl backdrop-blur-md ${
             openMenuUp ? 'bottom-10' : 'top-10'
           }`}
           role="menu"
@@ -434,18 +434,18 @@ function SidebarContent({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <Link className="mb-1 flex min-h-10 items-center gap-2 rounded-lg px-1 text-white" onClick={onCloseMobile} to="/">
-        <span className="grid size-8 flex-none place-items-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-lg font-black shadow-[0_12px_26px_rgba(168,85,247,0.24)]">
+      <Link className="mb-1 flex min-h-10 items-center gap-2 rounded-xl px-1 text-white" onClick={onCloseMobile} to="/">
+        <span className="grid size-8 flex-none place-items-center rounded-lg bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] text-lg font-black shadow-[0_12px_26px_rgba(172,75,255,0.24)]">
           M
         </span>
         <span className="min-w-0">
           <span className="block truncate text-lg font-black tracking-wide">MAPRANG</span>
-          <span className="block truncate text-[11px] font-bold text-[#9ca3af]">บทบาทสมมุติภาษาไทย</span>
+          <span className="block truncate text-[11px] font-bold text-slate-400">บทบาทสมมุติภาษาไทย</span>
         </span>
       </Link>
 
       <Link
-        className="flex min-h-9 items-center justify-center gap-2 rounded-lg bg-[#2e2e44]/60 text-sm font-black text-slate-200 transition hover:bg-[#a855f7]/25 border border-[#2e2e44]"
+        className="flex min-h-9 items-center justify-center gap-2 rounded-xl bg-white/5 text-sm font-black text-slate-200 transition hover:bg-[#ac4bff]/15 border border-white/10"
         to="/"
       >
         <Compass size={16} />
@@ -453,7 +453,7 @@ function SidebarContent({
       </Link>
 
       <Link
-        className="flex min-h-9 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-sm font-black text-white hover:from-purple-500 hover:to-pink-500 transition hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+        className="flex min-h-9 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-sm font-black text-white hover:brightness-110 transition missai-glow"
         onClick={onCloseMobile}
         to="/create"
       >
@@ -462,9 +462,9 @@ function SidebarContent({
       </Link>
 
       {/* Premium Navigation Links */}
-      <div className="flex flex-col gap-1 border-b border-[#2e2e44] pb-2 mt-1">
+      <div className="flex flex-col gap-1 border-b border-white/5 pb-2 mt-1">
         <Link
-          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          className="flex min-h-8 items-center gap-3 rounded-xl px-2 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
           onClick={onCloseMobile}
           to="/favorites"
         >
@@ -472,7 +472,7 @@ function SidebarContent({
           รายการโปรด
         </Link>
         <Link
-          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          className="flex min-h-8 items-center gap-3 rounded-xl px-2 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
           onClick={onCloseMobile}
           to="/works"
         >
@@ -480,7 +480,7 @@ function SidebarContent({
           ผลงานของฉัน
         </Link>
         <Link
-          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          className="flex min-h-8 items-center gap-3 rounded-xl px-2 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
           onClick={onCloseMobile}
           to="/creators"
         >
@@ -488,7 +488,7 @@ function SidebarContent({
           อันดับนักสร้าง
         </Link>
         <Link
-          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          className="flex min-h-8 items-center gap-3 rounded-xl px-2 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
           onClick={onCloseMobile}
           to="/announcements"
         >
@@ -496,7 +496,7 @@ function SidebarContent({
           ประกาศระบบ
         </Link>
         <Link
-          className="flex min-h-8 items-center gap-3 rounded-lg px-2 text-xs font-bold text-slate-300 hover:bg-[#2e2e44] hover:text-white transition"
+          className="flex min-h-8 items-center gap-3 rounded-xl px-2 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
           onClick={onCloseMobile}
           to="/support"
         >
@@ -505,9 +505,9 @@ function SidebarContent({
         </Link>
       </div>
 
-      <div className="mt-2 flex items-center justify-between border-b border-[#2e2e44] pb-2">
+      <div className="mt-2 flex items-center justify-between border-b border-white/5 pb-2">
         <Link
-          className="relative text-sm font-black text-[#a855f7] after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-[#a855f7]"
+          className="relative text-sm font-black text-[#ac4bff] after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-[#ac4bff]"
           onClick={onCloseMobile}
           to="/chats"
         >
@@ -519,10 +519,10 @@ function SidebarContent({
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_36px] gap-2">
-        <label className="flex min-h-10 items-center gap-2 rounded-full bg-[#1e1e34] border border-[#2e2e44] px-3 text-white/45 focus-within:border-[#a855f7] focus-within:ring-1 focus-within:ring-[#a855f7]/25 focus-within:bg-[#1e1e34]">
+        <label className="flex min-h-10 items-center gap-2 rounded-xl bg-[#080a1a]/60 border border-white/10 px-3 text-slate-400 focus-within:border-[#ac4bff] focus-within:ring-4 focus-within:ring-[#ac4bff]/10 focus-within:bg-[#080a1a]">
           <Search size={16} />
           <input
-            className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/42"
+            className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-slate-500"
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="ค้นหาแชท"
             value={searchTerm}
@@ -530,7 +530,7 @@ function SidebarContent({
         </label>
         <button type="button"
           aria-disabled={Boolean(refreshDisabledReason)}
-          className="grid size-10 place-items-center rounded-full bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+          className="grid size-10 place-items-center rounded-xl bg-white/5 border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
           data-testid="chat-sidebar-refresh"
           disabled={Boolean(refreshDisabledReason)}
           onClick={onLoadChatHistory}
@@ -541,12 +541,12 @@ function SidebarContent({
       </div>
 
       {isSelectionMode && (
-        <div className="rounded-lg border border-white/10 bg-white/6 p-2" data-testid="chat-selection-toolbar">
+        <div className="missai-card rounded-xl bg-[#0b0d1f]/60 p-2.5 shadow-lg border border-white/5" data-testid="chat-selection-toolbar">
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="text-xs font-black text-white">เลือกไว้ {selectedChatIds.length.toLocaleString()} แชท</span>
             <button
               aria-label="ยกเลิกการเลือกแชท"
-              className="grid size-7 place-items-center rounded-md text-white/55 transition hover:bg-white/8 hover:text-white"
+              className="grid size-7 place-items-center rounded-xl text-white/55 transition hover:bg-white/8 hover:text-white"
               data-testid="chat-selection-cancel"
               onClick={clearSelection}
               type="button"
@@ -556,7 +556,7 @@ function SidebarContent({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button type="button"
-              className="min-h-9 rounded-lg bg-white px-2 text-xs font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-45"
+              className="min-h-9 rounded-xl bg-white px-2 text-xs font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
               aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-archive"
               disabled={Boolean(selectionActionDisabledReason)}
@@ -566,7 +566,7 @@ function SidebarContent({
               จัดเก็บ
             </button>
             <button type="button"
-              className="min-h-9 rounded-lg bg-rose-500 px-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+              className="min-h-9 rounded-xl bg-rose-600 px-2 text-xs font-black text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-45"
               aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-delete"
               disabled={Boolean(selectionActionDisabledReason)}
@@ -580,7 +580,7 @@ function SidebarContent({
       )}
 
       <section className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <p className="mb-2 mt-3 text-xs font-black text-amber-300">ตัวละคร</p>
+        <p className="mb-2 mt-3 text-xs font-black text-[#d9b3ff]/80">ตัวละคร</p>
         <div className="space-y-1">
           {filteredCharacters.map((item) => (
             <SidebarCharacterRow
@@ -591,7 +591,7 @@ function SidebarContent({
             />
           ))}
           {filteredCharacters.length === 0 && (
-            <p className="rounded-lg border border-white/8 bg-white/5 p-3 text-xs leading-5 text-white/45">
+            <p className="rounded-xl border border-white/5 bg-[#0b0d1f]/40 p-3 text-xs leading-5 text-slate-400">
               ไม่พบตัวละครที่ตรงกับคำค้นหา
             </p>
           )}
@@ -599,15 +599,15 @@ function SidebarContent({
 
         {pinnedChats.length > 0 && (
           <>
-            <p className="mb-2 mt-4 text-xs font-black text-amber-300">ปักหมุดแชท</p>
+            <p className="mb-2 mt-4 text-xs font-black text-[#f9c86d]">ปักหมุดแชท</p>
             <div className="space-y-1">{pinnedChats.map((chat, index) => renderChatRow(chat, index, pinnedChats))}</div>
           </>
         )}
 
-        <p className="mb-2 mt-4 text-xs font-black text-white/30">ล่าสุด</p>
+        <p className="mb-2 mt-4 text-xs font-black text-slate-500">ล่าสุด</p>
         <div className="space-y-1">
           {filteredChats.length === 0 && (
-            <p className="rounded-lg border border-white/8 bg-white/5 p-3 text-xs leading-5 text-white/45">
+            <p className="rounded-xl border border-white/5 bg-[#0b0d1f]/40 p-3 text-xs leading-5 text-slate-400">
               {isHistoryLoading ? 'กำลังโหลด...' : normalizedSearch ? 'ไม่พบแชทที่ตรงกับคำค้นหา' : 'ยังไม่มีแชทที่บันทึกไว้'}
             </p>
           )}
@@ -615,9 +615,9 @@ function SidebarContent({
         </div>
       </section>
 
-      <div className="flex items-center gap-2 border-t border-white/10 pt-2 text-white/45">
+      <div className="flex items-center gap-2 border-t border-white/5 pt-2 text-slate-400">
         <Link
-          className="grid size-8 place-items-center rounded-lg transition hover:bg-white/8 hover:text-white"
+          className="grid size-8 place-items-center rounded-xl transition hover:bg-white/5 hover:text-white"
           onClick={onCloseMobile}
           title="อีเวนต์"
           to="/events"
@@ -625,7 +625,7 @@ function SidebarContent({
           <Disc3 size={16} />
         </Link>
         <Link
-          className="grid size-8 place-items-center rounded-lg transition hover:bg-white/8 hover:text-white"
+          className="grid size-8 place-items-center rounded-xl transition hover:bg-white/5 hover:text-white"
           onClick={onCloseMobile}
           title="แชททั้งหมด"
           to="/chats"
@@ -633,7 +633,7 @@ function SidebarContent({
           <Globe2 size={16} />
         </Link>
         <Link
-          className="grid size-8 place-items-center rounded-lg transition hover:bg-white/8 hover:text-white"
+          className="grid size-8 place-items-center rounded-xl transition hover:bg-white/5 hover:text-white"
           onClick={onCloseMobile}
           title="สร้างตัวละคร"
           to="/create"
@@ -641,7 +641,7 @@ function SidebarContent({
           <Sparkle size={16} />
         </Link>
         <Link
-          className="ml-auto grid size-8 place-items-center rounded-lg transition hover:bg-white/8 hover:text-white"
+          className="ml-auto grid size-8 place-items-center rounded-xl transition hover:bg-white/5 hover:text-white"
           onClick={onCloseMobile}
           title="ตั้งค่า"
           to="/profile"
@@ -649,18 +649,18 @@ function SidebarContent({
           <Settings size={16} />
         </Link>
       </div>
-      <p className="m-0 text-[11px] leading-5 text-white/35">{connectionNote}</p>
+      <p className="m-0 text-[11px] leading-5 text-slate-500">{connectionNote}</p>
 
       {renameTarget && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm" data-testid="chat-rename-dialog">
-          <div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#151518] p-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="chat-rename-dialog">
+          <div className="missai-card w-full max-w-sm rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="m-0 text-base font-black text-white">แก้ไขชื่อแชท</p>
-                <p className="m-0 mt-1 text-xs font-bold leading-5 text-white/45">ตั้งชื่อให้จำง่ายขึ้นโดยไม่กระทบบทสนทนาเดิม</p>
+                <p className="font-display m-0 text-lg font-black text-white">แก้ไขชื่อแชท</p>
+                <p className="m-0 mt-1.5 text-xs font-semibold leading-relaxed text-slate-400">ตั้งชื่อให้จำง่ายขึ้นโดยไม่กระทบบทสนทนาเดิม</p>
               </div>
               <button
-                className="grid size-8 place-items-center rounded-lg text-white/45 transition hover:bg-white/8 hover:text-white"
+                className="grid size-8 place-items-center rounded-xl text-slate-400 transition hover:bg-white/8 hover:text-white"
                 onClick={() => setRenameTarget(null)}
                 type="button"
               >
@@ -668,7 +668,7 @@ function SidebarContent({
               </button>
             </div>
             <input
-              className="mt-4 min-h-11 w-full rounded-lg border border-white/10 bg-white/6 px-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-orange-400/70 focus:ring-4 focus:ring-orange-400/10"
+              className="mt-4 min-h-11 w-full rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-bold text-white outline-none focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10"
               data-testid="chat-rename-input"
               onChange={(event) => setRenameValue(event.target.value)}
               onKeyDown={(event) => {
@@ -678,9 +678,9 @@ function SidebarContent({
               placeholder="ชื่อแชท"
               value={renameValue}
             />
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-10 rounded-lg border border-white/10 px-3 text-sm font-black text-white/75 transition hover:bg-white/8"
+                className="min-h-11 rounded-xl border border-white/10 px-3 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
                 data-testid="chat-rename-cancel"
                 onClick={() => setRenameTarget(null)}
                 type="button"
@@ -688,7 +688,7 @@ function SidebarContent({
                 ยกเลิก
               </button>
               <button
-                className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
+                className="min-h-11 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-3 text-sm font-black text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45 missai-glow"
                 aria-disabled={Boolean(renameConfirmDisabledReason)}
                 data-testid="chat-rename-confirm"
                 disabled={Boolean(renameConfirmDisabledReason)}
@@ -704,15 +704,15 @@ function SidebarContent({
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm" data-testid="chat-delete-dialog">
-          <div className="w-full max-w-sm rounded-xl border border-rose-400/20 bg-[#151518] p-4 shadow-2xl">
-            <p className="m-0 text-base font-black text-white">ลบแชทนี้?</p>
-            <p className="m-0 mt-2 text-sm font-bold leading-6 text-white/55">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="chat-delete-dialog">
+          <div className="missai-card w-full max-w-sm rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+            <p className="font-display m-0 text-lg font-black text-white">ลบแชทนี้?</p>
+            <p className="m-0 mt-2 text-sm font-semibold leading-relaxed text-slate-400">
               {deleteTarget.title || deleteTarget.characterName} จะถูกนำออกจากรายการแชทของคุณ
             </p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-10 rounded-lg border border-white/10 px-3 text-sm font-black text-white/75 transition hover:bg-white/8"
+                className="min-h-11 rounded-xl border border-white/10 px-3 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
                 data-testid="chat-delete-cancel"
                 onClick={() => setDeleteTarget(null)}
                 type="button"
@@ -720,7 +720,7 @@ function SidebarContent({
                 ยกเลิก
               </button>
               <button type="button"
-                className="min-h-10 rounded-lg bg-rose-500 px-3 text-sm font-black text-white transition hover:bg-rose-400"
+                className="min-h-11 rounded-xl bg-rose-600 px-3 text-sm font-black text-white transition hover:bg-rose-500"
                 data-testid="chat-delete-confirm"
                 onClick={confirmDeleteChat}
               >
@@ -732,15 +732,15 @@ function SidebarContent({
       )}
 
       {bulkDeleteIds.length > 0 && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm" data-testid="chat-bulk-delete-dialog">
-          <div className="w-full max-w-sm rounded-xl border border-rose-400/20 bg-[#151518] p-4 shadow-2xl">
-            <p className="m-0 text-base font-black text-white">ลบแชทที่เลือก?</p>
-            <p className="m-0 mt-2 text-sm font-bold leading-6 text-white/55">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="chat-bulk-delete-dialog">
+          <div className="missai-card w-full max-w-sm rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+            <p className="font-display m-0 text-lg font-black text-white">ลบแชทที่เลือก?</p>
+            <p className="m-0 mt-2 text-sm font-semibold leading-relaxed text-slate-400">
               แชท {bulkDeleteIds.length.toLocaleString()} รายการจะถูกนำออกจากรายการแชทของคุณ
             </p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-10 rounded-lg border border-white/10 px-3 text-sm font-black text-white/75 transition hover:bg-white/8"
+                className="min-h-11 rounded-xl border border-white/10 px-3 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
                 data-testid="chat-bulk-delete-cancel"
                 onClick={() => setBulkDeleteIds([])}
                 type="button"
@@ -748,7 +748,7 @@ function SidebarContent({
                 ยกเลิก
               </button>
               <button type="button"
-                className="min-h-10 rounded-lg bg-rose-500 px-3 text-sm font-black text-white transition hover:bg-rose-400"
+                className="min-h-11 rounded-xl bg-rose-600 px-3 text-sm font-black text-white transition hover:bg-rose-500"
                 data-testid="chat-bulk-delete-confirm"
                 onClick={confirmDeleteSelectedChats}
               >

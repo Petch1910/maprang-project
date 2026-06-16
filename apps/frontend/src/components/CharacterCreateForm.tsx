@@ -52,11 +52,11 @@ export type CreatorDraftStatus = {
 }
 
 const inputClass =
-  'min-h-11 rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 text-sm font-semibold text-white outline-none transition placeholder:text-white/30 focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/20'
+  'min-h-11 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3.5 text-sm font-semibold text-white outline-none transition placeholder:text-slate-500 focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10'
 const textareaClass =
-  'min-h-24 resize-y rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 py-2.5 text-sm font-semibold leading-relaxed text-white outline-none transition placeholder:text-white/30 focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/20'
+  'min-h-24 resize-y rounded-xl border border-white/10 bg-[#080a1a]/60 px-3.5 py-2.5 text-sm font-semibold leading-relaxed text-white outline-none transition placeholder:text-slate-500 focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10'
 const quietButtonClass =
-  'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 text-xs font-bold text-[#9ca3af] transition hover:bg-[#24243a] hover:text-white'
+  'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-slate-300 transition hover:bg-white/10 hover:text-white'
 
 const emptyCharacter = {
   name: '',
@@ -143,15 +143,15 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 grid size-8 flex-none place-items-center rounded-xl border border-[#a855f7]/30 bg-[#a855f7]/15 text-xs font-black text-[#d8b4fe]">
+      <span className="mt-0.5 grid size-8 flex-none place-items-center rounded-xl border border-[#ac4bff]/30 bg-[#ac4bff]/15 text-xs font-black text-[#d9b3ff]">
         {step}
       </span>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <Icon className="text-[#a855f7]" size={17} />
-          <h3 className="m-0 text-base font-black text-white">{title}</h3>
+          <Icon className="text-[#ac4bff]" size={17} />
+          <h3 className="font-display m-0 text-base font-black text-white">{title}</h3>
         </div>
-        <p className="m-0 mt-1 text-xs font-medium leading-5 text-[#9ca3af]">{detail}</p>
+        <p className="m-0 mt-1 text-xs font-medium leading-5 text-slate-400">{detail}</p>
       </div>
     </div>
   )
@@ -506,9 +506,9 @@ export function CharacterCreateForm({
   }
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/90 text-white shadow-2xl backdrop-blur-md">
+    <section className="missai-card overflow-hidden rounded-2xl bg-[#0b0d1f]/95 text-white shadow-2xl backdrop-blur-md">
       <button
-        className="flex min-h-12 w-full items-center justify-between gap-3 border-b border-[#2e2e44] bg-[#1e1e34] px-4 text-left text-sm font-black text-white transition hover:bg-[#24243a] sm:px-5"
+        className="flex min-h-12 w-full items-center justify-between gap-3 border-b border-white/5 bg-[#0b0d1f]/40 px-4 text-left text-sm font-black text-white transition hover:bg-white/5 sm:px-5"
         aria-controls="creator-form-panel"
         aria-expanded={isOpen}
         data-testid="creator-form-toggle"
@@ -516,9 +516,9 @@ export function CharacterCreateForm({
         type="button"
       >
         <span className="flex min-w-0 items-center gap-2">
-          <Bot className="text-[#a855f7]" size={18} />
+          <Bot className="text-[#ac4bff]" size={18} />
           <span>สร้างตัวละครใหม่</span>
-          <span className="hidden rounded-full border border-[#2e2e44] bg-[#1a1a2e] px-2.5 py-1 text-[11px] font-black text-white/55 sm:inline-flex">
+          <span className="hidden rounded-full border border-white/10 bg-[#080a1a]/60 px-2.5 py-1 text-[11px] font-black text-slate-400 sm:inline-flex">
             {status.readinessLabel}
           </span>
         </span>
@@ -526,7 +526,7 @@ export function CharacterCreateForm({
       </button>
 
       {isOpen && (
-        <div className="divide-y divide-[#2e2e44]" id="creator-form-panel">
+        <div className="divide-y divide-white/5" id="creator-form-panel">
           <div className="grid gap-4 p-4 sm:p-5">
             <SectionHeader
               detail="เริ่มจากภาพเหมือนที่ผู้ใช้คุ้นกับ Khuiai แล้วให้ Maprang ช่วยคิดรายละเอียดต่อ"
@@ -537,7 +537,7 @@ export function CharacterCreateForm({
 
             <div className="grid justify-items-center gap-4">
               <div className="w-full max-w-[280px]">
-                <div className="aspect-[3/4] overflow-hidden rounded-xl border border-[#2e2e44] bg-[#1a1a2e]">
+                <div className="aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-[#080a1a]">
                   {hasAvatar ? (
                     <img alt="รูปตัวละคร" className="h-full w-full object-cover" src={form.avatarUrl} />
                   ) : (
@@ -561,7 +561,7 @@ export function CharacterCreateForm({
                           setStoredAvatarSource(img.source)
                         }}
                         className={`relative aspect-[3/4] w-14 flex-none overflow-hidden rounded-md border-2 transition-all ${
-                          form.avatarUrl === img.url ? 'border-[#a855f7] shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'border-transparent hover:border-white/30'
+                          form.avatarUrl === img.url ? 'border-[#ac4bff] shadow-[0_0_10px_rgba(172,75,255,0.3)]' : 'border-transparent hover:border-white/30'
                         }`}
                       >
                         <img alt="ประวัติรูป" className="h-full w-full object-cover" src={img.url} />
@@ -574,7 +574,7 @@ export function CharacterCreateForm({
               <div className="grid w-full max-w-xl gap-3">
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#a855f7] px-3 text-xs font-bold text-white transition hover:bg-[#9333ea] shadow-lg disabled:opacity-60"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-3.5 text-xs font-black text-white transition hover:brightness-110 shadow-lg disabled:opacity-60 missai-glow"
                     aria-disabled={isGeneratingDraft}
                     data-testid="creator-ai-draft"
                     disabled={isGeneratingDraft}
@@ -586,7 +586,7 @@ export function CharacterCreateForm({
                     {isGeneratingDraft ? 'ร่าง...' : 'รูป+ข้อความ'}
                   </button>
                   <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 text-xs font-bold text-[#9ca3af] transition hover:bg-[#24243a] hover:text-white disabled:opacity-60"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-slate-300 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
                     aria-disabled={isGeneratingDraft}
                     data-testid="creator-ai-image-only"
                     disabled={isGeneratingDraft}
@@ -599,7 +599,7 @@ export function CharacterCreateForm({
                   </button>
                   <label
                     aria-disabled={isUploading}
-                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 text-xs font-bold text-[#9ca3af] transition hover:bg-[#24243a] hover:text-white ${
+                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-slate-300 transition hover:bg-white/10 hover:text-white ${
                       isUploading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
                     }`}
                     title={uploadDisabledReason || 'อัปโหลดรูปตัวละครจากเครื่อง'}
@@ -618,7 +618,7 @@ export function CharacterCreateForm({
                     />
                   </label>
                   <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 text-xs font-bold text-[#9ca3af] transition hover:bg-[#24243a] hover:text-white"
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-slate-300 transition hover:bg-white/10 hover:text-white"
                     onClick={() => {
                       if (avatarSource === 'placeholder' || avatarSource === 'provider') {
                         update('avatarUrl', '')
@@ -639,7 +639,7 @@ export function CharacterCreateForm({
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <select
-                    className="h-10 rounded-xl border border-[#2e2e44] bg-[#1e1e34] px-3 text-sm font-semibold text-white outline-none focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/20"
+                    className="h-10 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-semibold text-white outline-none focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10"
                     data-testid="creator-image-style"
                     value={imageStyle}
                     onChange={(e) => setImageStyle(e.target.value)}
@@ -653,7 +653,7 @@ export function CharacterCreateForm({
                   </select>
                 </div>
 
-                <div className="rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50 p-3 text-xs font-medium leading-5 text-[#9ca3af]">
+                <div className="rounded-xl border border-white/5 bg-[#0b0d1f]/40 p-3 text-xs font-semibold leading-relaxed text-slate-400">
                   กด AI สร้างรูป + เนื้อหาเพื่อให้ระบบช่วยร่างตัวละคร ถ้ายังไม่ได้เชื่อมระบบสร้างรูปจริง ระบบจะแสดงภาพร่างสำหรับจัดฟอร์มและคิดบุคลิกต่อได้ทันที
                 </div>
 
@@ -821,12 +821,12 @@ export function CharacterCreateForm({
               />
             </FieldBlock>
 
-            <details className="rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50" open>
+            <details className="rounded-xl border border-white/5 bg-[#0b0d1f]/40" open>
               <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 text-sm font-black text-white">
                 รายละเอียดขั้นสูงจากดราฟต์
                 <ChevronDown size={17} />
               </summary>
-              <div className="grid gap-3 border-t border-[#2e2e44] p-3">
+              <div className="grid gap-3 border-t border-white/5 p-3.5">
                 <FieldBlock label="ประวัติตัวละคร">
                   <textarea
                     className={textareaClass}
@@ -883,13 +883,13 @@ export function CharacterCreateForm({
 
             <CreatorReadinessPanel analysis={tagAnalysis} />
 
-            <div className="rounded-xl border border-[#2e2e44] bg-[#1a1a2e]/50 p-3 text-xs leading-relaxed text-white/50">
+            <div className="rounded-xl border border-white/5 bg-[#0b0d1f]/40 p-3.5 text-xs leading-relaxed text-slate-400">
               <p className="m-0 font-black text-white">
                 แท็กค้นหา {tagAnalysis.discovery.length}, แท็กระบบ {tagAnalysis.engine.length}, แท็กความปลอดภัย {tagAnalysis.safety.length}
               </p>
               {tagAnalysis.unknown.length > 0 && <p className="mt-1 mb-0">แท็กที่ยังไม่รู้จัก: {tagAnalysis.unknown.join(', ')}</p>}
               {tagAnalysis.issues.length === 0 && (
-                <p className="mt-2 mb-0 flex items-center gap-2 font-black text-emerald-100">
+                <p className="mt-2 mb-0 flex items-center gap-2 font-black text-emerald-300">
                   <CheckCircle2 size={15} />
                   ยังไม่พบแท็กที่ขัดแย้งกัน
                 </p>
@@ -897,7 +897,7 @@ export function CharacterCreateForm({
               {tagAnalysis.issues.map((issue) => (
                 <p
                   className={`mt-2 mb-0 flex items-start gap-2 font-bold ${
-                    issue.level === 'danger' ? 'text-red-200' : 'text-amber-100'
+                    issue.level === 'danger' ? 'text-rose-400' : 'text-amber-300'
                   }`}
                   key={issue.message}
                 >
@@ -920,8 +920,8 @@ export function CharacterCreateForm({
             <RelationshipPreviewPanel tags={form.tags} onPreviewComplete={() => setHasPreviewRun(true)} />
           </div>
 
-          <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-[#2e2e44] bg-[#1e1e34]/95 p-4 shadow-2xl backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <div className="min-w-0 text-xs font-bold leading-5 text-white/50">
+          <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-white/5 bg-[#0b0d1f]/95 p-4 shadow-2xl backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="min-w-0 text-xs font-bold leading-5 text-slate-500">
               <span className="block font-bold text-white">{status.readinessLabel}</span>
               {note ? <span>{note}</span> : <span>สร้างเป็นดราฟต์ส่วนตัวก่อน แล้วค่อยตรวจในหน้าโปรไฟล์ตัวละคร</span>}
             </div>
@@ -946,7 +946,7 @@ export function CharacterCreateForm({
                 ล้างฟอร์ม
               </button>
               <button type="button"
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-slate-950 transition hover:bg-white/90 disabled:opacity-60"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4.5 text-sm font-black text-white transition hover:brightness-110 disabled:opacity-60 missai-glow"
                 aria-disabled={Boolean(submitDisabledReason)}
                 data-testid="creator-submit"
                 disabled={!canSubmit}
