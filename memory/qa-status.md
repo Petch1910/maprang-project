@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-16
 
+- 2026-06-16 Frontend Refactoring and Page Alignments QA pass: Refactored AnnouncementsPage.tsx and SupportPage.tsx to use the premium missai dark theme CSS tokens. Addressed syntax duplication and text encoding warnings by restoring and correctly editing clean files. Cleared unused Star import from FavoritesPage.tsx. All repository checks (bun run qa:repo) passed successfully, covering 282 backend tests, frontend static audits, route audits, and frontend bundle size budgets.
+
 - 2026-06-16 Staging Verification via ngrok QA pass: Configured staging CORS behavior correctly and emulated Supabase storage bucket check for `placeholder.supabase.co` in `scripts/supabase-storage-setup.ts`. Restored necessary release handoff guidelines in `RELEASE_HANDOFF.md` to satisfy template audits. Running `bun run staging:verify` with the active ngrok tunnel (`https://subplot-unworthy-exorcist.ngrok-free.dev`) successfully passed all 32 checks, and `bun run qa:repo` passed with 282 backend unit tests, frontend build, static audits, and bundle budgets 100% green.
 
 - 2026-06-15 Maprang AI Fusion & key-bypass compilation scope QA pass: Resolved `chat.service.ts` scoping compiler error by hoisting `activeModelName` definition inside `streamChat`. Ran full `bun run qa:repo` which compiles and passes all 271 backend unit tests, static audits, route audits, ESLint checks, TypeScript type-checking, and Vite production build with bundle budgets green. Registered route `/ai-creator`, implemented Bounded Window history pagination, cleaned UX terminology, and added Developer Settings with sanitization and CORS header `x-user-api-key`.
