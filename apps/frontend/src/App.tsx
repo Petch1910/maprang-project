@@ -215,20 +215,20 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#18182f] text-white">
+    <div className="min-h-screen missai-aurora text-white">
       <AgeGate />
 
       {/* Modern Top Navigation */}
-      <header className="sticky top-0 z-50 border-b border-[#2e2e44] bg-[#1e1e34]/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#080a1a]/80 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <NavLink to="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-pink-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] missai-glow">
                 <span className="text-xl font-black">M</span>
               </div>
               <div className="hidden sm:block">
-                <span className="text-lg font-black">MAPRANG</span>
+                <span className="text-lg font-black tracking-wide font-display">MAPRANG</span>
                 <p className="text-xs text-slate-400">AI Roleplay</p>
               </div>
             </NavLink>
@@ -242,10 +242,10 @@ function App() {
                   end={item.to === '/'}
                   onMouseEnter={() => preloadRoute(item.to)}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                    `flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-black transition ${
                       isActive
-                        ? 'bg-[#a855f7] text-white shadow-[0_4px_12px_rgba(168,85,247,0.3)]'
-                        : 'text-slate-400 hover:bg-[#2e2e44] hover:text-white'
+                        ? 'bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white missai-glow'
+                        : 'text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white'
                     }`
                   }
                 >
@@ -260,7 +260,7 @@ function App() {
               {/* Wallet */}
               <NavLink
                 to="/wallet"
-                className="flex items-center gap-2 rounded-full bg-yellow-600/20 border border-yellow-500/30 px-4 py-2 text-sm font-bold text-yellow-400 transition hover:bg-yellow-600/30"
+                className="flex items-center gap-2 rounded-full border border-[#f99c00]/30 bg-[#f99c00]/10 px-4 py-2 text-sm font-black text-[#f9c86d] transition hover:brightness-110"
               >
                 <Coins className="h-4 w-4" />
                 <span className="hidden sm:inline">โทเคน</span>
@@ -270,7 +270,7 @@ function App() {
               {/* Events (with badge) */}
               <NavLink
                 to="/events"
-                className="relative rounded-lg p-2 text-slate-400 transition hover:bg-[#2e2e44] hover:text-white"
+                className="relative rounded-xl border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
                 title="อีเวนต์"
               >
                 <Bell className="h-5 w-5" />
@@ -285,7 +285,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="md:hidden rounded-lg p-2 text-slate-400 transition hover:bg-[#2e2e44] hover:text-white"
+                className="md:hidden rounded-xl border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
                 aria-label="เมนู"
               >
                 {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -296,7 +296,7 @@ function App() {
 
         {/* Mobile Menu Dropdown */}
         {showMobileMenu && (
-          <div className="border-t border-[#2e2e44] bg-[#1e1e34]/98 backdrop-blur-xl md:hidden">
+          <div className="border-t border-white/10 bg-[#0b0d1f]/95 backdrop-blur-xl md:hidden">
             <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
               {mobileDropdownNavItems.map((item) => (
                 <NavLink
@@ -304,10 +304,10 @@ function App() {
                   to={item.to}
                   end={item.to === '/'}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+                    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition ${
                       isActive
-                        ? 'bg-[#a855f7] text-white shadow-[0_4px_12px_rgba(168,85,247,0.3)]'
-                        : 'text-slate-400 hover:bg-[#2e2e44] hover:text-white'
+                        ? 'bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white missai-glow'
+                        : 'text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white'
                     }`
                   }
                 >
@@ -325,28 +325,26 @@ function App() {
 
       {/* Bottom Tab Navigation (Mobile Only) */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#2e2e44] bg-[#1e1e34]/98 backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-white/10 bg-[#0b0d1f]/90 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden"
         data-testid="app-mobile-nav"
       >
-        <div className="flex items-center justify-around px-2 py-2">
-          {primaryNavItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              data-testid={`app-mobile-nav-${item.to === '/' ? 'home' : item.to.slice(1)}`}
-              onTouchStart={() => preloadRoute(item.to)}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-xs font-bold transition ${
-                  isActive ? 'text-[#a855f7]' : 'text-slate-500'
-                }`
-              }
-            >
-              <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </div>
+        {primaryNavItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === '/'}
+            data-testid={`app-mobile-nav-${item.to === '/' ? 'home' : item.to.slice(1)}`}
+            onTouchStart={() => preloadRoute(item.to)}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-[11px] font-black transition ${
+                isActive ? 'bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] text-white missai-glow' : 'text-slate-400'
+              }`
+            }
+          >
+            <item.icon className="h-5 w-5" />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
       </nav>
 
       {/* Toast Notifications */}

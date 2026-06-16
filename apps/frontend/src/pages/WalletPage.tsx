@@ -171,21 +171,21 @@ export function WalletPage() {
 
   return (
     <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <section className="overflow-hidden rounded-lg border border-white/10 bg-[#18181d]/92 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
+      <section className="missai-card overflow-hidden rounded-2xl">
         <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_260px] lg:p-6">
           <div className="min-w-0">
-            <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
+            <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-[#ac4bff] uppercase">
               <Coins size={16} />
               กระเป๋าโทเคน
             </p>
-            <h1 className="m-0 mt-2 break-words text-3xl font-black tracking-normal text-white">
+            <h1 className="font-display m-0 mt-2 break-words text-3xl font-black tracking-normal text-[#f9c86d]">
               {balanceLabel}
             </h1>
-            <p className="m-0 mt-2 max-w-2xl text-sm font-bold leading-6 text-white/58">
+            <p className="m-0 mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#9ca3af]">
               ดูยอดโทเคน การใช้งานล่าสุด และความพร้อมสำหรับฉากยาวๆ
             </p>
             {note && (
-              <p className="m-0 mt-4 rounded-lg border border-white/10 bg-white/7 p-3 text-sm font-bold text-white/70" data-testid="wallet-note">
+              <p className="m-0 mt-4 rounded-xl border border-[#ac4bff]/20 bg-[#ac4bff]/10 p-3 text-sm font-bold text-[#d9b3ff]" data-testid="wallet-note">
                 {note}
               </p>
             )}
@@ -194,7 +194,7 @@ export function WalletPage() {
           <div className="grid gap-2">
             <button
               aria-disabled={isLoading}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-sm font-black text-white transition hover:brightness-110 missai-glow disabled:opacity-50"
               data-testid="wallet-refresh"
               disabled={isLoading}
               onClick={loadWallet}
@@ -205,7 +205,7 @@ export function WalletPage() {
               รีเฟรช
             </button>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
               to="/profile"
             >
               แก้ตัวตนผู้เล่น
@@ -215,24 +215,24 @@ export function WalletPage() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="missai-card rounded-2xl p-4">
           <p className="m-0 text-sm font-black text-white/48">ใช้ไปทั้งหมด</p>
-          <p className="m-0 mt-2 text-2xl font-black text-white">{totalTokensLabel}</p>
+          <p className="font-display m-0 mt-2 text-2xl font-black text-white">{totalTokensLabel}</p>
         </div>
-        <div className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="missai-card rounded-2xl p-4">
           <p className="m-0 text-sm font-black text-white/48">จำนวนคำขอ</p>
-          <p className="m-0 mt-2 text-2xl font-black text-white">{requestCountLabel}</p>
+          <p className="font-display m-0 mt-2 text-2xl font-black text-white">{requestCountLabel}</p>
         </div>
-        <div className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="missai-card rounded-2xl p-4">
           <p className="m-0 text-sm font-black text-white/48">ค่าใช้จ่ายรวม</p>
-          <p className="m-0 mt-2 text-2xl font-black text-white">{totalCostLabel}</p>
+          <p className="font-display m-0 mt-2 text-2xl font-black text-white">{totalCostLabel}</p>
         </div>
-        <div className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="missai-card rounded-2xl p-4">
           <p className="m-0 flex items-center gap-2 text-sm font-black text-white/48">
             <Gauge size={16} />
             คาดว่าคุยได้อีก
           </p>
-          <p className="m-0 mt-2 text-2xl font-black text-white">{estimatedRemainingLabel}</p>
+          <p className="font-display m-0 mt-2 text-2xl font-black text-[#f9c86d]">{estimatedRemainingLabel}</p>
           <p className="m-0 mt-1 text-xs font-bold text-white/35">
             เฉลี่ย {summary?.usage.estimate.averageTokensPerRequest.toLocaleString() ?? 0} โทเคน/รอบ
           </p>
@@ -241,13 +241,13 @@ export function WalletPage() {
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
         <div
-          className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]"
+          className="missai-card rounded-2xl p-5"
           data-testid="wallet-cost-by-model"
         >
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-                <BarChart3 size={17} />
+                <BarChart3 size={17} className="text-[#ac4bff]" />
                 ต้นทุนแยกตามโมเดล
               </p>
               <p className="m-0 mt-1 text-xs font-bold text-white/45">ใช้ดูว่าโมเดลไหนกินโทเคนและเงินมากที่สุด</p>
@@ -263,17 +263,17 @@ export function WalletPage() {
               {summary.usage.byModel.map((item) => {
                 const tokenShare = summary.usage.totalTokens > 0 ? Math.round((item.tokens / summary.usage.totalTokens) * 100) : 0
                 return (
-                  <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={item.modelName ?? 'unknown-model'}>
+                  <article className="rounded-xl border border-white/10 bg-[#080a1a]/40 p-3.5" key={item.modelName ?? 'unknown-model'}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="m-0 min-w-0 truncate text-sm font-black text-white">
                         {item.modelName ?? 'โมเดลไม่ระบุ'}
                       </p>
-                      <span className="rounded-full border border-amber-300/25 bg-amber-400/12 px-2.5 py-1 text-xs font-black text-amber-100">
+                      <span className="rounded-full border border-yellow-500/20 bg-yellow-500/10 px-2.5 py-1 text-xs font-black text-[#f9c86d]">
                         {formatCost(item.cost)}
                       </span>
                     </div>
                     <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/8">
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${Math.max(tokenShare, 4)}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6]" style={{ width: `${Math.max(tokenShare, 4)}%` }} />
                     </div>
                     <p className="m-0 mt-2 text-xs font-bold text-white/45">
                       {item.tokens.toLocaleString()} โทเคน / {item.requestCount.toLocaleString()} คำขอ / {tokenShare}%
@@ -286,11 +286,11 @@ export function WalletPage() {
         </div>
 
         <div
-          className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]"
+          className="missai-card rounded-2xl p-5"
           data-testid="wallet-usage-trend"
         >
           <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-            <TrendingDown size={17} />
+            <TrendingDown size={17} className="text-[#ac4bff]" />
             การใช้ 7 วันล่าสุด
           </p>
           <p className="m-0 mt-1 text-xs font-bold text-white/45">ดูจังหวะใช้โทเคนเพื่อประเมินงบและโปรโมชั่น</p>
@@ -307,7 +307,7 @@ export function WalletPage() {
                   <div className="grid grid-cols-[76px_minmax(0,1fr)_auto] items-center gap-3" key={item.date}>
                     <span className="text-xs font-black text-white/45">{formatShortDate(item.date)}</span>
                     <div className="h-3 overflow-hidden rounded-full bg-white/8">
-                      <div className="h-full rounded-full bg-white" style={{ width: `${width}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-[#ac4bff]" style={{ width: `${width}%` }} />
                     </div>
                     <span className="min-w-[4rem] text-right text-xs font-black text-white/70">{item.tokens.toLocaleString()}</span>
                   </div>
@@ -318,11 +318,11 @@ export function WalletPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-end">
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-              <KeyRound size={17} />
+              <KeyRound size={17} className="text-[#ac4bff]" />
               สิทธิ์ผู้ดูแลสำหรับเครื่องนี้
             </p>
             <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/55">
@@ -331,7 +331,7 @@ export function WalletPage() {
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input
-              className="min-h-11 min-w-0 rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+              className="min-h-11 min-w-0 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-bold text-white outline-none focus:border-[#ac4bff]/70"
               data-testid="wallet-admin-key-input"
               onChange={(event) => setAdminKeyInput(event.target.value)}
               placeholder="วาง ADMIN_API_KEY"
@@ -339,7 +339,7 @@ export function WalletPage() {
               value={adminKeyInput}
             />
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
               data-testid="wallet-admin-key-save"
               onClick={saveAdminKey}
               type="button"
@@ -347,7 +347,7 @@ export function WalletPage() {
               บันทึกคีย์
             </button>
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-white/20 hover:bg-white/8"
               data-testid="wallet-admin-key-clear"
               onClick={removeAdminKey}
               type="button"
@@ -359,7 +359,7 @@ export function WalletPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
           <div>
             <p className="m-0 text-sm font-black text-white">ปรับโทเคนโดยผู้ดูแล</p>
@@ -369,7 +369,7 @@ export function WalletPage() {
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input
-              className="min-h-11 min-w-0 rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white outline-none focus:border-amber-400/70"
+              className="min-h-11 min-w-0 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-bold text-white outline-none focus:border-[#ac4bff]/70"
               data-testid="wallet-adjust-amount"
               inputMode="numeric"
               onChange={(event) => setAdjustAmount(event.target.value)}
@@ -377,7 +377,7 @@ export function WalletPage() {
             />
             <button
               aria-disabled={Boolean(adjustTokenDisabledReason)}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-500 px-4 text-sm font-black text-emerald-950 transition hover:bg-emerald-400 disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 text-sm font-black text-white transition hover:brightness-110 disabled:opacity-60"
               data-testid="wallet-adjust-add"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(normalizedAdjustAmount)}
@@ -388,7 +388,7 @@ export function WalletPage() {
             </button>
             <button
               aria-disabled={Boolean(adjustTokenDisabledReason)}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-rose-300/25 bg-rose-400/12 px-4 text-sm font-black text-rose-100 transition hover:bg-rose-400/18 disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-rose-300/20 bg-rose-500/10 px-4 text-sm font-black text-rose-300 transition hover:bg-rose-500/20 disabled:opacity-60"
               data-testid="wallet-adjust-debit"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(-normalizedAdjustAmount)}
@@ -399,18 +399,18 @@ export function WalletPage() {
             </button>
           </div>
           {!hasAdminKey && (
-            <p className="m-0 mt-3 rounded-lg border border-amber-300/25 bg-amber-400/10 p-3 text-sm font-bold text-amber-100">
+            <p className="m-0 mt-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3 text-sm font-bold text-yellow-400">
               ใส่และบันทึก ADMIN_API_KEY ก่อน จึงจะใช้ปุ่มเพิ่ม/หักโทเคนได้
             </p>
           )}
         </div>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-              <ReceiptText size={17} />
+              <ReceiptText size={17} className="text-[#ac4bff]" />
               ประวัติธุรกรรมโทเคน
             </p>
             <p className="m-0 mt-1 text-xs font-bold text-white/45">รายการเพิ่ม/หักยอดที่ตรวจสอบกระเป๋าโทเคนย้อนหลังได้</p>
@@ -447,11 +447,11 @@ export function WalletPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-              <ReceiptText size={17} />
+              <ReceiptText size={17} className="text-[#ac4bff]" />
               การใช้งานล่าสุด
             </p>
             <p className="m-0 mt-1 text-xs font-bold text-white/45">รายการใช้ AI ล่าสุดที่ระบบบันทึกไว้</p>
@@ -485,9 +485,9 @@ export function WalletPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
+      <section className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm leading-6 text-amber-300">
         <p className="m-0 font-black">ระบบกันใช้โทเคนซ้ำ</p>
-        <p className="m-0 mt-1 font-bold text-amber-100/78">
+        <p className="m-0 mt-1 font-bold text-amber-300/78">
           ระหว่าง AI กำลังตอบ ระบบจะปิดการส่งซ้ำเพื่อลดการเรียกใช้งานซ้ำ โทเคนในระบบมีไว้เพื่อการใช้งานจำลอง โดยมีระบบโปรโมชัน รางวัล และการปรับยอดโดยผู้ดูแลระบบเป็นหลัก
         </p>
       </section>

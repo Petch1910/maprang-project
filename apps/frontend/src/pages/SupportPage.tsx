@@ -83,15 +83,15 @@ export function SupportPage() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 lg:py-8">
       {/* Header Banner */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/90 p-6 text-white shadow-2xl backdrop-blur-md">
+      <section className="missai-card flex flex-col gap-3 rounded-2xl p-6 text-white">
         <div className="flex items-center gap-2 text-xs font-bold text-[#d8b4fe]">
           <HelpCircle size={16} className="text-emerald-400" />
-          <span>ศูนย์ช่วยเหลือและบริการ</span>
+          <span className="font-black">ศูนย์ช่วยเหลือและบริการ</span>
           <span className="rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-0.5 text-[10px] text-emerald-400">
             ติดต่อผู้ดูแล
           </span>
         </div>
-        <h1 className="m-0 text-2xl font-black text-white sm:text-3xl">ช่วยเหลือ & ส่งฟีดแบ็ก</h1>
+        <h1 className="font-display m-0 text-2xl font-black text-white sm:text-3xl">ช่วยเหลือ & ส่งฟีดแบ็ก</h1>
         <p className="m-0 text-sm font-semibold leading-6 text-[#9ca3af]">
           ค้นหาคำตอบสำหรับข้อสงสัยทั่วไป หรือส่งเรื่องรายงานบั๊กและข้อเสนอแนะถึงทีมงานพัฒนา Maprang AI
         </p>
@@ -111,8 +111,8 @@ export function SupportPage() {
                 <div
                   key={index}
                   onClick={() => handleFAQToggle(index)}
-                  className={`overflow-hidden rounded-xl border transition cursor-pointer ${
-                    isOpen ? 'border-[#a855f7]/40 bg-[#1e1e34]' : 'border-[#2e2e44] bg-[#1e1e34]/60 hover:bg-[#1e1e34]'
+                  className={`missai-card overflow-hidden rounded-xl transition cursor-pointer ${
+                    isOpen ? 'border-[#ac4bff]/50 bg-[#080a1a]/60' : 'hover:border-[#ac4bff]/30'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3 p-4">
@@ -121,17 +121,17 @@ export function SupportPage() {
                       type="button"
                       aria-label={isOpen ? 'ย่อคำตอบ' : 'แสดงคำตอบ'}
                       title={isOpen ? 'ย่อคำตอบ' : 'แสดงคำตอบ'}
-                      className="grid size-7 flex-shrink-0 place-items-center rounded-lg bg-[#2e2e44] text-slate-400 group-hover:text-white"
+                      className="grid size-7 flex-shrink-0 place-items-center rounded-lg bg-white/5 border border-white/10 text-slate-400 group-hover:text-white"
                     >
                       {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                     </button>
                   </div>
                   <div
                     className={`transition-all duration-300 ${
-                      isOpen ? 'max-h-60 border-t border-[#2e2e44]/40 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+                      isOpen ? 'max-h-60 border-t border-white/10 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
                     }`}
                   >
-                    <p className="m-0 p-4 text-xs font-semibold leading-6 text-slate-300 bg-[#1a1a2e]/30">
+                    <p className="m-0 p-4 text-xs font-semibold leading-6 text-slate-300 bg-[#080a1a]/40">
                       {faq.a}
                     </p>
                   </div>
@@ -146,7 +146,7 @@ export function SupportPage() {
           <h2 className="m-0 text-lg font-black text-white flex items-center gap-2">
             <span>✉️</span> ส่งรายงานและข้อแนะนำ
           </h2>
-          <form onSubmit={handleSubmit} className="rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/70 p-5 space-y-4">
+          <form onSubmit={handleSubmit} className="missai-card rounded-2xl p-5 space-y-4">
             {successMsg && (
               <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs font-bold text-emerald-400">
                 <CheckCircle2 size={16} />
@@ -162,7 +162,7 @@ export function SupportPage() {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full min-h-10 rounded-lg border border-[#2e2e44] bg-[#1e1e34] px-3 text-xs font-bold text-white outline-none focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7]/25"
+                className="w-full min-h-10 rounded-lg border border-white/10 bg-[#080a1a]/60 px-3 text-xs font-bold text-white outline-none focus:border-[#ac4bff] focus:ring-1 focus:ring-[#ac4bff]/25"
               />
             </div>
 
@@ -171,7 +171,7 @@ export function SupportPage() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full min-h-10 rounded-lg border border-[#2e2e44] bg-[#1e1e34] px-3 text-xs font-bold text-white outline-none focus:border-[#a855f7]"
+                className="w-full min-h-10 rounded-lg border border-white/10 bg-[#080a1a]/60 px-3 text-xs font-bold text-white outline-none focus:border-[#ac4bff]"
               >
                 <option value="bug">แจ้งปัญหาการใช้งาน (Bug/Crash)</option>
                 <option value="feature">เสนอแนะแนวทางพัฒนา (Feature Request)</option>
@@ -187,13 +187,13 @@ export function SupportPage() {
                 rows={4}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full rounded-lg border border-[#2e2e44] bg-[#1e1e34] p-3 text-xs font-bold text-white outline-none focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7]/25"
+                className="w-full rounded-lg border border-white/10 bg-[#080a1a]/60 p-3 text-xs font-bold text-white outline-none focus:border-[#ac4bff] focus:ring-1 focus:ring-[#ac4bff]/25"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full min-h-10 flex items-center justify-center gap-2 rounded-xl bg-[#a855f7] text-xs font-black text-white hover:bg-[#a855f7]/95 transition shadow-lg shadow-[#a855f7]/20"
+              className="w-full min-h-10 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-xs font-black text-white hover:brightness-110 transition missai-glow"
             >
               <Send size={13} />
               <span>ส่งคำรายงาน</span>
@@ -212,11 +212,11 @@ export function SupportPage() {
             {tickets.map((ticket) => (
               <div
                 key={ticket.id}
-                className="flex flex-col justify-between rounded-xl border border-[#2e2e44] bg-[#1e1e34]/50 p-4 space-y-2"
+                className="missai-card flex flex-col justify-between rounded-xl p-4 space-y-2"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="rounded bg-[#2e2e44] px-1.5 py-0.5 text-[9px] font-bold text-slate-300">
+                    <span className="rounded bg-white/5 border border-white/10 px-1.5 py-0.5 text-[9px] font-bold text-slate-300">
                       {ticket.category}
                     </span>
                     <span className="text-[10px] font-semibold text-slate-500">{ticket.date}</span>
@@ -224,7 +224,7 @@ export function SupportPage() {
                   <h3 className="mt-2 text-sm font-black text-white leading-normal">{ticket.title}</h3>
                   <p className="mt-1 text-xs text-[#9ca3af] leading-relaxed">{ticket.content}</p>
                 </div>
-                <div className="flex items-center gap-1.5 border-t border-[#2e2e44]/40 pt-2 text-[10px] font-bold">
+                <div className="flex items-center gap-1.5 border-t border-white/10 pt-2 text-[10px] font-bold">
                   {ticket.status === 'pending' ? (
                     <span className="flex items-center gap-1 text-yellow-400">
                       <AlertCircle size={11} /> กำลังตรวจสอบ

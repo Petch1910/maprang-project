@@ -26,24 +26,24 @@ export function WorksPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:py-8">
       {/* Header Banner */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/90 p-6 text-white shadow-2xl backdrop-blur-md">
+      <section className="missai-card flex flex-col gap-3 rounded-2xl p-6 text-white">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs font-bold text-[#d8b4fe]">
             <Folder size={16} className="text-blue-400" />
-            <span>ผลงานของฉัน</span>
+            <span className="font-black">ผลงานของฉัน</span>
             <span className="rounded-full border border-blue-500/30 bg-blue-500/15 px-2.5 py-0.5 text-[10px] text-blue-300">
               {works.length} ตัวละคร
             </span>
           </div>
           <Link
             to="/create"
-            className="flex min-h-9 items-center gap-1.5 rounded-lg bg-[#a855f7] px-4 text-xs font-bold text-white transition hover:bg-[#a855f7]/95 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
+            className="flex min-h-9 items-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-xs font-black text-white transition hover:brightness-110 missai-glow"
           >
             <Plus size={14} />
             <span>สร้างใหม่</span>
           </Link>
         </div>
-        <h1 className="m-0 text-2xl font-black text-white sm:text-3xl">ผลงานสร้างสรรค์ของฉัน</h1>
+        <h1 className="font-display m-0 text-2xl font-black text-white sm:text-3xl">ผลงานสร้างสรรค์ของฉัน</h1>
         <p className="m-0 text-sm font-semibold leading-6 text-[#9ca3af]">
           จัดการ ดูแล และตรวจสอบประสิทธิภาพสถิติของตัวละครที่คุณเป็นผู้สร้างสรรค์ขึ้นมา
         </p>
@@ -53,7 +53,7 @@ export function WorksPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div className="h-[140px] animate-pulse rounded-2xl bg-[#1e1e34] border border-[#2e2e44]" key={index} />
+            <div className="h-[140px] animate-pulse rounded-2xl bg-white/5 border border-white/10" key={index} />
           ))}
         </div>
       ) : error ? (
@@ -65,7 +65,7 @@ export function WorksPage() {
           {works.map((character) => (
             <div
               key={character.id}
-              className="flex gap-4 rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/70 p-4 transition duration-300 hover:bg-[#1e1e34] hover:border-slate-500"
+              className="missai-card flex gap-4 rounded-2xl p-4 transition duration-300 hover:-translate-y-0.5 hover:border-[#ac4bff]/50 hover:shadow-[0_8px_26px_rgba(172,75,255,0.15)]"
             >
               {/* Left Column: Avatar */}
               <div className="relative size-16 flex-shrink-0 overflow-hidden rounded-xl bg-[#080A1A]">
@@ -99,7 +99,7 @@ export function WorksPage() {
                 </div>
 
                 {/* Stats Row */}
-                <div className="mt-3 flex items-center justify-between border-t border-[#2e2e44]/40 pt-2 text-[10px] font-semibold text-slate-500">
+                <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2 text-[10px] font-semibold text-slate-500">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1">
                       <MessageSquare size={11} />
@@ -112,7 +112,7 @@ export function WorksPage() {
                   </div>
                   <Link
                     to={`/characters/${character.id}`}
-                    className="flex items-center gap-1 font-bold text-[#d8b4fe] hover:text-white transition"
+                    className="flex items-center gap-1 font-black text-[#d8b4fe] hover:text-white transition"
                   >
                     <Edit size={10} />
                     <span>จัดการ</span>
@@ -123,15 +123,15 @@ export function WorksPage() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#2e2e44] bg-[#1e1e34]/30 py-20 text-center text-slate-500">
+        <div className="missai-card flex flex-col items-center justify-center rounded-3xl py-20 text-center text-slate-500">
           <Folder size={48} className="mb-4 text-blue-400/30" />
-          <h3 className="m-0 text-base font-black text-white">ยังไม่มีผลงานที่สร้าง</h3>
-          <p className="m-0 mt-2 text-sm text-[#9ca3af]">
+          <h3 className="font-display m-0 text-base font-black text-white">ยังไม่มีผลงานที่สร้าง</h3>
+          <p className="m-0 mt-2 text-sm font-bold text-white/55">
             คุณยังไม่ได้สร้างตัวละครใดๆ เริ่มสร้างตัวละครตัวแรกของคุณบนแพลตฟอร์ม Maprang AI ได้เลย!
           </p>
           <Link
             to="/create"
-            className="mt-6 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#a855f7] px-6 text-sm font-black text-white transition hover:bg-[#a855f7]/90 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
+            className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-6 text-sm font-black text-white transition hover:brightness-110 missai-glow"
           >
             <Plus size={15} />
             สร้างตัวละครตัวแรก

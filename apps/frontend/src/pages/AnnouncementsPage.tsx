@@ -62,40 +62,40 @@ export function AnnouncementsPage() {
 
   const categoryColor = (cat: Announcement['category']) => {
     switch (cat) {
-      case 'system': return 'border-red-500/30 bg-red-500/10 text-red-300'
-      case 'feature': return 'border-blue-500/30 bg-blue-500/10 text-blue-300'
-      case 'event': return 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300'
+      case 'system': return 'border-red-500/30 bg-red-500/10 text-red-400'
+      case 'feature': return 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'
+      case 'event': return 'border-yellow-500/30 bg-yellow-500/10 text-[#f9c86d]'
     }
   }
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 lg:py-8">
       {/* Header Banner */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-[#2e2e44] bg-[#1e1e34]/90 p-6 text-white shadow-2xl backdrop-blur-md">
+      <section className="missai-card flex flex-col gap-3 rounded-2xl p-6 text-white">
         <div className="flex items-center gap-2 text-xs font-bold text-[#d8b4fe]">
-          <Bell size={16} />
-          <span>ข่าวสารระบบ</span>
-          <span className="rounded-full border border-[#a855f7]/30 bg-[#a855f7]/15 px-2.5 py-0.5 text-[10px] text-[#d8b4fe]">
+          <Bell size={16} className="text-[#ac4bff]" />
+          <span className="font-black">ข่าวสารระบบ</span>
+          <span className="rounded-full border border-[#ac4bff]/30 bg-[#ac4bff]/15 px-2.5 py-0.5 text-[10px] text-[#d9b3ff]">
             อัปเดตสดใหม่
           </span>
         </div>
-        <h1 className="m-0 text-2xl font-black text-white sm:text-3xl">ประกาศ & ข่าวสารระบบ</h1>
+        <h1 className="font-display m-0 text-2xl font-black text-white sm:text-3xl">ประกาศ & ข่าวสารระบบ</h1>
         <p className="m-0 text-sm font-semibold leading-6 text-[#9ca3af]">
           ติดตามข่าวสารล่าสุด ฟีเจอร์ที่เพิ่มเข้ามา และประกาศกิจกรรมต่าง ๆ ของแพลตฟอร์ม Maprang AI
         </p>
       </section>
 
       {/* Tabs Filter */}
-      <div className="flex gap-2 border-b border-[#2e2e44] pb-2 overflow-x-auto [scrollbar-width:none]">
+      <div className="flex gap-2 border-b border-white/10 pb-2 overflow-x-auto [scrollbar-width:none]">
         {(['all', 'system', 'feature', 'event'] as const).map((cat) => (
           <button
             type="button"
             key={cat}
             onClick={() => setFilter(cat)}
-            className={`min-h-9 px-4 rounded-full text-xs font-bold transition whitespace-nowrap border ${
+            className={`min-h-9 px-4 rounded-full text-xs font-black transition whitespace-nowrap border ${
               filter === cat
-                ? 'bg-[#a855f7] border-[#a855f7] text-white shadow-[0_4px_12px_rgba(168,85,247,0.25)]'
-                : 'bg-[#1e1e34]/60 border-[#2e2e44] text-slate-400 hover:border-slate-500 hover:text-white'
+                ? 'bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] border-[#ac4bff]/50 text-white missai-glow'
+                : 'border-white/10 bg-[#080a1a]/60 text-slate-400 hover:border-[#ac4bff]/40 hover:text-white'
             }`}
           >
             {cat === 'all' ? 'ประกาศทั้งหมด' : cat === 'system' ? 'ประกาศจากระบบ' : cat === 'feature' ? 'ฟีเจอร์ใหม่' : 'กิจกรรมพิเศษ'}
@@ -111,10 +111,10 @@ export function AnnouncementsPage() {
             <div
               key={item.id}
               onClick={() => toggleExpand(item.id)}
-              className={`group overflow-hidden rounded-xl border transition-all duration-300 cursor-pointer ${
+              className={`missai-card group overflow-hidden rounded-xl transition-all duration-300 cursor-pointer ${
                 isExpanded
-                  ? 'border-[#a855f7]/50 bg-[#1e1e34]'
-                  : 'border-[#2e2e44] bg-[#1e1e34]/70 hover:bg-[#1e1e34] hover:border-slate-600'
+                  ? 'border-[#ac4bff]/50 bg-[#080a1a]/60'
+                  : 'hover:border-[#ac4bff]/30'
               }`}
             >
               {/* Header Row */}
@@ -142,8 +142,8 @@ export function AnnouncementsPage() {
                   type="button"
                   aria-label={isExpanded ? 'ย่อรายละเอียด' : 'ขยายรายละเอียด'}
                   title={isExpanded ? 'ย่อรายละเอียด' : 'ขยายรายละเอียด'}
-                  className={`mt-1 grid size-7 place-items-center rounded-lg bg-[#2e2e44] text-slate-400 transition group-hover:text-white ${
-                    isExpanded ? 'bg-[#a855f7]/20 text-[#d8b4fe]' : ''
+                  className={`mt-1 grid size-7 place-items-center rounded-lg bg-white/5 border border-white/10 text-slate-400 transition group-hover:text-white ${
+                    isExpanded ? 'bg-[#ac4bff]/20 text-[#d8b4fe] border-[#ac4bff]/40' : ''
                   }`}
                 >
                   {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -153,10 +153,10 @@ export function AnnouncementsPage() {
               {/* Collapsible Content */}
               <div
                 className={`transition-all duration-300 ease-in-out ${
-                  isExpanded ? 'max-h-96 opacity-100 border-t border-[#2e2e44]/40' : 'max-h-0 opacity-0 pointer-events-none'
+                  isExpanded ? 'max-h-96 opacity-100 border-t border-white/10' : 'max-h-0 opacity-0 pointer-events-none'
                 }`}
               >
-                <div className="p-4 text-sm leading-6 text-slate-300 font-medium whitespace-pre-line bg-[#1a1a2e]/30">
+                <div className="p-4 text-sm leading-6 text-slate-300 font-medium whitespace-pre-line bg-[#080a1a]/40">
                   {item.content}
                 </div>
               </div>
@@ -165,9 +165,9 @@ export function AnnouncementsPage() {
         })}
 
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#2e2e44] bg-[#1e1e34]/30 py-16 text-center text-slate-500">
+          <div className="missai-card flex flex-col items-center justify-center rounded-2xl border-dashed py-16 text-center text-slate-500">
             <Info size={40} className="mb-3 opacity-30 text-purple-400" />
-            <p className="m-0 text-sm font-semibold">ไม่พบประกาศข่าวสารที่ตรงกับหมวดหมู่นี้</p>
+            <p className="m-0 text-sm font-black text-white/55">ไม่พบประกาศข่าวสารที่ตรงกับหมวดหมู่นี้</p>
           </div>
         )}
       </div>
