@@ -5,6 +5,7 @@ import { rateLimit } from 'elysia-rate-limit'
 import { adminRoutes } from './src/admin.routes'
 import { characterRoutes } from './src/character.routes'
 import { chatRoutes } from './src/chat.routes'
+import { generationRoutes } from './src/generation.routes'
 import { healthRoutes } from './src/health.routes'
 import { loreRoutes } from './src/lore.routes'
 import { reportRoutes } from './src/report.routes'
@@ -46,6 +47,7 @@ export const app = new Elysia()
   .use(adminRoutes)
   .use(userRoutes)
   .use(uploadRoutes)
+  .use(generationRoutes)
   .use(characterRoutes)
   .use(loreRoutes)
   .use(chatRoutes)

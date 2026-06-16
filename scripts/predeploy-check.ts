@@ -579,6 +579,8 @@ const checks: Check[] = [
         '20260513103000_add_lore_parent_index',
         '20260611143000_add_message_window_index',
         '20260612100000_preserve_report_targets',
+        '20260617143000_add_generation_jobs',
+        '20260617153000_add_character_cover_url',
       ]
       const missing = required.filter((name) => !migrations.includes(name))
       if (missing.length > 0) throw new Error(`ยังไม่มี migration: ${missing.join(', ')}`)

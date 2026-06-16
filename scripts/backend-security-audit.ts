@@ -210,6 +210,7 @@ const allowedRawResponseJsonReaders = [
   'readSupabaseSignedUrlPayload',
   'readSupabaseUserPayload',
   'readStorageJson',
+  'readStorageObjectSignedUrlPayload',
 ]
 
 function rawErrorValueExpression(variableName: string) {

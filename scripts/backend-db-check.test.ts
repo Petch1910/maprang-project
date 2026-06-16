@@ -146,4 +146,43 @@ describe('backend db check command plan', () => {
     expect(migrationSql).toContain('DROP CONSTRAINT IF EXISTS "Report_messageId_fkey"')
     expect(migrationSql).toContain('ON DELETE SET NULL ON UPDATE CASCADE')
   })
+
+  test('keeps generation job and output storage schema owner-scoped', async () => {
+    const schema = await readFile(join(import.meta.dir, '../apps/backend/prisma/schema.prisma'), 'utf8')
+    const migrationSql = await readFile(
+      join(
+        import.meta.dir,
+        '../apps/backend/prisma/migrations/20260617143000_add_generation_jobs/migration.sql',
+      ),
+      'utf8',
+    )
+
+    expect(schema).toContain('enum GenerationJobStatus')
+    expect(schema).toContain('model GenerationJob')
+    expect(schema).toContain('model GenerationOutput')
+    expect(schema).toContain('generationJobs    GenerationJob[]')
+    expect(schema).toContain('generationOutputs GenerationOutput[]')
+    expect(schema).toContain('visibility GenerationOutputVisibility @default(PRIVATE)')
+    expect(schema).toContain('@@index([userId, status, createdAt(sort: Desc)])')
+    expect(schema).toContain('@@index([userId, isFavorite, createdAt(sort: Desc)])')
+    expect(migrationSql).toContain('CREATE TYPE "GenerationJobStatus"')
+    expect(migrationSql).toContain('CREATE TABLE "GenerationJob"')
+    expect(migrationSql).toContain('CREATE TABLE "GenerationOutput"')
+    expect(migrationSql).toContain('ON DELETE CASCADE ON UPDATE CASCADE')
+    expect(migrationSql).toContain('CREATE INDEX "GenerationOutput_visibility_createdAt_idx"')
+  })
+
+  test('keeps character cover URL schema and migration in sync', async () => {
+    const schema = await readFile(join(import.meta.dir, '../apps/backend/prisma/schema.prisma'), 'utf8')
+    const migrationSql = await readFile(
+      join(
+        import.meta.dir,
+        '../apps/backend/prisma/migrations/20260617153000_add_character_cover_url/migration.sql',
+      ),
+      'utf8',
+    )
+
+    expect(schema).toContain('coverUrl      String?')
+    expect(migrationSql).toContain('ALTER TABLE "Character" ADD COLUMN "coverUrl" TEXT')
+  })
 })

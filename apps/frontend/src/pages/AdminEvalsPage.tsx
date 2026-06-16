@@ -61,7 +61,7 @@ function ScenarioCard({ result }: { result: EvalScenarioResult }) {
 
   return (
     <details
-      className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]"
+      className="missai-card rounded-2xl p-4 text-white"
       data-testid="admin-evals-scenario"
     >
       <summary className="cursor-pointer list-none">
@@ -72,7 +72,7 @@ function ScenarioCard({ result }: { result: EvalScenarioResult }) {
                 {result.passed ? <CheckCircle2 size={14} /> : <CircleAlert size={14} />}
                 {result.passed ? 'ผ่าน' : 'ไม่ผ่าน'}
               </span>
-              <span className="rounded-full border border-white/10 bg-white/7 px-2.5 py-1 text-xs font-black text-white/65">
+              <span className="missai-badge text-white/65">
                 {result.estimatedTokens.toLocaleString()} โทเคน
               </span>
             </div>
@@ -101,7 +101,7 @@ function ScenarioCard({ result }: { result: EvalScenarioResult }) {
 
       <div className="mt-4 grid gap-2">
         {result.checks.map((check) => (
-          <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={`${result.id}-${check.label}`}>
+          <article className="missai-card rounded-xl p-3" key={`${result.id}-${check.label}`}>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <p className="m-0 text-sm font-black text-white">{check.label}</p>
@@ -174,8 +174,8 @@ export function AdminEvalsPage() {
   }
 
   return (
-    <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/92 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
+    <div className="missai-shell space-y-5 text-white">
+      <section className="missai-card rounded-2xl p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
@@ -192,7 +192,7 @@ export function AdminEvalsPage() {
             <label className="min-w-0">
               <span className="mb-1 block text-xs font-black text-white/48">ADMIN_API_KEY</span>
               <input
-                className="min-h-11 w-full rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+                className="missai-input min-h-11 rounded-xl px-3 text-sm"
                 data-testid="admin-evals-admin-key-input"
                 onChange={(event) => setAdminKeyInput(event.target.value)}
                 placeholder="วางคีย์ผู้ดูแล"
@@ -201,7 +201,7 @@ export function AdminEvalsPage() {
               />
             </label>
             <button
-              className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
+              className="missai-button-secondary mt-auto min-h-11 rounded-xl bg-white px-4 text-sm text-slate-950 hover:bg-white/90"
               data-testid="admin-evals-admin-key-save"
               onClick={saveAdminKey}
               type="button"
@@ -210,7 +210,7 @@ export function AdminEvalsPage() {
               บันทึก
             </button>
             <button
-              className="mt-auto min-h-11 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+              className="missai-button-secondary mt-auto min-h-11 rounded-xl px-4 text-sm"
               onClick={clearKey}
               type="button"
             >
@@ -219,12 +219,12 @@ export function AdminEvalsPage() {
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="m-0 rounded-lg border border-white/10 bg-white/7 px-3 py-2 text-sm font-bold text-white/70" data-testid="admin-evals-note">
+          <p className="missai-empty m-0 px-3 py-2 text-sm text-white/70" data-testid="admin-evals-note">
             {note}
           </p>
           <button
             aria-disabled={Boolean(runDisabledReason)}
-            className="inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 text-sm font-black text-white transition hover:bg-orange-400 disabled:opacity-60"
+            className="missai-button-primary min-h-11 w-fit rounded-xl px-4 text-sm disabled:opacity-60"
             data-testid="admin-evals-run"
             disabled={Boolean(runDisabledReason)}
             onClick={() => void loadEvals()}
@@ -262,7 +262,7 @@ export function AdminEvalsPage() {
                   {run.suite.description || 'ชุดตรวจ regression ของพรอมป์และบริบทแบบคงผลลัพธ์'}
                 </p>
               </div>
-              <span className="rounded-full border border-white/10 bg-black/22 px-3 py-1 text-xs font-black">
+              <span className="missai-badge px-3 py-1">
                 updated {run.suite.updatedAt || '-'} · run {new Date(run.generatedAt).toLocaleString('th-TH')}
               </span>
             </div>

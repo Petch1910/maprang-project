@@ -185,7 +185,7 @@ export function WalletPage() {
               ดูยอดโทเคน การใช้งานล่าสุด และความพร้อมสำหรับฉากยาวๆ
             </p>
             {note && (
-              <p className="m-0 mt-4 rounded-xl border border-[#ac4bff]/20 bg-[#ac4bff]/10 p-3 text-sm font-bold text-[#d9b3ff]" data-testid="wallet-note">
+          <p className="missai-empty m-0 mt-4 border-[#ac4bff]/20 bg-[#ac4bff]/10 p-3 text-sm text-[#d9b3ff]" data-testid="wallet-note">
                 {note}
               </p>
             )}
@@ -194,7 +194,7 @@ export function WalletPage() {
           <div className="grid gap-2">
             <button
               aria-disabled={isLoading}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-sm font-black text-white transition hover:brightness-110 missai-glow disabled:opacity-50"
+              className="missai-button-primary min-h-11 rounded-xl px-4 text-sm disabled:opacity-50"
               data-testid="wallet-refresh"
               disabled={isLoading}
               onClick={loadWallet}
@@ -205,7 +205,7 @@ export function WalletPage() {
               รีเฟรช
             </button>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+              className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
               to="/profile"
             >
               แก้ตัวตนผู้เล่น
@@ -263,7 +263,7 @@ export function WalletPage() {
               {summary.usage.byModel.map((item) => {
                 const tokenShare = summary.usage.totalTokens > 0 ? Math.round((item.tokens / summary.usage.totalTokens) * 100) : 0
                 return (
-                  <article className="rounded-xl border border-white/10 bg-[#080a1a]/40 p-3.5" key={item.modelName ?? 'unknown-model'}>
+                  <article className="missai-card rounded-xl p-3.5" key={item.modelName ?? 'unknown-model'}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="m-0 min-w-0 truncate text-sm font-black text-white">
                         {item.modelName ?? 'โมเดลไม่ระบุ'}
@@ -331,7 +331,7 @@ export function WalletPage() {
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input
-              className="min-h-11 min-w-0 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-bold text-white outline-none focus:border-[#ac4bff]/70"
+              className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
               data-testid="wallet-admin-key-input"
               onChange={(event) => setAdminKeyInput(event.target.value)}
               placeholder="วาง ADMIN_API_KEY"
@@ -339,7 +339,7 @@ export function WalletPage() {
               value={adminKeyInput}
             />
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
+              className="missai-button-secondary min-h-11 rounded-xl bg-white px-4 text-sm text-slate-950 hover:bg-white/90"
               data-testid="wallet-admin-key-save"
               onClick={saveAdminKey}
               type="button"
@@ -347,7 +347,7 @@ export function WalletPage() {
               บันทึกคีย์
             </button>
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-white/20 hover:bg-white/8"
+              className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
               data-testid="wallet-admin-key-clear"
               onClick={removeAdminKey}
               type="button"
@@ -369,7 +369,7 @@ export function WalletPage() {
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input
-              className="min-h-11 min-w-0 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-bold text-white outline-none focus:border-[#ac4bff]/70"
+              className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
               data-testid="wallet-adjust-amount"
               inputMode="numeric"
               onChange={(event) => setAdjustAmount(event.target.value)}
@@ -377,7 +377,7 @@ export function WalletPage() {
             />
             <button
               aria-disabled={Boolean(adjustTokenDisabledReason)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 text-sm font-black text-white transition hover:brightness-110 disabled:opacity-60"
+              className="missai-button-primary min-h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 text-sm disabled:opacity-60"
               data-testid="wallet-adjust-add"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(normalizedAdjustAmount)}
@@ -388,7 +388,7 @@ export function WalletPage() {
             </button>
             <button
               aria-disabled={Boolean(adjustTokenDisabledReason)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-rose-300/20 bg-rose-500/10 px-4 text-sm font-black text-rose-300 transition hover:bg-rose-500/20 disabled:opacity-60"
+              className="missai-button-danger min-h-11 rounded-xl border border-rose-300/20 bg-rose-500/10 px-4 text-sm text-rose-300 hover:bg-rose-500/20 disabled:opacity-60"
               data-testid="wallet-adjust-debit"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(-normalizedAdjustAmount)}
@@ -399,7 +399,7 @@ export function WalletPage() {
             </button>
           </div>
           {!hasAdminKey && (
-            <p className="m-0 mt-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3 text-sm font-bold text-yellow-400">
+            <p className="missai-empty m-0 mt-3 border-yellow-500/20 bg-yellow-500/10 p-3 text-sm text-yellow-400">
               ใส่และบันทึก ADMIN_API_KEY ก่อน จึงจะใช้ปุ่มเพิ่ม/หักโทเคนได้
             </p>
           )}
@@ -475,7 +475,7 @@ export function WalletPage() {
                     <TrendingDown size={14} />
                     {item.tokens.toLocaleString()} โทเคน
                   </span>
-                  <span className="rounded-full border border-white/10 bg-white/7 px-2.5 py-1 text-xs font-black text-white/65">
+                  <span className="missai-badge text-white/65">
                     {formatCost(item.cost)}
                   </span>
                 </div>
@@ -485,7 +485,7 @@ export function WalletPage() {
         )}
       </section>
 
-      <section className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm leading-6 text-amber-300">
+      <section className="missai-card rounded-2xl border-amber-500/20 bg-amber-500/10 p-4 text-sm leading-6 text-amber-300">
         <p className="m-0 font-black">ระบบกันใช้โทเคนซ้ำ</p>
         <p className="m-0 mt-1 font-bold text-amber-300/78">
           ระหว่าง AI กำลังตอบ ระบบจะปิดการส่งซ้ำเพื่อลดการเรียกใช้งานซ้ำ โทเคนในระบบมีไว้เพื่อการใช้งานจำลอง โดยมีระบบโปรโมชัน รางวัล และการปรับยอดโดยผู้ดูแลระบบเป็นหลัก

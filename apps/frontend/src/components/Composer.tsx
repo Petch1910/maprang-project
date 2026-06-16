@@ -52,22 +52,22 @@ export function Composer({
 
   return (
     <form
-      className="mx-auto w-full max-w-[820px] px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6"
+      className="mx-auto w-full max-w-[820px] px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-5"
       onSubmit={(event) => {
         event.preventDefault()
         if (canSend) onSubmit()
       }}
     >
       {isToolTrayOpen && (
-        <div className="mb-2 rounded-2xl border border-white/10 bg-[#17181d]/92 p-2 shadow-[0_18px_55px_rgba(0,0,0,0.34)] backdrop-blur-xl">
+        <div className="missai-card mb-2 rounded-2xl p-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex min-h-9 flex-1 basis-full items-center gap-2 rounded-xl bg-white/7 px-3 text-xs font-black text-white/62 sm:basis-auto">
+            <span className="inline-flex min-h-9 flex-1 basis-full items-center gap-2 rounded-xl bg-white/7 px-3 text-xs font-black text-[var(--color-text-muted)] sm:basis-auto">
               <Sparkles size={15} />
               ตัวช่วยข้อความ
             </span>
             {suggestionPrompts.map((item) => (
               <button
-                className="min-h-9 flex-1 basis-[9rem] rounded-xl border border-white/10 bg-white/6 px-3 text-xs font-black text-white/78 transition hover:bg-white/12 hover:text-white"
+                className="missai-button-secondary min-h-9 flex-1 basis-[9rem] rounded-xl px-3 text-xs"
                 aria-disabled={disabled}
                 data-testid={`chat-suggestion-${item.label}`}
                 disabled={disabled}
@@ -85,13 +85,13 @@ export function Composer({
           </div>
         </div>
       )}
-      <div className="grid grid-cols-[38px_minmax(0,1fr)_42px] items-center gap-2 rounded-2xl border border-white/10 bg-[#17181d]/94 p-2 shadow-[0_22px_70px_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:grid-cols-[40px_minmax(0,1fr)_46px]">
+      <div className="missai-card grid grid-cols-[38px_minmax(0,1fr)_42px] items-center gap-2 rounded-2xl p-2 shadow-[0_22px_70px_rgba(0,0,0,0.48)] sm:grid-cols-[40px_minmax(0,1fr)_46px]">
         <button
           aria-label="เปิดตัวช่วยข้อความ"
           aria-expanded={isToolTrayOpen}
           aria-disabled={disabled}
-          className={`grid size-9 place-items-center rounded-xl text-white/78 transition hover:bg-white/12 hover:text-white disabled:opacity-50 sm:size-10 ${
-            isToolTrayOpen ? 'bg-white/14 text-white' : 'bg-white/8'
+          className={`grid size-9 place-items-center rounded-xl transition hover:bg-white/12 hover:text-white disabled:opacity-50 sm:size-10 ${
+            isToolTrayOpen ? 'bg-[var(--color-accent-purple)]/20 text-white' : 'bg-white/8 text-[var(--color-text-muted)]'
           }`}
           disabled={disabled}
           onClick={() => setIsToolTrayOpen((current) => !current)}
@@ -103,7 +103,7 @@ export function Composer({
         </button>
         <label className="block min-w-0">
           <textarea
-            className="max-h-32 min-h-11 w-full resize-none overflow-hidden rounded-xl border border-transparent bg-transparent px-2 py-3 text-sm font-semibold leading-6 text-white outline-none placeholder:text-white/32 focus:border-white/12 focus:bg-black/18"
+            className="max-h-32 min-h-11 w-full resize-none overflow-hidden rounded-xl border border-transparent bg-transparent px-2 py-3 text-sm font-semibold leading-6 text-[var(--color-text-main)] outline-none placeholder:text-white/32 focus:border-white/12 focus:bg-black/18"
             data-testid="chat-composer-input"
             disabled={disabled}
             onChange={(event) => onMessageChange(event.target.value)}
@@ -123,7 +123,9 @@ export function Composer({
           aria-label="ส่งข้อความ"
           aria-disabled={!canSend}
           className={`grid size-10 place-items-center rounded-xl transition sm:size-11 ${
-            canSend ? 'bg-white text-slate-950 hover:bg-white/90' : 'bg-white/18 text-white/35'
+            canSend
+              ? 'bg-gradient-to-r from-[var(--color-accent-purple)] to-[#8b5cf6] text-white shadow-[0_10px_26px_rgba(172,75,255,0.28)] hover:brightness-110'
+              : 'bg-white/14 text-white/35'
           }`}
           data-testid="chat-composer-submit"
           disabled={!canSend}

@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react'
 import { displayMessageContent } from '../lib/characterDisplay'
+import { filterAndSortChats, getPendingChatEventCount, toggleSelectedChatId, type ChatListFilter } from '../lib/chatList'
 import { archiveChat, deleteChat, fetchChats, restoreChat, updateChatTitle, type ChatSummary } from '../lib/api'
 import { loadPinnedChatIds, savePinnedChatIds, togglePinnedChatId } from '../lib/pinnedChats'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
@@ -30,7 +31,7 @@ export function MyChatsPage() {
   const [archivedChats, setArchivedChats] = useState<ChatSummary[]>([])
   const [isArchivedLoading, setIsArchivedLoading] = useState(false)
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<'all' | 'pinned' | 'pending' | 'archived'>('all')
+  const [filter, setFilter] = useState<ChatListFilter>('all')
   const [pinnedChatIds, setPinnedChatIds] = useState<string[]>(() => loadPinnedChatIds())
   const [openMenuChatId, setOpenMenuChatId] = useState<string | null>(null)
   const [renameTarget, setRenameTarget] = useState<ChatSummary | null>(null)
@@ -41,35 +42,15 @@ export function MyChatsPage() {
   const [selectedChatIds, setSelectedChatIds] = useState<string[]>([])
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [actionNote, setActionNote] = useState('')
-  const normalizedSearch = search.trim().toLowerCase()
   const sourceChats = filter === 'archived' ? archivedChats : chats
   const isListLoading = filter === 'archived' ? isArchivedLoading : isLoading
   const hasListError = Boolean(error) || actionNote.includes('โหลดแชทที่จัดเก็บไว้ไม่สำเร็จ')
   const refreshDisabledReason = isListLoading ? 'กำลังโหลดรายการแชท' : undefined
 
-  const visibleChats = useMemo(() => {
-    const pinOrder = new Map(pinnedChatIds.map((id, index) => [id, index]))
-    const filtered = sourceChats.filter((chat) => {
-      const pendingCount = (chat.sceneState?.pendingEvents ?? []).filter((event) => event.status === 'pending').length
-      const matchesFilter =
-        filter === 'archived' || filter === 'all' || (filter === 'pending' ? pendingCount > 0 : pinOrder.has(chat.id))
-      if (!matchesFilter) return false
-      if (!normalizedSearch) return true
-      return [chat.title, chat.characterName, chat.preview, chat.relationshipState?.status, chat.relationshipState?.tier]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(normalizedSearch)
-    })
-    return [...filtered].sort((a, b) => {
-      const aPinned = pinOrder.has(a.id)
-      const bPinned = pinOrder.has(b.id)
-      if (aPinned && bPinned) return (pinOrder.get(a.id) ?? 0) - (pinOrder.get(b.id) ?? 0)
-      if (aPinned) return -1
-      if (bPinned) return 1
-      return new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
-    })
-  }, [filter, normalizedSearch, pinnedChatIds, sourceChats])
+  const visibleChats = useMemo(
+    () => filterAndSortChats({ chats: sourceChats, filter, pinnedChatIds, search }),
+    [filter, pinnedChatIds, search, sourceChats],
+  )
   const selectAllDisabledReason =
     visibleChats.length === 0 ? (hasListError ? 'ยังโหลดรายการแชทไม่ได้' : 'ไม่มีแชทให้เลือกในตัวกรองนี้') : undefined
   const bulkArchiveDisabledReason =
@@ -165,7 +146,7 @@ export function MyChatsPage() {
   }
 
   const toggleSelectedChat = (chatId: string) => {
-    setSelectedChatIds((current) => (current.includes(chatId) ? current.filter((id) => id !== chatId) : [...current, chatId]))
+    setSelectedChatIds((current) => toggleSelectedChatId(current, chatId))
   }
 
   const selectAllVisibleChats = () => {
@@ -178,124 +159,94 @@ export function MyChatsPage() {
     setRenameValue(chat.title || chat.characterName)
   }
 
+  const runChatAction = async (
+    actionId: string,
+    successNote: string,
+    failureNote: string,
+    action: () => Promise<void>,
+    cleanup?: () => void,
+  ) => {
+    setPendingAction(actionId)
+    setActionNote('')
+    try {
+      await action()
+      setActionNote(successNote)
+    } catch {
+      setActionNote(failureNote)
+    } finally {
+      setPendingAction(null)
+      cleanup?.()
+    }
+  }
+
   const confirmRename = async () => {
     const nextTitle = renameValue.trim()
     if (!renameTarget || !nextTitle) return
-    setPendingAction(`rename:${renameTarget.id}`)
-    setActionNote('')
-    try {
+    await runChatAction(`rename:${renameTarget.id}`, 'บันทึกชื่อแชทแล้ว', 'แก้ไขชื่อแชทไม่สำเร็จ ลองใหม่อีกครั้ง', async () => {
       await updateChatTitle(renameTarget.id, nextTitle)
       setRenameTarget(null)
       setRenameValue('')
-      setActionNote('บันทึกชื่อแชทแล้ว')
       await dispatch(loadChatSummaries())
-    } catch {
-      setActionNote('แก้ไขชื่อแชทไม่สำเร็จ ลองใหม่อีกครั้ง')
-    } finally {
-      setPendingAction(null)
-    }
+    })
   }
 
   const handleArchive = async (chat: ChatSummary) => {
     setOpenMenuChatId(null)
-    setPendingAction(`archive:${chat.id}`)
-    setActionNote('')
-    try {
+    await runChatAction(`archive:${chat.id}`, 'จัดเก็บแชทแล้ว', 'จัดเก็บแชทไม่สำเร็จ ลองใหม่อีกครั้ง', async () => {
       await archiveChat(chat.id)
-      setActionNote('จัดเก็บแชทแล้ว')
       await dispatch(loadChatSummaries())
       if (filter === 'archived') await loadArchivedChats()
-    } catch {
-      setActionNote('จัดเก็บแชทไม่สำเร็จ ลองใหม่อีกครั้ง')
-    } finally {
-      setPendingAction(null)
-    }
+    })
   }
 
   const handleRestore = async (chat: ChatSummary) => {
     setOpenMenuChatId(null)
-    setPendingAction(`restore:${chat.id}`)
-    setActionNote('')
-    try {
+    await runChatAction(`restore:${chat.id}`, 'เอาแชทกลับมาแล้ว', 'เอาแชทกลับมาไม่สำเร็จ ลองใหม่อีกครั้ง', async () => {
       await restoreChat(chat.id)
-      setActionNote('เอาแชทกลับมาแล้ว')
       await Promise.all([dispatch(loadChatSummaries()), loadArchivedChats()])
-    } catch {
-      setActionNote('เอาแชทกลับมาไม่สำเร็จ ลองใหม่อีกครั้ง')
-    } finally {
-      setPendingAction(null)
-    }
+    })
   }
 
   const confirmDelete = async () => {
     if (!deleteTarget) return
-    setPendingAction(`delete:${deleteTarget.id}`)
-    setActionNote('')
-    try {
+    await runChatAction(`delete:${deleteTarget.id}`, 'ลบแชทแล้ว', 'ลบแชทไม่สำเร็จ ลองใหม่อีกครั้ง', async () => {
       await deleteChat(deleteTarget.id)
       setDeleteTarget(null)
-      setActionNote('ลบแชทแล้ว')
       await dispatch(loadChatSummaries())
       if (filter === 'archived') await loadArchivedChats()
-    } catch {
-      setActionNote('ลบแชทไม่สำเร็จ ลองใหม่อีกครั้ง')
-    } finally {
-      setPendingAction(null)
-    }
+    })
   }
 
   const handleBulkArchive = async () => {
     const ids = selectedChatIds.filter(Boolean)
     if (ids.length === 0) return
-    setPendingAction('bulk-archive')
-    setActionNote('')
-    try {
+    await runChatAction('bulk-archive', `จัดเก็บ ${ids.length.toLocaleString()} แชทแล้ว`, 'จัดเก็บแชทที่เลือกไม่สำเร็จ ลองใหม่อีกครั้ง', async () => {
       await Promise.all(ids.map((id) => archiveChat(id)))
-      setActionNote(`จัดเก็บ ${ids.length.toLocaleString()} แชทแล้ว`)
       clearSelection()
       await dispatch(loadChatSummaries())
       if (filter === 'archived') await loadArchivedChats()
-    } catch {
-      setActionNote('จัดเก็บแชทที่เลือกไม่สำเร็จ ลองใหม่อีกครั้ง')
-    } finally {
-      setPendingAction(null)
-    }
+    })
   }
 
   const handleBulkRestore = async () => {
     const ids = selectedChatIds.filter(Boolean)
     if (ids.length === 0) return
-    setPendingAction('bulk-restore')
-    setActionNote('')
-    try {
+    await runChatAction('bulk-restore', `เอากลับมา ${ids.length.toLocaleString()} แชทแล้ว`, 'เอาแชทที่เลือกกลับมาไม่สำเร็จ ลองใหม่อีกครั้ง', async () => {
       await Promise.all(ids.map((id) => restoreChat(id)))
-      setActionNote(`เอากลับมา ${ids.length.toLocaleString()} แชทแล้ว`)
       clearSelection()
       await Promise.all([dispatch(loadChatSummaries()), loadArchivedChats()])
-    } catch {
-      setActionNote('เอาแชทที่เลือกกลับมาไม่สำเร็จ ลองใหม่อีกครั้ง')
-    } finally {
-      setPendingAction(null)
-    }
+    })
   }
 
   const confirmBulkDelete = async () => {
     const ids = bulkDeleteIds.filter(Boolean)
     if (ids.length === 0) return
-    setPendingAction('bulk-delete')
-    setActionNote('')
-    try {
+    await runChatAction('bulk-delete', `ลบ ${ids.length.toLocaleString()} แชทแล้ว`, 'ลบแชทที่เลือกไม่สำเร็จ ลองใหม่อีกครั้ง', async () => {
       await Promise.all(ids.map((id) => deleteChat(id)))
-      setActionNote(`ลบ ${ids.length.toLocaleString()} แชทแล้ว`)
       clearSelection()
       await dispatch(loadChatSummaries())
       if (filter === 'archived') await loadArchivedChats()
-    } catch {
-      setActionNote('ลบแชทที่เลือกไม่สำเร็จ ลองใหม่อีกครั้ง')
-    } finally {
-      setPendingAction(null)
-      setBulkDeleteIds([])
-    }
+    }, () => setBulkDeleteIds([]))
   }
 
   const renameConfirmDisabledReason = renameTarget
@@ -310,7 +261,7 @@ export function MyChatsPage() {
   const bulkDeleteConfirmDisabledReason = pendingAction === 'bulk-delete' ? 'กำลังลบแชทที่เลือก' : undefined
 
   return (
-    <div className="space-y-4 p-4 text-white sm:p-6 lg:p-8">
+    <div className="missai-shell space-y-4 text-white">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-3xl font-black text-white">แชทของฉัน</h1>
@@ -318,7 +269,7 @@ export function MyChatsPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <button
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+            className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
             data-testid="my-chats-select-mode"
             onClick={() => (isSelectionMode ? clearSelection() : startSelection())}
             type="button"
@@ -328,7 +279,7 @@ export function MyChatsPage() {
           </button>
           <button type="button"
             aria-disabled={Boolean(refreshDisabledReason)}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+            className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm disabled:cursor-not-allowed disabled:opacity-55"
             data-testid="my-chats-refresh"
             disabled={Boolean(refreshDisabledReason)}
             onClick={refreshChats}
@@ -338,7 +289,7 @@ export function MyChatsPage() {
             รีเฟรช
           </button>
           <Link
-            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-sm font-black text-white transition hover:brightness-110 missai-glow"
+            className="missai-button-primary min-h-11 rounded-xl px-4 text-sm"
             to="/events"
           >
             กล่องอีเวนต์
@@ -347,7 +298,7 @@ export function MyChatsPage() {
       </div>
 
       <section className="missai-card grid gap-3 rounded-2xl p-4 md:grid-cols-[minmax(0,1fr)_auto]">
-        <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-slate-400 transition focus-within:border-[#ac4bff]/50 focus-within:bg-[#080a1a]/85">
+        <label className="missai-input flex min-h-11 items-center gap-2 px-3 py-0 text-slate-400">
           <Search size={17} />
           <input
             className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/35"
@@ -358,9 +309,7 @@ export function MyChatsPage() {
         </label>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button
-            className={`min-h-11 rounded-full px-4 text-sm font-black transition ${
-              filter === 'all' ? 'border border-[#ac4bff]/50 bg-[#ac4bff]/15 text-[#d9b3ff]' : 'border border-white/10 bg-white/5 text-slate-400 hover:text-white'
-            }`}
+            className={`missai-tab min-h-11 px-4 text-sm ${filter === 'all' ? 'missai-tab-active' : ''}`}
             data-testid="my-chats-filter-all"
             onClick={() => setFilter('all')}
             type="button"
@@ -368,9 +317,7 @@ export function MyChatsPage() {
             ทั้งหมด
           </button>
           <button
-            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-black transition ${
-              filter === 'pinned' ? 'border border-[#ac4bff]/50 bg-[#ac4bff]/15 text-[#d9b3ff]' : 'border border-white/10 bg-white/5 text-slate-400 hover:text-white'
-            }`}
+            className={`missai-tab min-h-11 px-4 text-sm ${filter === 'pinned' ? 'missai-tab-active' : ''}`}
             data-testid="my-chats-filter-pinned"
             onClick={() => setFilter('pinned')}
             type="button"
@@ -379,9 +326,7 @@ export function MyChatsPage() {
             ปักหมุด
           </button>
           <button
-            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-black transition ${
-              filter === 'pending' ? 'border border-[#f99c00]/50 bg-[#f99c00]/15 text-[#f9c86d]' : 'border border-white/10 bg-white/5 text-slate-400 hover:text-white'
-            }`}
+            className={`missai-tab min-h-11 px-4 text-sm ${filter === 'pending' ? 'missai-tab-active border-[#f99c00]/50 bg-[#f99c00]/15 text-[#f9c86d]' : ''}`}
             data-testid="my-chats-filter-pending"
             onClick={() => setFilter('pending')}
             type="button"
@@ -390,9 +335,7 @@ export function MyChatsPage() {
             มีฉากรอ
           </button>
           <button
-            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-black transition ${
-              filter === 'archived' ? 'border border-[#ac4bff]/50 bg-[#ac4bff]/15 text-[#d9b3ff]' : 'border border-white/10 bg-white/5 text-slate-400 hover:text-white'
-            }`}
+            className={`missai-tab min-h-11 px-4 text-sm ${filter === 'archived' ? 'missai-tab-active' : ''}`}
             data-testid="my-chats-filter-archived"
             onClick={() => setFilter('archived')}
             type="button"
@@ -409,9 +352,9 @@ export function MyChatsPage() {
             ? 'ยังโหลดรายการแชทไม่ได้'
             : `แสดง ${visibleChats.length.toLocaleString()} จาก ${sourceChats.length.toLocaleString()} แชท`}
         </span>
-        {filter === 'pinned' && <span className="rounded-full border border-[#ac4bff]/30 bg-[#ac4bff]/15 px-2.5 py-1 text-[#d9b3ff]">เฉพาะแชทที่ปักหมุดไว้</span>}
-        {filter === 'pending' && <span className="rounded-full border border-[#f99c00]/30 bg-[#f99c00]/15 px-2.5 py-1 text-[#f9c86d]">เฉพาะแชทที่มีฉากรออยู่</span>}
-        {filter === 'archived' && <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-400">แชทที่จัดเก็บไว้ ไม่แสดงในรายการหลัก</span>}
+        {filter === 'pinned' && <span className="missai-badge text-[#d9b3ff]">เฉพาะแชทที่ปักหมุดไว้</span>}
+        {filter === 'pending' && <span className="missai-badge border-[#f99c00]/30 bg-[#f99c00]/15 text-[#f9c86d]">เฉพาะแชทที่มีฉากรออยู่</span>}
+        {filter === 'archived' && <span className="missai-badge text-slate-400">แชทที่จัดเก็บไว้ ไม่แสดงในรายการหลัก</span>}
       </div>
 
       {actionNote && (
@@ -422,7 +365,7 @@ export function MyChatsPage() {
 
       {isSelectionMode && (
         <div
-          className="missai-card sticky top-3 z-20 flex flex-col gap-3 rounded-3xl p-4 text-white sm:flex-row sm:items-center sm:justify-between"
+          className="missai-card sticky top-3 z-20 flex flex-col gap-3 rounded-2xl p-4 text-white sm:flex-row sm:items-center sm:justify-between"
           data-testid="my-chats-selection-toolbar"
         >
           <div>
@@ -432,7 +375,7 @@ export function MyChatsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               aria-disabled={Boolean(selectAllDisabledReason)}
-              className="min-h-10 rounded-xl border border-white/10 px-3 text-sm font-black text-white/75 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45"
+              className="missai-button-secondary min-h-10 rounded-xl px-3 text-sm disabled:cursor-not-allowed disabled:opacity-45"
               data-testid="my-chats-select-all"
               disabled={Boolean(selectAllDisabledReason)}
               onClick={selectAllVisibleChats}
@@ -444,7 +387,7 @@ export function MyChatsPage() {
             {filter === 'archived' ? (
               <button
                 aria-disabled={Boolean(bulkRestoreDisabledReason)}
-                className="min-h-10 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white px-3 text-sm font-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45"
+                className="missai-button-primary min-h-10 rounded-xl px-3 text-sm disabled:cursor-not-allowed disabled:opacity-45"
                 data-testid="my-chats-bulk-restore"
                 disabled={Boolean(bulkRestoreDisabledReason)}
                 onClick={() => void handleBulkRestore()}
@@ -456,7 +399,7 @@ export function MyChatsPage() {
             ) : (
               <button
                 aria-disabled={Boolean(bulkArchiveDisabledReason)}
-                className="min-h-10 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white px-3 text-sm font-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45"
+                className="missai-button-primary min-h-10 rounded-xl px-3 text-sm disabled:cursor-not-allowed disabled:opacity-45"
                 data-testid="my-chats-bulk-archive"
                 disabled={Boolean(bulkArchiveDisabledReason)}
                 onClick={() => void handleBulkArchive()}
@@ -468,7 +411,7 @@ export function MyChatsPage() {
             )}
             <button
               aria-disabled={Boolean(bulkDeleteDisabledReason)}
-              className="min-h-10 rounded-xl bg-rose-600 px-3 text-sm font-black text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-45"
+              className="missai-button-danger min-h-10 rounded-xl px-3 text-sm disabled:cursor-not-allowed disabled:opacity-45"
               data-testid="my-chats-bulk-delete"
               disabled={Boolean(bulkDeleteDisabledReason)}
               onClick={() => setBulkDeleteIds(selectedChatIds)}
@@ -483,13 +426,13 @@ export function MyChatsPage() {
 
       {error && (
         <div
-          className="flex flex-col gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm font-bold text-rose-300 sm:flex-row sm:items-center sm:justify-between"
+          className="missai-card flex flex-col gap-3 rounded-2xl border-rose-500/25 bg-rose-500/10 p-4 text-sm font-bold text-rose-300 sm:flex-row sm:items-center sm:justify-between"
           data-testid="my-chats-load-error"
           role="status"
         >
           <span>โหลดรายการแชทไม่ได้ ตรวจการเชื่อมต่อระบบหลังบ้านแล้วลองรีเฟรชอีกครั้ง</span>
           <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/15 px-3 text-xs font-black text-rose-300 transition hover:bg-rose-500/25"
+            className="missai-button-danger min-h-10 rounded-xl px-3 text-xs"
             onClick={refreshChats}
             type="button"
           >
@@ -500,11 +443,11 @@ export function MyChatsPage() {
       )}
 
       <div className="grid min-w-0 gap-2">
-        {isListLoading && [1, 2, 3, 4].map((item) => <div className="h-28 animate-pulse rounded-2xl bg-white/5 border border-white/10" key={item} />)}
+        {isListLoading && [1, 2, 3, 4].map((item) => <div className="missai-card h-28 animate-pulse rounded-2xl" key={item} />)}
 
         {!isListLoading &&
           visibleChats.map((chat) => {
-            const pendingCount = (chat.sceneState?.pendingEvents ?? []).filter((event) => event.status === 'pending').length
+            const pendingCount = getPendingChatEventCount(chat)
             const activeScene = chat.sceneState?.activeScene
             const relationship = chat.relationshipState
             const relationshipStatus = relationship?.status ?? 'NEUTRAL'
@@ -518,8 +461,8 @@ export function MyChatsPage() {
 
             return (
               <article
-                className={`missai-card relative min-w-0 overflow-visible rounded-2xl p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ac4bff]/50 hover:shadow-[0_8px_26px_rgba(172,75,255,0.15)] ${
-                  selectedChatIds.includes(chat.id) ? 'border-[#ac4bff]/50 bg-[#ac4bff]/10 ring-2 ring-[#ac4bff]/20' : ''
+                className={`missai-card relative min-w-0 overflow-visible rounded-2xl p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--color-neon)]/50 hover:shadow-[0_8px_26px_rgba(172,75,255,0.15)] ${
+                  selectedChatIds.includes(chat.id) ? 'border-[var(--color-neon)]/50 bg-[var(--color-accent)]/10 ring-2 ring-[var(--color-accent)]/20' : ''
                 } ${openMenuChatId === chat.id ? 'z-[70]' : 'z-0'}`}
                 key={chat.id}
               >
@@ -528,7 +471,7 @@ export function MyChatsPage() {
                     <button
                       aria-label="เลือกแชท"
                       aria-pressed={selectedChatIds.includes(chat.id)}
-                      className="mt-0.5 grid size-9 flex-none place-items-center rounded-lg border border-white/10 bg-white/5 text-slate-300 transition hover:border-[#ac4bff]/40 hover:bg-[#ac4bff]/10 hover:text-white"
+                      className="missai-icon-button mt-0.5 size-9 flex-none"
                       data-testid={`my-chat-checkbox-${chat.id}`}
                       onClick={() => toggleSelectedChat(chat.id)}
                       type="button"
@@ -550,7 +493,7 @@ export function MyChatsPage() {
                   </div>
                   <div className="absolute right-0 top-0 z-30 flex flex-none items-center gap-2">
                     {pendingCount > 0 && (
-                      <span className="pointer-events-none rounded-full bg-[#ac4bff]/15 px-2.5 py-1 text-xs font-black text-[#d9b3ff]">
+                      <span className="missai-badge pointer-events-none border-[#ac4bff]/30 bg-[#ac4bff]/15 text-[#d9b3ff]">
                         {pendingCount} ฉาก
                       </span>
                     )}
@@ -560,7 +503,7 @@ export function MyChatsPage() {
                         aria-haspopup="menu"
                         aria-label={`เปิดเมนูแชท ${chat.title || chat.characterName}`}
                         aria-disabled={isBusy}
-                        className="relative z-20 grid size-9 scroll-mt-28 touch-manipulation place-items-center rounded-xl border border-white/10 bg-white/5 text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+                        className="missai-icon-button relative z-20 size-9 scroll-mt-28 touch-manipulation disabled:cursor-not-allowed disabled:opacity-45"
                         data-testid={`my-chat-menu-${chat.id}`}
                         disabled={isBusy}
                         onClick={(event) => {
@@ -574,11 +517,11 @@ export function MyChatsPage() {
                       </button>
                       {openMenuChatId === chat.id && (
                         <div
-                          className="missai-card absolute right-0 top-10 z-[80] w-44 overflow-hidden rounded-xl bg-[#0b0d1f]/95 py-1"
+                           className="missai-menu absolute right-0 top-10 z-[80] w-44 py-1"
                           role="menu"
                         >
                           <button
-                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-300 transition hover:bg-[#ac4bff]/10 hover:text-[#d9b3ff]"
+                            className="missai-menu-item"
                             data-testid={`my-chat-rename-${chat.id}`}
                             onClick={() => openRenameDialog(chat)}
                             role="menuitem"
@@ -589,7 +532,7 @@ export function MyChatsPage() {
                           </button>
                           {!isArchived && (
                             <button
-                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-300 transition hover:bg-[#ac4bff]/10 hover:text-[#d9b3ff]"
+                              className="missai-menu-item"
                               data-testid={`my-chat-pin-${chat.id}`}
                               onClick={() => togglePinChat(chat)}
                               role="menuitem"
@@ -601,7 +544,7 @@ export function MyChatsPage() {
                           )}
                           {isArchived ? (
                             <button
-                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-300 transition hover:bg-[#ac4bff]/10 hover:text-[#d9b3ff]"
+                              className="missai-menu-item"
                               data-testid={`my-chat-restore-${chat.id}`}
                               onClick={() => void handleRestore(chat)}
                               role="menuitem"
@@ -612,7 +555,7 @@ export function MyChatsPage() {
                             </button>
                           ) : (
                             <button
-                              className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-300 transition hover:bg-[#ac4bff]/10 hover:text-[#d9b3ff]"
+                              className="missai-menu-item"
                               data-testid={`my-chat-archive-${chat.id}`}
                               onClick={() => void handleArchive(chat)}
                               role="menuitem"
@@ -623,7 +566,7 @@ export function MyChatsPage() {
                             </button>
                           )}
                           <button
-                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-slate-300 transition hover:bg-[#ac4bff]/10 hover:text-[#d9b3ff]"
+                            className="missai-menu-item"
                             data-testid={`my-chat-select-${chat.id}`}
                             onClick={() => startSelection(chat)}
                             role="menuitem"
@@ -633,7 +576,7 @@ export function MyChatsPage() {
                             เลือก
                           </button>
                           <button
-                            className="flex min-h-10 w-full items-center gap-2 px-3 text-left text-sm font-black text-rose-400 transition hover:bg-rose-500/10 hover:text-rose-300"
+                            className="missai-menu-item missai-menu-item-danger"
                             data-testid={`my-chat-delete-${chat.id}`}
                             onClick={() => {
                               setOpenMenuChatId(null)
@@ -651,29 +594,29 @@ export function MyChatsPage() {
                   </div>
                 </div>
                 <div className={`mt-3 flex flex-wrap gap-2 ${openMenuChatId === chat.id ? 'pointer-events-none' : ''}`}>
-                  <span className="rounded-full bg-sky-500/10 border border-sky-500/20 px-2.5 py-1 text-xs font-black text-sky-300">{chat.characterName}</span>
-                  <span className="rounded-full border border-[#ac4bff]/30 bg-[#ac4bff]/15 px-2.5 py-1 text-xs font-black text-[#d9b3ff]">
+                  <span className="missai-badge border-sky-500/20 bg-sky-500/10 text-sky-300">{chat.characterName}</span>
+                  <span className="missai-badge border-[#ac4bff]/30 bg-[#ac4bff]/15 text-[#d9b3ff]">
                     {relationshipStatusLabel(relationshipStatus)}
                   </span>
                   {relationship?.tier && (
-                    <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-black text-emerald-300">
+                    <span className="missai-badge border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
                       {relationshipTierLabel(relationship.tier)}
                     </span>
                   )}
                   {activeScene && (
-                    <span className="rounded-full bg-gradient-to-r from-[#f9c86d] to-[#f99c00] px-2.5 py-1 text-xs font-black text-[#1a1206]">โหมดฉาก</span>
+                    <span className="missai-badge border-[#f99c00]/25 bg-gradient-to-r from-[#f9c86d] to-[#f99c00] text-[#1a1206]">โหมดฉาก</span>
                   )}
                 </div>
                 <div className={`mt-4 flex flex-wrap gap-2 sm:justify-end ${openMenuChatId === chat.id ? 'pointer-events-none' : ''}`}>
                   <Link
-                    className="inline-flex min-h-10 items-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-sm font-black text-white transition hover:brightness-110 missai-glow"
+                    className="missai-button-primary min-h-10 rounded-xl px-4 text-sm"
                     to={`/chat/${chat.id}`}
                   >
                     {isArchived ? 'เปิดอ่าน' : 'เข้าแชท'}
                   </Link>
                   {isArchived && (
                     <button
-                      className="inline-flex min-h-10 items-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+                      className="missai-button-secondary min-h-10 rounded-xl px-4 text-sm disabled:cursor-not-allowed disabled:opacity-45"
                       aria-disabled={isBusy}
                       data-testid={`my-chat-restore-button-${chat.id}`}
                       disabled={isBusy}
@@ -686,7 +629,7 @@ export function MyChatsPage() {
                   )}
                   {pendingCount > 0 && (
                     <Link
-                      className="inline-flex min-h-10 items-center rounded-2xl border border-[#f99c00]/30 bg-[#f99c00]/15 px-4 text-sm font-black text-[#f9c86d] transition hover:bg-[#f99c00]/25"
+                      className="missai-button-secondary min-h-10 rounded-xl border-[#f99c00]/30 bg-[#f99c00]/15 px-4 text-sm text-[#f9c86d] hover:bg-[#f99c00]/25"
                       to={`/chat/${chat.id}`}
                     >
                       เข้าฉากที่รออยู่
@@ -698,7 +641,7 @@ export function MyChatsPage() {
           })}
 
         {!isListLoading && visibleChats.length === 0 && (
-          <div className="missai-card flex flex-col items-center justify-center rounded-3xl p-8 text-center text-slate-400">
+          <div className="missai-card flex flex-col items-center justify-center rounded-2xl p-8 text-center text-slate-400">
             <p className="m-0 text-sm font-bold leading-6 text-white/55">
               {filter === 'archived'
                 ? hasListError
@@ -713,11 +656,11 @@ export function MyChatsPage() {
                   : 'ไม่พบแชทที่ตรงกับคำค้นหาหรือตัวกรองตอนนี้'}
             </p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
-              <Link className="inline-flex min-h-10 items-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-5 text-sm font-black text-white transition hover:brightness-110 missai-glow" to="/">
+              <Link className="missai-button-primary min-h-10 rounded-xl px-5 text-sm" to="/">
                 ไปสำรวจตัวละคร
               </Link>
               <Link
-                className="inline-flex min-h-10 items-center rounded-2xl border border-white/10 bg-white/5 px-5 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+                className="missai-button-secondary min-h-10 rounded-xl px-5 text-sm"
                 to="/create"
               >
                 สร้างตัวละครของฉัน
@@ -729,11 +672,11 @@ export function MyChatsPage() {
 
       {renameTarget && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="my-chat-rename-dialog">
-          <div className="missai-card w-full max-w-md rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+          <div className="missai-dialog w-full max-w-md p-6">
             <h2 className="font-display m-0 text-xl font-black text-white">แก้ไขชื่อแชท</h2>
             <p className="m-0 mt-1.5 text-sm font-bold leading-relaxed text-slate-400">ตั้งชื่อให้จำง่ายขึ้น ข้อความเดิมและสถานะความสัมพันธ์จะยังอยู่ครบ</p>
             <input
-              className="mt-4 min-h-11 w-full rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-[#ac4bff] focus:bg-[#080a1a] focus:ring-4 focus:ring-[#ac4bff]/10"
+              className="missai-input mt-4 min-h-11"
               data-testid="my-chat-rename-input"
               onChange={(event) => setRenameValue(event.target.value)}
               onKeyDown={(event) => {
@@ -744,7 +687,7 @@ export function MyChatsPage() {
             />
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-white/10 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
+                className="missai-button-secondary min-h-11 rounded-xl text-sm"
                 data-testid="my-chat-rename-cancel"
                 onClick={() => setRenameTarget(null)}
                 type="button"
@@ -752,7 +695,7 @@ export function MyChatsPage() {
                 ยกเลิก
               </button>
               <button
-                className="min-h-11 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-sm font-black text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45 missai-glow"
+                className="missai-button-primary min-h-11 rounded-xl text-sm disabled:cursor-not-allowed disabled:opacity-45"
                 aria-disabled={Boolean(renameConfirmDisabledReason)}
                 data-testid="my-chat-rename-confirm"
                 disabled={Boolean(renameConfirmDisabledReason)}
@@ -769,14 +712,14 @@ export function MyChatsPage() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="my-chat-delete-dialog">
-          <div className="missai-card w-full max-w-md rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+          <div className="missai-dialog w-full max-w-md p-6">
             <h2 className="font-display m-0 text-xl font-black text-white">ลบแชทนี้?</h2>
             <p className="m-0 mt-2 text-sm font-bold leading-relaxed text-slate-400">
               {deleteTarget.title || deleteTarget.characterName} จะถูกนำออกจากรายการแชทของคุณ
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-white/10 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
+                className="missai-button-secondary min-h-11 rounded-xl text-sm"
                 data-testid="my-chat-delete-cancel"
                 onClick={() => setDeleteTarget(null)}
                 type="button"
@@ -784,7 +727,7 @@ export function MyChatsPage() {
                 ยกเลิก
               </button>
               <button
-                className="min-h-11 rounded-xl bg-rose-600 text-sm font-black text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-45"
+                className="missai-button-danger min-h-11 rounded-xl text-sm disabled:cursor-not-allowed disabled:opacity-45"
                 aria-disabled={Boolean(deleteConfirmDisabledReason)}
                 data-testid="my-chat-delete-confirm"
                 disabled={Boolean(deleteConfirmDisabledReason)}
@@ -801,14 +744,14 @@ export function MyChatsPage() {
 
       {bulkDeleteIds.length > 0 && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="my-chats-bulk-delete-dialog">
-          <div className="missai-card w-full max-w-md rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+          <div className="missai-dialog w-full max-w-md p-6">
             <h2 className="font-display m-0 text-xl font-black text-white">ลบแชทที่เลือก?</h2>
             <p className="m-0 mt-2 text-sm font-bold leading-relaxed text-slate-400">
               แชท {bulkDeleteIds.length.toLocaleString()} รายการจะถูกนำออกจากรายการแชทของคุณ
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-white/10 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
+                className="missai-button-secondary min-h-11 rounded-xl text-sm"
                 data-testid="my-chats-bulk-delete-cancel"
                 onClick={() => setBulkDeleteIds([])}
                 type="button"
@@ -816,7 +759,7 @@ export function MyChatsPage() {
                 ยกเลิก
               </button>
               <button
-                className="min-h-11 rounded-xl bg-rose-600 text-sm font-black text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-45"
+                className="missai-button-danger min-h-11 rounded-xl text-sm disabled:cursor-not-allowed disabled:opacity-45"
                 aria-disabled={Boolean(bulkDeleteConfirmDisabledReason)}
                 data-testid="my-chats-bulk-delete-confirm"
                 disabled={Boolean(bulkDeleteConfirmDisabledReason)}

@@ -4,7 +4,7 @@ export type PlaywrightSmokeEnv = Record<string, string | undefined>
 
 export function playwrightSmokeTargetUrls(env: PlaywrightSmokeEnv = process.env) {
   return {
-    frontendUrl: env.E2E_BASE_URL ?? 'http://127.0.0.1:5173',
+    frontendUrl: env.E2E_BASE_URL ?? 'http://127.0.0.1:5174',
     backendUrl: env.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000',
   }
 }
@@ -30,6 +30,7 @@ export function buildPlaywrightWebServers(env: PlaywrightSmokeEnv = process.env)
   const { frontendUrl, backendUrl } = playwrightSmokeTargetUrls(env)
   const backendOrigin = backendUrl.replace(/\/+$/, '')
   const backendPort = e2eUrlPort(backendUrl, '3000')
+  const frontendPort = e2eUrlPort(frontendUrl, '5174')
   const webServers: Array<{
     command: string
     url: string
@@ -50,7 +51,7 @@ export function buildPlaywrightWebServers(env: PlaywrightSmokeEnv = process.env)
 
   if (isLocalE2eUrl(frontendUrl)) {
     webServers.push({
-      command: 'cd apps/frontend && bun run dev -- --host 127.0.0.1',
+      command: `cd apps/frontend && bun run dev -- --host 127.0.0.1 --port ${frontendPort} --strictPort`,
       env: { VITE_API_BASE_URL: backendOrigin },
       url: frontendUrl,
       reuseExistingServer: true,

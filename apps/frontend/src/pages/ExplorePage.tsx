@@ -292,11 +292,12 @@ function Sidebar({
 
 function CharacterCard({ character }: { character: Character }) {
   const badges = getBadges(character)
+  const coverImageUrl = character.coverUrl || character.avatarUrl || ''
   return (
     <Link className="group block w-[132px] flex-none text-white sm:w-[148px]" to={`/characters/${character.id}`}>
       <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-[#101226] ring-1 ring-[#7864c8]/30 transition duration-300 group-hover:ring-[#ac4bff]/70 group-hover:shadow-[0_14px_36px_rgba(172,75,255,0.35)]">
-        {character.avatarUrl ? (
-          <img alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" src={character.avatarUrl} />
+        {coverImageUrl ? (
+          <img alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" src={coverImageUrl} />
         ) : (
           <div className="grid h-full place-items-center bg-gradient-to-br from-[#1e1e34] via-[#080a1a] to-[#59168b] text-4xl font-black text-slate-400">
             {avatarFallback(character.name)}

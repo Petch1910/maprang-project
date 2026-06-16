@@ -1,8 +1,8 @@
 # Maprang AI Test Plan
 
-Last updated: 2026-06-11
+Last updated: 2026-06-17
 
-เอกสารนี้แทน test plan เก่าที่ไม่ตรงกับ repo ปัจจุบัน ให้ใช้เป็น source of truth สำหรับการตรวจระบบก่อน deploy
+เอกสารนี้แทน test plan เก่าที่ไม่ตรงกับ repo ปัจจุบัน ให้ใช้เป็น source of truth สำหรับ QA gate ก่อน staging/production โดยยึดระบบจริงใน repo ไม่ยึดเอกสารภายนอกหรือ docx รุ่นเก่า
 
 ## Current Architecture
 
@@ -11,78 +11,59 @@ Last updated: 2026-06-11
 - Auth: local dev header ในเครื่อง, Supabase JWT สำหรับ production
 - Storage: local fallback ในเครื่อง, Supabase Storage `avatars` แบบ signed URL สำหรับ production
 - AI chat: `local/mock-roleplay` ใน local QA, OpenRouter/live provider สำหรับ staging/production
-- AI image: system draft image ใน local ถ้าไม่มี provider, live image provider ต้อง verified ก่อน production
+- AI image: system draft image ใน local เมื่อไม่มี provider, live image provider ต้อง verified ก่อน production
+- UI template direction: MissAI/Khuiai-like marketplace shell plus Maprang relationship/scene/memory systems
+- Core product direction: `docs/MAPRANG_CORE_PLAY_CREATE_PLAN.md` โฟกัส Chat play loop, Creator Studio, Character Lobby, My Chats, Wallet usage state และ AI Creator image workflow ก่อนระบบรอง
 
 ## Status Taxonomy
 
-ใช้สถานะเหล่านี้เท่านั้นเมื่อเขียน test plan, route/menu audit, หรือ deploy handoff:
+ใช้สถานะเหล่านี้เท่านั้นเมื่อเขียน test plan, route/menu audit หรือ deploy handoff:
 
 | Status | Meaning |
 | --- | --- |
 | `local ready` | ใช้ได้ครบในเครื่องและต้องผ่าน repo/runtime smoke |
 | `guarded` | ใช้ได้แต่ต้องมี admin/auth guard หรือ audit log ชัดเจน |
-| `staging required` | ต้องมี HTTPS staging, staging DB, CORS จริง, หรือ Supabase จริงก่อนถือว่าผ่าน |
+| `staging required` | ต้องมี HTTPS staging, staging DB, CORS จริง หรือ Supabase จริงก่อนถือว่าผ่าน |
 | `production blocker` | ยังปล่อย production ไม่ได้จนกว่าจะมี credential/domain/provider ภายนอกและ smoke ผ่าน |
 | `future` | งานเผื่ออนาคต ยังไม่ควรเป็น route/menu ที่ผู้ใช้กดแล้วคาดหวังผลจริง |
 
 ## Route Coverage
 
-Route ที่ต้องตรวจใน browser smoke:
-
 Route source: App.tsx declares 20 routes; test plan groups them into 13 product surfaces.
-<!-- Compatibility snippet: Route source: App.tsx declares 15 routes; test plan groups them into 13 product surfaces. and word: 15 -->
 
-หมายเหตุ: `App.tsx` ประกาศ route จริง 20 รายการ เพราะแยก `/chat` และ `/chat/:chatId` ออกจากกัน แต่ในแผนทดสอบให้นับเป็น 13 product surfaces โดยรวมสอง route นี้เป็นพื้นผิว "ห้องแชท" เดียวกัน การรัน `bun run frontend:route:audit` ต้องเห็น 20 รายการและไม่มี finding
+Compatibility snippet: Route source: App.tsx declares 15 routes; test plan groups them into 13 product surfaces.
 
-| Route | Purpose | Required status |
-| --- | --- | --- |
-| `/` | สำรวจตัวละครและเล่นต่อ | local ready |
-| `/characters/:id` | Character Lobby และ relationship contract | local ready |
-| `/chat`, `/chat/:chatId` | ห้องแชท, scene mode, report, world state | local ready |
-| `/chats` | กล่องแชท, เมนูสามจุด, bulk actions | local ready |
-| `/create` | Creator Studio, AI draft, upload, preview simulator | local ready |
-| `/ai-creator` | หน้าจอออกแบบภาพร่างระบบประมวลผลผ่านสิทธิ์ผู้ให้บริการคีย์ตรง | local ready |
-| `/events` | Pending events inbox | local ready |
-| `/profile` | Persona, content mode, account state | local ready |
-| `/wallet` | Token balance, usage, admin adjustment guard | local ready |
-| `/announcements` | หน้าประกาศข่าวสารและอัปเดตระบบ | local ready |
-| `/creators` | หน้าอันดับนักสร้างตัวละครยอดนิยม | local ready |
-| `/favorites` | หน้าตัวละครโปรดของผู้ใช้ | local ready |
-| `/works` | หน้ารวบรวมผลงานของผู้สร้าง | local ready |
-| `/support` | ศูนย์ช่วยเหลือและส่งข้อเสนอแนะ | local ready |
-| `/moderation` | Report queue และ admin audit log | guarded |
-| `/admin/health` | Deploy readiness dashboard | guarded |
-| `/admin/prompt-inspector` | Redacted prompt snapshot และ diff | guarded |
-| `/admin/evals` | Automated prompt/context evals | guarded |
-| `*` | Not found fallback | local ready |
+หมายเหตุ: `App.tsx` ประกาศ route จริง 20 รายการ เพราะแยก route technical เช่น `/chat` และ `/chat/:chatId` ออกจากกัน แต่ QA/product planning นับเป็น 13 product surfaces เพื่อให้ตรวจตามประสบการณ์ผู้ใช้ ไม่ใช่จำนวน path ดิบอย่างเดียว
+
+| Route | Product surface | Purpose | Required status |
+| --- | --- | --- | --- |
+| `/` | Explore | ตลาดตัวละคร, continue chatting, search/filter/rails | local ready |
+| `/characters/:id` | Character Lobby | โปรไฟล์ตัวละครและ Relationship Contract | local ready |
+| `/chat`, `/chat/:chatId` | Chat Room | ห้องแชท, scene mode, report, world state, memory | local ready |
+| `/chats` | My Chats | กล่องแชท, three-dot menu, bulk actions | local ready |
+| `/create` | Creator Studio | สร้างตัวละคร, AI draft, upload, preview simulator | local ready |
+| `/ai-creator` | AI Creator | สร้างภาพ/ร่างภาพ, permission/cost/provider state | local ready |
+| `/events` | Events Inbox | pending scene/event inbox | local ready |
+| `/profile` | Profile/Persona | persona, content mode, account state, BYOK settings | local ready |
+| `/wallet` | Wallet | token balance, usage ledger, admin adjustment guard | local ready |
+| `/announcements` | Announcements | ข่าวสาร/อัปเดตระบบ | local ready |
+| `/creators` | Creators | อันดับ/ค้นหานักสร้าง | local ready |
+| `/favorites` | Favorites | ตัวละครโปรด | local ready |
+| `/works` | Works | ผลงาน/draft/published ของผู้สร้าง | local ready |
+| `/support` | Support | FAQ/support/feedback | local ready |
+| `/moderation` | Moderation | report queue และ admin audit log | guarded |
+| `/admin/health` | Admin Health | deploy readiness dashboard | guarded |
+| `/admin/prompt-inspector` | Prompt Inspector | redacted prompt snapshot และ diff | guarded |
+| `/admin/evals` | Automated Evals | prompt/context eval status | guarded |
+| `*` | Not Found | fallback route | local ready |
 
 ไม่เพิ่ม route เก่าจากเอกสารภายนอก เช่น leaderboard, store, subscription จนกว่าจะเป็น product scope จริง
 
-## API And Backend Coverage
+AI Creator test status note:
 
-ต้องรักษา gate เหล่านี้ให้ผ่าน:
-
-```powershell
-bun run api:audit
-bun run backend:check
-bun run backend:check:db:test
-```
-
-สิ่งที่ต้องครอบคลุม:
-
-- Frontend API helper ต้องเรียก route ที่ backend มีจริง
-- Admin routes ต้องมี `ADMIN_API_KEY`
-- Owner resources ต้องใช้ user/owner guard
-- Chat local runtime ต้องตอบยาวพอสำหรับ roleplay และไม่ใช้เครดิต provider
-- Stream chat ต้องส่ง delta และ done event ได้
-- Saved chats ต้องคืนรายการแชทและ message window แบบจำกัดช่วงหลัง local chat สร้างห้องแล้ว
-- Chat world state ต้อง patch/get ได้หลัง local chat สร้างห้องแล้ว เพื่อรองรับ scene/universe continuity
-- Creator AI draft ต้องมีภาพร่างระบบที่บอกสถานะชัดเจนเมื่อยังไม่มี live image provider
-- Creator Preview simulator ต้องตอบ local preview ได้โดยไม่สร้าง chat จริง, คืน `source=local`, `modelName=local/preview`, usage/prompt/warnings shape ครบ, และคำตอบไม่สั้นจนใช้ทดสอบบุคลิกไม่ได้
-- Token ledger ต้องบันทึก balance และ usage ถูกต้อง
-- Report/admin actions ต้องสร้าง audit log
-- Local moderation smoke ต้องอ่าน report queue และ admin audit log ได้เมื่อมี admin smoke key
-- Upload/storage ต้องแยก local fallback ออกจาก Supabase signed production path
+- `/ai-creator` เป็น `local ready` เฉพาะ UI/local-safe workflow: template/cost state, upload preview/validation helper, blocked reasons, local My Library detail/actions, Creator Studio reuse, and public gallery disabled contract
+- ยังไม่ถือว่า production-ready สำหรับ generation library จนกว่า storage/download/retry/delete/favorite/use-as-cover, live image provider, and public gallery moderation/report flows ผ่าน gate
+- QA ต้องไม่ตี fallback/system image เป็น live provider success
 
 ## Frontend Coverage
 
@@ -98,18 +79,43 @@ bun run route-menu:audit
 
 สิ่งที่ต้องตรวจ:
 
-- ทุกปุ่มมีผลจริง หรือ disabled พร้อมเหตุผลภาษาไทย
+- ทุกปุ่มมีผลจริง หรือ disabled พร้อมเหตุผลภาษาไทยที่อ่านรู้เรื่อง
 - ไม่มี route/menu ที่กดแล้วตัน
-- Empty state ต้องบอกผู้ใช้ว่าทำอะไรต่อได้
+- Empty state ต้องมี next action ที่กดได้จริง
 - Mobile viewport ต้องผ่านสำหรับ `/`, `/chat`, `/create`, `/chats`, `/wallet`, `/moderation`, `/admin/health`
-- API error ต้องผ่าน helper กลางและไม่โชว์ raw technical error
-- UI ใช้ธีมเดียวกันเป็น dark-first และไม่มี horizontal overflow
-- Component/unit coverage ต้องครอบ core UI อย่างน้อย: chat composer, message bubble, character card, relationship picker, report dialog, และ creator readiness/form flow
-- E2E smoke ต้องตรวจ state สำคัญ ไม่ใช่แค่ render route: create draft, AI draft system-draft/live flag, chat send local, chat menu actions, report, wallet, moderation, admin health, และ mobile viewport
+- API error ต้องผ่าน helper กลางและไม่โชว์ raw technical error โดยไม่จำเป็น
+- UI เป็น dark-first และไปทางเดียวกับ MissAI template reference
+- ไม่มี horizontal overflow ที่เกี่ยวข้องกับหน้าหลัก
+- Component/unit coverage ต้องครอบ core UI อย่างน้อย: chat composer, message bubble, character card, relationship picker, report dialog, creator readiness/form flow
+- E2E smoke ต้องตรวจ state สำคัญ ไม่ใช่แค่ render route: create draft, AI draft system-draft/live flag, chat send local, chat menu actions, report, wallet, moderation, admin health, mobile viewport
 
-## QA Gates
+## Backend/API Coverage
 
-Current component/unit coverage also locks the Events Inbox pending-scene selector/page contract: `/events` must expose only playable pending scene summaries, filter held/QA-seed scene events, keep list/group/row hooks, link each row back to `/chat/:chatId`, and provide readable empty-state exits.
+ต้องรักษา gate เหล่านี้ให้ผ่าน:
+
+```powershell
+bun run api:audit
+bun run backend:check
+bun run backend:check:db:test
+```
+
+สิ่งที่ต้องครอบคลุม:
+
+- Frontend API helper ต้องเรียก route ที่ backend มีจริง
+- Admin routes ต้องใช้ `ADMIN_API_KEY`
+- Owner resources ต้องมี user/owner guard
+- Chat local runtime ต้องตอบยาวพอสำหรับ roleplay และไม่ใช้ provider credit
+- Stream chat ต้องส่ง delta และ done event ได้
+- Saved chats ต้องคืนรายการแชทและ bounded message window
+- Chat world state ต้อง get/patch ได้เพื่อรองรับ scene/universe continuity
+- Creator AI draft ต้องมี system draft image/fallback status เมื่อยังไม่มี live image provider
+- AI Creator ต้องมี template/cost state, upload validation, blocked reason, generation job/library state และไม่หัก token ก่อน backend รับ job ผ่าน validation
+- Creator Preview simulator ต้องตอบ local preview โดยไม่สร้าง chat จริง
+- Token ledger ต้องบันทึก balance/usage ถูกต้อง
+- Report/admin actions ต้องสร้าง audit log
+- Upload/storage ต้องแยก local fallback ออกจาก Supabase signed production path
+
+## Runtime QA Gates
 
 Baseline/docs:
 
@@ -120,13 +126,13 @@ bun run test-plan:audit
 git diff --check
 ```
 
-Repo-owned local:
+Repo-owned deterministic gate:
 
 ```powershell
 bun run qa:repo
 ```
 
-Runtime local:
+Local runtime gate:
 
 ```powershell
 bun run qa:seed
@@ -135,21 +141,11 @@ bun run smoke:local
 bun run e2e:smoke
 ```
 
-หมายเหตุ: `bun run qa:local` รัน `qa:seed` ให้อัตโนมัติก่อน runtime smoke เพื่อไม่ให้ `smoke:local` หรือ `api:smoke` ล้มเพราะยังไม่มีตัวละคร/แชทจำลองในฐานข้อมูล
-
-หมายเหตุ: `bun run smoke:local` ต้องตรวจ `GET /me/usage` เพื่อยืนยัน token balance, usage summary, กราฟ 7 วัน, และรายการกระเป๋า, ตรวจ `GET /me/content-settings` และ `GET /me/persona` เพื่อยืนยันเรตเนื้อหาและ persona limit, ตรวจ `GET /admin/reports?limit=5` และ `GET /admin/audit-logs?limit=5` เพื่อยืนยัน moderation/audit snapshot เมื่อมี `SMOKE_ADMIN_API_KEY` หรือเมื่อ local loopback smoke อ่าน `ADMIN_API_KEY` จาก `apps/backend/.env` ได้, ตรวจ `POST /creator/ai-draft` แบบ `imageOnly` + `skipImageProvider` เพื่อยืนยัน draft fallback และรูป placeholder, ตรวจ `POST /creator/preview-chat` แบบ `skipProvider` เพื่อยืนยันคำตอบลองบท, `source=local`, `modelName=local/preview`, usage/prompt/warnings shape ครบ จากนั้นต้องตรวจ local chat runtime เมื่อ backend health รายงานว่าใช้ local provider โดยยิง `POST /chat` และ `POST /chat/stream`, ตรวจว่ามี `chatId`, คำตอบยาวถึงขั้นต่ำ roleplay, stream มี delta/done event, model เป็น local runtime ที่คาดไว้, `totalTokens=0`, และ runtime memory มี `sceneState.mode`, pending scene event จาก seed `soulmate`, `relationshipState.status`, และ `relationshipState.events`; หลังสร้างแชทต้องตรวจ `GET /chats`, `GET /chats/:id/messages?limit=5`, และ `PATCH/GET /chats/:id/world-state` เพื่อยืนยันกล่องแชท, message window, และ world state
-
-หมายเหตุ: เมื่อไม่ได้ตั้ง `SMOKE_API_BASE_URL`, smoke/deploy CLIs จะอ่าน `PORT` จาก `apps/backend/.env` สำหรับ local QA เพื่อให้ `deploy:status`, `smoke:doctor`, `smoke:local`, และ `api:smoke` ไม่หลุดไปพอร์ต 3000 ถ้า backend ใช้พอร์ตอื่น
-
-หมายเหตุ: `bun run e2e:smoke` ต้องตรวจ PostgreSQL ผ่าน `apps/backend/src/db.required-check.ts` ก่อน `qa:seed` เสมอ เพื่อกัน browser smoke ทำงานต่อเมื่อ Docker/Postgres ยังไม่พร้อมหรือ DB เชื่อมต่อไม่ได้
-
 Full local:
 
 ```powershell
 bun run qa:full
 ```
-
-หมายเหตุ: `bun run qa:full` รัน `e2e:smoke` แล้วตามด้วย `qa:seed` อีกครั้ง เพราะ browser smoke ล้าง seed data ตอนจบ เพื่อให้ local app ยังมีข้อมูล QA พร้อมเล่นหลัง full gate ผ่าน
 
 DB-focused local:
 
@@ -182,7 +178,7 @@ Production ยังไม่ถือว่าพร้อมจนกว่า
 - Supabase Storage bucket `avatars` private + signed URL
 - `bun run smoke:chat` ผ่านกับ live chat provider
 - `bun run smoke:image:live` ผ่านกับ live image provider
-- `/admin/health` ไม่มี blocker ที่เกิดจาก env/provider/storage/CORS
+- `/admin/health` ไม่มี blocker จาก env/provider/storage/CORS
 
 ## Acceptance Criteria
 
@@ -191,9 +187,10 @@ Production ยังไม่ถือว่าพร้อมจนกว่า
 - `bun run qa:full` ผ่าน
 - `bun run api:audit` ผ่าน
 - `bun run route-menu:audit` ผ่าน
-- เปิด browser smoke ได้ครบทั้ง desktop/mobile
-- ไม่มีไฟล์ทดลองหรือเอกสารเก่าที่ทำให้ audit fail
+- Browser smoke ผ่านทั้ง desktop/mobile
+- ไม่มีไฟล์ทดลองหรือเอกสารเก่าที่ทำ audit fail
 - เอกสารหลักทั้งหมดชี้ไป PostgreSQL/Prisma/Bun/local QA roleplay ทางเดียวกัน
+- UI หลักยึด MissAI template direction และ Maprang-exclusive systems ไม่ขัดกัน
 
 ระบบถือว่า production-ready เมื่อ:
 
@@ -201,4 +198,4 @@ Production ยังไม่ถือว่าพร้อมจนกว่า
 - live chat และ live image smoke ผ่าน
 - Supabase signed storage ผ่าน
 - production env doctor และ `bun run production:check` ผ่าน
-- release handoff มี URL, commit, migration, QA gate, live provider evidence, และ go/no-go ครบ
+- release handoff มี URL, commit, migration, QA gate, live provider evidence และ go/no-go ครบ

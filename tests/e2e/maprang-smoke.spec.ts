@@ -26,6 +26,7 @@ const routeSmokeTargets: RouteSmokeTarget[] = [
   { path: `/chat/${seededChatId}`, testId: 'chat-composer-input' },
   { path: '/chats', text: 'แชท' },
   { path: '/create', testId: 'creator-name' },
+  { path: '/ai-creator', testId: 'ai-creator-page' },
   { path: '/events', text: 'อีเวนต์' },
   { path: '/profile', text: 'ตัวตนผู้เล่น' },
   { path: '/wallet', text: 'โทเคน' },
@@ -277,6 +278,120 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     })
     expect([200, 404], 'การตรวจเบราว์เซอร์ต้อง cleanup ตัวละครชั่วคราว').toContain(cleanup.status())
   }
+
+  await page.goto('/ai-creator')
+  await expect(page.getByTestId('ai-creator-page')).toBeVisible()
+  await expect(page.getByTestId('ai-creator-library')).toBeVisible()
+  await expect(page.getByTestId('ai-creator-public-gallery')).toBeVisible()
+  const backendLibraryItemId = 'backend-88888888-1111-4111-8111-888888888888'
+  const signedBackendLibraryItemId = 'backend-99999999-1111-4111-8111-999999999999'
+  await expect(page.getByTestId(`ai-creator-library-open-${backendLibraryItemId}`)).toBeVisible()
+  await page.getByTestId(`ai-creator-library-open-${backendLibraryItemId}`).click()
+  await expect(page.getByTestId(`ai-creator-library-detail-dialog-${backendLibraryItemId}`)).toBeVisible()
+  await expect(page.getByTestId(`ai-creator-library-detail-download-${backendLibraryItemId}`)).toBeEnabled()
+  await page.getByTestId(`ai-creator-library-detail-use-cover-${backendLibraryItemId}`).click()
+  await expect(page).toHaveURL(/\/create/)
+  await expect(page.getByTestId('creator-cover-draft-panel')).toBeVisible()
+  const coverFlowName = `QA Cover ${Date.now()}`
+  await ensureCreatorFormOpen(page)
+  await page.getByTestId('creator-name').fill(coverFlowName)
+  await page.getByTestId('creator-tagline').fill('coverUrl smoke')
+  await page.getByTestId('creator-avatar-url').fill('/src/assets/hero.png')
+  await page.getByTestId('creator-description').fill('coverUrl persistence smoke')
+  await page.getByTestId('creator-greeting').fill('coverUrl ready')
+  await page.getByTestId('creator-system-prompt').fill('You are a Maprang QA coverUrl character. Stay concise and Thai-first.')
+  await page.getByTestId('creator-scenario').fill('The user checks whether AI Creator cover output survives character creation.')
+  await page.getByTestId('creator-tags').fill('qa, cover, ai-creator')
+  await expect(page.getByTestId('creator-submit')).toBeEnabled()
+  await page.getByTestId('creator-submit').click()
+  await expect(page.locator('body')).toContainText(coverFlowName)
+  let coverCharacterId = page.url().match(/\/characters\/([^/?#]+)/)?.[1]
+  if (!coverCharacterId) {
+    const coverCharacters = await request.get(
+      `${backendUrl}/characters?view=admin&q=${encodeURIComponent(coverFlowName)}&limit=5`,
+      {
+        headers: {
+          'x-user-id': defaultUserId,
+          ...(adminKey ? { 'x-admin-key': adminKey } : {}),
+        },
+      },
+    )
+    expect(coverCharacters.ok(), 'coverUrl smoke must find the created character for verification').toBeTruthy()
+    const body = (await coverCharacters.json()) as { characters?: Array<{ id: string; name: string; coverUrl?: string | null }> }
+    const coverCharacter = body.characters?.find((item) => item.name === coverFlowName)
+    coverCharacterId = coverCharacter?.id
+    expect(coverCharacter?.coverUrl, 'created character must persist coverUrl from AI Creator draft').toContain('data:image/svg+xml')
+  }
+  expect(coverCharacterId, 'coverUrl smoke must keep the created character id for render verification and cleanup').toBeTruthy()
+  if (coverCharacterId) {
+    const coverDetail = await request.get(`${backendUrl}/characters/${coverCharacterId}`, {
+      headers: {
+        'x-user-id': defaultUserId,
+        ...(adminKey ? { 'x-admin-key': adminKey } : {}),
+      },
+    })
+    expect(coverDetail.ok(), 'coverUrl smoke must read created character detail').toBeTruthy()
+    const coverDetailBody = (await coverDetail.json()) as { character?: { coverUrl?: string | null } }
+    expect(coverDetailBody.character?.coverUrl, 'created character detail must include coverUrl').toContain('data:image/svg+xml')
+    await page.goto(`/characters/${coverCharacterId}`)
+    await expect(page.locator('body')).toContainText(coverFlowName)
+    await expect(page.getByTestId('character-cover-backdrop')).toHaveAttribute('src', coverDetailBody.character?.coverUrl ?? '')
+    const cleanup = await request.delete(`${backendUrl}/characters/${coverCharacterId}`, {
+      headers: {
+        'x-user-id': defaultUserId,
+        ...(adminKey ? { 'x-admin-key': adminKey } : {}),
+      },
+    })
+    expect([200, 404], 'coverUrl smoke must cleanup the temporary character').toContain(cleanup.status())
+  }
+
+  await page.goto('/ai-creator')
+  await expect(page.getByTestId('ai-creator-page')).toBeVisible()
+  await expect(page.getByTestId(`ai-creator-library-open-${signedBackendLibraryItemId}`)).toBeVisible()
+  await page.getByTestId(`ai-creator-library-open-${signedBackendLibraryItemId}`).click()
+  await expect(page.getByTestId(`ai-creator-library-detail-dialog-${signedBackendLibraryItemId}`)).toBeVisible()
+  await page.getByTestId(`ai-creator-library-detail-download-${signedBackendLibraryItemId}`).click()
+  await expect(page.getByTestId(`ai-creator-library-detail-download-notice-${signedBackendLibraryItemId}`)).toHaveAttribute(
+    'data-state',
+    'signed-active',
+  )
+  await expect(page.locator('body')).not.toContainText('qa-signed/maprang-ai-creator-smoke.png')
+
+  await page.goto('/ai-creator')
+  await expect(page.getByTestId('ai-creator-page')).toBeVisible()
+  await expect(page.getByTestId('ai-creator-public-gallery')).toBeVisible()
+  await expect(page.getByTestId('ai-creator-image-generate')).toBeDisabled()
+  await page.getByTestId('ai-creator-brief').fill('AI Creator smoke validation and blocked state check')
+  await page.getByTestId('ai-creator-image-prompt').fill('qa portrait, clean lighting, maprang smoke test')
+  await expect(page.getByTestId('ai-creator-image-generate')).toBeEnabled()
+  await page.getByTestId('ai-creator-image-upload').setInputFiles({
+    name: 'invalid-reference.gif',
+    mimeType: 'image/gif',
+    buffer: Buffer.from('GIF89a'),
+  })
+  await expect(page.getByTestId('ai-creator-status')).toBeVisible()
+  await expect(page.getByTestId('ai-creator-image-generate')).toBeDisabled()
+  await page.getByTestId('ai-creator-tab-video').click()
+  await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
+  await page.getByTestId('ai-creator-video-prompt').fill('slow camera push in with subtle motion')
+  await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
+  await page.getByTestId('ai-creator-video-upload').setInputFiles({
+    name: 'invalid-video.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('not a video'),
+  })
+  await expect(page.getByTestId('ai-creator-status')).toBeVisible()
+  await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
+  const publicGalleryActions = page.locator('[data-testid^="ai-creator-public-action-"]')
+  await expect(publicGalleryActions).toHaveCount(3)
+  expect(
+    await publicGalleryActions.evaluateAll((nodes) =>
+      nodes.every((node) => node instanceof HTMLButtonElement && node.disabled && node.title.length > 0),
+    ),
+    'public gallery actions must stay disabled with clear reasons until public contract is implemented',
+  ).toBe(true)
+  await page.getByTestId('ai-creator-public-create-focus').click()
+  await expect(page.getByTestId('ai-creator-tab-image')).toHaveAttribute('aria-pressed', 'true')
 
   await page.goto('/chats')
   await expect(page.locator('body')).toContainText('แชท')

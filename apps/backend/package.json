@@ -8,7 +8,7 @@
     "test": "bun test",
     "typecheck": "bunx tsc --noEmit",
     "env:check": "bun src/env.check.ts",
-    "deploy:check": "bunx prisma validate && bunx tsc --noEmit && bun test"
+    "deploy:check": "bunx prisma generate && bunx prisma validate && bunx tsc --noEmit && bun test"
   },
   "prisma": {
     "seed": "bun seed.ts"

@@ -247,7 +247,7 @@ export function AdminModerationPage() {
 
   return (
     <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/92 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
+      <section className="missai-card rounded-2xl p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
@@ -274,7 +274,7 @@ export function AdminModerationPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl p-4">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,440px)] lg:items-end">
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
@@ -296,7 +296,7 @@ export function AdminModerationPage() {
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input
-              className="min-h-11 min-w-0 rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+              className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
               onChange={(event) => setAdminKeyInput(event.target.value)}
               placeholder="วาง ADMIN_API_KEY"
               type="password"
@@ -321,9 +321,9 @@ export function AdminModerationPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_auto] lg:items-center">
-          <label className="flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-black/25 px-3 text-white/42 focus-within:border-amber-400/70">
+        <label className="missai-input flex min-h-11 items-center gap-2 px-3 py-0 text-white/42">
             <Search size={17} />
             <input
               className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/35"
@@ -334,7 +334,7 @@ export function AdminModerationPage() {
           </label>
           <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
             <select
-              className="min-h-11 min-w-0 rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white"
+            className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
               onChange={(event) => setStatus(event.target.value as ReportStatus | '')}
               value={status}
             >
@@ -345,7 +345,7 @@ export function AdminModerationPage() {
               ))}
             </select>
             <select
-              className="min-h-11 min-w-0 rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white"
+            className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
               onChange={(event) => setTargetType(event.target.value as ReportTargetType | '')}
               value={targetType}
             >
@@ -368,7 +368,7 @@ export function AdminModerationPage() {
           </div>
         </div>
         {note && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 bg-white/7 p-3 text-sm font-bold text-white/62">
+        <div className="missai-empty mt-3 flex items-center gap-2 p-3 text-sm text-white/62">
             <Filter size={16} />
             <p className="m-0">{note}</p>
           </div>
@@ -377,11 +377,11 @@ export function AdminModerationPage() {
 
       <section className="space-y-3">
         {isLoading ? (
-          <div className="rounded-lg border border-white/10 bg-[#18181d]/90 p-6 text-sm font-bold text-white/55 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+        <div className="missai-card rounded-2xl p-6 text-sm font-bold text-white/55">
             กำลังโหลดรายงาน...
           </div>
         ) : visibleReports.length === 0 ? (
-          <div className="grid gap-4 rounded-lg border border-white/10 bg-[#18181d]/90 p-6 shadow-[0_18px_58px_rgba(0,0,0,0.18)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="missai-card grid gap-4 rounded-2xl p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div>
               <p className="m-0 text-lg font-black text-white">
                 {reports.length === 0 ? 'ยังไม่มีรายการที่ต้องดูแล' : 'ไม่พบรายงานที่ตรงกับคำค้นหา'}
@@ -425,14 +425,14 @@ export function AdminModerationPage() {
                   : ''
             const statusActionReason = isUpdatingReport ? 'กำลังอัปเดตรายงานนี้' : ''
             return (
-              <article className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]" key={report.id}>
+          <article className="missai-card rounded-2xl p-4" key={report.id}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full border px-2.5 py-1 text-xs font-black ${statusStyle(report.status)}`}>
                         {statusLabel(report.status)}
                       </span>
-                      <span className="rounded-full border border-white/10 bg-white/7 px-2.5 py-1 text-xs font-black text-white/65">
+                    <span className="missai-badge text-white/65">
                         {targetLabel(report.targetType)}
                       </span>
                       <span className="text-xs font-bold text-white/42">{formatDate(report.createdAt)}</span>
@@ -441,7 +441,7 @@ export function AdminModerationPage() {
                       <h2 className="m-0 text-lg font-black tracking-normal text-white">{reportTitle(report)}</h2>
                       <p className="m-0 mt-1 text-sm font-bold text-white/50">เหตุผล: {report.reason}</p>
                     </div>
-                    <p className="m-0 max-h-36 overflow-auto whitespace-pre-wrap rounded-lg border border-white/10 bg-black/22 p-3 text-sm font-bold leading-6 text-white/65">
+                  <p className="missai-empty m-0 max-h-36 overflow-auto whitespace-pre-wrap p-3 text-sm leading-6 text-white/65">
                       {reportBody(report)}
                     </p>
                     <div className="flex flex-wrap gap-2 text-xs font-bold text-white/42">
@@ -525,7 +525,7 @@ export function AdminModerationPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl">
         <div className="border-b border-white/10 p-4">
           <p className="m-0 text-sm font-black text-white">ประวัติผู้ดูแลล่าสุด</p>
           <p className="m-0 mt-1 text-xs font-bold text-white/45">บันทึกคำสั่งดูแลรายงานและโทเคนที่ระบบเก็บไว้</p>

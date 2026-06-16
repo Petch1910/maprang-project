@@ -163,6 +163,7 @@ export type Character = {
   id: string
   name: string
   avatarUrl?: string | null
+  coverUrl?: string | null
   tagline: string | null
   description?: string | null
   biography?: string | null
@@ -815,6 +816,7 @@ export async function previewRelationship(tags: string[], messages?: string[]) {
 export type CharacterInput = {
   name: string
   avatarUrl: string | null
+  coverUrl?: string | null
   tagline: string | null
   description: string | null
   biography: string | null
@@ -856,6 +858,58 @@ export type CreatorAiDraftResponse = {
   warnings: string[]
 }
 
+export type GenerationJobOutput = {
+  id: string
+  jobId?: string
+  ownerId?: string
+  kind: 'image' | 'video'
+  url: string | null
+  visibility: 'private' | 'public'
+  isFavorite: boolean
+  createdAt: string
+  updatedAt?: string
+}
+
+export type GenerationJob = {
+  id: string
+  ownerId: string
+  templateId: string
+  status: 'blocked' | 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled'
+  source: string
+  failureCode: string
+  message: string
+  debit: {
+    charged: boolean
+    amount: number
+    reason: string
+  }
+  input: {
+    prompt: string
+    imageInputCount: number
+    videoInputCount: number
+  }
+  persisted?: boolean
+  createdAt?: string
+  updatedAt?: string
+  outputs?: GenerationJobOutput[]
+}
+
+export type GenerationInputMetadata = {
+  name?: string | null
+  mimeType?: string | null
+  sizeBytes?: number | null
+  durationSeconds?: number | null
+}
+
+export type CreateGenerationJobInput = {
+  templateId: string
+  prompt?: string | null
+  imageInputs?: string[]
+  videoInputs?: string[]
+  imageInputMetadata?: GenerationInputMetadata[]
+  videoInputMetadata?: GenerationInputMetadata[]
+}
+
 export async function generateCreatorAiDraft(input: {
   brief?: string
   imagePrompt?: string
@@ -866,6 +920,85 @@ export async function generateCreatorAiDraft(input: {
   return requestJson<CreatorAiDraftResponse>('/creator/ai-draft', {
     method: 'POST',
     body: JSON.stringify(input),
+  })
+}
+
+export async function fetchGenerationJobs(limit = 20) {
+  const params = new URLSearchParams()
+  params.set('limit', String(limit))
+  return requestJson<{
+    jobs: GenerationJob[]
+    persisted: boolean
+    persistenceWarning?: string
+  }>(`/generation/jobs?${params.toString()}`)
+}
+
+export async function createGenerationJob(input: CreateGenerationJobInput) {
+  return requestJson<{
+    job: GenerationJob
+  }>('/generation/jobs', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function fetchGenerationJob(jobId: string) {
+  return requestJson<{
+    job: GenerationJob
+    persisted: boolean
+  }>(`/generation/jobs/${jobId}`)
+}
+
+export async function retryGenerationJob(jobId: string) {
+  return requestJson<{
+    job: GenerationJob
+    persisted: boolean
+    persistenceWarning?: string
+  }>(`/generation/jobs/${jobId}/retry`, {
+    method: 'POST',
+  })
+}
+
+export async function favoriteGenerationOutput(outputId: string) {
+  return requestJson<{
+    output: GenerationJobOutput
+    persisted: boolean
+    persistenceWarning?: string
+  }>(`/generation/outputs/${outputId}/favorite`, {
+    method: 'POST',
+  })
+}
+
+export async function unfavoriteGenerationOutput(outputId: string) {
+  return requestJson<{
+    output: GenerationJobOutput
+    persisted: boolean
+    persistenceWarning?: string
+  }>(`/generation/outputs/${outputId}/favorite`, {
+    method: 'DELETE',
+  })
+}
+
+export async function fetchGenerationOutputDownload(outputId: string) {
+  return requestJson<{
+    download: {
+      outputId: string
+      kind: 'image' | 'video'
+      access: 'direct' | 'public' | 'signed'
+      url: string
+      expiresIn: number | null
+    }
+    persisted: boolean
+  }>(`/generation/outputs/${outputId}/download`)
+}
+
+export async function deleteGenerationOutput(outputId: string) {
+  return requestJson<{
+    ok: boolean
+    deleted: boolean
+    persisted: boolean
+  }>(`/generation/outputs/${outputId}`, {
+    method: 'DELETE',
   })
 }
 

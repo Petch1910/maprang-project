@@ -1,0 +1,10 @@
+# Layout Routing Details
+
+Match for "/home" at position 12964:
+CONTEXT:
+... kQ)(e),c=r&&u,d=!r&&!u;return(0,s.useEffect)(()=>{i(!0),l((0,en.DD)())},[]),(0,s.useEffect)(()=>{if(!(!a||!o||(0,ea.QD)(e))&&!n){if(c){let e=(0,en.B)("/home");t.prefetch(e);let r=window.setTimeout(()=>{t.replace(e)},600);return()=>window.clearTimeout(r)}d&&t.replace((0,en.B)("/login"))}},[n,o,a,t,c,d]),nul ...
+
+
+Match for "/support" at position 28807:
+CONTEXT:
+... ,r)=>{"use strict";r.d(t,{Ad:()=>f,JM:()=>g,Kn:()=>d,QD:()=>c,h9:()=>m,kQ:()=>u});let n=["/login","/register","/forgot-password"],a=["/twa-start"],s=["/support"],i=["/profile",...s,...n,...a],o=["/creation","/invite","/creation-guide","/advanced-guide","/activity","/points/agent-report","/register-debug","/hy ...

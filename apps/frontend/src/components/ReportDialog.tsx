@@ -49,7 +49,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
   return (
     <div className="fixed inset-0 z-50 grid place-items-end bg-black/72 p-0 backdrop-blur-md sm:place-items-center sm:p-4">
       <section
-        className="w-full rounded-t-2xl border border-white/10 bg-[#151518] p-5 text-white shadow-[0_28px_90px_rgba(0,0,0,0.58)] sm:max-w-lg sm:rounded-2xl"
+        className="missai-dialog w-full rounded-t-2xl p-5 text-white sm:max-w-lg sm:rounded-2xl"
         data-testid="report-dialog"
       >
         <div className="flex items-start justify-between gap-4">
@@ -60,7 +60,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
           <button type="button"
             aria-label="ปิดหน้าต่างรายงาน"
             aria-disabled={isSubmitting}
-            className="grid size-10 place-items-center rounded-full border border-white/10 bg-white/6 text-white/60 transition hover:bg-white/10 hover:text-white"
+            className="missai-icon-button size-10 rounded-full"
             disabled={isSubmitting}
             onClick={onClose}
             title={submittingDisabledReason || 'ปิดหน้าต่างรายงาน'}
@@ -70,7 +70,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
         </div>
 
         {target.preview && (
-          <p className="mt-4 max-h-28 overflow-auto whitespace-pre-wrap rounded-xl border border-white/8 bg-white/6 p-3 text-sm leading-6 text-white/66">
+          <p className="missai-empty mt-4 max-h-28 overflow-auto whitespace-pre-wrap text-sm text-white/66">
             {target.preview}
           </p>
         )}
@@ -79,7 +79,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
           เหตุผล
         </label>
         <select
-          className="mt-2 min-h-11 w-full rounded-lg border border-white/10 bg-[#1f1f24] px-3 text-sm font-bold text-white outline-none transition focus:border-orange-500/70 focus:ring-4 focus:ring-orange-500/15"
+          className="missai-input mt-2 min-h-11 rounded-xl px-3 text-sm"
           aria-disabled={isSubmitting}
           disabled={isSubmitting}
           id="report-reason"
@@ -98,7 +98,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
           รายละเอียด
         </label>
         <textarea
-          className="mt-2 min-h-28 w-full resize-none rounded-lg border border-white/10 bg-[#1f1f24] p-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/30 focus:border-orange-500/70 focus:ring-4 focus:ring-orange-500/15"
+          className="missai-input mt-2 min-h-28 resize-none rounded-xl p-3 text-sm leading-6"
           aria-disabled={isSubmitting}
           disabled={isSubmitting}
           id="report-details"
@@ -112,7 +112,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
 
         <div className="mt-5 grid grid-cols-2 gap-2">
           <button type="button"
-            className="min-h-11 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/74 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
+            className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm disabled:opacity-60"
             aria-disabled={isSubmitting}
             data-testid="report-cancel"
             disabled={isSubmitting}
@@ -122,7 +122,7 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
             ยกเลิก
           </button>
           <button type="button"
-            className="min-h-11 rounded-lg bg-rose-600 px-4 text-sm font-black text-white transition hover:bg-rose-500 disabled:opacity-60"
+            className="missai-button-danger min-h-11 rounded-xl px-4 text-sm disabled:opacity-60"
             aria-disabled={isSubmitting}
             data-testid="report-submit"
             disabled={isSubmitting}

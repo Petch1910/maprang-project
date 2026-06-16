@@ -193,13 +193,20 @@ export function CharacterLobbyPage() {
     setReportNote(copied ? 'คัดลอกลิงก์ตัวละครแล้ว' : `คัดลอกลิงก์นี้: ${url}`)
   }
 
+  const headerImageUrl = character?.coverUrl || character?.avatarUrl || ''
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="missai-card overflow-hidden rounded-3xl shadow-2xl">
         <div className="relative h-40 overflow-hidden bg-[radial-gradient(circle_at_20%_10%,rgba(172,75,255,0.28),transparent_32%),radial-gradient(circle_at_75%_0%,rgba(249,156,0,0.1),transparent_34%),linear-gradient(135deg,#15162c,#080a1a)] sm:h-60">
-          {character?.avatarUrl && (
+          {headerImageUrl && (
             <>
-              <img alt="" className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl" src={character.avatarUrl} />
+              <img
+                alt=""
+                className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
+                data-testid="character-cover-backdrop"
+                src={headerImageUrl}
+              />
               <div className="absolute inset-0 bg-black/62" />
             </>
           )}

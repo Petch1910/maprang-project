@@ -34,8 +34,22 @@ export const avatarStorageMessages = {
   unavailable: 'พื้นที่เก็บรูปตัวละครยังไม่พร้อมใช้งาน กรุณาลองใหม่หรือติดต่อผู้ดูแลระบบ',
 }
 
+export const storageObjectMessages = {
+  invalidPath: 'ตำแหน่งไฟล์ในพื้นที่เก็บข้อมูลไม่ถูกต้อง',
+  notConfigured: 'ยังไม่ได้ตั้งค่า Supabase Storage สำหรับไฟล์นี้',
+  signedUrlFailed: (status: number) => `สร้างลิงก์ไฟล์แบบ signed URL ไม่สำเร็จ สถานะ ${status}`,
+  signedUrlMissing: 'Supabase ไม่ได้ส่ง signed URL ของไฟล์กลับมา',
+  signedUrlMalformed: 'Supabase ส่งข้อมูล signed URL ของไฟล์ไม่ถูกต้อง',
+}
+
 export function safeAvatarFilename(filename: string) {
   return /^[a-z0-9-]+\.(jpg|jpeg|png|webp|gif)$/i.test(filename) ? filename : null
+}
+
+export function safeStorageObjectPath(objectPath: string) {
+  const normalized = objectPath.trim().replace(/^\/+/, '')
+  if (!normalized || normalized.includes('..') || normalized.includes('\\')) return null
+  return /^[a-z0-9][a-z0-9/_.,=-]*$/i.test(normalized) ? normalized : null
 }
 
 export function avatarExtension(file: File) {
@@ -73,11 +87,24 @@ export function normalizeSupabaseSignedUrl(supabaseUrl: string, signedPath: stri
   return `${baseUrl}/storage/v1/${signedPath.replace(/^\//, '')}`
 }
 
+function localSignedStorageFixtureUrl(objectPath: string) {
+  const label = encodeURIComponent(objectPath.replace(/^qa-signed\//, ''))
+  return `data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20640%20960%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20x2=%221%22%20y1=%220%22%20y2=%221%22%3E%3Cstop%20stop-color=%22%2322d3ee%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%232c0c64%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%22640%22%20height=%22960%22%20fill=%22url(%23g)%22/%3E%3Crect%20x=%2270%22%20y=%22160%22%20width=%22500%22%20height=%22640%22%20rx=%2236%22%20fill=%22%23070a18%22%20opacity=%22.55%22/%3E%3Ctext%20x=%22320%22%20y=%22440%22%20text-anchor=%22middle%22%20font-family=%22Arial%22%20font-size=%2240%22%20font-weight=%22700%22%20fill=%22white%22%3ESigned%20Storage%3C/text%3E%3Ctext%20x=%22320%22%20y=%22495%22%20text-anchor=%22middle%22%20font-family=%22Arial%22%20font-size=%2224%22%20fill=%22%23f5d36b%22%3E${label}%3C/text%3E%3C/svg%3E`
+}
+
 export async function readSupabaseSignedUrlPayload(response: Response) {
   try {
     return (await response.json()) as { signedURL?: string; signedUrl?: string }
   } catch {
     throw new Error(avatarStorageMessages.signedUrlMalformed)
+  }
+}
+
+export async function readStorageObjectSignedUrlPayload(response: Response) {
+  try {
+    return (await response.json()) as { signedURL?: string; signedUrl?: string }
+  } catch {
+    throw new Error(storageObjectMessages.signedUrlMalformed)
   }
 }
 
@@ -119,6 +146,47 @@ async function uploadSupabaseAvatar({
   if (!response.ok) throw new Error(avatarStorageMessages.uploadFailed(response.status))
 
   return objectPath
+}
+
+export async function resolveStorageObjectUrl(objectPath: string) {
+  const safePath = safeStorageObjectPath(objectPath)
+  if (!safePath) throw new Error(storageObjectMessages.invalidPath)
+
+  if (process.env.NODE_ENV !== 'production' && safePath.startsWith('qa-signed/')) {
+    return {
+      access: 'signed' as const,
+      url: localSignedStorageFixtureUrl(safePath),
+      expiresIn: supabaseSignedUrlExpiresInSeconds,
+    }
+  }
+
+  const { supabaseUrl, serviceRoleKey, bucket } = supabaseStorageConfig()
+  if (supabaseStorageAccess === 'public') {
+    return {
+      access: 'public' as const,
+      url: `${supabaseUrl}/storage/v1/object/public/${bucket}/${safePath}`,
+      expiresIn: null,
+    }
+  }
+
+  const response = await fetch(`${supabaseUrl}/storage/v1/object/sign/${bucket}/${safePath}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ expiresIn: supabaseSignedUrlExpiresInSeconds }),
+  })
+  if (!response.ok) throw new Error(storageObjectMessages.signedUrlFailed(response.status))
+
+  const body = await readStorageObjectSignedUrlPayload(response)
+  const signedPath = body.signedURL ?? body.signedUrl
+  if (!signedPath) throw new Error(storageObjectMessages.signedUrlMissing)
+  return {
+    access: 'signed' as const,
+    url: normalizeSupabaseSignedUrl(supabaseUrl, signedPath),
+    expiresIn: supabaseSignedUrlExpiresInSeconds,
+  }
 }
 
 export async function resolveAvatarLocation(filename: string) {

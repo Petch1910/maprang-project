@@ -89,6 +89,51 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['backend-test'],
     note: 'creator-preview.service.test.ts ตรวจการทดสอบตัวละครก่อนเผยแพร่',
   },
+  'GET /generation/templates': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ registry แม่แบบสร้างภาพ/วิดีโอแบบ repo-owned โดยไม่เรียก provider จริง',
+  },
+  'POST /generation/jobs': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ preflight งานสร้างภาพ, owner guard, blocked local-safe state และไม่หักโทเคนก่อนมี job/storage backend จริง',
+  },
+  'GET /generation/jobs': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ owner library read path, auth guard, local-safe empty fallback และไม่เปิดงานของผู้ใช้อื่น',
+  },
+  'GET /generation/jobs/:id': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ owner generation job detail, UUID guard, not-found response และ broken-access guard ผ่าน userId scope',
+  },
+  'POST /generation/jobs/:id/retry': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ owner-only retry, UUID guard, not-found response และ no-duplicate-debit local-safe contract',
+  },
+  'POST /generation/outputs/:id/favorite': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts และ generation.persistence.test.ts ตรวจ owner-only favorite mutation โดยไม่เปิด storageKey',
+  },
+  'DELETE /generation/outputs/:id/favorite': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts และ generation.persistence.test.ts ตรวจ owner-only unfavorite mutation โดยไม่เปิด storageKey',
+  },
+  'GET /generation/outputs/:id/download': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts, generation.persistence.test.ts และ storage.service.test.ts ตรวจ owner-only download URL, signed/direct access และไม่เปิด storageKey',
+  },
+  'DELETE /generation/outputs/:id': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts และ generation.persistence.test.ts ตรวจ owner-only delete mutation โดยไม่ลบ output ของผู้ใช้อื่น',
+  },
   'GET /creator/scenarios': {
     owner: 'creator',
     coverage: ['backend-test'],

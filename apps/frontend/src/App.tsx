@@ -113,7 +113,7 @@ const routePreloads: Record<string, () => Promise<unknown>> = {
 function NotFoundPage() {
   return (
     <main
-      className="grid min-h-screen place-items-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-6 text-white"
+      className="missai-page grid min-h-screen place-items-center px-6 text-white"
       data-testid="not-found-page"
     >
       <section className="text-center">
@@ -122,13 +122,13 @@ function NotFoundPage() {
         <p className="mt-2 text-lg text-slate-400">ขออภัย เราไม่พบหน้าที่คุณค้นหา</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <NavLink
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-purple-600 px-6 text-sm font-black text-white transition hover:bg-purple-500"
+            className="missai-button-primary min-h-11 px-6 text-sm"
             to="/"
           >
             ไปหน้าหลัก
           </NavLink>
           <NavLink
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-700 bg-slate-800/50 px-6 text-sm font-black text-slate-300 transition hover:bg-slate-700/50"
+            className="missai-button-secondary min-h-11 px-6 text-sm"
             to="/create"
           >
             สร้างตัวละคร
@@ -165,7 +165,7 @@ function App() {
   const appRoutes = (
     <Suspense
       fallback={
-        <div className="grid min-h-screen place-items-center bg-[#080A1A]">
+          <div className="missai-page grid min-h-screen place-items-center">
           <div className="text-center">
             <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#a855f7] border-t-transparent" />
             <p className="mt-4 text-slate-400">กำลังโหลด...</p>
@@ -206,7 +206,7 @@ function App() {
 
   if (isImmersiveRoute) {
     return (
-      <div className="min-h-screen bg-[#18182f] text-white">
+      <div className="min-h-screen bg-[var(--color-page)] text-white">
         <AgeGate />
         {appRoutes}
         <ToastContainer />
@@ -215,11 +215,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen missai-aurora text-white">
+    <div className="missai-page min-h-screen text-white">
       <AgeGate />
 
       {/* Modern Top Navigation */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#080a1a]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(8,10,26,0.82)] backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
@@ -228,8 +228,8 @@ function App() {
                 <span className="text-xl font-black">M</span>
               </div>
               <div className="hidden sm:block">
-                <span className="text-lg font-black tracking-wide font-display">MAPRANG</span>
-                <p className="text-xs text-slate-400">AI Roleplay</p>
+                <span className="font-display text-lg font-black tracking-wide">MAPRANG</span>
+                <p className="text-xs text-[var(--color-text-muted)]">AI Roleplay</p>
               </div>
             </NavLink>
 
@@ -244,8 +244,8 @@ function App() {
                   className={({ isActive }) =>
                     `flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-black transition ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white missai-glow'
-                        : 'text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white'
+                        ? 'bg-gradient-to-r from-[var(--color-accent-purple)] to-[#8b5cf6] text-white missai-glow'
+                        : 'text-[var(--color-text-muted)] hover:border-white/10 hover:bg-white/5 hover:text-white'
                     }`
                   }
                 >
@@ -270,7 +270,7 @@ function App() {
               {/* Events (with badge) */}
               <NavLink
                 to="/events"
-                className="relative rounded-xl border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+                className="relative rounded-xl border border-white/10 bg-white/5 p-2 text-[var(--color-text-muted)] transition hover:border-[var(--color-accent-purple)]/40 hover:text-white"
                 title="อีเวนต์"
               >
                 <Bell className="h-5 w-5" />
@@ -285,7 +285,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="md:hidden rounded-xl border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+                className="rounded-xl border border-white/10 bg-white/5 p-2 text-[var(--color-text-muted)] transition hover:border-[var(--color-accent-purple)]/40 hover:text-white md:hidden"
                 aria-label="เมนู"
               >
                 {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -296,7 +296,7 @@ function App() {
 
         {/* Mobile Menu Dropdown */}
         {showMobileMenu && (
-          <div className="border-t border-white/10 bg-[#0b0d1f]/95 backdrop-blur-xl md:hidden">
+          <div className="border-t border-[var(--color-border)] bg-[rgba(12,13,22,0.96)] backdrop-blur-xl md:hidden">
             <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
               {mobileDropdownNavItems.map((item) => (
                 <NavLink
@@ -306,8 +306,8 @@ function App() {
                   className={({ isActive }) =>
                     `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white missai-glow'
-                        : 'text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white'
+                        ? 'bg-gradient-to-r from-[var(--color-accent-purple)] to-[#8b5cf6] text-white missai-glow'
+                        : 'text-[var(--color-text-muted)] hover:border-white/10 hover:bg-white/5 hover:text-white'
                     }`
                   }
                 >
@@ -325,7 +325,7 @@ function App() {
 
       {/* Bottom Tab Navigation (Mobile Only) */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-white/10 bg-[#0b0d1f]/90 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur-xl md:hidden"
+        className="missai-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 md:hidden"
         data-testid="app-mobile-nav"
       >
         {primaryNavItems.map((item) => (
@@ -337,7 +337,9 @@ function App() {
             onTouchStart={() => preloadRoute(item.to)}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-[11px] font-black transition ${
-                isActive ? 'bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] text-white missai-glow' : 'text-slate-400'
+                isActive
+                  ? 'bg-gradient-to-br from-[var(--color-accent-purple)] to-[#8b5cf6] text-white missai-glow'
+                  : 'text-[var(--color-text-muted)]'
               }`
             }
           >

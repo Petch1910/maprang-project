@@ -58,7 +58,7 @@ describe('e2e smoke command plan', () => {
 
     expect(backendEnvPort(backendEnv)).toBe('3001')
     expect(resolveE2eSmokeEnv({}, backendEnv)).toMatchObject({
-      E2E_BASE_URL: 'http://127.0.0.1:5173',
+      E2E_BASE_URL: 'http://127.0.0.1:5174',
       E2E_API_BASE_URL: 'http://127.0.0.1:3001',
       VITE_API_BASE_URL: 'http://127.0.0.1:3001',
     })

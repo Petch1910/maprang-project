@@ -1180,6 +1180,18 @@ describe('backend security audit', () => {
         }
       `, 'apps/backend/src/security.ts'),
     ).toEqual([])
+
+    expect(
+      messagesFor(`
+        export async function readStorageObjectSignedUrlPayload(response: Response) {
+          try {
+            return (await response.json()) as { signedURL?: string }
+          } catch {
+            throw new Error(storageObjectMessages.signedUrlMalformed)
+          }
+        }
+      `, 'apps/backend/src/storage.service.ts'),
+    ).toEqual([])
   })
 
   test('catches raw response text diagnostics without redaction', () => {

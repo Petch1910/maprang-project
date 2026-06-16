@@ -42,7 +42,7 @@ export function backendEnvPort(envText: string) {
 export function resolveE2eSmokeEnv(env: E2eSmokeEnv = process.env, backendEnvText = ''): E2eSmokeEnv {
   const backendPort = env.E2E_API_BASE_URL ? '' : backendEnvPort(backendEnvText)
   const e2eApiBaseUrl = env.E2E_API_BASE_URL ?? (backendPort ? `http://127.0.0.1:${backendPort}` : 'http://127.0.0.1:3000')
-  const e2eBaseUrl = env.E2E_BASE_URL ?? 'http://127.0.0.1:5173'
+  const e2eBaseUrl = env.E2E_BASE_URL ?? 'http://127.0.0.1:5174'
 
   return {
     ...env,
@@ -81,7 +81,7 @@ function e2eUrlIssues(name: string, value: string) {
 export function e2eSmokeTargetIssues(env: E2eSmokeEnv = process.env) {
   const resolvedEnv = resolveE2eSmokeEnv(env)
   const targets = [
-    ['E2E_BASE_URL', resolvedEnv.E2E_BASE_URL ?? 'http://127.0.0.1:5173'],
+    ['E2E_BASE_URL', resolvedEnv.E2E_BASE_URL ?? 'http://127.0.0.1:5174'],
     ['E2E_API_BASE_URL', resolvedEnv.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'],
   ] as const
 

@@ -293,7 +293,7 @@ export function AdminHealthPage() {
 
   return (
     <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/92 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
+      <section className="missai-card rounded-2xl p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
@@ -322,20 +322,20 @@ export function AdminHealthPage() {
               รีเฟรช
             </button>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+            className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
               to="/admin/prompt-inspector"
             >
               ตรวจพรอมป์
             </Link>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+            className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
               to="/admin/evals"
             >
               ทดสอบคุณภาพ
             </Link>
           </div>
         </div>
-        {note && <p className="m-0 mt-4 rounded-lg border border-white/10 bg-white/7 p-3 text-sm font-bold text-white/70">{note}</p>}
+        {note && <p className="missai-empty m-0 mt-4 p-3 text-sm text-white/70">{note}</p>}
       </section>
 
       <section className="grid gap-3 md:grid-cols-3">
@@ -368,7 +368,7 @@ export function AdminHealthPage() {
         </article>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl p-4">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="m-0 text-sm font-black text-white">ลำดับงานก่อนปล่อยจริง</p>
@@ -376,13 +376,13 @@ export function AdminHealthPage() {
               แยกสิ่งที่ต้องปิดก่อนสเตจจิง ออกจาก smoke ผู้ให้บริการจริงและด่านโปรดักชัน
             </p>
           </div>
-          <span className="rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-black text-white/65">
+              <span className="missai-badge text-white/65">
             สเตจจิง → ทดสอบจริง → โปรดักชัน
           </span>
         </div>
         <div className="grid gap-3 lg:grid-cols-3">
           {deployPhaseSteps.map((step) => (
-            <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={step.title}>
+            <article className="missai-card rounded-xl p-3" key={step.title}>
               <div className="flex items-start justify-between gap-3">
                 <p className="m-0 text-sm font-black text-white">{step.title}</p>
                 <StatusPill ok={step.ok} />
@@ -426,7 +426,7 @@ export function AdminHealthPage() {
                   </span>
                 </div>
                 <p className="m-0 mt-2 text-xs font-bold leading-5 text-amber-100/70">{check.detail}</p>
-                <p className="m-0 mt-2 rounded-lg border border-white/10 bg-white/7 p-2 text-xs font-black leading-5 text-amber-50">
+              <p className="missai-empty m-0 mt-2 p-2 text-xs leading-5 text-amber-50">
                   ขั้นต่อไป: {check.action}
                 </p>
               </article>
@@ -435,7 +435,7 @@ export function AdminHealthPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl p-4">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
@@ -446,16 +446,16 @@ export function AdminHealthPage() {
               พร้อมแล้ว {postureReadyCount}/{postureRows.length} หมวด
             </p>
           </div>
-          <span className="rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-black text-white/65">
+              <span className="missai-badge text-white/65">
             ความลับ / ความถูกต้อง / ความพร้อมใช้งาน + ยืนยันตัวตน / สิทธิ์ / Audit
           </span>
         </div>
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           {postureRows.map((row) => (
-            <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={row.key}>
+            <article className="missai-card rounded-xl p-3" key={row.key}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="rounded-full border border-white/10 bg-black/22 px-2 py-0.5 text-[11px] font-black text-white/55">{row.group}</span>
+                <span className="missai-badge px-2 py-0.5 text-[11px] text-white/55">{row.group}</span>
                   <p className="m-0 mt-2 text-sm font-black text-white">{row.label}</p>
                 </div>
                 <StatusPill ok={row.ok} />
@@ -469,7 +469,7 @@ export function AdminHealthPage() {
       <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
         <SystemStatus healthStatus={healthStatus} isLoading={isLoading} onRefresh={loadHealth} />
 
-        <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl p-4">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
@@ -480,13 +480,13 @@ export function AdminHealthPage() {
                 พร้อมแล้ว {readyCount}/{deployChecks.length} ข้อ
               </p>
             </div>
-            <span className="rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-black text-white/65">
+              <span className="missai-badge text-white/65">
               API: {API_BASE_URL}
             </span>
           </div>
           <div className="grid gap-2 md:grid-cols-2">
             {deployChecks.map((check) => (
-              <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={check.label}>
+            <article className="missai-card rounded-xl p-3" key={check.label}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="m-0 text-sm font-black text-white">{check.label}</p>
@@ -497,7 +497,7 @@ export function AdminHealthPage() {
                   <StatusPill ok={check.ok} />
                 </div>
                 <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/52">{check.detail}</p>
-                <p className="m-0 mt-2 rounded-lg border border-white/10 bg-black/22 p-2 text-xs font-black leading-5 text-white/70">
+              <p className="missai-empty m-0 mt-2 p-2 text-xs leading-5 text-white/70">
                   ขั้นต่อไป: {check.action}
                 </p>
               </article>
@@ -506,7 +506,7 @@ export function AdminHealthPage() {
         </section>
       </div>
 
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/90 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <section className="missai-card rounded-2xl">
         <div className="flex flex-col gap-2 border-b border-white/10 p-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="m-0 text-sm font-black text-white">ตรวจเส้นทาง/เมนู</p>
@@ -514,7 +514,7 @@ export function AdminHealthPage() {
               ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็นด่านสเตจจิงหรือฟีเจอร์เผื่ออนาคต
             </p>
           </div>
-          <span className="inline-flex min-h-9 items-center justify-center rounded-lg border border-white/10 bg-white/7 px-3 text-xs font-black text-white/65">
+              <span className="missai-badge min-h-9 justify-center px-3 text-white/65">
             STAGING_RUNBOOK.md
           </span>
         </div>

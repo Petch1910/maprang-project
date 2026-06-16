@@ -1,9 +1,48 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap");
+
+@font-face {
+  font-family: "MissAI Source Sans";
+  src: url("/fonts/missai/source_sans/source-sans-3-v18-latin-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MissAI Source Sans";
+  src: url("/fonts/missai/source_sans/source-sans-3-v18-latin-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MissAI Source Sans";
+  src: url("/fonts/missai/source_sans/source-sans-3-v18-latin-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MissAI Cinzel";
+  src: url("/fonts/missai/cinzel/cinzel-v23-latin-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MissAI Cinzel";
+  src: url("/fonts/missai/cinzel/cinzel-v23-latin-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Cinzel", "Source Serif 4", ui-serif, Georgia, serif;
+  --font-sans: "MissAI Source Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "MissAI Cinzel", "Source Serif 4", ui-serif, Georgia, serif;
   --color-brand-dark: #080A1A;
   --color-page-bg: #18182f;
   --color-surface: #1e1e34;
@@ -16,6 +55,8 @@
   --color-violet-deep: #59168b;
   --color-gold: #f99c00;
   --color-gold-soft: #f9c86d;
+  --color-danger: #ef4444;
+  --color-success: #34d399;
 }
 
 @layer base {
@@ -537,5 +578,246 @@
       radial-gradient(circle at 88% 0%, rgba(249, 156, 0, 0.1), transparent 40%),
       radial-gradient(circle at 50% 120%, rgba(89, 22, 139, 0.22), transparent 55%),
       var(--color-brand-dark);
+  }
+
+  .missai-page {
+    min-height: 100svh;
+    background:
+      radial-gradient(circle at 12% -8%, rgba(172, 75, 255, 0.18), transparent 42%),
+      radial-gradient(circle at 88% 0%, rgba(249, 156, 0, 0.1), transparent 40%),
+      radial-gradient(circle at 50% 120%, rgba(89, 22, 139, 0.22), transparent 55%),
+      var(--color-brand-dark);
+    color: #fff;
+  }
+
+  .missai-shell {
+    width: min(100%, 80rem);
+    margin-inline: auto;
+    padding: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .missai-shell {
+      padding: 1.5rem 2rem;
+    }
+  }
+
+  .missai-sidebar {
+    border-right: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(10 12 28 / 0.86);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .missai-button-primary,
+  .missai-button-secondary,
+  .missai-button-danger {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 1rem;
+    padding-inline: 1rem;
+    font-size: 0.875rem;
+    font-weight: 900;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      filter 0.15s ease,
+      color 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  .missai-button-primary {
+    background: linear-gradient(90deg, #ac4bff, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 8px 26px rgba(172, 75, 255, 0.42);
+  }
+
+  .missai-button-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  .missai-button-secondary {
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.05);
+    color: rgb(203 213 225);
+  }
+
+  .missai-button-secondary:hover {
+    border-color: rgb(172 75 255 / 0.45);
+    color: #fff;
+  }
+
+  .missai-button-danger {
+    background: rgb(225 29 72 / 0.88);
+    color: #fff;
+  }
+
+  .missai-button-danger:hover {
+    background: rgb(244 63 94);
+  }
+
+  .missai-icon-button {
+    display: inline-grid;
+    min-height: 2.25rem;
+    min-width: 2.25rem;
+    place-items: center;
+    border-radius: 0.875rem;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.05);
+    color: rgb(203 213 225);
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      color 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  .missai-icon-button:hover {
+    border-color: rgb(172 75 255 / 0.42);
+    background: rgb(255 255 255 / 0.09);
+    color: #fff;
+  }
+
+  .missai-menu {
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    background: rgb(11 13 31 / 0.96);
+    box-shadow: 0 22px 58px rgb(0 0 0 / 0.5);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .missai-menu-item {
+    display: flex;
+    min-height: 2.5rem;
+    width: 100%;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 900;
+    color: rgb(203 213 225);
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .missai-menu-item:hover {
+    background: rgb(172 75 255 / 0.1);
+    color: #fff;
+  }
+
+  .missai-menu-item-danger {
+    color: rgb(251 113 133);
+  }
+
+  .missai-menu-item-danger:hover {
+    background: rgb(244 63 94 / 0.12);
+    color: rgb(253 164 175);
+  }
+
+  .missai-tab {
+    display: inline-flex;
+    min-height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding-inline: 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 900;
+    color: rgb(148 163 184);
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .missai-tab:hover,
+  .missai-tab-active {
+    border-color: rgb(172 75 255 / 0.34);
+    background: rgb(172 75 255 / 0.13);
+    color: #fff;
+  }
+
+  .missai-badge {
+    display: inline-flex;
+    min-height: 1.5rem;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.06);
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: rgb(226 232 240);
+  }
+
+  .missai-empty {
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 1rem;
+    background: rgb(11 13 31 / 0.42);
+    padding: 0.875rem;
+    color: rgb(148 163 184);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
+  .missai-input {
+    min-height: 2.75rem;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(8 10 26 / 0.62);
+    padding: 0.625rem 0.875rem;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    outline: none;
+  }
+
+  .missai-input::placeholder {
+    color: rgb(255 255 255 / 0.38);
+  }
+
+  .missai-input:focus {
+    border-color: rgb(172 75 255 / 0.72);
+    box-shadow: 0 0 0 3px rgb(172 75 255 / 0.14);
+  }
+
+  .missai-dialog {
+    border: 1px solid rgb(120 100 200 / 0.26);
+    border-radius: 1.25rem;
+    background: rgb(11 13 31 / 0.96);
+    box-shadow: 0 28px 80px rgb(0 0 0 / 0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .missai-rail {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .missai-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .missai-bottom-nav {
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(11 13 31 / 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
   }
 }

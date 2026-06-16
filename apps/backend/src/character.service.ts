@@ -10,6 +10,7 @@ export type { CharacterWithTags } from './character.types'
 export type CharacterInput = {
   name: string
   avatarUrl?: string | null
+  coverUrl?: string | null
   tagline?: string | null
   description?: string | null
   biography?: string | null
@@ -51,6 +52,7 @@ export function publicCharacter(
     id: character.id,
     name: character.name,
     avatarUrl: character.avatarUrl,
+    coverUrl: character.coverUrl,
     tagline: character.tagline,
     description: character.description,
     biography: character.biography,
@@ -291,6 +293,7 @@ export async function createCharacter(input: CharacterInput, creatorId = default
     data: {
       name: input.name,
       avatarUrl: input.avatarUrl ?? null,
+      coverUrl: input.coverUrl ?? null,
       tagline: input.tagline ?? null,
       description: input.description ?? null,
       biography: input.biography ?? null,
@@ -337,6 +340,7 @@ export async function updateCharacter(characterId: string, input: CharacterPatch
     data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
+      ...(input.coverUrl !== undefined ? { coverUrl: input.coverUrl } : {}),
       ...(input.tagline !== undefined ? { tagline: input.tagline } : {}),
       ...(input.description !== undefined ? { description: input.description } : {}),
       ...(input.biography !== undefined ? { biography: input.biography } : {}),
@@ -396,6 +400,7 @@ export async function duplicateCharacter(characterId: string, creatorId = defaul
     data: {
       name: `${existing.name} copy`,
       avatarUrl: existing.avatarUrl,
+      coverUrl: existing.coverUrl,
       tagline: existing.tagline,
       description: existing.description,
       biography: existing.biography,

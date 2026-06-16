@@ -58,6 +58,8 @@ describe('predeploy check wiring', () => {
     expect(predeploy).toContain('20260504170000_initial_roleplay_baseline')
     expect(predeploy).toContain('20260611143000_add_message_window_index')
     expect(predeploy).toContain('20260612100000_preserve_report_targets')
+    expect(predeploy).toContain('20260617143000_add_generation_jobs')
+    expect(predeploy).toContain('20260617153000_add_character_cover_url')
     expect(predeploy).toContain('decision `0023` dangerous link protocol contract')
     expect(predeploy).toContain('decision `0024` share URL origin contract')
     expect(predeploy).toContain('decision `0025` cross-window messaging helper contract')

@@ -10,7 +10,7 @@ This file is a short pointer for the current repo baseline. For the full local r
 - Local chat mode: `local/mock-roleplay`
 - Production auth/storage: Supabase JWT and private `avatars` bucket with signed URLs
 
-Do not use old SQLite instructions for this repo. PostgreSQL is the supported baseline.
+Do not use legacy embedded-database instructions for this repo. PostgreSQL is the supported baseline.
 
 ## Backend Env
 

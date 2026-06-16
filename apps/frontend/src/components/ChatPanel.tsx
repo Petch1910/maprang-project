@@ -868,8 +868,8 @@ export function ChatPanel({
   onSendMessage,
   onStartNewChat,
 }: ChatPanelProps) {
-  const backdropUrl = character.avatarUrl || heroImage
-  const hasAvatarBackdrop = Boolean(character.avatarUrl)
+  const backdropUrl = character.coverUrl || character.avatarUrl || heroImage
+  const hasAvatarBackdrop = Boolean(character.coverUrl || character.avatarUrl)
   const isSceneMode = runtimeState?.sceneState.mode === 'scene'
   const [isReadMode, setIsReadMode] = useState(false)
   const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false)
@@ -893,7 +893,7 @@ export function ChatPanel({
   }, [character.id, chatId])
 
   return (
-    <section className="grid h-svh min-w-0 grid-cols-1 overflow-hidden bg-[#080a1a] lg:grid-cols-[minmax(0,1fr)_300px]">
+    <section className="grid h-svh min-w-0 grid-cols-1 overflow-hidden bg-[var(--color-page)] lg:grid-cols-[minmax(0,1fr)_300px]">
       <div
         className={`relative grid min-h-0 grid-rows-[auto_1fr_auto] overflow-hidden transition duration-300 ${isSceneMode ? 'shadow-[inset_0_0_0_9999px_rgba(0,0,0,0.22)]' : ''}`}
         style={{
@@ -1095,9 +1095,9 @@ export function ChatPanel({
           </div>
         </div>
 
-        <div className="relative z-20 border-t border-white/8 bg-black/36 pt-3 backdrop-blur-2xl">
+        <div className="relative z-20 border-t border-[var(--color-border)] bg-[rgba(12,13,22,0.82)] pt-3 shadow-[0_-22px_80px_rgba(0,0,0,0.34)] backdrop-blur-2xl">
           <button
-            className="absolute right-5 top-[-50px] grid size-10 place-items-center rounded-full bg-white text-slate-950 shadow-lg"
+            className="absolute right-5 top-[-50px] grid size-10 place-items-center rounded-full border border-white/10 bg-[var(--color-surface-strong)] text-white shadow-lg transition hover:border-[var(--color-accent-purple)]/45 hover:text-[var(--color-accent-gold)]"
             onClick={() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
             title="เลื่อนลงล่างสุด"
             type="button"
@@ -1106,7 +1106,7 @@ export function ChatPanel({
           </button>
           {isLowToken && (
             <div
-              className={`mx-auto mb-2 flex w-[calc(100%-1.5rem)] ${readingWidthClass} items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs font-black transition-[max-width] duration-300 sm:w-[calc(100%-3rem)] ${
+              className={`mx-auto mb-2 flex w-[calc(100%-1.5rem)] ${readingWidthClass} items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs font-black shadow-[0_18px_46px_rgba(0,0,0,0.22)] transition-[max-width] duration-300 sm:w-[calc(100%-3rem)] ${
                 isOutOfTokens
                   ? 'border-rose-300/30 bg-rose-500/14 text-rose-100'
                   : 'border-amber-300/30 bg-amber-400/12 text-amber-100'
@@ -1118,7 +1118,7 @@ export function ChatPanel({
                   : `โทเคนเหลือน้อย: ${tokenBalance.toLocaleString()} ควรเพิ่มโทเคนหากเล่นฉากยาว`}
               </span>
               <button type="button"
-                className="min-h-8 rounded-lg bg-white px-3 text-[11px] font-black text-slate-950"
+                className="missai-button-secondary min-h-8 rounded-lg px-3 text-[11px]"
                 onClick={onOpenWallet}
               >
                 กระเป๋าโทเคน

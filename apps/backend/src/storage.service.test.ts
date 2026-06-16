@@ -5,7 +5,9 @@ import {
   avatarUrl,
   normalizeSupabaseSignedUrl,
   readSupabaseSignedUrlPayload,
+  readStorageObjectSignedUrlPayload,
   safeAvatarFilename,
+  safeStorageObjectPath,
   supabaseStorageAccess,
 } from './storage.service'
 
@@ -23,6 +25,14 @@ describe('storage service', () => {
     expect(safeAvatarFilename('550e8400-e29b-41d4-a716-446655440000.png')).toBe('550e8400-e29b-41d4-a716-446655440000.png')
     expect(safeAvatarFilename('../avatar.png')).toBeNull()
     expect(safeAvatarFilename('avatar.svg')).toBeNull()
+  })
+
+  test('accepts only safe storage object paths', () => {
+    expect(safeStorageObjectPath('avatars/generated/image.png')).toBe('avatars/generated/image.png')
+    expect(safeStorageObjectPath('/avatars/generated/image.png')).toBe('avatars/generated/image.png')
+    expect(safeStorageObjectPath('../secret.png')).toBeNull()
+    expect(safeStorageObjectPath('avatars\\secret.png')).toBeNull()
+    expect(safeStorageObjectPath('https://example.com/image.png')).toBeNull()
   })
 
   test('uses stable backend avatar URLs', () => {
@@ -62,6 +72,9 @@ describe('storage service', () => {
   test('wraps malformed Supabase signed URL payloads in Thai-first errors', async () => {
     await expect(readSupabaseSignedUrlPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
       'Supabase ส่งข้อมูล signed URL ของรูปตัวละครไม่ถูกต้อง',
+    )
+    await expect(readStorageObjectSignedUrlPayload(new Response('not-json', { status: 200 }))).rejects.toThrow(
+      'Supabase ส่งข้อมูล signed URL ของไฟล์ไม่ถูกต้อง',
     )
   })
 })

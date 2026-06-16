@@ -65,7 +65,7 @@ export function Sidebar(props: SidebarProps) {
         onClick={props.onCloseMobile}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[min(92vw,246px)] min-h-0 flex-col border-r border-[#ac4bff]/10 bg-[#080a1a]/75 p-2.5 text-white shadow-2xl backdrop-blur-md transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:shadow-none ${
+        className={`missai-sidebar fixed inset-y-0 left-0 z-40 flex w-[min(92vw,246px)] min-h-0 flex-col p-2.5 text-white shadow-2xl transition-transform md:static md:z-auto md:w-auto md:translate-x-0 md:shadow-none ${
           props.isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -79,12 +79,12 @@ function Avatar({ src, name }: { src: string | null; name: string }) {
   return src ? (
     <img alt="" className="size-8 rounded-lg object-cover ring-1 ring-white/10" src={src} />
   ) : (
-    <span className="grid size-8 place-items-center rounded-lg bg-slate-700/50 text-xs font-black">{name.slice(0, 1)}</span>
+    <span className="grid size-8 place-items-center rounded-lg bg-[var(--color-surface)] text-xs font-black">{name.slice(0, 1)}</span>
   )
 }
 
 const listItemClass =
-  'grid min-h-12 w-full grid-cols-[32px_minmax(0,1fr)_28px] items-center gap-2 rounded-xl px-1.5 text-left transition hover:bg-white/5 hover:text-[#d9b3ff]'
+  'grid min-h-12 w-full grid-cols-[32px_minmax(0,1fr)_28px] items-center gap-2 rounded-xl px-1.5 text-left transition hover:bg-white/6 hover:text-[#d9b3ff]'
 
 function SidebarCharacterRow({
   character,
@@ -97,7 +97,7 @@ function SidebarCharacterRow({
 }) {
   return (
     <button type="button"
-      className={`${listItemClass} ${isActive ? 'bg-[#ac4bff]/10 shadow-[inset_3px_0_0_#ac4bff] text-[#d9b3ff]' : 'text-slate-300'}`}
+      className={`${listItemClass} ${isActive ? 'bg-[var(--color-accent)]/12 shadow-[inset_3px_0_0_var(--color-neon)] text-[#d9b3ff]' : 'text-slate-300'}`}
       onClick={onSelect}
     >
       <Avatar name={character.name} src={character.avatarUrl ?? null} />
@@ -147,13 +147,12 @@ function SidebarChatRow({
   onTogglePin: () => void
   onToggleSelect: () => void
 }) {
-  const actionButtonClass =
-    'flex min-h-9 w-full items-center gap-2 px-3 text-left text-xs font-black text-slate-300 transition hover:bg-white/5 hover:text-white'
+  const actionButtonClass = 'missai-menu-item'
 
   return (
     <div
       className={`relative ${listItemClass} ${
-        isSelected ? 'bg-[#ac4bff]/20 ring-1 ring-[#ac4bff]/30 text-white' : isActive ? 'bg-[#ac4bff]/10 shadow-[inset_3px_0_0_#ac4bff] text-[#d9b3ff]' : 'text-slate-300'
+        isSelected ? 'bg-[var(--color-accent)]/20 ring-1 ring-[var(--color-accent)]/30 text-white' : isActive ? 'bg-[var(--color-accent)]/12 shadow-[inset_3px_0_0_var(--color-neon)] text-[#d9b3ff]' : 'text-slate-300'
       }`}
     >
       {isSelectionMode && (
@@ -197,7 +196,7 @@ function SidebarChatRow({
       </button>
       {isMenuOpen && (
         <div
-          className={`absolute right-0 z-30 w-44 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/10 bg-[#0b0d1f]/95 py-1.5 shadow-2xl backdrop-blur-md ${
+          className={`missai-menu absolute right-0 z-30 w-44 max-w-[calc(100vw-2rem)] py-1.5 ${
             openMenuUp ? 'bottom-10' : 'top-10'
           }`}
           role="menu"
@@ -218,7 +217,7 @@ function SidebarChatRow({
             <CheckSquare size={14} />
             เลือก
           </button>
-          <button type="button" className={`${actionButtonClass} text-rose-400 hover:text-rose-300`} data-testid={`chat-row-delete-${chat.id}`} onClick={onDelete} role="menuitem">
+          <button type="button" className={`${actionButtonClass} missai-menu-item-danger`} data-testid={`chat-row-delete-${chat.id}`} onClick={onDelete} role="menuitem">
             <Trash2 size={14} />
             ลบแชท
           </button>
@@ -445,7 +444,7 @@ function SidebarContent({
       </Link>
 
       <Link
-        className="flex min-h-9 items-center justify-center gap-2 rounded-xl bg-white/5 text-sm font-black text-slate-200 transition hover:bg-[#ac4bff]/15 border border-white/10"
+        className="missai-button-secondary min-h-9 rounded-xl text-sm"
         to="/"
       >
         <Compass size={16} />
@@ -453,7 +452,7 @@ function SidebarContent({
       </Link>
 
       <Link
-        className="flex min-h-9 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-sm font-black text-white hover:brightness-110 transition missai-glow"
+        className="missai-button-primary min-h-9 rounded-xl text-sm"
         onClick={onCloseMobile}
         to="/create"
       >
@@ -519,7 +518,7 @@ function SidebarContent({
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_36px] gap-2">
-        <label className="flex min-h-10 items-center gap-2 rounded-xl bg-[#080a1a]/60 border border-white/10 px-3 text-slate-400 focus-within:border-[#ac4bff] focus-within:ring-4 focus-within:ring-[#ac4bff]/10 focus-within:bg-[#080a1a]">
+        <label className="missai-input flex min-h-10 items-center gap-2 px-3 py-0 text-slate-400 focus-within:border-[var(--color-neon)]">
           <Search size={16} />
           <input
             className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-slate-500"
@@ -530,7 +529,7 @@ function SidebarContent({
         </label>
         <button type="button"
           aria-disabled={Boolean(refreshDisabledReason)}
-          className="grid size-10 place-items-center rounded-xl bg-white/5 border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+          className="missai-icon-button size-10 disabled:cursor-not-allowed disabled:opacity-45"
           data-testid="chat-sidebar-refresh"
           disabled={Boolean(refreshDisabledReason)}
           onClick={onLoadChatHistory}
@@ -541,7 +540,7 @@ function SidebarContent({
       </div>
 
       {isSelectionMode && (
-        <div className="missai-card rounded-xl bg-[#0b0d1f]/60 p-2.5 shadow-lg border border-white/5" data-testid="chat-selection-toolbar">
+        <div className="missai-card rounded-xl p-2.5" data-testid="chat-selection-toolbar">
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="text-xs font-black text-white">เลือกไว้ {selectedChatIds.length.toLocaleString()} แชท</span>
             <button
@@ -556,7 +555,7 @@ function SidebarContent({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button type="button"
-              className="min-h-9 rounded-xl bg-white px-2 text-xs font-black text-slate-950 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
+              className="missai-button-secondary min-h-9 rounded-xl px-2 text-xs disabled:cursor-not-allowed disabled:opacity-45"
               aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-archive"
               disabled={Boolean(selectionActionDisabledReason)}
@@ -566,7 +565,7 @@ function SidebarContent({
               จัดเก็บ
             </button>
             <button type="button"
-              className="min-h-9 rounded-xl bg-rose-600 px-2 text-xs font-black text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-45"
+              className="missai-button-danger min-h-9 rounded-xl px-2 text-xs disabled:cursor-not-allowed disabled:opacity-45"
               aria-disabled={Boolean(selectionActionDisabledReason)}
               data-testid="chat-selection-delete"
               disabled={Boolean(selectionActionDisabledReason)}
@@ -591,7 +590,7 @@ function SidebarContent({
             />
           ))}
           {filteredCharacters.length === 0 && (
-            <p className="rounded-xl border border-white/5 bg-[#0b0d1f]/40 p-3 text-xs leading-5 text-slate-400">
+            <p className="missai-empty">
               ไม่พบตัวละครที่ตรงกับคำค้นหา
             </p>
           )}
@@ -607,7 +606,7 @@ function SidebarContent({
         <p className="mb-2 mt-4 text-xs font-black text-slate-500">ล่าสุด</p>
         <div className="space-y-1">
           {filteredChats.length === 0 && (
-            <p className="rounded-xl border border-white/5 bg-[#0b0d1f]/40 p-3 text-xs leading-5 text-slate-400">
+            <p className="missai-empty">
               {isHistoryLoading ? 'กำลังโหลด...' : normalizedSearch ? 'ไม่พบแชทที่ตรงกับคำค้นหา' : 'ยังไม่มีแชทที่บันทึกไว้'}
             </p>
           )}
@@ -653,14 +652,14 @@ function SidebarContent({
 
       {renameTarget && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="chat-rename-dialog">
-          <div className="missai-card w-full max-w-sm rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+          <div className="missai-dialog w-full max-w-sm p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-display m-0 text-lg font-black text-white">แก้ไขชื่อแชท</p>
                 <p className="m-0 mt-1.5 text-xs font-semibold leading-relaxed text-slate-400">ตั้งชื่อให้จำง่ายขึ้นโดยไม่กระทบบทสนทนาเดิม</p>
               </div>
               <button
-                className="grid size-8 place-items-center rounded-xl text-slate-400 transition hover:bg-white/8 hover:text-white"
+                className="missai-icon-button size-8"
                 onClick={() => setRenameTarget(null)}
                 type="button"
               >
@@ -668,7 +667,7 @@ function SidebarContent({
               </button>
             </div>
             <input
-              className="mt-4 min-h-11 w-full rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-sm font-bold text-white outline-none focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10"
+              className="missai-input mt-4 min-h-11"
               data-testid="chat-rename-input"
               onChange={(event) => setRenameValue(event.target.value)}
               onKeyDown={(event) => {
@@ -680,7 +679,7 @@ function SidebarContent({
             />
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-white/10 px-3 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
+                className="missai-button-secondary min-h-11 rounded-xl px-3 text-sm"
                 data-testid="chat-rename-cancel"
                 onClick={() => setRenameTarget(null)}
                 type="button"
@@ -688,7 +687,7 @@ function SidebarContent({
                 ยกเลิก
               </button>
               <button
-                className="min-h-11 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-3 text-sm font-black text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45 missai-glow"
+                className="missai-button-primary min-h-11 rounded-xl px-3 text-sm disabled:cursor-not-allowed disabled:opacity-45"
                 aria-disabled={Boolean(renameConfirmDisabledReason)}
                 data-testid="chat-rename-confirm"
                 disabled={Boolean(renameConfirmDisabledReason)}
@@ -705,14 +704,14 @@ function SidebarContent({
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="chat-delete-dialog">
-          <div className="missai-card w-full max-w-sm rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+          <div className="missai-dialog w-full max-w-sm p-6">
             <p className="font-display m-0 text-lg font-black text-white">ลบแชทนี้?</p>
             <p className="m-0 mt-2 text-sm font-semibold leading-relaxed text-slate-400">
               {deleteTarget.title || deleteTarget.characterName} จะถูกนำออกจากรายการแชทของคุณ
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-white/10 px-3 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
+                className="missai-button-secondary min-h-11 rounded-xl px-3 text-sm"
                 data-testid="chat-delete-cancel"
                 onClick={() => setDeleteTarget(null)}
                 type="button"
@@ -720,7 +719,7 @@ function SidebarContent({
                 ยกเลิก
               </button>
               <button type="button"
-                className="min-h-11 rounded-xl bg-rose-600 px-3 text-sm font-black text-white transition hover:bg-rose-500"
+                className="missai-button-danger min-h-11 rounded-xl px-3 text-sm"
                 data-testid="chat-delete-confirm"
                 onClick={confirmDeleteChat}
               >
@@ -733,14 +732,14 @@ function SidebarContent({
 
       {bulkDeleteIds.length > 0 && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/75 p-4 backdrop-blur-sm" data-testid="chat-bulk-delete-dialog">
-          <div className="missai-card w-full max-w-sm rounded-2xl bg-[#0b0d1f]/95 p-6 shadow-2xl">
+          <div className="missai-dialog w-full max-w-sm p-6">
             <p className="font-display m-0 text-lg font-black text-white">ลบแชทที่เลือก?</p>
             <p className="m-0 mt-2 text-sm font-semibold leading-relaxed text-slate-400">
               แชท {bulkDeleteIds.length.toLocaleString()} รายการจะถูกนำออกจากรายการแชทของคุณ
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="min-h-11 rounded-xl border border-white/10 px-3 text-sm font-black text-slate-300 transition hover:bg-white/5 hover:text-white"
+                className="missai-button-secondary min-h-11 rounded-xl px-3 text-sm"
                 data-testid="chat-bulk-delete-cancel"
                 onClick={() => setBulkDeleteIds([])}
                 type="button"
@@ -748,7 +747,7 @@ function SidebarContent({
                 ยกเลิก
               </button>
               <button type="button"
-                className="min-h-11 rounded-xl bg-rose-600 px-3 text-sm font-black text-white transition hover:bg-rose-500"
+                className="missai-button-danger min-h-11 rounded-xl px-3 text-sm"
                 data-testid="chat-bulk-delete-confirm"
                 onClick={confirmDeleteSelectedChats}
               >

@@ -1,149 +1,114 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
-import {
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-  Image as ImageIcon,
-  CheckCircle2,
-  RefreshCw,
-  ArrowLeft,
-  BookOpen,
-  Video,
-  Play,
-  Pause,
-  Copy,
-  Check,
-  Upload,
-  X,
-  Film,
-  Compass,
-  LayoutGrid,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
+import { AiCreatorBlockedStateMatrix } from '../components/ai-creator/AiCreatorBlockedStateMatrix'
+import { AiCreatorControlPanel } from '../components/ai-creator/AiCreatorControlPanel'
+import { AiCreatorHistoryGallery } from '../components/ai-creator/AiCreatorHistoryGallery'
+import { AiCreatorHistoryDetailDialog } from '../components/ai-creator/AiCreatorHistoryDetailDialog'
+import { AiCreatorPublicGalleryPanel } from '../components/ai-creator/AiCreatorPublicGalleryPanel'
+import { AiCreatorResultPreview } from '../components/ai-creator/AiCreatorResultPreview'
 import {
   generateCreatorAiDraft,
   updateCreatorDraft,
   logUnexpectedError,
   ApiError,
+  deleteGenerationOutput,
+  favoriteGenerationOutput,
   fetchCharacters,
+  fetchGenerationJobs,
+  fetchGenerationOutputDownload,
+  retryGenerationJob,
+  unfavoriteGenerationOutput,
   type CreatorAiDraftResponse,
   type Character,
 } from '../lib/api'
-import { safeGetStorageItem, safeSetStorageItem } from '../lib/safeStorage'
 import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
+import {
+  AI_CREATOR_HISTORY_PAGE_SIZE,
+  AI_CREATOR_UPLOAD_SLOT_RULES,
+  AI_CREATOR_VIDEO_DEFAULT_TEMPLATE,
+  buildAiCreatorDownloadFilename,
+  buildAiCreatorBlockedStateMatrix,
+  createAiCreatorItemsFromGenerationJobs,
+  createAiCreatorUploadPreview,
+  createAiCreatorImageItem,
+  createAiCreatorVideoItem,
+  filterAiCreatorHistory,
+  getAiCreatorGenerateBlockReason,
+  getAiCreatorDownloadActionState,
+  getAiCreatorRetryActionState,
+  getAiCreatorVideoDurationFillPercent,
+  paginateAiCreatorHistory,
+  prependAiCreatorHistory,
+  readAiCreatorHistory,
+  removeAiCreatorHistoryItem,
+  saveAiCreatorItemToCreatorDraft,
+  saveAiCreatorItemToCreatorCoverDraft,
+  toggleAiCreatorHistoryFavorite,
+  validateAiCreatorUploadSlot,
+  writeAiCreatorHistory,
+  type AiCreatorDownloadLinkSnapshot,
+  type AiCreatorGalleryFilter,
+  type AiCreatorGeneratedItem,
+  type AiCreatorImageTemplate,
+  type AiCreatorMode,
+  type AiCreatorUploadPreview,
+} from '../lib/aiCreator'
 
-interface GeneratedItem {
-  id: string
-  type: 'image' | 'video'
-  url: string
-  videoUrl?: string
-  prompt: string
-  brief: string
-  style: string
-  duration?: number
-  motionTemplate?: string
-  timestamp: number
-  response: CreatorAiDraftResponse
-}
+const aiCreatorBlockedStateMatrix = buildAiCreatorBlockedStateMatrix()
 
-const STYLE_PRESETS = [
-  { value: 'realistic', label: 'ภาพบุคคลสมจริง (Realistic Portrait)' },
-  { value: 'anime', label: 'การ์ตูนญี่ปุ่น (Japanese Anime)' },
-  { value: '3d_render', label: 'สามมิติระดับพรีเมียม (3D Render)' },
-  { value: 'cyberpunk', label: 'ไซเบอร์พังก์เรืองแสง (Cyberpunk Concept)' },
-  { value: 'oil_painting', label: 'จิตรกรรมสีน้ำมัน (Oil Painting Style)' },
-]
-
-const IMAGE_TEMPLATES = [
-  {
-    id: 'neon-tokyo',
-    title: 'นีออนโตเกียว (Neon Tokyo Cyberpunk)',
-    prompt: 'close up portrait of an elegant character glowing under neon lights in rain-slicked Tokyo streets, cyberpunk aesthetic, highly detailed',
-    style: 'cyberpunk',
-    bgClass: 'from-[#2e1065] via-[#090514] to-[#1e1b4b]',
-    tag: 'Cyberpunk',
-  },
-  {
-    id: 'cozy-anime',
-    title: 'อนิเมะคาเฟ่ (Cozy Anime Cafe)',
-    prompt: 'soft portrait of a beautiful character sitting in a cozy sunlit cafe drinking tea, highly detailed anime illustration style, warm lighting',
-    style: 'anime',
-    bgClass: 'from-[#451a03] via-[#0f0502] to-[#1e1b4b]',
-    tag: 'Anime',
-  },
-  {
-    id: 'fantasy-forest',
-    title: 'ป่าเวทมนตร์ (Fantasy Magic Forest)',
-    prompt: 'full body portrait of an adventurer character in a magical glowing forest, golden particles, floating magical dust, high fantasy digital art',
-    style: '3d_render',
-    bgClass: 'from-[#064e3b] via-[#02120b] to-[#1e1b4b]',
-    tag: 'Fantasy',
-  },
-  {
-    id: 'classical-oil',
-    title: 'สีน้ำมันคลาสสิก (Classical Oil Portrait)',
-    prompt: 'fine art oil painting portrait of a noble character, renaissance style, dramatic chiaroscuro lighting, deep classical tones, textured brush strokes',
-    style: 'oil_painting',
-    bgClass: 'from-[#7f1d1d] via-[#1c0205] to-[#1e1b4b]',
-    tag: 'Classical',
-  },
-]
-
-const GALLERY_FILTERS = [
-  { val: 'all', label: 'ทั้งหมด' },
-  { val: 'image', label: 'ภาพร่าง' },
-  { val: 'video', label: 'วิดีโอ' },
-] as const
-
-// Purity Helper: Avoid calling Date.now() directly inside component renders or handlers.
-function getNowTimestamp(): number {
-  return Date.now()
+async function fetchBackendHistoryItems(limit = 12) {
+  const res = await fetchGenerationJobs(limit)
+  return {
+    jobs: res.jobs,
+    items: createAiCreatorItemsFromGenerationJobs(res.jobs),
+  }
 }
 
 export function AICreatorPage() {
+  const navigate = useNavigate()
+
   // Navigation & Character States
   const [characters, setCharacters] = useState<Character[]>([])
   const [selectedCharacterId, setSelectedCharacterId] = useState('')
-  const [activeTab, setActiveTab] = useState<'image' | 'video' | 'template'>('image')
+  const [activeTab, setActiveTab] = useState<AiCreatorMode>('image')
 
   // Form Inputs
   const [brief, setBrief] = useState('')
   const [imagePrompt, setImagePrompt] = useState('')
   const [imageStyle, setImageStyle] = useState('realistic')
   const [referenceImage, setReferenceImage] = useState<string | null>(null)
+  const [referenceImageMeta, setReferenceImageMeta] = useState<AiCreatorUploadPreview | null>(null)
+  const [imageInputError, setImageInputError] = useState<string | null>(null)
 
   // Video Inputs
   const [videoPrompt, setVideoPrompt] = useState('')
   const [videoDuration, setVideoDuration] = useState<number>(5)
-  const [videoTemplate, setVideoTemplate] = useState('gentle-breeze')
+  const [videoTemplate, setVideoTemplate] = useState(AI_CREATOR_VIDEO_DEFAULT_TEMPLATE)
   const [referenceVideo, setReferenceVideo] = useState<string | null>(null)
+  const [referenceVideoMeta, setReferenceVideoMeta] = useState<AiCreatorUploadPreview | null>(null)
+  const [videoInputError, setVideoInputError] = useState<string | null>(null)
 
   // App States
   const [isGenerating, setIsGenerating] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
-  const [lastResult, setLastResult] = useState<GeneratedItem | null>(null)
+  const [lastResult, setLastResult] = useState<AiCreatorGeneratedItem | null>(null)
+  const [detailItem, setDetailItem] = useState<AiCreatorGeneratedItem | null>(null)
   const [copiedPrompt, setCopiedPrompt] = useState(false)
-
-  // Video Player Mock States
-  const [isPlaying, setIsPlaying] = useState(true)
-  const [playProgress, setPlayProgress] = useState(0)
-  const videoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [downloadingItemId, setDownloadingItemId] = useState<string | null>(null)
+  const [downloadLinks, setDownloadLinks] = useState<Record<string, AiCreatorDownloadLinkSnapshot>>({})
+  const [retryingItemId, setRetryingItemId] = useState<string | null>(null)
 
   // History stored in LocalStorage
-  const [history, setHistory] = useState<GeneratedItem[]>(() => {
+  const [history, setHistory] = useState<AiCreatorGeneratedItem[]>(() => {
     if (typeof window === 'undefined') return []
-    try {
-      const stored = safeGetStorageItem(window.localStorage, 'maprang:creator-image-history')
-      return stored ? JSON.parse(stored) : []
-    } catch {
-      return []
-    }
+    return readAiCreatorHistory(window.localStorage)
   })
+  const [backendHistory, setBackendHistory] = useState<AiCreatorGeneratedItem[]>([])
 
   // Pagination & Filter States
   const [currentPage, setCurrentPage] = useState(1)
-  const [galleryFilter, setGalleryFilter] = useState<'all' | 'image' | 'video'>('all')
-  const PAGE_SIZE = 12
+  const [galleryFilter, setGalleryFilter] = useState<AiCreatorGalleryFilter>('all')
 
   // Fetch characters on load
   useEffect(() => {
@@ -162,37 +127,27 @@ export function AICreatorPage() {
     }
   }, [])
 
-  // Handle Mock Video Playback Animation
   useEffect(() => {
-    if (lastResult?.type === 'video' && isPlaying) {
-      const durationMs = (lastResult.duration || 5) * 1000
-      const intervalMs = 100
-      const step = (intervalMs / durationMs) * 100
-
-      videoTimerRef.current = setInterval(() => {
-        setPlayProgress((prev) => {
-          if (prev >= 100) return 0
-          return prev + step
-        })
-      }, intervalMs)
-    } else {
-      if (videoTimerRef.current) {
-        clearInterval(videoTimerRef.current)
-        videoTimerRef.current = null
-      }
-    }
-
+    let active = true
+    fetchBackendHistoryItems()
+      .then(({ jobs, items }) => {
+        if (!active) return
+        setBackendHistory(items)
+        if (jobs.length === 0) return
+        setStatusMessage(`พบงานสร้างภาพที่บันทึกบนระบบ ${jobs.length} รายการ ใช้คลังในเครื่องต่อได้และพร้อมเชื่อมรายละเอียดงาน`)
+      })
+      .catch((err) => {
+        logUnexpectedError('โหลดคลังงานสร้างภาพจากระบบไม่สำเร็จ', err)
+      })
     return () => {
-      if (videoTimerRef.current) {
-        clearInterval(videoTimerRef.current)
-      }
+      active = false
     }
-  }, [lastResult, isPlaying])
+  }, [])
 
-  const saveHistory = (newHistory: GeneratedItem[]) => {
+  const saveHistory = (newHistory: AiCreatorGeneratedItem[]) => {
     setHistory(newHistory)
     if (typeof window !== 'undefined') {
-      safeSetStorageItem(window.localStorage, 'maprang:creator-image-history', JSON.stringify(newHistory))
+      writeAiCreatorHistory(window.localStorage, newHistory)
     }
   }
 
@@ -208,7 +163,6 @@ export function AICreatorPage() {
     setIsGenerating(true)
     setStatusMessage('กำลังวิเคราะห์เค้าโครงร่างของสื่อและติดต่อระบบสิทธิ์ผู้ให้บริการคีย์ตรง...')
     setLastResult(null)
-    setPlayProgress(0)
 
     try {
       // Execute the generator draft backend service
@@ -224,40 +178,30 @@ export function AICreatorPage() {
         res.draft.name = targetChar.name
       }
 
-      let newItem: GeneratedItem
+      let newItem: AiCreatorGeneratedItem
 
       if (isVideoMode) {
-        // Build video item structure
-        newItem = {
+        newItem = createAiCreatorVideoItem({
           id: crypto.randomUUID(),
-          type: 'video',
-          url: res.image.url, // Thumbnail
-          videoUrl: 'mock-video-stream',
+          response: res,
           prompt: videoPrompt.trim(),
           brief: briefText,
-          style: 'video_render',
           duration: videoDuration,
           motionTemplate: videoTemplate,
-          timestamp: getNowTimestamp(),
-          response: res,
-        }
+        })
         setStatusMessage('ระบบจำลองการสั่นไหวและเรนเดอร์วิดีโอเคลื่อนไหวผ่านสิทธิ์ผู้ให้บริการคีย์ตรงเสร็จสิ้น')
       } else {
-        // Build image item structure
-        newItem = {
+        newItem = createAiCreatorImageItem({
           id: crypto.randomUUID(),
-          type: 'image',
-          url: res.image.url,
+          response: res,
           prompt: imagePrompt.trim() || briefText,
           brief: briefText,
           style: imageStyle,
-          timestamp: getNowTimestamp(),
-          response: res,
-        }
+        })
         setStatusMessage('ระบบวิเคราะห์ประมวลผลแบบสเก็ตช์ภาพร่างระบบเสร็จสิ้น')
       }
 
-      saveHistory([newItem, ...history])
+      saveHistory(prependAiCreatorHistory(history, newItem))
       setLastResult(newItem)
       setCurrentPage(1) // Reset to first page of gallery
     } catch (err) {
@@ -273,12 +217,12 @@ export function AICreatorPage() {
   }
 
   // Handle Preset Template Auto-click
-  const handleTemplateClick = async (tpl: typeof IMAGE_TEMPLATES[number]) => {
+  const handleTemplateClick = async (tpl: AiCreatorImageTemplate) => {
     setActiveTab('image')
     setImagePrompt(tpl.prompt)
     setImageStyle(tpl.style)
 
-    // Auto submit mock
+    // Submit the selected preset through the same generation path as manual prompts.
     setIsGenerating(true)
     setStatusMessage('กำลังโหลดโครงร่างสไตล์ความนุ่มนวลและเชื่อมระบบสร้างภาพร่างระบบ...')
     setLastResult(null)
@@ -291,18 +235,15 @@ export function AICreatorPage() {
         imageOnly: false,
       })
 
-      const newItem: GeneratedItem = {
+      const newItem = createAiCreatorImageItem({
         id: crypto.randomUUID(),
-        type: 'image',
-        url: res.image.url,
+        response: res,
         prompt: tpl.prompt,
         brief: brief.trim(),
         style: tpl.style,
-        timestamp: getNowTimestamp(),
-        response: res,
-      }
+      })
 
-      saveHistory([newItem, ...history])
+      saveHistory(prependAiCreatorHistory(history, newItem))
       setLastResult(newItem)
       setCurrentPage(1)
       setStatusMessage('ระบบวิเคราะห์ประมวลผลแม่แบบภาพร่างเสร็จสิ้นเรียบร้อย')
@@ -325,26 +266,107 @@ export function AICreatorPage() {
     }
   }
 
-  const handleSelectFromHistory = (item: GeneratedItem) => {
+  const handleOpenHistoryDetail = (item: AiCreatorGeneratedItem) => {
     setLastResult(item)
+    setDetailItem(item)
+    setActiveTab(item.type === 'video' ? 'video' : 'image')
+  }
+
+  const handleReuseFromHistory = (item: AiCreatorGeneratedItem) => {
+    setLastResult(item)
+    setDetailItem(null)
     setBrief(item.brief)
     if (item.type === 'video') {
       setActiveTab('video')
       setVideoPrompt(item.prompt)
       setVideoDuration(item.duration || 5)
-      setVideoTemplate(item.motionTemplate || 'gentle-breeze')
+      setVideoTemplate(item.motionTemplate || AI_CREATOR_VIDEO_DEFAULT_TEMPLATE)
     } else {
       setActiveTab('image')
       setImagePrompt(item.prompt)
       setImageStyle(item.style)
     }
-    setPlayProgress(0)
+  }
+
+  const deleteHistoryItem = (itemId: string) => {
+    const backendItem = backendHistory.find((item) => item.id === itemId)
+    if (backendItem?.backendOutputId) {
+      void deleteGenerationOutput(backendItem.backendOutputId)
+        .then(() => {
+          setBackendHistory((items) => items.filter((item) => item.id !== itemId))
+          setDownloadLinks((links) => {
+            const nextLinks = { ...links }
+            delete nextLinks[itemId]
+            return nextLinks
+          })
+          if (lastResult?.id === itemId) setLastResult(null)
+          if (detailItem?.id === itemId) setDetailItem(null)
+          setStatusMessage('ลบชิ้นงานที่บันทึกบน backend แล้ว')
+        })
+        .catch((err) => {
+          logUnexpectedError('ลบผลลัพธ์ AI Creator ไม่สำเร็จ', err)
+          setStatusMessage(err instanceof ApiError ? err.message : 'ลบชิ้นงาน backend ไม่สำเร็จ กรุณาลองใหม่')
+        })
+      return
+    }
+
+    const nextHistory = removeAiCreatorHistoryItem(history, itemId)
+    saveHistory(nextHistory)
+    setDownloadLinks((links) => {
+      const nextLinks = { ...links }
+      delete nextLinks[itemId]
+      return nextLinks
+    })
+    if (lastResult?.id === itemId) {
+      setLastResult(null)
+    }
+    if (detailItem?.id === itemId) {
+      setDetailItem(null)
+    }
+    const nextFilteredLength = filterAiCreatorHistory(nextHistory, galleryFilter).length
+    const nextTotalPages = Math.ceil(nextFilteredLength / AI_CREATOR_HISTORY_PAGE_SIZE) || 1
+    setCurrentPage((page) => Math.min(page, nextTotalPages))
+  }
+
+  const toggleHistoryFavorite = (itemId: string) => {
+    const backendItem = backendHistory.find((item) => item.id === itemId)
+    if (backendItem?.backendOutputId) {
+      const nextFavorite = !backendItem.isFavorite
+      const updateBackendItems = (items: AiCreatorGeneratedItem[]) =>
+        items.map((item) => (item.id === itemId ? { ...item, isFavorite: nextFavorite } : item))
+      setBackendHistory(updateBackendItems)
+      if (lastResult?.id === itemId) setLastResult({ ...backendItem, isFavorite: nextFavorite })
+      if (detailItem?.id === itemId) setDetailItem({ ...backendItem, isFavorite: nextFavorite })
+      setStatusMessage(nextFavorite ? 'เพิ่มชิ้นงานระบบเข้ารายการโปรดแล้ว' : 'นำชิ้นงานระบบออกจากรายการโปรดแล้ว')
+      const request = nextFavorite
+        ? favoriteGenerationOutput(backendItem.backendOutputId)
+        : unfavoriteGenerationOutput(backendItem.backendOutputId)
+      void request.catch((err) => {
+        logUnexpectedError('อัปเดตรายการโปรดของผลลัพธ์ AI Creator ไม่สำเร็จ', err)
+        setBackendHistory((items) =>
+          items.map((item) => (item.id === itemId ? { ...item, isFavorite: backendItem.isFavorite } : item)),
+        )
+        if (lastResult?.id === itemId) setLastResult(backendItem)
+        if (detailItem?.id === itemId) setDetailItem(backendItem)
+        setStatusMessage(err instanceof ApiError ? err.message : 'อัปเดตรายการโปรดไม่สำเร็จ กรุณาลองใหม่')
+      })
+      return
+    }
+
+    const nextHistory = toggleAiCreatorHistoryFavorite(history, itemId)
+    saveHistory(nextHistory)
+    const nextItem = nextHistory.find((item) => item.id === itemId) ?? null
+    if (lastResult?.id === itemId) setLastResult(nextItem)
+    if (detailItem?.id === itemId) setDetailItem(nextItem)
+    setStatusMessage(nextItem?.isFavorite ? 'เพิ่มชิ้นงานเข้ารายการโปรดแล้ว' : 'นำชิ้นงานออกจากรายการโปรดแล้ว')
   }
 
   const clearHistory = () => {
     saveHistory([])
     setCurrentPage(1)
     setLastResult(null)
+    setDetailItem(null)
+    setDownloadLinks({})
   }
 
   const handleCopySystemPrompt = () => {
@@ -357,24 +379,183 @@ export function AICreatorPage() {
     })
   }
 
-  // Filter and Paginate History items
-  const filteredHistory = history.filter((item) => {
-    if (galleryFilter === 'image') return item.type === 'image'
-    if (galleryFilter === 'video') return item.type === 'video'
-    return true
-  })
+  const handleCopyHistorySystemPrompt = (item: AiCreatorGeneratedItem) => {
+    void safeWriteClipboardText(getSafeClipboard(), item.response.draft.systemPrompt).then((success) => {
+      setStatusMessage(success ? 'คัดลอก system prompt ของชิ้นงานแล้ว' : 'คัดลอก system prompt ไม่สำเร็จ')
+    })
+  }
 
-  const totalPages = Math.ceil(filteredHistory.length / PAGE_SIZE) || 1
-  const paginatedHistory = filteredHistory.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+  const handleUseAsCharacterImage = (item: AiCreatorGeneratedItem) => {
+    if (typeof window === 'undefined') return
+    const draft = saveAiCreatorItemToCreatorDraft(window.localStorage, item)
+    void updateCreatorDraft(draft).catch(() => {})
+    setDetailItem(null)
+    setStatusMessage('ส่งรูปและเนื้อหาตั้งต้นไปยังหน้าสร้างตัวละครแล้ว')
+    navigate('/create')
+  }
+
+  const handleUseAsCover = (item: AiCreatorGeneratedItem) => {
+    if (typeof window === 'undefined') return
+    const draft = saveAiCreatorItemToCreatorCoverDraft(window.localStorage, item)
+    void updateCreatorDraft(draft).catch(() => {})
+    setDetailItem(null)
+    setStatusMessage('บันทึกรูปนี้เป็นภาพปกในดราฟต์หน้าสร้างตัวละครแล้ว')
+    navigate('/create')
+  }
+
+  const startDownload = (url: string, filename: string) => {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.rel = 'noopener noreferrer'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  }
+
+  const handleDownloadHistoryItem = async (item: AiCreatorGeneratedItem) => {
+    const downloadState = getAiCreatorDownloadActionState(item)
+    if (!downloadState.canDownload || downloadingItemId) {
+      setStatusMessage(downloadState.title)
+      return
+    }
+
+    setDownloadingItemId(item.id)
+    try {
+      const filename = buildAiCreatorDownloadFilename(item)
+      if (downloadState.mode === 'backend' && item.backendOutputId) {
+        const result = await fetchGenerationOutputDownload(item.backendOutputId)
+        const generatedAt = Date.now()
+        setDownloadLinks((links) => ({
+          ...links,
+          [item.id]: {
+            access: result.download.access,
+            generatedAt,
+            expiresIn: result.download.expiresIn,
+            expiresAt: result.download.expiresIn ? generatedAt + result.download.expiresIn * 1000 : null,
+          },
+        }))
+        startDownload(result.download.url, filename)
+        setStatusMessage(
+          result.download.expiresIn
+            ? `เตรียมลิงก์ดาวน์โหลดแล้ว ลิงก์นี้หมดอายุใน ${result.download.expiresIn} วินาที`
+            : 'เตรียมไฟล์ดาวน์โหลดแล้ว',
+        )
+        return
+      }
+
+      setDownloadLinks((links) => ({
+        ...links,
+        [item.id]: {
+          access: 'direct',
+          generatedAt: Date.now(),
+          expiresIn: null,
+          expiresAt: null,
+        },
+      }))
+      startDownload(item.url, filename)
+      setStatusMessage('เริ่มดาวน์โหลดไฟล์จากคลังเครื่องนี้แล้ว')
+    } catch (err) {
+      logUnexpectedError('ดาวน์โหลดผลลัพธ์ AI Creator ไม่สำเร็จ', err)
+      setStatusMessage(err instanceof ApiError ? err.message : 'ดาวน์โหลดไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setDownloadingItemId(null)
+    }
+  }
+
+  const handleRetryHistoryItem = async (item: AiCreatorGeneratedItem) => {
+    const retryState = getAiCreatorRetryActionState(item)
+    if (!retryState.canRetry || !item.backendJobId || retryingItemId) {
+      setStatusMessage(retryState.title)
+      return
+    }
+
+    setRetryingItemId(item.id)
+    try {
+      await retryGenerationJob(item.backendJobId)
+      const { items } = await fetchBackendHistoryItems()
+      setBackendHistory(items)
+      setCurrentPage(1)
+      setStatusMessage('บันทึกงานสร้างซ้ำแล้ว ระบบยังไม่หักโทเคนจนกว่างานจริงจะถูกเข้าคิว')
+    } catch (err) {
+      logUnexpectedError('สร้างงาน AI Creator ซ้ำไม่สำเร็จ', err)
+      setStatusMessage(err instanceof ApiError ? err.message : 'สร้างงานซ้ำไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setRetryingItemId(null)
+    }
+  }
+
+  const handleImageReferenceFile = (file: File, input: HTMLInputElement) => {
+    const validation = validateAiCreatorUploadSlot(AI_CREATOR_UPLOAD_SLOT_RULES.imageToImage[0], { file })
+    if (!validation.ok) {
+      setReferenceImage(null)
+      setReferenceImageMeta(null)
+      setImageInputError(validation.reason)
+      setStatusMessage(validation.reason)
+      input.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => setReferenceImage(reader.result as string)
+    reader.readAsDataURL(file)
+    setReferenceImageMeta(createAiCreatorUploadPreview(file))
+    setImageInputError(null)
+    setStatusMessage(`โหลดรูปอ้างอิงแล้ว: ${file.name}`)
+  }
+
+  const handleVideoReferenceFile = (file: File, input: HTMLInputElement) => {
+    const validation = validateAiCreatorUploadSlot(AI_CREATOR_UPLOAD_SLOT_RULES.advancedVideo[0], {
+      file,
+      durationSeconds: videoDuration,
+    })
+    if (!validation.ok) {
+      setReferenceVideo(null)
+      setReferenceVideoMeta(null)
+      setVideoInputError(validation.reason)
+      setStatusMessage(validation.reason)
+      input.value = ''
+      return
+    }
+
+    setReferenceVideo(file.name)
+    setReferenceVideoMeta(createAiCreatorUploadPreview(file))
+    setVideoInputError(null)
+    setStatusMessage(`โหลดวิดีโออ้างอิงแล้ว: ${file.name}`)
+  }
+
+  // Filter and Paginate History items
+  const combinedHistory = [...backendHistory, ...history]
+  const filteredHistory = filterAiCreatorHistory(combinedHistory, galleryFilter)
+
+  const totalPages = Math.ceil(filteredHistory.length / AI_CREATOR_HISTORY_PAGE_SIZE) || 1
+  const paginatedHistory = paginateAiCreatorHistory(filteredHistory, currentPage)
+  const imageGenerateBlockReason = getAiCreatorGenerateBlockReason({
+    mode: 'image',
+    brief,
+    prompt: imagePrompt,
+    isGenerating,
+    inputError: imageInputError,
+  })
+  const videoGenerateBlockReason = getAiCreatorGenerateBlockReason({
+    mode: 'video',
+    brief,
+    prompt: videoPrompt,
+    isGenerating,
+    requiredUploadCount: AI_CREATOR_UPLOAD_SLOT_RULES.advancedVideo.length,
+    uploadedCount: referenceVideo ? 1 : 0,
+    inputError: videoInputError,
+  })
+  const videoDurationFillPercent = getAiCreatorVideoDurationFillPercent(videoDuration)
 
   return (
-    <div className="min-h-screen bg-[#080a1a] text-white py-8 px-4 md:px-8 font-sans">
-      <div className="mx-auto max-w-7xl">
+    <div className="missai-page text-white" data-testid="ai-creator-page">
+      <div className="missai-shell max-w-7xl">
         {/* Upper bar */}
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
           <Link
             to="/create"
-            className="inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+            className="missai-button-secondary min-h-10 rounded-xl px-4 text-xs"
           >
             <ArrowLeft size={14} />
             กลับสู่ห้องควบคุมหลัก
@@ -398,722 +579,109 @@ export function AICreatorPage() {
         <div className="grid gap-8 lg:grid-cols-12">
           {/* Left Side: Dynamic Multi-Tab Controls */}
           <section className="lg:col-span-5 space-y-6">
-            <div className="missai-card rounded-3xl p-6 space-y-6 shadow-2xl">
-
-              {/* Categories/Tabs Switcher */}
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-white/10">
-                <button
-                  type="button"
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
-                    activeTab === 'image'
-                      ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
-                      : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
-                  }`}
-                  onClick={() => {
-                    setActiveTab('image')
-                    setStatusMessage('')
-                  }}
-                  title="แท็บการสร้างภาพร่างระบบ"
-                  aria-label="แท็บการสร้างภาพร่างระบบ"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <ImageIcon size={14} />
-                    ภาพร่างระบบ
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
-                    activeTab === 'video'
-                      ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
-                      : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
-                  }`}
-                  onClick={() => {
-                    setActiveTab('video')
-                    setStatusMessage('')
-                  }}
-                  title="แท็บการเรนเดอร์วิดีโอเคลื่อนไหว"
-                  aria-label="แท็บการเรนเดอร์วิดีโอเคลื่อนไหว"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Video size={14} />
-                    วิดีโอระดับสูง
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
-                    activeTab === 'template'
-                      ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
-                      : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
-                  }`}
-                  onClick={() => {
-                    setActiveTab('template')
-                    setStatusMessage('')
-                  }}
-                  title="แท็บเทมเพลตภาพร่างสำเร็จรูป"
-                  aria-label="แท็บเทมเพลตภาพร่างสำเร็จรูป"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <LayoutGrid size={14} />
-                    แม่แบบสไตล์
-                  </span>
-                </button>
-              </div>
-
-              {/* Common Inputs */}
-              {activeTab !== 'template' && (
-                <div className="space-y-5">
-                  {/* Targeting Character Dropdown */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-slate-400">
-                      เลือกตัวละครเป้าหมาย (Targeting Character)
-                    </label>
-                    <select
-                      className="block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-3 text-xs font-semibold text-white outline-none focus:border-[#ac4bff] transition-all"
-                      value={selectedCharacterId}
-                      onChange={(e) => setSelectedCharacterId(e.target.value)}
-                      disabled={isGenerating}
-                      title="เลือกตัวละครเป้าหมาย"
-                      aria-label="เลือกตัวละครเป้าหมาย"
-                    >
-                      <option value="">ภาพรวมระบบ / ยังไม่เจาะจงตัวละคร</option>
-                      {characters.map((char) => (
-                        <option key={char.id} value={char.id}>
-                          {char.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Brief Input */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-slate-400">
-                      ปูบริบทเบื้องหลัง / ประวัติย่อของตัวละคร
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="เช่น: เจ้าหน้าที่ฝ่ายความมั่นคงแห่งโลกอนาคตผู้เงียบขรึม..."
-                      className="block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-3.5 text-xs font-semibold text-white placeholder-white/20 outline-none focus:border-[#ac4bff] focus:ring-2 focus:ring-[#ac4bff]/20 transition-all resize-none"
-                      value={brief}
-                      onChange={(e) => setBrief(e.target.value)}
-                      disabled={isGenerating}
-                      title="ปูบริบทเบื้องหลังของตัวละคร"
-                      aria-label="ปูบริบทเบื้องหลังของตัวละคร"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 1: Image Generator Form */}
-              {activeTab === 'image' && (
-                <form onSubmit={handleGenerate} className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-slate-400">
-                      รายละเอียดคำสั่งภาพที่ต้องการ (Image Prompt)
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="เช่น: realistic portrait, glowing holographic jacket, rain reflection, cyber fantasy..."
-                      className="block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-3.5 text-xs font-semibold text-white placeholder-white/20 outline-none focus:border-[#ac4bff] focus:ring-2 focus:ring-[#ac4bff]/20 transition-all resize-none"
-                      value={imagePrompt}
-                      onChange={(e) => setImagePrompt(e.target.value)}
-                      disabled={isGenerating}
-                      title="รายละเอียดคำสั่งภาพที่ต้องการ"
-                      aria-label="รายละเอียดคำสั่งภาพที่ต้องการ"
-                    />
-                  </div>
-
-                  {/* Interactive Style Selection (Chips style) */}
-                  <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-slate-400">
-                      สไตล์และรูปแบบความพรีเมียม (Style Presets)
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {STYLE_PRESETS.map((preset) => {
-                        const isActive = imageStyle === preset.value
-                        return (
-                          <button
-                            type="button"
-                            key={preset.value}
-                            onClick={() => setImageStyle(preset.value)}
-                            disabled={isGenerating}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                              isActive
-                                ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
-                                : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
-                            }`}
-                            title={`สไตล์ ${preset.label}`}
-                            aria-label={`สไตล์ ${preset.label}`}
-                            aria-pressed={isActive}
-                          >
-                            {preset.label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Image Reference upload */}
-                  <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-slate-400">
-                      ภาพต้นแบบอ้างอิง (Image Reference - ControlNet)
-                    </label>
-                    {referenceImage ? (
-                      <div className="relative rounded-xl overflow-hidden border border-white/10 bg-[#080a1a]/60 p-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <img src={referenceImage} alt="Reference Preview" className="w-12 h-12 object-cover rounded-lg" />
-                          <span className="text-xs font-semibold text-slate-400">โหลดภาพอ้างอิงแล้ว.png</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setReferenceImage(null)}
-                          className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all"
-                          title="ลบรูปภาพอ้างอิง"
-                          aria-label="ลบรูปภาพอ้างอิง"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="border-2 border-dashed border-white/10 bg-[#080a1a]/40 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-white/5 hover:border-[#ac4bff]/50 transition cursor-pointer text-center group">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) {
-                              const reader = new FileReader()
-                              reader.onload = () => setReferenceImage(reader.result as string)
-                              reader.readAsDataURL(file)
-                            }
-                          }}
-                          disabled={isGenerating}
-                          title="เลือกรูปภาพอ้างอิง"
-                          aria-label="เลือกรูปภาพอ้างอิง"
-                        />
-                        <Upload size={24} className="text-[#6b7280] group-hover:text-[#ac4bff] transition mb-2" />
-                        <span className="text-xs font-semibold text-slate-400">อัปโหลดภาพท่าทางอ้างอิง</span>
-                        <span className="text-[10px] text-[#6b7280] mt-1">JPG / PNG / WebP / GIF (สูงสุด 10MB)</span>
-                      </label>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full min-h-12 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg missai-glow hover:brightness-110"
-                    disabled={isGenerating || (!brief.trim() && !imagePrompt.trim())}
-                    title="ประมวลผลข้อมูลโครงร่างตัวละคร"
-                    aria-label="ประมวลผลข้อมูลโครงร่างตัวละคร"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <RefreshCw className="animate-spin" size={14} />
-                        กำลังส่งประมวลผลโครงร่างภาพ...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles size={14} />
-                        ส่งประมวลผลโครงร่างภาพร่างระบบ
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* TAB 2: Advanced Video Form */}
-              {activeTab === 'video' && (
-                <form onSubmit={handleGenerate} className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-[#9ca3af]">
-                      คำสั่งการขยับมุมกล้อง / ท่าทางวิดีโอ (Video Prompt)
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="เช่น: gentle smile, wind blowing hair, golden dust particles flying, epic tracking camera..."
-                      className="block w-full rounded-xl border border-[#2e2e44] bg-[#1e1e34] p-3.5 text-xs font-semibold text-white placeholder-white/20 outline-none focus:border-[#a855f7] focus:ring-2 focus:ring-[#a855f7]/20 transition-all resize-none"
-                      value={videoPrompt}
-                      onChange={(e) => setVideoPrompt(e.target.value)}
-                      disabled={isGenerating}
-                      title="คำสั่งขยับมุมกล้องวิดีโอ"
-                      aria-label="คำสั่งขยับมุมกล้องวิดีโอ"
-                    />
-                  </div>
-
-                  {/* Duration select via Range Slider */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="block text-xs font-semibold text-slate-400">
-                        ความยาวของชิ้นงานวิดีโอ (Duration)
-                      </label>
-                      <span className="text-xs font-semibold text-white bg-[#ac4bff]/20 border border-[#ac4bff]/30 px-2 py-0.5 rounded-md">
-                        {videoDuration} วินาที
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-[#080a1a]/60 border border-white/10 p-3.5 rounded-xl">
-                      <span className="text-xs text-[#6b7280]">3s</span>
-                      <input
-                        type="range"
-                        min={3}
-                        max={10}
-                        step={1}
-                        value={videoDuration}
-                        onChange={(e) => setVideoDuration(Number(e.target.value))}
-                        disabled={isGenerating}
-                        className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#ac4bff]"
-                        style={{
-                          background: `linear-gradient(to right, #ac4bff 0%, #ac4bff ${((videoDuration - 3) / (10 - 3)) * 100}%, rgba(255,255,255,0.1) ${((videoDuration - 3) / (10 - 3)) * 100}%, rgba(255,255,255,0.1) 100%)`
-                        }}
-                        title="ความยาวของชิ้นงานวิดีโอ"
-                        aria-label="ความยาวของชิ้นงานวิดีโอ"
-                      />
-                      <span className="text-xs text-[#6b7280]">10s</span>
-                    </div>
-                  </div>
-
-                  {/* Motion Template select */}
-                  <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-slate-400">
-                      รูปแบบทิศทางขยับมุมกล้อง (Camera Motion)
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        { val: 'gentle-breeze', label: 'ลมพัดเบาๆ (Breeze)' },
-                        { val: 'snow', label: 'ละอองหิมะโปรย (Snowfall)' },
-                        { val: 'zoom-in', label: 'ซูมดึงเข้า (Zoom In)' },
-                        { val: 'zoom-out', label: 'ซูมออกขยาย (Zoom Out)' },
-                      ].map((tpl) => (
-                        <button
-                          type="button"
-                          key={tpl.val}
-                          onClick={() => setVideoTemplate(tpl.val)}
-                          disabled={isGenerating}
-                          className={`py-2.5 px-3.5 rounded-xl text-[10px] font-semibold border transition-all text-left ${
-                            videoTemplate === tpl.val
-                              ? 'bg-[#ac4bff]/15 border-[#ac4bff] text-[#ac4bff] shadow-[0_0_12px_rgba(172,75,255,0.15)]'
-                              : 'border-white/5 bg-[#0b0d1f]/60 text-slate-400 hover:text-white hover:bg-white/10'
-                          }`}
-                          title={`ทิศทางกล้อง ${tpl.label}`}
-                          aria-label={`ทิศทางกล้อง ${tpl.label}`}
-                          aria-pressed={videoTemplate === tpl.val}
-                        >
-                          {tpl.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Video reference */}
-                  <div className="space-y-3">
-                    <label className="block text-xs font-semibold text-slate-400">
-                      วิดีโอเป้าหมายอ้างอิง (Target Video Reference)
-                    </label>
-                    {referenceVideo ? (
-                      <div className="relative rounded-xl overflow-hidden border border-white/10 bg-[#080a1a]/60 p-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Film size={18} className="text-[#ac4bff]" />
-                          <span className="text-xs font-semibold text-slate-400">อ้างอิงวิดีโอ_{videoDuration}s.mp4</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setReferenceVideo(null)}
-                          className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all"
-                          title="ลบวิดีโออ้างอิง"
-                          aria-label="ลบวิดีโออ้างอิง"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="border-2 border-dashed border-white/10 bg-[#080a1a]/40 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-white/5 hover:border-[#ac4bff]/50 transition cursor-pointer text-center group">
-                        <input
-                          type="file"
-                          accept="video/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) {
-                              setReferenceVideo(file.name)
-                            }
-                          }}
-                          disabled={isGenerating}
-                          title="เลือกวิดีโออ้างอิง"
-                          aria-label="เลือกวิดีโออ้างอิง"
-                        />
-                        <Upload size={24} className="text-[#6b7280] group-hover:text-[#ac4bff] transition mb-2" />
-                        <span className="text-xs font-semibold text-slate-400">อัปโหลดวิดีโอเคลื่อนไหวอ้างอิง</span>
-                        <span className="text-[10px] text-[#6b7280] mt-1">MP4 / WebM / MOV (สูงสุด 50MB)</span>
-                      </label>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full min-h-12 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg missai-glow hover:brightness-110"
-                    disabled={isGenerating || (!brief.trim() && !videoPrompt.trim())}
-                    title="ประมวลผลวิดีโอระบบ"
-                    aria-label="ประมวลผลวิดีโอระบบ"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <RefreshCw className="animate-spin" size={14} />
-                        กำลังส่งประมวลผลเรนเดอร์วิดีโอ...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles size={14} />
-                        ส่งประมวลผลเรนเดอร์วิดีโอระดับสูง
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* TAB 3: Style Templates presets */}
-              {activeTab === 'template' && (
-                <div className="space-y-4">
-                  <p className="text-xs font-semibold text-[#9ca3af]">
-                    ⚡ เลือกพรีเซ็ตเทมเพลตสไตล์ยอดนิยมเพื่อกรอกพารามิเตอร์และสเก็ตช์ภาพร่างระบบแบบเร็วทันที:
-                  </p>
-                  <div className="grid gap-3">
-                    {IMAGE_TEMPLATES.map((tpl) => (
-                      <button
-                        key={tpl.id}
-                        onClick={() => void handleTemplateClick(tpl)}
-                        disabled={isGenerating}
-                        className={`w-full text-left p-4 rounded-xl border border-white/10 bg-gradient-to-br ${tpl.bgClass} hover:border-[#ac4bff]/50 hover:shadow-[0_0_15px_rgba(172,75,255,0.15)] transition-all duration-300 relative overflow-hidden group`}
-                        type="button"
-                        title={`ใช้งานพรีเซ็ต ${tpl.title}`}
-                      >
-                        <div className="absolute right-3 top-3 opacity-10 group-hover:opacity-30 transition duration-300">
-                          <Compass size={40} className="text-white" />
-                        </div>
-                        <span className="inline-block px-2.5 py-0.5 rounded bg-white/10 text-[9px] font-black text-purple-300 mb-2">
-                          {tpl.tag}
-                        </span>
-                        <h4 className="text-xs font-bold text-white">{tpl.title}</h4>
-                        <p className="text-[10px] text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
-                          {tpl.prompt}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {statusMessage && (
-                <div className="text-xs font-semibold text-[#d9b3ff] bg-[#ac4bff]/10 border border-[#ac4bff]/20 p-3.5 rounded-xl leading-relaxed flex gap-2">
-                  <span className="flex-shrink-0">ℹ️</span>
-                  <span>{statusMessage}</span>
-                </div>
-              )}
-            </div>
+            <AiCreatorControlPanel
+              activeTab={activeTab}
+              characters={characters}
+              selectedCharacterId={selectedCharacterId}
+              brief={brief}
+              imagePrompt={imagePrompt}
+              imageStyle={imageStyle}
+              referenceImage={referenceImage}
+              referenceImageMeta={referenceImageMeta}
+              videoPrompt={videoPrompt}
+              videoDuration={videoDuration}
+              videoDurationFillPercent={videoDurationFillPercent}
+              videoTemplate={videoTemplate}
+              referenceVideo={referenceVideo}
+              referenceVideoMeta={referenceVideoMeta}
+              isGenerating={isGenerating}
+              statusMessage={statusMessage}
+              imageGenerateBlockReason={imageGenerateBlockReason}
+              videoGenerateBlockReason={videoGenerateBlockReason}
+              onTabChange={(tab) => {
+                setActiveTab(tab)
+                setStatusMessage('')
+              }}
+              onSelectedCharacterIdChange={setSelectedCharacterId}
+              onBriefChange={setBrief}
+              onImagePromptChange={setImagePrompt}
+              onImageStyleChange={setImageStyle}
+              onImageReferenceFile={handleImageReferenceFile}
+              onClearImageReference={() => {
+                setReferenceImage(null)
+                setReferenceImageMeta(null)
+                setImageInputError(null)
+              }}
+              onVideoPromptChange={setVideoPrompt}
+              onVideoDurationChange={setVideoDuration}
+              onVideoTemplateChange={setVideoTemplate}
+              onVideoReferenceFile={handleVideoReferenceFile}
+              onClearVideoReference={() => {
+                setReferenceVideo(null)
+                setReferenceVideoMeta(null)
+                setVideoInputError(null)
+              }}
+              onGenerate={handleGenerate}
+              onTemplateClick={(template) => void handleTemplateClick(template)}
+            />
           </section>
 
           {/* Right Side: Interactive Preview surface */}
           <section className="lg:col-span-7">
-            {lastResult ? (
-              <div className="missai-card rounded-3xl p-6 space-y-6 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4 flex-wrap gap-2">
-                  <h2 className="font-display text-lg font-bold text-white flex items-center gap-2">
-                    <CheckCircle2 size={18} className="text-emerald-400" />
-                    {lastResult.type === 'video' ? 'วิดีโอเคลื่อนไหวจำลองสำเร็จ' : 'ภาพร่างระบบประมวลผลเสร็จสิ้น'}
-                  </h2>
-
-                  <button
-                    type="button"
-                    onClick={() => void handleSaveToStudio(lastResult.response)}
-                    className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:opacity-90 px-4 py-2.5 text-xs font-semibold text-white transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-600/10"
-                    title="บันทึกโครงร่างลงระบบสตูดิโอ"
-                  >
-                    <BookOpen size={13} />
-                    บันทึกโครงร่างเข้าระบบสตูดิโอ
-                  </button>
-                </div>
-
-                <div className="grid gap-6 sm:grid-cols-12">
-                  {/* Media preview panel */}
-                  <div className="sm:col-span-5 space-y-4">
-
-                    {lastResult.type === 'video' ? (
-                      /* Mock Video Player for Video Preview */
-                      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-[#2e2e44] bg-[#080a1a] flex flex-col justify-between shadow-2xl">
-
-                        {/* Viewfinder overlay */}
-                        <div className="p-3 flex items-center justify-between text-[9px] font-mono font-semibold text-[#6b7280] z-10">
-                          <span className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                            [REC] 00:0{videoDuration}
-                          </span>
-                          <span>{videoTemplate.toUpperCase()}</span>
-                        </div>
-
-                        {/* Mock animation container */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                          <div className="w-full h-full relative overflow-hidden flex items-center justify-center rounded-lg">
-                            {/* Main background image skeleton */}
-                            <img
-                              src={lastResult.url}
-                              alt="Video frame mock"
-                              className={`h-full w-full object-cover transition-all duration-700 ${
-                                isPlaying ? 'scale-105 saturate-[1.1] blur-[0.5px]' : 'scale-100'
-                              }`}
-                            />
-
-                            {/* Animated filter according to template */}
-                            {isPlaying && (
-                              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-purple-900/10 via-transparent to-cyan-950/10 z-0">
-
-                                {/* Scanning line animation */}
-                                <div className="w-full h-[1.5px] bg-cyan-400/20 absolute top-0 animate-[scan_3s_linear_infinite]" />
-
-                                {videoTemplate === 'snow' && (
-                                  <div className="absolute inset-0 animate-pulse opacity-40 bg-[radial-gradient(circle_at_center,_white_1px,_transparent_1px)] bg-[size:10px_10px]" />
-                                )}
-
-                                {videoTemplate === 'gentle-breeze' && (
-                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent skew-x-12 translate-x-full animate-[wind_4s_ease-in-out_infinite]" />
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Video Player Control bar */}
-                        <div className="p-3 bg-[#080a1a]/95 backdrop-blur-md border-t border-white/10 flex flex-col gap-2.5 z-10">
-                          {/* Progress slider */}
-                          <div className="h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer">
-                            <div
-                              className="h-full bg-gradient-to-r from-[#ac4bff] to-cyan-400 transition-all duration-100"
-                              style={{ width: `${playProgress}%` }}
-                            />
-                          </div>
-
-                          <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400">
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setIsPlaying(!isPlaying)}
-                                className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all"
-                                title={isPlaying ? "หยุดชั่วคราว" : "เล่น"}
-                                aria-label={isPlaying ? "หยุดชั่วคราว" : "เล่น"}
-                              >
-                                {isPlaying ? <Pause size={12} /> : <Play size={12} />}
-                              </button>
-                              <span>0:0{Math.floor((playProgress / 100) * videoDuration)} / 0:0{videoDuration}</span>
-                            </div>
-
-                            <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[9px] uppercase tracking-wider text-[#ac4bff]">
-                              {videoDuration}s Loop
-                            </span>
-                          </div>
-                        </div>
-
-                      </div>
-                    ) : (
-                      /* Image Preview Layout */
-                      <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-white/10 bg-[#080a1a] relative shadow-inner">
-                        {lastResult.url ? (
-                          <img
-                            src={lastResult.url}
-                            alt={lastResult.response.draft.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-full w-full flex flex-col items-center justify-center text-[#6b7280] text-xs p-4 text-center">
-                            <ImageIcon size={42} className="mb-2 text-white/10" />
-                            โครงร่างจำลองกรณีไม่เชื่อมต่ออินเทอร์เน็ต
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="rounded-xl bg-[#080a1a]/40 border border-white/10 p-4 text-[11px] font-semibold text-slate-400 space-y-2 leading-relaxed">
-                      <p>⚡ รูปแบบสื่อ: <span className="text-white">{lastResult.type === 'video' ? 'วิดีโอความยาวสั่นไหวระดับสูง' : 'ภาพร่างระบบเดี่ยว'}</span></p>
-                      {lastResult.type === 'video' && <p>🎬 ทิศทางมุมกล้อง: <span className="text-white">{lastResult.motionTemplate}</span></p>}
-                      <p className="line-clamp-3">📝 คำอธิบายภาพรวม: <span className="text-white font-mono">{lastResult.prompt}</span></p>
-                    </div>
-                  </div>
-
-                  {/* Character Metadata details */}
-                  <div className="sm:col-span-7 space-y-5 max-h-[35rem] overflow-y-auto pr-1">
-                    <div>
-                      <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">ชื่อตัวละครร่างระบบ</span>
-                      <p className="text-xl font-black text-white mt-1">{lastResult.response.draft.name}</p>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">คำอธิบายภาพลักษณ์</span>
-                      <p className="text-xs font-medium leading-relaxed text-slate-400 mt-1">{lastResult.response.draft.description}</p>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">ข้อความทักทายแรกสุด</span>
-                      <p className="text-xs font-medium leading-relaxed border-l-2 border-[#ac4bff] bg-[#ac4bff]/10 p-3 rounded-r-xl text-[#d9b3ff] mt-1">
-                        "{lastResult.response.draft.greeting}"
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
-                          บริบทความจำเป็นระบบ (System Prompt)
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleCopySystemPrompt}
-                          className="text-[10px] font-semibold text-[#ac4bff] hover:text-[#c084fc] flex items-center gap-1 transition-all"
-                          title="คัดลอกบริบทความจำเป็นระบบ"
-                        >
-                          {copiedPrompt ? (
-                            <>
-                              <Check size={11} className="text-emerald-400" />
-                              คัดลอกแล้ว!
-                            </>
-                          ) : (
-                            <>
-                              <Copy size={11} />
-                              คัดลอกคำสั่ง
-                            </>
-                          )}
-                        </button>
-                      </div>
-                      <pre className="text-[11px] font-mono leading-relaxed text-slate-400 bg-[#080a1a] p-3.5 rounded-xl border border-white/10 whitespace-pre-wrap max-h-48 overflow-y-auto">
-                        {lastResult.response.draft.systemPrompt}
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Empty state canvas */
-              <div className="rounded-2xl border-2 border-dashed border-[#2e2e44] bg-[#1e1e34]/40 p-12 text-center flex flex-col items-center justify-center min-h-[34rem] shadow-2xl">
-                <div className="w-16 h-16 rounded-full bg-[#1e1e34] flex items-center justify-center mb-4 border border-[#2e2e44]">
-                  <Sparkles size={28} className="text-[#a855f7]" />
-                </div>
-                <h3 className="text-base font-bold text-white/90">ยังไม่มีข้อมูลชิ้นงานประมวลผล</h3>
-                <p className="mt-2 text-xs font-semibold text-[#9ca3af] max-w-sm leading-relaxed">
-                  กรอกเป้าหมายตัวละคร หรือสลับแท็บเลือกรูปแบบภาพ/วิดีโอ จากนั้นคลิกประมวลผล เพื่อเริ่มเรนเดอร์โครงร่างสื่อชิ้นงาน
-                </p>
-              </div>
-            )}
+            <AiCreatorResultPreview
+              result={lastResult}
+              copiedPrompt={copiedPrompt}
+              onSaveToStudio={(response) => void handleSaveToStudio(response)}
+              onCopySystemPrompt={handleCopySystemPrompt}
+            />
           </section>
         </div>
 
-        {/* History section (Paginated Windowed Gallery) */}
-        <section className="mt-8 rounded-2xl bg-[#1e1e34]/90 border border-[#2e2e44] p-6 shadow-2xl backdrop-blur-md">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#2e2e44] pb-5 mb-6">
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                แกลเลอรีประวัติภาพร่างและชิ้นงานจำลองระบบ
-              </h2>
-              <p className="text-xs font-medium text-[#6b7280] mt-1">
-                แสดงภาพถ่ายและโครงร่างวิดีโอเคลื่อนไหวที่ประมวลผลเสร็จสิ้น (ดึงข้อมูลจำกัดหน้าต่างละ 12 รายการ)
-              </p>
-            </div>
+        <AiCreatorHistoryGallery
+          historyCount={history.length}
+          filteredCount={filteredHistory.length}
+          items={paginatedHistory}
+          galleryFilter={galleryFilter}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onFilterChange={(filter) => {
+            setGalleryFilter(filter)
+            setCurrentPage(1)
+          }}
+          onPageChange={setCurrentPage}
+          onOpenItem={handleOpenHistoryDetail}
+          onReuseItem={handleReuseFromHistory}
+          onUseAsCharacterImage={handleUseAsCharacterImage}
+          onToggleFavorite={toggleHistoryFavorite}
+          onDeleteItem={deleteHistoryItem}
+          onClearHistory={clearHistory}
+        />
 
-            {/* Filtering buttons */}
-            <div className="flex items-center gap-1.5 bg-[#18182f] p-1.5 rounded-xl border border-[#2e2e44]">
-              {GALLERY_FILTERS.map((f) => (
-                <button
-                  key={f.val}
-                  type="button"
-                  onClick={() => {
-                    setGalleryFilter(f.val)
-                    setCurrentPage(1)
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    galleryFilter === f.val
-                      ? 'bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] text-white shadow-lg missai-glow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title={`ตัวกรอง ${f.label}`}
-                  aria-label={`ตัวกรอง ${f.label}`}
-                  aria-pressed={galleryFilter === f.val}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
+        <AiCreatorPublicGalleryPanel
+          privateItemCount={combinedHistory.length}
+          onCreateFocus={() => {
+            setActiveTab('image')
+            setStatusMessage('แกลเลอรีสาธารณะยังปิดไว้ ใช้ My Library ส่วนตัวและสร้างชิ้นงานใหม่ได้จากแผงด้านบน')
+          }}
+        />
 
-            {history.length > 0 && (
-              <button
-                type="button"
-                onClick={clearHistory}
-                className="text-xs font-semibold text-rose-400 hover:text-rose-300 transition-all"
-              >
-                ล้างประวัติทั้งหมด
-              </button>
-            )}
-          </div>
+        <AiCreatorBlockedStateMatrix states={aiCreatorBlockedStateMatrix} />
 
-          {filteredHistory.length === 0 ? (
-            <div className="py-16 text-center text-slate-500 text-xs font-semibold">
-              ไม่มีรายการแกลเลอรีในหมวดนี้ในประวัติคอมพิวเตอร์ของคุณ
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                {paginatedHistory.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleSelectFromHistory(item)}
-                    className="group cursor-pointer rounded-xl border border-white/5 bg-[#0b0d1f]/60 overflow-hidden hover:border-[#ac4bff]/75 hover:shadow-[0_0_15px_rgba(172,75,255,0.2)] transition-all duration-300 relative"
-                  >
-                    <div className="aspect-[3/4] w-full overflow-hidden bg-[#080a1a] relative">
-                      <img
-                        src={item.url}
-                        alt={item.response.draft.name}
-                        className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
-                      />
-                      {item.type === 'video' && (
-                        <div className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-[#080a1a]/85 border border-white/10 text-white shadow-lg flex items-center justify-center">
-                          <Video size={12} className="text-[#ac4bff]" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3">
-                      <p className="text-xs font-semibold text-white truncate">{item.response.draft.name}</p>
-                      <p className="text-[10px] font-medium text-slate-500 truncate mt-1">{item.prompt}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 pt-5 border-t border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
-                    title="หน้าก่อนหน้า"
-                    aria-label="หน้าก่อนหน้า"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <span className="text-xs font-semibold text-slate-400">
-                    หน้า {currentPage} จากทั้งหมด {totalPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
-                    title="หน้าถัดไป"
-                    aria-label="หน้าถัดไป"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
+        <AiCreatorHistoryDetailDialog
+          item={detailItem}
+          onClose={() => setDetailItem(null)}
+          onReuse={handleReuseFromHistory}
+          onDelete={deleteHistoryItem}
+          onToggleFavorite={toggleHistoryFavorite}
+          onUseAsCharacterImage={handleUseAsCharacterImage}
+          onUseAsCover={handleUseAsCover}
+          onCopySystemPrompt={handleCopyHistorySystemPrompt}
+          onDownload={(item) => void handleDownloadHistoryItem(item)}
+          onRetry={(item) => void handleRetryHistoryItem(item)}
+          downloadLink={detailItem ? downloadLinks[detailItem.id] ?? null : null}
+          downloadingItemId={downloadingItemId}
+          retryingItemId={retryingItemId}
+        />
       </div>
     </div>
   )

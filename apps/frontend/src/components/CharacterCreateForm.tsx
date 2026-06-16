@@ -13,8 +13,15 @@ import {
   WandSparkles,
 } from 'lucide-react'
 import { generateCreatorAiDraft, uploadAvatar, fetchCreatorDraft, updateCreatorDraft, type CharacterInput, type CreatorAiDraftResponse } from '../lib/api'
-import { buildCharacterDraftFromImage, buildGeneratedAvatarDataUrl, mergeDraftTags } from '../lib/characterDraft'
-import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem } from '../lib/safeStorage'
+import {
+  buildCharacterDraftFromImage,
+  buildGeneratedAvatarDataUrl,
+  clearStoredCreatorDraft,
+  mergeDraftTags,
+  readStoredCreatorDraft,
+  writeStoredCreatorDraft,
+  type CreatorStoredDraft,
+} from '../lib/characterDraft'
 import { analyzeTags, normalizeTag, type TagAnalysis, type TagIssue } from '../lib/tagAnalysis'
 import { CreatorReadinessPanel } from './CreatorReadinessPanel'
 import { RelationshipPreviewPanel } from './RelationshipPreviewPanel'
@@ -52,11 +59,11 @@ export type CreatorDraftStatus = {
 }
 
 const inputClass =
-  'min-h-11 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3.5 text-sm font-semibold text-white outline-none transition placeholder:text-slate-500 focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10'
+  'missai-input min-h-11 rounded-xl px-3.5 text-sm font-semibold'
 const textareaClass =
-  'min-h-24 resize-y rounded-xl border border-white/10 bg-[#080a1a]/60 px-3.5 py-2.5 text-sm font-semibold leading-relaxed text-white outline-none transition placeholder:text-slate-500 focus:border-[#ac4bff] focus:ring-4 focus:ring-[#ac4bff]/10'
+  'missai-input min-h-24 resize-y rounded-xl px-3.5 py-2.5 text-sm font-semibold leading-relaxed'
 const quietButtonClass =
-  'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-slate-300 transition hover:bg-white/10 hover:text-white'
+  'missai-button-secondary min-h-9 rounded-xl px-3.5 text-xs'
 
 const emptyCharacter = {
   name: '',
@@ -73,36 +80,14 @@ const emptyCharacter = {
   tags: 'บทบาทสมมุติ, ไทย',
 }
 
-const creatorDraftStorageKey = 'maprang:creator-draft:v1'
-
-type CreatorStoredDraft = {
-  form?: Partial<typeof emptyCharacter>
-  creatorBrief?: string
-  avatarSource?: CreatorDraftStatus['avatarSource']
-  hasImageDraft?: boolean
-  hasPreviewRun?: boolean
-  lastImageSignal?: string
-  generatedImages?: { url: string; source: CreatorDraftStatus['avatarSource'] }[]
-  imageStyle?: string
-  updatedAt?: number
-}
-
 function loadStoredCreatorDraft(): CreatorStoredDraft | null {
   if (typeof window === 'undefined') return null
-  try {
-    const raw = safeGetStorageItem(window.localStorage, creatorDraftStorageKey)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as CreatorStoredDraft
-    if (!parsed || typeof parsed !== 'object') return null
-    return parsed
-  } catch {
-    return null
-  }
+  return readStoredCreatorDraft(window.localStorage)
 }
 
-function clearStoredCreatorDraft() {
+function clearLocalCreatorDraft() {
   if (typeof window === 'undefined') return
-  safeRemoveStorageItem(window.localStorage, creatorDraftStorageKey)
+  clearStoredCreatorDraft(window.localStorage)
 }
 
 function mergeStoredForm(stored: CreatorStoredDraft | null) {
@@ -210,6 +195,9 @@ export function CharacterCreateForm({
   const [isGeneratingDraft, setIsGeneratingDraft] = useState(false)
   const [lastImageSignal, setLastImageSignal] = useState(storedDraft?.lastImageSignal ?? '')
   const [storedAvatarSource, setStoredAvatarSource] = useState<CreatorDraftStatus['avatarSource']>(storedDraft?.avatarSource ?? 'none')
+  const [coverImageUrl, setCoverImageUrl] = useState(storedDraft?.coverImageUrl ?? '')
+  const [coverImageSource, setCoverImageSource] = useState<CreatorDraftStatus['avatarSource']>(storedDraft?.coverImageSource ?? 'none')
+  const [hasCoverDraft, setHasCoverDraft] = useState(Boolean(storedDraft?.coverImageUrl && storedDraft?.hasCoverDraft))
   const [hasImageDraft, setHasImageDraft] = useState(Boolean(storedDraft?.hasImageDraft))
   const [hasPreviewRun, setHasPreviewRun] = useState(Boolean(storedDraft?.hasPreviewRun))
   const [generatedImages, setGeneratedImages] = useState<{ url: string; source: CreatorDraftStatus['avatarSource'] }[]>(storedDraft?.generatedImages ?? [])
@@ -287,13 +275,16 @@ export function CharacterCreateForm({
             setForm(mergeStoredForm(dbDraft))
             setCreatorBrief(dbDraft.creatorBrief ?? '')
             setStoredAvatarSource(dbDraft.avatarSource ?? 'none')
+            setCoverImageUrl(dbDraft.coverImageUrl ?? '')
+            setCoverImageSource(dbDraft.coverImageSource ?? 'none')
+            setHasCoverDraft(Boolean(dbDraft.coverImageUrl && dbDraft.hasCoverDraft))
             setHasImageDraft(Boolean(dbDraft.hasImageDraft))
             setHasPreviewRun(Boolean(dbDraft.hasPreviewRun))
             setLastImageSignal(dbDraft.lastImageSignal ?? '')
             setGeneratedImages(dbDraft.generatedImages ?? [])
             setImageStyle(dbDraft.imageStyle ?? '')
             setNote('โหลดดราฟต์ล่าสุดจากระบบคลาวด์แล้ว คุณแก้ต่อได้ทันที')
-            safeSetStorageItem(window.localStorage, creatorDraftStorageKey, JSON.stringify(dbDraft))
+            writeStoredCreatorDraft(window.localStorage, dbDraft)
           }
         }
       })
@@ -307,8 +298,8 @@ export function CharacterCreateForm({
       return value.trim().length > 0
     })
 
-    if (!hasDraftContent && !creatorBrief.trim() && !lastImageSignal && !hasImageDraft && !hasPreviewRun) {
-      clearStoredCreatorDraft()
+    if (!hasDraftContent && !creatorBrief.trim() && !coverImageUrl && !lastImageSignal && !hasImageDraft && !hasCoverDraft && !hasPreviewRun) {
+      clearLocalCreatorDraft()
       return
     }
 
@@ -316,6 +307,9 @@ export function CharacterCreateForm({
       form,
       creatorBrief,
       avatarSource,
+      coverImageUrl: coverImageUrl || undefined,
+      coverImageSource,
+      hasCoverDraft,
       hasImageDraft,
       hasPreviewRun,
       lastImageSignal,
@@ -323,14 +317,14 @@ export function CharacterCreateForm({
       imageStyle,
       updatedAt: Date.now(),
     }
-    safeSetStorageItem(window.localStorage, creatorDraftStorageKey, JSON.stringify(payload))
+    writeStoredCreatorDraft(window.localStorage, payload)
 
     const timeoutId = setTimeout(() => {
       updateCreatorDraft(payload).catch(() => {})
     }, 1500)
 
     return () => clearTimeout(timeoutId)
-  }, [avatarSource, creatorBrief, form, hasImageDraft, hasPreviewRun, lastImageSignal, generatedImages, imageStyle])
+  }, [avatarSource, coverImageSource, coverImageUrl, creatorBrief, form, hasCoverDraft, hasImageDraft, hasPreviewRun, lastImageSignal, generatedImages, imageStyle])
 
   useEffect(() => {
     setHasPreviewRun(false)
@@ -468,6 +462,7 @@ export function CharacterCreateForm({
       const created = await onCreate({
         name: form.name.trim(),
         avatarUrl: form.avatarUrl.trim() || null,
+        coverUrl: coverImageUrl.trim() || null,
         tagline: form.tagline.trim() || null,
         description: form.description.trim() || null,
         biography: form.biography.trim() || null,
@@ -496,7 +491,7 @@ export function CharacterCreateForm({
       setLastImageSignal('')
       setGeneratedImages([])
       setImageStyle('')
-      clearStoredCreatorDraft()
+      clearLocalCreatorDraft()
       updateCreatorDraft(null).catch(() => {})
       setNote('สร้างดราฟต์ตัวละครแล้ว')
       setIsOpen(false)
@@ -567,6 +562,50 @@ export function CharacterCreateForm({
                         <img alt="ประวัติรูป" className="h-full w-full object-cover" src={img.url} />
                       </button>
                     ))}
+                  </div>
+                )}
+                {coverImageUrl && (
+                  <div
+                    data-testid="creator-cover-draft-panel"
+                    className="mt-3 rounded-xl border border-[#ac4bff]/30 bg-[#ac4bff]/10 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-black text-[#d8b4fe]">ภาพปกจาก AI Creator</p>
+                      <span className="rounded-full border border-white/10 bg-black/25 px-2 py-0.5 text-[10px] font-bold text-white/55">
+                        {coverImageSource === 'provider' ? 'provider' : coverImageSource === 'placeholder' ? 'fallback' : 'manual'}
+                      </span>
+                    </div>
+                    <div className="mt-2 overflow-hidden rounded-lg border border-white/10 bg-black/25">
+                      <img alt="ภาพปกตัวละคร" className="aspect-video w-full object-cover" src={coverImageUrl} />
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <button
+                        data-testid="creator-cover-use-main"
+                        className="rounded-lg border border-emerald-400/25 bg-emerald-400/10 px-2 py-1.5 text-[10px] font-bold text-emerald-200 transition hover:bg-emerald-400/20"
+                        onClick={() => {
+                          update('avatarUrl', coverImageUrl)
+                          setStoredAvatarSource(coverImageSource)
+                          setHasImageDraft(true)
+                          setNote('ใช้ภาพปกเป็นรูปตัวละครหลักแล้ว')
+                        }}
+                        type="button"
+                      >
+                        ใช้เป็นรูปหลัก
+                      </button>
+                      <button
+                        data-testid="creator-cover-clear"
+                        className="rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[10px] font-bold text-slate-300 transition hover:bg-white/10 hover:text-white"
+                        onClick={() => {
+                          setCoverImageUrl('')
+                          setCoverImageSource('none')
+                          setHasCoverDraft(false)
+                          setNote('ล้างภาพปกจากดราฟต์แล้ว')
+                        }}
+                        type="button"
+                      >
+                        ล้างภาพปก
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -937,7 +976,7 @@ export function CharacterCreateForm({
                   setLastImageSignal('')
                   setGeneratedImages([])
                   setImageStyle('')
-                  clearStoredCreatorDraft()
+                  clearLocalCreatorDraft()
                   updateCreatorDraft(null).catch(() => {})
                   setNote('ล้างฟอร์มแล้ว')
                 }}

@@ -52,6 +52,7 @@ export function CharacterCard({
   const rating = characterRating(character)
   const isFeatured = variant === 'featured'
   const isCompact = variant === 'compact'
+  const coverImageUrl = character.coverUrl || character.avatarUrl || fallbackAvatarUrl
   const [isFavorite, setIsFavorite] = useState(Boolean(character.isFavorite))
   const [favoriteCount, setFavoriteCount] = useState(character.favoriteCount ?? 0)
   const [isFavoritePending, setIsFavoritePending] = useState(false)
@@ -139,7 +140,7 @@ export function CharacterCard({
     >
       <div className={`relative overflow-hidden ${isFeatured ? 'aspect-[16/9]' : 'aspect-[3/4]'}`}>
         <img
-          src={character.avatarUrl || fallbackAvatarUrl}
+          src={coverImageUrl}
           alt={character.name}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
         />

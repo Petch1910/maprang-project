@@ -62,6 +62,7 @@ const scenarioDifficultySchema = t.Union([t.Literal('easy'), t.Literal('medium')
 const characterBody = t.Object({
   name: t.String({ minLength: 1 }),
   avatarUrl: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   tagline: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(t.String())),
   biography: t.Optional(t.Nullable(t.String())),

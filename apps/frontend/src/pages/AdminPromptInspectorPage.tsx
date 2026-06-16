@@ -83,7 +83,7 @@ function SectionBudget({ section, maxTokens }: { section: PromptInspectorSection
 
   return (
     <details
-      className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]"
+      className="missai-card rounded-2xl p-4 text-white"
       data-testid="prompt-inspector-section"
     >
       <summary className="cursor-pointer list-none">
@@ -95,10 +95,10 @@ function SectionBudget({ section, maxTokens }: { section: PromptInspectorSection
             <p className="m-0 mt-1 line-clamp-2 text-xs font-bold leading-5 text-white/52">{section.preview}</p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <span className="rounded-full border border-white/10 bg-white/7 px-2.5 py-1 text-xs font-black text-white/65">
+            <span className="missai-badge text-white/65">
               {section.estimatedTokens.toLocaleString()} โทเคน
             </span>
-            <span className="rounded-full border border-white/10 bg-white/7 px-2.5 py-1 text-xs font-black text-white/65">
+            <span className="missai-badge text-white/65">
               {section.chars.toLocaleString()} ตัวอักษร
             </span>
           </div>
@@ -117,7 +117,7 @@ function SectionBudget({ section, maxTokens }: { section: PromptInspectorSection
 function DiffPanel({ diff }: { diff?: PromptInspectorDiff }) {
   if (!diff) {
     return (
-      <div className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-sm font-bold text-white/55 shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+      <div className="missai-card rounded-2xl p-4 text-sm font-bold text-white/55">
         ใส่ข้อความก่อนหน้าเพื่อดูการเทียบพรอมป์
       </div>
     )
@@ -125,7 +125,7 @@ function DiffPanel({ diff }: { diff?: PromptInspectorDiff }) {
 
   return (
     <section
-      className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]"
+      className="missai-card rounded-2xl p-4 text-white"
       data-testid="prompt-inspector-diff"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -144,11 +144,11 @@ function DiffPanel({ diff }: { diff?: PromptInspectorDiff }) {
       </div>
 
       {diff.changedSections.length === 0 ? (
-        <p className="m-0 mt-4 rounded-lg border border-white/10 bg-white/7 p-3 text-sm font-bold text-white/55">โครงพรอมป์ไม่เปลี่ยน</p>
+        <p className="missai-empty m-0 mt-4 p-3 text-sm text-white/55">โครงพรอมป์ไม่เปลี่ยน</p>
       ) : (
         <div className="mt-4 grid gap-2">
           {diff.changedSections.map((section) => (
-            <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={`${section.index}-${section.title}`}>
+            <article className="missai-card rounded-xl p-3" key={`${section.index}-${section.title}`}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="m-0 text-sm font-black text-white">{section.title}</p>
@@ -280,8 +280,8 @@ export function AdminPromptInspectorPage() {
   }
 
   return (
-    <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <section className="rounded-lg border border-white/10 bg-[#18181d]/92 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
+    <div className="missai-shell space-y-5 text-white">
+      <section className="missai-card rounded-2xl p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
@@ -297,7 +297,7 @@ export function AdminPromptInspectorPage() {
             <label className="min-w-0">
               <span className="mb-1 block text-xs font-black text-white/48">ADMIN_API_KEY</span>
               <input
-                className="min-h-11 w-full rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+                className="missai-input min-h-11 rounded-xl px-3 text-sm"
                 data-testid="prompt-inspector-admin-key-input"
                 onChange={(event) => setAdminKeyInput(event.target.value)}
                 placeholder="วางคีย์ผู้ดูแล"
@@ -306,7 +306,7 @@ export function AdminPromptInspectorPage() {
               />
             </label>
             <button
-              className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
+              className="missai-button-secondary mt-auto min-h-11 rounded-xl bg-white px-4 text-sm text-slate-950 hover:bg-white/90"
               data-testid="prompt-inspector-admin-key-save"
               onClick={saveAdminKey}
               type="button"
@@ -315,7 +315,7 @@ export function AdminPromptInspectorPage() {
               บันทึก
             </button>
             <button
-              className="mt-auto min-h-11 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+              className="missai-button-secondary mt-auto min-h-11 rounded-xl px-4 text-sm"
               onClick={clearKey}
               type="button"
             >
@@ -324,7 +324,7 @@ export function AdminPromptInspectorPage() {
           </div>
         </div>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="m-0 rounded-lg border border-white/10 bg-white/7 px-3 py-2 text-sm font-bold text-white/70" data-testid="prompt-inspector-note">
+          <p className="missai-empty m-0 px-3 py-2 text-sm text-white/70" data-testid="prompt-inspector-note">
             {note}
           </p>
           <span
@@ -342,7 +342,7 @@ export function AdminPromptInspectorPage() {
 
       <section className="grid gap-5 xl:grid-cols-[420px_minmax(0,1fr)]">
         <form
-          className="space-y-4 rounded-lg border border-white/10 bg-[#18181d]/90 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)]"
+          className="missai-card space-y-4 rounded-2xl p-4"
           onSubmit={(event) => {
             event.preventDefault()
             void inspectPrompt()
@@ -352,7 +352,7 @@ export function AdminPromptInspectorPage() {
             <p className="m-0 text-sm font-black text-white">ข้อมูลตรวจ</p>
             <button
               aria-disabled={Boolean(refreshCharactersDisabledReason)}
-              className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/6 px-3 text-xs font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+              className="missai-button-secondary min-h-9 rounded-xl px-3 text-xs"
               disabled={Boolean(refreshCharactersDisabledReason)}
               onClick={() => void loadCharacters()}
               title={refreshCharactersDisabledReason || 'รีเฟรชรายชื่อตัวละคร'}
@@ -367,7 +367,7 @@ export function AdminPromptInspectorPage() {
             <span className="mb-1 block text-xs font-black text-white/48">ตัวละคร</span>
             <select
               aria-disabled={Boolean(characterSelectDisabledReason)}
-              className="min-h-11 w-full rounded-lg border border-white/10 bg-black/25 px-3 text-sm font-bold text-white outline-none focus:border-amber-400/70"
+              className="missai-input min-h-11 rounded-xl px-3 text-sm"
               data-testid="prompt-inspector-character-select"
               disabled={Boolean(characterSelectDisabledReason)}
               onChange={(event) => setSelectedCharacterId(event.target.value)}
@@ -387,14 +387,14 @@ export function AdminPromptInspectorPage() {
           </label>
 
           {selectedCharacter && (
-            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+            <div className="missai-card rounded-xl p-3">
               <p className="m-0 text-sm font-black text-white">{selectedCharacter.name}</p>
               <p className="m-0 mt-1 line-clamp-2 text-xs font-bold leading-5 text-white/52">
                 {selectedCharacter.tagline || selectedCharacter.description || 'ยังไม่มีคำโปรย'}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {selectedCharacter.tags.slice(0, 8).map((tag) => (
-                  <span className="rounded-full border border-white/10 bg-black/22 px-2 py-0.5 text-[11px] font-black text-white/55" key={tag}>
+                  <span className="missai-badge px-2 py-0.5 text-[11px] text-white/55" key={tag}>
                     {tag}
                   </span>
                 ))}
@@ -405,7 +405,7 @@ export function AdminPromptInspectorPage() {
           <label className="block">
             <span className="mb-1 block text-xs font-black text-white/48">ข้อความปัจจุบัน</span>
             <textarea
-              className="min-h-32 w-full resize-y rounded-lg border border-white/10 bg-black/25 px-3 py-3 text-sm font-bold leading-6 text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+              className="missai-input min-h-32 resize-y rounded-xl px-3 py-3 text-sm leading-6"
               data-testid="prompt-inspector-message"
               onChange={(event) => setMessage(event.target.value)}
               value={message}
@@ -415,7 +415,7 @@ export function AdminPromptInspectorPage() {
           <label className="block">
             <span className="mb-1 block text-xs font-black text-white/48">ข้อความก่อนหน้า</span>
             <textarea
-              className="min-h-24 w-full resize-y rounded-lg border border-white/10 bg-black/25 px-3 py-3 text-sm font-bold leading-6 text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+              className="missai-input min-h-24 resize-y rounded-xl px-3 py-3 text-sm leading-6"
               data-testid="prompt-inspector-compare"
               onChange={(event) => setCompareWithMessage(event.target.value)}
               value={compareWithMessage}
@@ -425,14 +425,14 @@ export function AdminPromptInspectorPage() {
           <label className="block">
             <span className="mb-1 block text-xs font-black text-white/48">โน้ตตอนรัน</span>
             <textarea
-              className="min-h-24 w-full resize-y rounded-lg border border-white/10 bg-black/25 px-3 py-3 text-sm font-bold leading-6 text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+              className="missai-input min-h-24 resize-y rounded-xl px-3 py-3 text-sm leading-6"
               data-testid="prompt-inspector-runtime-note"
               onChange={(event) => setRuntimeNote(event.target.value)}
               value={runtimeNote}
             />
           </label>
 
-          <label className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
+          <label className="missai-card flex items-start gap-3 rounded-xl p-3">
             <input
               checked={includeSavedPersona}
               className="mt-1 size-4"
@@ -448,7 +448,7 @@ export function AdminPromptInspectorPage() {
           <label className="block">
             <span className="mb-1 block text-xs font-black text-white/48">ตัวตนชั่วคราว</span>
             <textarea
-              className="min-h-24 w-full resize-y rounded-lg border border-white/10 bg-black/25 px-3 py-3 text-sm font-bold leading-6 text-white outline-none placeholder:text-white/35 focus:border-amber-400/70"
+              className="missai-input min-h-24 resize-y rounded-xl px-3 py-3 text-sm leading-6"
               data-testid="prompt-inspector-user-persona"
               onChange={(event) => setUserPersona(event.target.value)}
               placeholder="เว้นว่างเพื่อใช้ตัวตนผู้เล่นที่บันทึกไว้"
@@ -495,7 +495,7 @@ export function AdminPromptInspectorPage() {
 
               <DiffPanel diff={result.diff} />
 
-              <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+                <section className="missai-card rounded-2xl p-4 text-white">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
@@ -507,7 +507,7 @@ export function AdminPromptInspectorPage() {
                     </p>
                   </div>
                   <button
-                    className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/6 px-3 text-xs font-black text-white/76 transition hover:bg-white/10 hover:text-white"
+                    className="missai-button-secondary min-h-9 rounded-xl px-3 text-xs"
                     onClick={() => void copyPrompt()}
                     type="button"
                   >
@@ -535,20 +535,20 @@ export function AdminPromptInspectorPage() {
                 ))}
               </section>
 
-              <section className="rounded-lg border border-white/10 bg-[#18181d]/90 p-4 text-white shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+              <section className="missai-card rounded-2xl p-4 text-white">
                 <p className="m-0 text-sm font-black text-white">คลังความรู้ที่ดึงมาใช้</p>
                 {result.snapshot.retrieval.lore.length === 0 ? (
-                  <p className="m-0 mt-3 rounded-lg border border-white/10 bg-white/7 p-3 text-sm font-bold text-white/55">ไม่มีคลังความรู้ที่ถูกดึงมาใช้ในรอบนี้</p>
+                  <p className="missai-empty m-0 mt-3 p-3 text-sm text-white/55">ไม่มีคลังความรู้ที่ถูกดึงมาใช้ในรอบนี้</p>
                 ) : (
                   <div className="mt-3 grid gap-2">
                     {result.snapshot.retrieval.lore.map((entry) => (
-                      <article className="rounded-lg border border-white/10 bg-white/5 p-3" key={`${entry.keyword}-${entry.priority}`}>
+                      <article className="missai-card rounded-xl p-3" key={`${entry.keyword}-${entry.priority}`}>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
                             <p className="m-0 text-sm font-black text-white">{entry.keyword}</p>
                             <p className="m-0 mt-1 text-xs font-bold leading-5 text-white/52">{entry.preview}</p>
                           </div>
-                          <span className="shrink-0 rounded-full border border-white/10 bg-black/22 px-2.5 py-1 text-xs font-black text-white/65">
+                          <span className="missai-badge shrink-0 text-white/65">
                             ความสำคัญ {entry.priority}
                           </span>
                         </div>
@@ -562,9 +562,9 @@ export function AdminPromptInspectorPage() {
               </section>
             </>
           ) : (
-            <section className="grid min-h-[28rem] place-items-center rounded-lg border border-dashed border-white/15 bg-[#18181d]/90 p-8 text-center shadow-[0_18px_58px_rgba(0,0,0,0.18)]">
+            <section className="missai-card grid min-h-[28rem] place-items-center rounded-2xl border-dashed border-white/15 p-8 text-center">
               <div className="max-w-sm">
-                <span className="mx-auto grid size-12 place-items-center rounded-lg border border-white/10 bg-white/7 text-white">
+                <span className="missai-icon-button mx-auto size-12 text-white">
                   <FileSearch size={22} />
                 </span>
                 <h2 className="m-0 mt-4 text-xl font-black text-white">ยังไม่ได้ตรวจพรอมป์</h2>

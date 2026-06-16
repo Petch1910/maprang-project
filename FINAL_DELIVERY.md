@@ -2,7 +2,7 @@
 
 This repo is in a local-ready, staging-required state.
 
-Do not treat old `*PageNew` notes or local mock evidence as production readiness. The canonical app surfaces are the routes declared in `apps/frontend/src/App.tsx` and documented in [docs/MAPRANG_TEST_PLAN.md](docs/MAPRANG_TEST_PLAN.md).
+Do not treat legacy duplicate-page notes or local mock evidence as production readiness. The canonical app surfaces are the routes declared in `apps/frontend/src/App.tsx` and documented in [docs/MAPRANG_TEST_PLAN.md](docs/MAPRANG_TEST_PLAN.md).
 
 ## Delivered Locally
 

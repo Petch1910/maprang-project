@@ -1,16 +1,16 @@
 # Maprang AI - Start Here
 
-เอกสารนี้เป็นเส้นทางรันระบบหลักของ repo ปัจจุบัน ให้ยึดไฟล์นี้แทนโน้ตเก่าที่พูดถึง SQLite หรือ stack ที่ไม่ตรงกับโปรเจกต์แล้ว
+เอกสารนี้คือเส้นทางหลักสำหรับรัน repo ปัจจุบัน ให้ยึดไฟล์นี้แทนโน้ตเก่าที่พูดถึงฐานข้อมูลหรือ backend stack ที่ไม่ตรงกับโปรเจกต์แล้ว
 
 ## Stack ปัจจุบัน
 
 - Frontend: React 19, Vite, Redux Toolkit, Tailwind, Playwright smoke
 - Backend: Bun, Elysia, Prisma, PostgreSQL
 - Local chat runtime: `local/mock-roleplay` ใช้เล่นและ QA ในเครื่องได้โดยไม่ใช้เครดิต provider
-- Production chat/image runtime: ต้องมี live provider และรัน live smoke ก่อนปล่อยจริง
-- Auth/storage production: Supabase JWT และ Supabase Storage bucket `avatars` แบบ signed URL
+- Production chat/image runtime: ต้องมี OpenRouter/live provider และรัน live smoke ก่อนปล่อยจริง
+- Auth/storage production: Supabase JWT และ Supabase Storage bucket `avatars` แบบ private + signed URL
 
-## รันแบบ local
+## รันระบบแบบ local
 
 รันจาก repo root:
 
@@ -40,17 +40,17 @@ cd apps/backend
 bun run dev
 ```
 
-ค่าเริ่มต้นของ backend คือ `http://127.0.0.1:3000`
+Backend local URL ปกติคือ `http://127.0.0.1:3000`
 
-ถ้า `apps/backend/.env` override `PORT` เช่น `PORT=3001` ให้ถือ URL นั้นเป็น backend local URL ของเครื่องนั้น และตั้ง smoke/frontend ให้ตรงกัน:
+ถ้า `apps/backend/.env` ตั้ง `PORT` เป็นค่าอื่น เช่น `PORT=3001` ให้ใช้ URL นั้นเป็น backend local URL และตั้ง smoke/frontend ให้ตรงกัน:
 
 ```powershell
 $env:SMOKE_API_BASE_URL="http://127.0.0.1:3001"
 ```
 
-`bun run smoke:doctor`, `bun run api:smoke`, `bun run deploy:status`, และ `bun run e2e:smoke` จะอ่าน `PORT` จาก `apps/backend/.env` ให้อัตโนมัติเมื่อยังไม่ได้ตั้ง smoke/e2e backend URL; ถ้าตรวจ staging/deployed URL ให้ตั้ง `SMOKE_API_BASE_URL` หรือ `E2E_API_BASE_URL` เป็น backend origin จริงเสมอ.
+`bun run smoke:doctor`, `bun run api:smoke`, `bun run deploy:status`, และ `bun run e2e:smoke` จะอ่าน `PORT` จาก `apps/backend/.env` ให้อัตโนมัติเมื่อยังไม่ได้ตั้ง smoke/e2e backend URL ถ้าตรวจ staging/deployed URL ให้ตั้ง `SMOKE_API_BASE_URL` หรือ `E2E_API_BASE_URL` เป็น backend origin จริงเสมอ
 
-สำหรับ local loopback smoke ถ้าไม่ได้ตั้ง `SMOKE_ADMIN_API_KEY` ระบบจะอ่าน `ADMIN_API_KEY` จาก `apps/backend/.env` เพื่อเช็ค moderation/admin audit ได้ แต่ staging/production ต้องตั้ง `SMOKE_ADMIN_API_KEY` เป็น secret จริงเสมอ.
+สำหรับ local loopback smoke ถ้าไม่ได้ตั้ง `SMOKE_ADMIN_API_KEY` ระบบจะอ่าน `ADMIN_API_KEY` จาก `apps/backend/.env` เพื่อเช็ก moderation/admin audit ได้ แต่ staging/production ต้องตั้ง `SMOKE_ADMIN_API_KEY` เป็น secret จริงเสมอ
 
 4. รัน frontend
 
@@ -59,7 +59,7 @@ cd apps/frontend
 bun run dev
 ```
 
-ค่าเริ่มต้นของ frontend คือ `http://127.0.0.1:5173`
+Frontend local URL ปกติคือ `http://127.0.0.1:5173`
 
 ถ้า backend ใช้พอร์ตอื่น ให้ตั้ง `VITE_API_BASE_URL` ใน `apps/frontend/.env` เป็น backend URL เดียวกัน แล้ว restart frontend ก่อนตรวจ browser smoke
 
@@ -93,7 +93,7 @@ bun run qa:repo
 bun run qa:full
 ```
 
-`qa:full` จะครอบ repo-owned checks และ browser smoke แล้ว seed QA data กลับท้ายงานอีกครั้งเพื่อให้ local app ยังพร้อมเล่นหลัง e2e; มันยังไม่แทน staging/production live smoke
+`qa:full` ครอบ repo-owned checks, local runtime smoke, browser smoke แล้ว seed QA data กลับท้ายงานอีกครั้ง เพื่อให้ local app ยังมีตัวละคร/แชทจำลองพร้อมเล่นหลังตรวจครบชุด มันยังไม่แทน staging/production live smoke
 
 ## ก่อน staging และ production
 
@@ -124,6 +124,8 @@ bun run production:check
 
 - แผนทดสอบหลัก: `docs/MAPRANG_TEST_PLAN.md`
 - ตาราง route/menu: `ROUTE_MENU_AUDIT.md`
-- เช็กลิสต์ production: `memory/production/checklist.md`
+- MissAI template reference: `docs/MISSAI_TEMPLATE_AUDIT.md`
+- MissAI logged-in flow reference: `docs/MISSAI_LOGGED_IN_FLOW_AUDIT.md`
+- Checklist production: `memory/production/checklist.md`
 - ตัวกั้น deploy ล่าสุด: `memory/deploy-blockers.md`
 - วิธีให้ agent ทำงานต่อ: `AGENTS.md` และ `agent.md`

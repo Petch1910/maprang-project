@@ -1,4 +1,4 @@
-# แม่แบบส่งมอบ release
+﻿# แม่แบบส่งมอบ release
 
 ใช้แม่แบบนี้หลัง `production:check` ผ่าน และก่อนเปิดให้ผู้ใช้จริงเข้า release ห้ามวาง secrets,
 tokens, private database URLs, service role keys, หรือข้อมูลผู้ใช้ดิบลงในไฟล์นี้.
@@ -45,12 +45,12 @@ bun run release:handoff:check -- --filled
 
 ## ฐานข้อมูลและ migrations
 
-หมายเหตุ: `Database host/provider` ให้ใส่ชื่อ provider หรือ host สรุป เช่น Supabase Postgres, Neon, Render Postgres หรือ managed Postgres เท่านั้น ห้ามวาง raw `DATABASE_URL`, localhost, SQLite, Docker/dev/test database ลงใน handoff.
+หมายเหตุ: `Database host/provider` ให้ใส่ชื่อ provider หรือ host สรุป เช่น Supabase Postgres, Neon, Render Postgres หรือ managed Postgres เท่านั้น ห้ามวาง raw `DATABASE_URL`, localhost, local/dev/test database ลงใน handoff.
 
 - Database host/provider: Render Postgres
 - คำสั่ง migration: bunx prisma migrate deploy
 - ผล migration: pass
-- Prisma migration version: 20260612100000_preserve_report_targets
+- Prisma migration version: 20260617153000_add_character_cover_url
 
 ## ระบบ auth/storage และ CORS (Auth, Storage และ CORS)
 

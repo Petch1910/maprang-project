@@ -4,7 +4,7 @@ import { buildPlaywrightWebServers, isLocalE2eUrl, playwrightSmokeTargetUrls } f
 describe('Playwright e2e target config', () => {
   test('starts local backend and frontend dev servers for local defaults', () => {
     expect(playwrightSmokeTargetUrls({})).toEqual({
-      frontendUrl: 'http://127.0.0.1:5173',
+      frontendUrl: 'http://127.0.0.1:5174',
       backendUrl: 'http://127.0.0.1:3000',
     })
 
@@ -14,8 +14,8 @@ describe('Playwright e2e target config', () => {
         url: 'http://127.0.0.1:3000/health',
       },
       {
-        command: 'cd apps/frontend && bun run dev -- --host 127.0.0.1',
-        url: 'http://127.0.0.1:5173',
+        command: 'cd apps/frontend && bun run dev -- --host 127.0.0.1 --port 5174 --strictPort',
+        url: 'http://127.0.0.1:5174',
       },
     ])
     const localWebServers = buildPlaywrightWebServers({})

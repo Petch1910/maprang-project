@@ -1,3 +1,5 @@
+import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem, type SafeStorageLike } from './safeStorage'
+
 export type CharacterDraftFields = {
   name: string
   tagline: string
@@ -11,6 +13,29 @@ export type CharacterDraftFields = {
   greeting: string
   tags: string
 }
+
+export type CharacterDraftFormFields = CharacterDraftFields & {
+  avatarUrl: string
+}
+
+export type CharacterDraftAvatarSource = 'none' | 'manual' | 'placeholder' | 'provider'
+
+export type CreatorStoredDraft = {
+  form?: Partial<CharacterDraftFormFields>
+  creatorBrief?: string
+  avatarSource?: CharacterDraftAvatarSource
+  coverImageUrl?: string
+  coverImageSource?: CharacterDraftAvatarSource
+  hasImageDraft?: boolean
+  hasCoverDraft?: boolean
+  hasPreviewRun?: boolean
+  lastImageSignal?: string
+  generatedImages?: { url: string; source: CharacterDraftAvatarSource }[]
+  imageStyle?: string
+  updatedAt?: number
+}
+
+export const CREATOR_DRAFT_STORAGE_KEY = 'maprang:creator-draft:v1'
 
 type CharacterDraftSource = {
   imageName?: string
@@ -190,4 +215,23 @@ export function mergeDraftTags(currentTags: string, draftTags: string) {
     .map((tag) => tag.trim())
     .filter(Boolean)
   return [...new Set(tags)].join(', ')
+}
+
+export function readStoredCreatorDraft(storage: SafeStorageLike): CreatorStoredDraft | null {
+  try {
+    const raw = safeGetStorageItem(storage, CREATOR_DRAFT_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as CreatorStoredDraft
+    return parsed && typeof parsed === 'object' ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+export function writeStoredCreatorDraft(storage: SafeStorageLike, draft: CreatorStoredDraft) {
+  safeSetStorageItem(storage, CREATOR_DRAFT_STORAGE_KEY, JSON.stringify(draft))
+}
+
+export function clearStoredCreatorDraft(storage: SafeStorageLike) {
+  safeRemoveStorageItem(storage, CREATOR_DRAFT_STORAGE_KEY)
 }

@@ -191,7 +191,7 @@ export function ProfilePage() {
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <button
-            className="min-h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+            className="missai-button-secondary min-h-10 rounded-xl px-3 text-sm"
             data-testid="profile-persona-template"
             onClick={() => updatePersona(personaDraft.trim() ? `${personaDraft}\n\n${personaTemplate}` : personaTemplate)}
             type="button"
@@ -199,7 +199,7 @@ export function ProfilePage() {
             ใส่แม่แบบ
           </button>
           <button
-            className="min-h-10 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+            className="missai-button-secondary min-h-10 rounded-xl px-3 text-sm"
             data-testid="profile-persona-clear"
             onClick={() => updatePersona('')}
             type="button"
@@ -207,7 +207,7 @@ export function ProfilePage() {
             ล้างข้อมูล
           </button>
           <div
-            className="flex min-h-10 items-center rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-bold text-white/45"
+            className="missai-button-secondary flex min-h-10 rounded-xl px-3 text-sm text-white/45"
             data-testid="profile-persona-count"
           >
             {personaLength.toLocaleString()}/2,000 ตัวอักษร
@@ -217,7 +217,7 @@ export function ProfilePage() {
         <label className="mt-6 block">
           <span className="text-sm font-black text-white/60">ข้อมูลตัวตน</span>
           <textarea
-            className="mt-2 min-h-56 w-full resize-y rounded-xl border border-white/10 bg-[#080a1a]/60 p-4 text-sm font-bold leading-7 text-white outline-none placeholder:text-white/30 focus:border-[#ac4bff]/70 focus:ring-1 focus:ring-[#ac4bff]/25"
+            className="missai-input mt-2 min-h-56 resize-y rounded-xl p-4 text-sm leading-7"
             data-testid="profile-persona-textarea"
             maxLength={2000}
             onChange={(event) => updatePersona(event.target.value)}
@@ -230,14 +230,14 @@ export function ProfilePage() {
         </div>
         {personaNote && (
           <p
-            className="m-0 mt-3 rounded-lg border border-white/10 bg-white/7 px-3 py-2 text-xs font-bold text-white/58"
+            className="missai-empty m-0 mt-3 px-3 py-2 text-xs text-white/58"
             data-testid="profile-persona-note"
           >
             {personaNote}
           </p>
         )}
 
-        <section className="mt-6 rounded-xl border border-white/10 bg-white/5 p-5">
+        <section className="missai-card mt-6 rounded-2xl p-5">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="m-0 text-lg font-black text-white">ตั้งค่าคอนเทนต์</h2>
@@ -245,7 +245,7 @@ export function ProfilePage() {
                 ใช้ควบคุมสิ่งที่หน้าสำรวจและระบบแชทอนุญาตให้เห็น โดยระบบหลังบ้านจะจำกัดซ้ำตามบัญชี
               </p>
             </div>
-            <span className="rounded-full border border-white/10 bg-white/7 px-3 py-1 text-xs font-black text-white/65">
+            <span className="missai-badge text-white/65">
               {contentSettings.maxRating}
             </span>
           </div>
@@ -276,13 +276,13 @@ export function ProfilePage() {
             })}
           </div>
           {contentNote && (
-            <p className="m-0 mt-3 rounded-lg border border-white/10 bg-white/7 px-3 py-2 text-xs font-bold text-white/58" data-testid="profile-content-note">
+            <p className="missai-empty m-0 mt-3 px-3 py-2 text-xs text-white/58" data-testid="profile-content-note">
               {contentNote}
             </p>
           )}
         </section>
 
-        <section className="mt-6 rounded-xl border border-white/10 bg-[#080a1a]/40 p-5">
+        <section className="missai-card mt-6 rounded-2xl p-5">
           <h2 className="text-xl font-black text-white flex items-center gap-2">
             ⚙️ โหมดนักพัฒนา & ผู้ทดสอบระบบ
           </h2>
@@ -310,7 +310,7 @@ export function ProfilePage() {
                   <label className="block">
                     <span className="text-xs font-black text-white/68">ผู้ให้บริการ (Provider)</span>
                     <select
-                      className="mt-1 block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-2.5 text-sm font-bold text-white outline-none focus:border-[#ac4bff]"
+                      className="missai-input mt-1 block min-h-11 rounded-xl p-2.5 text-sm"
                       value={customApiProvider}
                       onChange={(e) => {
                         setCustomApiProvider(e.target.value)
@@ -328,7 +328,7 @@ export function ProfilePage() {
                     <input
                       type="password"
                       placeholder="sk-..."
-                      className="mt-1 block w-full rounded-xl border border-white/10 bg-[#080a1a]/60 p-2.5 text-sm font-bold text-white outline-none focus:border-[#ac4bff]"
+                      className="missai-input mt-1 block min-h-11 rounded-xl p-2.5 text-sm"
                       value={customApiKey}
                       onChange={(e) => {
                         setCustomApiKey(e.target.value)
@@ -345,7 +345,7 @@ export function ProfilePage() {
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    className="min-h-10 rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-xs font-black text-white transition hover:brightness-110 missai-glow disabled:opacity-50"
+                    className="missai-button-primary min-h-10 rounded-xl px-4 text-xs disabled:opacity-50"
                     onClick={handleTestConnection}
                     disabled={isTesting || !customApiKey.trim()}
                     title="กรุณากรอก API Key เพื่อทดสอบการเชื่อมต่อ"
@@ -399,14 +399,14 @@ export function ProfilePage() {
         <div className="mt-5 border-t border-white/10 pt-5">
           <p className="m-0 text-sm font-black text-white">เครื่องมือบัญชี</p>
           <Link
-            className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#f9c86d] to-[#f99c00] px-4 text-sm font-black text-[#1a1206] transition hover:brightness-110 missai-glow"
+            className="missai-button-primary mt-3 min-h-11 w-full rounded-xl bg-gradient-to-r from-[#f9c86d] to-[#f99c00] px-4 text-sm text-[#1a1206]"
             to="/wallet"
           >
             <Coins size={17} />
             การใช้โทเคน
           </Link>
           <Link
-            className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
+            className="missai-button-secondary mt-3 min-h-11 w-full rounded-xl px-4 text-sm"
             to="/moderation"
           >
             <ShieldCheck size={17} />

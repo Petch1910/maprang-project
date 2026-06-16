@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
+import { GenerationJobStatus, GenerationOutputKind, GenerationOutputVisibility, PrismaClient } from '@prisma/client'
 import { summarizeSeedError } from './seed-error'
 
 if (!process.env.DATABASE_URL) {
@@ -33,6 +33,14 @@ const qaMyChatsBulkDeleteMobileChatId = 'ffffffff-2222-4222-8222-ffffffff2222'
 const qaUsageId = '11111111-1111-4111-8111-111111111111'
 const qaReportId = '22222222-2222-4222-8222-222222222222'
 const qaAuditId = '33333333-3333-4333-8333-333333333333'
+const qaGenerationJobId = '77777777-1111-4111-8111-777777777777'
+const qaSignedGenerationJobId = '77777777-2222-4222-8222-777777777777'
+const qaGenerationOutputId = '88888888-1111-4111-8111-888888888888'
+const qaSignedGenerationOutputId = '99999999-1111-4111-8111-999999999999'
+const qaGenerationOutputUrl =
+  'data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20640%20960%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20x2=%221%22%20y1=%220%22%20y2=%221%22%3E%3Cstop%20stop-color=%22%23ac4bff%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%230b0d1f%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%22640%22%20height=%22960%22%20fill=%22url(%23g)%22/%3E%3Ccircle%20cx=%22320%22%20cy=%22320%22%20r=%22132%22%20fill=%22%23ffffff%22%20opacity=%22.16%22/%3E%3Ctext%20x=%22320%22%20y=%22495%22%20text-anchor=%22middle%22%20font-family=%22Arial%22%20font-size=%2242%22%20font-weight=%22700%22%20fill=%22white%22%3EMaprang%20AI%3C/text%3E%3Ctext%20x=%22320%22%20y=%22552%22%20text-anchor=%22middle%22%20font-family=%22Arial%22%20font-size=%2226%22%20fill=%22%23f5d36b%22%3EQA%20Creator%20Output%3C/text%3E%3C/svg%3E'
+const qaSignedGenerationOutputPreviewUrl =
+  'data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20640%20960%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20x2=%221%22%20y1=%220%22%20y2=%221%22%3E%3Cstop%20stop-color=%22%2322d3ee%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%232c0c64%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%22640%22%20height=%22960%22%20fill=%22url(%23g)%22/%3E%3Ctext%20x=%22320%22%20y=%22495%22%20text-anchor=%22middle%22%20font-family=%22Arial%22%20font-size=%2240%22%20font-weight=%22700%22%20fill=%22white%22%3ESigned%20Preview%3C/text%3E%3Ctext%20x=%22320%22%20y=%22552%22%20text-anchor=%22middle%22%20font-family=%22Arial%22%20font-size=%2226%22%20fill=%22%23f5d36b%22%3EQA%20Storage%20Output%3C/text%3E%3C/svg%3E'
 
 const qaChatIds = [
   qaChatId,
@@ -699,6 +707,84 @@ async function upsertReportAndAudit() {
   })
 }
 
+async function upsertGenerationLibraryData() {
+  await prisma.generationOutput.deleteMany({
+    where: {
+      OR: [
+        { id: qaGenerationOutputId },
+        { id: qaSignedGenerationOutputId },
+        { metadata: { path: ['source'], equals: 'qa-seed' } },
+      ],
+    },
+  })
+  await prisma.generationJob.deleteMany({
+    where: {
+      OR: [
+        { id: qaGenerationJobId },
+        { id: qaSignedGenerationJobId },
+        { metadata: { path: ['source'], equals: 'qa-seed' } },
+      ],
+    },
+  })
+
+  await prisma.generationJob.create({
+    data: {
+      id: qaGenerationJobId,
+      userId,
+      templateId: 'character-avatar',
+      mode: 'text-to-image',
+      status: GenerationJobStatus.SUCCEEDED,
+      source: 'qa-seed',
+      prompt: 'QA backend-backed AI Creator output for browser smoke',
+      imageInputs: [],
+      videoInputs: [],
+      costTokens: 0,
+      debitStatus: 'not_charged',
+      metadata: { source: 'qa-seed', expectedRoute: '/ai-creator' },
+      outputs: {
+        create: {
+          id: qaGenerationOutputId,
+          userId,
+          kind: GenerationOutputKind.IMAGE,
+          url: qaGenerationOutputUrl,
+          visibility: GenerationOutputVisibility.PRIVATE,
+          isFavorite: false,
+          metadata: { source: 'qa-seed', expectedRoute: '/ai-creator' },
+        },
+      },
+    },
+  })
+
+  await prisma.generationJob.create({
+    data: {
+      id: qaSignedGenerationJobId,
+      userId,
+      templateId: 'character-avatar',
+      mode: 'text-to-image',
+      status: GenerationJobStatus.SUCCEEDED,
+      source: 'qa-seed',
+      prompt: 'QA signed-storage AI Creator output for browser smoke',
+      imageInputs: [],
+      videoInputs: [],
+      costTokens: 0,
+      debitStatus: 'not_charged',
+      metadata: { source: 'qa-seed', expectedRoute: '/ai-creator', storageAccess: 'signed' },
+      outputs: {
+        create: {
+          id: qaSignedGenerationOutputId,
+          userId,
+          kind: GenerationOutputKind.IMAGE,
+          url: qaSignedGenerationOutputPreviewUrl,
+          storageKey: 'qa-signed/maprang-ai-creator-smoke.png',
+          visibility: GenerationOutputVisibility.PRIVATE,
+          isFavorite: false,
+          metadata: { source: 'qa-seed', expectedRoute: '/ai-creator', storageAccess: 'signed' },
+        },
+      },
+    },
+  })
+}
+
 async function main() {
   console.log('QA seed: กำลังเตรียมผู้ใช้ ตัวละคร แชท กระเป๋าโทเคน และรายงาน...')
   await cleanupPreviousBrowserSmokeArtifacts()
@@ -708,15 +794,17 @@ async function main() {
   await upsertMenuActionChats()
   await upsertWalletData()
   await upsertReportAndAudit()
+  await upsertGenerationLibraryData()
 
-  const [characterCount, chatCount, reportCount, transactionCount] = await Promise.all([
+  const [characterCount, chatCount, reportCount, transactionCount, generationOutputCount] = await Promise.all([
     prisma.character.count({ where: { sourceKey: { startsWith: 'qa-' } } }),
     prisma.chat.count({ where: { id: { in: qaChatIds }, deletedAt: null } }),
     prisma.report.count({ where: { metadata: { path: ['source'], equals: 'qa-seed' } } }),
     prisma.tokenTransaction.count({ where: { metadata: { path: ['source'], equals: 'qa-seed' } } }),
+    prisma.generationOutput.count({ where: { metadata: { path: ['source'], equals: 'qa-seed' } } }),
   ])
 
-  console.log(`QA seed พร้อมแล้ว: ตัวละคร QA ${characterCount} รายการ, แชท QA ${chatCount} ห้อง, รายงาน ${reportCount} รายการ, ธุรกรรม ${transactionCount} รายการ`)
+  console.log(`QA seed พร้อมแล้ว: ตัวละคร QA ${characterCount} รายการ, แชท QA ${chatCount} ห้อง, รายงาน ${reportCount} รายการ, ธุรกรรม ${transactionCount} รายการ, generation outputs ${generationOutputCount} รายการ`)
 }
 
 try {

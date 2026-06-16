@@ -1,6 +1,6 @@
 # How To Run
 
-The current repo baseline is PostgreSQL + Prisma + Bun. Do not use old SQLite setup notes.
+The current repo baseline is PostgreSQL + Prisma + Bun. Do not use legacy embedded-database setup notes.
 Local/dev chat can use `local/mock-roleplay` for playable QA without spending live provider credits. Staging and production still require live provider smoke.
 
 For the full step-by-step guide, start here:

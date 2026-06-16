@@ -13,6 +13,10 @@ const prisma = new PrismaClient({
 const qaUsageId = '11111111-1111-4111-8111-111111111111'
 const qaReportId = '22222222-2222-4222-8222-222222222222'
 const qaAuditId = '33333333-3333-4333-8333-333333333333'
+const qaGenerationJobId = '77777777-1111-4111-8111-777777777777'
+const qaSignedGenerationJobId = '77777777-2222-4222-8222-777777777777'
+const qaGenerationOutputId = '88888888-1111-4111-8111-888888888888'
+const qaSignedGenerationOutputId = '99999999-1111-4111-8111-999999999999'
 
 const qaChatIds = [
   '61aaecf2-a85b-4e01-a7ee-0973eef62699',
@@ -55,6 +59,8 @@ async function clearQaSeed() {
     reports,
     transactions,
     usages,
+    generationOutputs,
+    generationJobs,
     messages,
     chats,
     characters,
@@ -93,6 +99,24 @@ async function clearQaSeed() {
         ],
       },
     }),
+    prisma.generationOutput.deleteMany({
+      where: {
+        OR: [
+          { id: qaGenerationOutputId },
+          { id: qaSignedGenerationOutputId },
+          { metadata: { path: ['source'], equals: 'qa-seed' } },
+        ],
+      },
+    }),
+    prisma.generationJob.deleteMany({
+      where: {
+        OR: [
+          { id: qaGenerationJobId },
+          { id: qaSignedGenerationJobId },
+          { metadata: { path: ['source'], equals: 'qa-seed' } },
+        ],
+      },
+    }),
     prisma.message.deleteMany({
       where: {
         OR: [
@@ -123,7 +147,7 @@ async function clearQaSeed() {
   ])
 
   console.log(
-    `QA clear เสร็จแล้ว: audit ${audit.count}, reports ${reports.count}, transactions ${transactions.count}, usages ${usages.count}, messages ${messages.count}, chats ${chats.count}, characters ${characters.count}`,
+    `QA clear เสร็จแล้ว: audit ${audit.count}, reports ${reports.count}, transactions ${transactions.count}, usages ${usages.count}, generation outputs ${generationOutputs.count}, generation jobs ${generationJobs.count}, messages ${messages.count}, chats ${chats.count}, characters ${characters.count}`,
   )
 }
 
