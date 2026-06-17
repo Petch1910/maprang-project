@@ -1,7 +1,0 @@
-Found in 9348-327bec45fea8535c.js
-Found in app\(standalone)\creation\page-185bce8ed8a9f2e3.js
-Found in app\creative-plaza\page-e8fff33bae05d52b.js
-Found in app\favorites\page-9b36c6470cfe3bc4.js
-  Match: "/api/gva/narratium/favorites"
-  Match: "]=e),!(await fetch(`/api/gva/narratium/favorites/${C.characterId}`,{method:"
-Found in app\works\page-a2ee91ace3af7b96.js
