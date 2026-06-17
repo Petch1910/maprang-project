@@ -61,9 +61,9 @@ Compatibility snippet: Route source: App.tsx declares 15 routes; test plan group
 
 AI Creator test status note:
 
-- `/ai-creator` เป็น `local ready` เฉพาะ UI/local-safe workflow: template/cost state, upload preview/validation helper, blocked reasons, local My Library detail/actions, Creator Studio reuse, and public gallery disabled contract
-- ยังไม่ถือว่า production-ready สำหรับ generation library จนกว่า storage/download/retry/delete/favorite/use-as-cover, live image provider, and public gallery moderation/report flows ผ่าน gate
-- QA ต้องไม่ตี fallback/system image เป็น live provider success
+- `/ai-creator` เป็น `local ready` สำหรับ UI/local-safe workflow: template/cost state, upload preview/validation helper, blocked reasons, My Library detail/actions, Creator Studio reuse, owner download/signed URL state, and Public Gallery opt-in/sanitized/reuse/report path.
+- ยังไม่ถือว่า production-ready สำหรับ generation library จนกว่า live image provider, Supabase signed storage, deployed backend/frontend, CORS จริง, และ production moderation/runbook verification ผ่าน gate.
+- QA ต้องไม่ตี fallback/system image เป็น live provider success.
 
 ## Frontend Coverage
 

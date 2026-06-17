@@ -20,8 +20,9 @@ AI Creator is a job-based asset workflow for character creation and roleplay. It
 Core principles:
 
 - Private by default: generated outputs belong to the owner until explicitly published.
-- No fake production: Public Gallery must stay empty/disabled until visibility, moderation, reports, and sanitized DTOs exist.
+- No fake production: Public Gallery may show only backend-owned public outputs returned through sanitized DTOs. Never seed fake public content or expose private storage metadata.
 - No silent debit: validation, permission, provider, and content-gate blocks must not charge tokens.
+- Token ledger contract: chat usage already records `CHAT_USAGE`; the schema now reserves `IMAGE_GENERATION` rows so wallet history can label image-generation debits once live provider execution and debit policy are enabled.
 - One contract: frontend and backend must share the same template/upload/provider/cost assumptions.
 - Creator-first: generated outputs must flow into Creator Studio without manual URL copying.
 - Observable states: every visible button must either work or show a clear disabled reason.
@@ -40,22 +41,32 @@ Implemented:
   - `GET /generation/jobs`
   - `GET /generation/jobs/:id`
   - `POST /generation/jobs/:id/retry`
+  - `POST /generation/jobs/:id/cancel`
   - `POST /generation/outputs/:id/favorite`
   - `DELETE /generation/outputs/:id/favorite`
   - `GET /generation/outputs/:id/download`
+  - `POST /generation/outputs/:id/use-as-character-image`
+  - `POST /generation/outputs/:id/use-as-cover`
   - `DELETE /generation/outputs/:id`
+  - `POST /generation/gallery/:id/publish`
+  - `DELETE /generation/gallery/:id`
+  - `GET /generation/gallery`
+  - `GET /generation/gallery/:id`
 - Prisma generation model and private-by-default outputs.
 - My Library list/detail for local and backend-backed items.
-- My Library actions where supported: open detail, reuse, favorite, delete, download, retry.
-- Use-as-character-image and use-as-cover bridge into Creator Studio draft state.
+- My Library actions where supported: open detail, reuse, favorite, delete, download, retry, and owner-safe cancel state.
+- Use-as-character-image and use-as-cover bridge into Creator Studio draft state. Backend-backed outputs now request owner-safe reference URLs before handoff; local/dev can fall back to an existing local-safe preview URL only when the backend reference returns 404.
 - Persisted character cover contract through `Character.coverUrl`.
-- Signed URL expiry/refresh UI state through owner-scoped download route.
-- Browser smoke covers `/ai-creator`, invalid upload blocking, Generate blocked/enabled states, Public Gallery disabled contract, backend-backed My Library detail, direct download availability, signed-storage owner-path download notice, no `storageKey` DOM exposure, use-as-cover draft handoff, and Creator Studio cover publish/render through Character Lobby.
+- Signed URL expiry/refresh UI state through owner-scoped download route. Backend persistence tests cover other-owner denial for retry, favorite, delete, direct download, signed download, and signed creator-reference handoff, including the rule that other-owner paths do not invoke signed-storage resolvers or expose `storageKey`.
+- Video and Advanced Video provider execution are intentionally gated. The current UI exposes the form as a contract surface but keeps generation disabled with a visible provider-contract notice until a real video provider, debit policy, and smoke evidence exist.
+- Public Gallery opt-in publish/unpublish, sanitized list/detail, generation-output report/moderation path, safe reuse UI flow, and a public detail mode that hides owner-only actions such as publish/unpublish, delete, retry, cancel, download, and system-prompt copy.
+- Production moderation runbook and policy copy in `docs/AI_CREATOR_PRODUCTION_MODERATION_RUNBOOK.md`.
+- Browser smoke covers `/ai-creator`, invalid upload blocking, Generate blocked/enabled states, backend-backed My Library detail, direct download availability, signed-storage owner-path download notice, no `storageKey` DOM exposure, use-as-cover draft handoff with backend-reference/local-safe fallback behavior, Creator Studio cover publish/render through Character Lobby, Public Gallery publish, Public Gallery sanitized detail action visibility, and Public Gallery reuse.
 
 Not complete:
 
 - Browser smoke proving `coverUrl` survives dedicated edit flow and renders on Explore/Chat surfaces.
-- Public Gallery opt-in publish/unpublish, sanitized detail DTO, reuse, report, moderation queue, and admin audit.
+- Public Gallery deployed production moderation evidence.
 - Production live image provider verification. Local fallback is not production evidence.
 - Full video/advanced-video provider execution. The UI may expose contracts, but production execution is deferred until image workflow and provider policy are stable.
 
@@ -183,16 +194,16 @@ Never expose:
 
 Implemented routes are listed in Current Local Status.
 
-Still required:
+Implemented through existing route groups:
 
+- `GET /generation/gallery`
+- `GET /generation/gallery/:id`
+- `POST /generation/gallery/:id/publish`
+- `DELETE /generation/gallery/:id`
 - `POST /generation/jobs/:id/cancel`
 - `POST /generation/outputs/:id/use-as-character-image`
 - `POST /generation/outputs/:id/use-as-cover`
-- `GET /generation/gallery`
-- `GET /generation/gallery/:outputId`
-- `POST /generation/gallery/:outputId/publish`
-- `DELETE /generation/gallery/:outputId`
-- `POST /generation/gallery/:outputId/report`
+- Generation output reports use the shared report route with `generationOutputId`, then appear in moderation/admin flows.
 
 API rules:
 
@@ -216,13 +227,11 @@ Do not move AI Creator state to Redux until more than one route needs live share
 
 ## Implementation Priority
 
-1. Implement Public Gallery opt-in publish/unpublish.
-2. Add sanitized Public Gallery list/detail DTO.
-3. Add Public Gallery report to moderation queue plus admin audit.
-4. Add safe Public Gallery reuse flow.
-5. Add cover smoke expansion for dedicated edit flow, Explore card, and Chat backdrop when those statuses are productized.
-6. Add cancel/use-as-character/use-as-cover backend routes if product needs backend-safe references beyond current draft bridge.
-7. Expand video/advanced-video execution only after image flow is stable.
+1. Sync docs/memory to the implemented Public Gallery local contract.
+2. Remove committed MissAI extraction/temp artifacts that are not referenced by runtime, tests, docs, or scripts.
+3. Reduce `/ai-creator` route orchestration by moving reusable business logic into existing helpers or focused hooks.
+4. Add cover smoke expansion for dedicated edit flow, Explore card, and Chat backdrop when those statuses are productized.
+5. Expand video/advanced-video execution only after image flow is stable.
 
 ## QA Gate
 

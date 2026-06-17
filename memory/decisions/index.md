@@ -1,6 +1,6 @@
 # บันทึก decision
 
-อัปเดตล่าสุด: 2026-06-02
+อัปเดตล่าสุด: 2026-06-17
 
 - [0001 - ใช้ SocratiCode เป็น local codebase intelligence](./0001-use-socraticode-local-tool.md)
 - [0002 - เพิ่ม Markdown memory vault](./0002-add-markdown-memory-vault.md)
@@ -30,3 +30,5 @@
 - [0026 - ล็อกชุด guard ความปลอดภัย UI และ route error](./0026-lock-frontend-ui-route-error-guards.md)
 - [0027 - ล็อก namespace reflection guard ของ Promise และ console](./0027-lock-namespace-reflection-guards.md)
 - [0028 - ล็อก container alias guard ของ Promise และ console](./0028-lock-promise-console-container-guards.md)
+- [0029 - ดัดแปลง Agent Skills เป็น workflow ของ Maprang](./0029-adapt-agent-skills-workflows.md)
+- [0030 - เพิ่มแผนงานที่เหลือแบบรวมศูนย์](./0030-add-remaining-development-plan.md)
