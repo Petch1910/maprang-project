@@ -18,6 +18,12 @@ logs
 .tmp/
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
+# local server runtime artifacts
+/runtime/
+/backups/
+*.dump
+*.backup
+
 # dotenv environment variable files
 .env
 .env.*

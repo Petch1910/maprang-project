@@ -1,5 +1,9 @@
 # คู่มือรัน Staging
 
+Ngrok temporary staging path: use [`docs/NGROK_STAGING_RUNBOOK.md`](./docs/NGROK_STAGING_RUNBOOK.md) when staging must run from this local machine through one HTTPS Ngrok origin. Ngrok is for temporary smoke/browser QA only; permanent production still needs real frontend/backend domains, final CORS, production database, and Supabase signed storage.
+
+Latest Ngrok evidence (2026-06-17): `bun run e2e:smoke`, `bun run smoke:chat`, and `bun run staging:verify` passed through `https://subplot-unworthy-exorcist.ngrok-free.dev`. For browser e2e, build frontend preview with `VITE_ALLOW_QA_SEED=1` only for staging QA. For live chat smoke, restart backend with `LOCAL_CHAT_PROVIDER=0` so provider failures cannot fall back to local roleplay and hide a live-provider issue.
+
 เป้าหมายคือปล่อย staging ให้เหมือน production จริงก่อนเปิด production เพื่อจับปัญหา env, DB, CORS, storage, ผู้ให้บริการสร้างรูป และ UI flow แบบ end-to-end
 
 ## ขั้นที่ 1 ตั้งค่า Supabase สำหรับ Staging

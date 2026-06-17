@@ -86,6 +86,16 @@ bun run memory:audit
 
 ## สถานะ deploy (Deploy Status)
 
+เป้าหมายปัจจุบันคือ local server ก่อน ไม่ใช่ cloud production ก่อน. ใช้ [`docs/LOCAL_SERVER_RUNBOOK.md`](./docs/LOCAL_SERVER_RUNBOOK.md) สำหรับเปิด backend/frontend/PostgreSQL ในเครื่องและใช้ `bun run qa:full` เป็น local readiness gate หลัก.
+
+เช็ค wiring ของ local server แบบเร็วได้ด้วย:
+
+```bash
+bun run local:doctor
+```
+
+ถ้าต้องใช้ Ngrok เป็น staging ชั่วคราวจากเครื่องนี้ ให้ใช้ [`docs/NGROK_STAGING_RUNBOOK.md`](./docs/NGROK_STAGING_RUNBOOK.md). เส้นทางนี้รัน `bun run ngrok:proxy` เพื่อให้ frontend และ backend อยู่หลัง HTTPS origin เดียว แล้วชี้ Ngrok ไปที่พอร์ต proxy แทนการเปิด tunnel แยกหลายตัว.
+
 ใช้คำสั่งนี้ก่อน staging handoff เมื่อต้องการดู current blockers และ next actions ในที่เดียว:
 
 ```bash
