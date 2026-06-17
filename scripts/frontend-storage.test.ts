@@ -9,6 +9,7 @@ import {
   buildAiCreatorBlockedStateMatrix,
   buildAiCreatorDownloadFilename,
   createAiCreatorItemsFromGenerationJobs,
+  createAiCreatorItemsFromPublicGalleryOutputs,
   createAiCreatorImageItem,
   createAiCreatorUploadPreview,
   createAiCreatorVideoItem,
@@ -17,6 +18,7 @@ import {
   getAiCreatorDownloadActionState,
   getAiCreatorDownloadLinkNotice,
   getAiCreatorGenerateBlockReason,
+  getAiCreatorGenerateBlockState,
   getAiCreatorRetryActionState,
   getAiCreatorVideoDurationFillPercent,
   paginateAiCreatorHistory,
@@ -377,6 +379,50 @@ describe('frontend storage helpers', () => {
     expect(items[0].response.draft.constraints).toContain('ส่วนตัว')
   })
 
+  test('maps public gallery outputs into reusable library items without private metadata', () => {
+    const items = createAiCreatorItemsFromPublicGalleryOutputs([
+      {
+        id: '88888888-1111-4111-8111-888888888888',
+        jobId: '77777777-1111-4111-8111-777777777777',
+        kind: 'image',
+        url: 'https://cdn.example.test/public.png',
+        visibility: 'public',
+        isFavorite: false,
+        createdAt: '2026-06-17T00:00:00.000Z',
+        prompt: '  reusable public prompt  ',
+        templateId: 'character-avatar',
+        brief: '  public brief  ',
+      },
+      {
+        id: '99999999-1111-4111-8111-999999999999',
+        jobId: '77777777-1111-4111-8111-777777777777',
+        kind: 'image',
+        url: null,
+        visibility: 'public',
+        isFavorite: false,
+        createdAt: '2026-06-17T00:00:00.000Z',
+        prompt: 'hidden output',
+        templateId: 'character-avatar',
+      },
+    ])
+
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({
+      id: 'public-88888888-1111-4111-8111-888888888888',
+      backendJobId: '77777777-1111-4111-8111-777777777777',
+      backendOutputId: '88888888-1111-4111-8111-888888888888',
+      librarySource: 'backend',
+      type: 'image',
+      url: 'https://cdn.example.test/public.png',
+      prompt: 'reusable public prompt',
+      brief: 'public brief',
+      style: 'character-avatar',
+      visibility: 'public',
+    })
+    expect(items[0].response.modelName).toBe('generation/gallery')
+    expect(JSON.stringify(items[0])).not.toContain('storageKey')
+  })
+
   test('saves an AI creator library item into the existing creator draft contract', () => {
     const storage = mapStorage()
     const item = createAiCreatorImageItem({
@@ -412,7 +458,7 @@ describe('frontend storage helpers', () => {
     )
     const item = createAiCreatorImageItem({
       id: 'image-cover',
-      response: creatorDraftResponse('เธกเธดเธเธฐ'),
+      response: creatorDraftResponse('มิกะ'),
       prompt: 'wide cover',
       brief: 'cover mood',
       style: 'cinematic',
@@ -594,6 +640,75 @@ describe('frontend storage helpers', () => {
     expect(matrix.every((state) => state.title && state.cause && state.nextAction)).toBe(true)
   })
 
+  test('prioritizes AI creator blocked states before any debit-capable work', () => {
+    expect(
+      getAiCreatorGenerateBlockState({
+        mode: 'image',
+        brief: 'ready',
+        prompt: 'ready',
+        isGenerating: true,
+        providerStatus: 'missing',
+        contentAllowed: false,
+        tokenBalance: 0,
+        creditCost: 100,
+        inputError: 'bad file',
+        requiredUploadCount: 1,
+        uploadedCount: 0,
+      })?.code,
+    ).toBe('running_job')
+    expect(
+      getAiCreatorGenerateBlockState({
+        mode: 'image',
+        brief: 'ready',
+        prompt: 'ready',
+        isGenerating: false,
+        providerStatus: 'missing',
+        contentAllowed: false,
+        tokenBalance: 0,
+        creditCost: 100,
+      })?.code,
+    ).toBe('content_gate')
+    expect(
+      getAiCreatorGenerateBlockState({
+        mode: 'image',
+        brief: 'ready',
+        prompt: 'ready',
+        isGenerating: false,
+        providerStatus: 'missing',
+        tokenBalance: 0,
+        creditCost: 100,
+      })?.code,
+    ).toBe('provider_missing')
+    expect(
+      getAiCreatorGenerateBlockState({
+        mode: 'image',
+        brief: 'ready',
+        prompt: 'ready',
+        isGenerating: false,
+        providerStatus: 'ready',
+        tokenBalance: 0,
+        creditCost: 100,
+        inputError: 'bad file',
+        requiredUploadCount: 1,
+        uploadedCount: 0,
+      })?.code,
+    ).toBe('insufficient_credit')
+    expect(
+      getAiCreatorGenerateBlockState({
+        mode: 'image',
+        brief: 'ready',
+        prompt: 'ready',
+        isGenerating: false,
+        providerStatus: 'ready',
+        tokenBalance: 100,
+        creditCost: 100,
+        inputError: 'bad file',
+        requiredUploadCount: 1,
+        uploadedCount: 0,
+      })?.code,
+    ).toBe('invalid_input')
+  })
+
   test('validates AI creator upload slots by template contract', () => {
     const imageRule = AI_CREATOR_UPLOAD_SLOT_RULES.imageToImage[0]
     const imageToVideoRule = AI_CREATOR_UPLOAD_SLOT_RULES.imageToVideo[0]
@@ -638,6 +753,56 @@ describe('frontend storage helpers', () => {
         durationSeconds: 30,
       }),
     ).toEqual({ ok: true })
+  })
+
+  test('validates aggregate AI creator upload slots in stable first-failure order', () => {
+    const rules = [
+      {
+        id: 'primary-image',
+        label: 'รูปหลัก',
+        kind: 'image',
+        required: true,
+        acceptedTypes: ['image/png'] as const,
+        maxBytes: 1024,
+      },
+      {
+        id: 'reference-video',
+        label: 'วิดีโออ้างอิง',
+        kind: 'video',
+        required: true,
+        acceptedTypes: ['video/mp4'] as const,
+        maxBytes: 2048,
+        maxDurationSeconds: 10,
+      },
+    ] as const
+
+    expect(validateAiCreatorUploadSlots(rules, {})).toMatchObject({
+      ok: false,
+      slotId: 'primary-image',
+    })
+    expect(
+      validateAiCreatorUploadSlots(rules, {
+        'primary-image': { file: { name: 'avatar.png', type: 'image/png', size: 1024 } },
+      }),
+    ).toMatchObject({
+      ok: false,
+      slotId: 'reference-video',
+    })
+    expect(
+      validateAiCreatorUploadSlots(rules, {
+        'primary-image': { file: { name: 'avatar.png', type: 'image/png', size: 1024 } },
+        'reference-video': { file: { name: 'clip.mp4', type: 'video/mp4', size: 2048 }, durationSeconds: 10 },
+      }),
+    ).toEqual({ ok: true })
+    expect(
+      validateAiCreatorUploadSlots(rules, {
+        'primary-image': { file: { name: 'avatar.png', type: 'image/png', size: 1025 } },
+        'reference-video': { file: { name: 'clip.mp4', type: 'video/mp4', size: 4096 }, durationSeconds: 11 },
+      }),
+    ).toMatchObject({
+      ok: false,
+      slotId: 'primary-image',
+    })
   })
 
   test('drops stale redux fields from persisted local state', () => {

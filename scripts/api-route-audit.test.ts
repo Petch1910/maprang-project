@@ -296,6 +296,26 @@ describe('api route audit', () => {
     ])
   })
 
+  test('matches frontend dynamic id helpers to semantic backend route params', () => {
+    const missing = auditFrontendApiCalls(
+      [
+        {
+          key: 'PUT /me/provider-keys/:id',
+          file: 'apps/frontend/src/lib/api.ts',
+          line: 10,
+        },
+      ],
+      [
+        {
+          key: 'PUT /me/provider-keys/:provider',
+          file: 'apps/backend/src/user.routes.ts',
+        },
+      ],
+    )
+
+    expect(missing).toEqual([])
+  })
+
   test('covers the backend root identity route', () => {
     const routes = discoverRoutesFromSource(
       'apps/backend/index.ts',

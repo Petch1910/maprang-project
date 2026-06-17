@@ -53,11 +53,42 @@ describe('e2e smoke command plan', () => {
     expect(e2eSpec).not.toContain(")).toContainText('local/mock-roleplay')")
   })
 
-  test('resolves local backend port from backend env when E2E_API_BASE_URL is omitted', () => {
+  test('locks chat message action menu coverage', () => {
+    expect(e2eSpec).toContain('message-actions-')
+    expect(e2eSpec).toContain('message-action-menu-')
+    expect(e2eSpec).toContain('message-copy-')
+    expect(e2eSpec).toContain('message-report-')
+    expect(e2eSpec).toContain('message-edit-disabled-')
+    expect(e2eSpec).toContain('message-regenerate-disabled-')
+    expect(e2eSpec).toContain('message-delete-disabled-')
+  })
+
+  test('locks AI Creator cancel action browser coverage', () => {
+    expect(e2eSpec).toContain('ai-creator-library-detail-cancel-')
+    expect(e2eSpec).toContain('toBeDisabled()')
+    expect(e2eSpec).toContain('งานนี้จบแล้ว')
+  })
+
+  test('locks AI Creator video provider contract browser coverage', () => {
+    expect(e2eSpec).toContain('ai-creator-video-contract-state')
+    expect(e2eSpec).toContain("toContainText('production')")
+  })
+
+  test('defaults local browser smoke to an isolated backend port', () => {
     const backendEnv = 'DATABASE_URL=postgresql://example\nPORT="3001"\n'
 
     expect(backendEnvPort(backendEnv)).toBe('3001')
     expect(resolveE2eSmokeEnv({}, backendEnv)).toMatchObject({
+      E2E_BASE_URL: 'http://127.0.0.1:5174',
+      E2E_API_BASE_URL: 'http://127.0.0.1:3191',
+      VITE_API_BASE_URL: 'http://127.0.0.1:3191',
+    })
+  })
+
+  test('can opt into using the backend env port for focused local debugging', () => {
+    const backendEnv = 'DATABASE_URL=postgresql://example\nPORT="3001"\n'
+
+    expect(resolveE2eSmokeEnv({ E2E_RESPECT_BACKEND_ENV_PORT: '1' }, backendEnv)).toMatchObject({
       E2E_BASE_URL: 'http://127.0.0.1:5174',
       E2E_API_BASE_URL: 'http://127.0.0.1:3001',
       VITE_API_BASE_URL: 'http://127.0.0.1:3001',

@@ -289,6 +289,9 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.getByTestId(`ai-creator-library-open-${backendLibraryItemId}`).click()
   await expect(page.getByTestId(`ai-creator-library-detail-dialog-${backendLibraryItemId}`)).toBeVisible()
   await expect(page.getByTestId(`ai-creator-library-detail-download-${backendLibraryItemId}`)).toBeEnabled()
+  const cancelButton = page.getByTestId(`ai-creator-library-detail-cancel-${backendLibraryItemId}`)
+  await expect(cancelButton).toBeDisabled()
+  await expect(cancelButton).toHaveAttribute('title', /งานนี้จบแล้ว|ยกเลิกไม่ได้/)
   await page.getByTestId(`ai-creator-library-detail-use-cover-${backendLibraryItemId}`).click()
   await expect(page).toHaveURL(/\/create/)
   await expect(page.getByTestId('creator-cover-draft-panel')).toBeVisible()
@@ -373,8 +376,11 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.getByTestId('ai-creator-image-generate')).toBeDisabled()
   await page.getByTestId('ai-creator-tab-video').click()
   await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
+  await expect(page.getByTestId('ai-creator-video-contract-state')).toBeVisible()
+  await expect(page.getByTestId('ai-creator-video-contract-state')).toContainText('production')
   await page.getByTestId('ai-creator-video-prompt').fill('slow camera push in with subtle motion')
   await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
+  await expect(page.getByTestId('ai-creator-video-contract-state')).toBeVisible()
   await page.getByTestId('ai-creator-video-upload').setInputFiles({
     name: 'invalid-video.txt',
     mimeType: 'text/plain',
@@ -399,6 +405,21 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.getByTestId(`ai-creator-library-detail-dialog-${backendLibraryItemId}`)).toBeHidden()
 
   // Wait for public gallery to refresh with the newly published item
+  const publicGalleryDetailId = 'public-88888888-1111-4111-8111-888888888888'
+  const publicGalleryDetailButton = page.getByTestId(`ai-creator-public-action-detail-${publicGalleryDetailId}`)
+  await expect(publicGalleryDetailButton).toBeVisible()
+  await publicGalleryDetailButton.click()
+  await expect(page.getByTestId(`ai-creator-library-detail-dialog-${publicGalleryDetailId}`)).toBeVisible()
+  await expect(page.getByTestId(`ai-creator-library-detail-public-notice-${publicGalleryDetailId}`)).toBeVisible()
+  await expect(page.getByTestId(`ai-creator-library-detail-report-${publicGalleryDetailId}`)).toBeVisible()
+  await expect(page.getByTestId(`ai-creator-library-detail-use-image-${publicGalleryDetailId}`)).toBeVisible()
+  await expect(page.getByTestId(`ai-creator-library-detail-publish-${publicGalleryDetailId}`)).toHaveCount(0)
+  await expect(page.getByTestId(`ai-creator-library-detail-delete-${publicGalleryDetailId}`)).toHaveCount(0)
+  await expect(page.getByTestId(`ai-creator-library-detail-download-${publicGalleryDetailId}`)).toHaveCount(0)
+  await expect(page.getByTestId(`ai-creator-library-detail-cancel-${publicGalleryDetailId}`)).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(page.getByTestId(`ai-creator-library-detail-dialog-${publicGalleryDetailId}`)).toBeHidden()
+
   const publicGalleryReuseButton = page.getByTestId(`ai-creator-public-action-reuse-public-88888888-1111-4111-8111-888888888888`)
   await expect(publicGalleryReuseButton).toBeVisible()
   await publicGalleryReuseButton.click()
@@ -631,6 +652,24 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.locator('body')).toContainText('โหมดอ่านเปิดอยู่')
   await page.getByTestId('chat-read-mode').click()
   await expect(page.getByTestId('chat-read-mode')).toHaveAttribute('aria-pressed', 'false')
+
+  const firstMessageMenuButton = page.locator('[data-testid^="message-actions-"]').first()
+  await expect(firstMessageMenuButton).toBeVisible()
+  await firstMessageMenuButton.click()
+  const messageActionMenu = page.locator('[data-testid^="message-action-menu-"]').first()
+  await expect(messageActionMenu).toBeVisible()
+  await expect(messageActionMenu.locator('[data-testid^="message-copy-"]').first()).toBeVisible()
+  await expect(messageActionMenu.locator('[data-testid^="message-report-"]').first()).toBeVisible()
+  await expect(messageActionMenu.locator('[data-testid^="message-edit-disabled-"]').first()).toBeDisabled()
+  await expect(messageActionMenu.locator('[data-testid^="message-regenerate-disabled-"]').first()).toBeDisabled()
+  await expect(messageActionMenu.locator('[data-testid^="message-delete-disabled-"]').first()).toBeDisabled()
+  await messageActionMenu.locator('[data-testid^="message-copy-"]').first().click()
+  await expect(messageActionMenu).toBeHidden()
+  await firstMessageMenuButton.click()
+  await page.locator('[data-testid^="message-action-menu-"] [data-testid^="message-report-"]').first().click()
+  await expect(page.getByTestId('report-dialog')).toBeVisible()
+  await page.getByTestId('report-cancel').click()
+  await expect(page.getByTestId('report-dialog')).toBeHidden()
 
   if (!isMobile) {
     await page.getByTestId('chat-right-panel-world').click()

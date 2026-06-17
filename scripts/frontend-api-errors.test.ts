@@ -7,6 +7,7 @@ import {
   apiUploadTimeoutMs,
   fetchCharacters,
   logUnexpectedError,
+  normalizeBackendMediaUrl,
   parseChatStreamEvent,
   safeBrowserErrorSummary,
   safeApiUserMessage,
@@ -134,6 +135,14 @@ describe('frontend API errors', () => {
     expect(apiRequestTimeoutMs('/creator/ai-draft', { method: 'POST' })).toBe(60_000)
     expect(apiUploadTimeoutMs()).toBe(60_000)
     expect(apiStreamConnectTimeoutMs()).toBe(60_000)
+  })
+
+  test('rewrites backend-local uploaded media URLs through the configured API base', () => {
+    expect(normalizeBackendMediaUrl('http://127.0.0.1:3001/uploads/avatars/avatar.webp')).toBe(
+      'http://localhost:3000/uploads/avatars/avatar.webp',
+    )
+    expect(normalizeBackendMediaUrl('/uploads/avatars/avatar.webp')).toBe('http://localhost:3000/uploads/avatars/avatar.webp')
+    expect(normalizeBackendMediaUrl('/src/assets/hero.png')).toBe('/src/assets/hero.png')
   })
 
   test('aborts avatar uploads with a Thai ApiError instead of hanging', async () => {

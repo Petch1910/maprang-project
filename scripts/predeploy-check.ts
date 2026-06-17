@@ -1,6 +1,7 @@
 import { access, readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { collectDocsCommandAuditResult } from './docs-command-audit'
+import { collectRemainingPlanAuditResult } from './remaining-plan-audit'
 import { formatUnknownDiagnosticText } from './smoke-helpers'
 import { collectTestCoverageAuditResult } from './test-coverage-audit'
 
@@ -22,6 +23,9 @@ const requiredFiles = [
   'ROUTE_MENU_AUDIT.md',
   'SECURITY_CHECKLIST.md',
   'STAGING_RUNBOOK.md',
+  'docs/LOCAL_SERVER_RUNBOOK.md',
+  'docs/MAPRANG_AGENT_SKILLS_WORKFLOW.md',
+  'docs/MAPRANG_REMAINING_DEVELOPMENT_PLAN.md',
   'render.yaml',
   'knowledge/README.md',
   'knowledge/raw/README.md',
@@ -71,6 +75,8 @@ const requiredFiles = [
   'scripts/docs-command-audit.test.ts',
   'scripts/test-coverage-audit.ts',
   'scripts/test-coverage-audit.test.ts',
+  'scripts/remaining-plan-audit.ts',
+  'scripts/remaining-plan-audit.test.ts',
   'scripts/release-handoff-check.ts',
   'scripts/release-handoff-check.test.ts',
   'scripts/frontend-static-audit.test.ts',
@@ -82,6 +88,12 @@ const requiredFiles = [
   'scripts/backend-security-audit.test.ts',
   'scripts/smoke-helpers.test.ts',
   'scripts/provider-smoke-guards.test.ts',
+  'scripts/local-server-up.ts',
+  'scripts/local-server-up.test.ts',
+  'scripts/local-db-backup.ts',
+  'scripts/local-db-backup.test.ts',
+  'scripts/local-server-doctor.ts',
+  'scripts/local-server-doctor.test.ts',
   'scripts/smoke-doctor.test.ts',
   'scripts/readiness-smoke.test.ts',
   'scripts/image-smoke.test.ts',
@@ -111,6 +123,9 @@ const markdownHeadingBaseFiles = [
   'ROUTE_MENU_AUDIT.md',
   'SECURITY_CHECKLIST.md',
   'STAGING_RUNBOOK.md',
+  'docs/LOCAL_SERVER_RUNBOOK.md',
+  'docs/MAPRANG_AGENT_SKILLS_WORKFLOW.md',
+  'docs/MAPRANG_REMAINING_DEVELOPMENT_PLAN.md',
   'apps/backend/README.md',
   'apps/frontend/README.md',
   'evals/README.md',
@@ -267,6 +282,9 @@ const checks: Check[] = [
           'การ commit และ push (Commit And Push)',
           'git status --short',
           'Do not commit secrets',
+          'docs/MAPRANG_AGENT_SKILLS_WORKFLOW.md',
+          'docs/MAPRANG_REMAINING_DEVELOPMENT_PLAN.md',
+          'addyosmani/agent-skills',
         ],
         'AGENTS.md',
       )
@@ -334,8 +352,66 @@ const checks: Check[] = [
           'predeploy:check` audits decision Markdown dynamically',
           'decision markdown files ถูก audit แบบ dynamic',
           'Markdown Thai-first headings',
+          'docs/MAPRANG_AGENT_SKILLS_WORKFLOW.md',
+          'docs/MAPRANG_REMAINING_DEVELOPMENT_PLAN.md',
+          'addyosmani/agent-skills',
         ],
         'agent.md',
+      )
+    },
+  },
+  {
+    name: 'กระบวนการ Agent Skills ของ Maprang ต้องเป็น repo-owned',
+    run: async () => {
+      const workflow = await readRepoFile('docs/MAPRANG_AGENT_SKILLS_WORKFLOW.md')
+      requireIncludes(
+        workflow,
+        [
+          'addyosmani/agent-skills',
+          'Source of truth',
+          'Progressive disclosure',
+          'frontend-ui-engineering',
+          'api-and-interface-design',
+          'security-and-hardening',
+          'shipping-and-launch',
+          'bun run qa:repo',
+          'ห้าม import หรือ copy instruction ภายนอกแบบ blind vendor',
+        ],
+        'docs/MAPRANG_AGENT_SKILLS_WORKFLOW.md',
+      )
+    },
+  },
+  {
+    name: 'แผนงานที่เหลือของ Maprang ต้องครอบคลุม core และ deploy gate',
+    run: async () => {
+      const result = await collectRemainingPlanAuditResult()
+      if (result.findings.length > 0) {
+        throw new Error(result.findings.join('; '))
+      }
+      const plan = await readRepoFile('docs/MAPRANG_REMAINING_DEVELOPMENT_PLAN.md')
+      requireIncludes(
+        plan,
+        [
+          'ระยะที่ 0 จัด repo checkpoint',
+          'ระยะที่ 1 แชทเล่นจริง',
+          'ระยะที่ 2 สร้างตัวละคร',
+          'ระยะที่ 3 คลังแชทและเล่นต่อ',
+          'ระยะที่ 4 Marketplace และ Character Lobby',
+          'ระยะที่ 5 AI Creator และคลังผลงาน',
+          'ระยะที่ 6 Wallet, BYOK, และ usage',
+          'ระยะที่ 7 Moderation, Safety, และ Admin',
+          'ระยะที่ 8 Prompt, Memory, และ Debug Tooling',
+          'ระยะที่ 9 Responsive และ Visual QA',
+          'Local Server, Ngrok Preview, และ Production',
+          'docs/LOCAL_SERVER_RUNBOOK.md',
+          'local server เปิดแล้ว `bun run qa:full` ผ่าน',
+          'bun run qa:repo',
+          'bun run qa:full',
+          'bun run e2e:smoke',
+          'bun run production:check',
+          'Definition Of Done รวม',
+        ],
+        'docs/MAPRANG_REMAINING_DEVELOPMENT_PLAN.md',
       )
     },
   },
@@ -581,6 +657,7 @@ const checks: Check[] = [
         '20260612100000_preserve_report_targets',
         '20260617143000_add_generation_jobs',
         '20260617153000_add_character_cover_url',
+        '20260617193000_add_image_generation_token_type',
       ]
       const missing = required.filter((name) => !migrations.includes(name))
       if (missing.length > 0) throw new Error(`ยังไม่มี migration: ${missing.join(', ')}`)
@@ -899,6 +976,13 @@ const checks: Check[] = [
           '"route-menu:audit:test"',
           '"smoke:helpers:test"',
           '"provider:smoke:guards:test"',
+          '"local:up"',
+          '"local:up:test"',
+          '"local:db:backup"',
+          '"local:db:restore"',
+          '"local:db:test"',
+          '"local:doctor"',
+          '"local:doctor:test"',
           '"smoke:doctor:test"',
           '"smoke:ready:test"',
           '"smoke:image:test"',
@@ -1157,6 +1241,15 @@ const checks: Check[] = [
       }
       if (!qaLocalCommands.includes('bun run provider:smoke:guards:test')) {
         throw new Error('package.json qa:local ต้องรัน provider:smoke:guards:test เพื่อจับ regression ของ provider smoke guard')
+      }
+      if (!qaLocalCommands.includes('bun run local:up:test')) {
+        throw new Error('package.json qa:local ต้องรัน local:up:test เพื่อจับ regression ของคำสั่งเปิด local server')
+      }
+      if (!qaLocalCommands.includes('bun run local:db:test')) {
+        throw new Error('package.json qa:local ต้องรัน local:db:test เพื่อจับ regression ของคำสั่งสำรอง/กู้คืนฐานข้อมูล local')
+      }
+      if (!qaLocalCommands.includes('bun run local:doctor:test')) {
+        throw new Error('package.json qa:local ต้องรัน local:doctor:test เพื่อจับ regression ของ local server runbook และ QA wiring')
       }
       if (!qaLocalCommands.includes('bun run smoke:doctor:test')) {
         throw new Error('package.json qa:local ต้องรัน smoke:doctor:test เพื่อจับ regression ของผลลัพธ์ blocker ใน smoke doctor')
@@ -1600,7 +1693,68 @@ const checks: Check[] = [
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const readme = await readRepoFile('README.md')
       const stagingRunbook = await readRepoFile('STAGING_RUNBOOK.md')
+      const localRunbook = await readRepoFile('docs/LOCAL_SERVER_RUNBOOK.md')
       requireIncludes(packageJson, ['"deploy:status"', 'bun scripts/deploy-status.ts'], 'package.json')
+      requireIncludes(packageJson, ['"local:up"', 'bun scripts/local-server-up.ts'], 'package.json')
+      requireIncludes(packageJson, ['"local:up:test"', 'bun test scripts/local-server-up.test.ts'], 'package.json')
+      requireIncludes(packageJson, ['bun run local:up:test'], 'package.json')
+      requireIncludes(packageJson, ['"local:db:backup"', 'bun scripts/local-db-backup.ts backup'], 'package.json')
+      requireIncludes(packageJson, ['"local:db:restore"', 'bun scripts/local-db-backup.ts restore'], 'package.json')
+      requireIncludes(packageJson, ['"local:db:test"', 'bun test scripts/local-db-backup.test.ts'], 'package.json')
+      requireIncludes(packageJson, ['bun run local:db:test'], 'package.json')
+      requireIncludes(packageJson, ['"local:doctor"', 'bun scripts/local-server-doctor.ts'], 'package.json')
+      requireIncludes(packageJson, ['"local:doctor:test"', 'bun test scripts/local-server-doctor.test.ts'], 'package.json')
+      requireIncludes(packageJson, ['bun run local:doctor:test'], 'package.json')
+      requireIncludes(
+        await readRepoFile('scripts/local-db-backup.ts'),
+        [
+          'buildLocalDbCommandPlan',
+          'parseLocalDbToolArgs',
+          'pg_dump',
+          'pg_restore',
+          '--confirm-restore',
+          '--clean',
+          '--if-exists',
+          'backups',
+        ],
+        'scripts/local-db-backup.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/local-db-backup.test.ts'),
+        [
+          'builds a safe backup command',
+          'builds a destructive restore command',
+          'parses Bun-style restore arguments',
+        ],
+        'scripts/local-db-backup.test.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/local-server-up.ts'),
+        [
+          'buildLocalServerStartupPlan',
+          'parseLocalServerStartupArgs',
+          'docker',
+          'prisma',
+          'qa:seed',
+          'VITE_API_BASE_URL',
+          'กด Ctrl+C',
+        ],
+        'scripts/local-server-up.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/local-server-up.test.ts'),
+        [
+          'builds the default local startup sequence',
+          'supports skipping one-shot setup tasks',
+          'parses custom local ports and hosts',
+        ],
+        'scripts/local-server-up.test.ts',
+      )
+      requireIncludes(
+        localRunbook,
+        ['bun run local:up', 'bun run local:db:backup', 'bun run local:db:restore', '--confirm-restore', 'bun run qa:full', 'docker compose up -d postgres', 'bunx prisma migrate deploy', 'bun run ngrok:proxy', 'local server'],
+        'docs/LOCAL_SERVER_RUNBOOK.md',
+      )
       requireIncludes(packageJson, ['"smoke:doctor:test"', 'bun test scripts/smoke-doctor.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:status:test"', 'bun test scripts/deploy-status.test.ts'], 'package.json')
       requireIncludes(packageJson, ['"deploy:readiness:test"', 'bun test scripts/deploy-readiness.test.ts'], 'package.json')
@@ -1976,6 +2130,10 @@ const checks: Check[] = [
           'test-coverage-audit.ts',
           '"tests:audit:test"',
           'test-coverage-audit.test.ts',
+          '"remaining-plan:audit"',
+          'remaining-plan-audit.ts',
+          '"remaining-plan:audit:test"',
+          'remaining-plan-audit.test.ts',
           '"smoke:helpers:test"',
           'smoke-helpers.test.ts',
           '"provider:smoke:guards:test"',
@@ -1992,6 +2150,29 @@ const checks: Check[] = [
           'local-smoke.test.ts',
         ],
         'package.json',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/remaining-plan-audit.ts'),
+        [
+          'auditRemainingDevelopmentPlan',
+          'collectRemainingPlanAuditResult',
+          'runRemainingPlanAudit',
+          'docs/MAPRANG_REMAINING_DEVELOPMENT_PLAN.md',
+          'future/external',
+          'bun run qa:full',
+          'Local Server, Ngrok Preview',
+        ],
+        'scripts/remaining-plan-audit.ts',
+      )
+      requireIncludes(
+        await readRepoFile('scripts/remaining-plan-audit.test.ts'),
+        [
+          'accepts closed local tasks and explicit future/external tasks',
+          'flags local tasks without done evidence',
+          'flags external tasks without future/external state',
+          'runs the committed remaining plan audit through an importable runner',
+        ],
+        'scripts/remaining-plan-audit.test.ts',
       )
       requireIncludes(
         await readRepoFile('scripts/test-coverage-audit.ts'),
@@ -5443,6 +5624,7 @@ const checks: Check[] = [
     run: async () => {
       const audit = await readRepoFile('ROUTE_MENU_AUDIT.md')
       const staging = await readRepoFile('STAGING_RUNBOOK.md')
+      const localRunbook = await readRepoFile('docs/LOCAL_SERVER_RUNBOOK.md')
       const readme = await readRepoFile('README.md')
       const deploymentQa = await readRepoFile('DEPLOYMENT_QA.md')
       const productionSetup = await readRepoFile('PRODUCTION_SETUP.md')
@@ -5543,6 +5725,22 @@ const checks: Check[] = [
         'STAGING_RUNBOOK.md',
       )
       requireIncludes(readme, ['local/non-https CORS', 'backend root identity'], 'README.md')
+      requireIncludes(
+        localRunbook,
+        [
+          'Maprang Local Server Runbook',
+          'bun run local:up',
+          'bun run local:db:backup',
+          'bun run local:db:restore',
+          'bun run qa:full',
+          'bun run local:doctor',
+          'bun run ngrok:proxy',
+          'สถานะงาน Local Server Tasks',
+          'Operator checklist',
+          'future/external',
+        ],
+        'docs/LOCAL_SERVER_RUNBOOK.md',
+      )
       requireIncludes(deploymentQa, ['local/non-https CORS', 'backend root identity'], 'DEPLOYMENT_QA.md')
       requireIncludes(productionSetup, ['local/non-https CORS origins', 'CORS เป็น local หรือไม่ใช่ HTTPS หรือมี credential/userinfo หรือ path/query/hash', 'local/non-https CORS'], 'PRODUCTION_SETUP.md')
       forbidIncludes(

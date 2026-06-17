@@ -59,6 +59,21 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['smoke', 'e2e', 'backend-test'],
     note: 'api-smoke ตรวจบันทึก/คืนค่า persona และ tests คุมความยาวสูงสุด',
   },
+  'GET /me/provider-keys': {
+    owner: 'user/profile',
+    coverage: ['backend-test'],
+    note: 'user.service.test.ts ตรวจ metadata-only list ของตู้เซฟ BYOK โดยไม่เปิดเผย raw/ciphertext',
+  },
+  'PUT /me/provider-keys/:provider': {
+    owner: 'user/profile',
+    coverage: ['backend-test'],
+    note: 'user.service.test.ts ตรวจ encrypted upsert, owner scope, redacted response, และ user security audit log',
+  },
+  'DELETE /me/provider-keys/:provider': {
+    owner: 'user/profile',
+    coverage: ['backend-test'],
+    note: 'user.service.test.ts ตรวจ delete เฉพาะ provider ของผู้ใช้และ audit log โดยไม่คืน raw key',
+  },
   'POST /me/daily-login': {
     owner: 'user/wallet',
     coverage: ['backend-test'],
@@ -114,6 +129,11 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['backend-test'],
     note: 'generation.routes.test.ts ตรวจ owner-only retry, UUID guard, not-found response และ no-duplicate-debit local-safe contract',
   },
+  'POST /generation/jobs/:id/cancel': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ owner-only cancel, UUID guard, not-found response และ terminal-state guard',
+  },
   'POST /generation/outputs/:id/favorite': {
     owner: 'creator',
     coverage: ['backend-test'],
@@ -128,6 +148,16 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     owner: 'creator',
     coverage: ['backend-test'],
     note: 'generation.routes.test.ts, generation.persistence.test.ts และ storage.service.test.ts ตรวจ owner-only download URL, signed/direct access และไม่เปิด storageKey',
+  },
+  'POST /generation/outputs/:id/use-as-character-image': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ owner-only image reference สำหรับส่งต่อเข้า Creator Studio โดยไม่เปิด storageKey',
+  },
+  'POST /generation/outputs/:id/use-as-cover': {
+    owner: 'creator',
+    coverage: ['backend-test'],
+    note: 'generation.routes.test.ts ตรวจ owner-only cover reference สำหรับ Creator Studio โดยไม่เปิด storageKey',
   },
   'DELETE /generation/outputs/:id': {
     owner: 'creator',
@@ -692,9 +722,14 @@ export async function collectFrontendApiCalls(file = frontendApiClientFile, root
   return collectFrontendApiCallsFromSource(file, content)
 }
 
+function routeShapeKey(key: RouteKey) {
+  return key.replace(/:[^/\s]+/g, ':param') as RouteKey
+}
+
 export function auditFrontendApiCalls(frontendCalls: FrontendApiCall[], discoveredRoutes: DiscoveredRoute[]) {
   const discoveredKeys = new Set(discoveredRoutes.map((route) => route.key))
-  return frontendCalls.filter((call) => !discoveredKeys.has(call.key))
+  const discoveredRouteShapes = new Set(discoveredRoutes.map((route) => routeShapeKey(route.key)))
+  return frontendCalls.filter((call) => !discoveredKeys.has(call.key) && !discoveredRouteShapes.has(routeShapeKey(call.key)))
 }
 
 function normalizeRepoPath(value: string) {

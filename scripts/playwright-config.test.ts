@@ -5,13 +5,13 @@ describe('Playwright e2e target config', () => {
   test('starts local backend and frontend dev servers for local defaults', () => {
     expect(playwrightSmokeTargetUrls({})).toEqual({
       frontendUrl: 'http://127.0.0.1:5174',
-      backendUrl: 'http://127.0.0.1:3000',
+      backendUrl: 'http://127.0.0.1:3191',
     })
 
     expect(buildPlaywrightWebServers({}).map(({ command, url }) => ({ command, url }))).toEqual([
       {
         command: 'cd apps/backend && bun run dev',
-        url: 'http://127.0.0.1:3000/health',
+        url: 'http://127.0.0.1:3191/health',
       },
       {
         command: 'cd apps/frontend && bun run dev -- --host 127.0.0.1 --port 5174 --strictPort',
@@ -19,8 +19,8 @@ describe('Playwright e2e target config', () => {
       },
     ])
     const localWebServers = buildPlaywrightWebServers({})
-    expect(localWebServers[0]?.env).toEqual({ PORT: '3000' })
-    expect(localWebServers[1]?.env).toEqual({ VITE_API_BASE_URL: 'http://127.0.0.1:3000' })
+    expect(localWebServers[0]?.env).toEqual({ PORT: '3191' })
+    expect(localWebServers[1]?.env).toEqual({ VITE_API_BASE_URL: 'http://127.0.0.1:3191' })
   })
 
   test('does not start local dev servers for deployed staging targets', () => {

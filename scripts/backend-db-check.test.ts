@@ -138,10 +138,15 @@ describe('backend db check command plan', () => {
       'utf8',
     )
 
-    expect(schema).toContain(
-      'character Character? @relation(fields: [characterId], references: [id], onDelete: SetNull)',
+    expect(schema).toMatch(
+      /character\s+Character\?\s+@relation\(fields: \[characterId\], references: \[id\], onDelete: SetNull\)/,
     )
-    expect(schema).toContain('message   Message?   @relation(fields: [messageId], references: [id], onDelete: SetNull)')
+    expect(schema).toMatch(
+      /message\s+Message\?\s+@relation\(fields: \[messageId\], references: \[id\], onDelete: SetNull\)/,
+    )
+    expect(schema).toMatch(
+      /generationOutput\s+GenerationOutput\?\s+@relation\(fields: \[generationOutputId\], references: \[id\], onDelete: SetNull\)/,
+    )
     expect(migrationSql).toContain('DROP CONSTRAINT IF EXISTS "Report_characterId_fkey"')
     expect(migrationSql).toContain('DROP CONSTRAINT IF EXISTS "Report_messageId_fkey"')
     expect(migrationSql).toContain('ON DELETE SET NULL ON UPDATE CASCADE')
@@ -184,5 +189,19 @@ describe('backend db check command plan', () => {
 
     expect(schema).toContain('coverUrl      String?')
     expect(migrationSql).toContain('ALTER TABLE "Character" ADD COLUMN "coverUrl" TEXT')
+  })
+
+  test('keeps image generation token transaction type schema and migration in sync', async () => {
+    const schema = await readFile(join(import.meta.dir, '../apps/backend/prisma/schema.prisma'), 'utf8')
+    const migrationSql = await readFile(
+      join(
+        import.meta.dir,
+        '../apps/backend/prisma/migrations/20260617193000_add_image_generation_token_type/migration.sql',
+      ),
+      'utf8',
+    )
+
+    expect(schema).toContain('IMAGE_GENERATION')
+    expect(migrationSql).toContain(`ALTER TYPE "TokenTransactionType" ADD VALUE 'IMAGE_GENERATION'`)
   })
 })

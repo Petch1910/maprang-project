@@ -14,6 +14,8 @@ export type E2eSmokeEnv = Record<string, string | undefined>
 export type E2eSmokeRunner = (step: E2eSmokeStep, env: E2eSmokeEnv) => Promise<number>
 
 const backendEnvPath = join(import.meta.dir, '..', 'apps/backend/.env')
+const defaultLocalE2eApiBaseUrl = 'http://127.0.0.1:3191'
+const defaultLocalE2eFrontendUrl = 'http://127.0.0.1:5174'
 export const E2E_SMOKE_DB_PREFLIGHT_LABEL = 'ตรวจฐานข้อมูลก่อน QA: PostgreSQL พร้อมก่อน seed'
 
 function unquoteEnvValue(value: string) {
@@ -40,9 +42,10 @@ export function backendEnvPort(envText: string) {
 }
 
 export function resolveE2eSmokeEnv(env: E2eSmokeEnv = process.env, backendEnvText = ''): E2eSmokeEnv {
-  const backendPort = env.E2E_API_BASE_URL ? '' : backendEnvPort(backendEnvText)
-  const e2eApiBaseUrl = env.E2E_API_BASE_URL ?? (backendPort ? `http://127.0.0.1:${backendPort}` : 'http://127.0.0.1:3000')
-  const e2eBaseUrl = env.E2E_BASE_URL ?? 'http://127.0.0.1:5174'
+  const backendPort =
+    !env.E2E_API_BASE_URL && env.E2E_RESPECT_BACKEND_ENV_PORT === '1' ? backendEnvPort(backendEnvText) : ''
+  const e2eApiBaseUrl = env.E2E_API_BASE_URL ?? (backendPort ? `http://127.0.0.1:${backendPort}` : defaultLocalE2eApiBaseUrl)
+  const e2eBaseUrl = env.E2E_BASE_URL ?? defaultLocalE2eFrontendUrl
 
   return {
     ...env,
@@ -81,8 +84,8 @@ function e2eUrlIssues(name: string, value: string) {
 export function e2eSmokeTargetIssues(env: E2eSmokeEnv = process.env) {
   const resolvedEnv = resolveE2eSmokeEnv(env)
   const targets = [
-    ['E2E_BASE_URL', resolvedEnv.E2E_BASE_URL ?? 'http://127.0.0.1:5174'],
-    ['E2E_API_BASE_URL', resolvedEnv.E2E_API_BASE_URL ?? 'http://127.0.0.1:3000'],
+    ['E2E_BASE_URL', resolvedEnv.E2E_BASE_URL ?? defaultLocalE2eFrontendUrl],
+    ['E2E_API_BASE_URL', resolvedEnv.E2E_API_BASE_URL ?? defaultLocalE2eApiBaseUrl],
   ] as const
 
   return targets.flatMap(([name, value]) => e2eUrlIssues(name, value))
