@@ -3,7 +3,16 @@ import { defaultUserId } from './config'
 import { requireDatabase } from './db'
 import { routeErrorResponse } from './route-guards'
 import { resolveRequestUserId } from './security'
-import { loadContentSettings, loadUsageSummary, loadUserPersona, updateContentSettings, updateUserPersona } from './user.service'
+import {
+  deleteUserProviderKey,
+  listUserProviderKeys,
+  loadContentSettings,
+  loadUsageSummary,
+  loadUserPersona,
+  upsertUserProviderKey,
+  updateContentSettings,
+  updateUserPersona,
+} from './user.service'
 import { processDailyLogin, getDailyLoginStats } from './daily-login.service'
 
 const contentRatingSchema = t.Union([
@@ -14,6 +23,64 @@ const contentRatingSchema = t.Union([
 ])
 
 export const userRoutes = new Elysia()
+  .get('/me/provider-keys', async ({ request, set }) => {
+    const prisma = requireDatabase(set)
+    if (!prisma) return routeErrorResponse('database_not_configured')
+
+    const keys = await listUserProviderKeys(await resolveRequestUserId(request, defaultUserId))
+    if (!keys) {
+      set.status = 404
+      return routeErrorResponse('user_not_found')
+    }
+
+    return { keys }
+  })
+  .put(
+    '/me/provider-keys/:provider',
+    async ({ body, params, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return routeErrorResponse('database_not_configured')
+
+      try {
+        const key = await upsertUserProviderKey(await resolveRequestUserId(request, defaultUserId), params.provider, body)
+        if (!key) {
+          set.status = 404
+          return routeErrorResponse('user_not_found')
+        }
+        return { key }
+      } catch (error) {
+        set.status = 400
+        return routeErrorResponse('provider_key_invalid')
+      }
+    },
+    {
+      params: t.Object({
+        provider: t.String({ minLength: 1, maxLength: 40 }),
+      }),
+      body: t.Object({
+        apiKey: t.String({ minLength: 1, maxLength: 8000 }),
+      }),
+    },
+  )
+  .delete(
+    '/me/provider-keys/:provider',
+    async ({ params, request, set }) => {
+      const prisma = requireDatabase(set)
+      if (!prisma) return routeErrorResponse('database_not_configured')
+
+      const result = await deleteUserProviderKey(await resolveRequestUserId(request, defaultUserId), params.provider)
+      if (!result) {
+        set.status = 404
+        return routeErrorResponse('user_not_found')
+      }
+      return result
+    },
+    {
+      params: t.Object({
+        provider: t.String({ minLength: 1, maxLength: 40 }),
+      }),
+    },
+  )
   .get('/me/usage', async ({ request, set }) => {
     const prisma = requireDatabase(set)
     if (!prisma) return routeErrorResponse('database_not_configured')

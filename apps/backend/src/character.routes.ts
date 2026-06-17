@@ -37,7 +37,7 @@ import {
 } from './relationship.engine'
 import { rejectInvalidUuid, routeErrorResponse } from './route-guards'
 import { canAccessOwnerResource, isAdminRequest, resolveRequestUserId } from './security'
-import { effectiveMaxRatingForUser } from './user.service'
+import { effectiveMaxRatingForUser, resolveUserProviderKey } from './user.service'
 
 const visibilitySchema = t.Union([t.Literal('PUBLIC'), t.Literal('UNLISTED'), t.Literal('PRIVATE')])
 const statusSchema = t.Union([
@@ -115,6 +115,23 @@ function hasRequestIdentity(request: Request) {
   return Boolean(request.headers.get('authorization') || request.headers.get('x-user-id'))
 }
 
+async function resolveCreatorUserApiKey(request: Request) {
+  const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
+  const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+  const useVault = request.headers.get('x-user-api-vault') === '1'
+
+  if (userApiKey || !useVault) {
+    return { userApiKey, userApiProvider }
+  }
+
+  const userId = await resolveRequestUserId(request, defaultUserId)
+  const vaultKey = await resolveUserProviderKey(userId, userApiProvider)
+  return {
+    userApiKey: vaultKey?.apiKey,
+    userApiProvider: vaultKey?.provider ?? userApiProvider,
+  }
+}
+
 export const characterRoutes = new Elysia()
   .get('/creator/draft', async ({ request, set }) => {
     const prisma = requireDatabase(set)
@@ -144,9 +161,8 @@ export const characterRoutes = new Elysia()
       payload: t.Any(),
     }),
   })
-  .post('/creator/ai-draft', ({ body, request }) => {
-    const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
-    const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+  .post('/creator/ai-draft', async ({ body, request }) => {
+    const { userApiKey, userApiProvider } = await resolveCreatorUserApiKey(request)
     return generateCreatorDraft({
       ...body,
       origin: new URL(request.url).origin,

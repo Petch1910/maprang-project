@@ -3,8 +3,10 @@ import { GenerationJobStatus, GenerationOutputKind } from '@prisma/client'
 import { getPrisma } from './db'
 import { createDbTestGate } from './db.test-gate'
 import {
+  cancelGenerationJobForUser,
   createGenerationJob,
   deleteGenerationOutputForUser,
+  getGenerationOutputCreatorReferenceForUser,
   getGenerationOutputDownloadForUser,
   getGenerationJobForUser,
   listGenerationJobsForUser,
@@ -148,6 +150,39 @@ describe('generation job persistence', () => {
         throw new Error('resolver must not run for another owner')
       },
     })
+    const storageOnlyOutput = await prisma?.generationOutput.create({
+      data: {
+        jobId: result.job.id,
+        userId: generationUserId,
+        kind: GenerationOutputKind.IMAGE,
+        storageKey: 'avatars/reference-only-output.png',
+      },
+    })
+    if (!storageOnlyOutput) throw new Error('storage-only generation output should be created')
+    const signedCoverReferenceResolverCalls: string[] = []
+    const signedCoverReference = await getGenerationOutputCreatorReferenceForUser({
+      userId: generationUserId,
+      outputId: storageOnlyOutput.id,
+      target: 'cover',
+      prisma,
+      resolveStorageObjectUrl: async (objectPath) => {
+        signedCoverReferenceResolverCalls.push(objectPath)
+        return {
+          access: 'signed',
+          url: `https://project-ref.supabase.co/storage/v1/object/sign/${objectPath}?token=creator-reference`,
+          expiresIn: 900,
+        }
+      },
+    })
+    const otherOwnerSignedCoverReference = await getGenerationOutputCreatorReferenceForUser({
+      userId: '990e8400-e29b-41d4-a716-446655440000',
+      outputId: storageOnlyOutput.id,
+      target: 'cover',
+      prisma,
+      resolveStorageObjectUrl: async () => {
+        throw new Error('creator reference resolver must not run for another owner')
+      },
+    })
     const directOutput = await prisma?.generationOutput.create({
       data: {
         jobId: result.job.id,
@@ -160,6 +195,18 @@ describe('generation job persistence', () => {
     const directDownload = await getGenerationOutputDownloadForUser({
       userId: generationUserId,
       outputId: directOutput.id,
+      prisma,
+    })
+    const coverReference = await getGenerationOutputCreatorReferenceForUser({
+      userId: generationUserId,
+      outputId: directOutput.id,
+      target: 'cover',
+      prisma,
+    })
+    const otherOwnerCoverReference = await getGenerationOutputCreatorReferenceForUser({
+      userId: '990e8400-e29b-41d4-a716-446655440000',
+      outputId: directOutput.id,
+      target: 'cover',
       prisma,
     })
     const otherOwnerDownload = await getGenerationOutputDownloadForUser({
@@ -178,6 +225,11 @@ describe('generation job persistence', () => {
       prisma,
     })
     const deletedOutput = await prisma?.generationOutput.findUnique({ where: { id: directOutput.id } })
+    const otherOwnerRetry = await retryGenerationJobForUser({
+      userId: '990e8400-e29b-41d4-a716-446655440000',
+      jobId: result.job.id,
+      prisma,
+    })
     const retry = await retryGenerationJobForUser({
       userId: generationUserId,
       jobId: result.job.id,
@@ -249,6 +301,25 @@ describe('generation job persistence', () => {
     })
     expect(JSON.stringify(signedDownload)).not.toContain('storageKey')
     expect(otherOwnerSignedDownload).toMatchObject({ persisted: true, download: null })
+    expect(signedCoverReferenceResolverCalls).toEqual(['avatars/reference-only-output.png'])
+    expect(signedCoverReference).toMatchObject({
+      persisted: true,
+      reference: {
+        target: 'cover',
+        outputId: storageOnlyOutput.id,
+        kind: 'image',
+        access: 'signed',
+        url: 'https://project-ref.supabase.co/storage/v1/object/sign/avatars/reference-only-output.png?token=creator-reference',
+        expiresIn: 900,
+        draftPatch: {
+          coverImageUrl: 'https://project-ref.supabase.co/storage/v1/object/sign/avatars/reference-only-output.png?token=creator-reference',
+          coverImageSource: 'provider',
+          hasCoverDraft: true,
+        },
+      },
+    })
+    expect(JSON.stringify(signedCoverReference)).not.toContain('storageKey')
+    expect(otherOwnerSignedCoverReference).toMatchObject({ persisted: true, reference: null })
     expect(directDownload).toMatchObject({
       persisted: true,
       download: {
@@ -259,10 +330,29 @@ describe('generation job persistence', () => {
         expiresIn: null,
       },
     })
+    expect(coverReference).toMatchObject({
+      persisted: true,
+      reference: {
+        target: 'cover',
+        outputId: directOutput.id,
+        jobId: result.job.id,
+        kind: 'image',
+        access: 'direct',
+        url: 'https://example.invalid/direct-output.png',
+        draftPatch: {
+          coverImageUrl: 'https://example.invalid/direct-output.png',
+          coverImageSource: 'provider',
+          hasCoverDraft: true,
+        },
+      },
+    })
+    expect(JSON.stringify(coverReference)).not.toContain('storageKey')
+    expect(otherOwnerCoverReference).toMatchObject({ persisted: true, reference: null })
     expect(otherOwnerDownload).toMatchObject({ persisted: true, download: null })
     expect(otherOwnerDelete).toMatchObject({ persisted: true, deleted: false })
     expect(ownerDelete).toMatchObject({ persisted: true, deleted: true })
     expect(deletedOutput).toBeNull()
+    expect(otherOwnerRetry).toMatchObject({ persisted: true, job: null })
     expect(retry).toMatchObject({
       persisted: true,
       job: {
@@ -282,5 +372,51 @@ describe('generation job persistence', () => {
       debitStatus: 'not_charged',
     })
     expect(userAfterRetry?.tokenBalance).toBe(900)
+  })
+
+  test('cancels an owner generation job without affecting another owner', async () => {
+    if (!(await shouldRunDbTest())) return
+    const preflight = validateGenerationJobInput({
+      templateId: 'character-avatar',
+      prompt: 'cancel portrait',
+    })
+    expect(preflight.ok).toBe(true)
+    if (!preflight.ok) return
+
+    const created = await createGenerationJob({
+      userId: generationUserId,
+      template: preflight.template,
+      prompt: preflight.sanitized.prompt,
+      imageInputs: preflight.sanitized.imageInputs,
+      videoInputs: preflight.sanitized.videoInputs,
+      prisma,
+    })
+    const otherOwnerCancel = await cancelGenerationJobForUser({
+      userId: '990e8400-e29b-41d4-a716-446655440000',
+      jobId: created.job.id,
+      prisma,
+    })
+    const ownerCancel = await cancelGenerationJobForUser({
+      userId: generationUserId,
+      jobId: created.job.id,
+      prisma,
+    })
+    const cancelledRecord = await prisma?.generationJob.findUnique({ where: { id: created.job.id } })
+
+    expect(otherOwnerCancel).toMatchObject({ persisted: true, job: null })
+    expect(ownerCancel).toMatchObject({
+      persisted: true,
+      job: {
+        id: created.job.id,
+        ownerId: generationUserId,
+        status: 'cancelled',
+        failureCode: 'generation_job_cancelled',
+        debit: { charged: false },
+      },
+    })
+    expect(cancelledRecord).toMatchObject({
+      status: GenerationJobStatus.CANCELLED,
+      failureCode: 'generation_job_cancelled',
+    })
   })
 })

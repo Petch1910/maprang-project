@@ -27,8 +27,17 @@ export const app = new Elysia()
   .use(
     cors({
       origin: allowedOrigins,
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id', 'x-admin-key', 'x-user-api-key', 'x-user-api-provider', 'ngrok-skip-browser-warning'],
-      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'x-user-id',
+        'x-admin-key',
+        'x-user-api-key',
+        'x-user-api-provider',
+        'x-user-api-vault',
+        'ngrok-skip-browser-warning',
+      ],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   )
   .use(

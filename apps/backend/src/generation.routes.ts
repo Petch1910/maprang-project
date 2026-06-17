@@ -1,7 +1,9 @@
 import { Elysia, t } from 'elysia'
 import {
+  cancelGenerationJobForUser,
   createGenerationJob,
   deleteGenerationOutputForUser,
+  getGenerationOutputCreatorReferenceForUser,
   getGenerationOutputDownloadForUser,
   getGenerationJobForUser,
   listGenerationJobsForUser,
@@ -129,6 +131,41 @@ export const generationRoutes = new Elysia()
       persisted: result.persisted,
     }
   })
+  .post('/generation/jobs/:id/cancel', async ({ params, request, set }) => {
+    if (!hasRequestIdentity(request)) {
+      set.status = 401
+      return routeErrorResponse('unauthorized')
+    }
+
+    const invalidId = rejectInvalidUuid(params.id, set, 'invalid_id')
+    if (invalidId) return invalidId
+
+    const result = await cancelGenerationJobForUser({
+      userId: await resolveRequestUserId(request),
+      jobId: params.id,
+    })
+    if (result.cancelBlockedReason) {
+      set.status = 409
+      return {
+        ...routeErrorResponse(result.cancelBlockedReason),
+        job: result.job,
+        persisted: result.persisted,
+      }
+    }
+    if (!result.job) {
+      set.status = 404
+      return {
+        ...routeErrorResponse('generation_job_not_found'),
+        persisted: result.persisted,
+        persistenceWarning: result.persistenceWarning,
+      }
+    }
+
+    return {
+      job: result.job,
+      persisted: result.persisted,
+    }
+  })
   .post('/generation/outputs/:id/favorite', async ({ params, request, set }) => {
     if (!hasRequestIdentity(request)) {
       set.status = 401
@@ -218,6 +255,62 @@ export const generationRoutes = new Elysia()
 
     return {
       download: result.download,
+      persisted: result.persisted,
+    }
+  })
+  .post('/generation/outputs/:id/use-as-character-image', async ({ params, request, set }) => {
+    if (!hasRequestIdentity(request)) {
+      set.status = 401
+      return routeErrorResponse('unauthorized')
+    }
+
+    const invalidId = rejectInvalidUuid(params.id, set, 'invalid_id')
+    if (invalidId) return invalidId
+
+    const result = await getGenerationOutputCreatorReferenceForUser({
+      userId: await resolveRequestUserId(request),
+      outputId: params.id,
+      target: 'character-image',
+    })
+    if (!result.reference) {
+      set.status = result.reason === 'generation_output_image_required' ? 409 : 404
+      return {
+        ...routeErrorResponse(result.reason ?? 'generation_output_not_found'),
+        persisted: result.persisted,
+        persistenceWarning: result.persistenceWarning,
+      }
+    }
+
+    return {
+      reference: result.reference,
+      persisted: result.persisted,
+    }
+  })
+  .post('/generation/outputs/:id/use-as-cover', async ({ params, request, set }) => {
+    if (!hasRequestIdentity(request)) {
+      set.status = 401
+      return routeErrorResponse('unauthorized')
+    }
+
+    const invalidId = rejectInvalidUuid(params.id, set, 'invalid_id')
+    if (invalidId) return invalidId
+
+    const result = await getGenerationOutputCreatorReferenceForUser({
+      userId: await resolveRequestUserId(request),
+      outputId: params.id,
+      target: 'cover',
+    })
+    if (!result.reference) {
+      set.status = result.reason === 'generation_output_image_required' ? 409 : 404
+      return {
+        ...routeErrorResponse(result.reason ?? 'generation_output_not_found'),
+        persisted: result.persisted,
+        persistenceWarning: result.persistenceWarning,
+      }
+    }
+
+    return {
+      reference: result.reference,
       persisted: result.persisted,
     }
   })

@@ -6,6 +6,8 @@ import {
   buildRoleplayContinuationInstruction,
   chatReplyMessages,
   classifyChatProviderError,
+  ensureBillableChatUsage,
+  estimateBillableChatUsage,
   isTransientChatProviderError,
   localChatProviderEnabled,
   preferLocalChatProvider,
@@ -186,6 +188,23 @@ describe('chat content rating guard', () => {
     expect(rating).toBe('restricted_18')
     expect(ratingAllowed(rating, 'teen_romance')).toBe(false)
   })
+
+  test('source keeps content rating guard before provider execution', () => {
+    const source = readFileSync(new URL('./chat.service.ts', import.meta.url), 'utf8')
+    const sendChatIndex = source.indexOf('export async function sendChat')
+    const ratingGuardIndex = source.indexOf('const ratingError = chatRatingError(character, effectiveMaxRating)', sendChatIndex)
+    const providerCallIndex = source.indexOf('const completion = await generateChatCompletion', sendChatIndex)
+
+    expect(source).toContain('function chatRatingError(character: CharacterWithTags | null, maxRating?: ContentRating)')
+    expect(source).toContain('const allowed = normalizeMaxRating(maxRating)')
+    expect(source).toContain('if (ratingAllowed(rating, allowed)) return null')
+    expect(source).toContain('return chatReplyMessages.ratingTooHigh(rating)')
+    expect(source).toContain('await effectiveMaxRatingForUser(activeUserId, input.maxRating)')
+    expect(sendChatIndex).toBeGreaterThan(-1)
+    expect(ratingGuardIndex).toBeGreaterThan(-1)
+    expect(providerCallIndex).toBeGreaterThan(-1)
+    expect(ratingGuardIndex).toBeLessThan(providerCallIndex)
+  })
 })
 
 describe('chat id validation guard', () => {
@@ -222,6 +241,35 @@ describe('chat id validation guard', () => {
 })
 
 describe('roleplay reply quality guard', () => {
+  test('estimates billable usage when a provider reply has no usage metadata', () => {
+    const messages = [
+      { role: 'system', content: 'Stay in character and answer in Thai.' },
+      { role: 'user', content: 'เล่าต่อจากฉากเดิมแบบละเอียด' },
+    ]
+    const reply = 'เธอหยุดมองออกไปนอกหน้าต่าง ก่อนจะค่อย ๆ ตอบด้วยน้ำเสียงที่เบาลงกว่าเดิม'
+    const usage = estimateBillableChatUsage(messages, reply)
+
+    expect(usage.promptTokens).toBeGreaterThan(0)
+    expect(usage.completionTokens).toBeGreaterThan(0)
+    expect(usage.totalTokens).toBe(usage.promptTokens + usage.completionTokens)
+    expect(usage.cost).toBeGreaterThanOrEqual(0)
+  })
+
+  test('keeps provider usage when present and fills it only when missing', () => {
+    const providerUsage = { promptTokens: 11, completionTokens: 7, totalTokens: 18, cost: 0.00001 }
+    const messages = [{ role: 'user', content: 'hello' }]
+
+    expect(ensureBillableChatUsage(providerUsage, messages, 'reply')).toBe(providerUsage)
+
+    const estimated = ensureBillableChatUsage(
+      { promptTokens: 0, completionTokens: 0, totalTokens: 0, cost: 0 },
+      messages,
+      'reply',
+    )
+
+    expect(estimated.totalTokens).toBeGreaterThan(0)
+  })
+
   test('extends only short roleplay replies when the user did not ask for brevity', () => {
     expect(
       shouldExtendShortRoleplayReply({

@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import { ReportTargetType } from '@prisma/client'
 import { validateReportAdminAction, validateReportInput } from './report.service'
 
@@ -67,5 +68,23 @@ describe('report validation', () => {
     expect(validateReportAdminAction('ARCHIVE_MESSAGE')).toBeNull()
     expect(validateReportAdminAction('HIDE_GENERATION_OUTPUT')).toBeNull()
     expect(validateReportAdminAction('BANANA')).toBe('invalid_report_action')
+  })
+
+  test('admin report action source keeps target mutations, audit logs, and resolved status together', () => {
+    const source = readFileSync(new URL('./report.service.ts', import.meta.url), 'utf8')
+
+    expect(source).toContain("export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE' | 'HIDE_GENERATION_OUTPUT'")
+    expect(source).toContain('AdminAuditAction.HIDE_CHARACTER')
+    expect(source).toContain('AdminAuditAction.ARCHIVE_MESSAGE')
+    expect(source).toContain('AdminAuditAction.HIDE_GENERATION_OUTPUT')
+    expect(source).toContain("targetType: 'CHARACTER'")
+    expect(source).toContain("targetType: 'MESSAGE'")
+    expect(source).toContain("targetType: 'GENERATION_OUTPUT'")
+    expect(source).toContain('data: {')
+    expect(source).toContain('visibility: Visibility.PRIVATE')
+    expect(source).toContain('deletedAt: new Date()')
+    expect(source).toContain('status: ReportStatus.RESOLVED')
+    expect(source).toContain('reviewedAt: new Date()')
+    expect(source.match(/createAdminAuditLog\(/g)?.length).toBeGreaterThanOrEqual(4)
   })
 })

@@ -4,11 +4,17 @@ import { createDbTestGate } from './db.test-gate'
 import { userRoutes } from './user.routes'
 import {
   effectiveMaxRatingForUser,
+  decryptUserProviderKey,
+  deleteUserProviderKey,
+  encryptUserProviderKey,
   loadContentSettings,
   loadUsageSummary,
   loadUserPersona,
+  listUserProviderKeys,
+  resolveUserProviderKey,
   updateContentSettings,
   updateUserPersona,
+  upsertUserProviderKey,
 } from './user.service'
 
 const prisma = getPrisma()
@@ -178,5 +184,52 @@ describe('user content settings', () => {
     })
     expect(summary?.usage.daily).toHaveLength(7)
     expect(summary?.usage.daily.reduce((total, item) => total + item.tokens, 0)).toBe(1200)
+  })
+
+  test('encrypts provider keys without leaving plaintext in ciphertext', () => {
+    const apiKey = 'sk-test-maprang-secret-1234567890'
+    const ciphertext = encryptUserProviderKey(apiKey, 'unit-test-secret')
+
+    expect(ciphertext.startsWith('v1:')).toBe(true)
+    expect(ciphertext).not.toContain(apiKey)
+    expect(decryptUserProviderKey(ciphertext, 'unit-test-secret')).toBe(apiKey)
+  })
+
+  test('stores provider keys as redacted metadata and writes user audit rows', async () => {
+    if (!(await shouldRunDbTest())) return
+    const contentUserId = contentUserIds[0]!
+    const apiKey = 'sk-test-maprang-provider-vault-abcdef123456'
+
+    await ensureContentUser(contentUserId)
+    await prisma!.userSecurityAuditLog.deleteMany({ where: { userId: contentUserId } })
+    await prisma!.userProviderKey.deleteMany({ where: { userId: contentUserId } })
+
+    const saved = await upsertUserProviderKey(contentUserId, 'openrouter', { apiKey })
+    expect(saved).toMatchObject({
+      provider: 'openrouter',
+      keyHint: '****3456',
+    })
+    expect(JSON.stringify(saved)).not.toContain(apiKey)
+
+    const listed = await listUserProviderKeys(contentUserId)
+    expect(listed).toHaveLength(1)
+    expect(JSON.stringify(listed)).not.toContain(apiKey)
+
+    const resolved = await resolveUserProviderKey(contentUserId, 'openrouter')
+    expect(resolved).toEqual({
+      provider: 'openrouter',
+      apiKey,
+    })
+
+    const rows = await prisma!.userSecurityAuditLog.findMany({
+      where: { userId: contentUserId },
+      orderBy: { createdAt: 'asc' },
+    })
+    expect(rows.map((row) => row.action)).toEqual(['USER_PROVIDER_KEY_UPSERT', 'USER_PROVIDER_KEY_USE'])
+    expect(JSON.stringify(rows)).not.toContain(apiKey)
+
+    const deleted = await deleteUserProviderKey(contentUserId, 'openrouter')
+    expect(deleted).toEqual({ deleted: true, provider: 'openrouter' })
+    expect(await listUserProviderKeys(contentUserId)).toEqual([])
   })
 })

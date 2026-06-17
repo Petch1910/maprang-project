@@ -520,6 +520,54 @@ export async function retryGenerationJobForUser(input: {
   }
 }
 
+export async function cancelGenerationJobForUser(input: {
+  userId: string
+  jobId: string
+  prisma?: PrismaClient | null
+}) {
+  const prisma = input.prisma === undefined ? getPrisma() : input.prisma
+  if (!prisma) return { job: null, persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+
+  try {
+    const original = await prisma.generationJob.findFirst({
+      where: { id: input.jobId, userId: input.userId },
+    })
+    if (!original) return { job: null, persisted: true }
+
+    if (original.status === PrismaGenerationJobStatus.SUCCEEDED || original.status === PrismaGenerationJobStatus.FAILED) {
+      return {
+        job: publicGenerationJob(original),
+        persisted: true,
+        cancelBlockedReason: 'generation_job_cancel_unavailable',
+      }
+    }
+
+    if (original.status === PrismaGenerationJobStatus.CANCELLED) {
+      return { job: publicGenerationJob(original), persisted: true }
+    }
+
+    const cancelled = await prisma.generationJob.update({
+      where: { id: original.id },
+      data: {
+        status: PrismaGenerationJobStatus.CANCELLED,
+        failureCode: 'generation_job_cancelled',
+        failureMessage: 'ยกเลิกงานสร้างนี้แล้ว ระบบไม่หักโทเคนเพิ่มจากคำสั่งยกเลิก',
+        debitStatus: original.debitStatus || 'not_charged',
+      },
+      include: {
+        outputs: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    })
+
+    return { job: publicGenerationJob(cancelled), persisted: true }
+  } catch (error) {
+    if (shouldThrowPersistenceError()) throw error
+    return { job: null, persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+  }
+}
+
 export async function setGenerationOutputFavoriteForUser(input: {
   userId: string
   outputId: string
@@ -729,6 +777,92 @@ export async function getGenerationOutputDownloadForUser(input: {
   } catch (error) {
     if (shouldThrowPersistenceError()) throw error
     return { download: null, persisted: false, persistenceWarning: 'generation_storage_unavailable' }
+  }
+}
+
+export async function getGenerationOutputCreatorReferenceForUser(input: {
+  userId: string
+  outputId: string
+  target: 'character-image' | 'cover'
+  prisma?: PrismaClient | null
+  resolveStorageObjectUrl?: typeof resolveStorageObjectUrl
+}) {
+  const prisma = input.prisma === undefined ? getPrisma() : input.prisma
+  if (!prisma) return { reference: null, persisted: false, persistenceWarning: 'generation_persistence_unavailable' }
+
+  try {
+    const output = await prisma.generationOutput.findFirst({
+      where: { id: input.outputId, userId: input.userId },
+      include: {
+        job: {
+          select: {
+            prompt: true,
+            templateId: true,
+            mode: true,
+          },
+        },
+      },
+    })
+    if (!output) return { reference: null, persisted: true }
+    if (output.kind !== 'IMAGE') {
+      return {
+        reference: null,
+        persisted: true,
+        reason: 'generation_output_image_required',
+      }
+    }
+
+    let url = output.url
+    let access: 'direct' | 'signed' | 'public' = output.visibility === 'PUBLIC' ? 'public' : 'direct'
+    let expiresIn: number | null = null
+
+    if (!url && output.storageKey) {
+      const resolveObjectUrl = input.resolveStorageObjectUrl ?? resolveStorageObjectUrl
+      const resolved = await resolveObjectUrl(output.storageKey)
+      url = resolved.url
+      access = resolved.access
+      expiresIn = resolved.expiresIn
+    }
+
+    if (!url) {
+      return {
+        reference: null,
+        persisted: true,
+        reason: 'generation_output_file_unavailable',
+      }
+    }
+
+    return {
+      reference: {
+        target: input.target,
+        outputId: output.id,
+        jobId: output.jobId,
+        kind: output.kind.toLowerCase(),
+        url,
+        access,
+        expiresIn,
+        visibility: output.visibility.toLowerCase(),
+        prompt: output.job?.prompt,
+        templateId: output.job?.templateId,
+        mode: output.job?.mode,
+        draftPatch:
+          input.target === 'cover'
+            ? {
+                coverImageUrl: url,
+                coverImageSource: 'provider',
+                hasCoverDraft: true,
+              }
+            : {
+                avatarUrl: url,
+                avatarSource: 'provider',
+                hasImageDraft: true,
+              },
+      },
+      persisted: true,
+    }
+  } catch (error) {
+    if (shouldThrowPersistenceError()) throw error
+    return { reference: null, persisted: false, persistenceWarning: 'generation_storage_unavailable' }
   }
 }
 

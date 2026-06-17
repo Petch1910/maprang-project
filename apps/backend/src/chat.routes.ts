@@ -4,9 +4,26 @@ import { archiveChat, deleteChat, listChats, loadChatMessages, restoreChat, send
 import { AuthError, authErrorResponse, isUuid, resolveRequestUserId } from './security'
 import { rejectInvalidUuid, routeErrorResponse, safeRouteErrorSummary } from './route-guards'
 import { loadChatWorldState, updateChatWorldState } from './world-state.service'
+import { resolveUserProviderKey } from './user.service'
 
 function responseChatId(chatId?: string) {
   return isUuid(chatId) ? chatId : null
+}
+
+async function resolveRequestUserApiKey(request: Request, userId: string) {
+  const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
+  const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+  const useVault = request.headers.get('x-user-api-vault') === '1'
+
+  if (userApiKey || !useVault) {
+    return { userApiKey, userApiProvider }
+  }
+
+  const vaultKey = await resolveUserProviderKey(userId, userApiProvider)
+  return {
+    userApiKey: vaultKey?.apiKey,
+    userApiProvider: vaultKey?.provider ?? userApiProvider,
+  }
 }
 
 const chatBody = t.Object({
@@ -60,11 +77,11 @@ export const chatRoutes = new Elysia()
     '/chat',
     async ({ body, request, set }) => {
       try {
-        const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
-        const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+        const userId = await resolveRequestUserId(request)
+        const { userApiKey, userApiProvider } = await resolveRequestUserApiKey(request, userId)
         return await sendChat({
           ...body,
-          userId: await resolveRequestUserId(request),
+          userId,
           userApiKey,
           userApiProvider,
         })
@@ -92,12 +109,12 @@ export const chatRoutes = new Elysia()
     '/chat/stream',
     async ({ body, request, set }) => {
       try {
-        const userApiKey = request.headers.get('x-user-api-key')?.trim() || undefined
-        const userApiProvider = request.headers.get('x-user-api-provider')?.trim() || undefined
+        const userId = await resolveRequestUserId(request)
+        const { userApiKey, userApiProvider } = await resolveRequestUserApiKey(request, userId)
         return new Response(
           streamChat({
             ...body,
-            userId: await resolveRequestUserId(request),
+            userId,
             userApiKey,
             userApiProvider,
           }),

@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import { validateTokenAdjustment } from './admin.service'
 import { routeErrorResponse } from './route-guards'
 
@@ -20,5 +21,18 @@ describe('admin token adjustment validation', () => {
       error: 'insufficient_token_balance',
       message: 'ยอดโทเคนของผู้ใช้นี้ไม่พอสำหรับการปรับลด',
     })
+  })
+
+  test('token adjustment source keeps audit log and non-negative balance contract', () => {
+    const source = readFileSync(new URL('./admin.service.ts', import.meta.url), 'utf8')
+
+    expect(source).toContain('const nextBalance = user.tokenBalance + amount')
+    expect(source).toContain("if (nextBalance < 0) return { error: 'insufficient_token_balance' }")
+    expect(source).toContain('TokenTransactionType.ADMIN_ADJUSTMENT')
+    expect(source).toContain('createAdminAuditLog(')
+    expect(source).toContain('AdminAuditAction.TOKEN_ADJUSTMENT')
+    expect(source).toContain("targetType: 'USER'")
+    expect(source).toContain('previousBalance: user.tokenBalance')
+    expect(source).toContain('nextBalance')
   })
 })

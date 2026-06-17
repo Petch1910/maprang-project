@@ -128,6 +128,41 @@ describe('generation.routes', () => {
     expect(typeof body.persisted).toBe('boolean')
   })
 
+  test('requires identity before cancelling generation jobs', async () => {
+    const response = await generationRoutes.handle(
+      jsonRequest('/generation/jobs/22222222-2222-4222-8222-222222222222/cancel', {}),
+    )
+    const body = (await response.json()) as { error: string }
+
+    expect(response.status).toBe(401)
+    expect(body.error).toBe('unauthorized')
+  })
+
+  test('rejects invalid generation job ids before cancel', async () => {
+    const response = await generationRoutes.handle(
+      jsonRequest('/generation/jobs/not-a-uuid/cancel', {}, {
+        'x-user-id': '11111111-1111-4111-8111-111111111111',
+      }),
+    )
+    const body = (await response.json()) as { error: string }
+
+    expect(response.status).toBe(400)
+    expect(body.error).toBe('invalid_id')
+  })
+
+  test('returns not found for missing owner generation job cancel', async () => {
+    const response = await generationRoutes.handle(
+      jsonRequest('/generation/jobs/22222222-2222-4222-8222-222222222222/cancel', {}, {
+        'x-user-id': '11111111-1111-4111-8111-111111111111',
+      }),
+    )
+    const body = (await response.json()) as { error: string; persisted: boolean }
+
+    expect(response.status).toBe(404)
+    expect(body.error).toBe('generation_job_not_found')
+    expect(typeof body.persisted).toBe('boolean')
+  })
+
   test('requires identity before favoriting generation outputs', async () => {
     const response = await generationRoutes.handle(
       jsonRequest('/generation/outputs/33333333-3333-4333-8333-333333333333/favorite', {}),
@@ -209,6 +244,50 @@ describe('generation.routes', () => {
     expect(response.status).toBe(404)
     expect(body.error).toBe('generation_output_not_found')
     expect(typeof body.persisted).toBe('boolean')
+  })
+
+  test('requires identity before using generation output as character image', async () => {
+    const response = await generationRoutes.handle(
+      jsonRequest('/generation/outputs/33333333-3333-4333-8333-333333333333/use-as-character-image', {}),
+    )
+    const body = (await response.json()) as { error: string }
+
+    expect(response.status).toBe(401)
+    expect(body.error).toBe('unauthorized')
+  })
+
+  test('rejects invalid generation output ids before creator reference', async () => {
+    const response = await generationRoutes.handle(
+      jsonRequest('/generation/outputs/not-a-uuid/use-as-cover', {}, {
+        'x-user-id': '11111111-1111-4111-8111-111111111111',
+      }),
+    )
+    const body = (await response.json()) as { error: string }
+
+    expect(response.status).toBe(400)
+    expect(body.error).toBe('invalid_id')
+  })
+
+  test('returns not found for missing owner generation output creator references', async () => {
+    const imageResponse = await generationRoutes.handle(
+      jsonRequest('/generation/outputs/33333333-3333-4333-8333-333333333333/use-as-character-image', {}, {
+        'x-user-id': '11111111-1111-4111-8111-111111111111',
+      }),
+    )
+    const coverResponse = await generationRoutes.handle(
+      jsonRequest('/generation/outputs/33333333-3333-4333-8333-333333333333/use-as-cover', {}, {
+        'x-user-id': '11111111-1111-4111-8111-111111111111',
+      }),
+    )
+    const imageBody = (await imageResponse.json()) as { error: string; persisted: boolean }
+    const coverBody = (await coverResponse.json()) as { error: string; persisted: boolean }
+
+    expect(imageResponse.status).toBe(404)
+    expect(imageBody.error).toBe('generation_output_not_found')
+    expect(typeof imageBody.persisted).toBe('boolean')
+    expect(coverResponse.status).toBe(404)
+    expect(coverBody.error).toBe('generation_output_not_found')
+    expect(typeof coverBody.persisted).toBe('boolean')
   })
 
   test('requires identity before deleting generation outputs', async () => {

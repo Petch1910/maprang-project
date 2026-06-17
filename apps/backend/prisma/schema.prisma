@@ -54,6 +54,7 @@ enum AdminAuditAction {
 
 enum TokenTransactionType {
   CHAT_USAGE
+  IMAGE_GENERATION
   ADMIN_ADJUSTMENT
   PROMOTION
   PURCHASE
@@ -105,6 +106,8 @@ model User {
   creatorDraft      CreatorDraft?
   generationJobs    GenerationJob[]
   generationOutputs GenerationOutput[]
+  providerKeys      UserProviderKey[]
+  securityAuditLogs UserSecurityAuditLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -310,6 +313,38 @@ model TokenTransaction {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([type, createdAt(sort: Desc)])
+}
+
+model UserProviderKey {
+  id            String  @id @default(uuid()) @db.Uuid
+  userId        String  @db.Uuid
+  provider      String
+  keyCiphertext String  @db.Text
+  keyHint       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, provider])
+  @@index([userId])
+}
+
+model UserSecurityAuditLog {
+  id         String  @id @default(uuid()) @db.Uuid
+  userId     String  @db.Uuid
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action, createdAt(sort: Desc)])
 }
 
 model Report {

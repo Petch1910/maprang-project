@@ -86,7 +86,7 @@ export type SendChatInput = {
   userApiProvider?: string
 }
 
-type CompletionUsage = {
+export type CompletionUsage = {
   promptTokens: number
   completionTokens: number
   totalTokens: number
@@ -259,6 +259,32 @@ function fallbackUsage(): CompletionUsage {
     totalTokens: 0,
     cost: 0,
   }
+}
+
+export function estimateBillableChatUsage(
+  messages: Array<{ role: string; content: string }>,
+  reply: string,
+): CompletionUsage {
+  const promptTokens = Math.max(1, estimatePromptTokens(messages.map((message) => `${message.role}: ${message.content}`).join('\n\n')))
+  const completionTokens = Math.max(1, estimatePromptTokens(reply))
+  const totalTokens = promptTokens + completionTokens
+
+  return {
+    promptTokens,
+    completionTokens,
+    totalTokens,
+    cost: calculateCost(promptTokens, completionTokens),
+  }
+}
+
+export function ensureBillableChatUsage(
+  usage: CompletionUsage,
+  messages: Array<{ role: string; content: string }>,
+  reply: string,
+): CompletionUsage {
+  if (usage.totalTokens > 0) return usage
+  if (!reply.trim()) return usage
+  return estimateBillableChatUsage(messages, reply)
 }
 
 type EnvLike = Record<string, string | undefined>
@@ -1663,6 +1689,7 @@ export async function sendChat(input: SendChatInput) {
     reply = extension.reply
     usage = addUsage(usage, extension.usage)
   }
+  usage = ensureBillableChatUsage(usage, messages, reply)
   const persistResult =
     prisma && character
       ? await persistChatTurn({
@@ -1893,6 +1920,7 @@ export function streamChat(input: SendChatInput) {
           trimmedReply = extension.reply
           usage = addUsage(usage, extension.usage)
         }
+        usage = ensureBillableChatUsage(usage, messages, trimmedReply)
         const persistResult =
           prisma && character
             ? await persistChatTurn({

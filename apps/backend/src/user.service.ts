@@ -1,3 +1,5 @@
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
+import { Prisma } from '@prisma/client'
 import { defaultUserId } from './config'
 import { clampMaxRating, normalizeMaxRating, type ContentRating } from './content-rating'
 import { getPrisma } from './db'
@@ -13,6 +15,19 @@ export type UserPersonaInput = {
 
 const maxPersonaChars = 2000
 const usageLookbackDays = 7
+const providerKeyVaultVersion = 'v1'
+const supportedUserApiProviders = new Set(['openrouter', 'openai', 'gemini', 'anthropic'])
+
+export type ProviderKeyInput = {
+  apiKey: string
+}
+
+export type ProviderKeyMetadata = {
+  provider: string
+  keyHint: string | null
+  createdAt: Date
+  updatedAt: Date
+}
 
 function normalizePersona(value?: string) {
   return value?.replace(/\r\n/g, '\n').trim().slice(0, maxPersonaChars) ?? ''
@@ -36,6 +51,226 @@ function decimalString(value: { toString(): string } | number | string | null | 
   const numericValue = Number(value.toString())
   if (!Number.isFinite(numericValue)) return '0'
   return numericValue.toFixed(6)
+}
+
+export function normalizeUserApiProvider(value?: string | null) {
+  const provider = value?.trim().toLowerCase() || 'openrouter'
+  if (!supportedUserApiProviders.has(provider)) return 'openrouter'
+  return provider
+}
+
+export function providerKeyHint(apiKey: string) {
+  const normalized = apiKey.trim()
+  if (normalized.length <= 4) return '****'
+  return `****${normalized.slice(-4)}`
+}
+
+function byokEncryptionSecret() {
+  const explicitSecret = process.env.BYOK_ENCRYPTION_SECRET?.trim()
+  if (explicitSecret) return explicitSecret
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('BYOK_ENCRYPTION_SECRET_missing')
+  }
+  return process.env.ADMIN_API_KEY?.trim() || 'maprang-local-user-provider-key-vault'
+}
+
+function encryptionKey(secret = byokEncryptionSecret()) {
+  return createHash('sha256').update(secret).digest()
+}
+
+export function encryptUserProviderKey(apiKey: string, secret = byokEncryptionSecret()) {
+  const plaintext = apiKey.trim()
+  if (!plaintext) throw new Error('provider_key_empty')
+
+  const iv = randomBytes(12)
+  const cipher = createCipheriv('aes-256-gcm', encryptionKey(secret), iv)
+  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
+  const tag = cipher.getAuthTag()
+  return [
+    providerKeyVaultVersion,
+    iv.toString('base64url'),
+    tag.toString('base64url'),
+    encrypted.toString('base64url'),
+  ].join(':')
+}
+
+export function decryptUserProviderKey(ciphertext: string, secret = byokEncryptionSecret()) {
+  const [version, ivValue, tagValue, encryptedValue] = ciphertext.split(':')
+  if (version !== providerKeyVaultVersion || !ivValue || !tagValue || !encryptedValue) {
+    throw new Error('provider_key_ciphertext_invalid')
+  }
+
+  const decipher = createDecipheriv('aes-256-gcm', encryptionKey(secret), Buffer.from(ivValue, 'base64url'))
+  decipher.setAuthTag(Buffer.from(tagValue, 'base64url'))
+  return Buffer.concat([
+    decipher.update(Buffer.from(encryptedValue, 'base64url')),
+    decipher.final(),
+  ]).toString('utf8')
+}
+
+function providerKeyMetadata(row: {
+  provider: string
+  keyHint: string | null
+  createdAt: Date
+  updatedAt: Date
+}): ProviderKeyMetadata {
+  return {
+    provider: row.provider,
+    keyHint: row.keyHint,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }
+}
+
+async function writeUserSecurityAuditLog(
+  userId: string,
+  action: string,
+  targetType: string,
+  targetId: string | null,
+  metadata?: Record<string, unknown>,
+) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+  return prisma.userSecurityAuditLog.create({
+    data: {
+      userId,
+      action,
+      targetType,
+      targetId,
+      metadata: (metadata ?? {}) as Prisma.InputJsonValue,
+    },
+  })
+}
+
+export async function listUserProviderKeys(userId = defaultUserId) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const rows = await prisma.userProviderKey.findMany({
+    where: { userId },
+    orderBy: [{ provider: 'asc' }],
+    select: {
+      provider: true,
+      keyHint: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+
+  return rows.map(providerKeyMetadata)
+}
+
+export async function upsertUserProviderKey(userId = defaultUserId, providerInput: string, input: ProviderKeyInput) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const provider = normalizeUserApiProvider(providerInput)
+  const apiKey = input.apiKey.trim()
+  if (!apiKey) throw new Error('provider_key_empty')
+
+  const saved = await prisma.userProviderKey.upsert({
+    where: {
+      userId_provider: {
+        userId,
+        provider,
+      },
+    },
+    create: {
+      userId,
+      provider,
+      keyCiphertext: encryptUserProviderKey(apiKey),
+      keyHint: providerKeyHint(apiKey),
+    },
+    update: {
+      keyCiphertext: encryptUserProviderKey(apiKey),
+      keyHint: providerKeyHint(apiKey),
+    },
+    select: {
+      id: true,
+      provider: true,
+      keyHint: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+
+  await writeUserSecurityAuditLog(userId, 'USER_PROVIDER_KEY_UPSERT', 'UserProviderKey', saved.id, {
+    provider,
+    keyHint: saved.keyHint,
+  })
+
+  return providerKeyMetadata(saved)
+}
+
+export async function deleteUserProviderKey(userId = defaultUserId, providerInput: string) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const provider = normalizeUserApiProvider(providerInput)
+  const existing = await prisma.userProviderKey.findUnique({
+    where: {
+      userId_provider: {
+        userId,
+        provider,
+      },
+    },
+    select: {
+      id: true,
+      provider: true,
+      keyHint: true,
+    },
+  })
+
+  if (!existing) {
+    await writeUserSecurityAuditLog(userId, 'USER_PROVIDER_KEY_DELETE_MISSING', 'UserProviderKey', null, { provider })
+    return { deleted: false, provider }
+  }
+
+  await prisma.userProviderKey.delete({
+    where: {
+      userId_provider: {
+        userId,
+        provider,
+      },
+    },
+  })
+  await writeUserSecurityAuditLog(userId, 'USER_PROVIDER_KEY_DELETE', 'UserProviderKey', existing.id, {
+    provider,
+    keyHint: existing.keyHint,
+  })
+
+  return { deleted: true, provider }
+}
+
+export async function resolveUserProviderKey(userId = defaultUserId, providerInput?: string | null) {
+  const prisma = getPrisma()
+  if (!prisma) return null
+
+  const provider = normalizeUserApiProvider(providerInput)
+  const row = await prisma.userProviderKey.findUnique({
+    where: {
+      userId_provider: {
+        userId,
+        provider,
+      },
+    },
+    select: {
+      id: true,
+      provider: true,
+      keyCiphertext: true,
+      keyHint: true,
+    },
+  })
+
+  if (!row) return null
+  await writeUserSecurityAuditLog(userId, 'USER_PROVIDER_KEY_USE', 'UserProviderKey', row.id, {
+    provider,
+    keyHint: row.keyHint,
+  })
+  return {
+    provider: row.provider,
+    apiKey: decryptUserProviderKey(row.keyCiphertext),
+  }
 }
 
 export async function loadContentSettings(userId = defaultUserId) {

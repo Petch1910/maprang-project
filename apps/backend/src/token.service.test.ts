@@ -45,6 +45,7 @@ describe('token.service', () => {
     test('should have all required types', () => {
       const types: TokenTransactionType[] = [
         TokenTransactionType.CHAT_USAGE,
+        TokenTransactionType.IMAGE_GENERATION,
         TokenTransactionType.ADMIN_ADJUSTMENT,
         TokenTransactionType.PROMOTION,
         TokenTransactionType.PURCHASE,
@@ -54,7 +55,7 @@ describe('token.service', () => {
         TokenTransactionType.PENALTY,
         TokenTransactionType.EXPIRY,
       ]
-      expect(types.length).toBe(9)
+      expect(types.length).toBe(10)
     })
   })
 

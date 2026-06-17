@@ -1,8 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 import {
   buildBlockedGenerationJob,
+  cancelGenerationJobForUser,
   createGenerationJob,
   deleteGenerationOutputForUser,
+  getGenerationOutputCreatorReferenceForUser,
   getGenerationOutputDownloadForUser,
   getGenerationJobForUser,
   listGenerationJobsForUser,
@@ -185,6 +187,20 @@ describe('generation.service', () => {
     })
   })
 
+  test('keeps generation job cancel local-safe when persistence is unavailable', async () => {
+    await expect(
+      cancelGenerationJobForUser({
+        userId: '11111111-1111-4111-8111-111111111111',
+        jobId: '22222222-2222-4222-8222-222222222222',
+        prisma: null,
+      }),
+    ).resolves.toEqual({
+      job: null,
+      persisted: false,
+      persistenceWarning: 'generation_persistence_unavailable',
+    })
+  })
+
   test('keeps generation output download URLs local-safe when persistence is unavailable', async () => {
     await expect(
       getGenerationOutputDownloadForUser({
@@ -194,6 +210,21 @@ describe('generation.service', () => {
       }),
     ).resolves.toEqual({
       download: null,
+      persisted: false,
+      persistenceWarning: 'generation_persistence_unavailable',
+    })
+  })
+
+  test('keeps generation output creator references local-safe when persistence is unavailable', async () => {
+    await expect(
+      getGenerationOutputCreatorReferenceForUser({
+        userId: '11111111-1111-4111-8111-111111111111',
+        outputId: '33333333-3333-4333-8333-333333333333',
+        target: 'cover',
+        prisma: null,
+      }),
+    ).resolves.toEqual({
+      reference: null,
       persisted: false,
       persistenceWarning: 'generation_persistence_unavailable',
     })

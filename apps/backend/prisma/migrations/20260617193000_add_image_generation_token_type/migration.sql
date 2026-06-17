@@ -1,0 +1,1 @@
+ALTER TYPE "TokenTransactionType" ADD VALUE 'IMAGE_GENERATION';
