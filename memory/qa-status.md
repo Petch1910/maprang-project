@@ -2,6 +2,8 @@
 
 Last updated: 2026-06-17
 
+- 2026-06-17 Local server stabilization commit/push + re-verification: All local server work committed to GitHub main branch in 6 focused commits (docs, backend, frontend, scripts, root config, memory). `bun run qa:full` re-verified after push: backend 331 tests / 1442 expects, API smoke 32 pass / 2 live-skip / 0 fail, Playwright e2e 4/4 desktop+mobile, QA seed/reseed clean. Working tree clean. Local server target is fully committed, tested, and verified on main.
+
 - 2026-06-17 Non-cloud local acceptance QA pass: `bun run qa:full` passed after the BYOK vault and local-server slices. Evidence includes repo audits/tests/builds, backend tests 331 pass / 1442 expects, frontend production build and bundle budget, API smoke 32 pass / 2 live skips / 0 fail, and Playwright e2e 4/4 across Chromium desktop/mobile. Browser smoke now uses isolated backend port `3191` by default to avoid stale dev-server reuse, while normal local backend operation remains on the configured app port.
 
 - 2026-06-17 Local-server runbook sync QA pass: `docs/LOCAL_SERVER_RUNBOOK.md` now separates completed local tasks, operator checklist, and future/external work. `local:doctor` source-locks that split and rejects stale backlog wording. Passing evidence: `bun run local:doctor:test` (4 pass / 7 expects), `bun run local:doctor` (7/7), and `bun run docs:commands`.
