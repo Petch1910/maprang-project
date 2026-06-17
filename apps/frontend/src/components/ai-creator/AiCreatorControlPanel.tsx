@@ -33,6 +33,7 @@ type AiCreatorControlPanelProps = {
   statusMessage: string
   imageGenerateBlockReason: string | null
   videoGenerateBlockReason: string | null
+  videoProviderNotice: string
   onTabChange: (tab: AiCreatorMode) => void
   onSelectedCharacterIdChange: (characterId: string) => void
   onBriefChange: (brief: string) => void
@@ -74,6 +75,7 @@ export function AiCreatorControlPanel({
   statusMessage,
   imageGenerateBlockReason,
   videoGenerateBlockReason,
+  videoProviderNotice,
   onTabChange,
   onSelectedCharacterIdChange,
   onBriefChange,
@@ -440,6 +442,15 @@ export function AiCreatorControlPanel({
               </>
             )}
           </button>
+          {videoGenerateBlockReason && (
+            <div
+              data-testid="ai-creator-video-contract-state"
+              className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-3.5 py-3 text-[11px] leading-relaxed text-amber-100"
+            >
+              <p className="font-semibold text-amber-200">{videoGenerateBlockReason}</p>
+              <p className="mt-1 text-amber-100/80">{videoProviderNotice}</p>
+            </div>
+          )}
         </form>
       )}
 

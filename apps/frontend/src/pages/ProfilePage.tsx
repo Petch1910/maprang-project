@@ -6,8 +6,8 @@ import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadContentSettings, saveContentSettings, selectContentSettings } from '../store/slices/contentSlice'
 import { loadPersonaDraft, savePersonaDraft, savePersonaDraftToCloud, selectPersonaDraft, selectPersonaUpdatedAt } from '../store/slices/draftsSlice'
 import { loadWalletSummary, selectIsLowToken, selectTokenBalance } from '../store/slices/walletSlice'
-import { safeGetStorageItem, safeSetStorageItem } from '../lib/safeStorage'
-import { testConnection } from '../lib/api'
+import { safeGetStorageItem, safeRemoveStorageItem, safeSetStorageItem } from '../lib/safeStorage'
+import { deleteProviderKey, fetchProviderKeys, saveProviderKey, testConnection, type ProviderKeyMetadata } from '../lib/api'
 
 const personaTemplate = [
   'ชื่อ:',
@@ -72,7 +72,8 @@ export function ProfilePage() {
   })
   const [customApiKey, setCustomApiKey] = useState(() => {
     if (typeof window === 'undefined') return ''
-    return safeGetStorageItem(window.localStorage, 'maprang:customApiKey') || ''
+    safeRemoveStorageItem(window.localStorage, 'maprang:customApiKey')
+    return safeGetStorageItem(window.sessionStorage, 'maprang:customApiKey:session') || ''
   })
   const [customApiProvider, setCustomApiProvider] = useState(() => {
     if (typeof window === 'undefined') return 'openrouter'
@@ -80,11 +81,19 @@ export function ProfilePage() {
   })
   const [isTesting, setIsTesting] = useState(false)
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null)
+  const [vaultKeys, setVaultKeys] = useState<ProviderKeyMetadata[]>([])
+  const [vaultNote, setVaultNote] = useState('')
+  const [isVaultSaving, setIsVaultSaving] = useState(false)
 
   const saveSettings = (enabled: boolean, key: string, provider: string) => {
     if (typeof window === 'undefined') return
     safeSetStorageItem(window.localStorage, 'maprang:bypassEnabled', String(enabled))
-    safeSetStorageItem(window.localStorage, 'maprang:customApiKey', key.trim())
+    safeRemoveStorageItem(window.localStorage, 'maprang:customApiKey')
+    if (enabled && key.trim()) {
+      safeSetStorageItem(window.sessionStorage, 'maprang:customApiKey:session', key.trim())
+    } else {
+      safeRemoveStorageItem(window.sessionStorage, 'maprang:customApiKey:session')
+    }
     safeSetStorageItem(window.localStorage, 'maprang:customApiProvider', provider)
   }
 
@@ -100,6 +109,50 @@ export function ProfilePage() {
       setTestResult({ ok: false, message: msg })
     } finally {
       setIsTesting(false)
+    }
+  }
+
+  const currentVaultKey = vaultKeys.find((key) => key.provider === customApiProvider)
+
+  const refreshProviderKeys = useCallback(async () => {
+    try {
+      const result = await fetchProviderKeys()
+      setVaultKeys(result.keys)
+    } catch {
+      setVaultNote('โหลดตู้เซฟ API key ไม่สำเร็จ')
+    }
+  }, [])
+
+  const handleSaveKeyToVault = async () => {
+    const trimmed = customApiKey.trim()
+    if (!trimmed || isVaultSaving) return
+    setIsVaultSaving(true)
+    setVaultNote('กำลังบันทึก API key เข้าตู้เซฟบัญชี...')
+    try {
+      const result = await saveProviderKey(customApiProvider, trimmed)
+      setVaultKeys((keys) => [result.key, ...keys.filter((key) => key.provider !== result.key.provider)])
+      setCustomApiKey('')
+      if (typeof window !== 'undefined') safeRemoveStorageItem(window.sessionStorage, 'maprang:customApiKey:session')
+      setVaultNote(`บันทึก ${result.key.provider} แล้ว (${result.key.keyHint ?? 'ซ่อนทั้งหมด'})`)
+    } catch {
+      setVaultNote('บันทึก API key เข้าตู้เซฟไม่สำเร็จ')
+    } finally {
+      setIsVaultSaving(false)
+    }
+  }
+
+  const handleDeleteVaultKey = async () => {
+    if (!currentVaultKey || isVaultSaving) return
+    setIsVaultSaving(true)
+    setVaultNote('กำลังลบ API key จากตู้เซฟบัญชี...')
+    try {
+      await deleteProviderKey(currentVaultKey.provider)
+      setVaultKeys((keys) => keys.filter((key) => key.provider !== currentVaultKey.provider))
+      setVaultNote(`ลบ ${currentVaultKey.provider} จากตู้เซฟแล้ว`)
+    } catch {
+      setVaultNote('ลบ API key จากตู้เซฟไม่สำเร็จ')
+    } finally {
+      setIsVaultSaving(false)
     }
   }
 
@@ -119,8 +172,13 @@ export function ProfilePage() {
       dispatch(loadWalletSummary()).unwrap(),
       dispatch(loadContentSettings()).unwrap(),
       dispatch(loadPersonaDraft()).unwrap(),
+      refreshProviderKeys(),
     ])
-  }, [dispatch])
+  }, [dispatch, refreshProviderKeys])
+
+  useEffect(() => {
+    void refreshProviderKeys()
+  }, [refreshProviderKeys])
 
   useEffect(() => {
     if (!personaUpdatedAt) return
@@ -359,8 +417,49 @@ export function ProfilePage() {
                   )}
                 </div>
 
+                <div className="rounded-xl border border-white/10 bg-black/24 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="m-0 text-sm font-black text-white">ตู้เซฟ API key ของบัญชี</p>
+                      <p className="m-0 mt-1 text-xs font-bold leading-5 text-white/50">
+                        เก็บแบบเข้ารหัสฝั่ง backend และส่งให้ provider เฉพาะตอนเปิดโหมดผู้ทดสอบระบบ
+                      </p>
+                      <p className="m-0 mt-2 text-xs font-bold text-white/45" data-testid="profile-provider-key-vault-status">
+                        {currentVaultKey
+                          ? `มี key สำหรับ ${currentVaultKey.provider} (${currentVaultKey.keyHint ?? 'ซ่อนทั้งหมด'})`
+                          : `ยังไม่มี key ที่บันทึกไว้สำหรับ ${customApiProvider}`}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="missai-button-primary min-h-10 rounded-xl px-4 text-xs disabled:opacity-50"
+                        disabled={isVaultSaving || !customApiKey.trim()}
+                        onClick={handleSaveKeyToVault}
+                        title={customApiKey.trim() ? 'บันทึก key เข้าตู้เซฟบัญชี' : 'กรอก API key ก่อนบันทึกเข้าตู้เซฟ'}
+                      >
+                        {isVaultSaving ? 'กำลังบันทึก...' : 'บันทึกเข้าตู้เซฟ'}
+                      </button>
+                      <button
+                        type="button"
+                        className="missai-button-secondary min-h-10 rounded-xl px-4 text-xs disabled:opacity-50"
+                        disabled={isVaultSaving || !currentVaultKey}
+                        onClick={handleDeleteVaultKey}
+                        title={currentVaultKey ? 'ลบ key ที่บันทึกไว้' : 'ยังไม่มี key ที่บันทึกไว้'}
+                      >
+                        ลบ key ที่บันทึกไว้
+                      </button>
+                    </div>
+                  </div>
+                  {vaultNote && (
+                    <p className="m-0 mt-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white/55">
+                      {vaultNote}
+                    </p>
+                  )}
+                </div>
+
                 <p className="text-[11px] font-bold text-white/35 flex items-center gap-1">
-                  🔒 Privacy Lock: API Key จะถูกบันทึกไว้ที่เบราว์เซอร์ (LocalStorage) ของท่านเท่านั้น โดยจะไม่บันทึกเข้าสู่เซิร์ฟเวอร์หลักอย่างเด็ดขาด
+                  🔒 Privacy Lock: API Key ใช้เฉพาะแท็บนี้ผ่าน sessionStorage และจะไม่ถูกบันทึกถาวรลง localStorage หรือฐานข้อมูลหลัก
                 </p>
               </div>
             )}

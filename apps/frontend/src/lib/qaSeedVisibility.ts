@@ -27,7 +27,7 @@ const qaSeedChatIds = new Set([
 
 export function canShowQaSeedData() {
   if (typeof window === 'undefined') return false
-  if (import.meta.env.PROD) return false
+  if (import.meta.env.PROD && import.meta.env.VITE_ALLOW_QA_SEED !== '1') return false
   return safeGetStorageItem(window.localStorage, QA_SEED_VISIBILITY_STORAGE_KEY) === '1'
 }
 

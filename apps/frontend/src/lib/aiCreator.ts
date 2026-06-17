@@ -1,4 +1,4 @@
-import type { CreatorAiDraftResponse } from './api'
+import type { CreatorAiDraftResponse, GenerationJobOutput } from './api'
 import {
   buildCharacterDraftFromImage,
   mergeDraftTags,
@@ -98,6 +98,12 @@ export type AiCreatorRetryActionState = {
   label: string
   title: string
 }
+export type AiCreatorCancelActionState = {
+  canCancel: boolean
+  mode: 'backend' | 'unavailable'
+  label: string
+  title: string
+}
 export type AiCreatorGenerationJobSnapshot = {
   id: string
   templateId: string
@@ -116,6 +122,12 @@ export type AiCreatorGenerationJobSnapshot = {
     createdAt?: string
   }>
 }
+export type AiCreatorPublicGalleryOutput = GenerationJobOutput & {
+  prompt?: string
+  templateId?: string
+  mode?: string
+  brief?: string
+}
 
 export const AI_CREATOR_HISTORY_KEY = 'maprang:creator-image-history'
 export const AI_CREATOR_HISTORY_PAGE_SIZE = 12
@@ -129,6 +141,9 @@ export const AI_CREATOR_TEMPLATE_VIDEO_TYPES = ['video/mp4', 'video/webm', 'vide
 export const AI_CREATOR_VIDEO_MIN_SECONDS = 3
 export const AI_CREATOR_VIDEO_MAX_SECONDS = 10
 export const AI_CREATOR_VIDEO_DEFAULT_TEMPLATE = 'gentle-breeze'
+export const AI_CREATOR_VIDEO_PROVIDER_STATUS: AiCreatorProviderStatus = 'missing'
+export const AI_CREATOR_VIDEO_PROVIDER_NOTICE =
+  'โหมดวิดีโอ/Advanced Video ยังเป็นสัญญาหน้าจอสำหรับเตรียมงาน ยังไม่เปิด provider สร้างวิดีโอจริงใน production'
 export const AI_CREATOR_UPLOAD_SLOT_RULES = {
   textToImage: [] as AiCreatorUploadSlotRule[],
   imageToImage: [
@@ -353,6 +368,42 @@ export function getAiCreatorRetryActionState(item: AiCreatorGeneratedItem): AiCr
   }
 }
 
+export function getAiCreatorCancelActionState(item: AiCreatorGeneratedItem): AiCreatorCancelActionState {
+  if (!item.backendJobId) {
+    return {
+      canCancel: false,
+      mode: 'unavailable',
+      label: 'ไม่มีงาน backend',
+      title: 'ยกเลิกได้เฉพาะงานที่บันทึกอยู่ใน backend เท่านั้น',
+    }
+  }
+
+  if (item.backendJobStatus === 'queued' || item.backendJobStatus === 'running' || item.backendJobStatus === 'blocked') {
+    return {
+      canCancel: true,
+      mode: 'backend',
+      label: 'ยกเลิกงาน',
+      title: 'ยกเลิกงานสร้างนี้โดยไม่หักโทเคนเพิ่ม',
+    }
+  }
+
+  if (item.backendJobStatus === 'cancelled') {
+    return {
+      canCancel: false,
+      mode: 'backend',
+      label: 'ยกเลิกแล้ว',
+      title: 'งานนี้ถูกยกเลิกแล้ว',
+    }
+  }
+
+  return {
+    canCancel: false,
+    mode: 'backend',
+    label: 'ยกเลิกไม่ได้',
+    title: 'งานนี้จบแล้ว จึงยกเลิกไม่ได้',
+  }
+}
+
 export function getAiCreatorDownloadLinkNotice(
   snapshot: AiCreatorDownloadLinkSnapshot | null | undefined,
   now = getAiCreatorTimestamp(),
@@ -468,6 +519,57 @@ export function createAiCreatorItemsFromGenerationJobs(
         }
       }),
   )
+}
+
+export function createAiCreatorItemsFromPublicGalleryOutputs(
+  outputs: AiCreatorPublicGalleryOutput[],
+): AiCreatorGeneratedItem[] {
+  return outputs
+    .filter((output) => typeof output.url === 'string' && output.url.length > 0)
+    .map((output) => {
+      const prompt = output.prompt?.trim() ?? ''
+      const templateId = output.templateId?.trim() || ''
+      const timestamp = Date.parse(output.createdAt ?? '')
+      return {
+        id: `public-${output.id}`,
+        backendJobId: output.jobId,
+        backendOutputId: output.id,
+        librarySource: 'backend' as const,
+        type: output.kind,
+        url: output.url ?? '',
+        prompt,
+        brief: output.brief?.trim() ?? '',
+        style: output.kind === 'image' ? templateId : '',
+        motionTemplate: output.kind === 'video' ? templateId : undefined,
+        timestamp: Number.isFinite(timestamp) ? timestamp : getAiCreatorTimestamp(),
+        isFavorite: output.isFavorite,
+        visibility: output.visibility,
+        response: {
+          draft: {
+            name: 'Public Generation',
+            tagline: '',
+            description: '',
+            biography: '',
+            scenario: '',
+            systemPrompt: prompt,
+            compactPrompt: prompt,
+            characterAnchor: '',
+            constraints: '',
+            greeting: '',
+            tags: 'public-gallery',
+          },
+          image: {
+            url: output.url ?? '',
+            provider: 'configured',
+            prompt,
+            note: 'Public Gallery output',
+          },
+          source: 'ai',
+          modelName: 'generation/gallery',
+          warnings: [],
+        } satisfies CreatorAiDraftResponse,
+      }
+    })
 }
 
 function fillCreatorDraftField<K extends keyof CharacterDraftFormFields>(
@@ -826,7 +928,7 @@ export function getAiCreatorGenerateBlockState({
       code: 'running_job',
       title: 'ระบบกำลังประมวลผลอยู่',
       cause: 'มีงาน Generate ที่ยังไม่จบ ระบบจึงกันการยิงซ้ำเพื่อไม่ให้เสียโทเคนซ้อน',
-      nextAction: 'รอให้งานปัจจุบันจบ หรือยกเลิกงานเมื่อมี cancel route พร้อม',
+      nextAction: 'รอให้งานปัจจุบันจบ หรือยกเลิกงานที่ยังไม่จบผ่านเมนูรายละเอียด',
       debitAllowed: false,
     }
   }

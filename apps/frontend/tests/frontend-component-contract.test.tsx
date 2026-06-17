@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
 import { createElement, type ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
@@ -204,6 +205,16 @@ describe('frontend component contracts', () => {
     expect(html).toContain('token balance is too low')
   })
 
+  test('chat composer routes button and enter submit through a local duplicate-send guard', () => {
+    const source = readFileSync(new URL('../src/components/Composer.tsx', import.meta.url), 'utf8')
+
+    expect(source).toContain('submitLockRef')
+    expect(source).toContain('handleSubmitRequest')
+    expect(source).toContain('if (!canSend || submitLockRef.current) return')
+    expect(source.match(/handleSubmitRequest\(\)/g)?.length).toBeGreaterThanOrEqual(2)
+    expect(source).not.toContain('if (canSend) onSubmit()')
+  })
+
   test('message bubble renders assistant markdown and report affordance', () => {
     const html = render(
       createElement(MessageBubble, {
@@ -214,7 +225,14 @@ describe('frontend component contracts', () => {
     )
 
     expect(html).toContain('<strong>Mika</strong>')
-    expect(html).toContain('data-testid="message-report-msg-assistant"')
+    expect(html).toContain('data-testid="message-actions-msg-assistant"')
+    const source = readFileSync(new URL('../src/components/MessageBubble.tsx', import.meta.url), 'utf8')
+    expect(source).toContain('data-testid={`message-copy-${chat.id}`}')
+    expect(source).toContain('data-testid={`message-report-${chat.id}`}')
+    expect(source).toContain('data-testid={`message-edit-disabled-${chat.id}`}')
+    expect(source).toContain('data-testid={`message-regenerate-disabled-${chat.id}`}')
+    expect(source).toContain('data-testid={`message-delete-disabled-${chat.id}`}')
+    expect(source).toContain('ยังไม่มีระบบแก้ไข ลบ หรือสร้างคำตอบใหม่เฉพาะข้อความนี้ใน API ปัจจุบัน')
   })
 
   test('character card renders identity, stats, favorite control, and lobby navigation context', () => {
@@ -389,9 +407,14 @@ describe('frontend component contracts', () => {
       },
     ]
 
-    const [staging, liveProvider, production] = buildDeployPhaseSteps(checks)
+    const [localServer, staging, liveProvider, production] = buildDeployPhaseSteps(checks)
 
-    expect(staging.command).toBe('bun run staging:verify + bun run e2e:smoke')
+    expect(localServer.command).toBe('bun run local:doctor + bun run qa:full')
+    expect(localServer.ok).toBe(false)
+    expect(localServer.detail).toContain('local')
+    expect(localServer.detail).not.toContain('URL')
+
+    expect(staging.command).toBe('bun run ngrok:proxy + bun run staging:verify + bun run e2e:smoke')
     expect(staging.ok).toBe(false)
     expect(staging.detail).toContain('URL หลังบ้านของหน้าเว็บ')
     expect(staging.detail).not.toContain('ฐานข้อมูล local')
@@ -459,9 +482,23 @@ describe('frontend component contracts', () => {
 
     expect(walletSource).toContain('ผู้ดูแลเพิ่มโทเคน')
     expect(walletSource).toContain('ผู้ดูแลหักโทเคน')
+    expect(walletSource).toContain('IMAGE_GENERATION')
+    expect(walletSource).toContain('สร้างรูป AI')
     expect(walletSource).not.toContain('manual_beta_grant')
     expect(walletSource).not.toContain('manual_admin_debit')
     expect(walletSource).not.toContain('ช่วงทดสอบก่อนเชื่อมระบบชำระเงินจริง')
+  })
+
+  test('profile BYOK mode keeps raw user API keys session-only', async () => {
+    const profileSource = await Bun.file('apps/frontend/src/pages/ProfilePage.tsx').text()
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
+
+    expect(profileSource).toContain("safeSetStorageItem(window.sessionStorage, 'maprang:customApiKey:session'")
+    expect(profileSource).toContain("safeRemoveStorageItem(window.sessionStorage, 'maprang:customApiKey:session')")
+    expect(profileSource).toContain("safeRemoveStorageItem(window.localStorage, 'maprang:customApiKey')")
+    expect(profileSource).not.toContain("safeSetStorageItem(window.localStorage, 'maprang:customApiKey'")
+    expect(apiSource).toContain("sessionValue('maprang:customApiKey:session')")
+    expect(apiSource).not.toContain("localValue('maprang:customApiKey')")
   })
 
   test('character lobby hides unavailable characters with product-facing copy', async () => {
@@ -483,13 +520,92 @@ describe('frontend component contracts', () => {
   test('moderation empty state uses product-facing report guidance', async () => {
     const moderationSource = await Bun.file('apps/frontend/src/pages/AdminModerationPage.tsx').text()
     const routeAuditSource = await Bun.file('apps/frontend/src/lib/routeMenuAudit.ts').text()
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
 
     expect(moderationSource).toContain('เมื่อมีรายงานจากห้องแชทหรือหน้าโปรไฟล์ตัวละคร')
     expect(moderationSource).toContain('ไปสร้างรายงานจากแชท')
+    expect(moderationSource).toContain("'GENERATION_OUTPUT'")
+    expect(moderationSource).toContain("'HIDE_GENERATION_OUTPUT'")
+    expect(moderationSource).toContain('ซ่อนผลงานสร้าง')
+    expect(apiSource).toContain("ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE' | 'HIDE_GENERATION_OUTPUT'")
+    expect(apiSource).toContain("AdminAuditAction =")
+    expect(apiSource).toContain("'HIDE_GENERATION_OUTPUT'")
+    expect(apiSource).toContain('generationOutput?:')
     expect(routeAuditSource).toContain('ถ้าไม่มีรายงานจะบอกวิธีสร้างรายงานจากหน้าแชทหรือหน้าโปรไฟล์ตัวละคร')
     expect(moderationSource).not.toContain('ทดสอบ flow')
     expect(moderationSource).not.toContain('ไปทดสอบรายงาน')
     expect(routeAuditSource).not.toContain('ทดสอบ flow')
+  })
+
+  test('content mode flows from age/profile settings into explore, lobby, and chat requests', async () => {
+    const contentSliceSource = await Bun.file('apps/frontend/src/store/slices/contentSlice.ts').text()
+    const ageGateSource = await Bun.file('apps/frontend/src/components/AgeGate.tsx').text()
+    const profileSource = await Bun.file('apps/frontend/src/pages/ProfilePage.tsx').text()
+    const exploreSource = await Bun.file('apps/frontend/src/pages/ExplorePage.tsx').text()
+    const lobbySource = await Bun.file('apps/frontend/src/pages/CharacterLobbyPage.tsx').text()
+    const workspaceSource = await Bun.file('apps/frontend/src/pages/WorkspacePage.tsx').text()
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
+
+    expect(contentSliceSource).toContain("maxRating: 'teen_romance'")
+    expect(contentSliceSource).toContain("state.maxRating = action.payload ? 'restricted_18' : 'teen_romance'")
+    expect(ageGateSource).toContain("dispatch(saveContentSettings({ isAdult, maxRating: isAdult ? 'restricted_18' : 'teen_romance' }))")
+    expect(profileSource).toContain('dispatch(saveContentSettings({ isAdult: mode.isAdult, maxRating: mode.maxRating }))')
+    expect(profileSource).toContain('data-testid={`profile-content-mode-${mode.maxRating}`}')
+    expect(exploreSource).toContain('maxRating: content.maxRating')
+    expect(exploreSource).toContain('canViewRating(characterRating(character), content.maxRating)')
+    expect(lobbySource).toContain('const canView = canViewRating(rating, content.maxRating)')
+    expect(lobbySource).toContain("dispatch(saveContentSettings({ isAdult: true, maxRating: 'restricted_18' }))")
+    expect(workspaceSource).toContain('maxRating: contentSettings.maxRating')
+    expect(apiSource).toContain("maxRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'")
+  })
+
+  test('ai creator generation API helpers cover cancel and creator reference endpoints', async () => {
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
+    const aiCreatorSource = await Bun.file('apps/frontend/src/lib/aiCreator.ts').text()
+    const detailSource = await Bun.file('apps/frontend/src/components/ai-creator/AiCreatorHistoryDetailDialog.tsx').text()
+    const pageSource = await Bun.file('apps/frontend/src/pages/AICreatorPage.tsx').text()
+
+    expect(apiSource).toContain('cancelGenerationJob')
+    expect(apiSource).toContain('/generation/jobs/${jobId}/cancel')
+    expect(apiSource).toContain('GenerationOutputCreatorReference')
+    expect(apiSource).toContain('useGenerationOutputAsCharacterImage')
+    expect(apiSource).toContain('/generation/outputs/${outputId}/use-as-character-image')
+    expect(apiSource).toContain('useGenerationOutputAsCover')
+    expect(apiSource).toContain('/generation/outputs/${outputId}/use-as-cover')
+    expect(aiCreatorSource).toContain('AI_CREATOR_VIDEO_PROVIDER_STATUS')
+    expect(aiCreatorSource).toContain('AI_CREATOR_VIDEO_PROVIDER_NOTICE')
+    expect(aiCreatorSource).toContain('getAiCreatorCancelActionState')
+    expect(aiCreatorSource).toContain("backendJobStatus === 'queued'")
+    expect(aiCreatorSource).toContain("backendJobStatus === 'running'")
+    expect(detailSource).toContain('ai-creator-library-detail-cancel-')
+    expect(detailSource).toContain('cancelState.title')
+    expect(detailSource).toContain('creatorReferenceAction')
+    expect(detailSource).toContain('const isPublicGalleryItem = item.id.startsWith')
+    expect(detailSource).toContain('Public Gallery Detail')
+    expect(detailSource).toContain('ai-creator-library-detail-public-notice-')
+    expect(detailSource).toContain('!isPublicGalleryItem && downloadNotice')
+    expect(detailSource).toContain("item.librarySource === 'backend' && !isPublicGalleryItem")
+    expect(detailSource).toContain('ai-creator-library-detail-use-image-')
+    expect(detailSource).toContain('ai-creator-library-detail-use-cover-')
+    expect(pageSource).toContain('providerStatus: AI_CREATOR_VIDEO_PROVIDER_STATUS')
+    expect(pageSource).toContain('videoProviderNotice={AI_CREATOR_VIDEO_PROVIDER_NOTICE}')
+    expect(pageSource).toContain('AI_CREATOR_VIDEO_PROVIDER_STATUS')
+    expect(await Bun.file('apps/frontend/src/components/ai-creator/AiCreatorControlPanel.tsx').text()).toContain(
+      'data-testid="ai-creator-video-contract-state"',
+    )
+    expect(pageSource).toContain('handleCancelHistoryItem')
+    expect(pageSource).toContain('cancelGenerationJob(item.backendJobId)')
+    expect(pageSource).toContain('resolveCreatorReferenceItem')
+    expect(pageSource).toContain("if (item.id.startsWith('public-')) return { ok: true, item }")
+    expect(pageSource).toContain('useGenerationOutputAsCharacterImage as createCharacterImageReference')
+    expect(pageSource).toContain('useGenerationOutputAsCover as createCoverReference')
+    expect(pageSource).toContain('createCharacterImageReference(item.backendOutputId)')
+    expect(pageSource).toContain('createCoverReference(item.backendOutputId)')
+    expect(pageSource).toContain('import.meta.env.DEV && err instanceof ApiError && err.status === 404 && hasLocalSafePreview')
+    expect(pageSource).toContain('ใช้ preview local-safe แทน backend reference')
+    expect(pageSource).toContain('Promise<{ ok: true; item: AiCreatorGeneratedItem } | { ok: false; message: string }>')
+    expect(pageSource).toContain('saveAiCreatorItemToCreatorDraft(window.localStorage, resolved.item)')
+    expect(pageSource).toContain('saveAiCreatorItemToCreatorCoverDraft(window.localStorage, resolved.item)')
   })
 
   test('events inbox selector exposes only playable pending scene summaries', () => {

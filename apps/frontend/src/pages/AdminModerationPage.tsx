@@ -21,7 +21,7 @@ import { safeErrorTextForClassification } from '../lib/safeError'
 import { safeGetStorageItem } from '../lib/safeStorage'
 
 const statuses: Array<ReportStatus | ''> = ['', 'PENDING', 'REVIEWED', 'RESOLVED', 'REJECTED']
-const targetTypes: Array<ReportTargetType | ''> = ['', 'CHARACTER', 'MESSAGE']
+const targetTypes: Array<ReportTargetType | ''> = ['', 'CHARACTER', 'MESSAGE', 'GENERATION_OUTPUT']
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('th-TH', {
@@ -83,6 +83,10 @@ function apiErrorMessage(error: unknown) {
 
 function reportTitle(report: ReportSummary) {
   if (report.targetType === 'CHARACTER') return report.character?.name ?? `ตัวละคร ${report.characterId ?? ''}`
+  if (report.targetType === 'GENERATION_OUTPUT') {
+    const kindLabel = report.generationOutput?.kind === 'video' ? 'วิดีโอ' : 'รูปภาพ'
+    return `รายงานผลงานสร้าง ${kindLabel}`
+  }
   return `รายงานข้อความจาก ${report.message?.role ?? 'ข้อความ'}`
 }
 
@@ -90,12 +94,16 @@ function reportBody(report: ReportSummary) {
   if (report.targetType === 'CHARACTER') {
     return report.details ?? 'ตัวละครนี้ถูกรายงานให้ผู้ดูแลตรวจสอบ'
   }
+  if (report.targetType === 'GENERATION_OUTPUT') {
+    return report.details ?? `ผลงานสร้างนี้ถูกแจ้งให้ตรวจสอบ สถานะปัจจุบัน: ${report.generationOutput?.visibility ?? 'ไม่ทราบ'}`
+  }
   return report.message?.content ?? report.details ?? 'ไม่พบเนื้อหาข้อความนี้แล้ว'
 }
 
 function reportTargetPath(report: ReportSummary) {
   if (report.targetType === 'CHARACTER' && report.characterId) return `/characters/${report.characterId}`
   if (report.message?.chatId) return `/chat/${report.message.chatId}`
+  if (report.targetType === 'GENERATION_OUTPUT') return '/ai-creator'
   return null
 }
 
@@ -111,6 +119,7 @@ function auditActionLabel(action: AdminAuditLog['action']) {
     REPORT_STATUS_UPDATE: 'เปลี่ยนสถานะรายงาน',
     HIDE_CHARACTER: 'ซ่อนตัวละคร',
     ARCHIVE_MESSAGE: 'จัดเก็บข้อความ',
+    HIDE_GENERATION_OUTPUT: 'ซ่อนผลงานสร้าง',
     TOKEN_ADJUSTMENT: 'ปรับโทเคน',
   }
   return labels[action] ?? action
@@ -153,6 +162,10 @@ export function AdminModerationPage() {
         report.id,
         report.characterId,
         report.messageId,
+        report.generationOutputId,
+        report.generationOutput?.id,
+        report.generationOutput?.kind,
+        report.generationOutput?.visibility,
       ]
         .filter(Boolean)
         .join(' ')
@@ -233,7 +246,12 @@ export function AdminModerationPage() {
       setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
       const auditData = await fetchAdminAuditLogs(12)
       setAuditLogs(auditData.logs)
-      setNote(action === 'HIDE_CHARACTER' ? 'ซ่อนตัวละครและปิดรายงานแล้ว' : 'จัดเก็บข้อความและปิดรายงานแล้ว')
+      const actionNote: Record<ReportAdminAction, string> = {
+        HIDE_CHARACTER: 'ซ่อนตัวละครและปิดรายงานแล้ว',
+        ARCHIVE_MESSAGE: 'จัดเก็บข้อความและปิดรายงานแล้ว',
+        HIDE_GENERATION_OUTPUT: 'ซ่อนผลงานสร้างและปิดรายงานแล้ว',
+      }
+      setNote(actionNote[action])
     } catch (error) {
       logUnexpectedError('ทำคำสั่งดูแลรายงานไม่สำเร็จ:', error)
       setNote(error instanceof ApiError && error.status === 403 ? 'ยังไม่ได้เปิดสิทธิ์ผู้ดูแล หรือรหัสผู้ดูแลไม่ถูกต้อง' : 'ทำคำสั่งดูแลรายงานไม่ได้')
@@ -424,6 +442,13 @@ export function AdminModerationPage() {
                 : isMessageArchived
                   ? 'ข้อความนี้ถูกจัดเก็บแล้ว'
                   : ''
+            const hideGenerationOutputReason = isUpdatingReport
+              ? 'กำลังซ่อนผลงานสร้างรายงานนี้'
+              : isResolvedReport
+                ? 'รายงานนี้จัดการแล้ว'
+                : report.generationOutput?.visibility === 'private'
+                  ? 'ผลงานสร้างนี้ถูกซ่อนแล้ว'
+                  : ''
             const statusActionReason = isUpdatingReport ? 'กำลังอัปเดตรายงานนี้' : ''
             return (
           <article className="missai-card rounded-2xl p-4" key={report.id}>
@@ -484,6 +509,18 @@ export function AdminModerationPage() {
                         type="button"
                       >
                         จัดเก็บข้อความ
+                      </button>
+                    )}
+                    {report.targetType === 'GENERATION_OUTPUT' && (
+                      <button
+                        aria-disabled={Boolean(hideGenerationOutputReason)}
+                        className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60 sm:col-span-2"
+                        disabled={Boolean(hideGenerationOutputReason)}
+                        onClick={() => applyAction(report.id, 'HIDE_GENERATION_OUTPUT')}
+                        title={hideGenerationOutputReason || 'ซ่อนผลงานสร้างและปิดรายงานนี้'}
+                        type="button"
+                      >
+                        ซ่อนผลงานสร้าง
                       </button>
                     )}
                     <button

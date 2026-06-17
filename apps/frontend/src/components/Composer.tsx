@@ -35,11 +35,20 @@ export function Composer({
 }: ComposerProps) {
   const [isToolTrayOpen, setIsToolTrayOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const submitLockRef = useRef(false)
   const canSend = !disabled && canSubmit && message.trim().length > 0
   const busyDisabledReason = disabled ? 'ระบบกำลังตอบอยู่ รอให้จบก่อนใช้งาน' : ''
   const sendButtonTitle = canSend
     ? 'ส่งข้อความ'
     : busyDisabledReason || (!canSubmit ? sendDisabledReason || 'โทเคนไม่พอสำหรับส่งข้อความ' : 'พิมพ์ข้อความก่อนส่ง')
+
+  const handleSubmitRequest = () => {
+    if (!canSend || submitLockRef.current) return
+    submitLockRef.current = true
+    Promise.resolve(onSubmit()).finally(() => {
+      submitLockRef.current = false
+    })
+  }
 
   useEffect(() => {
     const textarea = textareaRef.current
@@ -50,12 +59,16 @@ export function Composer({
     textarea.style.overflowY = textarea.scrollHeight > 128 ? 'auto' : 'hidden'
   }, [message])
 
+  useEffect(() => {
+    if (!disabled) submitLockRef.current = false
+  }, [disabled, message])
+
   return (
     <form
       className="mx-auto w-full max-w-[820px] px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-5"
       onSubmit={(event) => {
         event.preventDefault()
-        if (canSend) onSubmit()
+        handleSubmitRequest()
       }}
     >
       {isToolTrayOpen && (
@@ -110,7 +123,7 @@ export function Composer({
             onKeyDown={(event) => {
               if (event.key !== 'Enter' || event.shiftKey || !canSend) return
               event.preventDefault()
-              onSubmit()
+              handleSubmitRequest()
             }}
             placeholder="พิมพ์ข้อความ..."
             ref={textareaRef}

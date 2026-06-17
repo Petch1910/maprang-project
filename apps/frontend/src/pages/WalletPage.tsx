@@ -43,6 +43,7 @@ function errorMessage(error: unknown) {
 function transactionLabel(type: NonNullable<UsageSummary['wallet']>['transactions'][number]['type']) {
   const labels = {
     CHAT_USAGE: 'ใช้แชท AI',
+    IMAGE_GENERATION: 'สร้างรูป AI',
     ADMIN_ADJUSTMENT: 'ผู้ดูแลปรับยอด',
     PROMOTION: 'โปรโมชัน',
     PURCHASE: 'เติมโทเคน',

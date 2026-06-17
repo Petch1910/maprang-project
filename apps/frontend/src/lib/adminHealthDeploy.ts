@@ -23,27 +23,38 @@ function blockerSummary(blockers: DeployCheck[]) {
 }
 
 export function buildDeployPhaseSteps(deployChecks: DeployCheck[]): DeployPhaseStep[] {
+  const localChecks = deployChecks.filter((check) => check.scope === 'local')
   const productionChecks = deployChecks.filter((check) => check.scope === 'production' || check.scope === 'frontend')
   const liveProviderChecks = productionChecks.filter(
     (check) => check.action.includes('CHAT_PROVIDER_LIVE_VERIFIED') || check.action.includes('IMAGE_GENERATION_LIVE_VERIFIED'),
   )
   const liveProviderCheckSet = new Set(liveProviderChecks)
+  const localBlockers = localChecks.filter((check) => !check.ok)
   const stagingBlockers = productionChecks.filter((check) => !check.ok && !liveProviderCheckSet.has(check))
   const liveProviderBlockers = liveProviderChecks.filter((check) => !check.ok)
   const productionBlockers = productionChecks.filter((check) => !check.ok)
 
   return [
     {
-      title: '1. สเตจจิงและโดเมนจริง',
-      ok: stagingBlockers.length === 0,
-      command: 'bun run staging:verify + bun run e2e:smoke',
+      title: '1. Local server',
+      ok: localBlockers.length === 0,
+      command: 'bun run local:doctor + bun run qa:full',
       detail:
-        stagingBlockers.length === 0
-          ? 'ด่านสเตจจิงฝั่ง config พร้อมแล้ว ให้เก็บหลักฐาน URL, CORS, auth, storage และ e2e smoke ลง RELEASE_HANDOFF.md'
-          : `${blockerSummary(stagingBlockers)} ก่อน จากนั้นตั้ง E2E_BASE_URL/E2E_API_BASE_URL เป็น deployed origins แล้วรัน e2e smoke`,
+        localBlockers.length === 0
+          ? 'เครื่องนี้พร้อมเป็น local server baseline แล้ว ใช้ qa:full เป็น gate หลักก่อนให้คนลองเล่น'
+          : `${blockerSummary(localBlockers)} ก่อนถือว่า local server พร้อมเล่น`,
     },
     {
-      title: '2. ทดสอบผู้ให้บริการจริง',
+      title: '2. Ngrok preview / staging',
+      ok: stagingBlockers.length === 0,
+      command: 'bun run ngrok:proxy + bun run staging:verify + bun run e2e:smoke',
+      detail:
+        stagingBlockers.length === 0
+          ? 'ถ้าต้องให้คนนอกลอง ให้เปิด Ngrok proxy แล้วรัน staging/e2e smoke กับ HTTPS origin เดียว'
+          : `${blockerSummary(stagingBlockers)} ก่อน จากนั้นตั้ง E2E_BASE_URL/E2E_API_BASE_URL เป็น Ngrok หรือ deployed origin แล้วรัน e2e smoke`,
+    },
+    {
+      title: '3. Live provider smoke',
       ok: liveProviderBlockers.length === 0,
       command: 'bun run api:smoke:live',
       detail:
@@ -52,7 +63,7 @@ export function buildDeployPhaseSteps(deployChecks: DeployCheck[]): DeployPhaseS
           : `${blockerSummary(liveProviderBlockers)} แล้วคัด JSON handoffEvidence ลง RELEASE_HANDOFF.md ก่อนตั้งค่าธงยืนยัน`,
     },
     {
-      title: '3. เช็กก่อนปล่อยโปรดักชัน',
+      title: '4. Cloud production',
       ok: productionBlockers.length === 0,
       command: 'bun run production:check',
       detail:

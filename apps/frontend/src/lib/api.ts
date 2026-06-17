@@ -5,6 +5,7 @@ export { API_BASE_URL }
 
 export const DEFAULT_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const backendLocalHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'])
 const genericApiErrorMessage = 'คำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่'
 const thaiTextPattern = /[\u0e00-\u0e7f]/
 const rawTechnicalMessagePattern =
@@ -89,6 +90,51 @@ function localValue(key: string) {
   return safeGetStorageItem(window.localStorage, key)
 }
 
+function sessionValue(key: string) {
+  if (typeof window === 'undefined') return null
+  return safeGetStorageItem(window.sessionStorage, key)
+}
+
+export function normalizeBackendMediaUrl(value?: string | null) {
+  if (!value) return value ?? null
+  if (value.startsWith('/uploads/')) return `${API_BASE_URL}${value}`
+
+  try {
+    const url = new URL(value)
+    if (backendLocalHosts.has(url.hostname.toLowerCase()) && url.pathname.startsWith('/uploads/')) {
+      return `${API_BASE_URL}${url.pathname}${url.search}${url.hash}`
+    }
+  } catch {
+    return value
+  }
+
+  return value
+}
+
+export function normalizeCharacterMedia<T extends Character>(character: T): T {
+  return {
+    ...character,
+    avatarUrl: normalizeBackendMediaUrl(character.avatarUrl),
+    coverUrl: normalizeBackendMediaUrl(character.coverUrl),
+  }
+}
+
+export function normalizeChatSummaryMedia<T extends ChatSummary>(chat: T): T {
+  return chat.character
+    ? {
+        ...chat,
+        character: normalizeCharacterMedia(chat.character),
+      }
+    : chat
+}
+
+export function normalizeSavedChatMedia<T extends SavedChat>(chat: T): T {
+  return {
+    ...chat,
+    character: normalizeCharacterMedia(chat.character),
+  }
+}
+
 export function setApiUserId(userId: string) {
   if (typeof window === 'undefined') return
   if (!uuidPattern.test(userId)) return
@@ -125,13 +171,15 @@ function authHeaders() {
   const shouldSendLocalUserId = import.meta.env.DEV || Boolean(adminKey)
 
   const bypassEnabled = localValue('maprang:bypassEnabled') === 'true'
-  const customApiKey = localValue('maprang:customApiKey')?.trim()
+  const customApiKey = sessionValue('maprang:customApiKey:session')?.trim()
   const customApiProvider = localValue('maprang:customApiProvider')?.trim()
 
-  const bypassHeaders = bypassEnabled && customApiKey ? {
-    'x-user-api-key': customApiKey,
-    ...(customApiProvider ? { 'x-user-api-provider': customApiProvider } : {}),
-  } : {}
+  const bypassHeaders = bypassEnabled
+    ? {
+        ...(customApiKey ? { 'x-user-api-key': customApiKey } : { 'x-user-api-vault': '1' }),
+        ...(customApiProvider ? { 'x-user-api-provider': customApiProvider } : {}),
+      }
+    : {}
 
   return {
     ...(shouldSendLocalUserId ? { 'x-user-id': userId } : {}),
@@ -541,7 +589,17 @@ export type UsageSummary = {
   wallet?: {
     transactions: Array<{
       id: string
-      type: 'CHAT_USAGE' | 'ADMIN_ADJUSTMENT' | 'PROMOTION' | 'PURCHASE' | 'REFUND'
+      type:
+        | 'CHAT_USAGE'
+        | 'IMAGE_GENERATION'
+        | 'ADMIN_ADJUSTMENT'
+        | 'PROMOTION'
+        | 'PURCHASE'
+        | 'REFUND'
+        | 'DAILY_LOGIN'
+        | 'ACHIEVEMENT'
+        | 'PENALTY'
+        | 'EXPIRY'
       amount: number
       balanceAfter: number
       reason: string | null
@@ -560,6 +618,13 @@ export type UserPersona = {
   persona: string
   updatedAt: string | null
   maxChars: number
+}
+
+export type ProviderKeyMetadata = {
+  provider: string
+  keyHint: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export type PromptInspectorSection = {
@@ -715,7 +780,8 @@ export async function fetchCharacters(filters: CharacterListFilters = { view: 'p
   if (filters.maxRating) params.set('maxRating', filters.maxRating)
   if (filters.limit) params.set('limit', String(filters.limit))
 
-  return requestJson<{ characters?: Character[] }>(`/characters?${params.toString()}`)
+  const data = await requestJson<{ characters?: Character[] }>(`/characters?${params.toString()}`)
+  return { ...data, characters: data.characters?.map(normalizeCharacterMedia) }
 }
 
 export async function reportGenerationOutput(generationOutputId: string, reason: string, details?: string) {
@@ -731,7 +797,8 @@ export async function reportGenerationOutput(generationOutputId: string, reason:
 }
 
 export async function fetchCharacter(characterId: string) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}`)
+  const data = await requestJson<{ character: Character }>(`/characters/${characterId}`)
+  return { ...data, character: normalizeCharacterMedia(data.character) }
 }
 
 export async function fetchHealthStatus() {
@@ -761,6 +828,23 @@ export async function updateUserPersona(persona: string) {
   return requestJson<{ persona: UserPersona }>('/me/persona', {
     method: 'PATCH',
     body: JSON.stringify({ persona }),
+  })
+}
+
+export async function fetchProviderKeys() {
+  return requestJson<{ keys: ProviderKeyMetadata[] }>('/me/provider-keys')
+}
+
+export async function saveProviderKey(provider: string, apiKey: string) {
+  return requestJson<{ key: ProviderKeyMetadata }>(`/me/provider-keys/${encodeURIComponent(provider)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ apiKey }),
+  })
+}
+
+export async function deleteProviderKey(provider: string) {
+  return requestJson<{ deleted: boolean; provider: string }>(`/me/provider-keys/${encodeURIComponent(provider)}`, {
+    method: 'DELETE',
   })
 }
 
@@ -971,6 +1055,16 @@ export async function retryGenerationJob(jobId: string) {
   })
 }
 
+export async function cancelGenerationJob(jobId: string) {
+  return requestJson<{
+    job: GenerationJob
+    persisted: boolean
+    persistenceWarning?: string
+  }>(`/generation/jobs/${jobId}/cancel`, {
+    method: 'POST',
+  })
+}
+
 export async function favoriteGenerationOutput(outputId: string) {
   return requestJson<{
     output: GenerationJobOutput
@@ -1002,6 +1096,39 @@ export async function fetchGenerationOutputDownload(outputId: string) {
     }
     persisted: boolean
   }>(`/generation/outputs/${outputId}/download`)
+}
+
+export type GenerationOutputCreatorReference = {
+  target: 'character-image' | 'cover'
+  outputId: string
+  jobId: string
+  kind: 'image' | 'video'
+  url: string
+  access: 'direct' | 'public' | 'signed'
+  expiresIn: number | null
+  visibility: 'private' | 'public' | 'unlisted' | string
+  prompt?: string
+  templateId?: string
+  mode?: string
+  draftPatch: Record<string, unknown>
+}
+
+export async function useGenerationOutputAsCharacterImage(outputId: string) {
+  return requestJson<{
+    reference: GenerationOutputCreatorReference
+    persisted: boolean
+  }>(`/generation/outputs/${outputId}/use-as-character-image`, {
+    method: 'POST',
+  })
+}
+
+export async function useGenerationOutputAsCover(outputId: string) {
+  return requestJson<{
+    reference: GenerationOutputCreatorReference
+    persisted: boolean
+  }>(`/generation/outputs/${outputId}/use-as-cover`, {
+    method: 'POST',
+  })
 }
 
 export async function deleteGenerationOutput(outputId: string) {
@@ -1060,10 +1187,11 @@ export async function updateCreatorDraft(payload: unknown) {
 }
 
 export async function createCharacter(input: CharacterInput) {
-  return requestJson<{ character: Character }>('/characters', {
+  const data = await requestJson<{ character: Character }>('/characters', {
     method: 'POST',
     body: JSON.stringify(input),
   })
+  return { ...data, character: normalizeCharacterMedia(data.character) }
 }
 
 export async function uploadAvatar(file: File, timeoutMs = apiUploadTimeoutMs()) {
@@ -1085,7 +1213,8 @@ export async function uploadAvatar(file: File, timeoutMs = apiUploadTimeoutMs())
       throw new ApiError('/uploads/avatar', response.status, payload)
     }
 
-    return readApiJson<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>('/uploads/avatar', response)
+    const data = await readApiJson<{ url: string; filename: string; provider: 'local' | 'supabase'; size: number; contentType: string }>('/uploads/avatar', response)
+    return { ...data, url: normalizeBackendMediaUrl(data.url) ?? data.url }
   } catch (error) {
     if (isAbortLikeError(error)) {
       throw new ApiError('/uploads/avatar', 408, { message: 'อัปโหลดรูปใช้เวลานานเกินไป กรุณาลองใหม่' })
@@ -1097,30 +1226,34 @@ export async function uploadAvatar(file: File, timeoutMs = apiUploadTimeoutMs())
 }
 
 export async function setCharacterFavorite(characterId: string, favorite: boolean) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}/favorite`, {
+  const data = await requestJson<{ character: Character }>(`/characters/${characterId}/favorite`, {
     method: 'POST',
     body: JSON.stringify({ favorite }),
   })
+  return { ...data, character: normalizeCharacterMedia(data.character) }
 }
 
 export async function trackCharacterView(characterId: string) {
-  return requestJson<{ character: Character }>(`/characters/${characterId}/view`, {
+  const data = await requestJson<{ character: Character }>(`/characters/${characterId}/view`, {
     method: 'POST',
   })
+  return { ...data, character: normalizeCharacterMedia(data.character) }
 }
 
 export async function fetchChats(options: { archived?: boolean } = {}) {
   const params = new URLSearchParams()
   if (options.archived) params.set('archived', 'true')
   const query = params.toString()
-  return requestJson<{ chats?: ChatSummary[] }>(`/chats${query ? `?${query}` : ''}`)
+  const data = await requestJson<{ chats?: ChatSummary[] }>(`/chats${query ? `?${query}` : ''}`)
+  return { ...data, chats: data.chats?.map(normalizeChatSummaryMedia) }
 }
 
 export async function fetchChatMessages(chatId: string, options: { limit?: number } = {}) {
   const params = new URLSearchParams()
   if (options.limit !== undefined) params.set('limit', String(options.limit))
   const query = params.toString()
-  return requestJson<{ chat?: SavedChat }>(`/chats/${chatId}/messages${query ? `?${query}` : ''}`)
+  const data = await requestJson<{ chat?: SavedChat }>(`/chats/${chatId}/messages${query ? `?${query}` : ''}`)
+  return { ...data, chat: data.chat ? normalizeSavedChatMedia(data.chat) : data.chat }
 }
 
 export async function updateChatWorldState(chatId: string, input: WorldStateInput) {
@@ -1157,8 +1290,13 @@ export async function updateChatTitle(chatId: string, title: string) {
 
 export type ReportTargetType = 'CHARACTER' | 'MESSAGE' | 'GENERATION_OUTPUT'
 export type ReportStatus = 'PENDING' | 'REVIEWED' | 'RESOLVED' | 'REJECTED'
-export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE'
-export type AdminAuditAction = 'REPORT_STATUS_UPDATE' | 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE' | 'TOKEN_ADJUSTMENT'
+export type ReportAdminAction = 'HIDE_CHARACTER' | 'ARCHIVE_MESSAGE' | 'HIDE_GENERATION_OUTPUT'
+export type AdminAuditAction =
+  | 'REPORT_STATUS_UPDATE'
+  | 'HIDE_CHARACTER'
+  | 'ARCHIVE_MESSAGE'
+  | 'HIDE_GENERATION_OUTPUT'
+  | 'TOKEN_ADJUSTMENT'
 
 export type AdminAuditLog = {
   id: string
@@ -1184,6 +1322,7 @@ export type ReportSummary = {
   reporterId?: string
   characterId: string | null
   messageId: string | null
+  generationOutputId?: string | null
   character?: Pick<Character, 'id' | 'name' | 'status' | 'visibility'> | null
   message?: {
     id: string
@@ -1191,6 +1330,12 @@ export type ReportSummary = {
     content: string
     chatId: string
     deletedAt?: string | null
+  } | null
+  generationOutput?: {
+    id: string
+    kind: 'image' | 'video'
+    url: string | null
+    visibility: 'private' | 'public' | string
   } | null
   reporter?: {
     id: string

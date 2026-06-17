@@ -13,28 +13,31 @@ import {
   updateCreatorDraft,
   logUnexpectedError,
   ApiError,
+  cancelGenerationJob,
   deleteGenerationOutput,
   favoriteGenerationOutput,
   fetchCharacters,
-  fetchGenerationJobs,
   fetchGenerationOutputDownload,
   retryGenerationJob,
   unfavoriteGenerationOutput,
   publishGenerationOutput,
   unpublishGenerationOutput,
-  fetchPublicGallery,
   reportGenerationOutput,
+  useGenerationOutputAsCharacterImage as createCharacterImageReference,
+  useGenerationOutputAsCover as createCoverReference,
   type CreatorAiDraftResponse,
   type Character,
 } from '../lib/api'
 import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
+import { useAiCreatorRemoteGalleries } from '../hooks/useAiCreatorRemoteGalleries'
 import {
   AI_CREATOR_HISTORY_PAGE_SIZE,
   AI_CREATOR_UPLOAD_SLOT_RULES,
   AI_CREATOR_VIDEO_DEFAULT_TEMPLATE,
+  AI_CREATOR_VIDEO_PROVIDER_NOTICE,
+  AI_CREATOR_VIDEO_PROVIDER_STATUS,
   buildAiCreatorDownloadFilename,
   buildAiCreatorBlockedStateMatrix,
-  createAiCreatorItemsFromGenerationJobs,
   createAiCreatorUploadPreview,
   createAiCreatorImageItem,
   createAiCreatorVideoItem,
@@ -50,7 +53,6 @@ import {
   saveAiCreatorItemToCreatorDraft,
   saveAiCreatorItemToCreatorCoverDraft,
   toggleAiCreatorHistoryFavorite,
-  getAiCreatorTimestamp,
   validateAiCreatorUploadSlot,
   writeAiCreatorHistory,
   type AiCreatorDownloadLinkSnapshot,
@@ -62,14 +64,6 @@ import {
 } from '../lib/aiCreator'
 
 const aiCreatorBlockedStateMatrix = buildAiCreatorBlockedStateMatrix()
-
-async function fetchBackendHistoryItems(limit = 12) {
-  const res = await fetchGenerationJobs(limit)
-  return {
-    jobs: res.jobs,
-    items: createAiCreatorItemsFromGenerationJobs(res.jobs),
-  }
-}
 
 export function AICreatorPage() {
   const navigate = useNavigate()
@@ -104,6 +98,11 @@ export function AICreatorPage() {
   const [downloadingItemId, setDownloadingItemId] = useState<string | null>(null)
   const [downloadLinks, setDownloadLinks] = useState<Record<string, AiCreatorDownloadLinkSnapshot>>({})
   const [retryingItemId, setRetryingItemId] = useState<string | null>(null)
+  const [cancellingItemId, setCancellingItemId] = useState<string | null>(null)
+  const [creatorReferenceAction, setCreatorReferenceAction] = useState<{
+    itemId: string
+    target: 'character-image' | 'cover'
+  } | null>(null)
 
 
   // History stored in LocalStorage
@@ -111,8 +110,14 @@ export function AICreatorPage() {
     if (typeof window === 'undefined') return []
     return readAiCreatorHistory(window.localStorage)
   })
-  const [backendHistory, setBackendHistory] = useState<AiCreatorGeneratedItem[]>([])
-  const [publicHistory, setPublicHistory] = useState<AiCreatorGeneratedItem[]>([])
+  const {
+    backendHistory,
+    setBackendHistory,
+    publicHistory,
+    setPublicHistory,
+    reloadBackendHistory,
+    reloadPublicGallery,
+  } = useAiCreatorRemoteGalleries({ onStatusMessage: setStatusMessage })
   const [isPublishing, setIsPublishing] = useState(false)
   const [reportTarget, setReportTarget] = useState<AiCreatorGeneratedItem | null>(null)
   const [isReporting, setIsReporting] = useState(false)
@@ -136,59 +141,6 @@ export function AICreatorPage() {
     return () => {
       active = false
     }
-  }, [])
-
-  useEffect(() => {
-    let active = true
-    fetchBackendHistoryItems()
-      .then(({ jobs, items }) => {
-        if (!active) return
-        setBackendHistory(items)
-        if (jobs.length === 0) return
-        setStatusMessage(`พบงานสร้างภาพที่บันทึกบนระบบ ${jobs.length} รายการ ใช้คลังในเครื่องต่อได้และพร้อมเชื่อมรายละเอียดงาน`)
-      })
-      .catch((err) => {
-        logUnexpectedError('โหลดคลังงานสร้างภาพจากระบบไม่สำเร็จ', err)
-      })
-    return () => {
-      active = false
-    }
-  }, [])
-
-  const loadPublicGallery = () => {
-    fetchPublicGallery(24)
-      .then((res) => {
-        const mapped = res.outputs.map((out) => ({
-          id: `public-${out.id}`,
-          backendJobId: out.jobId,
-          backendOutputId: out.id,
-          librarySource: 'backend' as const,
-          type: out.kind,
-          url: out.url || '',
-          prompt: out.prompt || '',
-          brief: '',
-          style: out.kind === 'image' ? (out.templateId || '') : '',
-          motionTemplate: out.kind === 'video' ? (out.templateId || '') : undefined,
-          timestamp: Date.parse(out.createdAt) || getAiCreatorTimestamp(),
-          isFavorite: out.isFavorite,
-          visibility: out.visibility,
-          response: {
-            draft: {
-              name: 'Public Generation',
-              systemPrompt: out.prompt || '',
-              avatarUrl: '', coverUrl: '', tagline: '', description: '', biography: '', scenario: '', greeting: '', exampleDialog: '', compactPrompt: '', characterAnchor: '', constraints: '', promptVersion: 1
-            }
-          }
-        }))
-        setPublicHistory(mapped as unknown as AiCreatorGeneratedItem[])
-      })
-      .catch((err) => {
-        logUnexpectedError('โหลด Public Gallery ไม่สำเร็จ', err)
-      })
-  }
-
-  useEffect(() => {
-    loadPublicGallery()
   }, [])
 
   const saveHistory = (newHistory: AiCreatorGeneratedItem[]) => {
@@ -463,7 +415,7 @@ export function AICreatorPage() {
       if (lastResult?.id === item.id) setLastResult({ ...item, visibility: res.output.visibility })
       if (detailItem?.id === item.id) setDetailItem({ ...item, visibility: res.output.visibility })
       setStatusMessage(res.output.visibility === 'public' ? 'เผยแพร่ผลงานสู่สาธารณะแล้ว' : 'ยกเลิกการเผยแพร่ผลงานแล้ว')
-      loadPublicGallery() // refresh
+      void reloadPublicGallery()
     } catch (err) {
       logUnexpectedError('ปรับสถานะเผยแพร่ไม่สำเร็จ', err)
       setStatusMessage(err instanceof ApiError ? err.message : 'ปรับสถานะเผยแพร่ไม่สำเร็จ กรุณาลองใหม่')
@@ -496,22 +448,98 @@ export function AICreatorPage() {
     })
   }
 
-  const handleUseAsCharacterImage = (item: AiCreatorGeneratedItem) => {
-    if (typeof window === 'undefined') return
-    const draft = saveAiCreatorItemToCreatorDraft(window.localStorage, item)
-    void updateCreatorDraft(draft).catch(() => {})
-    setDetailItem(null)
-    setStatusMessage('ส่งรูปและเนื้อหาตั้งต้นไปยังหน้าสร้างตัวละครแล้ว')
-    navigate('/create')
+  const resolveCreatorReferenceItem = async (
+    item: AiCreatorGeneratedItem,
+    target: 'character-image' | 'cover',
+  ): Promise<{ ok: true; item: AiCreatorGeneratedItem } | { ok: false; message: string }> => {
+    if (item.id.startsWith('public-')) return { ok: true, item }
+    if (item.librarySource !== 'backend' || !item.backendOutputId) return { ok: true, item }
+
+    setStatusMessage('กำลังตรวจสิทธิ์ไฟล์ผลลัพธ์ก่อนส่งเข้าสตูดิโอ...')
+    let result: Awaited<ReturnType<typeof createCoverReference>>
+    try {
+      result =
+        target === 'cover'
+          ? await createCoverReference(item.backendOutputId)
+          : await createCharacterImageReference(item.backendOutputId)
+    } catch (err) {
+      const hasLocalSafePreview =
+        item.url.startsWith('data:image/') || item.url.startsWith('/src/') || item.url.startsWith('blob:')
+      if (import.meta.env.DEV && err instanceof ApiError && err.status === 404 && hasLocalSafePreview) {
+        setStatusMessage('ใช้ preview local-safe แทน backend reference สำหรับการทดสอบในเครื่อง')
+        return { ok: true, item }
+      }
+      logUnexpectedError('ตรวจสิทธิ์ไฟล์ AI Creator ก่อนส่งเข้าสตูดิโอไม่สำเร็จ', err)
+      return {
+        ok: false,
+        message: err instanceof ApiError ? err.message : 'ตรวจสิทธิ์ไฟล์ผลลัพธ์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+      }
+    }
+
+    return {
+      ok: true,
+      item: {
+        ...item,
+        url: result.reference.url,
+        prompt: result.reference.prompt || item.prompt,
+        response: {
+          ...item.response,
+          image: {
+            ...item.response.image,
+            url: result.reference.url,
+            prompt: result.reference.prompt || item.response.image.prompt,
+          },
+        },
+      },
+    }
   }
 
-  const handleUseAsCover = (item: AiCreatorGeneratedItem) => {
+  const handleUseAsCharacterImage = async (item: AiCreatorGeneratedItem) => {
     if (typeof window === 'undefined') return
-    const draft = saveAiCreatorItemToCreatorCoverDraft(window.localStorage, item)
-    void updateCreatorDraft(draft).catch(() => {})
-    setDetailItem(null)
-    setStatusMessage('บันทึกรูปนี้เป็นภาพปกในดราฟต์หน้าสร้างตัวละครแล้ว')
-    navigate('/create')
+    if (creatorReferenceAction) return
+
+    setCreatorReferenceAction({ itemId: item.id, target: 'character-image' })
+    try {
+      const resolved = await resolveCreatorReferenceItem(item, 'character-image')
+      if (!resolved.ok) {
+        setStatusMessage(resolved.message)
+        return
+      }
+      const draft = saveAiCreatorItemToCreatorDraft(window.localStorage, resolved.item)
+      void updateCreatorDraft(draft).catch(() => {})
+      setDetailItem(null)
+      setStatusMessage('ส่งรูปและเนื้อหาตั้งต้นไปยังหน้าสร้างตัวละครแล้ว')
+      navigate('/create')
+    } catch (err) {
+      logUnexpectedError('ส่งรูป AI Creator เข้าสตูดิโอไม่สำเร็จ', err)
+      setStatusMessage(err instanceof ApiError ? err.message : 'ส่งรูปเข้าสตูดิโอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setCreatorReferenceAction(null)
+    }
+  }
+
+  const handleUseAsCover = async (item: AiCreatorGeneratedItem) => {
+    if (typeof window === 'undefined') return
+    if (creatorReferenceAction) return
+
+    setCreatorReferenceAction({ itemId: item.id, target: 'cover' })
+    try {
+      const resolved = await resolveCreatorReferenceItem(item, 'cover')
+      if (!resolved.ok) {
+        setStatusMessage(resolved.message)
+        return
+      }
+      const draft = saveAiCreatorItemToCreatorCoverDraft(window.localStorage, resolved.item)
+      void updateCreatorDraft(draft).catch(() => {})
+      setDetailItem(null)
+      setStatusMessage('บันทึกรูปนี้เป็นภาพปกในดราฟต์หน้าสร้างตัวละครแล้ว')
+      navigate('/create')
+    } catch (err) {
+      logUnexpectedError('ส่งภาพปก AI Creator เข้าสตูดิโอไม่สำเร็จ', err)
+      setStatusMessage(err instanceof ApiError ? err.message : 'ส่งภาพปกเข้าสตูดิโอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setCreatorReferenceAction(null)
+    }
   }
 
   const startDownload = (url: string, filename: string) => {
@@ -584,8 +612,7 @@ export function AICreatorPage() {
     setRetryingItemId(item.id)
     try {
       await retryGenerationJob(item.backendJobId)
-      const { items } = await fetchBackendHistoryItems()
-      setBackendHistory(items)
+      await reloadBackendHistory()
       setCurrentPage(1)
       setStatusMessage('บันทึกงานสร้างซ้ำแล้ว ระบบยังไม่หักโทเคนจนกว่างานจริงจะถูกเข้าคิว')
     } catch (err) {
@@ -593,6 +620,36 @@ export function AICreatorPage() {
       setStatusMessage(err instanceof ApiError ? err.message : 'สร้างงานซ้ำไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
     } finally {
       setRetryingItemId(null)
+    }
+  }
+
+  const handleCancelHistoryItem = async (item: AiCreatorGeneratedItem) => {
+    if (!item.backendJobId || cancellingItemId) {
+      setStatusMessage('ยกเลิกได้เฉพาะงานที่บันทึกอยู่ใน backend และยังไม่มีคำสั่งยกเลิกค้างอยู่')
+      return
+    }
+
+    setCancellingItemId(item.id)
+    try {
+      const result = await cancelGenerationJob(item.backendJobId)
+      const updateCancelledItems = (items: AiCreatorGeneratedItem[]) =>
+        items.map((entry) =>
+          entry.backendJobId === result.job.id ? { ...entry, backendJobStatus: result.job.status, brief: result.job.message } : entry,
+        )
+      setBackendHistory(updateCancelledItems)
+      if (lastResult?.id === item.id) {
+        setLastResult({ ...item, backendJobStatus: result.job.status, brief: result.job.message })
+      }
+      if (detailItem?.id === item.id) {
+        setDetailItem({ ...item, backendJobStatus: result.job.status, brief: result.job.message })
+      }
+      await reloadBackendHistory()
+      setStatusMessage('ยกเลิกงานสร้างแล้ว ระบบไม่หักโทเคนเพิ่มจากคำสั่งนี้')
+    } catch (err) {
+      logUnexpectedError('ยกเลิกงาน AI Creator ไม่สำเร็จ', err)
+      setStatusMessage(err instanceof ApiError ? err.message : 'ยกเลิกงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
+    } finally {
+      setCancellingItemId(null)
     }
   }
 
@@ -653,6 +710,7 @@ export function AICreatorPage() {
     brief,
     prompt: videoPrompt,
     isGenerating,
+    providerStatus: AI_CREATOR_VIDEO_PROVIDER_STATUS,
     requiredUploadCount: AI_CREATOR_UPLOAD_SLOT_RULES.advancedVideo.length,
     uploadedCount: referenceVideo ? 1 : 0,
     inputError: videoInputError,
@@ -709,6 +767,7 @@ export function AICreatorPage() {
               statusMessage={statusMessage}
               imageGenerateBlockReason={imageGenerateBlockReason}
               videoGenerateBlockReason={videoGenerateBlockReason}
+              videoProviderNotice={AI_CREATOR_VIDEO_PROVIDER_NOTICE}
               onTabChange={(tab) => {
                 setActiveTab(tab)
                 setStatusMessage('')
@@ -762,7 +821,7 @@ export function AICreatorPage() {
           onPageChange={setCurrentPage}
           onOpenItem={handleOpenHistoryDetail}
           onReuseItem={handleReuseFromHistory}
-          onUseAsCharacterImage={handleUseAsCharacterImage}
+          onUseAsCharacterImage={(item) => void handleUseAsCharacterImage(item)}
           onToggleFavorite={toggleHistoryFavorite}
           onDeleteItem={deleteHistoryItem}
           onClearHistory={clearHistory}
@@ -787,16 +846,19 @@ export function AICreatorPage() {
           onReuse={handleReuseFromHistory}
           onDelete={deleteHistoryItem}
           onToggleFavorite={toggleHistoryFavorite}
-          onUseAsCharacterImage={handleUseAsCharacterImage}
-          onUseAsCover={handleUseAsCover}
+          onUseAsCharacterImage={(item) => void handleUseAsCharacterImage(item)}
+          onUseAsCover={(item) => void handleUseAsCover(item)}
           onCopySystemPrompt={handleCopyHistorySystemPrompt}
           onDownload={(item) => void handleDownloadHistoryItem(item)}
           onRetry={(item) => void handleRetryHistoryItem(item)}
+          onCancel={(item) => void handleCancelHistoryItem(item)}
           onTogglePublish={toggleHistoryPublish}
           onReport={(item) => setReportTarget(item)}
           downloadLink={detailItem ? downloadLinks[detailItem.id] ?? null : null}
           downloadingItemId={downloadingItemId}
           retryingItemId={retryingItemId}
+          cancellingItemId={cancellingItemId}
+          creatorReferenceAction={creatorReferenceAction}
           isPublishing={isPublishing}
         />
 

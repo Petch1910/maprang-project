@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
-import { BookOpen, Copy, Download, Flag, Image as ImageIcon, RefreshCcw, RotateCcw, Sparkles, Star, Trash2, X } from 'lucide-react'
+import { BookOpen, CircleX, Copy, Download, Flag, Image as ImageIcon, RefreshCcw, RotateCcw, Sparkles, Star, Trash2, X } from 'lucide-react'
 import {
+  getAiCreatorCancelActionState,
   getAiCreatorDownloadActionState,
   getAiCreatorDownloadLinkNotice,
   getAiCreatorRetryActionState,
@@ -19,11 +20,17 @@ type AiCreatorHistoryDetailDialogProps = {
   onCopySystemPrompt: (item: AiCreatorGeneratedItem) => void
   onDownload: (item: AiCreatorGeneratedItem) => void
   onRetry: (item: AiCreatorGeneratedItem) => void
+  onCancel: (item: AiCreatorGeneratedItem) => void
   onTogglePublish?: (item: AiCreatorGeneratedItem) => void
   onReport?: (item: AiCreatorGeneratedItem) => void
   downloadLink?: AiCreatorDownloadLinkSnapshot | null
   downloadingItemId?: string | null
   retryingItemId?: string | null
+  cancellingItemId?: string | null
+  creatorReferenceAction?: {
+    itemId: string
+    target: 'character-image' | 'cover'
+  } | null
   isPublishing?: boolean
 }
 
@@ -46,11 +53,14 @@ export function AiCreatorHistoryDetailDialog({
   onCopySystemPrompt,
   onDownload,
   onRetry,
+  onCancel,
   onTogglePublish,
   onReport,
   downloadLink,
   downloadingItemId,
   retryingItemId,
+  cancellingItemId,
+  creatorReferenceAction,
   isPublishing,
 }: AiCreatorHistoryDetailDialogProps) {
   useEffect(() => {
@@ -71,8 +81,14 @@ export function AiCreatorHistoryDetailDialog({
   const downloadState = getAiCreatorDownloadActionState(item)
   const downloadNotice = getAiCreatorDownloadLinkNotice(downloadLink)
   const retryState = getAiCreatorRetryActionState(item)
+  const cancelState = getAiCreatorCancelActionState(item)
+  const isPublicGalleryItem = item.id.startsWith('public-')
   const isDownloading = downloadingItemId === item.id
   const isRetrying = retryingItemId === item.id
+  const isCancelling = cancellingItemId === item.id
+  const isUsingAsCharacterImage =
+    creatorReferenceAction?.itemId === item.id && creatorReferenceAction.target === 'character-image'
+  const isUsingAsCover = creatorReferenceAction?.itemId === item.id && creatorReferenceAction.target === 'cover'
   const isPublic = item.visibility === 'public'
   const downloadLabel =
     !isDownloading && downloadNotice?.state === 'signed-expired' ? 'รีเฟรชลิงก์' : downloadState.label
@@ -93,12 +109,14 @@ export function AiCreatorHistoryDetailDialog({
       >
         <header className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 p-5">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#a78bfa]">My Library Detail</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#a78bfa]">
+              {isPublicGalleryItem ? 'Public Gallery Detail' : 'My Library Detail'}
+            </p>
             <h2 id="ai-creator-history-detail-title" className="mt-1 text-xl font-black text-white">
               {item.response.draft.name}
             </h2>
             <p className="mt-1 text-xs font-semibold text-white/45">
-              {isVideo ? 'วิดีโอพรีวิว' : 'ภาพร่าง'} · {sourceLabel} · {formatGeneratedTime(item.timestamp)}
+              {isVideo ? 'วิดีโอพรีวิว' : 'ภาพร่าง'} · {isPublicGalleryItem ? 'ผลงานสาธารณะที่ผ่านการคัดกรอง' : sourceLabel} · {formatGeneratedTime(item.timestamp)}
             </p>
           </div>
 
@@ -120,19 +138,21 @@ export function AiCreatorHistoryDetailDialog({
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs font-bold">
-              <button
-                type="button"
-                data-testid={`ai-creator-library-detail-favorite-${item.id}`}
-                className={`justify-center ${
-                  item.isFavorite ? 'missai-button-primary' : 'missai-button-secondary'
-                }`}
-                onClick={() => onToggleFavorite(item.id)}
-                title={item.isFavorite ? 'นำออกจากรายการโปรด' : 'เพิ่มเข้ารายการโปรด'}
-                aria-pressed={item.isFavorite === true}
-              >
-                <Star size={14} fill={item.isFavorite ? 'currentColor' : 'none'} />
-                {item.isFavorite ? 'ติดดาวแล้ว' : 'ติดดาว'}
-              </button>
+              {!isPublicGalleryItem && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-favorite-${item.id}`}
+                  className={`justify-center ${
+                    item.isFavorite ? 'missai-button-primary' : 'missai-button-secondary'
+                  }`}
+                  onClick={() => onToggleFavorite(item.id)}
+                  title={item.isFavorite ? 'นำออกจากรายการโปรด' : 'เพิ่มเข้ารายการโปรด'}
+                  aria-pressed={item.isFavorite === true}
+                >
+                  <Star size={14} fill={item.isFavorite ? 'currentColor' : 'none'} />
+                  {item.isFavorite ? 'ติดดาวแล้ว' : 'ติดดาว'}
+                </button>
+              )}
               <button
                 type="button"
                 data-testid={`ai-creator-library-detail-reuse-${item.id}`}
@@ -146,62 +166,96 @@ export function AiCreatorHistoryDetailDialog({
               <button
                 type="button"
                 data-testid={`ai-creator-library-detail-use-image-${item.id}`}
-                className="missai-button-secondary justify-center"
+                className={`missai-button-secondary justify-center ${isUsingAsCharacterImage ? 'opacity-60' : ''}`}
                 onClick={() => onUseAsCharacterImage(item)}
-                title="บันทึก draft นี้เข้าหน้าสร้างตัวละคร"
+                disabled={isUsingAsCharacterImage}
+                title={
+                  isUsingAsCharacterImage
+                    ? 'กำลังตรวจสิทธิ์ไฟล์ก่อนส่งเข้าสตูดิโอ'
+                    : 'บันทึก draft นี้เข้าหน้าสร้างตัวละคร'
+                }
+                aria-disabled={isUsingAsCharacterImage}
               >
                 <BookOpen size={14} />
-                เข้าสตูดิโอ
+                {isUsingAsCharacterImage ? 'กำลังส่ง' : 'เข้าสตูดิโอ'}
               </button>
               <button
                 type="button"
                 data-testid={`ai-creator-library-detail-use-cover-${item.id}`}
-                className="missai-button-secondary justify-center"
+                className={`missai-button-secondary justify-center ${isUsingAsCover ? 'opacity-60' : ''}`}
                 onClick={() => onUseAsCover(item)}
-                title="บันทึกรูปนี้เป็นภาพปกในดราฟต์หน้าสร้างตัวละคร"
+                disabled={isUsingAsCover}
+                title={
+                  isUsingAsCover
+                    ? 'กำลังตรวจสิทธิ์ไฟล์ก่อนส่งเป็นภาพปก'
+                    : 'บันทึกรูปนี้เป็นภาพปกในดราฟต์หน้าสร้างตัวละคร'
+                }
+                aria-disabled={isUsingAsCover}
               >
                 <ImageIcon size={14} />
-                ใช้เป็นภาพปก
+                {isUsingAsCover ? 'กำลังส่งปก' : 'ใช้เป็นภาพปก'}
               </button>
-              <button
-                type="button"
-                data-testid={`ai-creator-library-detail-copy-${item.id}`}
-                className="missai-button-secondary justify-center"
-                onClick={() => onCopySystemPrompt(item)}
-                title="คัดลอก system prompt ของชิ้นงานนี้"
-              >
-                <Copy size={14} />
-                คัดลอกคำสั่ง
-              </button>
-              <button
-                type="button"
-                data-testid={`ai-creator-library-detail-download-${item.id}`}
-                className={`missai-button-secondary justify-center ${
-                  downloadState.canDownload && !isDownloading ? '' : 'opacity-60'
-                }`}
-                disabled={!downloadState.canDownload || isDownloading}
-                onClick={() => onDownload(item)}
-                title={isDownloading ? 'กำลังเตรียมไฟล์ดาวน์โหลด' : downloadState.title}
-                aria-disabled={!downloadState.canDownload || isDownloading}
-              >
-                <Download size={14} />
-                {isDownloading ? 'กำลังเตรียมไฟล์' : downloadLabel}
-              </button>
-              <button
-                type="button"
-                data-testid={`ai-creator-library-detail-retry-${item.id}`}
-                className={`missai-button-secondary justify-center ${
-                  retryState.canRetry && !isRetrying ? '' : 'opacity-60'
-                }`}
-                disabled={!retryState.canRetry || isRetrying}
-                onClick={() => onRetry(item)}
-                title={isRetrying ? 'กำลังสร้างงานซ้ำจากข้อมูลเดิม' : retryState.title}
-                aria-disabled={!retryState.canRetry || isRetrying}
-              >
-                <RefreshCcw size={14} />
-                {isRetrying ? 'กำลังสร้างซ้ำ' : retryState.label}
-              </button>
-              {onTogglePublish && item.librarySource === 'backend' && (
+              {!isPublicGalleryItem && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-copy-${item.id}`}
+                  className="missai-button-secondary justify-center"
+                  onClick={() => onCopySystemPrompt(item)}
+                  title="คัดลอก system prompt ของชิ้นงานนี้"
+                >
+                  <Copy size={14} />
+                  คัดลอกคำสั่ง
+                </button>
+              )}
+              {!isPublicGalleryItem && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-download-${item.id}`}
+                  className={`missai-button-secondary justify-center ${
+                    downloadState.canDownload && !isDownloading ? '' : 'opacity-60'
+                  }`}
+                  disabled={!downloadState.canDownload || isDownloading}
+                  onClick={() => onDownload(item)}
+                  title={isDownloading ? 'กำลังเตรียมไฟล์ดาวน์โหลด' : downloadState.title}
+                  aria-disabled={!downloadState.canDownload || isDownloading}
+                >
+                  <Download size={14} />
+                  {isDownloading ? 'กำลังเตรียมไฟล์' : downloadLabel}
+                </button>
+              )}
+              {!isPublicGalleryItem && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-retry-${item.id}`}
+                  className={`missai-button-secondary justify-center ${
+                    retryState.canRetry && !isRetrying ? '' : 'opacity-60'
+                  }`}
+                  disabled={!retryState.canRetry || isRetrying}
+                  onClick={() => onRetry(item)}
+                  title={isRetrying ? 'กำลังสร้างงานซ้ำจากข้อมูลเดิม' : retryState.title}
+                  aria-disabled={!retryState.canRetry || isRetrying}
+                >
+                  <RefreshCcw size={14} />
+                  {isRetrying ? 'กำลังสร้างซ้ำ' : retryState.label}
+                </button>
+              )}
+              {!isPublicGalleryItem && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-cancel-${item.id}`}
+                  className={`missai-button-secondary justify-center ${
+                    cancelState.canCancel && !isCancelling ? '' : 'opacity-60'
+                  }`}
+                  disabled={!cancelState.canCancel || isCancelling}
+                  onClick={() => onCancel(item)}
+                  title={isCancelling ? 'กำลังยกเลิกงานสร้างนี้' : cancelState.title}
+                  aria-disabled={!cancelState.canCancel || isCancelling}
+                >
+                  <CircleX size={14} />
+                  {isCancelling ? 'กำลังยกเลิก' : cancelState.label}
+                </button>
+              )}
+              {onTogglePublish && item.librarySource === 'backend' && !isPublicGalleryItem && (
                 <button
                   type="button"
                   data-testid={`ai-creator-library-detail-publish-${item.id}`}
@@ -229,19 +283,30 @@ export function AiCreatorHistoryDetailDialog({
                   รายงาน
                 </button>
               )}
-              <button
-                type="button"
-                data-testid={`ai-creator-library-detail-delete-${item.id}`}
-                className="missai-button-danger justify-center"
-                onClick={() => onDelete(item.id)}
-                title={item.librarySource === 'backend' ? 'ลบชิ้นงานนี้จาก backend library ของฉัน' : 'ลบชิ้นงานนี้จากคลังของฉัน'}
-              >
-                <Trash2 size={14} />
-                ลบ
-              </button>
+              {!isPublicGalleryItem && (
+                <button
+                  type="button"
+                  data-testid={`ai-creator-library-detail-delete-${item.id}`}
+                  className="missai-button-danger justify-center"
+                  onClick={() => onDelete(item.id)}
+                  title={item.librarySource === 'backend' ? 'ลบชิ้นงานนี้จาก backend library ของฉัน' : 'ลบชิ้นงานนี้จากคลังของฉัน'}
+                >
+                  <Trash2 size={14} />
+                  ลบ
+                </button>
+              )}
             </div>
 
-            {downloadNotice && (
+            {isPublicGalleryItem && (
+              <div
+                data-testid={`ai-creator-library-detail-public-notice-${item.id}`}
+                className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-3 text-xs font-semibold leading-5 text-emerald-100"
+              >
+                รายละเอียดนี้มาจาก Public Gallery ที่ส่งเฉพาะข้อมูลที่ปลอดภัยต่อการแชร์ ไม่มี storage key หรือข้อมูลเจ้าของส่วนตัว
+              </div>
+            )}
+
+            {!isPublicGalleryItem && downloadNotice && (
               <div
                 data-testid={`ai-creator-library-detail-download-notice-${item.id}`}
                 data-state={downloadNotice.state}
