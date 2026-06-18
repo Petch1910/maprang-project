@@ -10,9 +10,8 @@ import { CreatorReadinessPanel } from '../src/components/CreatorReadinessPanel'
 import { MessageBubble } from '../src/components/MessageBubble'
 import { RelationshipPresetPicker } from '../src/components/RelationshipPresetPicker'
 import { ReportDialog } from '../src/components/ReportDialog'
-import { SystemStatus } from '../src/components/SystemStatus'
 import { buildDeployPhaseSteps, type DeployCheck } from '../src/lib/adminHealthDeploy'
-import type { Character, ChatMessage, ChatSummary, HealthStatus } from '../src/lib/api'
+import type { Character, ChatMessage, ChatSummary } from '../src/lib/api'
 import type { TagAnalysis } from '../src/lib/tagAnalysis'
 import { selectPendingSceneCount, selectPendingSceneSummaries } from '../src/store/slices/chatsSlice'
 import type { RootState } from '../src/store/types'
@@ -51,68 +50,6 @@ const readyAnalysis: TagAnalysis = {
   safety: ['green-flag'],
   unknown: [],
   issues: [],
-}
-
-const localHealthStatus: HealthStatus = {
-  ok: true,
-  service: 'maprang-backend',
-  checks: {
-    databaseConfigured: true,
-    databaseConnected: true,
-    openRouterConfigured: false,
-    imageGenerationConfigured: false,
-    adminAuthConfigured: true,
-    supabaseAuthConfigured: false,
-  },
-  security: {
-    corsOrigins: ['http://127.0.0.1:5173'],
-    authMode: 'local-dev-header',
-    adminGuard: 'api-key',
-    avatarStorage: 'local',
-    avatarStorageAccess: 'local',
-    signedUrlExpiresIn: null,
-  },
-  knowledge: {
-    structured: {
-      ok: true,
-      fileCount: 5,
-      missing: [],
-      errors: [],
-      files: [],
-    },
-  },
-  env: {
-    mode: 'development',
-    missingRequired: [],
-    missingRecommended: [],
-    invalid: [],
-  },
-  databaseError: null,
-  timestamp: '2026-06-11T00:00:00.000Z',
-  model: {
-    name: 'local runtime',
-    inputCostPer1M: 0,
-    outputCostPer1M: 0,
-    maxInputChars: 4000,
-    minTokenBalanceForChat: 1,
-    chatProvider: {
-      configured: false,
-      liveVerified: false,
-      productionReady: false,
-      status: 'missing_provider',
-      localFallbackEnabled: true,
-      forcedLocal: true,
-      activeRuntimeProvider: 'local',
-      localModel: 'local/mock-roleplay',
-    },
-    imageGeneration: {
-      configured: false,
-      liveVerified: false,
-      productionReady: false,
-      status: 'missing_provider',
-      model: 'fallback',
-    },
-  },
 }
 
 function chatSummaryWithPendingScene(overrides: Partial<ChatSummary> = {}): ChatSummary {
@@ -203,6 +140,18 @@ describe('frontend component contracts', () => {
     expect(html).toContain('data-testid="chat-composer-submit"')
     expect(html).toContain('disabled=""')
     expect(html).toContain('token balance is too low')
+  })
+
+  test('chat panel bypasses token send lock only for local runtime', () => {
+    const source = readFileSync(new URL('../src/components/ChatPanel.tsx', import.meta.url), 'utf8')
+    const workspaceSource = readFileSync(new URL('../src/pages/WorkspacePage.tsx', import.meta.url), 'utf8')
+
+    expect(source).toContain('isLocalChatRuntime?: boolean')
+    expect(source).toContain('const isTokenGated = !isLocalChatRuntime')
+    expect(source).toContain('canSubmit={!isOutOfTokens}')
+    expect(source).toContain('กำลังตอบอยู่ กรุณารอคำตอบก่อนส่งต่อ')
+    expect(workspaceSource).toContain("activeRuntimeProvider === 'local'")
+    expect(workspaceSource).toContain('isLocalChatRuntime={isLocalChatRuntime}')
   })
 
   test('chat composer routes button and enter submit through a local duplicate-send guard', () => {
@@ -333,39 +282,96 @@ describe('frontend component contracts', () => {
 
   test('creator studio image draft copy stays product-facing', async () => {
     const formSource = await Bun.file('apps/frontend/src/components/CharacterCreateForm.tsx').text()
+    const creatorStateSource = await Bun.file('apps/frontend/src/lib/creatorFormState.ts').text()
+    const creatorPersistenceHookSource = await Bun.file('apps/frontend/src/hooks/useCreatorDraftPersistence.ts').text()
+    const creatorGenerationHookSource = await Bun.file('apps/frontend/src/hooks/useCreatorDraftGeneration.ts').text()
+    const creatorFormActionsHookSource = await Bun.file('apps/frontend/src/hooks/useCreatorFormActions.ts').text()
     const pageSource = await Bun.file('apps/frontend/src/pages/CreatorStudioPage.tsx').text()
     const routeAuditSource = await Bun.file('apps/frontend/src/lib/routeMenuAudit.ts').text()
     const workspaceSource = await Bun.file('apps/frontend/src/pages/WorkspacePage.tsx').text()
-    const systemStatusSource = await Bun.file('apps/frontend/src/components/SystemStatus.tsx').text()
-    const combinedSource = `${formSource}\n${pageSource}\n${routeAuditSource}\n${workspaceSource}\n${systemStatusSource}`
+    const adminHealthSource = await Bun.file('apps/frontend/src/pages/AdminHealthPage.tsx').text()
+    const combinedSource = `${formSource}\n${creatorStateSource}\n${creatorGenerationHookSource}\n${creatorFormActionsHookSource}\n${pageSource}\n${routeAuditSource}\n${workspaceSource}\n${adminHealthSource}`
 
     expect(formSource).toContain('ภาพร่างสำหรับจัดฟอร์ม')
-    expect(formSource).toContain('ระบบช่วยร่างเนื้อหาในเครื่องให้ก่อน')
+    expect(creatorGenerationHookSource).toContain('ระบบช่วยร่างเนื้อหาในเครื่องให้ก่อน')
+    expect(formSource).toContain('useCreatorDraftPersistence({')
+    expect(formSource).toContain('useCreatorDraftGeneration({')
+    expect(formSource).toContain('useCreatorFormActions({')
+    expect(formSource).toContain('onClick={useCoverAsMainImage}')
+    expect(formSource).toContain('onClick={clearCoverDraft}')
+    expect(formSource).toContain('clearGeneratedAvatar()')
+    expect(formSource).toContain('onClick={clearGeneratedAvatar}')
+    expect(formSource).toContain('onClick={() => resetCreatorForm()}')
+    expect(formSource).not.toContain('fetchCreatorDraft()')
+    expect(formSource).not.toContain('updateCreatorDraft(payload)')
+    expect(formSource).not.toContain('generateCreatorAiDraft')
+    expect(formSource).not.toContain('uploadAvatar')
+    expect(formSource).not.toContain('buildGeneratedAvatarDataUrl')
+    expect(formSource).not.toContain("setCoverImageUrl('')")
+    expect(formSource).not.toContain("setCoverImageSource('none')")
+    expect(formSource).not.toContain('setForm(emptyCharacter)')
+    expect(formSource).not.toContain("update('avatarUrl', coverImageUrl)")
+    expect(formSource).not.toContain("update('avatarUrl', '')")
+    expect(formSource).not.toContain('withCreatorUiTimeout')
+    expect(formSource).not.toContain('trackFrontendEventSafe')
+    expect(formSource).not.toContain('persistLocalCreatorDraft(dbDraft)')
+    expect(formSource).not.toContain('persistLocalCreatorDraft(payload)')
+    expect(formSource).not.toContain('writeStoredCreatorDraft(window.localStorage')
+    expect(formSource).not.toContain('readStoredCreatorDraft(window.localStorage')
+    expect(formSource).not.toContain('clearStoredCreatorDraft(window.localStorage')
+    expect(creatorPersistenceHookSource).toContain('fetchCreatorDraft()')
+    expect(creatorPersistenceHookSource).toContain('persistLocalCreatorDraft(dbDraft)')
+    expect(creatorPersistenceHookSource).toContain('persistLocalCreatorDraft(payload)')
+    expect(creatorPersistenceHookSource).toContain('updateCreatorDraft(payload).catch(() => {})')
+    expect(creatorPersistenceHookSource).toContain('updateCreatorDraft(null).catch(() => {})')
+    expect(creatorGenerationHookSource).toContain('generateCreatorAiDraft')
+    expect(creatorGenerationHookSource).toContain('uploadAvatar')
+    expect(creatorGenerationHookSource).toContain('buildGeneratedAvatarDataUrl')
+    expect(creatorGenerationHookSource).toContain('withCreatorUiTimeout')
+    expect(creatorGenerationHookSource).toContain('trackFrontendEventSafe')
+    expect(creatorGenerationHookSource).toContain('applyImageDraft')
+    expect(creatorFormActionsHookSource).toContain('useCoverAsMainImage')
+    expect(creatorFormActionsHookSource).toContain('clearCoverDraft')
+    expect(creatorFormActionsHookSource).toContain('clearGeneratedAvatar')
+    expect(creatorFormActionsHookSource).toContain('resetCreatorForm')
+    expect(creatorFormActionsHookSource).toContain('clearPersistedCreatorDraft()')
+    expect(creatorFormActionsHookSource).toContain("setCoverImageUrl('')")
+    expect(creatorFormActionsHookSource).toContain("setCoverImageSource('none')")
+    expect(creatorFormActionsHookSource).toContain('setForm(emptyCharacter)')
+    expect(creatorStateSource).toContain('function avatarSourceLabel')
+    expect(creatorStateSource).toContain('ระบบสร้างรูป')
+    expect(creatorStateSource).toContain('ภาพร่างระบบ')
+    expect(creatorStateSource).toContain('ผู้ใช้เลือกเอง')
+    expect(creatorStateSource).toContain('function buildReadinessSummary')
+    expect(creatorStateSource).toContain('function buildCreatorCharacterInput')
+    expect(creatorStateSource).toContain("visibility: 'PRIVATE'")
+    expect(creatorStateSource).toContain("status: 'DRAFT'")
+    expect(formSource).toContain('onCreate(buildCreatorCharacterInput({ form, coverImageUrl }))')
+    expect(formSource).toContain('ภาพยนตร์สมจริง')
+    expect(formSource).toContain('ภาพสามมิติ')
     expect(pageSource).toContain('ภาพร่างพร้อม')
     expect(routeAuditSource).toContain('ภาพร่างระบบแทนพร้อมบอกสถานะ')
     expect(workspaceSource).toContain('ระบบสร้างรูปจริงยังไม่พร้อม')
-    expect(systemStatusSource).toContain('ใช้ภาพร่างระบบ')
+    expect(routeAuditSource).toContain('ภาพร่างระบบแทนพร้อมบอกสถานะ')
     expect(combinedSource).not.toContain('ภาพตัวอย่าง')
     expect(combinedSource).not.toContain('ภาพตัวอย่างชั่วคราว')
     expect(combinedSource).not.toContain('ยังไม่ใช่รูป AI จริง')
     expect(combinedSource).not.toContain('ผู้ให้บริการสร้างรูปจริง')
     expect(combinedSource).not.toContain('ดราฟต์สำรองเพราะโมเดลเนื้อหาไม่พร้อม')
     expect(combinedSource).not.toContain('เรียก AI ไม่สำเร็จ')
+    expect(formSource).not.toContain('Cinematic Realistic')
+    expect(formSource).not.toContain('3D Render')
+    expect(formSource).not.toContain('Digital Art)')
   })
 
-  test('system status presents local runtime without debug provider wording', () => {
-    const html = render(
-      createElement(SystemStatus, {
-        healthStatus: localHealthStatus,
-        onRefresh: async () => undefined,
-      }),
-    )
+  test('admin health presents local runtime without old component dependency', async () => {
+    const source = await Bun.file('apps/frontend/src/pages/AdminHealthPage.tsx').text()
 
-    expect(html).toContain('โหมดในเครื่องพร้อมเล่น')
-    expect(html).toContain('แชทในเครื่องพร้อมใช้')
-    expect(html).not.toContain('local QA')
-    expect(html).not.toContain('local/mock-roleplay')
-    expect(html).not.toContain('local mock')
+    expect(source).toContain('โหมดจำลองในเครื่องพร้อมเล่นโดยไม่ใช้เครดิตผู้ให้บริการ')
+    expect(source).toContain('แชทในเครื่องพร้อมใช้')
+    expect(source).not.toContain('SystemStatus')
+    expect(source).not.toContain('local QA')
+    expect(source).not.toContain('local mock')
   })
 
   test('admin health deploy phases keep local, staging, live provider, and production gates separate', () => {
@@ -409,23 +415,27 @@ describe('frontend component contracts', () => {
 
     const [localServer, staging, liveProvider, production] = buildDeployPhaseSteps(checks)
 
+    expect(localServer.title).toBe('1. เซิร์ฟเวอร์ในเครื่อง')
     expect(localServer.command).toBe('bun run local:doctor + bun run qa:full')
     expect(localServer.ok).toBe(false)
     expect(localServer.detail).toContain('local')
     expect(localServer.detail).not.toContain('URL')
 
+    expect(staging.title).toBe('2. พรีวิวผ่าน Ngrok / สเตจจิง')
     expect(staging.command).toBe('bun run ngrok:proxy + bun run staging:verify + bun run e2e:smoke')
     expect(staging.ok).toBe(false)
     expect(staging.detail).toContain('URL หลังบ้านของหน้าเว็บ')
     expect(staging.detail).not.toContain('ฐานข้อมูล local')
     expect(staging.detail).not.toContain('ทดสอบแชทจริง')
 
+    expect(liveProvider.title).toBe('3. ทดสอบผู้ให้บริการจริง')
     expect(liveProvider.command).toBe('bun run api:smoke:live')
     expect(liveProvider.ok).toBe(false)
     expect(liveProvider.detail).toContain('ทดสอบแชทจริง')
     expect(liveProvider.detail).toContain('ทดสอบสร้างรูปจริง')
     expect(liveProvider.detail).not.toContain('URL หลังบ้านของหน้าเว็บ')
 
+    expect(production.title).toBe('4. โปรดักชันบนคลาวด์')
     expect(production.command).toBe('bun run production:check')
     expect(production.ok).toBe(false)
     expect(production.detail).toContain('URL หลังบ้านของหน้าเว็บ')
@@ -440,10 +450,14 @@ describe('frontend component contracts', () => {
     expect(source).toContain("import { buildDeployPhaseSteps, type DeployCheck } from '../lib/adminHealthDeploy'")
     expect(source).not.toContain('function buildDeployPhaseSteps(')
     expect(source).not.toContain('function blockerSummary(')
-    expect(source).toContain('โดเมนหน้าบ้านสเตจจิง')
+    expect(source).toContain('แชทในเครื่องพร้อมใช้')
     expect(source).not.toContain('โดเมนหน้าบ้านทดลอง')
     expect(source).not.toContain('ทดสอบ flow')
-    expect(source).toContain('ยังมีรายการต้องตรวจในเช็กลิสต์ด้านล่างก่อนเปิดใช้งานจริง')
+    expect(source).toContain('ลำดับงานก่อนปล่อยจริง')
+    expect(source).toContain('buildDeployPhaseSteps(checks)')
+    expect(source).toContain('ยังใช้ภาพร่างของระบบ')
+    expect(source).not.toContain("'provider'} แล้ว")
+    expect(source).not.toContain('ยังใช้ภาพ fallback ของระบบ')
     expect(source).not.toContain('ยังไม่พร้อมเต็ม')
   })
 
@@ -463,18 +477,156 @@ describe('frontend component contracts', () => {
     expect(source).not.toContain('initialDarkMode')
   })
 
+  test('navigation disabled reasons stay Thai and local-server friendly', async () => {
+    const source = await Bun.file('apps/frontend/src/lib/missaiNavigation.ts').text()
+
+    expect(source).toContain('เซิร์ฟเวอร์ในเครื่องยังไม่มีแพ็กเกจแอปให้ดาวน์โหลด')
+    expect(source).not.toContain('Local server ยังไม่มีแพ็กเกจแอปให้ดาวน์โหลด')
+  })
+
+  test('frontend event capture is wired through the shared api helper', async () => {
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
+    const analyticsSource = await Bun.file('apps/frontend/src/lib/analytics.ts').text()
+    const exploreSource = await Bun.file('apps/frontend/src/pages/ExplorePage.tsx').text()
+    const lobbySource = await Bun.file('apps/frontend/src/pages/CharacterLobbyPage.tsx').text()
+    const walletSource = await Bun.file('apps/frontend/src/pages/WalletPage.tsx').text()
+    const creatorSource = await Bun.file('apps/frontend/src/pages/CreatorStudioPage.tsx').text()
+    const aiCreatorSource = await Bun.file('apps/frontend/src/pages/AICreatorPage.tsx').text()
+    const aiCreatorGenerationHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorGeneration.ts').text()
+    const reportSource = await Bun.file('apps/frontend/src/components/ReportDialog.tsx').text()
+
+    expect(apiSource).toContain("requestJson<{ ok: boolean; eventId: string }>('/analytics/events'")
+    expect(analyticsSource).toContain('trackFrontendEventSafe')
+    expect(analyticsSource).not.toContain('fetch(')
+    expect(exploreSource).toContain("eventName: 'marketplace_view'")
+    expect(exploreSource).toContain("eventName: 'character_impression'")
+    expect(lobbySource).toContain("eventName: 'character_detail_view'")
+    expect(walletSource).toContain("eventName: 'wallet_view'")
+    expect(creatorSource).toContain("eventName: 'creator_opened'")
+    expect(creatorSource).toContain("eventName: 'creator_publish'")
+    expect(aiCreatorSource).toContain("eventName: 'ai_creator_opened'")
+    expect(aiCreatorGenerationHookSource).toContain("eventName: 'ai_creator_generate_started'")
+    expect(reportSource).toContain("eventName: 'report_opened'")
+  })
+
+  test('ai creator detail dialog keeps product labels Thai-first', async () => {
+    const source = await Bun.file('apps/frontend/src/components/ai-creator/AiCreatorHistoryDetailDialog.tsx').text()
+
+    for (const label of ['สถานะ', 'ประเภท', 'ค่าใช้จ่าย', 'พรอมป์', 'บรีฟ', 'ร่างตัวละคร', 'พรอมป์ระบบ']) {
+      expect(source).toContain(label)
+    }
+    for (const staleLabel of ['>Status<', '>Type<', '>Cost<', '>Prompt<', '>Brief<', '>Character Draft<', '>System Prompt<', 'Video Preview', 'Image Draft', 'local-safe']) {
+      expect(source).not.toContain(staleLabel)
+    }
+  })
+
+  test('ai creator page keeps character loading and local history in focused hooks', async () => {
+    const pageSource = await Bun.file('apps/frontend/src/pages/AICreatorPage.tsx').text()
+    const characterHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorCharacterOptions.ts').text()
+    const historyHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorLocalHistory.ts').text()
+
+    expect(pageSource).toContain("import { useAiCreatorCharacterOptions } from '../hooks/useAiCreatorCharacterOptions'")
+    expect(pageSource).toContain("import { useAiCreatorDownloads } from '../hooks/useAiCreatorDownloads'")
+    expect(pageSource).toContain("import { useAiCreatorGeneration } from '../hooks/useAiCreatorGeneration'")
+    expect(pageSource).toContain("import { useAiCreatorLocalHistory } from '../hooks/useAiCreatorLocalHistory'")
+    expect(pageSource).toContain("import { useAiCreatorUploadReferences } from '../hooks/useAiCreatorUploadReferences'")
+    expect(pageSource).toContain('const characters = useAiCreatorCharacterOptions(40)')
+    expect(pageSource).toContain('useAiCreatorDownloads(setStatusMessage)')
+    expect(pageSource).toContain('useAiCreatorGeneration({')
+    expect(pageSource).toContain('prependHistoryItem,')
+    expect(pageSource).toContain('removeHistoryItem,')
+    expect(pageSource).toContain('toggleLocalHistoryFavorite,')
+    expect(pageSource).toContain('useAiCreatorUploadReferences(videoDuration, setStatusMessage)')
+    expect(pageSource).not.toContain('fetchCharacters')
+    expect(pageSource).not.toContain('generateCreatorAiDraft')
+    expect(pageSource).not.toContain('createAiCreatorImageItem')
+    expect(pageSource).not.toContain('createAiCreatorVideoItem')
+    expect(pageSource).not.toContain('readAiCreatorHistory')
+    expect(pageSource).not.toContain('writeAiCreatorHistory')
+    expect(pageSource).not.toContain('validateAiCreatorUploadSlot')
+    expect(pageSource).not.toContain('new FileReader')
+    expect(pageSource).not.toContain('fetchGenerationOutputDownload')
+    expect(pageSource).not.toContain('buildAiCreatorDownloadFilename')
+    expect(pageSource).not.toContain('getAiCreatorDownloadActionState')
+    expect(pageSource).not.toContain("document.createElement('a')")
+
+    expect(characterHookSource).toContain("fetchCharacters({ view: 'public', limit })")
+    expect(characterHookSource).toContain('active = false')
+    expect(historyHookSource).toContain('readAiCreatorHistory(window.localStorage)')
+    expect(historyHookSource).toContain('writeAiCreatorHistory(window.localStorage, nextHistory)')
+    expect(historyHookSource).toContain('prependAiCreatorHistory(currentHistory, item)')
+
+    const uploadHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorUploadReferences.ts').text()
+    expect(uploadHookSource).toContain('validateAiCreatorUploadSlot')
+    expect(uploadHookSource).toContain('AI_CREATOR_UPLOAD_SLOT_RULES.imageToImage[0]')
+    expect(uploadHookSource).toContain('AI_CREATOR_UPLOAD_SLOT_RULES.advancedVideo[0]')
+    expect(uploadHookSource).toContain('new FileReader')
+
+    const generationHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorGeneration.ts').text()
+    expect(generationHookSource).toContain('generateCreatorAiDraft')
+    expect(generationHookSource).toContain('createAiCreatorImageItem')
+    expect(generationHookSource).toContain('createAiCreatorVideoItem')
+    expect(generationHookSource).toContain("eventName: 'ai_creator_generate_started'")
+
+    const downloadHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorDownloads.ts').text()
+    expect(downloadHookSource).toContain('fetchGenerationOutputDownload')
+    expect(downloadHookSource).toContain('buildAiCreatorDownloadFilename')
+    expect(downloadHookSource).toContain('getAiCreatorDownloadActionState')
+    expect(downloadHookSource).toContain("document.createElement('a')")
+
+    const libraryActionsHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorLibraryActions.ts').text()
+    expect(libraryActionsHookSource).toContain('toggleLocalHistoryFavorite(itemId)')
+    expect(libraryActionsHookSource).toContain('removeHistoryItem(itemId)')
+  })
+
   test('workspace chat does not substitute a client-side character when backend data is empty', async () => {
     const workspaceSource = await Bun.file('apps/frontend/src/pages/WorkspacePage.tsx').text()
+    const workspaceRuntimeSource = await Bun.file('apps/frontend/src/lib/workspaceRuntime.ts').text()
+    const workspaceChatHistoryHookSource = await Bun.file('apps/frontend/src/hooks/useWorkspaceChatHistory.ts').text()
+    const workspaceReportsHookSource = await Bun.file('apps/frontend/src/hooks/useWorkspaceReports.ts').text()
+    const workspaceWorldStateHookSource = await Bun.file('apps/frontend/src/hooks/useWorkspaceWorldState.ts').text()
     const chatHelperSource = await Bun.file('apps/frontend/src/lib/chat.ts').text()
 
     expect(workspaceSource).not.toContain('fallbackCharacter')
     expect(chatHelperSource).not.toContain('fallbackCharacter')
     expect(workspaceSource).toContain('data-testid="chat-empty-character-state"')
-    expect(workspaceSource).toContain('หน้าแชทจะไม่ใช้ตัวละครที่ไม่ได้มาจากระบบหลังบ้านแทนข้อมูลจริง')
     expect(workspaceSource).toContain("setCharacters(visibleCharacters)")
+    expect(workspaceSource).toContain("from '../lib/workspaceRuntime'")
+    expect(workspaceSource).toContain("from '../hooks/useWorkspaceChatHistory'")
+    expect(workspaceSource).toContain("from '../hooks/useWorkspaceReports'")
+    expect(workspaceSource).toContain("from '../hooks/useWorkspaceWorldState'")
+    expect(workspaceSource).toContain('useWorkspaceChatHistory()')
+    expect(workspaceSource).toContain('useWorkspaceReports({')
+    expect(workspaceSource).toContain('useWorkspaceWorldState({')
+    expect(workspaceSource).not.toContain('function apiErrorMessage')
+    expect(workspaceSource).not.toContain('function defaultSceneState')
+    expect(workspaceSource).not.toContain('const openMessageReport =')
+    expect(workspaceSource).not.toContain('const openCharacterReport =')
+    expect(workspaceSource).not.toContain('const reportMessage = async')
+    expect(workspaceSource).not.toContain('const saveWorldState = async')
+    expect(workspaceSource).not.toContain('const loadChatHistory = useCallback')
+    expect(workspaceSource).not.toContain('defaultMemoryState')
+    expect(workspaceSource).not.toContain('defaultSceneState')
+    expect(workspaceSource).not.toContain('defaultRelationshipState')
+    expect(workspaceSource).not.toContain('????????')
+    expect(workspaceSource).not.toContain('setIsLoading(false)\n      try {\n        setIsLoading(false)')
+    expect(workspaceRuntimeSource).toContain('function apiErrorMessage')
+    expect(workspaceRuntimeSource).toContain('function defaultSceneState')
+    expect(workspaceRuntimeSource).toContain('function logUnexpectedWorkspaceError')
+    expect(workspaceRuntimeSource).toContain('function savedChatRuntimeState')
+    expect(workspaceRuntimeSource).toContain('export const savedChatMessageWindowLimit = 120')
+    expect(workspaceChatHistoryHookSource).toContain('fetchChats')
+    expect(workspaceChatHistoryHookSource).toContain('isPlayableChatSummary')
+    expect(workspaceChatHistoryHookSource).toContain('loadChatHistory')
+    expect(workspaceReportsHookSource).toContain('createReport')
+    expect(workspaceReportsHookSource).toContain('openMessageReport')
+    expect(workspaceReportsHookSource).toContain('openCharacterReport')
+    expect(workspaceReportsHookSource).toContain('reportMessage')
+    expect(workspaceWorldStateHookSource).toContain('updateChatWorldState')
+    expect(workspaceWorldStateHookSource).toContain('saveWorldState')
+    expect(workspaceWorldStateHookSource).toContain('setRuntimeState')
     expect(workspaceSource).not.toContain('visibleCharacters.length ? visibleCharacters')
-    expect(workspaceSource).not.toContain('เปิด QA seed')
-    expect(workspaceSource).not.toContain('แชท QA สำหรับทดสอบ')
+    expect(workspaceSource).not.toContain('QA seed')
   })
 
   test('wallet admin token adjustments keep production-facing ledger reasons', async () => {
@@ -512,9 +664,14 @@ describe('frontend component contracts', () => {
 
   test('saved chat cards avoid demo-like empty preview copy', async () => {
     const myChatsSource = await Bun.file('apps/frontend/src/pages/MyChatsPage.tsx').text()
+    const characterVisualSource = await Bun.file('apps/frontend/src/lib/characterVisual.ts').text()
 
     expect(myChatsSource).toContain('ยังไม่มีข้อความล่าสุด')
+    expect(myChatsSource).toContain('characterImageUrl({ id: chat.characterId, name: chat.characterName, src: chat.characterAvatarUrl })')
+    expect(characterVisualSource).toContain('export function generatedCharacterImageUrl')
+    expect(characterVisualSource).toContain('<ellipse cx="260" cy="254"')
     expect(myChatsSource).not.toContain('ยังไม่มีตัวอย่างข้อความ')
+    expect(characterVisualSource).not.toContain('<text')
   })
 
   test('moderation empty state uses product-facing report guidance', async () => {
@@ -522,8 +679,8 @@ describe('frontend component contracts', () => {
     const routeAuditSource = await Bun.file('apps/frontend/src/lib/routeMenuAudit.ts').text()
     const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
 
-    expect(moderationSource).toContain('เมื่อมีรายงานจากห้องแชทหรือหน้าโปรไฟล์ตัวละคร')
-    expect(moderationSource).toContain('ไปสร้างรายงานจากแชท')
+    expect(moderationSource).toContain('ไม่พบรายงานในเงื่อนไขนี้')
+    expect(moderationSource).toContain('ตรวจรายงานจากตัวละคร ข้อความ และผลงานสร้าง')
     expect(moderationSource).toContain("'GENERATION_OUTPUT'")
     expect(moderationSource).toContain("'HIDE_GENERATION_OUTPUT'")
     expect(moderationSource).toContain('ซ่อนผลงานสร้าง')
@@ -564,6 +721,10 @@ describe('frontend component contracts', () => {
     const aiCreatorSource = await Bun.file('apps/frontend/src/lib/aiCreator.ts').text()
     const detailSource = await Bun.file('apps/frontend/src/components/ai-creator/AiCreatorHistoryDetailDialog.tsx').text()
     const pageSource = await Bun.file('apps/frontend/src/pages/AICreatorPage.tsx').text()
+    const historyViewHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorHistoryView.ts').text()
+    const libraryActionsHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorLibraryActions.ts').text()
+    const studioActionsHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorStudioActions.ts').text()
+    const studioBridgeHookSource = await Bun.file('apps/frontend/src/hooks/useAiCreatorStudioBridge.ts').text()
 
     expect(apiSource).toContain('cancelGenerationJob')
     expect(apiSource).toContain('/generation/jobs/${jobId}/cancel')
@@ -594,18 +755,49 @@ describe('frontend component contracts', () => {
       'data-testid="ai-creator-video-contract-state"',
     )
     expect(pageSource).toContain('handleCancelHistoryItem')
-    expect(pageSource).toContain('cancelGenerationJob(item.backendJobId)')
-    expect(pageSource).toContain('resolveCreatorReferenceItem')
-    expect(pageSource).toContain("if (item.id.startsWith('public-')) return { ok: true, item }")
-    expect(pageSource).toContain('useGenerationOutputAsCharacterImage as createCharacterImageReference')
-    expect(pageSource).toContain('useGenerationOutputAsCover as createCoverReference')
-    expect(pageSource).toContain('createCharacterImageReference(item.backendOutputId)')
-    expect(pageSource).toContain('createCoverReference(item.backendOutputId)')
-    expect(pageSource).toContain('import.meta.env.DEV && err instanceof ApiError && err.status === 404 && hasLocalSafePreview')
-    expect(pageSource).toContain('ใช้ preview local-safe แทน backend reference')
-    expect(pageSource).toContain('Promise<{ ok: true; item: AiCreatorGeneratedItem } | { ok: false; message: string }>')
-    expect(pageSource).toContain('saveAiCreatorItemToCreatorDraft(window.localStorage, resolved.item)')
-    expect(pageSource).toContain('saveAiCreatorItemToCreatorCoverDraft(window.localStorage, resolved.item)')
+    expect(pageSource).toContain('useAiCreatorLibraryActions({')
+    expect(pageSource).toContain('useAiCreatorHistoryView(backendHistory, history)')
+    expect(pageSource).not.toContain('filterAiCreatorHistory(combinedHistory, galleryFilter)')
+    expect(pageSource).not.toContain('paginateAiCreatorHistory(filteredHistory, currentPage)')
+    expect(historyViewHookSource).toContain('filterAiCreatorHistory(combinedHistory, galleryFilter)')
+    expect(historyViewHookSource).toContain('paginateAiCreatorHistory(filteredHistory, currentPage)')
+    expect(historyViewHookSource).toContain('setGalleryFilter(filter)')
+    expect(historyViewHookSource).toContain('setCurrentPage(1)')
+    expect(pageSource).not.toContain('cancelGenerationJob(item.backendJobId)')
+    expect(pageSource).not.toContain('retryGenerationJob(item.backendJobId)')
+    expect(pageSource).not.toContain('deleteGenerationOutput(backendItem.backendOutputId)')
+    expect(pageSource).not.toContain('reportGenerationOutput(reportTarget.id')
+    expect(pageSource).not.toContain('publishGenerationOutput(item.backendOutputId)')
+    expect(pageSource).not.toContain('unpublishGenerationOutput(item.backendOutputId)')
+    expect(libraryActionsHookSource).toContain('cancelGenerationJob(item.backendJobId)')
+    expect(libraryActionsHookSource).toContain('retryGenerationJob(item.backendJobId)')
+    expect(libraryActionsHookSource).toContain('deleteGenerationOutput(backendItem.backendOutputId)')
+    expect(libraryActionsHookSource).toContain('reportGenerationOutput(reportTarget.id')
+    expect(libraryActionsHookSource).toContain('publishGenerationOutput(item.backendOutputId)')
+    expect(libraryActionsHookSource).toContain('unpublishGenerationOutput(item.backendOutputId)')
+    expect(pageSource).toContain('useAiCreatorStudioBridge(setStatusMessage, setDetailItem)')
+    expect(pageSource).toContain('useAiCreatorStudioActions(setStatusMessage)')
+    expect(pageSource).not.toContain('updateCreatorDraft(response.draft)')
+    expect(pageSource).not.toContain('safeWriteClipboardText(getSafeClipboard()')
+    expect(studioActionsHookSource).toContain('updateCreatorDraft(response.draft)')
+    expect(studioActionsHookSource).toContain('safeWriteClipboardText(getSafeClipboard()')
+    expect(studioActionsHookSource).toContain('setCopiedPrompt(true)')
+    expect(pageSource).not.toContain('resolveCreatorReferenceItem')
+    expect(pageSource).not.toContain('createCharacterImageReference(item.backendOutputId)')
+    expect(pageSource).not.toContain('createCoverReference(item.backendOutputId)')
+    expect(pageSource).not.toContain('saveAiCreatorItemToCreatorDraft(window.localStorage, resolved.item)')
+    expect(pageSource).not.toContain('saveAiCreatorItemToCreatorCoverDraft(window.localStorage, resolved.item)')
+    expect(studioBridgeHookSource).toContain('resolveCreatorReferenceItem')
+    expect(studioBridgeHookSource).toContain("if (item.id.startsWith('public-')) return { ok: true, item }")
+    expect(studioBridgeHookSource).toContain('useGenerationOutputAsCharacterImage as createCharacterImageReference')
+    expect(studioBridgeHookSource).toContain('useGenerationOutputAsCover as createCoverReference')
+    expect(studioBridgeHookSource).toContain('createCharacterImageReference(item.backendOutputId)')
+    expect(studioBridgeHookSource).toContain('createCoverReference(item.backendOutputId)')
+    expect(studioBridgeHookSource).toContain('import.meta.env.DEV && err instanceof ApiError && err.status === 404 && hasLocalSafePreview')
+    expect(studioBridgeHookSource).toContain('ใช้ preview local-safe แทน backend reference')
+    expect(studioBridgeHookSource).toContain('Promise<{ ok: true; item: AiCreatorGeneratedItem } | { ok: false; message: string }>')
+    expect(studioBridgeHookSource).toContain('saveAiCreatorItemToCreatorDraft(window.localStorage, resolved.item)')
+    expect(studioBridgeHookSource).toContain('saveAiCreatorItemToCreatorCoverDraft(window.localStorage, resolved.item)')
   })
 
   test('events inbox selector exposes only playable pending scene summaries', () => {

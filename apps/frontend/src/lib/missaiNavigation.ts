@@ -36,7 +36,7 @@ export const missAiPrimaryNav: MissAiNavItem[] = [
   { to: '/ai-creator', label: 'แกลเลอรี AI', icon: Image },
   { to: '/announcements', label: 'ประกาศ', icon: Bell },
   { to: '/creators', label: 'นักสร้างยอดนิยม', icon: Trophy },
-  { label: 'ดาวน์โหลดแอป', icon: Download, disabledReason: 'Local server ยังไม่มีแพ็กเกจแอปให้ดาวน์โหลด' },
+  { label: 'ดาวน์โหลดแอป', icon: Download, disabledReason: 'เซิร์ฟเวอร์ในเครื่องยังไม่มีแพ็กเกจแอปให้ดาวน์โหลด' },
   { to: '/support', label: 'ช่วยเหลือ', icon: HelpCircle },
 ]
 

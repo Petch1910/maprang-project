@@ -325,31 +325,31 @@ export function AiCreatorHistoryDetailDialog({
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Status</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-white/35">สถานะ</p>
                 <p className="mt-1 text-sm font-black text-emerald-300">พร้อมใช้งาน</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Type</p>
-                <p className="mt-1 text-sm font-black text-white">{isVideo ? 'Video Preview' : 'Image Draft'}</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-white/35">ประเภท</p>
+                <p className="mt-1 text-sm font-black text-white">{isVideo ? 'พรีวิววิดีโอ' : 'ร่างรูปภาพ'}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Cost</p>
-                <p className="mt-1 text-sm font-black text-amber-200">local-safe</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-white/35">ค่าใช้จ่าย</p>
+                <p className="mt-1 text-sm font-black text-amber-200">ปลอดภัยในเครื่อง</p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Prompt</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">พรอมป์</p>
               <p className="mt-2 text-sm font-semibold leading-6 text-white/78">{item.prompt || 'ไม่มี prompt ที่บันทึกไว้'}</p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Brief</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">บรีฟ</p>
               <p className="mt-2 text-sm font-semibold leading-6 text-white/65">{item.brief || 'ไม่มี brief เพิ่มเติม'}</p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Character Draft</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">ร่างตัวละคร</p>
               <dl className="mt-3 grid gap-3 text-xs font-semibold text-white/65">
                 <div>
                   <dt className="text-white/35">คำโปรย</dt>
@@ -367,7 +367,7 @@ export function AiCreatorHistoryDetailDialog({
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-[#080a1a] p-4">
-              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">System Prompt</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-white/35">พรอมป์ระบบ</p>
               <pre className="mt-3 max-h-52 overflow-auto whitespace-pre-wrap text-[11px] font-semibold leading-5 text-white/55">
                 {item.response.draft.systemPrompt}
               </pre>

@@ -3,6 +3,7 @@ import { cors } from '@elysiajs/cors'
 import { Elysia } from 'elysia'
 import { rateLimit } from 'elysia-rate-limit'
 import { adminRoutes } from './src/admin.routes'
+import { analyticsRoutes } from './src/analytics.routes'
 import { characterRoutes } from './src/character.routes'
 import { chatRoutes } from './src/chat.routes'
 import { generationRoutes } from './src/generation.routes'
@@ -53,6 +54,7 @@ export const app = new Elysia()
     service: 'maprang-backend',
   }))
   .use(healthRoutes)
+  .use(analyticsRoutes)
   .use(adminRoutes)
   .use(userRoutes)
   .use(uploadRoutes)

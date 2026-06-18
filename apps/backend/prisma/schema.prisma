@@ -108,6 +108,8 @@ model User {
   generationOutputs GenerationOutput[]
   providerKeys      UserProviderKey[]
   securityAuditLogs UserSecurityAuditLog[]
+  analyticsEvents   AnalyticsEvent[]
+  contextSnapshots  ContextSnapshot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -152,6 +154,8 @@ model Character {
   tags        CharacterTag[]
   loreEntries LoreEntry[]
   reports     Report[]
+  analyticsEvents  AnalyticsEvent[]
+  contextSnapshots ContextSnapshot[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -202,6 +206,8 @@ model Chat {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   messages  Message[]
+  analyticsEvents  AnalyticsEvent[]
+  contextSnapshots ContextSnapshot[]
 
   lastMessageAt DateTime  @default(now())
   deletedAt     DateTime?
@@ -455,4 +461,60 @@ model GenerationOutput {
   @@index([userId, isFavorite, createdAt(sort: Desc)])
   @@index([visibility, createdAt(sort: Desc)])
   @@index([jobId])
+}
+
+model AnalyticsEvent {
+  id          String  @id @default(uuid()) @db.Uuid
+  userId      String? @db.Uuid
+  chatId      String? @db.Uuid
+  characterId String? @db.Uuid
+
+  eventName  String
+  source     String  @default("server")
+  route      String?
+  entityType String?
+  entityId   String?
+  metadata   Json?
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chat      Chat?      @relation(fields: [chatId], references: [id], onDelete: SetNull)
+  character Character? @relation(fields: [characterId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([eventName, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([chatId, createdAt(sort: Desc)])
+  @@index([characterId, createdAt(sort: Desc)])
+}
+
+model ContextSnapshot {
+  id                    String  @id @default(uuid()) @db.Uuid
+  requestId             String? @unique
+  userId                String? @db.Uuid
+  chatId                String? @db.Uuid
+  characterId           String? @db.Uuid
+  modelRoute            String
+  replyProfile          String
+  modelName             String?
+  promptHash            String
+  promptTokensEstimate  Int
+  promptBudget          Json?
+  loreCount             Int     @default(0)
+  retrievedLore         Json?
+  sectionStats          Json?
+  redactedPromptPreview String? @db.Text
+  metadata              Json?
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chat      Chat?      @relation(fields: [chatId], references: [id], onDelete: SetNull)
+  character Character? @relation(fields: [characterId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([chatId, createdAt(sort: Desc)])
+  @@index([characterId, createdAt(sort: Desc)])
+  @@index([modelRoute, createdAt(sort: Desc)])
+  @@index([promptHash])
 }

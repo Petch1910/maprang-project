@@ -1,4 +1,6 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { buildLocalServerStartupPlan, parseLocalServerStartupArgs } from './local-server-up'
 
 describe('local server startup plan', () => {
@@ -18,7 +20,13 @@ describe('local server startup plan', () => {
       'Backend local server',
       'Frontend local server',
     ])
-    expect(plan.services[0].env).toMatchObject({ HOST: '127.0.0.1', PORT: '3001' })
+    expect(plan.services[0].env).toMatchObject({
+      HOST: '127.0.0.1',
+      PORT: '3001',
+      LOCAL_CHAT_PROVIDER: '1',
+      CHAT_PROVIDER: 'local',
+      LOCAL_CHAT_MODEL_NAME: 'local/mock-roleplay',
+    })
     expect(plan.services[1].env).toMatchObject({ VITE_API_BASE_URL: 'http://127.0.0.1:3001' })
   })
 
@@ -51,5 +59,17 @@ describe('local server startup plan', () => {
     expect(plan.urls.backend).toBe('http://0.0.0.0:3010')
     expect(plan.urls.frontend).toBe('http://127.0.0.1:5174')
     expect(plan.services[1].env).toMatchObject({ VITE_API_BASE_URL: 'http://0.0.0.0:3010' })
+  })
+
+  test('keeps user-facing startup logs readable', () => {
+    const source = readFileSync(join(import.meta.dir, 'local-server-up.ts'), 'utf8')
+
+    expect(source).toContain('รัน - ${command.label}')
+    expect(source).toContain('เปิด - ${command.label}')
+    expect(source).toContain('พร้อมเปิดใช้งาน: frontend')
+    expect(source).toContain('กด Ctrl+C เพื่อปิด backend/frontend')
+    expect(source).toContain('เปิด local server ไม่สำเร็จ')
+    expect(source).not.toMatch(/เธฃเธฑ|เน€เธ|เธ|เธ/)
+    expect(source).not.toContain('????????')
   })
 })

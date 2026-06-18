@@ -1,6 +1,7 @@
 import type { Character } from '@prisma/client'
 import { getPrisma } from './db'
 import { buildChatKnowledgePrompt } from './knowledge.service'
+import { buildModelRoutePromptBlock, type ModelRoutePromptInput } from './model-route.service'
 
 export type LoreForContext = {
   keyword: string
@@ -70,9 +71,10 @@ export async function loadRelevantLore(characterId: string, userMessage: string)
   return [...unique.values()].slice(0, 8)
 }
 
-export function buildContextPromptBlocks(character: ContextCharacter, loreEntries: LoreForContext[]) {
+export function buildContextPromptBlocks(character: ContextCharacter, loreEntries: LoreForContext[], options: ModelRoutePromptInput = {}) {
   const blocks = [
     promptControlPolicy,
+    buildModelRoutePromptBlock(options),
     compact(character.systemPrompt),
     compact(character.compactPrompt) ? `สรุปตัวละครแบบย่อ:\n${compact(character.compactPrompt)}` : '',
     compact(character.characterAnchor) ? `แกนตัวละคร:\n${compact(character.characterAnchor)}` : '',
@@ -116,6 +118,6 @@ export function buildContextPromptBlocks(character: ContextCharacter, loreEntrie
   return blocks
 }
 
-export function buildContextPrompt(character: ContextCharacter, loreEntries: LoreForContext[]) {
-  return buildContextPromptBlocks(character, loreEntries).join('\n\n')
+export function buildContextPrompt(character: ContextCharacter, loreEntries: LoreForContext[], options: ModelRoutePromptInput = {}) {
+  return buildContextPromptBlocks(character, loreEntries, options).join('\n\n')
 }

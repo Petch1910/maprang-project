@@ -10,6 +10,7 @@ export const routeErrorMessages: Record<string, string> = {
   amount_must_be_integer: 'จำนวนโทเคนต้องเป็นเลขจำนวนเต็ม',
   amount_required: 'กรุณาระบุจำนวนโทเคนที่ต้องการปรับ',
   amount_too_large: 'จำนวนโทเคนที่ปรับมากเกินไป',
+  analytics_event_failed: 'บันทึกเหตุการณ์การใช้งานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
   character_create_failed: 'สร้างตัวละครไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
   character_forbidden: 'คุณไม่มีสิทธิ์จัดการตัวละครนี้',
   character_id_required: 'กรุณาระบุตัวละครที่ต้องการรายงาน',

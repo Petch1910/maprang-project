@@ -34,6 +34,11 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     coverage: ['smoke', 'manual-production'],
     note: 'smoke:ready และ production gate แบบเข้มตรวจความพร้อมก่อนปล่อยจริง',
   },
+  'POST /analytics/events': {
+    owner: 'analytics',
+    coverage: ['backend-test', 'e2e'],
+    note: 'frontend event capture ส่ง marketplace/lobby/creator/wallet/report events ให้ process-mining โดยไม่ต้องใช้ admin key',
+  },
   'GET /me/usage': {
     owner: 'user/wallet',
     coverage: ['smoke', 'e2e'],
@@ -398,6 +403,11 @@ export const routeCoverage: Record<RouteKey, RouteCoverage> = {
     owner: 'admin/evals',
     coverage: ['admin-smoke', 'e2e', 'backend-test'],
     note: 'api-smoke และหน้า Admin Evals ตรวจ eval แบบผลซ้ำได้ของพรอมป์/บริบทหลัง admin auth',
+  },
+  'GET /admin/process-mining': {
+    owner: 'admin/analytics',
+    coverage: ['admin-smoke', 'backend-test'],
+    note: 'backend tests ตรวจ admin guard และ service tests ตรวจสรุป event funnel/context snapshots แบบ local-safe',
   },
   'PATCH /admin/users/:id/tokens': {
     owner: 'wallet/admin',
@@ -781,7 +791,7 @@ export async function runApiRouteAudit(
 ) {
   const discoveredRoutes = await discoverRoutes()
   const frontendCalls = await collectFrontendApiCalls()
-  const { missingCoverage, staleCoverage, weakCoverage, byOwner } = auditRouteCoverage(discoveredRoutes)
+  const { missingCoverage, staleCoverage, weakCoverage, weakCoverageIssues, byOwner } = auditRouteCoverage(discoveredRoutes)
   const missingFrontendRoutes = auditFrontendApiCalls(frontendCalls, discoveredRoutes)
 
   writeLine(`ตรวจ API route: พบ ${discoveredRoutes.length} รายการ`)

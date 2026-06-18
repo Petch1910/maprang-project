@@ -11,6 +11,11 @@ Last updated: 2026-06-17
 - Detailed reference docs:
   - `docs/MISSAI_TEMPLATE_AUDIT.md`
   - `docs/MISSAI_LOGGED_IN_FLOW_AUDIT.md`
+  - `docs/KHUIAI_REFERENCE_AUDIT.md`
+  - `docs/COMPETITOR_FEATURE_AUDIT.md`
+  - `docs/COMPETITOR_MODEL_PROMPT_AUDIT.md`
+  - `docs/MAPRANG_COMPETITIVE_SYSTEM_IMPROVEMENT_PLAN.md`
+  - `docs/MAPRANG_PHASE_0_11_LOCAL_FIRST_PLAN.md`
   - `docs/AI_CREATOR_COMPLETION_PLAN.md`
   - `memory/ui-ux/current-direction.md`
   - `docs/MAPRANG_TEST_PLAN.md`
@@ -37,6 +42,7 @@ Last updated: 2026-06-17
 - Backend owner output favorite/unfavorite path now has `POST /generation/outputs/:id/favorite` and `DELETE /generation/outputs/:id/favorite`; frontend helper boundary has `favoriteGenerationOutput` / `unfavoriteGenerationOutput`
 - Backend owner output download path now has `GET /generation/outputs/:id/download`; frontend helper boundary has `fetchGenerationOutputDownload`
 - Current AI Creator gap is no longer "draw the page"; retry, owner cancel, download, use-as-character-image, use-as-cover, public gallery opt-in/report/sanitized reuse, and signed storage owner paths are local-ready. Remaining AI Creator blockers are production live image provider, Supabase signed storage, deployed HTTPS URLs/CORS, richer browser hardening, and full video/advanced-video provider execution.
+- Current chat reply-quality gap is partially closed locally: `apps/backend/src/response-quality.service.ts` defines response depth prompts and scoring, `apps/frontend/src/lib/chatReplySettings.ts` defines user-facing presets, and `/chat` sends `modelRoute`, `replyProfile`, and `responseDepth` through the existing chat API. Continue from this contract before adding deeper model routing UI.
 
 ## Product Priority
 
@@ -320,7 +326,7 @@ My Library คือพื้นที่งาน generation ของผู้
 
 ## Public Gallery Requirements
 
-Public Gallery ยังไม่ใช่ MVP core แต่ต้องวางสัญญาไว้
+Public Gallery ไม่ใช่ core play/create priority แรก แต่ local-safe route/reuse/report contract มีแล้วและต้องรักษาสัญญาไว้
 
 - generated outputs ต้อง private by default
 - publish to public ต้องเป็น opt-in action เท่านั้น

@@ -32,6 +32,9 @@ const chatBody = t.Object({
   chatId: t.Optional(t.String()),
   relationshipSeed: t.Optional(t.String()),
   userPersona: t.Optional(t.String()),
+  modelRoute: t.Optional(t.String()),
+  replyProfile: t.Optional(t.String()),
+  responseDepth: t.Optional(t.String()),
   maxRating: t.Optional(
     t.Union([
       t.Literal('general'),

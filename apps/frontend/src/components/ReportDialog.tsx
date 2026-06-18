@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import type { ReportTargetType } from '../lib/api'
+import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 
 export type ReportDialogTarget = {
   targetType: ReportTargetType
@@ -40,6 +41,17 @@ export function ReportDialog({ isOpen, isSubmitting = false, target, onClose, on
   const [reason, setReason] = useState(reasons[0].id)
   const [details, setDetails] = useState('')
   const submittingDisabledReason = isSubmitting ? 'กำลังส่งรายงาน รอให้เสร็จก่อน' : ''
+
+  useEffect(() => {
+    if (!isOpen || !target) return
+    trackFrontendEventSafe({
+      eventName: 'report_opened',
+      route: currentRoutePath(),
+      entityType: target.targetType.toLowerCase(),
+      entityId: target.title,
+      metadata: { hasPreview: Boolean(target.preview) },
+    })
+  }, [isOpen, target])
 
   if (!isOpen || !target) return null
 

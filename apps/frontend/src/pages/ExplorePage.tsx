@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { Bell, ChevronLeft, ChevronRight, Coins, Dice5, Search, Sparkles, WandSparkles, X } from 'lucide-react'
 import type { Character, CharacterListFilters } from '../lib/api'
+import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { characterImageUrl } from '../lib/characterVisual'
@@ -19,20 +20,20 @@ import { selectContentSettings } from '../store/slices/contentSlice'
 import { selectTokenBalance } from '../store/slices/walletSlice'
 
 const tabs = [
-  { label: 'Latest', value: 'newest' },
-  { label: '24H', value: 'popular' },
-  { label: 'Weekly', value: 'viewed' },
-  { label: 'All Time', value: 'favorited' },
+  { label: 'ล่าสุด', value: 'newest' },
+  { label: '24 ชม.', value: 'popular' },
+  { label: 'สัปดาห์นี้', value: 'viewed' },
+  { label: 'ตลอดกาล', value: 'favorited' },
 ] satisfies Array<{ label: string; value: NonNullable<CharacterListFilters['sort']> }>
 
 const quickFilters = [
-  { label: 'All', tag: '' },
-  { label: 'Anime', tag: 'anime' },
-  { label: 'Fantasy', tag: 'fantasy' },
-  { label: 'Romance', tag: 'romance' },
-  { label: 'Drama', tag: 'drama' },
-  { label: 'Slow Burn', tag: 'slow-burn' },
-  { label: 'Rival', tag: 'rival' },
+  { label: 'ทั้งหมด', tag: '' },
+  { label: 'อนิเมะ', tag: 'anime' },
+  { label: 'แฟนตาซี', tag: 'fantasy' },
+  { label: 'โรแมนซ์', tag: 'romance' },
+  { label: 'ดราม่า', tag: 'drama' },
+  { label: 'ค่อยเป็นค่อยไป', tag: 'slow-burn' },
+  { label: 'คู่ปรับ', tag: 'rival' },
 ]
 
 function avatarFallback(name: string) {
@@ -47,15 +48,15 @@ function displayNumber(value?: number) {
 }
 
 function characterSummary(character: Character) {
-  return displayCharacterSummary(character, 'Start a new roleplay with this character.')
+  return displayCharacterSummary(character, 'เริ่มโรลเพลย์ใหม่กับตัวละครนี้')
 }
 
 function getBadges(character: Character) {
   const badges = new Set<string>()
-  if (character.tags.some((tag) => ['slow-burn', 'trust-building', 'mentor'].includes(tag))) badges.add('Relationship')
-  if (character.tags.some((tag) => ['rival', 'hostile', 'red-flag', 'slow-burn'].includes(tag))) badges.add('Scene Ready')
+  if (character.tags.some((tag) => ['slow-burn', 'trust-building', 'mentor'].includes(tag))) badges.add('ความสัมพันธ์')
+  if (character.tags.some((tag) => ['rival', 'hostile', 'red-flag', 'slow-burn'].includes(tag))) badges.add('ฉากพร้อม')
   if (character.contentRating && character.contentRating !== 'general') badges.add(ratingLabel(character.contentRating))
-  if (badges.size === 0) badges.add('Original')
+  if (badges.size === 0) badges.add('ออริจินัล')
   return [...badges].slice(0, 2)
 }
 
@@ -154,7 +155,7 @@ function Sidebar({
         </span>
         <span>
           <span className="font-display block text-lg font-black tracking-[0.22em] text-[#d9b3ff]">Maprang</span>
-          <span className="block text-[11px] font-bold text-white/45">MissAI style local server</span>
+          <span className="block text-[11px] font-bold text-white/45">เซิร์ฟเวอร์ในเครื่องพร้อมเล่น</span>
         </span>
       </Link>
 
@@ -175,14 +176,14 @@ function Sidebar({
           <input
             className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/42"
             onChange={(event) => setSidebarSearch(event.target.value)}
-            placeholder="Search chats"
+            placeholder="ค้นหาแชท"
             value={sidebarSearch}
           />
         </label>
         <button
           className="grid size-10 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white/60 transition hover:bg-white/10"
           onClick={() => setSidebarSearch('')}
-          title="Clear search"
+          title="ล้างคำค้นหา"
           type="button"
         >
           <X size={16} />
@@ -190,7 +191,7 @@ function Sidebar({
       </div>
 
       <section className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
-        <p className="mb-2 text-xs font-black text-[#d9b3ff]">Pinned Characters</p>
+        <p className="mb-2 text-xs font-black text-[#d9b3ff]">ตัวละครที่ปักหมุด</p>
         <div className="space-y-1">
           {filteredCharacters.map((character) => (
             <Link
@@ -207,16 +208,16 @@ function Sidebar({
             </Link>
           ))}
           {filteredCharacters.length === 0 && (
-            <p className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs text-white/45">No matching characters.</p>
+            <p className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs text-white/45">ไม่พบตัวละครที่ตรงกับคำค้นหา</p>
           )}
         </div>
 
-        <p className="mb-2 mt-4 text-xs font-black text-slate-500">Messages</p>
+        <p className="mb-2 mt-4 text-xs font-black text-slate-500">แชทล่าสุด</p>
         <div className="space-y-1">
-          {isChatsLoading && <p className="rounded-xl bg-white/[0.03] p-3 text-xs text-white/45">Loading chats...</p>}
+          {isChatsLoading && <p className="rounded-xl bg-white/[0.03] p-3 text-xs text-white/45">กำลังโหลดแชท...</p>}
           {!isChatsLoading && filteredChats.length === 0 && (
             <p className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs text-white/45">
-              {normalizedSidebarSearch ? 'No matching chats.' : 'No saved chats yet.'}
+              {normalizedSidebarSearch ? 'ไม่พบแชทที่ตรงกับคำค้นหา' : 'ยังไม่มีแชทที่บันทึกไว้'}
             </p>
           )}
           {!isChatsLoading &&
@@ -233,7 +234,7 @@ function Sidebar({
                 />
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-black">{chat.title || chat.characterName}</span>
-                  <span className="block truncate text-[11px] text-white/42">{chat.preview || 'Continue the story'}</span>
+                  <span className="block truncate text-[11px] text-white/42">{chat.preview || 'กลับไปต่อจากเรื่องเดิม'}</span>
                 </span>
                 <ChevronRight className="text-white/40" size={16} />
               </Link>
@@ -241,7 +242,7 @@ function Sidebar({
         </div>
       </section>
 
-      <p className="m-0 border-t border-white/10 pt-3 text-[11px] text-white/35">Terms and Privacy</p>
+      <p className="m-0 border-t border-white/10 pt-3 text-[11px] text-white/35">ข้อกำหนดและความเป็นส่วนตัว</p>
     </aside>
   )
 }
@@ -260,7 +261,7 @@ function CharacterCard({ character }: { character: Character }) {
           </div>
         )}
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-1.5">
-          <span className="rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-black text-[#f9c86d] backdrop-blur-sm">only on Maprang</span>
+          <span className="rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-black text-[#f9c86d] backdrop-blur-sm">เฉพาะ Maprang</span>
           <span className="grid size-5 place-items-center rounded-full bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] text-[11px] font-black text-white shadow-[0_2px_8px_rgba(172,75,255,0.5)]">
             M
           </span>
@@ -307,17 +308,17 @@ function CharacterRail({
         <h2 className="font-display m-0 text-xl font-black">{title}</h2>
         <button
           className="text-sm font-black text-[#d9b3ff]/70 transition hover:text-[#d9b3ff]"
-          aria-label={`Scroll ${title} right`}
+          aria-label={`เลื่อน ${title} ไปทางขวา`}
           onClick={() => scrollRail(1)}
           type="button"
         >
-          View more
+          ดูเพิ่ม
         </button>
       </div>
       <div className="relative">
         <button
           className="absolute -left-2 top-[72px] z-10 hidden size-10 place-items-center rounded-full border border-[#ac4bff]/30 bg-[#101226]/80 text-[#d9b3ff] backdrop-blur-md transition hover:bg-[#ac4bff]/25 lg:grid"
-          aria-label={`Scroll ${title} left`}
+          aria-label={`เลื่อน ${title} ไปทางซ้าย`}
           onClick={() => scrollRail(-1)}
           type="button"
         >
@@ -332,7 +333,7 @@ function CharacterRail({
         </div>
         <button
           className="absolute -right-2 top-[72px] z-10 hidden size-10 place-items-center rounded-full border border-[#ac4bff]/30 bg-[#101226]/80 text-[#d9b3ff] backdrop-blur-md transition hover:bg-[#ac4bff]/25 lg:grid"
-          aria-label={`Scroll ${title} right`}
+          aria-label={`เลื่อน ${title} ไปทางขวา`}
           onClick={() => scrollRail(1)}
           type="button"
         >
@@ -361,7 +362,7 @@ function ContinueChattingRail({
           <p className="m-0 mt-1 text-sm font-bold text-white/45">กลับเข้าเรื่องเดิมพร้อมสถานะความสัมพันธ์และฉากที่รออยู่</p>
         </div>
         <Link className="text-sm font-black text-[#d9b3ff]/70 transition hover:text-[#d9b3ff]" to="/chats">
-          All messages
+          ดูแชททั้งหมด
         </Link>
       </div>
 
@@ -393,7 +394,7 @@ function ContinueChattingRail({
                   </span>
                 </div>
                 <p className="m-0 line-clamp-2 min-h-10 text-xs leading-5 text-[#94a3b8]">
-                  {chat.preview ? displayMessageContent(chat.preview) : 'Continue from the latest turn.'}
+                  {chat.preview ? displayMessageContent(chat.preview) : 'ต่อจากเทิร์นล่าสุด'}
                 </p>
                 <div className="flex min-w-0 flex-wrap gap-1.5">
                   <span className="rounded-full border border-[#ac4bff]/25 bg-[#ac4bff]/12 px-2 py-1 text-[11px] font-black text-[#d9b3ff]">
@@ -406,7 +407,7 @@ function ContinueChattingRail({
                   )}
                   {pendingCount > 0 && (
                     <span className="rounded-full border border-[#f99c00]/30 bg-[#f99c00]/14 px-2 py-1 text-[11px] font-black text-[#f9c86d]">
-                      {pendingCount} pending
+                      {pendingCount} ฉากรออยู่
                     </span>
                   )}
                 </div>
@@ -432,6 +433,7 @@ export function ExplorePage() {
   const [search, setSearch] = useState('')
   const [activeTag, setActiveTag] = useState('')
   const [sort, setSort] = useState<CharacterListFilters['sort']>('popular')
+  const trackedImpressionIdsRef = useRef(new Set<string>())
 
   const exploreFilters = useMemo(
     () => ({
@@ -447,6 +449,16 @@ export function ExplorePage() {
     dispatch(loadExploreCharacters(exploreFilters))
     dispatch(loadChatSummaries())
   }, [dispatch, exploreFilters])
+
+  useEffect(() => {
+    trackFrontendEventSafe({
+      eventName: 'marketplace_view',
+      route: currentRoutePath(),
+      entityType: 'surface',
+      entityId: 'explore',
+      metadata: { sort, tag: activeTag || 'all', maxRating: content.maxRating },
+    })
+  }, [activeTag, content.maxRating, sort])
 
   const visibleCharacters = useMemo(
     () => characters.filter((character) => canViewRating(characterRating(character), content.maxRating)),
@@ -467,6 +479,22 @@ export function ExplorePage() {
     .sort((a, b) => (b.chatCount + (b.viewCount ?? 0)) - (a.chatCount + (a.viewCount ?? 0)))
     .slice(0, 12)
   const fresh = taggedCharacters.length > 6 ? [...taggedCharacters].slice(6, 18) : taggedCharacters.slice(0, 12)
+
+  useEffect(() => {
+    for (const character of taggedCharacters.slice(0, 12)) {
+      if (trackedImpressionIdsRef.current.has(character.id)) continue
+      trackedImpressionIdsRef.current.add(character.id)
+      trackFrontendEventSafe({
+        eventName: 'character_impression',
+        route: currentRoutePath(),
+        entityType: 'character',
+        entityId: character.id,
+        characterId: character.id,
+        metadata: { source: 'explore_rail', tags: character.tags.slice(0, 6), rating: character.contentRating ?? 'general' },
+      })
+    }
+  }, [taggedCharacters])
+
   const openRandomCharacter = () => {
     const pool = taggedCharacters.length > 0 ? taggedCharacters : marketplaceCharacters
     const picked = pool[Math.floor(Math.random() * pool.length)]
@@ -494,22 +522,22 @@ export function ExplorePage() {
               <input
                 className="min-h-12 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 pr-11 text-sm font-bold text-white outline-none backdrop-blur-md placeholder:text-white/38 focus:border-[#ac4bff]/70 focus:ring-2 focus:ring-[#ac4bff]/25"
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search characters"
+                placeholder="ค้นหาตัวละคร"
                 value={search}
               />
             </label>
             <div className="hidden items-center gap-2 rounded-full border border-[#f99c00]/30 bg-[#f99c00]/10 px-3 py-2 text-sm font-black text-[#f9c86d] xl:flex">
               <Coins size={16} />
-              <span>{tokenBalance.toLocaleString()} coins</span>
+               <span>{tokenBalance.toLocaleString()} โทเคน</span>
               <Link className="ml-2 rounded-full bg-gradient-to-r from-[#f9c86d] to-[#f99c00] px-4 py-1 text-xs font-black text-[#1a1206]" to="/wallet">
-                Top Up
+                เติมโทเคน
               </Link>
             </div>
             <button
               type="button"
               className="hidden size-12 place-items-center rounded-xl bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] text-white missai-glow transition duration-200 hover:brightness-110 lg:grid"
               onClick={openRandomCharacter}
-              title="Random character"
+              title="สุ่มตัวละคร"
             >
               <Dice5 size={20} />
             </button>
@@ -517,7 +545,7 @@ export function ExplorePage() {
               type="button"
               className="hidden size-12 place-items-center rounded-xl bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] text-white missai-glow transition duration-200 hover:brightness-110 lg:grid"
               onClick={activateRelationshipPicks}
-              title="Relationship picks"
+              title="เลือกจากโทนความสัมพันธ์"
             >
               <WandSparkles size={20} />
             </button>
@@ -561,7 +589,7 @@ export function ExplorePage() {
             </div>
             {charactersError && (
               <div className="rounded-2xl border border-amber-400/20 bg-amber-300/10 p-4 text-sm font-bold text-amber-100">
-                Character API failed. Check the local backend connection and retry.
+                โหลดตัวละครไม่ได้ ตรวจการเชื่อมต่อระบบหลังบ้านแล้วลองใหม่อีกครั้ง
               </div>
             )}
           </section>
@@ -572,21 +600,21 @@ export function ExplorePage() {
               <div className="mx-auto grid size-12 place-items-center rounded-full bg-[#ac4bff]/16 text-[#ac4bff]">
                 <Sparkles size={22} />
               </div>
-              <h2 className="font-display m-0 mt-4 text-xl font-black">No characters yet</h2>
+              <h2 className="font-display m-0 mt-4 text-xl font-black">ยังไม่มีตัวละคร</h2>
               <p className="mx-auto mt-2 max-w-xl text-sm font-bold leading-6 text-white/55">
-                Published characters will appear here. Create the first Maprang character to populate the marketplace.
+                ตัวละครที่เผยแพร่แล้วจะแสดงที่นี่ ลองสร้างตัวละครแรกของ Maprang เพื่อเริ่มเติมตลาดตัวละคร
               </p>
               <Link
                 className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-5 text-sm font-black text-white transition hover:brightness-110 missai-glow"
                 to="/create"
               >
-                Create character
+                สร้างตัวละคร
               </Link>
             </section>
           )}
-          <CharacterRail characters={forYou} isLoading={isCharactersLoading} title="For You" />
-          <CharacterRail characters={popular} isLoading={isCharactersLoading} title="Popular Characters" />
-          <CharacterRail characters={fresh} isLoading={isCharactersLoading} title="New Arrivals" />
+          <CharacterRail characters={forYou} isLoading={isCharactersLoading} title="สำหรับคุณ" />
+          <CharacterRail characters={popular} isLoading={isCharactersLoading} title="ตัวละครยอดนิยม" />
+          <CharacterRail characters={fresh} isLoading={isCharactersLoading} title="มาใหม่" />
         </div>
       </section>
 

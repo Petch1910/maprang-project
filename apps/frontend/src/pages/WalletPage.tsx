@@ -10,6 +10,7 @@ import {
   setAdminApiKey,
   type UsageSummary,
 } from '../lib/api'
+import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 import { safeGetStorageItem } from '../lib/safeStorage'
 import { useAppDispatch } from '../store/hooks'
 import { setTokenBalance } from '../store/slices/walletSlice'
@@ -88,6 +89,15 @@ export function WalletPage() {
         : !hasAdminKey
           ? 'บันทึก ADMIN_API_KEY ก่อนปรับโทเคน'
           : ''
+
+  useEffect(() => {
+    trackFrontendEventSafe({
+      eventName: 'wallet_view',
+      route: currentRoutePath(),
+      entityType: 'surface',
+      entityId: 'wallet',
+    })
+  }, [])
 
   const balanceLabel = summary ? `${summary.user.tokenBalance.toLocaleString()} โทเคน` : isLoading ? 'กำลังโหลด...' : '0 โทเคน'
   const totalTokensLabel = summary ? summary.usage.totalTokens.toLocaleString() : isLoading ? '...' : '0'

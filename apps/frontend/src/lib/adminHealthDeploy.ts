@@ -36,16 +36,16 @@ export function buildDeployPhaseSteps(deployChecks: DeployCheck[]): DeployPhaseS
 
   return [
     {
-      title: '1. Local server',
+      title: '1. เซิร์ฟเวอร์ในเครื่อง',
       ok: localBlockers.length === 0,
       command: 'bun run local:doctor + bun run qa:full',
       detail:
         localBlockers.length === 0
-          ? 'เครื่องนี้พร้อมเป็น local server baseline แล้ว ใช้ qa:full เป็น gate หลักก่อนให้คนลองเล่น'
-          : `${blockerSummary(localBlockers)} ก่อนถือว่า local server พร้อมเล่น`,
+          ? 'เครื่องนี้พร้อมเป็นฐานทดสอบในเครื่องแล้ว ใช้ qa:full เป็น gate หลักก่อนให้คนลองเล่น'
+          : `${blockerSummary(localBlockers)} ก่อนถือว่าเซิร์ฟเวอร์ในเครื่องพร้อมเล่น`,
     },
     {
-      title: '2. Ngrok preview / staging',
+      title: '2. พรีวิวผ่าน Ngrok / สเตจจิง',
       ok: stagingBlockers.length === 0,
       command: 'bun run ngrok:proxy + bun run staging:verify + bun run e2e:smoke',
       detail:
@@ -54,7 +54,7 @@ export function buildDeployPhaseSteps(deployChecks: DeployCheck[]): DeployPhaseS
           : `${blockerSummary(stagingBlockers)} ก่อน จากนั้นตั้ง E2E_BASE_URL/E2E_API_BASE_URL เป็น Ngrok หรือ deployed origin แล้วรัน e2e smoke`,
     },
     {
-      title: '3. Live provider smoke',
+      title: '3. ทดสอบผู้ให้บริการจริง',
       ok: liveProviderBlockers.length === 0,
       command: 'bun run api:smoke:live',
       detail:
@@ -63,7 +63,7 @@ export function buildDeployPhaseSteps(deployChecks: DeployCheck[]): DeployPhaseS
           : `${blockerSummary(liveProviderBlockers)} แล้วคัด JSON handoffEvidence ลง RELEASE_HANDOFF.md ก่อนตั้งค่าธงยืนยัน`,
     },
     {
-      title: '4. Cloud production',
+      title: '4. โปรดักชันบนคลาวด์',
       ok: productionBlockers.length === 0,
       command: 'bun run production:check',
       detail:

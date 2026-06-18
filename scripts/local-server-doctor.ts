@@ -25,7 +25,7 @@ export function collectLocalServerDoctorChecks(input: LocalServerDoctorInput): L
     {
       label: 'Local runbook',
       ok: includesAll(input.localRunbook, ['bun run qa:full', 'docker compose up -d postgres', 'bunx prisma migrate deploy', 'bun run ngrok:proxy']),
-      detail: 'docs/LOCAL_SERVER_RUNBOOK.md ต้องบอกวิธีเปิด local server, migration, QA gate และ Ngrok preview',
+      detail: 'docs/LOCAL_SERVER_RUNBOOK.md must document local server startup, migration, QA gate, and Ngrok preview',
     },
     {
       label: 'Root scripts',
@@ -41,7 +41,7 @@ export function collectLocalServerDoctorChecks(input: LocalServerDoctorInput): L
         '"local:doctor"',
         '"local:doctor:test"',
       ]),
-      detail: 'package.json ต้องมีคำสั่งเปิด local server, สำรอง/กู้คืนฐานข้อมูล local, local QA, Ngrok proxy และ local doctor',
+      detail: 'package.json must include local server, local database backup/restore, local QA, Ngrok proxy, and local doctor scripts',
     },
     {
       label: 'QA gate wiring',
@@ -51,37 +51,37 @@ export function collectLocalServerDoctorChecks(input: LocalServerDoctorInput): L
         input.packageJson.includes('bun run local:db:test') &&
         input.packageJson.includes('bun run local:doctor:test') &&
         input.packageJson.includes('bun run predeploy:check'),
-      detail: 'qa:repo ต้องรัน local:up:test, local:db:test, local:doctor:test และ predeploy check',
+      detail: 'qa:repo must run local:up:test, local:db:test, local:doctor:test, and predeploy check',
     },
     {
       label: 'Runtime artifacts ignored',
       ok: includesAll(input.gitignore, ['/runtime/', '/backups/', '*.dump', '*.backup']),
-      detail: 'runtime logs, local backups และ database dumps ต้องไม่เข้า source โดยไม่ตั้งใจ',
+      detail: 'runtime logs, local backups, and database dumps must stay out of source control',
     },
     {
       label: 'Local database backup',
       ok: includesAll(input.localRunbook, ['bun run local:db:backup', 'bun run local:db:restore', '--confirm-restore', '/backups/', '*.dump']),
-      detail: 'docs/LOCAL_SERVER_RUNBOOK.md ต้องบอกวิธี backup/restore ฐานข้อมูล local และบังคับ confirm ก่อน restore',
+      detail: 'docs/LOCAL_SERVER_RUNBOOK.md must document local database backup/restore and require restore confirmation',
     },
     {
       label: 'Operator checklist',
       ok:
         includesAll(input.localRunbook, [
-          'สถานะงาน Local Server Tasks',
-          'Operator checklist',
+          'Completed Local Work',
+          'Operator Checklist',
           'bun run local:up',
           '--backend-port',
           '--frontend-port',
-          'firewall',
+          'Docker Desktop',
           '/admin/health',
-          'future/external',
-        ]) && !input.localRunbook.includes('งานที่ควรทำต่อถ้าเป้าหมายคือ local server'),
-      detail: 'docs/LOCAL_SERVER_RUNBOOK.md ต้องแยกงาน local ที่ปิดแล้ว, operator checklist, และ future/external โดยไม่ทิ้งรายการค้างเก่า',
+          'Future / External',
+        ]) && !input.localRunbook.includes('work to do next if local server is the target'),
+      detail: 'docs/LOCAL_SERVER_RUNBOOK.md must separate completed local work, operator checklist, and future/external work without stale backlog wording',
     },
     {
       label: 'Remaining plan target',
-      ok: includesAll(input.remainingPlan, ['Local Server, Ngrok Preview, และ Production', 'local server เปิดแล้ว `bun run qa:full` ผ่าน', 'docs/LOCAL_SERVER_RUNBOOK.md']),
-      detail: 'แผนหลักต้องแยก local server ออกจาก Ngrok preview และ cloud production',
+      ok: includesAll(input.remainingPlan, ['Local Server, Ngrok Preview, and Production', 'local server baseline passed `bun run qa:full`', 'docs/LOCAL_SERVER_RUNBOOK.md']),
+      detail: 'the main plan must separate local server from Ngrok preview and cloud production',
     },
   ]
 }

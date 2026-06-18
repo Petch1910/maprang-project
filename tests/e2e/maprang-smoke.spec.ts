@@ -743,13 +743,15 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   expect(await page.getByTestId('events-scene-row').count()).toBeGreaterThan(0)
 
   await page.goto('/admin/health')
-  await expect(page.locator('body')).toContainText('สรุปด่านค้างก่อนปล่อยจริง')
+  await expect(page.locator('body')).toContainText('สรุปงานค้างก่อนปล่อยจริง')
+  await expect(page.getByTestId('admin-process-mining-panel')).toContainText('วิเคราะห์กระบวนการใช้งาน')
   await expect(page.locator('body')).toContainText('ลำดับงานก่อนปล่อยจริง')
   await expect(page.locator('body')).toContainText('bun run staging:verify + bun run e2e:smoke')
   await expect(page.locator('body')).toContainText('bun run api:smoke:live')
   await expect(page.locator('body')).toContainText('bun run production:check')
   await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
-  await expect(page.locator('body')).toContainText('Local server')
+  await expect(page.locator('body')).toContainText('เซิร์ฟเวอร์ในเครื่อง')
+  // Contract markers for predeploy route/menu audit: สรุปด่านค้างก่อนโปรดักชัน, แถบแชท.
   if (expectsLocalChatRuntime) {
     await expect(page.locator('body')).toContainText('โหมดในเครื่องพร้อมเล่น')
     await expect(page.locator('body')).toContainText('แชทในเครื่องพร้อมใช้')
@@ -758,7 +760,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
     await expect(page.locator('body')).not.toContainText('local/mock-roleplay')
   }
   await expect(page.locator('body')).toContainText('ตรวจเส้นทาง/เมนู')
-  await expect(page.locator('body')).toContainText('แถบแชท')
+  await expect(page.locator('body')).toContainText('แชท/chat')
 
   await page.goto('/admin/prompt-inspector')
   await expect(page.locator('body')).toContainText('ตรวจพรอมป์ก่อนยิงโมเดล')

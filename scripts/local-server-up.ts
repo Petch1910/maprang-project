@@ -99,6 +99,9 @@ export function buildLocalServerStartupPlan(options: LocalServerStartupOptions =
         env: {
           HOST: backendHost,
           PORT: String(backendPort),
+          LOCAL_CHAT_PROVIDER: '1',
+          CHAT_PROVIDER: 'local',
+          LOCAL_CHAT_MODEL_NAME: 'local/mock-roleplay',
         },
         longRunning: true,
       },

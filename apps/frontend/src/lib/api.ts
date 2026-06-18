@@ -293,6 +293,19 @@ export type ChatResponse = {
       historyMessagesDropped: number
       overBudget: boolean
     }
+    responseQuality?: {
+      responseDepth: 'quick' | 'balanced' | 'deep' | 'cinematic'
+      minRecommendedChars: number
+      charCount: number
+      lineCount: number
+      hasAction: boolean
+      hasEmotion: boolean
+      hasNextHook: boolean
+      hasContextReference: boolean
+      likelyTooShort: boolean
+      score: number
+      notes: string[]
+    }
     providerFailure?: {
       code: 'rate_limited' | 'quota_exhausted' | 'invalid_credentials' | 'timeout' | 'provider_unavailable' | 'unknown'
       status: number | null
@@ -717,6 +730,71 @@ export type LocalEvalRun = {
   results: EvalScenarioResult[]
 }
 
+export type AdminProcessMiningSummary = {
+  generatedAt: string
+  days: number
+  windowStart: string
+  eventCounts: Array<{ eventName: string; count: number }>
+  funnel: {
+    characterImpressions: number
+    characterDetailViews: number
+    chatStarts: number
+    chatTurns: number
+    firstReplies: number
+    reports: number
+    uniqueChats: number
+    uniqueCharacters: number
+  }
+  contextSnapshots: {
+    count: number
+    latest: Array<{
+      id: string
+      chatId: string | null
+      characterId: string | null
+      modelRoute: string
+      replyProfile: string
+      modelName: string | null
+      promptHash: string
+      promptTokensEstimate: number
+      loreCount: number
+      createdAt: string
+    }>
+  }
+  recentEvents: Array<{
+    id: string
+    eventName: string
+    source: string
+    route: string | null
+    entityType: string | null
+    entityId: string | null
+    chatId: string | null
+    characterId: string | null
+    createdAt: string
+  }>
+}
+
+export type FrontendAnalyticsEventName =
+  | 'marketplace_view'
+  | 'character_impression'
+  | 'character_detail_view'
+  | 'wallet_view'
+  | 'creator_opened'
+  | 'creator_draft_generated'
+  | 'creator_publish'
+  | 'ai_creator_opened'
+  | 'ai_creator_generate_started'
+  | 'report_opened'
+
+export type FrontendAnalyticsEventInput = {
+  eventName: FrontendAnalyticsEventName
+  route?: string
+  entityType?: string
+  entityId?: string
+  chatId?: string
+  characterId?: string
+  metadata?: Record<string, unknown>
+}
+
 export function apiRequestTimeoutMs(path: string, init?: RequestInit) {
   const method = (init?.method ?? 'GET').toUpperCase()
   if (path === '/chat' || path === '/creator/ai-draft') return 60_000
@@ -867,6 +945,18 @@ export async function inspectAdminPrompt(input: {
 
 export async function fetchAdminLocalEvals() {
   return requestJson<LocalEvalRun>('/admin/evals/local')
+}
+
+export async function fetchAdminProcessMining(days = 7) {
+  const params = new URLSearchParams({ days: String(days) })
+  return requestJson<AdminProcessMiningSummary>(`/admin/process-mining?${params.toString()}`)
+}
+
+export async function trackAnalyticsEvent(input: FrontendAnalyticsEventInput) {
+  return requestJson<{ ok: boolean; eventId: string }>('/analytics/events', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
 }
 
 export type RelationshipPreset = {
@@ -1414,6 +1504,9 @@ export async function sendChatMessage(input: {
   chatId: string | null
   relationshipSeed?: string
   userPersona?: string
+  modelRoute?: string
+  replyProfile?: string
+  responseDepth?: 'quick' | 'balanced' | 'deep' | 'cinematic'
   maxRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
   history: Array<{ role: 'user' | 'assistant'; content: string }>
 }) {
@@ -1430,6 +1523,9 @@ export async function streamChatMessage(
     chatId: string | null
     relationshipSeed?: string
     userPersona?: string
+    modelRoute?: string
+    replyProfile?: string
+    responseDepth?: 'quick' | 'balanced' | 'deep' | 'cinematic'
     maxRating?: 'general' | 'teen_romance' | 'mature_18' | 'restricted_18'
     history: Array<{ role: 'user' | 'assistant'; content: string }>
   },

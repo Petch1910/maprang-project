@@ -32,7 +32,7 @@ const filledHandoff = [
   '- Database host/provider: managed postgres',
   '- คำสั่ง migration: bunx prisma migrate deploy',
   '- ผล migration: pass',
-  '- Prisma migration version: 20260617212000_add_user_provider_key_vault',
+  '- Prisma migration version: 20260618123000_add_analytics_context_snapshots',
   '',
   '## ระบบ auth/storage และ CORS (Auth, Storage และ CORS)',
   '- โหมด auth: supabase-jwt',
@@ -492,7 +492,7 @@ describe('release handoff check', () => {
     const productionUnsafe = filledHandoff
       .replace('- คำสั่ง migration: bunx prisma migrate deploy', '- คำสั่ง migration: prisma db push')
       .replace('- ผล migration: pass', '- ผล migration: fail')
-      .replace('- Prisma migration version: 20260617212000_add_user_provider_key_vault', '- Prisma migration version: latest')
+      .replace('- Prisma migration version: 20260618123000_add_analytics_context_snapshots', '- Prisma migration version: latest')
     const stagingUnsafe = productionUnsafe.replace('- Environment: production', '- Environment: staging')
 
     expect(checkReleaseHandoffContent(productionUnsafe, { requireFilled: true })).toEqual(
@@ -512,9 +512,9 @@ describe('release handoff check', () => {
   })
 
   test('requires the latest migration version for deployed handoffs', () => {
-    expect(latestPrismaMigrationVersion).toBe('20260617212000_add_user_provider_key_vault')
+    expect(latestPrismaMigrationVersion).toBe('20260618123000_add_analytics_context_snapshots')
     const stale = filledHandoff.replace(
-      '- Prisma migration version: 20260617212000_add_user_provider_key_vault',
+      '- Prisma migration version: 20260618123000_add_analytics_context_snapshots',
       '- Prisma migration version: 20260513103000_add_lore_parent_index',
     )
 
@@ -542,7 +542,7 @@ describe('release handoff check', () => {
       .replace('- Database host/provider: managed postgres\n', '- DB note: Database host/provider: managed postgres\n')
       .replace('- คำสั่ง migration: bunx prisma migrate deploy\n', '')
       .replace('- ผล migration: pass\n', '')
-      .replace('- Prisma migration version: 20260617212000_add_user_provider_key_vault\n', '')
+      .replace('- Prisma migration version: 20260618123000_add_analytics_context_snapshots\n', '')
 
     expect(checkReleaseHandoffContent(stale)).toEqual(
       expect.arrayContaining([

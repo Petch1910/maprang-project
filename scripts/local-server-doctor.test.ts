@@ -1,4 +1,6 @@
 import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { collectLocalServerDoctorChecks, formatLocalServerDoctorReport } from './local-server-doctor'
 
 const validInput = {
@@ -28,16 +30,16 @@ const validInput = {
     '--confirm-restore',
     '/backups/',
     '*.dump',
-    'สถานะงาน Local Server Tasks',
-    'Operator checklist',
+    'Completed Local Work',
+    'Operator Checklist',
     'bun run local:up',
     '--backend-port',
     '--frontend-port',
-    'firewall',
+    'Docker Desktop',
     '/admin/health',
-    'future/external',
+    'Future / External',
   ].join('\n'),
-  remainingPlan: ['Local Server, Ngrok Preview, และ Production', 'local server เปิดแล้ว `bun run qa:full` ผ่าน', 'docs/LOCAL_SERVER_RUNBOOK.md'].join('\n'),
+  remainingPlan: ['Local Server, Ngrok Preview, and Production', 'local server baseline passed `bun run qa:full`', 'docs/LOCAL_SERVER_RUNBOOK.md'].join('\n'),
 }
 
 describe('local server doctor', () => {
@@ -55,15 +57,23 @@ describe('local server doctor', () => {
   })
 
   test('flags stale plan target', () => {
-    const checks = collectLocalServerDoctorChecks({ ...validInput, remainingPlan: 'Staging และ Production' })
+    const checks = collectLocalServerDoctorChecks({ ...validInput, remainingPlan: 'Staging and Production' })
     expect(checks.find((check) => check.label === 'Remaining plan target')?.ok).toBe(false)
   })
 
   test('flags stale local server task backlog wording', () => {
     const checks = collectLocalServerDoctorChecks({
       ...validInput,
-      localRunbook: `${validInput.localRunbook}\nงานที่ควรทำต่อถ้าเป้าหมายคือ local server`,
+      localRunbook: `${validInput.localRunbook}\nwork to do next if local server is the target`,
     })
     expect(checks.find((check) => check.label === 'Operator checklist')?.ok).toBe(false)
+  })
+
+  test('keeps doctor source readable', () => {
+    const source = readFileSync(join(import.meta.dir, 'local-server-doctor.ts'), 'utf8')
+
+    expect(source).toContain('must document local server startup')
+    expect(source).toContain('Completed Local Work')
+    expect(source).not.toMatch(/เธฃเธฑ|เน€เธ|เธ|เธ/)
   })
 })

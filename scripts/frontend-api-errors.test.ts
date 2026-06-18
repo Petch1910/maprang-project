@@ -29,10 +29,13 @@ describe('frontend API errors', () => {
   })
 
   test('loads saved chat messages through a bounded frontend window', () => {
-    const source = readFileSync('apps/frontend/src/pages/WorkspacePage.tsx', 'utf8')
-    expect(source).toContain('const savedChatMessageWindowLimit = 120')
-    expect(source.match(/fetchChatMessages\(id,\s*\{\s*limit:\s*savedChatMessageWindowLimit\s*\}/g)?.length ?? 0).toBe(2)
-    expect(source).not.toContain('fetchChatMessages(id)')
+    const pageSource = readFileSync('apps/frontend/src/pages/WorkspacePage.tsx', 'utf8')
+    const runtimeSource = readFileSync('apps/frontend/src/lib/workspaceRuntime.ts', 'utf8')
+
+    expect(runtimeSource).toContain('export const savedChatMessageWindowLimit = 120')
+    expect(pageSource).toContain('savedChatMessageWindowLimit,')
+    expect(pageSource.match(/fetchChatMessages\(id,\s*\{\s*limit:\s*savedChatMessageWindowLimit\s*\}/g)?.length ?? 0).toBe(2)
+    expect(pageSource).not.toContain('fetchChatMessages(id)')
   })
 
   test('sanitizes frontend error text before classification', () => {

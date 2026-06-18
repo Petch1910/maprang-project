@@ -338,6 +338,13 @@ describe('chat provider retry guard', () => {
     expect(localChatProviderEnabled({ NODE_ENV: 'development', CHAT_PROVIDER: 'remote' })).toBe(false)
   })
 
+  test('local chat runtime bypasses token gate before provider execution', () => {
+    const source = readFileSync(new URL('./chat.service.ts', import.meta.url), 'utf8')
+
+    expect(source).toContain('const usesLocalRuntime = preferLocalChatProvider()')
+    expect(source.match(/!hasUserApiKey && !usesLocalRuntime && tokenBalance !== null && tokenBalance < minTokenBalanceForChat/g)?.length).toBeGreaterThanOrEqual(2)
+  })
+
   test('builds a playable local roleplay reply instead of provider setup copy', () => {
     const reply = buildLocalRoleplayReply({
       character: {

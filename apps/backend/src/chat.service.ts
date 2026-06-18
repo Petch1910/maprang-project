@@ -32,11 +32,18 @@ import {
   createAnthropicCompletion,
   createAnthropicCompletionStream,
 } from './anthropic-provider'
+import { createContextSnapshotSafe, recordAnalyticsEventSafe } from './analytics.service'
 import { buildContextPrompt, loadRelevantLore, promptControlPolicy } from './context.service'
 import { getPrisma } from './db'
 import { estimatePromptTokens } from './prompt-inspector.service'
 import { redactSensitiveText } from './redaction'
 import { isUuid } from './security'
+import { buildModelRoutePromptBlock } from './model-route.service'
+import {
+  analyzeResponseQuality,
+  buildResponseQualityPromptBlock,
+  type ResponseQualityMetadata,
+} from './response-quality.service'
 import {
   applyRelationshipDelta,
   buildRelationshipPrompt,
@@ -70,6 +77,9 @@ type ChatRole = 'system' | 'user' | 'assistant'
 type ChatMessage = { role: ChatRole; content: string }
 type Prisma = PrismaClient
 
+const defaultChatModelRoute = 'chat.roleplay.standard'
+const defaultChatReplyProfile = 'balanced'
+
 export const savedChatMessagesDefaultLimit = 200
 export const savedChatMessagesMaxLimit = 500
 
@@ -84,6 +94,9 @@ export type SendChatInput = {
   history?: ChatMessage[]
   userApiKey?: string
   userApiProvider?: string
+  modelRoute?: string
+  replyProfile?: string
+  responseDepth?: string
 }
 
 export type CompletionUsage = {
@@ -99,6 +112,13 @@ export type PromptBudget = {
   historyMessagesIncluded: number
   historyMessagesDropped: number
   overBudget: boolean
+}
+
+type ChatContextSnapshotInput = {
+  systemPrompt: string
+  modelRoute: string
+  replyProfile: string
+  responseDepth: string
 }
 
 export type ChatProviderFailure = {
@@ -180,6 +200,7 @@ type StreamEvent =
         cost: number
         promptBudget?: PromptBudget
         providerFailure?: ChatProviderFailure
+        responseQuality?: ResponseQualityMetadata
       }
       memory?: ChatRuntimeState
     }
@@ -893,12 +914,22 @@ async function buildMessages(
   relationshipSeed?: string,
   userPersona?: string,
   userId?: string,
+  modelRouteInput?: string,
+  replyProfileInput?: string,
+  responseDepthInput?: string,
 ) {
   const loreEntries = character ? await loadRelevantLore(character.id, userMessage) : []
   const runtimeContext = await loadRuntimeContext(character, userMessage, chatId, relationshipSeed)
   const resolvedUserPersona = userId ? await resolveUserPersona(userId, userPersona) : userPersona
+  const modelRoute = modelRouteInput || defaultChatModelRoute
+  const replyProfile = replyProfileInput || defaultChatReplyProfile
+  const responseDepth = responseDepthInput || replyProfile
   const systemPrompt = [
-    character ? buildContextPrompt(character, loreEntries) : [promptControlPolicy, defaultSystemPrompt].join('\n\n'),
+    character
+      ? buildContextPrompt(character, loreEntries, { modelRoute, replyProfile })
+      : [promptControlPolicy, defaultSystemPrompt].join('\n\n'),
+    buildModelRoutePromptBlock({ modelRoute, replyProfile }),
+    buildResponseQualityPromptBlock({ responseDepth, replyProfile }),
     buildUserPersonaPrompt(resolvedUserPersona),
     runtimeContext,
   ]
@@ -915,6 +946,12 @@ async function buildMessages(
     loreEntries,
     messages: budgeted.messages,
     promptBudget: budgeted.promptBudget,
+    contextSnapshot: {
+      systemPrompt,
+      modelRoute,
+      replyProfile,
+      responseDepth,
+    } satisfies ChatContextSnapshotInput,
   }
 }
 
@@ -1266,24 +1303,30 @@ async function findOrCreateChat({
     })
 
     if (existing) {
-      return prisma.chat.update({
-        where: { id: existing.id },
-        data: {
-          lastMessageAt: new Date(),
-          isArchived: false,
-        },
-      })
+      return {
+        chat: await prisma.chat.update({
+          where: { id: existing.id },
+          data: {
+            lastMessageAt: new Date(),
+            isArchived: false,
+          },
+        }),
+        created: false,
+      }
     }
   }
 
-  return prisma.chat.create({
-    data: {
-      title: title.slice(0, 80),
-      userId,
-      characterId,
-      lastMessageAt: new Date(),
-    },
-  })
+  return {
+    chat: await prisma.chat.create({
+      data: {
+        title: title.slice(0, 80),
+        userId,
+        characterId,
+        lastMessageAt: new Date(),
+      },
+    }),
+    created: true,
+  }
 }
 
 async function persistChatTurn({
@@ -1296,6 +1339,8 @@ async function persistChatTurn({
   usage,
   loreKeywords,
   promptBudget,
+  contextSnapshot,
+  responseQuality,
   relationshipSeed,
   modelLabel = modelName,
   bypassTokens = false,
@@ -1309,18 +1354,44 @@ async function persistChatTurn({
   usage: CompletionUsage
   loreKeywords: string[]
   promptBudget?: PromptBudget
+  contextSnapshot?: ChatContextSnapshotInput
+  responseQuality?: ResponseQualityMetadata
   relationshipSeed?: string
   modelLabel?: string
   bypassTokens?: boolean
 }): Promise<PersistResult> {
-  const chat = await findOrCreateChat({
+  const { chat, created: chatCreated } = await findOrCreateChat({
     prisma,
     chatId,
     characterId: character.id,
     userId,
     title: userMessage,
   })
+  const contextSnapshotRecord = contextSnapshot
+    ? await createContextSnapshotSafe(
+        {
+          userId,
+          chatId: chat.id,
+          characterId: character.id,
+          modelRoute: contextSnapshot.modelRoute,
+          replyProfile: contextSnapshot.replyProfile,
+          modelName: modelLabel,
+          prompt: contextSnapshot.systemPrompt,
+          promptBudget,
+          retrievedLore: loreKeywords,
+          metadata: {
+            source: 'chat_turn',
+            relationshipSeed,
+            chatCreated,
+            responseDepth: contextSnapshot.responseDepth,
+            responseQuality,
+          },
+        },
+        prisma,
+      )
+    : null
   const promptBudgetMetadata = promptBudget ? { promptBudget } : {}
+  const contextSnapshotMetadata = contextSnapshotRecord ? { contextSnapshotId: contextSnapshotRecord.id } : {}
 
   await prisma.message.createMany({
     data: [
@@ -1335,6 +1406,8 @@ async function persistChatTurn({
         cost: 0,
         metadata: {
           contextLoreCount: loreKeywords.length,
+          responseDepth: contextSnapshot?.responseDepth,
+          ...contextSnapshotMetadata,
           ...promptBudgetMetadata,
         },
       },
@@ -1352,6 +1425,9 @@ async function persistChatTurn({
           totalTokens: usage.totalTokens,
           contextLoreCount: loreKeywords.length,
           contextLoreKeywords: loreKeywords,
+          responseDepth: contextSnapshot?.responseDepth,
+          responseQuality,
+          ...contextSnapshotMetadata,
           ...promptBudgetMetadata,
         },
       },
@@ -1391,7 +1467,7 @@ async function persistChatTurn({
         userId,
         tokens: usage.totalTokens,
         cost: usage.cost,
-        modelName,
+        modelName: modelLabel,
       },
     })
 
@@ -1417,12 +1493,81 @@ async function persistChatTurn({
           completionTokens: usage.completionTokens,
           totalTokens: usage.totalTokens,
           cost: usage.cost,
+          ...contextSnapshotMetadata,
           ...promptBudgetMetadata,
         },
       },
     })
   } else {
     tokenBalance = await loadTokenBalance(prisma, userId)
+  }
+
+  if (contextSnapshotRecord) {
+    await recordAnalyticsEventSafe(
+      {
+        userId,
+        chatId: chat.id,
+        characterId: character.id,
+        eventName: 'context_snapshot_created',
+        source: 'chat.service',
+        route: '/chat',
+        entityType: 'context_snapshot',
+        entityId: contextSnapshotRecord.id,
+        metadata: {
+          modelName: modelLabel,
+          modelRoute: contextSnapshot?.modelRoute,
+          replyProfile: contextSnapshot?.replyProfile,
+          promptTokensEstimate: contextSnapshotRecord.promptTokensEstimate,
+          loreCount: loreKeywords.length,
+        },
+      },
+      prisma,
+    )
+  }
+  await recordAnalyticsEventSafe(
+    {
+      userId,
+      chatId: chat.id,
+      characterId: character.id,
+      eventName: chatCreated ? 'chat_start' : 'chat_turn',
+      source: 'chat.service',
+      route: '/chat',
+      entityType: 'chat',
+      entityId: chat.id,
+      metadata: {
+        chatCreated,
+        userMessageChars: userMessage.length,
+        replyChars: reply.length,
+        totalTokens: usage.totalTokens,
+        promptTokens: usage.promptTokens,
+        completionTokens: usage.completionTokens,
+        modelName: modelLabel,
+        bypassTokens,
+        loreCount: loreKeywords.length,
+        contextSnapshotId: contextSnapshotRecord?.id ?? null,
+      },
+    },
+    prisma,
+  )
+  if (chatCreated) {
+    await recordAnalyticsEventSafe(
+      {
+        userId,
+        chatId: chat.id,
+        characterId: character.id,
+        eventName: 'first_reply',
+        source: 'chat.service',
+        route: '/chat',
+        entityType: 'chat',
+        entityId: chat.id,
+        metadata: {
+          modelName: modelLabel,
+          replyChars: reply.length,
+          contextSnapshotId: contextSnapshotRecord?.id ?? null,
+        },
+      },
+      prisma,
+    )
   }
 
   return {
@@ -1440,6 +1585,7 @@ async function completeLocalChatTurn({
   userMessage,
   loreKeywords,
   promptBudget,
+  contextSnapshot,
   relationshipSeed,
   tokenBalance,
 }: {
@@ -1450,12 +1596,20 @@ async function completeLocalChatTurn({
   userMessage: string
   loreKeywords: string[]
   promptBudget?: PromptBudget
+  contextSnapshot?: ChatContextSnapshotInput
   relationshipSeed?: string
   tokenBalance: number | null
 }) {
   const reply = buildLocalRoleplayReply({ character, userMessage, relationshipSeed })
   const usage = fallbackUsage()
   const modelLabel = localChatModelName()
+  const responseQuality = analyzeResponseQuality({
+    reply,
+    userMessage,
+    responseDepth: contextSnapshot?.responseDepth,
+    replyProfile: contextSnapshot?.replyProfile,
+    activeScene: contextSnapshot?.modelRoute === 'chat.scene.cinematic',
+  })
   const persistResult = prisma
     ? await persistChatTurn({
         prisma,
@@ -1467,6 +1621,8 @@ async function completeLocalChatTurn({
         usage,
         loreKeywords,
         promptBudget,
+        contextSnapshot,
+        responseQuality,
         relationshipSeed,
         modelLabel,
       })
@@ -1494,6 +1650,7 @@ async function completeLocalChatTurn({
       contextLoreCount: loreKeywords.length,
       tokenBalance: persistResult.tokenBalance,
       promptBudget,
+      responseQuality,
     },
   }
 }
@@ -1574,8 +1731,9 @@ export async function sendChat(input: SendChatInput) {
   const chatCharacter = character as CharacterWithTags
 
   const hasUserApiKey = Boolean(input.userApiKey)
+  const usesLocalRuntime = preferLocalChatProvider()
   const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
-  if (!hasUserApiKey && tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
+  if (!hasUserApiKey && !usesLocalRuntime && tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
     return {
       reply: chatReplyMessages.insufficientTokens,
       chatId: responseChatId(input.chatId),
@@ -1605,7 +1763,7 @@ export async function sendChat(input: SendChatInput) {
       },
     }
   }
-  const { loreEntries, messages, promptBudget } = await buildMessages(
+  const { loreEntries, messages, promptBudget, contextSnapshot } = await buildMessages(
     character,
     input.message,
     input.history,
@@ -1613,6 +1771,9 @@ export async function sendChat(input: SendChatInput) {
     input.relationshipSeed,
     input.userPersona,
     activeUserId,
+    input.modelRoute,
+    input.replyProfile,
+    input.responseDepth,
   )
   const loreKeywords = loreEntries.map((entry) => entry.keyword)
 
@@ -1625,6 +1786,7 @@ export async function sendChat(input: SendChatInput) {
       userMessage: input.message,
       loreKeywords,
       promptBudget,
+      contextSnapshot,
       relationshipSeed: input.relationshipSeed,
       tokenBalance,
     })
@@ -1654,6 +1816,7 @@ export async function sendChat(input: SendChatInput) {
         userMessage: input.message,
         loreKeywords,
         promptBudget,
+        contextSnapshot,
         relationshipSeed: input.relationshipSeed,
         tokenBalance,
       })
@@ -1690,6 +1853,13 @@ export async function sendChat(input: SendChatInput) {
     reply = extension.reply
     usage = addUsage(usage, extension.usage)
   }
+  const responseQuality = analyzeResponseQuality({
+    reply,
+    userMessage: input.message,
+    responseDepth: contextSnapshot.responseDepth,
+    replyProfile: contextSnapshot.replyProfile,
+    activeScene: contextSnapshot.modelRoute === 'chat.scene.cinematic',
+  })
   usage = ensureBillableChatUsage(usage, messages, reply)
   const persistResult =
     prisma && character
@@ -1703,6 +1873,8 @@ export async function sendChat(input: SendChatInput) {
           usage,
           loreKeywords,
           promptBudget,
+          contextSnapshot,
+          responseQuality,
           relationshipSeed: input.relationshipSeed,
           modelLabel: activeModelName,
           bypassTokens: hasUserApiKey,
@@ -1731,6 +1903,7 @@ export async function sendChat(input: SendChatInput) {
       contextLoreCount: loreKeywords.length,
       tokenBalance: persistResult.tokenBalance,
       promptBudget,
+      responseQuality,
     },
   }
 }
@@ -1787,7 +1960,8 @@ export function streamChat(input: SendChatInput) {
         const tokenBalance = prisma ? await loadTokenBalance(prisma, activeUserId) : null
         streamTokenBalance = tokenBalance
         const hasUserApiKey = Boolean(input.userApiKey)
-        if (!hasUserApiKey && tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
+        const usesLocalRuntime = preferLocalChatProvider()
+        if (!hasUserApiKey && !usesLocalRuntime && tokenBalance !== null && tokenBalance < minTokenBalanceForChat) {
           const reply = chatReplyMessages.insufficientTokens
           send({ type: 'delta', content: reply })
           send({
@@ -1819,15 +1993,18 @@ export function streamChat(input: SendChatInput) {
           })
           return
         }
-        const { loreEntries, messages, promptBudget } = await buildMessages(
+        const { loreEntries, messages, promptBudget, contextSnapshot } = await buildMessages(
           character,
           input.message,
           input.history,
           input.chatId,
           input.relationshipSeed,
-          input.userPersona,
-          activeUserId,
-        )
+    input.userPersona,
+    activeUserId,
+    input.modelRoute,
+    input.replyProfile,
+    input.responseDepth,
+  )
         const loreKeywords = loreEntries.map((entry) => entry.keyword)
         streamPromptBudget = promptBudget
         streamContextLoreCount = loreKeywords.length
@@ -1841,6 +2018,7 @@ export function streamChat(input: SendChatInput) {
             userMessage: input.message,
             loreKeywords,
             promptBudget,
+            contextSnapshot,
             relationshipSeed: input.relationshipSeed,
             tokenBalance,
           })
@@ -1888,6 +2066,7 @@ export function streamChat(input: SendChatInput) {
             userMessage: input.message,
             loreKeywords,
             promptBudget,
+            contextSnapshot,
             relationshipSeed: input.relationshipSeed,
             tokenBalance,
           })
@@ -1921,6 +2100,13 @@ export function streamChat(input: SendChatInput) {
           trimmedReply = extension.reply
           usage = addUsage(usage, extension.usage)
         }
+        const responseQuality = analyzeResponseQuality({
+          reply: trimmedReply,
+          userMessage: input.message,
+          responseDepth: contextSnapshot.responseDepth,
+          replyProfile: contextSnapshot.replyProfile,
+          activeScene: contextSnapshot.modelRoute === 'chat.scene.cinematic',
+        })
         usage = ensureBillableChatUsage(usage, messages, trimmedReply)
         const persistResult =
           prisma && character
@@ -1934,6 +2120,8 @@ export function streamChat(input: SendChatInput) {
                 usage,
                 loreKeywords,
                 promptBudget,
+                contextSnapshot,
+                responseQuality,
                 relationshipSeed: input.relationshipSeed,
                 modelLabel: activeModelName,
                 bypassTokens: hasUserApiKey,
@@ -1961,6 +2149,7 @@ export function streamChat(input: SendChatInput) {
             contextLoreCount: loreKeywords.length,
             tokenBalance: persistResult.tokenBalance,
             promptBudget,
+            responseQuality,
           },
           memory: persistResult.memory,
         })

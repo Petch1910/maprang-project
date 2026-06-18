@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { adjustUserTokenBalance, loadAdminSummary } from './admin.service'
+import { loadProcessMiningSummary } from './analytics.service'
 import { listAdminAuditLogs } from './audit.service'
 import { loadCharacter } from './character.service'
 import { loadRelevantLore } from './context.service'
@@ -140,6 +141,28 @@ export const adminRoutes = new Elysia()
       }
     }
   })
+  .get(
+    '/admin/process-mining',
+    async ({ query, request, set }) => {
+      if (!requireAdminApiKey({ request, set })) return routeErrorResponse('admin_unauthorized')
+
+      const prisma = requireDatabase(set)
+      if (!prisma) return routeErrorResponse('database_not_configured')
+
+      const summary = await loadProcessMiningSummary({ days: query.days, prisma })
+      if (!summary) {
+        set.status = 503
+        return routeErrorResponse('database_not_configured')
+      }
+
+      return summary
+    },
+    {
+      query: t.Object({
+        days: t.Optional(t.Number()),
+      }),
+    },
+  )
   .post(
     '/admin/prompt-inspector',
     async ({ body, request, set }) => {

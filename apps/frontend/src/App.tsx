@@ -73,14 +73,14 @@ function NotFoundPage() {
     <main className="missai-page grid min-h-screen place-items-center px-6 text-white" data-testid="not-found-page">
       <section className="text-center">
         <SearchX className="mx-auto h-20 w-20 text-purple-400" />
-        <h1 className="mt-6 text-4xl font-black">Page not found</h1>
-        <p className="mt-2 text-lg text-slate-400">This route is not available in the current Maprang local server.</p>
+        <h1 className="mt-6 text-4xl font-black">ไม่พบหน้านี้</h1>
+        <p className="mt-2 text-lg text-slate-400">หน้านี้ยังไม่พร้อมในเซิร์ฟเวอร์เครื่องนี้</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <NavLink className="missai-button-primary min-h-11 px-6 text-sm" to="/">
-            Back to Explore
+            กลับไปหน้าสำรวจ
           </NavLink>
           <NavLink className="missai-button-secondary min-h-11 px-6 text-sm" to="/create">
-            Creation
+            ไปหน้าสร้าง
           </NavLink>
         </div>
       </section>
@@ -151,7 +151,7 @@ function MissAiSidebar({
         </div>
         <div>
           <p className="font-display m-0 text-lg font-black tracking-[0.22em] text-[#d9b3ff]">Maprang</p>
-          <p className="m-0 text-[11px] font-bold text-white/45">MissAI style local server</p>
+          <p className="m-0 text-[11px] font-bold text-white/45">เซิร์ฟเวอร์ในเครื่องพร้อมเล่น</p>
         </div>
       </NavLink>
 

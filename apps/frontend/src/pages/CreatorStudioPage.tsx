@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlertTriangle,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { CharacterCreateForm, type CreatorDraftStatus } from '../components/CharacterCreateForm'
 import { ApiError, createCharacter, type Character, type CharacterInput } from '../lib/api'
+import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 
 function createErrorMessage(error: unknown) {
   if (!(error instanceof ApiError)) return 'สร้างตัวละครไม่สำเร็จ กรุณาลองใหม่'
@@ -96,6 +97,15 @@ export function CreatorStudioPage() {
   const [error, setError] = useState('')
   const [draftStatus, setDraftStatus] = useState<CreatorDraftStatus>(defaultDraftStatus)
 
+  useEffect(() => {
+    trackFrontendEventSafe({
+      eventName: 'creator_opened',
+      route: currentRoutePath(),
+      entityType: 'surface',
+      entityId: 'create',
+    })
+  }, [])
+
   const handleCreate = async (input: CharacterInput) => {
     setIsSaving(true)
     setError('')
@@ -103,6 +113,14 @@ export function CreatorStudioPage() {
     try {
       const data = await createCharacter(input)
       setCreatedCharacter(data.character)
+      trackFrontendEventSafe({
+        eventName: 'creator_publish',
+        route: currentRoutePath(),
+        entityType: 'character',
+        entityId: data.character.id,
+        characterId: data.character.id,
+        metadata: { visibility: data.character.visibility ?? 'PUBLIC', status: data.character.status ?? 'PUBLISHED' },
+      })
       return true
     } catch (createError) {
       const message = createErrorMessage(createError)

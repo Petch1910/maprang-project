@@ -23,6 +23,7 @@ import heroImage from '../assets/hero.png'
 import type { Character, ChatMessage, ChatResponse, ChatRuntimeState, WorldStateInput } from '../lib/api'
 import { displayCharacterDetail, displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { characterStatusLabel, characterVisibilityLabel } from '../lib/characterLabels'
+import { chatReplyPresetLabel, chatReplyPresets, type ChatReplySettings } from '../lib/chatReplySettings'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
 import { characterShareUrl } from '../lib/shareUrl'
@@ -37,6 +38,7 @@ type ChatPanelProps = {
   chatId: string | null
   chatLog: ChatMessage[]
   isLoading: boolean
+  isLocalChatRuntime?: boolean
   isWalletLoading?: boolean
   isWorldStateSaving?: boolean
   lastUsage: ChatUsage | null
@@ -44,6 +46,7 @@ type ChatPanelProps = {
   runtimeState: ChatRuntimeState | null
   message: string
   onMessageChange: (message: string) => void
+  onReplySettingsChange: (settings: ChatReplySettings) => void
   onOpenMenu: () => void
   onFavoriteCharacter?: (characterId: string, favorite: boolean) => Promise<void> | void
   onOpenCharacterProfile: () => void
@@ -58,6 +61,7 @@ type ChatPanelProps = {
   ) => void
   onSendMessage: (message?: string) => void
   onStartNewChat: () => void
+  replySettings: ChatReplySettings
 }
 
 function usageLabel(usage: ChatUsage | null) {
@@ -238,20 +242,24 @@ function SceneBar({
 function MobileQuickActions({
   runtimeState,
   tokenBalance,
+  replySettings,
   onOpenCharacterProfile,
   onOpenChats,
   onOpenWallet,
+  onOpenReplySettings,
 }: {
   runtimeState: ChatRuntimeState | null
   tokenBalance: number
+  replySettings: ChatReplySettings
   onOpenCharacterProfile: () => void
   onOpenChats: () => void
   onOpenWallet: () => void
+  onOpenReplySettings: () => void
 }) {
   const relationship = runtimeState?.relationshipState
 
   return (
-    <div className="mx-auto grid w-full max-w-3xl grid-cols-3 gap-2 lg:hidden">
+    <div className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-2 sm:grid-cols-4 lg:hidden">
       <button type="button"
         className="min-w-0 rounded-xl border border-white/10 bg-black/32 px-3 py-2 text-left text-xs font-black text-white backdrop-blur-xl"
         onClick={onOpenCharacterProfile}
@@ -265,6 +273,16 @@ function MobileQuickActions({
       >
         <span className="block truncate text-white/42">ฉาก</span>
         <span className="mt-0.5 block truncate">{compactSceneLabel(runtimeState)}</span>
+      </button>
+      <button type="button"
+        className="min-w-0 rounded-xl border border-white/10 bg-black/32 px-3 py-2 text-left text-xs font-black text-white backdrop-blur-xl"
+        onClick={onOpenReplySettings}
+      >
+        <span className="flex items-center gap-1 text-white/42">
+          <Settings size={13} />
+          คำตอบ
+        </span>
+        <span className="mt-0.5 block truncate">{chatReplyPresetLabel(replySettings)}</span>
       </button>
       <button type="button"
         className="min-w-0 rounded-xl border border-white/10 bg-black/32 px-3 py-2 text-left text-xs font-black text-white backdrop-blur-xl"
@@ -341,7 +359,9 @@ function RightRail({
   isWorldStateSaving,
   isReadMode,
   onToggleReadMode,
+  onReplySettingsChange,
   runtimeState,
+  replySettings,
   usage,
 }: {
   chatId: string | null
@@ -355,7 +375,9 @@ function RightRail({
   isWorldStateSaving: boolean
   isReadMode: boolean
   onToggleReadMode: () => void
+  onReplySettingsChange: (settings: ChatReplySettings) => void
   runtimeState: ChatRuntimeState | null
+  replySettings: ChatReplySettings
   usage: ChatUsage | null
 }) {
   const relationship = runtimeState?.relationshipState
@@ -380,7 +402,7 @@ function RightRail({
     { key: 'media', label: 'รูปภาพและวิดีโอ', icon: Image },
     { key: 'read', label: 'โหมดอ่าน', icon: BookOpen },
     { key: 'avoid', label: 'คำที่ไม่ต้องการ', icon: Flag },
-    { key: 'model', label: 'โมเดลของใจ', icon: Settings },
+    { key: 'model', label: 'คุณภาพคำตอบ', icon: Settings },
   ]
   const activeScene = runtimeState?.sceneState.activeScene
   const pendingEvents = runtimeState?.sceneState.pendingEvents?.filter((event) => event.status === 'pending') ?? []
@@ -694,7 +716,42 @@ function RightRail({
     }
     return (
       <>
+        <div className="space-y-2" data-testid="chat-reply-settings-panel">
+          {chatReplyPresets.map((preset) => {
+            const selected = replySettings.responseDepth === preset.settings.responseDepth
+            return (
+              <button
+                aria-pressed={selected}
+                className={`w-full rounded-lg border px-3 py-2 text-left transition ${
+                  selected
+                    ? 'border-[#ac4bff]/60 bg-[#ac4bff]/18 text-white shadow-[0_0_24px_rgba(172,75,255,0.16)]'
+                    : 'border-white/10 bg-black/18 text-white/68 hover:border-white/20 hover:bg-white/8 hover:text-white'
+                }`}
+                data-testid={`chat-reply-preset-${preset.settings.responseDepth}`}
+                key={preset.settings.responseDepth}
+                onClick={() => onReplySettingsChange(preset.settings)}
+                type="button"
+              >
+                <span className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-black">{preset.label}</span>
+                  {selected && <span className="rounded-full bg-white/14 px-2 py-0.5 text-[10px] font-black text-white/72">ใช้อยู่</span>}
+                </span>
+                <span className="mt-1 block text-xs font-bold leading-5 text-white/48">{preset.detail}</span>
+              </button>
+            )
+          })}
+        </div>
         <InfoLine label="โมเดลล่าสุด" value={usage?.modelName ?? 'ยังไม่มีรอบแชทล่าสุด'} />
+        <InfoLine label="โปรไฟล์คำตอบ" value={chatReplyPresetLabel(replySettings)} />
+        <InfoLine label="เส้นทางโมเดล" value={replySettings.modelRoute} />
+        <InfoLine
+          label="คะแนนคุณภาพล่าสุด"
+          value={
+            usage?.responseQuality
+              ? `${usage.responseQuality.score}/100 · ${usage.responseQuality.charCount.toLocaleString()} ตัวอักษร`
+              : 'ยังไม่มีข้อมูล'
+          }
+        />
         <InfoLine label="โทเคนรอบล่าสุด" value={usage ? usage.totalTokens.toLocaleString() : '0'} />
         <InfoLine label="คลังความรู้ที่ดึงมาใช้" value={String(usage?.contextLoreCount ?? 0)} />
         <InfoLine
@@ -849,6 +906,7 @@ export function ChatPanel({
   chatId,
   chatLog,
   isLoading,
+  isLocalChatRuntime = false,
   isWalletLoading = false,
   isWorldStateSaving = false,
   lastUsage,
@@ -856,6 +914,7 @@ export function ChatPanel({
   runtimeState,
   message,
   onMessageChange,
+  onReplySettingsChange,
   onFavoriteCharacter,
   onOpenCharacterProfile,
   onOpenChats,
@@ -867,14 +926,16 @@ export function ChatPanel({
   onSceneAction,
   onSendMessage,
   onStartNewChat,
+  replySettings,
 }: ChatPanelProps) {
   const backdropUrl = character.coverUrl || character.avatarUrl || heroImage
   const hasAvatarBackdrop = Boolean(character.coverUrl || character.avatarUrl)
   const isSceneMode = runtimeState?.sceneState.mode === 'scene'
   const [isReadMode, setIsReadMode] = useState(false)
   const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false)
-  const isLowToken = !isWalletLoading && tokenBalance <= 250
-  const isOutOfTokens = !isWalletLoading && tokenBalance <= 0
+  const isTokenGated = !isLocalChatRuntime
+  const isLowToken = isTokenGated && !isWalletLoading && tokenBalance <= 250
+  const isOutOfTokens = isTokenGated && !isWalletLoading && tokenBalance <= 0
   const visibleMessages = useMemo(
     () =>
       chatLog
@@ -1046,6 +1107,29 @@ export function ChatPanel({
                     <Coins size={16} />
                     กระเป๋าโทเคน
                   </button>
+                  <div className="my-1 h-px bg-white/8" />
+                  <p className="m-0 px-3 py-1 text-[11px] font-black text-white/42">คุณภาพคำตอบ</p>
+                  {chatReplyPresets.map((preset) => {
+                    const selected = replySettings.responseDepth === preset.settings.responseDepth
+                    return (
+                      <button
+                        aria-pressed={selected}
+                        className={`flex min-h-10 w-full items-center justify-between gap-2 rounded-lg px-3 text-left hover:bg-white/8 ${
+                          selected ? 'text-[#f9c86d]' : 'text-white/76 hover:text-white'
+                        }`}
+                        data-testid={`chat-mobile-reply-preset-${preset.settings.responseDepth}`}
+                        key={preset.settings.responseDepth}
+                        onClick={() => {
+                          onReplySettingsChange(preset.settings)
+                          setIsMobileActionsOpen(false)
+                        }}
+                        type="button"
+                      >
+                        <span>{preset.label}</span>
+                        {selected && <span className="text-[11px] font-black">ใช้อยู่</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -1058,7 +1142,9 @@ export function ChatPanel({
               <MobileQuickActions
                 onOpenCharacterProfile={onOpenCharacterProfile}
                 onOpenChats={onOpenChats}
+                onOpenReplySettings={() => setIsMobileActionsOpen(true)}
                 onOpenWallet={onOpenWallet}
+                replySettings={replySettings}
                 runtimeState={runtimeState}
                 tokenBalance={tokenBalance}
               />
@@ -1112,11 +1198,7 @@ export function ChatPanel({
                   : 'border-amber-300/30 bg-amber-400/12 text-amber-100'
               }`}
             >
-              <span>
-                {isOutOfTokens
-                  ? 'โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อใช้งานแชท AI'
-                  : `โทเคนเหลือน้อย: ${tokenBalance.toLocaleString()} ควรเพิ่มโทเคนหากเล่นฉากยาว`}
-              </span>
+              <span>{isOutOfTokens ? 'โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อใช้งานแชท AI' : `โทเคนเหลือน้อย: ${tokenBalance.toLocaleString()} ควรเพิ่มโทเคนหากเล่นฉากยาว`}</span>
               <button type="button"
                 className="missai-button-secondary min-h-8 rounded-lg px-3 text-[11px]"
                 onClick={onOpenWallet}
@@ -1132,7 +1214,7 @@ export function ChatPanel({
               message={message}
               onMessageChange={onMessageChange}
               onSubmit={() => onSendMessage()}
-              sendDisabledReason="โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อส่งข้อความ"
+              sendDisabledReason={isLocalChatRuntime ? 'กำลังตอบอยู่ กรุณารอคำตอบก่อนส่งต่อ' : 'โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อส่งข้อความ'}
             />
           </div>
           <p className="m-0 pb-2 text-center text-[11px] font-bold text-white/30">อย่าลืม: ทุกสิ่งที่ตัวละครพูดเป็นการแต่งเรื่อง</p>
@@ -1151,6 +1233,8 @@ export function ChatPanel({
         onStartNewChat={onStartNewChat}
         isReadMode={isReadMode}
         onToggleReadMode={() => setIsReadMode((value) => !value)}
+        onReplySettingsChange={onReplySettingsChange}
+        replySettings={replySettings}
         runtimeState={runtimeState}
         usage={lastUsage}
       />

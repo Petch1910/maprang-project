@@ -1,138 +1,49 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChatPanel } from '../components/ChatPanel'
-import { ReportDialog, type ReportDialogSubmit, type ReportDialogTarget } from '../components/ReportDialog'
+import { ReportDialog } from '../components/ReportDialog'
 import { Sidebar } from '../components/Sidebar'
+import { useWorkspaceChatHistory } from '../hooks/useWorkspaceChatHistory'
+import { useWorkspaceReports } from '../hooks/useWorkspaceReports'
+import { useWorkspaceWorldState } from '../hooks/useWorkspaceWorldState'
 import {
   archiveChat as archiveSavedChat,
-  createReport,
   deleteChat as deleteSavedChat,
   fetchCharacters,
   fetchChatMessages,
-  fetchChats,
   fetchHealthStatus,
   fetchUsageSummary,
-  logUnexpectedError,
   sendChatMessage,
   setCharacterFavorite,
   streamChatMessage,
   trackCharacterView,
-  updateChatWorldState as updateSavedChatWorldState,
   updateChatTitle as updateSavedChatTitle,
-  ApiError,
   type Character,
   type CharacterListFilters,
   type ChatMessage,
   type ChatResponse,
+  type HealthStatus,
   type ChatRuntimeState,
-  type ChatSummary,
-  type WorldStateInput,
 } from '../lib/api'
 import { getAuthState } from '../lib/auth'
 import { createGreeting } from '../lib/chat'
+import { defaultChatReplySettings, type ChatReplySettings } from '../lib/chatReplySettings'
 import { canShowQaSeedData, filterVisibleCharacters, isQaSeedCharacter } from '../lib/qaSeedVisibility'
 import { relationshipSeedLabel } from '../lib/relationshipLabels'
+import {
+  apiErrorMessage,
+  isExpectedUserApiError,
+  logUnexpectedWorkspaceError,
+  savedChatMessageWindowLimit,
+  savedChatRuntimeState,
+  shouldUseNonStreamingFallback,
+} from '../lib/workspaceRuntime'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { isPlayableChatSummary } from '../store/slices/chatsSlice'
 import { selectContentSettings } from '../store/slices/contentSlice'
 import { saveComposerDraft, selectComposerDraft, selectPersonaDraft } from '../store/slices/draftsSlice'
 import { selectTokenBalance, selectWalletLoading, setTokenBalance } from '../store/slices/walletSlice'
 
 type ChatUsage = NonNullable<ChatResponse['usage']>
-type WorkspaceReportTarget =
-  | (ReportDialogTarget & { targetType: 'MESSAGE'; messageId: string; role: ChatMessage['role'] })
-  | (ReportDialogTarget & { targetType: 'CHARACTER'; characterId: string })
-
-const savedChatMessageWindowLimit = 120
-
-function apiErrorMessage(error: unknown, fallback: string) {
-  if (!(error instanceof ApiError)) return fallback
-  if (error.status === 401) return 'กรุณาเข้าสู่ระบบใหม่ เซสชันอาจหมดอายุแล้ว'
-  if (error.status === 403) return 'บัญชีนี้ไม่มีสิทธิ์ทำคำสั่งนี้'
-  if (error.status === 404) return 'ไม่พบข้อมูลนี้ หรือข้อมูลเป็นของบัญชีอื่น'
-  if (error.status === 413) return 'ไฟล์ที่อัปโหลดมีขนาดใหญ่เกินไป'
-  if (error.status === 415) return 'ไม่รองรับไฟล์ประเภทนี้'
-  if (error.status === 422) return 'ข้อมูลที่ส่งยังไม่ครบหรือไม่ถูกต้อง'
-  if (error.status === 429) return 'มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่'
-  return fallback
-}
-
-function isExpectedUserApiError(error: unknown) {
-  return error instanceof ApiError && [401, 403, 404, 413, 415, 422, 429].includes(error.status)
-}
-
-function logUnexpectedWorkspaceError(label: string, error: unknown) {
-  logUnexpectedError(label, error)
-}
-
-function shouldUseNonStreamingFallback(error: unknown) {
-  return !(error instanceof ApiError && [401, 403, 404, 422, 429].includes(error.status))
-}
-
-function defaultSceneState(): ChatRuntimeState['sceneState'] {
-  return {
-    currentScene: 'sandbox',
-    lastUserIntent: 'conversation',
-    mode: 'sandbox',
-    pendingEvents: [],
-    activeScene: null,
-    sceneOutcomes: [],
-    eventCooldowns: {},
-    consumedEvents: [],
-    declinedEvents: [],
-    updatedAt: '',
-  }
-}
-
-function defaultMemoryState(): ChatRuntimeState['memory'] {
-  return {
-    summary: '',
-    facts: [],
-    turnCount: 0,
-    updatedAt: '',
-  }
-}
-
-function defaultRelationshipState(): ChatRuntimeState['relationshipState'] {
-  return {
-    affinity: 0,
-    trust: 0,
-    intimacy: 0,
-    dominance: 0,
-    fear: 0,
-    respect: 0,
-    route: 'general',
-    arcStage: 'setup',
-    status: 'NEUTRAL',
-    tier: 'neutral',
-    tone: 'neutral',
-    flags: [],
-    constraints: [],
-    events: [],
-    multipliers: {
-      affinityGain: 1,
-      trustGain: 1,
-      intimacyGain: 1,
-      respectGain: 1,
-    },
-    normalized: {
-      affinity: 0,
-      trust: 0,
-      intimacy: 0,
-      dominance: 0,
-      fear: 0,
-      respect: 0,
-    },
-    promptProfile: '',
-    tagProfile: {
-      discovery: [],
-      engine: [],
-      safety: [],
-      unknown: [],
-    },
-    updatedAt: '',
-  }
-}
 
 function EmptyChatWorkspace({
   isLoading,
@@ -205,17 +116,14 @@ export function WorkspacePage() {
   const [characters, setCharacters] = useState<Character[]>([])
   const [chatId, setChatId] = useState<string | null>(null)
   const [chatLog, setChatLog] = useState<ChatMessage[]>([])
-  const [chatHistory, setChatHistory] = useState<ChatSummary[]>([])
   const [lastUsage, setLastUsage] = useState<ChatUsage | null>(null)
+  const [replySettings, setReplySettings] = useState<ChatReplySettings>(defaultChatReplySettings)
   const [runtimeState, setRuntimeState] = useState<ChatRuntimeState | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isBooting, setIsBooting] = useState(true)
-  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
-  const [isWorldStateSaving, setIsWorldStateSaving] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [reportTarget, setReportTarget] = useState<WorkspaceReportTarget | null>(null)
-  const [isReporting, setIsReporting] = useState(false)
   const [connectionNote, setConnectionNote] = useState('กำลังโหลดตัวละครจากฐานข้อมูล...')
+  const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const lastUsageChatIdRef = useRef<string | null>(null)
   const draftKey = chatId ? `chat:${chatId}` : `character:${character?.id ?? 'none'}`
@@ -224,6 +132,25 @@ export function WorkspacePage() {
   const contentSettings = useAppSelector(selectContentSettings)
   const tokenBalance = useAppSelector(selectTokenBalance)
   const isWalletLoading = useAppSelector(selectWalletLoading)
+  const { chatHistory, isHistoryLoading, loadChatHistory } = useWorkspaceChatHistory()
+  const { isWorldStateSaving, saveWorldState } = useWorkspaceWorldState({
+    chatId,
+    setConnectionNote,
+    setRuntimeState,
+  })
+  const {
+    isReporting,
+    openCharacterReport,
+    openMessageReport,
+    reportMessage,
+    reportTarget,
+    setReportTarget,
+  } = useWorkspaceReports({
+    character,
+    chatId,
+    isLoading,
+    setConnectionNote,
+  })
 
   const visibleHistory = useMemo(
     () =>
@@ -240,6 +167,7 @@ export function WorkspacePage() {
   const loadHealthStatus = useCallback(async () => {
     try {
       const health = await fetchHealthStatus()
+      setHealthStatus(health)
       if (!health.checks.databaseConnected) {
         setConnectionNote('บริการแชททำงานแล้ว แต่ฐานข้อมูลยังไม่พร้อม')
         return
@@ -252,8 +180,13 @@ export function WorkspacePage() {
         setConnectionNote('แชทพร้อมแล้ว แต่ระบบสร้างรูปจริงยังไม่พร้อม จึงใช้ภาพร่างระบบสำหรับจัดฟอร์มตัวละคร')
         return
       }
+      if (health.model?.chatProvider?.activeRuntimeProvider === 'local' || health.model?.chatProvider?.forcedLocal) {
+        setConnectionNote('ฐานข้อมูลพร้อมแล้ว แชทกำลังใช้โหมดในเครื่องสำหรับทดสอบเซิร์ฟเวอร์เครื่องนี้')
+        return
+      }
       setConnectionNote('ฐานข้อมูลและบริการ AI เชื่อมต่อแล้ว')
     } catch (error) {
+      setHealthStatus(null)
       logUnexpectedWorkspaceError('โหลดสถานะระบบไม่สำเร็จ:', error)
       setConnectionNote('เชื่อมต่อบริการแชทไม่ได้')
     }
@@ -267,19 +200,6 @@ export function WorkspacePage() {
       logUnexpectedWorkspaceError('โหลดสรุปการใช้โทเคนไม่สำเร็จ:', error)
     }
   }, [reduxDispatch])
-
-  const loadChatHistory = useCallback(async () => {
-    setIsHistoryLoading(true)
-    try {
-      const data = await fetchChats()
-      setChatHistory((data.chats ?? []).filter(isPlayableChatSummary))
-    } catch (error) {
-      logUnexpectedWorkspaceError('โหลดประวัติแชทไม่สำเร็จ:', error)
-      setChatHistory([])
-    } finally {
-      setIsHistoryLoading(false)
-    }
-  }, [])
 
   const loadCharacters = useCallback(async (filters: CharacterListFilters = { view: 'admin', sort: 'popular', limit: 40 }) => {
     const data = await fetchCharacters(filters)
@@ -376,13 +296,7 @@ export function WorkspacePage() {
       }
       setChatId(data.chat.id)
       setLastUsage((current) => (lastUsageChatIdRef.current === data.chat!.id ? current : null))
-      setRuntimeState({
-        memory: { ...defaultMemoryState(), ...(data.chat.memory ?? {}) },
-        sceneState: { ...defaultSceneState(), ...(data.chat.sceneState ?? {}) },
-        relationshipState: data.chat.relationshipState ?? {
-          ...defaultRelationshipState(),
-        },
-      })
+      setRuntimeState(savedChatRuntimeState(data.chat))
       setCharacter(data.chat.character)
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
     } catch (error) {
@@ -507,6 +421,9 @@ export function WorkspacePage() {
     }
     const currentMsg = value.trim()
     if (!currentMsg || isLoading) return
+    const modelRoute = replySettings.modelRoute
+    const replyProfile = replySettings.replyProfile
+    const responseDepth = replySettings.responseDepth
 
     const sceneCommand = currentMsg.match(/^\/scene\s+(enter|hold|decline|exit|resolve|accept|reject)\s*([a-z0-9_-]+)?/i)
     const userFacingMessage = sceneCommand
@@ -545,6 +462,9 @@ export function WorkspacePage() {
           chatId,
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           userPersona: personaDraft.trim() || undefined,
+          modelRoute,
+          replyProfile,
+          responseDepth,
           maxRating: contentSettings.maxRating,
           history: visibleHistory,
         },
@@ -578,14 +498,8 @@ export function WorkspacePage() {
       )
       setIsLoading(false)
       try {
-        setIsLoading(false)
-        try {
-          if (completedChatId) await syncOpenChatMessages(completedChatId)
-          await loadChatHistory()
-        } catch (syncError) {
-          logUnexpectedWorkspaceError('ซิงก์ประวัติแชทหลังตอบกลับสำรองไม่สำเร็จ:', syncError)
-          setConnectionNote('ตอบกลับสำเร็จแล้ว แต่ซิงก์ประวัติแชทไม่ครบ กดรีเฟรชรายการแชทได้')
-        }
+        if (completedChatId) await syncOpenChatMessages(completedChatId)
+        await loadChatHistory()
       } catch (syncError) {
         logUnexpectedWorkspaceError('ซิงก์ประวัติแชทหลังตอบกลับไม่สำเร็จ:', syncError)
         setConnectionNote('ตอบกลับสำเร็จแล้ว แต่ซิงก์ประวัติแชทไม่ครบ กดรีเฟรชรายการแชทได้')
@@ -616,6 +530,9 @@ export function WorkspacePage() {
           chatId,
           relationshipSeed: chatId ? undefined : relationshipSeed ?? undefined,
           userPersona: personaDraft.trim() || undefined,
+          modelRoute,
+          replyProfile,
+          responseDepth,
           maxRating: contentSettings.maxRating,
           history: visibleHistory,
         })
@@ -673,113 +590,17 @@ export function WorkspacePage() {
     sendMessage(command)
   }
 
-  const saveWorldState = async (input: WorldStateInput) => {
-    if (!chatId) {
-      setConnectionNote('ต้องเริ่มแชทให้ระบบสร้างห้องก่อน แล้วค่อยบันทึกสถานะโลก')
-      return false
-    }
-
-    setIsWorldStateSaving(true)
-    try {
-      const data = await updateSavedChatWorldState(chatId, input)
-      setRuntimeState((current) => ({
-        memory: {
-          ...defaultMemoryState(),
-          ...(current?.memory ?? {}),
-          worldState: data.worldState,
-        },
-        sceneState: current?.sceneState ?? defaultSceneState(),
-        relationshipState: current?.relationshipState ?? defaultRelationshipState(),
-      }))
-      setConnectionNote('บันทึกสถานะโลกของแชทนี้แล้ว')
-      return true
-    } catch (error) {
-      logUnexpectedWorkspaceError('บันทึกสถานะโลกไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'บันทึกสถานะโลกไม่สำเร็จ กรุณาลองใหม่'))
-      return false
-    } finally {
-      setIsWorldStateSaving(false)
-    }
-  }
+  const isLocalChatRuntime =
+    healthStatus?.model?.chatProvider?.activeRuntimeProvider === 'local' || healthStatus?.model?.chatProvider?.forcedLocal === true
 
   const syncOpenChatMessages = async (id: string) => {
     try {
       const data = await fetchChatMessages(id, { limit: savedChatMessageWindowLimit })
       if (!data.chat) return
       setChatLog(data.chat.messages.length > 0 ? data.chat.messages : [createGreeting(data.chat.character)])
-      setRuntimeState({
-        memory: { ...defaultMemoryState(), ...(data.chat.memory ?? {}) },
-        sceneState: { ...defaultSceneState(), ...(data.chat.sceneState ?? {}) },
-        relationshipState: data.chat.relationshipState ?? {
-          ...defaultRelationshipState(),
-        },
-      })
+      setRuntimeState(savedChatRuntimeState(data.chat))
     } catch (error) {
       logUnexpectedWorkspaceError('ซิงก์ข้อความแชทไม่สำเร็จ:', error)
-    }
-  }
-
-  const openMessageReport = (chat: ChatMessage) => {
-    if (!character) return
-    if (isLoading || chat.role === 'system' || !chat.content.trim()) return
-    setReportTarget({
-      targetType: 'MESSAGE',
-      title: `ข้อความจาก${chat.role === 'assistant' ? character.name : 'ผู้ใช้'}`,
-      preview: chat.content,
-      messageId: chat.id,
-      role: chat.role,
-    })
-  }
-
-  const openCharacterReport = () => {
-    if (!character?.id) return
-    setReportTarget({
-      targetType: 'CHARACTER',
-      title: character.name,
-      preview: character.biography || character.description || character.tagline || character.greeting || '',
-      characterId: character.id,
-    })
-  }
-
-  const reportMessage = async ({ reason, details }: ReportDialogSubmit) => {
-    if (!character) return
-    if (!reportTarget || isReporting) return
-    setIsReporting(true)
-    setConnectionNote(reportTarget.targetType === 'CHARACTER' ? 'กำลังส่งรายงานตัวละคร...' : 'กำลังส่งรายงานข้อความ...')
-    try {
-      if (reportTarget.targetType === 'CHARACTER') {
-        await createReport({
-          targetType: 'CHARACTER',
-          characterId: reportTarget.characterId,
-          reason,
-          details: details || `รายงานตัวละคร ${character.name} จากหน้าห้องแชท`,
-          metadata: {
-            chatId,
-            tags: character.tags,
-            status: character.status,
-            visibility: character.visibility,
-          },
-        })
-      } else {
-        await createReport({
-          targetType: 'MESSAGE',
-          messageId: reportTarget.messageId,
-          reason,
-          details: details || `รายงานข้อความจาก ${reportTarget.role} ในห้องแชท`,
-          metadata: {
-            chatId,
-            characterId: character.id,
-            role: reportTarget.role,
-          },
-        })
-      }
-      setConnectionNote(reportTarget.targetType === 'CHARACTER' ? 'ส่งรายงานตัวละครให้ผู้ดูแลตรวจแล้ว' : 'ส่งรายงานข้อความให้ผู้ดูแลตรวจแล้ว')
-      setReportTarget(null)
-    } catch (error) {
-      logUnexpectedWorkspaceError('ส่งรายงานไม่สำเร็จ:', error)
-      setConnectionNote(apiErrorMessage(error, 'ส่งรายงานไม่ได้ กรุณาลองใหม่หลังแชทซิงก์เสร็จ'))
-    } finally {
-      setIsReporting(false)
     }
   }
 
@@ -830,6 +651,7 @@ export function WorkspacePage() {
         chatId={chatId}
         chatLog={chatLog}
         isLoading={isLoading}
+        isLocalChatRuntime={isLocalChatRuntime}
         isWalletLoading={isWalletLoading}
         lastUsage={lastUsage}
         tokenBalance={tokenBalance}
@@ -837,6 +659,7 @@ export function WorkspacePage() {
         message={message}
         isWorldStateSaving={isWorldStateSaving}
         onMessageChange={updateMessageDraft}
+        onReplySettingsChange={setReplySettings}
         onFavoriteCharacter={toggleFavorite}
         onOpenCharacterProfile={() => navigate(`/characters/${character.id}`)}
         onOpenChats={() => navigate('/chats')}
@@ -848,6 +671,7 @@ export function WorkspacePage() {
         onSceneAction={handleSceneAction}
         onSendMessage={sendMessage}
         onStartNewChat={startNewChat}
+        replySettings={replySettings}
       />
 
       <ReportDialog

@@ -9,6 +9,7 @@ import {
   type Character,
   type RelationshipPreset,
 } from '../lib/api'
+import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 import { displayCharacterDetail } from '../lib/characterDisplay'
 import { characterRating, canViewRating, ratingLabel } from '../lib/contentRating'
 import { canShowQaSeedData, isQaSeedCharacter } from '../lib/qaSeedVisibility'
@@ -138,6 +139,14 @@ export function CharacterLobbyPage() {
           return
         }
         setDetailCharacter(data.character)
+        trackFrontendEventSafe({
+          eventName: 'character_detail_view',
+          route: currentRoutePath(),
+          entityType: 'character',
+          entityId: data.character.id,
+          characterId: data.character.id,
+          metadata: { source: 'character_lobby', rating: data.character.contentRating ?? 'general' },
+        })
       })
       .catch(() => {
         if (cancelled) return
