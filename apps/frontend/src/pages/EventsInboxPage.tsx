@@ -36,6 +36,7 @@ export function EventsInboxPage() {
   const [search, setSearch] = useState('')
   type PendingSceneSummary = (typeof events)[number]
   const normalizedSearch = search.trim().toLowerCase()
+
   const visibleEvents = useMemo(() => {
     if (!normalizedSearch) return events
     return events.filter((event) =>
@@ -45,6 +46,7 @@ export function EventsInboxPage() {
         .includes(normalizedSearch),
     )
   }, [events, normalizedSearch])
+
   const eventGroups = useMemo<Array<{
     key: string
     title: string
@@ -84,24 +86,27 @@ export function EventsInboxPage() {
   }, [dispatch])
 
   return (
-    <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <main className="missai-shell space-y-5 text-white">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-black">กล่องอีเวนต์</h1>
-          <p className="mt-2 text-sm font-bold text-white/58">รวมฉากสำคัญจากแชทที่กำลังเล่น เพื่อให้กลับไปต่อได้เร็ว</p>
+          <p className="m-0 text-xs font-black tracking-widest text-[#ac4bff] uppercase">ศูนย์รวมฉาก</p>
+          <h1 className="font-display mt-2 text-3xl font-black">กล่องอีเวนต์</h1>
+          <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-white/58">
+            รวมฉากสำคัญจากทุกแชท เพื่อให้กลับไปเล่นต่อได้เร็วโดยไม่ต้องไล่หาเอง
+          </p>
         </div>
         <button
           aria-disabled={isLoading}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+          className="missai-button-secondary disabled:cursor-not-allowed disabled:opacity-55"
           disabled={isLoading}
           onClick={() => dispatch(loadChatSummaries())}
-          title={isLoading ? 'กำลังโหลดกล่องอีเวนต์ รอให้เสร็จก่อนรีเฟรช' : 'รีเฟรชกล่องอีเวนต์'}
+          title={isLoading ? 'กำลังโหลดอีเวนต์ รอให้เสร็จก่อนรีเฟรช' : 'รีเฟรชกล่องอีเวนต์'}
           type="button"
         >
           <RefreshCw size={16} />
           รีเฟรช
         </button>
-      </div>
+      </header>
 
       <section className="missai-card grid gap-3 rounded-2xl p-3 md:grid-cols-[minmax(0,1fr)_auto]">
         <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-white/45 transition focus-within:border-[#ac4bff]/45 focus-within:bg-[#080a1a]/85">
@@ -119,32 +124,29 @@ export function EventsInboxPage() {
       </section>
 
       {error && (
-        <div className="rounded-lg border border-purple-500/20 bg-purple-500/10 p-4 text-sm font-bold text-purple-200">
-          โหลดอีเวนต์ไม่ได้
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm font-bold text-rose-200">
+          โหลดอีเวนต์ไม่สำเร็จ ลองรีเฟรชอีกครั้ง
         </div>
       )}
 
       {isLoading ? (
         <div className="grid gap-3">
           {[1, 2, 3].map((item) => (
-            <div className="h-28 animate-pulse rounded-2xl bg-white/5 border border-white/10" key={item} />
+            <div className="h-28 animate-pulse rounded-2xl border border-white/10 bg-white/5" key={item} />
           ))}
         </div>
       ) : visibleEvents.length === 0 ? (
-        <div className="missai-card flex flex-col rounded-3xl p-6 text-white/55">
+        <div className="missai-card rounded-3xl p-6 text-white/58">
           <p className="m-0 text-sm font-bold leading-6">
             {events.length === 0
-              ? 'ยังไม่มีฉากที่รออยู่ คุยต่อในห้องแชทจนกว่าเงื่อนไขความสัมพันธ์จะพร้อม แล้วระบบจะแจ้งเตือนก่อนเข้าสู่ฉากสำคัญ'
+              ? 'ยังไม่มีฉากสำคัญที่รออยู่ คุยต่อในห้องแชทจนกว่าเงื่อนไขความสัมพันธ์จะพร้อม แล้วระบบจะแจ้งเตือนก่อนเข้าสู่ฉาก'
               : 'ไม่พบฉากที่ตรงกับคำค้นหาตอนนี้'}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link className="inline-flex min-h-10 items-center justify-center rounded-xl bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6] px-4 text-sm font-black text-white transition hover:brightness-110 missai-glow" to="/chat">
+            <Link className="missai-button-primary" to="/chat">
               ไปห้องแชท
             </Link>
-            <Link
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-black text-slate-300 transition hover:border-[#ac4bff]/40 hover:text-white"
-              to="/"
-            >
+            <Link className="missai-button-secondary" to="/">
               เลือกตัวละครใหม่
             </Link>
           </div>
@@ -161,7 +163,7 @@ export function EventsInboxPage() {
               >
                 <div className="grid gap-3 border-b border-white/10 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div className="flex min-w-0 gap-3">
-                    <span className={`mt-0.5 grid size-10 flex-none place-items-center rounded-lg ${tone.icon}`}>
+                    <span className={`mt-0.5 grid size-10 flex-none place-items-center rounded-xl ${tone.icon}`}>
                       <Sparkles size={18} />
                     </span>
                     <div className="min-w-0">
@@ -176,7 +178,7 @@ export function EventsInboxPage() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-[#080a1a]/40 px-3 py-2 text-center text-xs font-black text-white/55">
-                    {group.events.length.toLocaleString()} แชทที่พร้อมเข้า
+                    {group.events.length.toLocaleString()} แชทพร้อมเข้า
                   </div>
                 </div>
 
@@ -201,7 +203,7 @@ export function EventsInboxPage() {
                           </span>
                         </p>
                       </div>
-                      <span className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-black text-slate-950 transition duration-200 group-hover:bg-gradient-to-r group-hover:from-[#ac4bff] group-hover:to-[#8b5cf6] group-hover:text-white group-hover:missai-glow group-hover:translate-x-0.5">
+                      <span className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-black text-slate-950 transition duration-200 group-hover:translate-x-0.5 group-hover:bg-gradient-to-r group-hover:from-[#ac4bff] group-hover:to-[#8b5cf6] group-hover:text-white">
                         เปิดแชท <ArrowRight size={14} />
                       </span>
                     </Link>
@@ -212,6 +214,6 @@ export function EventsInboxPage() {
           })}
         </div>
       )}
-    </div>
+    </main>
   )
 }

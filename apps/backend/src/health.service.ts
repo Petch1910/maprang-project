@@ -89,7 +89,7 @@ function localChatProviderHealth() {
     process.env.NODE_ENV !== 'production' &&
     process.env.LOCAL_CHAT_PROVIDER !== '0' &&
     process.env.CHAT_PROVIDER !== 'remote'
-  const forcedLocal = fallbackEnabled && process.env.CHAT_PROVIDER === 'local'
+  const forcedLocal = fallbackEnabled && (process.env.LOCAL_CHAT_PROVIDER === '1' || process.env.CHAT_PROVIDER === 'local')
   const active = fallbackEnabled && (forcedLocal || !process.env.OPENROUTER_API_KEY)
 
   return {

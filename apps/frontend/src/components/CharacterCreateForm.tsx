@@ -65,6 +65,13 @@ const textareaClass =
 const quietButtonClass =
   'missai-button-secondary min-h-9 rounded-xl px-3.5 text-xs'
 
+function withCreatorUiTimeout<T>(promise: Promise<T>, timeoutMs = 15_000): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => reject(new Error('creator_ai_draft_timeout')), timeoutMs)
+    promise.then(resolve, reject).finally(() => window.clearTimeout(timeoutId))
+  })
+}
+
 const emptyCharacter = {
   name: '',
   avatarUrl: '',
@@ -431,13 +438,15 @@ export function CharacterCreateForm({
     setIsGeneratingDraft(true)
     setNote(imageOnly ? 'กำลังให้ AI สร้างรูปใหม่...' : 'กำลังให้ AI ช่วยร่างตัวละคร...')
     try {
-      const result = await generateCreatorAiDraft({
-        brief: source,
-        imagePrompt: source,
-        current: form,
-        imageOnly,
-        imageStyle,
-      })
+      const result = await withCreatorUiTimeout(
+        generateCreatorAiDraft({
+          brief: source,
+          imagePrompt: source,
+          current: form,
+          imageOnly,
+          imageStyle,
+        }),
+      )
       if (imageOnly) {
         applyImageDraft({ imagePrompt: result.image.prompt, imageUrl: result.image.url }, false)
         setStoredAvatarSource(result.image.provider === 'configured' ? 'provider' : result.image.provider)

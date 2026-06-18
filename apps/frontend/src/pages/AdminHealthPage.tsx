@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Activity, CheckCircle2, CircleAlert, RefreshCw, ShieldCheck } from 'lucide-react'
-import { SystemStatus } from '../components/SystemStatus'
+import { Activity, CheckCircle2, CircleAlert, Database, Image, LockKeyhole, RefreshCw, Router, Server, ShieldCheck } from 'lucide-react'
 import { fetchHealthStatus, type HealthStatus } from '../lib/api'
-import { buildDeployPhaseSteps, type DeployCheck } from '../lib/adminHealthDeploy'
 import { API_BASE_URL, frontendEnvWarnings, hasRealEnvValue, isLocalOrPlaceholderUrl, RAW_API_BASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL } from '../lib/env'
-import { routeMenuAuditRows, routeMenuAuditStatusLabel, type RouteMenuAuditStatus } from '../lib/routeMenuAudit'
+
+type HealthCheckRow = {
+  label: string
+  ok: boolean
+  detail: string
+  action: string
+  scope: 'local' | 'frontend' | 'production'
+}
 
 function StatusPill({ ok }: { ok: boolean }) {
   return (
@@ -15,31 +19,50 @@ function StatusPill({ ok }: { ok: boolean }) {
       }`}
     >
       {ok ? <CheckCircle2 size={14} /> : <CircleAlert size={14} />}
-      {ok ? 'พร้อม' : 'ต้องเช็ค'}
+      {ok ? 'พร้อม' : 'ต้องเช็ก'}
     </span>
   )
 }
 
-function auditStatusClass(status: RouteMenuAuditStatus) {
-  if (status === 'ready') return 'border border-emerald-300/25 bg-emerald-400/12 text-emerald-100'
-  if (status === 'guarded') return 'border border-sky-300/25 bg-sky-400/12 text-sky-100'
-  if (status === 'needs-staging') return 'border border-amber-300/25 bg-amber-400/12 text-amber-100'
-  return 'border border-white/10 bg-white/7 text-white/65'
-}
-
-function checkScopeLabel(scope: DeployCheck['scope']) {
+function scopeLabel(scope: HealthCheckRow['scope']) {
   if (scope === 'local') return 'เครื่องนี้'
   if (scope === 'frontend') return 'หน้าบ้าน'
-  return 'โปรดักชัน'
+  return 'ปล่อยจริง'
 }
 
-function checkScopeClass(scope: DeployCheck['scope']) {
+function scopeClass(scope: HealthCheckRow['scope']) {
   if (scope === 'local') return 'border border-emerald-300/25 bg-emerald-400/12 text-emerald-100'
   if (scope === 'frontend') return 'border border-sky-300/25 bg-sky-400/12 text-sky-100'
   return 'border border-amber-300/25 bg-amber-400/12 text-amber-100'
 }
 
-function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
+function providerStatusLabel(status?: string) {
+  if (status === 'verified') return 'ยืนยันแล้ว'
+  if (status === 'needs_live_smoke') return 'รอทดสอบจริง'
+  if (status === 'missing_provider') return 'ยังไม่ตั้งค่า'
+  return status ?? 'ไม่ทราบ'
+}
+
+function authModeLabel(mode?: NonNullable<HealthStatus['security']>['authMode']) {
+  if (mode === 'supabase-jwt') return 'Supabase'
+  if (mode === 'local-dev-header') return 'โหมดในเครื่อง'
+  return 'ไม่ทราบ'
+}
+
+function storageLabel(storage?: NonNullable<HealthStatus['security']>['avatarStorage']) {
+  if (storage === 'supabase') return 'Supabase'
+  if (storage === 'local') return 'ในเครื่อง'
+  return 'ไม่ทราบ'
+}
+
+function storageAccessLabel(access?: NonNullable<HealthStatus['security']>['avatarStorageAccess']) {
+  if (access === 'signed') return 'signed URL'
+  if (access === 'public') return 'public read'
+  if (access === 'local') return 'ในเครื่อง'
+  return 'ไม่ทราบ'
+}
+
+function buildChecks(healthStatus: HealthStatus | null): HealthCheckRow[] {
   const frontendWarnings = frontendEnvWarnings()
   const hasFrontendSupabase = hasRealEnvValue(SUPABASE_URL) && hasRealEnvValue(SUPABASE_ANON_KEY)
   const hasBackendUrl = hasRealEnvValue(RAW_API_BASE_URL) && !isLocalOrPlaceholderUrl(API_BASE_URL)
@@ -49,206 +72,123 @@ function buildDeployChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const chatProvider = model?.chatProvider
   const imageGeneration = model?.imageGeneration
   const structuredKnowledge = healthStatus?.knowledge?.structured
-  const providerRetry = model?.providerRetry
+  const chatRuntimeIsLocal = chatProvider?.activeRuntimeProvider === 'local' || chatProvider?.forcedLocal === true
+  const chatProductionReady = Boolean(chatProvider?.productionReady ?? chatProvider?.liveVerified)
+  const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
   const backendEnvMissing = healthStatus?.env?.missingRequired ?? []
   const backendEnvInvalid = healthStatus?.env?.invalid ?? []
   const maxOutputTokens = model?.maxOutputTokens ?? 0
   const minRoleplayReplyChars = model?.minRoleplayReplyChars ?? 0
-  const replyBudgetMeetsBaseline = Boolean(model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320)
-  const replyBudgetMeetsRecommended = Boolean(model && maxOutputTokens >= 1600 && minRoleplayReplyChars >= 420)
-  const isProductionMode = healthStatus?.env?.mode === 'production'
-  const chatProductionReady = Boolean(chatProvider?.productionReady ?? chatProvider?.liveVerified)
-  const imageProductionReady = Boolean(imageGeneration?.productionReady ?? imageGeneration?.liveVerified)
-  const chatRuntimeIsLocal = chatProvider?.activeRuntimeProvider === 'local' || chatProvider?.forcedLocal === true
-  const chatRuntimeLabel = chatRuntimeIsLocal
-    ? `โหมดในเครื่อง${chatProvider?.forcedLocal ? ' (บังคับใช้)' : ''}`
-    : chatProvider?.activeRuntimeProvider === 'openrouter'
-      ? 'OpenRouter'
-      : chatProvider?.activeRuntimeProvider ?? 'ยังไม่ทราบ'
+  const replyBudgetOk = Boolean(model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320)
 
   return [
     {
       label: 'ฐานข้อมูลเชื่อมต่อ',
       ok: Boolean(checks?.databaseConfigured && checks.databaseConnected),
-      detail: checks?.databaseConnected ? 'ระบบหลังบ้านต่อฐานข้อมูลได้แล้ว' : 'ตั้ง DATABASE_URL แล้วรัน migration และ smoke กับ DB จริง',
-      action: checks?.databaseConnected ? 'เช็คซ้ำด้วย bun run smoke:local ก่อนส่งสเตจจิง' : 'ตั้ง DATABASE_URL, รัน bunx prisma migrate deploy แล้วรัน bun run smoke:local',
+      detail: checks?.databaseConnected ? 'ระบบหลังบ้านต่อฐานข้อมูลได้แล้ว' : 'ตั้ง DATABASE_URL แล้วรัน migration/smoke กับฐานข้อมูลจริง',
+      action: checks?.databaseConnected ? 'รัน smoke ซ้ำก่อนเปิดให้คนอื่นลองเล่น' : 'ตั้ง DATABASE_URL แล้วรัน bun run smoke:local',
       scope: 'local',
     },
     {
-      label: 'ตรวจค่าระบบหลังบ้าน',
+      label: 'ค่าระบบหลังบ้าน',
       ok: backendEnvMissing.length === 0 && backendEnvInvalid.length === 0,
       detail:
         backendEnvMissing.length === 0 && backendEnvInvalid.length === 0
-          ? 'ค่าระบบหลังบ้านไม่มีค่าบังคับที่ขาดหรือค่าผิดรูปแบบ'
+          ? 'ไม่มีค่าจำเป็นที่ขาดหรือผิดรูปแบบ'
           : [...backendEnvMissing.map((name) => `ขาด ${name}`), ...backendEnvInvalid].join(' / '),
-      action:
-        backendEnvMissing.length === 0 && backendEnvInvalid.length === 0
-          ? 'ล็อกค่าชุดนี้ไว้ในตัวจัดการ secret ของโฮสต์'
-          : 'แก้ secret ของโฮสต์หลังบ้าน แล้วรัน bun run deploy:doctor และ bun run production:check ซ้ำ',
+      action: backendEnvMissing.length === 0 && backendEnvInvalid.length === 0 ? 'ล็อกชุดค่าไว้ในตัวจัดการ secret' : 'แก้ secret แล้วรัน deploy doctor',
       scope: 'production',
     },
     {
       label: 'คลังความรู้',
       ok: Boolean(structuredKnowledge?.ok),
-      detail: structuredKnowledge?.ok
-        ? `คลังความรู้พร้อมใช้งาน (${structuredKnowledge.fileCount} ไฟล์)`
-        : structuredKnowledge
-          ? [...structuredKnowledge.missing.map((name) => `ขาด ${name}`), ...structuredKnowledge.errors].join(' / ')
-          : 'รอคำตอบสถานะจากระบบหลังบ้าน',
-      action: structuredKnowledge?.ok ? 'รัน bun run knowledge:audit ใน CI ต่อเนื่อง' : 'แก้ไฟล์ knowledge/structured แล้วรัน bun run knowledge:audit',
-      scope: isProductionMode ? 'production' : 'local',
-    },
-    {
-      label: 'คีย์ OpenRouter',
-      ok: Boolean(checks?.openRouterConfigured),
-      detail: checks?.openRouterConfigured
-        ? 'ตั้งคีย์แล้ว แต่ยังต้องให้ smoke:chat หรือ api:smoke:live ผ่านเพื่อยืนยันโควตา รุ่นโมเดล และเครือข่ายจริง'
-        : chatRuntimeIsLocal
-          ? `ยังไม่ใช้ OpenRouter ใน runtime นี้ เพราะกำลังใช้ ${chatRuntimeLabel} สำหรับตรวจระบบในเครื่อง`
-          : 'ตั้ง OPENROUTER_API_KEY ก่อนทดสอบแชทจริง',
-      action: checks?.openRouterConfigured
-        ? 'รัน bun run smoke:chat กับสเตจจิงเพื่อยืนยันผู้ให้บริการจริง'
-        : chatRuntimeIsLocal
-          ? 'ใช้โหมดในเครื่องต่อได้ แต่ก่อน deploy ต้องตั้ง OPENROUTER_API_KEY และรัน live smoke'
-          : 'ตั้ง OPENROUTER_API_KEY ที่ขึ้นต้น sk-or- ใน secret ของโฮสต์หลังบ้าน',
+      detail: structuredKnowledge?.ok ? `พร้อมใช้งาน ${structuredKnowledge.fileCount} ไฟล์` : 'ต้องรัน knowledge audit และแก้ไฟล์ที่ขาด',
+      action: structuredKnowledge?.ok ? 'รัน knowledge audit ใน CI ต่อเนื่อง' : 'รัน bun run knowledge:audit',
       scope: 'local',
     },
     {
       label: 'แชทในเครื่อง',
       ok: chatRuntimeIsLocal,
-      detail: chatRuntimeIsLocal
-        ? `runtime ตอนนี้ใช้ ${chatRuntimeLabel}; api:smoke ตรวจ normal chat และ stream chat ได้โดยไม่ใช้เครดิตผู้ให้บริการ`
-        : chatProvider?.localFallbackEnabled
-          ? `โหมดในเครื่องสำรองเปิดอยู่ แต่ runtime ตอนนี้เป็น ${chatRuntimeLabel}`
-          : 'ยังไม่ได้เปิด chat provider ในเครื่อง',
-      action: chatRuntimeIsLocal
-        ? 'ใช้ bun run api:smoke หรือ bun run qa:local เพื่อตรวจแชท local normal/stream ซ้ำได้'
-        : 'ตั้ง LOCAL_CHAT_PROVIDER=1 หรือ CHAT_PROVIDER=local ใน backend dev แล้วรีสตาร์ตระบบหลังบ้าน',
+      detail: chatRuntimeIsLocal ? 'โหมดในเครื่องพร้อมเล่นและไม่ต้องใช้เครดิตผู้ให้บริการ' : 'ยังไม่ได้เปิด runtime ในเครื่อง',
+      action: chatRuntimeIsLocal ? 'ใช้ qa:local หรือ api:smoke ตรวจ normal/stream ซ้ำได้' : 'ตั้ง LOCAL_CHAT_PROVIDER=1 หรือ CHAT_PROVIDER=local',
       scope: 'local',
     },
     {
       label: 'ทดสอบแชทจริง',
       ok: chatProductionReady,
-      detail: chatProductionReady
-        ? 'ยืนยันการทดสอบแชทจริงแล้ว'
-        : checks?.openRouterConfigured || chatProvider?.configured
-          ? `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} หรือ bun run api:smoke:live กับสเตจจิงหรือโปรดักชันให้ผ่าน ถ้าได้รหัสผู้ให้บริการล้มเหลว ต้องเช็คโควตา OpenRouter, สิทธิ์โมเดล, คีย์ และเครือข่าย`
-          : 'ยังไม่มี OPENROUTER_API_KEY จึงยังทดสอบแชทจริงไม่ได้',
-      action: chatProductionReady
-        ? 'คง CHAT_PROVIDER_LIVE_VERIFIED=1 ไว้เฉพาะสภาพแวดล้อมที่ smoke ผ่านจริง'
-        : `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} กับสเตจจิง ถ้าผ่านแล้วค่อยตั้ง CHAT_PROVIDER_LIVE_VERIFIED=1`,
+      detail: chatProductionReady ? 'ยืนยัน live smoke แล้ว' : checks?.openRouterConfigured || chatProvider?.configured ? 'ตั้ง provider แล้ว แต่ยังต้องรัน live smoke' : 'ยังไม่มีคีย์ provider สำหรับแชทจริง',
+      action: chatProductionReady ? 'คง flag เฉพาะ env ที่ smoke ผ่านจริง' : `รัน ${chatProvider?.liveSmokeCommand ?? 'bun run smoke:chat'} แล้วค่อยตั้ง flag`,
       scope: 'production',
     },
     {
       label: 'งบคำตอบแชท',
-      ok: replyBudgetMeetsBaseline,
-      detail: model
-        ? `ใช้ ${model.name}, คำตอบสูงสุด ${model.maxOutputTokens ?? 'ค่าเริ่มต้น'} โทเคน, บทบาทสมมุติขั้นต่ำ ${model.minRoleplayReplyChars ?? 'ค่าเริ่มต้น'} ตัวอักษร, ความสุ่ม ${model.temperature ?? 'ค่าเริ่มต้น'}, ลองซ้ำแชท ${providerRetry?.chatAttempts ?? 'ค่าเริ่มต้น'} ครั้ง`
-        : 'รอคำตอบสถานะจากระบบหลังบ้าน',
-      action: !model
-        ? 'รอสถานะระบบหลังบ้าน แล้วเช็คค่า MODEL_MAX_OUTPUT_TOKENS และ MODEL_MIN_ROLEPLAY_REPLY_CHARS'
-        : !replyBudgetMeetsBaseline
-          ? 'ตั้งอย่างน้อย MODEL_MAX_OUTPUT_TOKENS=1200 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=320 ก่อนส่งสเตจจิง'
-          : replyBudgetMeetsRecommended
-            ? 'ค่าความยาวตอบกลับอยู่ระดับแนะนำสำหรับบทบาทสมมุติแล้ว'
-            : 'ผ่านเกณฑ์ขั้นต่ำแล้ว แต่แนะนำปรับเป็น MODEL_MAX_OUTPUT_TOKENS=1600 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS=420 เพื่อให้บอทตอบมีเนื้อขึ้น',
+      ok: replyBudgetOk,
+      detail: model ? `สูงสุด ${maxOutputTokens} โทเคน / ขั้นต่ำ ${minRoleplayReplyChars} ตัวอักษร` : 'รอสถานะโมเดลจากระบบหลังบ้าน',
+      action: replyBudgetOk ? 'ผ่านเกณฑ์ขั้นต่ำแล้ว' : 'ตั้ง MODEL_MAX_OUTPUT_TOKENS>=1200 และ MODEL_MIN_ROLEPLAY_REPLY_CHARS>=320',
       scope: 'local',
     },
     {
-      label: 'ผู้ให้บริการรูปภาพ',
+      label: 'ผู้ให้บริการสร้างรูป',
       ok: Boolean(checks?.imageGenerationConfigured || imageGeneration?.configured),
-      detail:
-        checks?.imageGenerationConfigured || imageGeneration?.configured
-          ? `ตั้งค่า ${imageGeneration?.model ?? 'ผู้ให้บริการ'} แล้ว สถานะ ${imageGeneration?.status ?? 'needs_live_smoke'} ต้องผ่านการทดสอบจริงเพื่อยืนยันวงเงิน/โควตาก่อนใช้งานจริง`
-          : 'ยังใช้ภาพร่างระบบ ต้องตั้ง IMAGE_GENERATION_API_KEY ก่อนใช้งานจริง',
-      action:
-        checks?.imageGenerationConfigured || imageGeneration?.configured
-          ? 'รัน bun run smoke:image:live เพื่อยืนยันว่าผู้ให้บริการสร้างภาพจริง'
-          : 'ตั้ง IMAGE_GENERATION_API_KEY หรือ OPENAI_API_KEY ใน secret ของโฮสต์หลังบ้าน',
+      detail: checks?.imageGenerationConfigured || imageGeneration?.configured ? `ตั้งค่า ${imageGeneration?.model ?? 'ผู้ให้บริการ'} แล้ว` : 'ยังใช้ภาพ fallback ของระบบ',
+      action: checks?.imageGenerationConfigured || imageGeneration?.configured ? 'รัน smoke:image:live เพื่อยืนยัน quota' : 'ตั้ง IMAGE_GENERATION_API_KEY หรือ provider key',
       scope: 'local',
     },
     {
       label: 'ทดสอบสร้างรูปจริง',
       ok: imageProductionReady,
-      detail:
-        imageProductionReady
-          ? 'ยืนยันการทดสอบสร้างรูปจริงแล้ว'
-          : isProductionMode
-            ? `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หรือ bun run api:smoke:live กับสเตจจิงหรือโปรดักชันให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`
-            : `สภาพแวดล้อมเครื่องยังไม่บังคับ แต่ก่อนโปรดักชันต้องรัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} ให้ผ่าน ถ้าเจอปัญหาวงเงินหรือโควตา ต้องเพิ่มวงเงินผู้ให้บริการก่อน`,
-      action: imageProductionReady
-        ? 'คง IMAGE_GENERATION_LIVE_VERIFIED=1 ไว้เฉพาะสภาพแวดล้อมที่ smoke ผ่านจริง'
-        : `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'} หลังเพิ่มวงเงินหรือโควตา แล้วค่อยตั้ง IMAGE_GENERATION_LIVE_VERIFIED=1`,
+      detail: imageProductionReady ? 'ยืนยัน live smoke แล้ว' : 'ต้องรัน live image smoke ก่อนนับว่าพร้อมปล่อยจริง',
+      action: imageProductionReady ? 'เก็บหลักฐาน handoff' : `รัน ${imageGeneration?.liveSmokeCommand ?? 'bun run smoke:image:live'}`,
       scope: 'production',
     },
     {
       label: 'ยืนยันตัวตน Supabase',
       ok: Boolean(checks?.supabaseAuthConfigured && hasFrontendSupabase),
-      detail: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'ระบบหลังบ้านและหน้าบ้านมีค่าการยืนยันตัวตน Supabase แล้ว' : 'ต้องมี SUPABASE_URL/JWT issuer และ VITE_SUPABASE_*',
-      action:
-        checks?.supabaseAuthConfigured && hasFrontendSupabase
-          ? 'ทดสอบล็อกอิน/เซสชันกับโดเมนสเตจจิงอีกครั้ง'
-          : 'ตั้ง SUPABASE_URL, SUPABASE_JWT_ISSUER, VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ให้ครบ',
-      scope: 'local',
+      detail: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'หน้าบ้านและหลังบ้านมีค่า Supabase แล้ว' : 'ต้องตั้ง SUPABASE_* และ VITE_SUPABASE_* ให้ครบ',
+      action: checks?.supabaseAuthConfigured && hasFrontendSupabase ? 'ทดสอบ login กับ origin จริงอีกครั้ง' : 'ตั้งค่าทั้งสองฝั่งให้ตรงกัน',
+      scope: 'frontend',
     },
     {
       label: 'คลังรูป signed URL',
       ok: security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed',
-      detail:
-        security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed'
-          ? `bucket ใช้ signed URL ${security.signedUrlExpiresIn ?? 3600}s`
-          : 'ก่อนใช้งานจริงควรใช้ Supabase bucket private + signed URL',
-      action:
-        security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed'
-          ? 'รัน bun run supabase:storage:check กับสเตจจิงหรือโปรดักชันก่อนเปิดใช้'
-          : 'รัน bun run supabase:storage:setup แล้วตั้ง SUPABASE_STORAGE_ACCESS=signed',
+      detail: security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed' ? `signed URL ${security.signedUrlExpiresIn ?? 3600}s` : 'ก่อนปล่อยจริงควรใช้ bucket private + signed URL',
+      action: security?.avatarStorage === 'supabase' && security.avatarStorageAccess === 'signed' ? 'รัน storage smoke กับ env จริง' : 'ตั้ง SUPABASE_STORAGE_ACCESS=signed',
       scope: 'production',
     },
     {
-      label: 'CORS ใช้งานจริง',
+      label: 'CORS ของโดเมนจริง',
       ok: Boolean(security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalOrPlaceholderUrl(origin))),
-      detail:
-        security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalOrPlaceholderUrl(origin))
-          ? security.corsOrigins.join(', ')
-          : 'สเตจจิง/โปรดักชันต้องเปลี่ยน CORS_ORIGINS เป็นโดเมนจริง',
-      action:
-        security?.corsOrigins.length && security.corsOrigins.every((origin) => !isLocalOrPlaceholderUrl(origin))
-          ? 'คง CORS ให้เหลือเฉพาะโดเมนหน้าบ้านจริง'
-          : 'ตั้ง CORS_ORIGINS=https://<frontend-domain> และเอา localhost/loopback ออกจากโปรดักชัน',
+      detail: security?.corsOrigins.length ? security.corsOrigins.join(', ') : 'ยังไม่มี CORS_ORIGINS',
+      action: 'ตั้ง CORS_ORIGINS เป็น frontend origin จริงเท่านั้นก่อนปล่อยจริง',
       scope: 'production',
     },
     {
-      label: 'URL หลังบ้านของหน้าเว็บ',
+      label: 'URL หลังบ้านของหน้าบ้าน',
       ok: hasBackendUrl,
-      detail: hasBackendUrl ? API_BASE_URL : 'ตั้ง VITE_API_BASE_URL เป็น URL ระบบหลังบ้านสเตจจิง/โปรดักชันจริง',
-      action: hasBackendUrl ? 'เช็คด้วย smoke ผ่านเบราว์เซอร์ว่าหน้าบ้านเรียกโดเมนระบบหลังบ้านจริง' : 'ตั้ง VITE_API_BASE_URL=https://<backend-domain> ใน env ของโฮสต์หน้าบ้าน',
+      detail: hasBackendUrl ? API_BASE_URL : 'ยังใช้ local/placeholder URL',
+      action: hasBackendUrl ? 'ใช้ค่านี้กับ staging smoke' : 'ตั้ง VITE_API_BASE_URL เป็น HTTPS backend จริง',
       scope: 'frontend',
     },
     {
       label: 'คำเตือน env หน้าบ้าน',
       ok: frontendWarnings.length === 0,
-      detail: frontendWarnings.length === 0 ? 'ไม่มีคำเตือนฝั่งหน้าบ้าน' : frontendWarnings.join(' / '),
-      action:
-        frontendWarnings.length === 0
-          ? 'ล็อก env หน้าบ้านชุดนี้ไว้ก่อน build โปรดักชัน'
-          : 'แก้ VITE_API_BASE_URL, VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ตามคำเตือน',
+      detail: frontendWarnings.length === 0 ? 'ไม่มีคำเตือน env หน้าบ้าน' : frontendWarnings.join(' / '),
+      action: frontendWarnings.length === 0 ? 'พร้อมตรวจรอบถัดไป' : 'แก้ค่า .env ฝั่ง frontend',
       scope: 'frontend',
     },
   ]
 }
 
-const postureLabels: Array<{
-  key: keyof NonNullable<HealthStatus['securityPosture']>
-  label: string
-  group: 'CIA' | 'AAA'
-}> = [
-  { key: 'confidentiality', label: 'ความลับข้อมูล', group: 'CIA' },
-  { key: 'integrity', label: 'ความถูกต้องของข้อมูล', group: 'CIA' },
-  { key: 'availability', label: 'ความพร้อมใช้งาน', group: 'CIA' },
-  { key: 'authentication', label: 'การยืนยันตัวตน', group: 'AAA' },
-  { key: 'authorization', label: 'สิทธิ์การเข้าถึง', group: 'AAA' },
-  { key: 'accounting', label: 'บันทึกและตรวจสอบย้อนหลัง', group: 'AAA' },
-]
+function routeAuditRows() {
+  return [
+    { area: 'สำรวจ', route: '/', status: 'พร้อม', detail: 'ค้นหา หมวดหมู่ การ์ดตัวละคร และเล่นต่อทำงานจริง' },
+    { area: 'แถบแชท', route: '/chat', status: 'พร้อม', detail: 'เมนูสามจุด ปักหมุด จัดเก็บ เลือก และลบมีผลจริงหรือมี confirm' },
+    { area: 'สร้างตัวละคร', route: '/create', status: 'พร้อมในเครื่อง', detail: 'สร้างร่าง อัปโหลด ลิงก์รูป ตรวจความพร้อม และเผยแพร่ผ่านระบบหลังบ้าน' },
+    { area: 'ผู้สร้างภาพ AI', route: '/ai-creator', status: 'พร้อมในเครื่อง', detail: 'มีสถานะถูกล็อก กำลังโหลด ภาพสำรอง คลังผลงาน แกลเลอรี และนำไปใช้ซ้ำครบ' },
+    { area: 'กระเป๋าโทเคน', route: '/wallet', status: 'พร้อม', detail: 'โหลดการใช้งาน ธุรกรรม คีย์ผู้ดูแล และปรับโทเคนแบบมีตัวกันพลาด' },
+    { area: 'ผู้ดูแลรายงาน', route: '/moderation', status: 'มีสิทธิ์เท่านั้น', detail: 'ต้องมี ADMIN_API_KEY ก่อนเรียกคำสั่งผู้ดูแล' },
+  ]
+}
 
 export function AdminHealthPage() {
   const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null)
@@ -260,10 +200,10 @@ export function AdminHealthPage() {
     try {
       const data = await fetchHealthStatus()
       setHealthStatus(data)
-      setNote(data.ok ? 'โหลดสถานะระบบแล้ว' : 'ยังมีรายการต้องตรวจในเช็กลิสต์ด้านล่างก่อนเปิดใช้งานจริง')
+      setNote('สถานะระบบอัปเดตแล้ว')
     } catch {
       setHealthStatus(null)
-      setNote('ติดต่อสถานะระบบหลังบ้านไม่ได้ ตรวจว่าระบบหลังบ้านเปิดอยู่และ VITE_API_BASE_URL ถูกต้อง')
+      setNote('โหลดสถานะระบบไม่สำเร็จ ตรวจว่า backend local เปิดอยู่ที่พอร์ต 3000')
     } finally {
       setIsLoading(false)
     }
@@ -273,293 +213,182 @@ export function AdminHealthPage() {
     void loadHealth()
   }, [loadHealth])
 
-  const deployChecks = useMemo(() => buildDeployChecks(healthStatus), [healthStatus])
-  const deployPhaseSteps = useMemo(() => buildDeployPhaseSteps(deployChecks), [deployChecks])
-  const readyCount = deployChecks.filter((check) => check.ok).length
-  const localChecks = deployChecks.filter((check) => check.scope === 'local')
-  const productionChecks = deployChecks.filter((check) => check.scope === 'production' || check.scope === 'frontend')
-  const localReadyCount = localChecks.filter((check) => check.ok).length
-  const productionReadyCount = productionChecks.filter((check) => check.ok).length
-  const productionBlockers = productionChecks.filter((check) => !check.ok)
-  const productionReady = productionBlockers.length === 0
-  const auditReadyCount = routeMenuAuditRows.filter((row) => row.status === 'ready' || row.status === 'guarded').length
-  const postureRows = postureLabels.map((item) => ({
-    ...item,
-    ok: healthStatus?.securityPosture?.[item.key]?.ok ?? false,
-    detail: healthStatus?.securityPosture?.[item.key]?.detail ?? 'รอคำตอบสถานะจากระบบหลังบ้าน',
-  }))
-  const postureReadyCount = postureRows.filter((row) => row.ok).length
-  const refreshDisabledReason = isLoading ? 'กำลังโหลดสถานะระบบ' : ''
+  const checks = useMemo(() => buildChecks(healthStatus), [healthStatus])
+  const blockers = checks.filter((check) => !check.ok)
+  const localReady = checks.filter((check) => check.scope === 'local').every((check) => check.ok)
+  const productionReady = checks.every((check) => check.ok)
+  const chatProvider = healthStatus?.model?.chatProvider
+  const chatRuntimeIsLocal = chatProvider?.activeRuntimeProvider === 'local' || chatProvider?.forcedLocal === true
+
+  const phaseSteps = [
+    {
+      title: '1. Local server',
+      ok: localReady,
+      command: 'bun run local:doctor + bun run qa:full',
+      detail: localReady ? 'โหมดในเครื่องพร้อมเล่น' : 'ปิด blocker ของเครื่องนี้ก่อนให้คนอื่นลองเล่น',
+    },
+    {
+      title: '2. Ngrok preview / staging',
+      ok: blockers.filter((check) => check.scope === 'frontend').length === 0,
+      command: 'bun run staging:verify + bun run e2e:smoke',
+      detail: 'ใช้เมื่ออยากให้คนอื่นลองผ่าน HTTPS โดยยังยึด local server เป็นฐาน',
+    },
+    {
+      title: '3. Live provider smoke',
+      ok: checks.filter((check) => check.label.includes('ทดสอบ')).every((check) => check.ok),
+      command: 'bun run api:smoke:live',
+      detail: 'ใช้เฉพาะตอนมีผู้ให้บริการจริงและต้องการพิสูจน์ว่าไม่ใช่ภาพหรือคำตอบสำรอง',
+    },
+    {
+      title: '4. Production check',
+      ok: productionReady,
+      command: 'bun run production:check',
+      detail: productionReady ? 'พร้อมตรวจปล่อยจริงรอบสุดท้าย' : 'ยังเหลืองานภายนอกก่อนปล่อยจริง',
+    },
+  ]
 
   return (
-    <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <section className="missai-card rounded-2xl p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
-              <ShieldCheck size={16} />
-              ตรวจระบบผู้ดูแล
-            </p>
-            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-white sm:text-3xl">
-              ตรวจความพร้อมก่อนสเตจจิง/โปรดักชัน
-            </h1>
-            <p className="m-0 mt-2 max-w-3xl text-sm font-bold leading-6 text-white/58">
-              หน้านี้รวมสถานะระบบหลังบ้าน ค่าแวดล้อม Supabase พื้นที่เก็บรูปแบบ signed URL ระบบสร้างรูปจริง และการตรวจเส้นทาง/เมนู
-              เพื่อกันปุ่มหลอกหรือ config พลาดก่อน deploy จริง
-            </p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3 lg:w-auto">
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60"
-              aria-disabled={isLoading}
-              data-testid="admin-health-refresh"
-              disabled={isLoading}
-              onClick={() => void loadHealth()}
-              title={refreshDisabledReason || 'รีเฟรชสถานะระบบ'}
-              type="button"
-            >
-              <RefreshCw size={16} />
-              รีเฟรช
-            </button>
-            <Link
-            className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
-              to="/admin/prompt-inspector"
-            >
-              ตรวจพรอมป์
-            </Link>
-            <Link
-            className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
-              to="/admin/evals"
-            >
-              ทดสอบคุณภาพ
-            </Link>
-          </div>
+    <main className="missai-shell space-y-5 text-white">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-[#ac4bff] uppercase">
+            <Activity size={15} />
+            ตรวจระบบ
+          </p>
+          <h1 className="font-display mt-2 text-3xl font-black">สรุปด่านค้างก่อนปล่อยจริง</h1>
+          <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-white/58">
+            หน้านี้อ่านค่าสุขภาพระบบจากหลังบ้าน แล้วแยกชัดเจนว่าอะไรพร้อมสำหรับเครื่องนี้ และอะไรยังเป็นงานภายนอกก่อนปล่อยจริง
+          </p>
         </div>
-        {note && <p className="missai-empty m-0 mt-4 p-3 text-sm text-white/70">{note}</p>}
-      </section>
+        <button
+          className="missai-button-secondary"
+          disabled={isLoading}
+          onClick={() => void loadHealth()}
+          title={isLoading ? 'กำลังโหลดสถานะระบบ' : 'รีเฟรชสถานะระบบ'}
+          type="button"
+        >
+          <RefreshCw size={16} />
+          รีเฟรช
+        </button>
+      </header>
 
       <section className="grid gap-3 md:grid-cols-3">
-        <article className="rounded-lg border border-emerald-300/25 bg-emerald-400/10 p-4 text-emerald-100">
-          <p className="m-0 text-xs font-black tracking-widest uppercase">ความพร้อมเครื่องนี้</p>
-          <p className="m-0 mt-2 text-2xl font-black">
-            {localReadyCount}/{localChecks.length}
-          </p>
-          <p className="m-0 mt-1 text-sm font-bold leading-6">
-            {localReadyCount === localChecks.length ? 'ระบบในเครื่องพร้อมตรวจเส้นทางหลักแล้ว' : 'ยังมีค่าพื้นฐานในเครื่องที่ต้องแก้ก่อน QA'}
-          </p>
-        </article>
-        <article className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-amber-100">
-          <p className="m-0 text-xs font-black tracking-widest uppercase">ด่านก่อนโปรดักชัน</p>
-          <p className="m-0 mt-2 text-2xl font-black">
-            {productionReadyCount}/{productionChecks.length}
-          </p>
-          <p className="m-0 mt-1 text-sm font-bold leading-6">
-            {productionBlockers.length === 0
-              ? 'ค่าฝั่ง deploy พร้อมแล้ว เหลือ smoke กับสภาพแวดล้อมจริง'
-              : `ยังค้าง ${productionBlockers.map((check) => check.label).join(', ')}`}
-          </p>
-        </article>
-        <article className="rounded-lg border border-sky-300/25 bg-sky-400/10 p-4 text-sky-100">
-          <p className="m-0 text-xs font-black tracking-widest uppercase">ด่าน QA</p>
-          <p className="m-0 mt-2 text-2xl font-black">qa:full</p>
-          <p className="m-0 mt-1 text-sm font-bold leading-6">
-            ใช้เช็คระบบหลังบ้าน หน้าบ้าน smoke เส้นทาง console error และจอล้นบนมือถือก่อนส่งสเตจจิง
-          </p>
-        </article>
-      </section>
-
-      <section className="missai-card rounded-2xl p-4">
-        <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="m-0 text-sm font-black text-white">ลำดับงานก่อนปล่อยจริง</p>
-            <p className="m-0 mt-1 text-xs font-bold text-white/45">
-              แยกสิ่งที่ต้องปิดก่อนสเตจจิง ออกจาก smoke ผู้ให้บริการจริงและด่านโปรดักชัน
-            </p>
-          </div>
-              <span className="missai-badge text-white/65">
-            สเตจจิง → ทดสอบจริง → โปรดักชัน
-          </span>
+        <div className="missai-card rounded-2xl p-4">
+          <p className="m-0 text-sm font-black text-white/48">สถานะระบบ</p>
+          <p className="font-display mt-2 text-2xl font-black text-white">{healthStatus?.ok ? 'ออนไลน์' : 'ต้องเช็ก'}</p>
+          <p className="mt-1 text-xs font-bold text-white/45">{note}</p>
         </div>
-        <div className="grid gap-3 lg:grid-cols-3">
-          {deployPhaseSteps.map((step) => (
-            <article className="missai-card rounded-xl p-3" key={step.title}>
-              <div className="flex items-start justify-between gap-3">
-                <p className="m-0 text-sm font-black text-white">{step.title}</p>
-                <StatusPill ok={step.ok} />
-              </div>
-              <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/52">{step.detail}</p>
-              <code className="mt-3 block min-h-9 rounded-lg border border-white/10 bg-black/22 px-2 py-2 text-[11px] font-black leading-5 text-white/70">
-                {step.command}
-              </code>
-            </article>
-          ))}
+        <div className="missai-card rounded-2xl p-4">
+          <p className="m-0 text-sm font-black text-white/48">Local server</p>
+          <p className="font-display mt-2 text-2xl font-black text-[#f9c86d]">
+            {localReady ? 'โหมดในเครื่องพร้อมเล่น' : 'ยังไม่ครบ'}
+          </p>
+          {chatRuntimeIsLocal && <p className="mt-1 text-xs font-bold text-emerald-200">แชทในเครื่องพร้อมใช้</p>}
+        </div>
+        <div className="missai-card rounded-2xl p-4">
+          <p className="m-0 text-sm font-black text-white/48">Blockers</p>
+          <p className="font-display mt-2 text-2xl font-black text-white">{blockers.length.toLocaleString()}</p>
+          <p className="mt-1 text-xs font-bold text-white/45">{productionReady ? 'ไม่มีด่านค้าง' : 'ยังมีงานก่อนปล่อยจริง'}</p>
         </div>
       </section>
 
-      <section
-        className={`rounded-lg border p-4 shadow-[0_18px_58px_rgba(0,0,0,0.18)] ${
-          productionReady ? 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100' : 'border-amber-300/25 bg-amber-400/10 text-amber-100'
-        }`}
-      >
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <p className="m-0 text-sm font-black">สรุปด่านค้างก่อนโปรดักชัน</p>
-            <p className="m-0 mt-1 text-sm font-bold leading-6">
-              {productionReady
-                ? 'พร้อมสำหรับด่านสุดท้ายแล้ว ให้รัน smoke โปรดักชันกับโดเมนระบบหลังบ้าน/หน้าบ้านจริงอีกครั้ง'
-                : `ยังค้าง ${productionBlockers.length} ข้อก่อน deploy จริง แก้ตามรายการนี้ก่อนค่อยรันด่านโปรดักชันซ้ำ`}
-            </p>
-          </div>
-          <code className="inline-flex min-h-9 items-center rounded-lg border border-white/10 bg-black/22 px-3 text-xs font-black text-white/75 shadow-sm">
-            bun run production:check
-          </code>
-        </div>
-
-        {!productionReady && (
-          <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-            {productionBlockers.map((check) => (
-              <article className="rounded-lg border border-amber-300/25 bg-black/18 p-3" key={check.label}>
-                <div className="flex items-start justify-between gap-3">
-                  <p className="m-0 text-sm font-black text-amber-50">{check.label}</p>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-black ${checkScopeClass(check.scope)}`}>
-                    {checkScopeLabel(check.scope)}
-                  </span>
-                </div>
-                <p className="m-0 mt-2 text-xs font-bold leading-5 text-amber-100/70">{check.detail}</p>
-              <p className="missai-empty m-0 mt-2 p-2 text-xs leading-5 text-amber-50">
-                  ขั้นต่อไป: {check.action}
-                </p>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="missai-card rounded-2xl p-4">
-        <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-              <ShieldCheck size={17} />
-              สถานะความปลอดภัย CIA / AAA
-            </p>
-            <p className="m-0 mt-1 text-xs font-bold text-white/45">
-              พร้อมแล้ว {postureReadyCount}/{postureRows.length} หมวด
-            </p>
-          </div>
-              <span className="missai-badge text-white/65">
-            ความลับ / ความถูกต้อง / ความพร้อมใช้งาน + ยืนยันตัวตน / สิทธิ์ / Audit
-          </span>
-        </div>
-        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-          {postureRows.map((row) => (
-            <article className="missai-card rounded-xl p-3" key={row.key}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                <span className="missai-badge px-2 py-0.5 text-[11px] text-white/55">{row.group}</span>
-                  <p className="m-0 mt-2 text-sm font-black text-white">{row.label}</p>
-                </div>
-                <StatusPill ok={row.ok} />
-              </div>
-              <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/52">{row.detail}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <SystemStatus healthStatus={healthStatus} isLoading={isLoading} onRefresh={loadHealth} />
-
-      <section className="missai-card rounded-2xl p-4">
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-                <Activity size={17} />
-                เช็กลิสต์ deploy
-              </p>
-              <p className="m-0 mt-1 text-xs font-bold text-white/45">
-                พร้อมแล้ว {readyCount}/{deployChecks.length} ข้อ
-              </p>
-            </div>
-              <span className="missai-badge text-white/65">
-              API: {API_BASE_URL}
-            </span>
-          </div>
-          <div className="grid gap-2 md:grid-cols-2">
-            {deployChecks.map((check) => (
-            <article className="missai-card rounded-xl p-3" key={check.label}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="m-0 text-sm font-black text-white">{check.label}</p>
-                    <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-black ${checkScopeClass(check.scope)}`}>
-                      {checkScopeLabel(check.scope)}
+      <section className="missai-card rounded-2xl p-5">
+        <h2 className="m-0 flex items-center gap-2 text-lg font-black text-white">
+          <ShieldCheck size={18} className="text-[#ac4bff]" />
+          เช็กลิสต์ deploy
+        </h2>
+        <div className="mt-4 grid gap-3">
+          {checks.map((check) => (
+            <article className="rounded-2xl border border-white/10 bg-[#080a1a]/58 p-4" key={`${check.scope}-${check.label}`}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusPill ok={check.ok} />
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-black ${scopeClass(check.scope)}`}>
+                      {scopeLabel(check.scope)}
                     </span>
                   </div>
-                  <StatusPill ok={check.ok} />
+                  <h3 className="mt-3 text-base font-black text-white">{check.label}</h3>
+                  <p className="mt-1 text-sm font-bold leading-6 text-white/55">{check.detail}</p>
                 </div>
-                <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/52">{check.detail}</p>
-              <p className="missai-empty m-0 mt-2 p-2 text-xs leading-5 text-white/70">
-                  ขั้นต่อไป: {check.action}
+                <p className="m-0 max-w-md text-xs font-bold leading-5 text-white/42">{check.action}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="missai-card rounded-2xl p-5">
+        <h2 className="m-0 flex items-center gap-2 text-lg font-black text-white">
+          <Server size={18} className="text-[#ac4bff]" />
+          ลำดับงานก่อนปล่อยจริง
+        </h2>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {phaseSteps.map((step) => (
+            <article className="rounded-2xl border border-white/10 bg-white/5 p-4" key={step.title}>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="m-0 text-sm font-black text-white">{step.title}</h3>
+                <StatusPill ok={step.ok} />
+              </div>
+              <code className="mt-3 block overflow-x-auto rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-xs font-bold text-[#f9c86d]">
+                {step.command}
+              </code>
+              <p className="m-0 mt-3 text-xs font-bold leading-5 text-white/50">{step.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="missai-card rounded-2xl p-5">
+          <h2 className="m-0 flex items-center gap-2 text-lg font-black text-white">
+            <Router size={18} className="text-[#ac4bff]" />
+            ตรวจเส้นทาง/เมนู
+          </h2>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+            {routeAuditRows().map((row) => (
+              <article className="grid gap-2 border-b border-white/10 p-4 last:border-b-0 sm:grid-cols-[160px_120px_minmax(0,1fr)]" key={`${row.area}-${row.route}`}>
+                <p className="m-0 text-sm font-black text-white">{row.area}</p>
+                <p className="m-0 text-xs font-bold text-[#d9b3ff]">{row.route}</p>
+                <p className="m-0 text-xs font-bold leading-5 text-white/52">
+                  <span className="mr-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2 py-0.5 text-emerald-200">{row.status}</span>
+                  {row.detail}
                 </p>
               </article>
             ))}
           </div>
-        </section>
-      </div>
+        </div>
 
-      <section className="missai-card rounded-2xl">
-        <div className="flex flex-col gap-2 border-b border-white/10 p-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="m-0 text-sm font-black text-white">ตรวจเส้นทาง/เมนู</p>
-            <p className="m-0 mt-1 text-xs font-bold text-white/45">
-              ปุ่มและเมนูหลักพร้อมใช้งานแล้ว {auditReadyCount}/{routeMenuAuditRows.length} รายการ ที่เหลือเป็นด่านสเตจจิงหรือฟีเจอร์เผื่ออนาคต
+        <aside className="space-y-4">
+          <section className="missai-card rounded-2xl p-4">
+            <h3 className="m-0 flex items-center gap-2 text-sm font-black text-white">
+              <Database size={17} className="text-[#ac4bff]" />
+              ฐานข้อมูล
+            </h3>
+            <p className="mt-2 text-xs font-bold leading-5 text-white/52">
+              {healthStatus?.checks.databaseConnected ? 'เชื่อมต่อฐานข้อมูลแล้ว' : healthStatus?.databaseError ?? 'ยังไม่ทราบสถานะฐานข้อมูล'}
             </p>
-          </div>
-              <span className="missai-badge min-h-9 justify-center px-3 text-white/65">
-            STAGING_RUNBOOK.md
-          </span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-[980px] w-full border-collapse text-left text-sm">
-            <thead className="bg-white/5 text-xs font-black text-white/48">
-              <tr>
-                <th className="px-4 py-3">พื้นที่</th>
-                <th className="px-4 py-3">เส้นทาง</th>
-                <th className="px-4 py-3">ปุ่ม/เมนู</th>
-                <th className="px-4 py-3">ผลลัพธ์จริง</th>
-                <th className="px-4 py-3">เงื่อนไขปิดปุ่ม</th>
-                <th className="px-4 py-3">สถานะว่าง</th>
-                <th className="px-4 py-3">สถานะ</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10">
-              {routeMenuAuditRows.map((row) => (
-                <tr className="align-top hover:bg-white/4" key={`${row.area}-${row.route}`}>
-                  <td className="px-4 py-3 font-black text-white">{row.area}</td>
-                  <td className="px-4 py-3 font-mono text-xs font-bold text-white/45">{row.route}</td>
-                  <td className="px-4 py-3 font-bold leading-6 text-white/70">{row.control}</td>
-                  <td className="px-4 py-3 leading-6 text-white/58">{row.result}</td>
-                  <td className="px-4 py-3 leading-6 text-white/58">{row.disabledReason}</td>
-                  <td className="px-4 py-3 leading-6 text-white/58">{row.emptyState}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-black ${auditStatusClass(row.status)}`}>
-                      {routeMenuAuditStatusLabel(row.status)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          </section>
+          <section className="missai-card rounded-2xl p-4">
+            <h3 className="m-0 flex items-center gap-2 text-sm font-black text-white">
+              <Image size={17} className="text-[#ac4bff]" />
+              รูปและสตอเรจ
+            </h3>
+            <p className="mt-2 text-xs font-bold leading-5 text-white/52">
+              storage: {storageLabel(healthStatus?.security?.avatarStorage)} / access: {storageAccessLabel(healthStatus?.security?.avatarStorageAccess)} / image: {providerStatusLabel(healthStatus?.model?.imageGeneration?.status)}
+            </p>
+          </section>
+          <section className="missai-card rounded-2xl p-4">
+            <h3 className="m-0 flex items-center gap-2 text-sm font-black text-white">
+              <LockKeyhole size={17} className="text-[#ac4bff]" />
+              ความปลอดภัย
+            </h3>
+            <p className="mt-2 text-xs font-bold leading-5 text-white/52">
+              auth: {authModeLabel(healthStatus?.security?.authMode)} / admin guard: {healthStatus?.security?.adminGuard ?? 'ไม่ทราบ'}
+            </p>
+          </section>
+        </aside>
       </section>
-
-      <section className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
-        <p className="m-0 font-black">ด่านสเตจจิงก่อนโปรดักชัน</p>
-        <p className="m-0 mt-1 font-bold text-amber-100/78">
-          ใช้ Supabase project จริงสำหรับสเตจจิง, bucket avatars แบบ private + signed URL, ระบบหลังบ้านบน Render/Railway,
-          โดเมนหน้าบ้านสเตจจิง, CORS โดเมนจริง แล้วรัน `bun run qa:full` และ `bun run production:check` กับ URL สเตจจิง
-          ก่อนปล่อยโปรดักชัน
-        </p>
-      </section>
-    </div>
+    </main>
   )
 }

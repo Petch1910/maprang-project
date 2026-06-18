@@ -28,7 +28,7 @@ const routeSmokeTargets: RouteSmokeTarget[] = [
   { path: '/create', testId: 'creator-name' },
   { path: '/ai-creator', testId: 'ai-creator-page' },
   { path: '/events', text: 'อีเวนต์' },
-  { path: '/profile', text: 'ตัวตนผู้เล่น' },
+  { path: '/profile', text: 'โปรไฟล์ผู้เล่น' },
   { path: '/wallet', text: 'โทเคน' },
   { path: '/moderation', text: adminKey ? 'คิวรายงาน' : 'ADMIN_API_KEY' },
   { path: '/admin/health', text: 'ตรวจเส้นทาง/เมนู' },
@@ -743,13 +743,13 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   expect(await page.getByTestId('events-scene-row').count()).toBeGreaterThan(0)
 
   await page.goto('/admin/health')
-  await expect(page.locator('body')).toContainText('สรุปด่านค้างก่อนโปรดักชัน')
+  await expect(page.locator('body')).toContainText('สรุปด่านค้างก่อนปล่อยจริง')
   await expect(page.locator('body')).toContainText('ลำดับงานก่อนปล่อยจริง')
   await expect(page.locator('body')).toContainText('bun run staging:verify + bun run e2e:smoke')
   await expect(page.locator('body')).toContainText('bun run api:smoke:live')
   await expect(page.locator('body')).toContainText('bun run production:check')
   await expect(page.locator('body')).toContainText('เช็กลิสต์ deploy')
-  await expect(page.locator('body')).toContainText('Runtime แชท')
+  await expect(page.locator('body')).toContainText('Local server')
   if (expectsLocalChatRuntime) {
     await expect(page.locator('body')).toContainText('โหมดในเครื่องพร้อมเล่น')
     await expect(page.locator('body')).toContainText('แชทในเครื่องพร้อมใช้')

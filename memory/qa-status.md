@@ -1,6 +1,11 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
+
+- 2026-06-18 MissAI account/admin rewrite gate pass: `/events`, `/support`, `/wallet`, `/profile`, `/moderation`, and `/admin/health` were rewritten to use the current dark MissAI-aligned shell language and product-facing Thai copy. The pages now expose real actions or clear disabled/empty reasons, keep existing API helpers/test ids where smoke depends on them, and remove the dead `SystemStatus.tsx` dependency. Passing evidence so far: `bun run frontend:check`, `bun run api:audit` (78 backend routes / 54 frontend helper calls), and `bun run route-menu:audit` (20 areas). Browser click-through QA and full `e2e:smoke` still need to run after backend gate verification in this checkpoint.
+- 2026-06-18 Local browser click-through QA pass with stream fix: manual in-app browser QA covered `/wallet`, `/profile`, `/support`, `/events`, `/admin/health`, `/moderation`, and `/chat/e52fabe1-6ad3-421b-80d6-48981655eb7e`. Found and fixed chat composer loading behavior by restoring local frontend API base, resolving chat streams on terminal `done`/`error`, cancelling the reader, and making post-reply history sync best-effort. Regression coverage added in `scripts/frontend-api-errors.test.ts`. Evidence recorded in `docs/LOCAL_BROWSER_QA_OBSERVATIONS.md`.
+- 2026-06-18 Full browser smoke pass after stream/profile expectation fixes: `bun run e2e:smoke` passed 4/4 across Chromium desktop/mobile after syncing `/profile` expected copy to `โปรไฟล์ผู้เล่น`. The smoke cleared QA seed data at the end, then `bun run qa:seed` restored 3 QA characters, 13 chats, 1 report, 2 wallet transactions, and 2 generation outputs.
+- 2026-06-18 Thai MissAI navigation QA pass: MissAI shell navigation labels were converted to Thai while keeping the same route structure. `bun run frontend:check`, `bun run route-menu:audit`, and full `bun run e2e:smoke` passed again 4/4 across Chromium desktop/mobile; QA seed was restored afterward.
 
 - 2026-06-17 Local server stabilization commit/push + re-verification: All local server work committed to GitHub main branch in 6 focused commits (docs, backend, frontend, scripts, root config, memory). `bun run qa:full` re-verified after push: backend 331 tests / 1442 expects, API smoke 32 pass / 2 live-skip / 0 fail, Playwright e2e 4/4 desktop+mobile, QA seed/reseed clean. Working tree clean. Local server target is fully committed, tested, and verified on main.
 

@@ -1,6 +1,16 @@
 # Maprang AI Development Process Summary
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
+
+## Latest 2026-06-18 Checkpoint
+
+- รีดีไซน์และจัดระเบียบหน้า account/admin เสริมจาก MissAI direction แล้ว: `/events`, `/support`, `/wallet`, `/profile`, `/moderation`, และ `/admin/health`.
+- ทุกหน้าชุดนี้ใช้ข้อความไทย product-facing, มี action จริงหรือ disabled/empty reason ชัดเจน, และเชื่อม API/helper กลางตาม route ที่มีอยู่แล้ว.
+- ลบ `SystemStatus.tsx` เพราะกลายเป็น component ตายหลัง `/admin/health` ถูกเขียนใหม่เป็น readiness dashboard ที่อ่านง่ายกว่า.
+- Gate ล่าสุดของ frontend/API/menu ผ่าน: `bun run frontend:check`, `bun run api:audit` (78 backend routes / 54 frontend helper calls), และ `bun run route-menu:audit` (20 areas).
+- `tests/e2e/maprang-smoke.spec.ts` ถูก sync กับ copy ใหม่ของ `/admin/health` แล้ว; ยังต้องรัน browser smoke เต็มหลังยืนยัน backend gate.
+- งาน local/repo-owned ที่ยังควรทำต่อคือ browser click-through จริงบนหน้าใหม่, clean code รอบใหญ่ของ `AICreatorPage.tsx`, `CreatorStudioPage`/`CharacterCreateForm`, และ `WorkspacePage`.
+- Production/cloud ยังเป็น external blocker เหมือนเดิม: deployed HTTPS backend/frontend, CORS origin จริง, Supabase signed storage บน environment จริง, live image/chat smoke, และ release handoff evidence.
 
 เอกสารนี้สรุปภาพรวมกระบวนการพัฒนาเว็บ Maprang AI ในสถานะปัจจุบัน โดยยึด repo จริงและ QA gate ล่าสุดเป็น source of truth ไม่ยึดเอกสารเก่าที่อาจพูดถึง stack หรือ route ที่เลิกใช้แล้ว
 

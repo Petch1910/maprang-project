@@ -1,6 +1,9 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
+
+- 2026-06-18 current checkpoint: continue from the MissAI template migration with local server as the target. The latest code pass rewrote `/events`, `/support`, `/wallet`, `/profile`, `/moderation`, and `/admin/health`; preserved existing route/API contracts; removed dead `SystemStatus.tsx`; and synced the `/admin/health` e2e copy. Frontend/API/menu gates are green (`frontend:check`, `api:audit`, `route-menu:audit`). Next work is backend gate verification, browser click-through QA with real typing/submission, observation logging, then commit/checkpoint.
+- 2026-06-18 browser QA follow-up: local click-through found chat composer appeared stuck after receiving a reply. The active local frontend env was corrected back to `http://127.0.0.1:3001`; `streamChatMessage` now resolves after terminal events; `WorkspacePage` releases loading before best-effort history sync. Browser retest confirmed typing a new draft re-enables submit after reply. Observation file: `docs/LOCAL_BROWSER_QA_OBSERVATIONS.md`.
 
 - 2026-06-17: Committed and pushed all local server stabilization work to GitHub (main branch `9e01595..b726b3b`). 6 focused commits covering docs/runbooks, backend (generation jobs/BYOK vault/cover URL/migrations), frontend (AI Creator My Library/Public Gallery/BYOK/wallet labels), scripts (local:up, local:doctor, local:db:backup, ngrok:proxy, remaining-plan:audit), root config, and memory/docs. Working tree is now clean. Re-verified with `bun run qa:full` after push: 4/4 Playwright desktop+mobile, API smoke 32 pass/2 live-skip/0 fail, backend tests 331/1442, all gates green. Local server target is fully committed and verified on main.
 

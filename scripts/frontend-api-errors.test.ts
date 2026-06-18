@@ -222,6 +222,51 @@ describe('frontend API errors', () => {
     ])
   })
 
+  test('resolves chat streams when a done event arrives even if the connection stays open', async () => {
+    const originalFetch = globalThis.fetch
+    const encoder = new TextEncoder()
+    const events: ChatStreamEvent[] = []
+    let streamCancelled = false
+
+    try {
+      globalThis.fetch = (async () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode('data: {"type":"delta","content":"ตอบแล้ว"}\n\n'))
+              controller.enqueue(
+                encoder.encode(
+                  'data: {"type":"done","chatId":"550e8400-e29b-41d4-a716-446655440000","usage":{"totalTokens":0,"cost":0,"modelName":"test-model","contextLoreCount":0,"tokenBalance":42}}\n\n',
+                ),
+              )
+            },
+            cancel() {
+              streamCancelled = true
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'text/event-stream' } },
+        )) as typeof fetch
+
+      await Promise.race([
+        streamChatMessage(
+          {
+            message: 'ทดสอบสตรีมที่ server ยังไม่ปิด connection',
+            characterId: '550e8400-e29b-41d4-a716-446655440001',
+            chatId: null,
+            history: [],
+          },
+          (event) => events.push(event),
+        ),
+        new Promise((_resolve, reject) => setTimeout(() => reject(new Error('stream did not resolve after done')), 250)),
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+
+    expect(events.at(-1)?.type).toBe('done')
+    expect(streamCancelled).toBe(true)
+  })
+
   test('aborts chat streams that never connect without cutting active streams', async () => {
     const originalFetch = globalThis.fetch
 

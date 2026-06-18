@@ -18,6 +18,7 @@ import {
 import { displayMessageContent } from '../lib/characterDisplay'
 import { filterAndSortChats, getPendingChatEventCount, toggleSelectedChatId, type ChatListFilter } from '../lib/chatList'
 import { archiveChat, deleteChat, fetchChats, restoreChat, updateChatTitle, type ChatSummary } from '../lib/api'
+import { characterImageUrl } from '../lib/characterVisual'
 import { loadPinnedChatIds, savePinnedChatIds, togglePinnedChatId } from '../lib/pinnedChats'
 import { relationshipStatusLabel, relationshipTierLabel } from '../lib/relationshipLabels'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -479,9 +480,11 @@ export function MyChatsPage() {
                       {selectedChatIds.includes(chat.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                     </button>
                   )}
-                  <div className="grid size-10 flex-none place-items-center rounded-lg bg-gradient-to-br from-[#ac4bff] to-[#8b5cf6] text-sm font-black text-white missai-glow">
-                    {(chat.characterName || chat.title || 'M').trim().slice(0, 1).toUpperCase()}
-                  </div>
+                  <img
+                    alt={chat.characterName}
+                    className="size-10 flex-none rounded-lg object-cover ring-1 ring-[#ac4bff]/35 missai-glow"
+                    src={characterImageUrl({ id: chat.characterId, name: chat.characterName, src: chat.characterAvatarUrl })}
+                  />
                   <div className="pointer-events-none min-w-0 flex-1 overflow-hidden">
                     <p className="flex min-w-0 items-center gap-1.5 font-black text-white">
                       {isPinned && <Pin className="flex-none text-amber-300" size={14} />}

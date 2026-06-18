@@ -31,6 +31,7 @@ import type {
   ChatRuntimeState,
 } from '../lib/api'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
+import { characterImageUrl } from '../lib/characterVisual'
 import { formatTime } from '../lib/chat'
 import { loadPinnedChatIds, savePinnedChatIds, togglePinnedChatId } from '../lib/pinnedChats'
 
@@ -75,11 +76,13 @@ export function Sidebar(props: SidebarProps) {
   )
 }
 
-function Avatar({ src, name }: { src: string | null; name: string }) {
-  return src ? (
-    <img alt="" className="size-8 rounded-lg object-cover ring-1 ring-white/10" src={src} />
-  ) : (
-    <span className="grid size-8 place-items-center rounded-lg bg-[var(--color-surface)] text-xs font-black">{name.slice(0, 1)}</span>
+function Avatar({ id, src, name }: { id?: string | null; src: string | null; name: string }) {
+  return (
+    <img
+      alt=""
+      className="size-8 rounded-lg object-cover ring-1 ring-white/10"
+      src={characterImageUrl({ id, name, src })}
+    />
   )
 }
 
@@ -100,7 +103,7 @@ function SidebarCharacterRow({
       className={`${listItemClass} ${isActive ? 'bg-[var(--color-accent)]/12 shadow-[inset_3px_0_0_var(--color-neon)] text-[#d9b3ff]' : 'text-slate-300'}`}
       onClick={onSelect}
     >
-      <Avatar name={character.name} src={character.avatarUrl ?? null} />
+      <Avatar id={character.id} name={character.name} src={character.avatarUrl ?? null} />
       <span className="min-w-0">
         <span className="block truncate text-sm font-black text-white">{character.name}</span>
         <span className="block truncate text-[11px] leading-4 text-slate-400">
@@ -168,7 +171,7 @@ function SidebarChatRow({
         </button>
       )}
       <button type="button" className="contents text-left" onClick={isSelectionMode ? onToggleSelect : onOpen}>
-        {!isSelectionMode && <Avatar name={chat.characterName} src={null} />}
+        {!isSelectionMode && <Avatar id={chat.characterId} name={chat.characterName} src={chat.characterAvatarUrl ?? null} />}
         <span className="min-w-0">
           <span className="flex min-w-0 items-center gap-1.5">
             {isPinned && <Pin className="flex-none text-[#f9c86d]" size={12} />}

@@ -1,6 +1,25 @@
 # แผนงานที่เหลือของ Maprang AI
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
+
+## Latest 2026-06-18 Repo-Owned Remaining Work
+
+สถานะล่าสุดหลัง MissAI account/admin rewrite:
+
+- Closed locally: `/events`, `/support`, `/wallet`, `/profile`, `/moderation`, `/admin/health` ถูกปรับเป็นธีมเดียวกันมากขึ้น, มี state/action ชัดเจน, และผ่าน `frontend:check`, `api:audit`, `route-menu:audit`.
+- Closed locally: `/admin/health` ไม่พึ่ง `SystemStatus.tsx` แล้ว และแยก local readiness ออกจาก external production blockers ชัดเจน.
+- Still open locally: browser click-through แบบกดจริงบนหน้าใหม่ทั้งหมด และบันทึก observation ว่าปุ่ม/ฟอร์ม/การส่งข้อมูลทำงานตาม flow หรือไม่.
+- Still open locally: clean code/refactor หน้าหนักที่ยังรวม orchestration เยอะ ได้แก่ `AICreatorPage.tsx`, `CreatorStudioPage`/`CharacterCreateForm`, และ `WorkspacePage`.
+- Still open locally: ตรวจ `/chat`, `/create`, `/ai-creator` อีกหนึ่งรอบหลัง account/admin rewrite เพื่อให้ shell, spacing, composer, upload/generate state, และ empty/disabled reason ไปทาง MissAI เดียวกัน.
+- Future/external only: deploy HTTPS backend/frontend, production CORS/domain, Supabase signed storage บน environment จริง, live provider smoke, และ release handoff evidence.
+
+ลำดับทำต่อที่เหมาะสม:
+
+1. รัน backend/frontend gate ซ้ำให้แน่ใจก่อน browser QA.
+2. ใช้ browser click-through สร้าง ticket/support, ปรับ persona/BYOK, refresh wallet, เปิด moderation/admin health, เข้า events, ส่ง chat จริง.
+3. บันทึกผลใน `memory/qa-status.md` และถ้ามี bug ให้แก้ก่อน commit.
+4. Refactor หน้าหนักทีละหน้า โดยต้องรักษา `frontend:check`, `api:audit`, และ `e2e:smoke` ให้ผ่าน.
+5. Commit/checkpoint ชุด UI/docs/test ที่ผ่าน gate แล้ว.
 
 Latest local gate: 2026-06-17 `bun run qa:full` ผ่านครบแล้วหลัง phase 6-10 local closure. Gate นี้รวม `qa:repo`, `qa:seed`, `smoke:doctor`, `smoke:local`, `api:smoke`, `e2e:smoke`, และ reseed หลัง browser smoke จึงยืนยันว่า local runtime ใช้งานได้ครบตาม baseline ปัจจุบัน. เป้าหมายหลักปัจจุบันคือ local server ก่อนตาม `docs/LOCAL_SERVER_RUNBOOK.md`; Ngrok ใช้เป็น public preview/staging ชั่วคราวเท่านั้น. สิ่งที่ยังไม่จบเฉพาะเมื่อจะทำ cloud production คือ phase 10 external deployment: backend/frontend HTTPS origins ถาวร, CORS จริง, production/staging database URL จริง, Supabase signed storage verification บน environment นั้น, live smoke บน deployed URL, และ release handoff evidence จริงก่อนถือว่า production-ready.
 

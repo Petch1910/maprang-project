@@ -51,12 +51,12 @@ function statusLabel(status: ReportStatus | '') {
 }
 
 function targetLabel(targetType: ReportTargetType | '') {
-  const targetTypeLabel: Record<ReportTargetType, string> = {
+  const labels: Record<ReportTargetType, string> = {
     CHARACTER: 'ตัวละคร',
     MESSAGE: 'ข้อความ',
     GENERATION_OUTPUT: 'ผลงานสร้าง',
   }
-  return targetType ? targetTypeLabel[targetType] : 'ทุกประเภท'
+  return targetType ? labels[targetType] : 'ทุกประเภท'
 }
 
 function getApiErrorStatus(error: unknown) {
@@ -78,21 +78,20 @@ function isExpectedAdminAuthError(error: unknown) {
 function apiErrorMessage(error: unknown) {
   const status = getApiErrorStatus(error)
   if (status === 401 || status === 403) return 'ต้องบันทึก ADMIN_API_KEY ก่อนเปิดคิวรายงาน'
-  return 'โหลดรายการรายงานไม่ได้'
+  return 'โหลดรายการรายงานไม่สำเร็จ'
 }
 
 function reportTitle(report: ReportSummary) {
   if (report.targetType === 'CHARACTER') return report.character?.name ?? `ตัวละคร ${report.characterId ?? ''}`
   if (report.targetType === 'GENERATION_OUTPUT') {
-    const kindLabel = report.generationOutput?.kind === 'video' ? 'วิดีโอ' : 'รูปภาพ'
-    return `รายงานผลงานสร้าง ${kindLabel}`
+    return report.generationOutput?.kind === 'video' ? 'รายงานวิดีโอที่สร้าง' : 'รายงานรูปภาพที่สร้าง'
   }
   return `รายงานข้อความจาก ${report.message?.role ?? 'ข้อความ'}`
 }
 
 function reportBody(report: ReportSummary) {
   if (report.targetType === 'CHARACTER') {
-    return report.details ?? 'ตัวละครนี้ถูกรายงานให้ผู้ดูแลตรวจสอบ'
+    return report.details ?? 'ตัวละครนี้ถูกแจ้งให้ผู้ดูแลตรวจสอบ'
   }
   if (report.targetType === 'GENERATION_OUTPUT') {
     return report.details ?? `ผลงานสร้างนี้ถูกแจ้งให้ตรวจสอบ สถานะปัจจุบัน: ${report.generationOutput?.visibility ?? 'ไม่ทราบ'}`
@@ -125,6 +124,19 @@ function auditActionLabel(action: AdminAuditLog['action']) {
   return labels[action] ?? action
 }
 
+function actionForReport(report: ReportSummary): ReportAdminAction | null {
+  if (report.targetType === 'CHARACTER') return 'HIDE_CHARACTER'
+  if (report.targetType === 'MESSAGE') return 'ARCHIVE_MESSAGE'
+  if (report.targetType === 'GENERATION_OUTPUT') return 'HIDE_GENERATION_OUTPUT'
+  return null
+}
+
+function actionLabel(action: ReportAdminAction) {
+  if (action === 'HIDE_CHARACTER') return 'ซ่อนตัวละคร'
+  if (action === 'ARCHIVE_MESSAGE') return 'จัดเก็บข้อความ'
+  return 'ซ่อนผลงาน'
+}
+
 export function AdminModerationPage() {
   const [reports, setReports] = useState<ReportSummary[]>([])
   const [status, setStatus] = useState<ReportStatus | ''>('PENDING')
@@ -150,9 +162,11 @@ export function AdminModerationPage() {
     () => reports.filter((report) => report.status === 'RESOLVED' || report.status === 'REJECTED').length,
     [reports],
   )
+
   const visibleReports = useMemo(() => {
-    if (!normalizedSearch) return reports
-    return reports.filter((report) =>
+    const base = canShowQaSeedData() ? reports : reports.filter((report) => !isQaSeedReport(report))
+    if (!normalizedSearch) return base
+    return base.filter((report) =>
       [
         reportTitle(report),
         reportBody(report),
@@ -163,7 +177,6 @@ export function AdminModerationPage() {
         report.characterId,
         report.messageId,
         report.generationOutputId,
-        report.generationOutput?.id,
         report.generationOutput?.kind,
         report.generationOutput?.visibility,
       ]
@@ -182,17 +195,17 @@ export function AdminModerationPage() {
       setNote('บันทึก ADMIN_API_KEY ก่อนเปิดคิวรายงาน')
       return
     }
-
     setIsLoading(true)
     try {
-      const data = await fetchAdminReports({ status, targetType, limit: 80 })
-      const visibleReports = canShowQaSeedData() ? data.reports : data.reports.filter((report) => !isQaSeedReport(report))
-      setReports(visibleReports)
-      const auditData = await fetchAdminAuditLogs(12)
-      setAuditLogs(auditData.logs)
-      setNote(visibleReports.length > 0 ? `โหลดรายงานแล้ว ${visibleReports.length} รายการ` : 'ไม่มีรายงานที่ตรงกับตัวกรองนี้')
+      const [reportsPayload, auditPayload] = await Promise.all([
+        fetchAdminReports({ status, targetType, limit: 80 }),
+        fetchAdminAuditLogs(40),
+      ])
+      setReports(reportsPayload.reports)
+      setAuditLogs(auditPayload.logs)
+      setNote(`โหลดคิวรายงานแล้ว ${reportsPayload.reports.length.toLocaleString()} รายการ`)
     } catch (error) {
-      if (!isExpectedAdminAuthError(error)) logUnexpectedError('โหลดคิวรายงานผู้ดูแลไม่สำเร็จ:', error)
+      if (!isExpectedAdminAuthError(error)) logUnexpectedError('โหลดคิวรายงานไม่สำเร็จ:', error)
       setReports([])
       setAuditLogs([])
       setNote(apiErrorMessage(error))
@@ -201,21 +214,23 @@ export function AdminModerationPage() {
     }
   }, [status, targetType])
 
-  async function saveAdminKey() {
+  function saveAdminKey() {
     const key = adminKeyInput.trim()
     if (!key) {
       clearAdminApiKey()
       setAdminKeyInput('')
+      setReports([])
+      setAuditLogs([])
       setNote('ล้าง ADMIN_API_KEY แล้ว')
       return
     }
     setAdminApiKey(key)
     setAdminKeyInput(key)
-    setNote('บันทึก ADMIN_API_KEY แล้ว กำลังโหลดคิวรายงานใหม่...')
-    await loadReports()
+    setNote('บันทึก ADMIN_API_KEY แล้ว กำลังโหลดคิวรายงาน...')
+    void loadReports()
   }
 
-  async function removeAdminKey() {
+  function removeAdminKey() {
     clearAdminApiKey()
     setAdminKeyInput('')
     setReports([])
@@ -224,115 +239,90 @@ export function AdminModerationPage() {
   }
 
   async function changeStatus(reportId: string, nextStatus: ReportStatus) {
+    if (updatingId) return
     setUpdatingId(reportId)
     try {
-      const data = await updateAdminReportStatus(reportId, nextStatus)
-      setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
-      const auditData = await fetchAdminAuditLogs(12)
-      setAuditLogs(auditData.logs)
-      setNote(`ปรับสถานะรายงานเป็น ${statusLabel(nextStatus)} แล้ว`)
+      const payload = await updateAdminReportStatus(reportId, nextStatus)
+      setReports((items) => items.map((item) => (item.id === reportId ? payload.report : item)))
+      setNote(`เปลี่ยนสถานะเป็น ${statusLabel(nextStatus)} แล้ว`)
+      const auditPayload = await fetchAdminAuditLogs(40)
+      setAuditLogs(auditPayload.logs)
     } catch (error) {
-      logUnexpectedError('ปรับสถานะรายงานไม่สำเร็จ:', error)
-      setNote(error instanceof ApiError && error.status === 403 ? 'ยังไม่ได้เปิดสิทธิ์ผู้ดูแล หรือรหัสผู้ดูแลไม่ถูกต้อง' : 'ปรับสถานะรายงานไม่ได้')
+      logUnexpectedError('เปลี่ยนสถานะรายงานไม่สำเร็จ:', error)
+      setNote('เปลี่ยนสถานะรายงานไม่สำเร็จ')
     } finally {
       setUpdatingId('')
     }
   }
 
-  async function applyAction(reportId: string, action: ReportAdminAction) {
-    setUpdatingId(reportId)
+  async function applyAction(report: ReportSummary) {
+    const action = actionForReport(report)
+    if (!action || updatingId) return
+    setUpdatingId(report.id)
     try {
-      const data = await applyAdminReportAction(reportId, action)
-      setReports((prev) => prev.map((report) => (report.id === reportId ? data.report : report)))
-      const auditData = await fetchAdminAuditLogs(12)
-      setAuditLogs(auditData.logs)
-      const actionNote: Record<ReportAdminAction, string> = {
-        HIDE_CHARACTER: 'ซ่อนตัวละครและปิดรายงานแล้ว',
-        ARCHIVE_MESSAGE: 'จัดเก็บข้อความและปิดรายงานแล้ว',
-        HIDE_GENERATION_OUTPUT: 'ซ่อนผลงานสร้างและปิดรายงานแล้ว',
-      }
-      setNote(actionNote[action])
+      const payload = await applyAdminReportAction(report.id, action)
+      setReports((items) => items.map((item) => (item.id === report.id ? payload.report : item)))
+      setNote(`${actionLabel(action)} แล้ว`)
+      const auditPayload = await fetchAdminAuditLogs(40)
+      setAuditLogs(auditPayload.logs)
     } catch (error) {
-      logUnexpectedError('ทำคำสั่งดูแลรายงานไม่สำเร็จ:', error)
-      setNote(error instanceof ApiError && error.status === 403 ? 'ยังไม่ได้เปิดสิทธิ์ผู้ดูแล หรือรหัสผู้ดูแลไม่ถูกต้อง' : 'ทำคำสั่งดูแลรายงานไม่ได้')
+      logUnexpectedError('จัดการรายงานไม่สำเร็จ:', error)
+      setNote('จัดการรายงานไม่สำเร็จ')
     } finally {
       setUpdatingId('')
     }
   }
 
   useEffect(() => {
-    loadReports()
+    void loadReports()
   }, [loadReports])
 
   return (
-    <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
-      <section className="missai-card rounded-2xl p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-white/42 uppercase">
-              <ShieldCheck size={16} />
-              ดูแลรายงาน
-            </p>
-            <h1 className="m-0 mt-2 text-2xl font-black tracking-normal text-white sm:text-3xl">คิวรายงาน</h1>
-            <p className="m-0 mt-2 max-w-3xl text-sm font-bold leading-6 text-white/58">
-              ตรวจตัวละครและข้อความที่ถูกรายงานจากหน้าเดียว พร้อมเก็บประวัติการทำงานของผู้ดูแล
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3 sm:flex sm:items-center">
-            <div className="rounded-lg border border-amber-300/25 bg-amber-400/12 px-3 py-2 text-center text-sm font-black text-amber-100">
-              รอตรวจ {pendingCount}
-            </div>
-            <div className="rounded-lg border border-sky-300/25 bg-sky-400/12 px-3 py-2 text-center text-sm font-black text-sky-100">
-              ตรวจแล้ว {reviewedCount}
-            </div>
-            <div className="rounded-lg border border-emerald-300/25 bg-emerald-400/12 px-3 py-2 text-center text-sm font-black text-emerald-100">
-              จบแล้ว {completedCount}
-            </div>
-          </div>
+    <main className="missai-shell space-y-5 text-white">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-[#ac4bff] uppercase">
+            <ShieldCheck size={15} />
+            ผู้ดูแล
+          </p>
+          <h1 className="font-display mt-2 text-3xl font-black">คิวรายงาน</h1>
+          <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-white/58">
+            ตรวจรายงานจากตัวละคร ข้อความ และผลงานสร้าง พร้อมบันทึกประวัติคำสั่งผู้ดูแลทุกครั้ง
+          </p>
         </div>
-      </section>
+        <button
+          className="missai-button-secondary"
+          disabled={isLoading}
+          onClick={() => void loadReports()}
+          title={isLoading ? 'กำลังโหลดคิวรายงาน' : 'รีเฟรชคิวรายงาน'}
+          type="button"
+        >
+          <RefreshCw size={16} />
+          รีเฟรช
+        </button>
+      </header>
 
       <section className="missai-card rounded-2xl p-4">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,440px)] lg:items-end">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
           <div>
             <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-              <KeyRound size={17} />
+              <KeyRound size={17} className="text-[#ac4bff]" />
               สิทธิ์ผู้ดูแลสำหรับเครื่องนี้
             </p>
-            <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/55">
-              ใส่ `ADMIN_API_KEY` เพื่อเปิดคิวรายงานและคำสั่งผู้ดูแลบนเบราว์เซอร์นี้
-            </p>
-            <p
-              className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-black ${
-                hasAdminKey
-                  ? 'border border-emerald-300/25 bg-emerald-400/12 text-emerald-100'
-                  : 'border border-amber-300/25 bg-amber-400/12 text-amber-100'
-              }`}
-            >
-              {hasAdminKey ? 'มีคีย์ในเครื่องนี้แล้ว' : 'ยังไม่ได้ตั้งค่า ADMIN_API_KEY'}
-            </p>
+            <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/55">{note}</p>
           </div>
-          <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input
-              className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
+              className="missai-input min-h-11 rounded-xl px-3 text-sm"
               onChange={(event) => setAdminKeyInput(event.target.value)}
               placeholder="วาง ADMIN_API_KEY"
               type="password"
               value={adminKeyInput}
             />
-            <button
-              className="min-h-11 rounded-lg bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
-              onClick={() => void saveAdminKey()}
-              type="button"
-            >
-              บันทึกคีย์
+            <button className="missai-button-secondary bg-white text-slate-950 hover:bg-white/90" onClick={saveAdminKey} type="button">
+              บันทึก
             </button>
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white"
-              onClick={() => void removeAdminKey()}
-              type="button"
-            >
+            <button className="missai-button-secondary" onClick={removeAdminKey} type="button">
               <X size={16} />
               ล้าง
             </button>
@@ -340,254 +330,163 @@ export function AdminModerationPage() {
         </div>
       </section>
 
-      <section className="missai-card rounded-2xl p-4">
-        <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_auto] lg:items-center">
-        <label className="missai-input flex min-h-11 items-center gap-2 px-3 py-0 text-white/42">
-            <Search size={17} />
-            <input
-              className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/35"
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="ค้นหารายงาน เหตุผล ผู้รายงาน หรือรหัส"
-              value={search}
-            />
-          </label>
-          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-            <select
-            className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
-              onChange={(event) => setStatus(event.target.value as ReportStatus | '')}
-              value={status}
-            >
-              {statuses.map((item) => (
-                <option key={item || 'ALL'} value={item}>
-                  {statusLabel(item)}
-                </option>
-              ))}
-            </select>
-            <select
-            className="missai-input min-h-11 min-w-0 rounded-xl px-3 text-sm"
-              onChange={(event) => setTargetType(event.target.value as ReportTargetType | '')}
-              value={targetType}
-            >
-              {targetTypes.map((item) => (
-                <option key={item || 'ALL'} value={item}>
-                  {targetLabel(item)}
-                </option>
-              ))}
-            </select>
-            <button type="button"
-              aria-disabled={isLoading || !hasAdminKey}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/6 px-3 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
-              disabled={isLoading || !hasAdminKey}
-              onClick={loadReports}
-              title={isLoading ? 'กำลังโหลดคิวรายงาน' : hasAdminKey ? 'โหลดคิวรายงานใหม่' : 'บันทึก ADMIN_API_KEY ก่อนรีเฟรช'}
-            >
-              <RefreshCw size={16} />
-              รีเฟรช
-            </button>
-          </div>
+      <section className="grid gap-3 sm:grid-cols-3">
+        <div className="missai-card rounded-2xl p-4">
+          <p className="m-0 text-sm font-black text-white/48">รอตรวจ</p>
+          <p className="font-display mt-2 text-3xl font-black text-amber-200">{pendingCount.toLocaleString()}</p>
         </div>
-        {note && (
-        <div className="missai-empty mt-3 flex items-center gap-2 p-3 text-sm text-white/62">
-            <Filter size={16} />
-            <p className="m-0">{note}</p>
-          </div>
-        )}
+        <div className="missai-card rounded-2xl p-4">
+          <p className="m-0 text-sm font-black text-white/48">ตรวจแล้ว</p>
+          <p className="font-display mt-2 text-3xl font-black text-sky-200">{reviewedCount.toLocaleString()}</p>
+        </div>
+        <div className="missai-card rounded-2xl p-4">
+          <p className="m-0 text-sm font-black text-white/48">ปิดเคส</p>
+          <p className="font-display mt-2 text-3xl font-black text-emerald-200">{completedCount.toLocaleString()}</p>
+        </div>
       </section>
 
-      <section className="space-y-3">
-        {isLoading ? (
-        <div className="missai-card rounded-2xl p-6 text-sm font-bold text-white/55">
-            กำลังโหลดรายงาน...
-          </div>
-        ) : visibleReports.length === 0 ? (
-        <div className="missai-card grid gap-4 rounded-2xl p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-            <div>
-              <p className="m-0 text-lg font-black text-white">
-                {reports.length === 0 ? 'ยังไม่มีรายการที่ต้องดูแล' : 'ไม่พบรายงานที่ตรงกับคำค้นหา'}
-              </p>
-              <p className="m-0 mt-2 max-w-2xl text-sm font-bold leading-6 text-white/55">
-                เมื่อมีรายงานจากห้องแชทหรือหน้าโปรไฟล์ตัวละคร ระบบจะส่งรายการมาเข้าคิวนี้ทันที
-              </p>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-              <Link
-                className="inline-flex min-h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-black text-slate-950 hover:bg-white/90"
-                to="/chat"
-              >
-                ไปสร้างรายงานจากแชท
-              </Link>
-              <Link
-                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-4 text-sm font-black text-white/76 hover:bg-white/10 hover:text-white"
-                to="/"
-              >
-                ไปหน้าเลือกตัวละคร
-              </Link>
-            </div>
-          </div>
-        ) : (
-          visibleReports.map((report) => {
-            const targetPath = reportTargetPath(report)
-            const isUpdatingReport = updatingId === report.id
-            const isResolvedReport = report.status === 'RESOLVED'
-            const isMessageArchived = Boolean(report.message?.deletedAt)
-            const hideCharacterReason = isUpdatingReport
-              ? 'กำลังซ่อนตัวละครรายงานนี้'
-              : isResolvedReport
-                ? 'รายงานนี้จัดการแล้ว'
-                : ''
-            const archiveMessageReason = isUpdatingReport
-              ? 'กำลังจัดเก็บข้อความรายงานนี้'
-              : isResolvedReport
-                ? 'รายงานนี้จัดการแล้ว'
-                : isMessageArchived
-                  ? 'ข้อความนี้ถูกจัดเก็บแล้ว'
-                  : ''
-            const hideGenerationOutputReason = isUpdatingReport
-              ? 'กำลังซ่อนผลงานสร้างรายงานนี้'
-              : isResolvedReport
-                ? 'รายงานนี้จัดการแล้ว'
-                : report.generationOutput?.visibility === 'private'
-                  ? 'ผลงานสร้างนี้ถูกซ่อนแล้ว'
-                  : ''
-            const statusActionReason = isUpdatingReport ? 'กำลังอัปเดตรายงานนี้' : ''
+      <section className="missai-card grid gap-3 rounded-2xl p-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+        <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-white/45">
+          <Search size={17} />
+          <input
+            className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none placeholder:text-white/35"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="ค้นหารายงาน ผู้แจ้ง เหตุผล หรือเนื้อหา"
+            value={search}
+          />
+        </label>
+        <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-white/60">
+          <Filter size={16} />
+          <select className="bg-transparent text-sm font-bold text-white outline-none" onChange={(event) => setStatus(event.target.value as ReportStatus | '')} value={status}>
+            {statuses.map((item) => (
+              <option className="bg-slate-950 text-white" key={item || 'all-status'} value={item}>
+                {statusLabel(item)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#080a1a]/60 px-3 text-white/60">
+          <Filter size={16} />
+          <select className="bg-transparent text-sm font-bold text-white outline-none" onChange={(event) => setTargetType(event.target.value as ReportTargetType | '')} value={targetType}>
+            {targetTypes.map((item) => (
+              <option className="bg-slate-950 text-white" key={item || 'all-type'} value={item}>
+                {targetLabel(item)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </section>
+
+      {!hasAdminKey ? (
+        <section className="missai-card rounded-2xl border-amber-500/20 bg-amber-500/10 p-5 text-amber-100">
+          <p className="m-0 flex items-center gap-2 text-sm font-black">
+            <AlertTriangle size={17} />
+            ต้องมี ADMIN_API_KEY ก่อนเปิดคิวรายงาน
+          </p>
+          <p className="m-0 mt-2 text-sm font-bold leading-6 text-amber-100/75">
+            ปุ่มและคิวรายงานถูกล็อกไว้เพื่อป้องกันการเรียกคำสั่งผู้ดูแลโดยไม่มีสิทธิ์
+          </p>
+        </section>
+      ) : isLoading ? (
+        <div className="grid gap-3">
+          {[1, 2, 3].map((item) => (
+            <div className="h-36 animate-pulse rounded-2xl border border-white/10 bg-white/5" key={item} />
+          ))}
+        </div>
+      ) : visibleReports.length === 0 ? (
+        <section className="missai-card rounded-2xl p-5 text-white/58">
+          <p className="m-0 text-sm font-bold">ไม่พบรายงานในเงื่อนไขนี้</p>
+        </section>
+      ) : (
+        <section className="grid gap-3">
+          {visibleReports.map((report) => {
+            const path = reportTargetPath(report)
+            const action = actionForReport(report)
+            const isUpdating = updatingId === report.id
             return (
-          <article className="missai-card rounded-2xl p-4" key={report.id}>
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="min-w-0 space-y-3">
+              <article className="missai-card rounded-2xl p-4" key={report.id}>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full border px-2.5 py-1 text-xs font-black ${statusStyle(report.status)}`}>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-black ${statusStyle(report.status)}`}>
                         {statusLabel(report.status)}
                       </span>
-                    <span className="missai-badge text-white/65">
-                        {targetLabel(report.targetType)}
-                      </span>
-                      <span className="text-xs font-bold text-white/42">{formatDate(report.createdAt)}</span>
+                      <span className="missai-badge text-white/65">{targetLabel(report.targetType)}</span>
+                      <span className="text-xs font-bold text-white/38">{formatDate(report.createdAt)}</span>
                     </div>
-                    <div>
-                      <h2 className="m-0 text-lg font-black tracking-normal text-white">{reportTitle(report)}</h2>
-                      <p className="m-0 mt-1 text-sm font-bold text-white/50">เหตุผล: {report.reason}</p>
-                    </div>
-                  <p className="missai-empty m-0 max-h-36 overflow-auto whitespace-pre-wrap p-3 text-sm leading-6 text-white/65">
-                      {reportBody(report)}
+                    <h2 className="mt-3 text-lg font-black text-white">{reportTitle(report)}</h2>
+                    <p className="mt-1 line-clamp-3 text-sm font-semibold leading-6 text-white/58">{reportBody(report)}</p>
+                    <p className="mt-2 text-xs font-bold text-white/40">
+                      เหตุผล: {report.reason} / ผู้แจ้ง: {report.reporter?.username ?? report.reporter?.email ?? 'ไม่ระบุ'}
                     </p>
-                    <div className="flex flex-wrap gap-2 text-xs font-bold text-white/42">
-                      {report.reporter && (
-                        <span>ผู้รายงาน: {report.reporter.username ?? report.reporter.email ?? report.reporter.id}</span>
-                      )}
-                      <span>รหัสรายงาน: {report.id}</span>
-                    </div>
                   </div>
-
-                  <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:w-[240px]">
-                    {targetPath && (
-                      <Link
-                        className="inline-flex min-h-10 items-center justify-center rounded-lg border border-white/10 bg-white/6 px-3 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white sm:col-span-2"
-                        to={targetPath}
-                      >
-                        เปิดต้นทาง
+                  <div className="flex flex-wrap gap-2 lg:justify-end">
+                    {path ? (
+                      <Link className="missai-button-secondary min-h-10 px-3 text-xs" to={path}>
+                        เปิดเป้าหมาย
                       </Link>
-                    )}
-                    {report.targetType === 'CHARACTER' && (
-                      <button
-                        aria-disabled={Boolean(hideCharacterReason)}
-                        className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60 sm:col-span-2"
-                        disabled={Boolean(hideCharacterReason)}
-                        onClick={() => applyAction(report.id, 'HIDE_CHARACTER')}
-                        title={hideCharacterReason || 'ซ่อนตัวละครและปิดรายงานนี้'}
-                        type="button"
-                      >
-                        ซ่อนตัวละคร
-                      </button>
-                    )}
-                    {report.targetType === 'MESSAGE' && (
-                      <button
-                        aria-disabled={Boolean(archiveMessageReason)}
-                        className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60 sm:col-span-2"
-                        disabled={Boolean(archiveMessageReason)}
-                        onClick={() => applyAction(report.id, 'ARCHIVE_MESSAGE')}
-                        title={archiveMessageReason || 'จัดเก็บข้อความและปิดรายงานนี้'}
-                        type="button"
-                      >
-                        จัดเก็บข้อความ
-                      </button>
-                    )}
-                    {report.targetType === 'GENERATION_OUTPUT' && (
-                      <button
-                        aria-disabled={Boolean(hideGenerationOutputReason)}
-                        className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-slate-950 transition hover:bg-white/90 disabled:opacity-60 sm:col-span-2"
-                        disabled={Boolean(hideGenerationOutputReason)}
-                        onClick={() => applyAction(report.id, 'HIDE_GENERATION_OUTPUT')}
-                        title={hideGenerationOutputReason || 'ซ่อนผลงานสร้างและปิดรายงานนี้'}
-                        type="button"
-                      >
-                        ซ่อนผลงานสร้าง
-                      </button>
+                    ) : (
+                      <span className="missai-button-secondary min-h-10 px-3 text-xs opacity-50" title="รายงานนี้ไม่มีเป้าหมายที่เปิดได้">
+                        ไม่มีลิงก์เป้าหมาย
+                      </span>
                     )}
                     <button
-                      aria-disabled={Boolean(statusActionReason)}
-                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-sky-500 px-3 text-sm font-black text-sky-950 transition hover:bg-sky-400 disabled:opacity-60"
-                      disabled={Boolean(statusActionReason)}
-                      onClick={() => changeStatus(report.id, 'REVIEWED')}
-                      title={statusActionReason || 'ทำเครื่องหมายว่าตรวจแล้ว'}
+                      className="missai-button-secondary min-h-10 px-3 text-xs"
+                      disabled={isUpdating}
+                      onClick={() => void changeStatus(report.id, 'REVIEWED')}
+                      title={isUpdating ? 'กำลังอัปเดตรายงานนี้' : 'เปลี่ยนเป็นตรวจแล้ว'}
                       type="button"
                     >
-                      <AlertTriangle size={16} />
                       ตรวจแล้ว
                     </button>
                     <button
-                      aria-disabled={Boolean(statusActionReason)}
-                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 text-sm font-black text-emerald-950 transition hover:bg-emerald-400 disabled:opacity-60"
-                      disabled={Boolean(statusActionReason)}
-                      onClick={() => changeStatus(report.id, 'RESOLVED')}
-                      title={statusActionReason || 'ทำเครื่องหมายว่าจัดการแล้ว'}
+                      className="missai-button-secondary min-h-10 px-3 text-xs"
+                      disabled={isUpdating}
+                      onClick={() => void changeStatus(report.id, 'RESOLVED')}
+                      title={isUpdating ? 'กำลังอัปเดตรายงานนี้' : 'เปลี่ยนเป็นปิดเคส'}
                       type="button"
                     >
-                      <CheckCircle2 size={16} />
-                      จัดการแล้ว
+                      ปิดเคส
                     </button>
-                    <button
-                      aria-disabled={Boolean(statusActionReason)}
-                      className="min-h-10 rounded-lg border border-white/10 bg-white/6 px-3 text-sm font-black text-white/76 transition hover:bg-white/10 hover:text-white disabled:opacity-60 sm:col-span-2"
-                      disabled={Boolean(statusActionReason)}
-                      onClick={() => changeStatus(report.id, 'REJECTED')}
-                      title={statusActionReason || 'ปฏิเสธรายงานนี้'}
-                      type="button"
-                    >
-                      ปฏิเสธรายงาน
+                    <button className="missai-button-danger min-h-10 px-3 text-xs" disabled={isUpdating || !action} onClick={() => void applyAction(report)} title={action ? actionLabel(action) : 'รายงานนี้ไม่มีคำสั่งที่รองรับ'} type="button">
+                      {action ? actionLabel(action) : 'ไม่มีคำสั่ง'}
                     </button>
                   </div>
                 </div>
               </article>
             )
-          })
-        )}
-      </section>
+          })}
+        </section>
+      )}
 
-      <section className="missai-card rounded-2xl">
+      <section className="missai-card overflow-hidden rounded-2xl">
         <div className="border-b border-white/10 p-4">
-          <p className="m-0 text-sm font-black text-white">ประวัติผู้ดูแลล่าสุด</p>
-          <p className="m-0 mt-1 text-xs font-bold text-white/45">บันทึกคำสั่งดูแลรายงานและโทเคนที่ระบบเก็บไว้</p>
+          <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
+            <CheckCircle2 size={17} className="text-[#ac4bff]" />
+            ประวัติคำสั่งผู้ดูแล
+          </p>
+          <p className="m-0 mt-1 text-xs font-bold text-white/45">แสดงรายการล่าสุดจากบันทึกตรวจสอบ</p>
         </div>
-        {auditLogs.length === 0 ? (
-          <div className="p-4 text-sm font-bold text-white/55">ยังไม่มีประวัติผู้ดูแล</div>
+        {!hasAdminKey ? (
+          <div className="p-5 text-sm font-bold text-white/55">บันทึก ADMIN_API_KEY ก่อนดูบันทึกตรวจสอบ</div>
+        ) : auditLogs.length === 0 ? (
+          <div className="p-5 text-sm font-bold text-white/55">ยังไม่มีรายการบันทึกตรวจสอบ</div>
         ) : (
           <div className="divide-y divide-white/10">
             {auditLogs.map((log) => (
               <article className="grid gap-2 p-4 sm:grid-cols-[1fr_auto] sm:items-center" key={log.id}>
                 <div className="min-w-0">
-                  <p className="m-0 truncate text-sm font-black text-white">
-                    {auditActionLabel(log.action)} / {log.targetType}
-                  </p>
+                  <p className="m-0 truncate text-sm font-black text-white">{auditActionLabel(log.action)}</p>
                   <p className="m-0 mt-1 truncate text-xs font-bold text-white/45">
-                    {log.targetId} / {log.actorUser?.username ?? log.actorUser?.email ?? log.actorUserId ?? 'รหัสผู้ดูแล'}
+                    {log.targetType} / {log.targetId}
                   </p>
                 </div>
-                <span className="text-xs font-bold text-white/45">{formatDate(log.createdAt)}</span>
+                <span className="text-xs font-bold text-white/38">{formatDate(log.createdAt)}</span>
               </article>
             ))}
           </div>
         )}
       </section>
-    </div>
+    </main>
   )
 }

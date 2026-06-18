@@ -576,8 +576,21 @@ export function WorkspacePage() {
           }
         },
       )
-      if (completedChatId) await syncOpenChatMessages(completedChatId)
-      await loadChatHistory()
+      setIsLoading(false)
+      try {
+        setIsLoading(false)
+        try {
+          if (completedChatId) await syncOpenChatMessages(completedChatId)
+          await loadChatHistory()
+        } catch (syncError) {
+          logUnexpectedWorkspaceError('ซิงก์ประวัติแชทหลังตอบกลับสำรองไม่สำเร็จ:', syncError)
+          setConnectionNote('ตอบกลับสำเร็จแล้ว แต่ซิงก์ประวัติแชทไม่ครบ กดรีเฟรชรายการแชทได้')
+        }
+      } catch (syncError) {
+        logUnexpectedWorkspaceError('ซิงก์ประวัติแชทหลังตอบกลับไม่สำเร็จ:', syncError)
+        setConnectionNote('ตอบกลับสำเร็จแล้ว แต่ซิงก์ประวัติแชทไม่ครบ กดรีเฟรชรายการแชทได้')
+      }
+      return
     } catch (error) {
       if (!isExpectedUserApiError(error)) logUnexpectedWorkspaceError('ส่งแชทไม่สำเร็จ:', error)
       const streamMessage = apiErrorMessage(error, 'ทำคำสั่งนี้ไม่สำเร็จ กรุณาลองใหม่')

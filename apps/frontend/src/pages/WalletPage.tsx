@@ -14,6 +14,8 @@ import { safeGetStorageItem } from '../lib/safeStorage'
 import { useAppDispatch } from '../store/hooks'
 import { setTokenBalance } from '../store/slices/walletSlice'
 
+type WalletTransaction = NonNullable<UsageSummary['wallet']>['transactions'][number]
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('th-TH', {
     dateStyle: 'medium',
@@ -37,23 +39,23 @@ function formatShortDate(value: string) {
 function errorMessage(error: unknown) {
   if (error instanceof ApiError && error.status === 404) return 'ไม่พบข้อมูลการใช้งานของบัญชีนี้'
   if (error instanceof ApiError && error.status === 401) return 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อดูข้อมูลโทเคน'
-  return 'โหลดข้อมูลโทเคนไม่ได้'
+  return 'โหลดข้อมูลกระเป๋าโทเคนไม่สำเร็จ'
 }
 
-function transactionLabel(type: NonNullable<UsageSummary['wallet']>['transactions'][number]['type']) {
-  const labels = {
+function transactionLabel(type: WalletTransaction['type']) {
+  const labels: Record<WalletTransaction['type'], string> = {
     CHAT_USAGE: 'ใช้แชท AI',
     IMAGE_GENERATION: 'สร้างรูป AI',
     ADMIN_ADJUSTMENT: 'ผู้ดูแลปรับยอด',
     PROMOTION: 'โปรโมชัน',
     PURCHASE: 'เติมโทเคน',
     REFUND: 'คืนโทเคน',
-    DAILY_LOGIN: 'เข้าสู่ระบบประจำวัน',
+    DAILY_LOGIN: 'รางวัลเข้าใช้งานประจำวัน',
     ACHIEVEMENT: 'รางวัลความสำเร็จ',
     PENALTY: 'หักโทเคน',
     EXPIRY: 'โทเคนหมดอายุ',
-  } as const
-  return labels[type as keyof typeof labels] || type
+  }
+  return labels[type] || type
 }
 
 export function WalletPage() {
@@ -78,7 +80,7 @@ export function WalletPage() {
   }, [adjustAmount])
   const hasAdminKey = adminKeyInput.trim().length > 0
   const adjustTokenDisabledReason = !summary
-    ? 'โหลดข้อมูลกระเป๋าโทเคนก่อนปรับยอด'
+    ? 'โหลดข้อมูลกระเป๋าก่อนปรับยอด'
     : isAdjusting
       ? 'กำลังปรับยอดโทเคน'
       : normalizedAdjustAmount <= 0
@@ -86,6 +88,7 @@ export function WalletPage() {
         : !hasAdminKey
           ? 'บันทึก ADMIN_API_KEY ก่อนปรับโทเคน'
           : ''
+
   const balanceLabel = summary ? `${summary.user.tokenBalance.toLocaleString()} โทเคน` : isLoading ? 'กำลังโหลด...' : '0 โทเคน'
   const totalTokensLabel = summary ? summary.usage.totalTokens.toLocaleString() : isLoading ? '...' : '0'
   const requestCountLabel = summary ? summary.usage.requestCount.toLocaleString() : isLoading ? '...' : '0'
@@ -114,7 +117,7 @@ export function WalletPage() {
   }, [dispatch])
 
   async function adjustTokens(amount: number) {
-    if (!summary || isAdjusting) return
+    if (!summary || isAdjusting || adjustTokenDisabledReason) return
     setIsAdjusting(true)
     try {
       const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'ผู้ดูแลเพิ่มโทเคน' : 'ผู้ดูแลหักโทเคน')
@@ -140,7 +143,7 @@ export function WalletPage() {
           ? 'ADMIN_API_KEY ไม่ถูกต้องหรือยังไม่ได้บันทึกในเบราว์เซอร์นี้'
           : error instanceof ApiError && error.status === 403
             ? 'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลสำหรับปรับโทเคน'
-            : 'ปรับโทเคนไม่ได้',
+            : 'ปรับโทเคนไม่สำเร็จ',
       )
     } finally {
       setIsAdjusting(false)
@@ -171,7 +174,7 @@ export function WalletPage() {
   }, [loadWallet])
 
   return (
-    <div className="space-y-5 p-4 text-white sm:p-6 lg:p-8">
+    <main className="missai-shell space-y-5 text-white">
       <section className="missai-card overflow-hidden rounded-2xl">
         <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_260px] lg:p-6">
           <div className="min-w-0">
@@ -183,10 +186,10 @@ export function WalletPage() {
               {balanceLabel}
             </h1>
             <p className="m-0 mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#9ca3af]">
-              ดูยอดโทเคน การใช้งานล่าสุด และความพร้อมสำหรับฉากยาวๆ
+              ดูยอดโทเคน การใช้งานล่าสุด ต้นทุนตามโมเดล และประเมินจำนวนรอบแชทที่ยังใช้ได้
             </p>
             {note && (
-          <p className="missai-empty m-0 mt-4 border-[#ac4bff]/20 bg-[#ac4bff]/10 p-3 text-sm text-[#d9b3ff]" data-testid="wallet-note">
+              <p className="missai-empty m-0 mt-4 border-[#ac4bff]/20 bg-[#ac4bff]/10 p-3 text-sm text-[#d9b3ff]" data-testid="wallet-note">
                 {note}
               </p>
             )}
@@ -195,7 +198,7 @@ export function WalletPage() {
           <div className="grid gap-2">
             <button
               aria-disabled={isLoading}
-              className="missai-button-primary min-h-11 rounded-xl px-4 text-sm disabled:opacity-50"
+              className="missai-button-primary disabled:opacity-50"
               data-testid="wallet-refresh"
               disabled={isLoading}
               onClick={loadWallet}
@@ -205,11 +208,8 @@ export function WalletPage() {
               <RefreshCw size={16} />
               รีเฟรช
             </button>
-            <Link
-              className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
-              to="/profile"
-            >
-              แก้ตัวตนผู้เล่น
+            <Link className="missai-button-secondary" to="/profile">
+              แก้โปรไฟล์ผู้เล่น
             </Link>
           </div>
         </div>
@@ -241,18 +241,13 @@ export function WalletPage() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div
-          className="missai-card rounded-2xl p-5"
-          data-testid="wallet-cost-by-model"
-        >
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-                <BarChart3 size={17} className="text-[#ac4bff]" />
-                ต้นทุนแยกตามโมเดล
-              </p>
-              <p className="m-0 mt-1 text-xs font-bold text-white/45">ใช้ดูว่าโมเดลไหนกินโทเคนและเงินมากที่สุด</p>
-            </div>
+        <div className="missai-card rounded-2xl p-5" data-testid="wallet-cost-by-model">
+          <div className="mb-4">
+            <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
+              <BarChart3 size={17} className="text-[#ac4bff]" />
+              ต้นทุนแยกตามโมเดล
+            </p>
+            <p className="m-0 mt-1 text-xs font-bold text-white/45">ดูว่าโมเดลไหนใช้โทเคนและต้นทุนมากที่สุด</p>
           </div>
 
           {isLoading ? (
@@ -286,15 +281,12 @@ export function WalletPage() {
           )}
         </div>
 
-        <div
-          className="missai-card rounded-2xl p-5"
-          data-testid="wallet-usage-trend"
-        >
+        <div className="missai-card rounded-2xl p-5" data-testid="wallet-usage-trend">
           <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
             <TrendingDown size={17} className="text-[#ac4bff]" />
             การใช้ 7 วันล่าสุด
           </p>
-          <p className="m-0 mt-1 text-xs font-bold text-white/45">ดูจังหวะใช้โทเคนเพื่อประเมินงบและโปรโมชั่น</p>
+          <p className="m-0 mt-1 text-xs font-bold text-white/45">ใช้ดูจังหวะการกินโทเคนเพื่อประเมินงบและโปรโมชัน</p>
 
           {isLoading ? (
             <div className="py-5 text-sm font-bold text-white/55">กำลังโหลดกราฟการใช้งาน...</div>
@@ -327,7 +319,7 @@ export function WalletPage() {
               สิทธิ์ผู้ดูแลสำหรับเครื่องนี้
             </p>
             <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/55">
-              ใช้เฉพาะเครื่อง dev/admin เพื่อเรียก endpoint ผู้ดูแล เช่น เพิ่มหรือหักโทเคน คีย์จะถูกเก็บใน localStorage ของเบราว์เซอร์นี้
+              ใช้เฉพาะ local/dev เพื่อเรียก endpoint ผู้ดูแล เช่น เพิ่มหรือหักโทเคน คีย์เก็บใน localStorage ของเบราว์เซอร์นี้
             </p>
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
@@ -339,20 +331,10 @@ export function WalletPage() {
               type="password"
               value={adminKeyInput}
             />
-            <button
-              className="missai-button-secondary min-h-11 rounded-xl bg-white px-4 text-sm text-slate-950 hover:bg-white/90"
-              data-testid="wallet-admin-key-save"
-              onClick={saveAdminKey}
-              type="button"
-            >
+            <button className="missai-button-secondary bg-white text-slate-950 hover:bg-white/90" data-testid="wallet-admin-key-save" onClick={saveAdminKey} type="button">
               บันทึกคีย์
             </button>
-            <button
-              className="missai-button-secondary min-h-11 rounded-xl px-4 text-sm"
-              data-testid="wallet-admin-key-clear"
-              onClick={removeAdminKey}
-              type="button"
-            >
+            <button className="missai-button-secondary" data-testid="wallet-admin-key-clear" onClick={removeAdminKey} type="button">
               <X size={16} />
               ล้าง
             </button>
@@ -378,7 +360,7 @@ export function WalletPage() {
             />
             <button
               aria-disabled={Boolean(adjustTokenDisabledReason)}
-              className="missai-button-primary min-h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 text-sm disabled:opacity-60"
+              className="missai-button-primary bg-gradient-to-r from-emerald-500 to-teal-600 disabled:opacity-60"
               data-testid="wallet-adjust-add"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(normalizedAdjustAmount)}
@@ -389,7 +371,7 @@ export function WalletPage() {
             </button>
             <button
               aria-disabled={Boolean(adjustTokenDisabledReason)}
-              className="missai-button-danger min-h-11 rounded-xl border border-rose-300/20 bg-rose-500/10 px-4 text-sm text-rose-300 hover:bg-rose-500/20 disabled:opacity-60"
+              className="missai-button-danger border border-rose-300/20 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 disabled:opacity-60"
               data-testid="wallet-adjust-debit"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(-normalizedAdjustAmount)}
@@ -399,25 +381,22 @@ export function WalletPage() {
               หัก
             </button>
           </div>
-          {!hasAdminKey && (
-            <p className="missai-empty m-0 mt-3 border-yellow-500/20 bg-yellow-500/10 p-3 text-sm text-yellow-400">
-              ใส่และบันทึก ADMIN_API_KEY ก่อน จึงจะใช้ปุ่มเพิ่ม/หักโทเคนได้
-            </p>
-          )}
         </div>
+        {!hasAdminKey && (
+          <p className="missai-empty m-0 mt-3 border-yellow-500/20 bg-yellow-500/10 p-3 text-sm text-yellow-300">
+            ใส่และบันทึก ADMIN_API_KEY ก่อน จึงจะใช้ปุ่มเพิ่ม/หักโทเคนได้
+          </p>
+        )}
       </section>
 
-      <section className="missai-card rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
-          <div>
-            <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-              <ReceiptText size={17} className="text-[#ac4bff]" />
-              ประวัติธุรกรรมโทเคน
-            </p>
-            <p className="m-0 mt-1 text-xs font-bold text-white/45">รายการเพิ่ม/หักยอดที่ตรวจสอบกระเป๋าโทเคนย้อนหลังได้</p>
-          </div>
+      <section className="missai-card overflow-hidden rounded-2xl">
+        <div className="border-b border-white/10 p-4">
+          <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
+            <ReceiptText size={17} className="text-[#ac4bff]" />
+            ประวัติธุรกรรมโทเคน
+          </p>
+          <p className="m-0 mt-1 text-xs font-bold text-white/45">รายการเพิ่ม/หักยอดที่ตรวจสอบย้อนหลังได้</p>
         </div>
-
         {isLoading ? (
           <div className="p-5 text-sm font-bold text-white/55">กำลังโหลดธุรกรรม...</div>
         ) : !summary || !summary.wallet?.transactions.length ? (
@@ -448,17 +427,14 @@ export function WalletPage() {
         )}
       </section>
 
-      <section className="missai-card rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 p-4">
-          <div>
-            <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
-              <ReceiptText size={17} className="text-[#ac4bff]" />
-              การใช้งานล่าสุด
-            </p>
-            <p className="m-0 mt-1 text-xs font-bold text-white/45">รายการใช้ AI ล่าสุดที่ระบบบันทึกไว้</p>
-          </div>
+      <section className="missai-card overflow-hidden rounded-2xl">
+        <div className="border-b border-white/10 p-4">
+          <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
+            <ReceiptText size={17} className="text-[#ac4bff]" />
+            การใช้งานล่าสุด
+          </p>
+          <p className="m-0 mt-1 text-xs font-bold text-white/45">รายการใช้ AI ล่าสุดที่ระบบบันทึกไว้</p>
         </div>
-
         {isLoading ? (
           <div className="p-5 text-sm font-bold text-white/55">กำลังโหลดการใช้งาน...</div>
         ) : !summary || summary.usage.recent.length === 0 ? (
@@ -476,22 +452,13 @@ export function WalletPage() {
                     <TrendingDown size={14} />
                     {item.tokens.toLocaleString()} โทเคน
                   </span>
-                  <span className="missai-badge text-white/65">
-                    {formatCost(item.cost)}
-                  </span>
+                  <span className="missai-badge text-white/65">{formatCost(item.cost)}</span>
                 </div>
               </article>
             ))}
           </div>
         )}
       </section>
-
-      <section className="missai-card rounded-2xl border-amber-500/20 bg-amber-500/10 p-4 text-sm leading-6 text-amber-300">
-        <p className="m-0 font-black">ระบบกันใช้โทเคนซ้ำ</p>
-        <p className="m-0 mt-1 font-bold text-amber-300/78">
-          ระหว่าง AI กำลังตอบ ระบบจะปิดการส่งซ้ำเพื่อลดการเรียกใช้งานซ้ำ โทเคนในระบบมีไว้เพื่อการใช้งานจำลอง โดยมีระบบโปรโมชัน รางวัล และการปรับยอดโดยผู้ดูแลระบบเป็นหลัก
-        </p>
-      </section>
-    </div>
+    </main>
   )
 }

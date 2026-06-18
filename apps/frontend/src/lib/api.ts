@@ -120,12 +120,12 @@ export function normalizeCharacterMedia<T extends Character>(character: T): T {
 }
 
 export function normalizeChatSummaryMedia<T extends ChatSummary>(chat: T): T {
-  return chat.character
-    ? {
-        ...chat,
-        character: normalizeCharacterMedia(chat.character),
-      }
-    : chat
+  const character = chat.character ? normalizeCharacterMedia(chat.character) : undefined
+  return {
+    ...chat,
+    characterAvatarUrl: normalizeBackendMediaUrl(chat.characterAvatarUrl ?? character?.avatarUrl),
+    ...(character ? { character } : {}),
+  }
 }
 
 export function normalizeSavedChatMedia<T extends SavedChat>(chat: T): T {
@@ -247,6 +247,7 @@ export type ChatSummary = {
   title: string
   characterId: string
   characterName: string
+  characterAvatarUrl?: string | null
   character?: Character
   lastMessageAt: string
   createdAt?: string
@@ -1466,6 +1467,7 @@ export async function streamChatMessage(
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
+  let terminalEventReceived = false
 
   const emitEvent = (rawEvent: string) => {
     const line = rawEvent
@@ -1473,7 +1475,9 @@ export async function streamChatMessage(
       .find((item) => item.startsWith('data: '))
 
     if (!line) return
-    onEvent(parseChatStreamEvent(line.slice(6)))
+    const event = parseChatStreamEvent(line.slice(6))
+    onEvent(event)
+    if (event.type === 'done' || event.type === 'error') terminalEventReceived = true
   }
 
   try {
@@ -1487,13 +1491,22 @@ export async function streamChatMessage(
       buffer = events.pop() ?? ''
 
       for (const rawEvent of events) emitEvent(rawEvent)
+      if (terminalEventReceived) break
     }
 
-    buffer += decoder.decode()
-    buffer = buffer.replace(/\r\n/g, '\n')
-    for (const rawEvent of buffer.split('\n\n').filter((event) => event.trim())) emitEvent(rawEvent)
+    if (!terminalEventReceived) {
+      buffer += decoder.decode()
+      buffer = buffer.replace(/\r\n/g, '\n')
+      for (const rawEvent of buffer.split('\n\n').filter((event) => event.trim())) {
+        emitEvent(rawEvent)
+        if (terminalEventReceived) break
+      }
+    }
   } catch (error) {
     if (error instanceof ApiError) throw error
     throw malformedChatStreamError()
+  } finally {
+    if (terminalEventReceived) await reader.cancel().catch(() => undefined)
+    reader.releaseLock()
   }
 }

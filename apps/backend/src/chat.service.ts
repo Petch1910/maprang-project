@@ -294,7 +294,7 @@ export function localChatProviderEnabled(env: EnvLike = process.env) {
 }
 
 export function preferLocalChatProvider(env: EnvLike = process.env) {
-  return localChatProviderEnabled(env) && (env.CHAT_PROVIDER === 'local' || !env.OPENROUTER_API_KEY)
+  return localChatProviderEnabled(env) && (env.LOCAL_CHAT_PROVIDER === '1' || env.CHAT_PROVIDER === 'local' || !env.OPENROUTER_API_KEY)
 }
 
 function localChatModelName(env: EnvLike = process.env) {
@@ -1528,6 +1528,7 @@ export async function listChats(userId = defaultUserId, options: { archived?: bo
     title: chat.title || 'New chat',
     characterId: chat.characterId,
     characterName: chat.character.name,
+    characterAvatarUrl: chat.character.avatarUrl,
     lastMessageAt: chat.lastMessageAt,
     createdAt: chat.createdAt,
     preview: chat.messages[0]?.content ?? '',
