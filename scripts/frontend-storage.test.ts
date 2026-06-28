@@ -543,7 +543,7 @@ describe('frontend storage helpers', () => {
         tokenBalance: 100,
         creditCost: 600,
       }),
-    ).toBe('โทเคนไม่พอ ต้องใช้ 600 โทเคน')
+    ).toBe('เครดิตไม่พอ ต้องใช้ 600 เครดิต')
     expect(
       getAiCreatorGenerateBlockReason({
         mode: 'image',

@@ -1,6 +1,6 @@
 # Local Browser QA Observations
 
-Last updated: 2026-06-18
+Last updated: 2026-06-28
 
 เป้าหมายรอบนี้คือกดใช้งานจริงบน local server หลัง MissAI account/admin rewrite และตรวจว่าปุ่มหลักไม่ตันโดยไม่มีเหตุผล
 
@@ -15,7 +15,16 @@ Last updated: 2026-06-18
 
 | Route | Result | Evidence |
 | --- | --- | --- |
-| `/wallet` | pass | Refresh works. Admin key save/clear works. Token adjustment buttons return to disabled after clearing admin key. |
+| `/wallet` | pass 2026-06-28 | Credit Usage page shows credit balance, admin credit adjustment, and credit ledger copy. No coin/top-up/payment wording was found in the page text. |
+| `/ai-creator` | pass 2026-06-28 | AI Creator shows credit cost, template controls, disabled Generate reason when prompt/input is missing, My Library/Public Gallery sections, and no coin/top-up/payment wording. |
+| `/profile` | pass 2026-06-28 | Profile shows persona, content mode, BYOK/API section, credit usage, and no coin/top-up/payment wording. |
+| `/create` | pass 2026-06-28 | Creator Studio shows AI image/content draft controls, image URL section, relationship presets, readiness, and preview simulator. Clicking `ทดสอบ 5 เทิร์น` produced preview turns without error. |
+| `/chat` | pass 2026-06-28 | Forced-local backend/frontend were running. Sending a real Thai roleplay message returned a 1103-character local reply, cleared the composer, and typing a new draft re-enabled the send button. Browser console error log was empty. |
+| `/chat` | pass 2026-06-28 follow-up | In-app browser sent a new Thai roleplay prompt from the actual composer. The app created/opened `/chat/a67de6ec-7dec-40bd-9d38-40621d77c4a5`, displayed the user prompt plus a long Thai MIKA reply, cleared the composer, and keyboard clearing returned submit to disabled. Browser console errors: 0. |
+| `/create` | pass 2026-06-28 follow-up | Creator Studio rendered AI image/content controls, manual image URL mode, relationship presets, greeting/system/scenario fields, and preview simulator. Clicking `ทดสอบ 5 เทิร์น` completed without error and the assistant panel reported `จำลอง 5 เทิร์นแล้ว`. |
+| `/ai-creator` | pass 2026-06-28 follow-up | AI Creator rendered credit cost, missing-input disabled reason, My Library, Public Gallery, and no coin/top-up wording. Video tab showed disabled Generate with the local contract text that real video generation is not open yet. |
+| `/chats` | pass 2026-06-28 follow-up | Chat cards render portrait images/backgrounds instead of letter-only tiles. The latest chat three-dot menu exposes `แก้ไขแชท`, `ปักหมุดแชท`, `จัดเก็บแชท`, `เลือก`, and `ลบแชท`. Browser console errors: 0. |
+| `/wallet` | pass | Refresh works. Admin key save/clear works. Credit adjustment buttons return to disabled after clearing admin key. |
 | `/profile` | pass | Persona template fills textarea. Content mode controls render 3 states. BYOK vault panel remains visible without storing a raw key. |
 | `/support` | pass | Local support ticket form accepts title/detail and submits to local state. |
 | `/events` | pass | Events inbox renders one scene list with 13 pending scene rows in current QA data. |
@@ -50,4 +59,5 @@ Fixes applied:
 
 - Keep `.env` local during local QA. Use the Ngrok URL only for temporary staging preview.
 - Full `bun run e2e:smoke` passed after this browser-driven fix and `/profile` smoke-copy sync. QA seed was restored afterward with `bun run qa:seed`.
-- Larger cleanup remains for `AICreatorPage.tsx`, `CharacterCreateForm`, and `WorkspacePage`, but the local browser play path is usable after this fix.
+- 2026-06-28 browser click-through confirmed the current credit-usage and local-chat-quality checkpoint. Larger cleanup remains for future maintainability, but the local browser play path is usable after this fix.
+- 2026-06-28 automated browser smoke was rerun after syncing the credit-copy contracts: focused desktop/mobile Playwright smoke passed, then `bun run e2e:smoke` passed 4/4 and `bun run qa:full` passed. New local avatar uploads from QA are ignored as runtime artifacts via `.gitignore`; tracked seed avatar files remain committed.

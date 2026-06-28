@@ -1,10 +1,12 @@
 # แผนงานที่เหลือของ Maprang AI
 
-Last updated: 2026-06-18
+Last updated: 2026-06-28
 
 Current target split: Local Server, Ngrok Preview, and Production. Version 1 target is Local Server first because the team has not finalized hosting yet. The local server baseline passed `bun run qa:full`; Ngrok is optional preview for other testers; production/cloud requires external HTTPS/domain/provider evidence and is not a blocker for the first local versions. Use `docs/LOCAL_SERVER_RUNBOOK.md` for local startup and operator checks.
 
 Latest local runtime checkpoint: Docker Desktop/PostgreSQL/backend/frontend were started successfully and `bun run qa:full` passed on 2026-06-18. This closes the current local-server runtime gate. `scripts/local-server-up.ts` startup/error logs were cleaned from mojibake into readable Thai and locked by `scripts/local-server-up.test.ts`. Passing evidence: `bun run qa:full`, `bun test scripts/local-server-up.test.ts`, `bun run local:doctor:test`, and `bun run docs:commands`.
+
+Latest product-copy checkpoint: 2026-06-28 local v1 no longer treats coin/top-up/payment as an active player flow. `/wallet` is a Credit Usage dashboard for balance, usage ledger, admin local adjustments, model/function cost visibility, and BYOK/local-provider state. Real payment/top-up remains future/external until provider and policy decisions exist. Chat local fallback replies also now use intent-aware roleplay beats to reduce shallow local responses. Browser click-through QA passed for `/wallet`, `/ai-creator`, `/profile`, `/create`, and `/chat`; the chat reply reached 1103 characters and the composer recovered after reply.
 
 Latest cleanup checkpoint: `CharacterCreateForm.tsx` now delegates reset-form, clear generated avatar, clear cover draft, and use-cover-as-main actions to `useCreatorFormActions`. The form is down to 692 lines and the focused contract/type/API/docs/memory/diff gates pass. Next local cleanup target is `WorkspacePage.tsx`, followed by browser click-through verification.
 
@@ -292,7 +294,7 @@ QA gate:
 
 งาน:
 
-- `W6.1` ตรวจ wallet balance, usage ledger, chat/image rows — done locally on 2026-06-17. Wallet summary already reads backend usage/transactions, `TokenTransactionType` now includes `IMAGE_GENERATION`, frontend wallet labels image generation rows, and backend/frontend checks pass. Actual image-generation debit remains gated until provider execution/debit policy is enabled.
+- `W6.1` ตรวจ credit balance, usage ledger, chat/image rows — done locally on 2026-06-17 and refreshed on 2026-06-28 to use Credit Usage wording. Wallet summary already reads backend usage/transactions, `TokenTransactionType` now includes `IMAGE_GENERATION`, frontend wallet labels image generation rows, and backend/frontend checks pass. Actual image-generation debit remains gated until provider execution/debit policy is enabled.
 - `W6.2` ตรวจ insufficient token state ใน chat/generation — done locally on 2026-06-17. Chat and stream chat block non-BYOK users before provider calls when `tokenBalance < MIN_TOKEN_BALANCE_FOR_CHAT`, return zero-token usage with the current balance, and keep the composer disabled with a visible wallet warning when the frontend balance is empty. AI Creator generation has explicit non-debit block states for running jobs, missing/unavailable/rate-limited providers, insufficient credit, invalid input, level gates, content gates, and missing uploads.
 - `W6.3` ออกแบบ BYOK เป็น developer/local mode ก่อน ไม่ใช่ production secret storage — done locally on 2026-06-17. Profile/API helper now keep raw user API keys session-only via `sessionStorage`, clear the old `localStorage` key, and source-lock that raw BYOK keys are not persisted to `localStorage`.
 - `W6.4` ถ้าจะทำ BYOK production ต้องมี server-side encrypted vault, owner guard, redaction, audit log — done locally on 2026-06-17. Backend now stores user provider keys in `UserProviderKey` as AES-GCM ciphertext with metadata-only responses, writes `UserSecurityAuditLog` rows for upsert/use/delete, resolves saved vault keys for chat/creator routes when `x-user-api-vault: 1`, and Profile can save/delete provider keys without keeping raw keys in `localStorage`.
@@ -442,7 +444,7 @@ QA gate:
 | 4 | `M3.1` ถึง `M3.4` | My Chats ต้องจัดการแชทได้จริง | ได้ |
 | 5 | `E4.1` ถึง `E4.6` | marketplace/lobby เป็น flow เริ่มเล่น | ได้ |
 | 6 | `A5.1` ถึง `A5.4` | AI Creator local contract ใกล้ครบ ต้องปิด smoke เพิ่ม | ได้ |
-| 7 | `W6.1` ถึง `W6.4` | wallet/BYOK ต้องไม่เสี่ยง secret | ได้ |
+| 7 | `W6.1` ถึง `W6.4` | credit usage/BYOK ต้องไม่เสี่ยง secret | ได้ |
 | 8 | `S7.1` ถึง `S7.6` | moderation/security ต้องพร้อมก่อนเปิด UGC | ได้ |
 | 9 | `V9.1` ถึง `V9.6` | visual QA ต้องทำหลัง flow หลักนิ่ง | ได้ |
 | 10 | `L10.1` ถึง `L10.5` | local server คือ release target ปัจจุบัน | ได้ |
@@ -452,7 +454,7 @@ QA gate:
 
 ระบบถือว่าพร้อมก่อน deploy เมื่อ:
 
-- core local flow เล่นได้ครบ: Explore, Lobby, Chat, My Chats, Create, AI Creator, Wallet, Events, Moderation, Admin Health
+- core local flow เล่นได้ครบ: Explore, Lobby, Chat, My Chats, Create, AI Creator, Credit Usage, Events, Moderation, Admin Health
 - ทุก frontend route มี action หรือ disabled reason ที่ชัดเจน
 - API audit และ frontend helper boundary ผ่าน
 - DB migration/index/owner guard ผ่าน backend checks

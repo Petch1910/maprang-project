@@ -43,8 +43,8 @@ describe('e2e smoke command plan', () => {
   })
 
   test('locks product-facing local runtime copy in admin health e2e coverage', () => {
-    expect(e2eSpec).toContain('โหมดในเครื่องพร้อมเล่น')
-    expect(e2eSpec).toContain('แชทในเครื่องพร้อมใช้')
+    expect(e2eSpec).toContain('เซิร์ฟเวอร์ในเครื่องพร้อมเล่น')
+    expect(e2eSpec).toContain('แชทในเครื่องพร้อมใช้งาน')
     expect(e2eSpec).toContain("not.toContainText('โหมด local QA พร้อมเล่น')")
     expect(e2eSpec).toContain("not.toContainText('แชท local สำหรับ QA')")
     expect(e2eSpec).toContain("not.toContainText('local/mock-roleplay')")
@@ -71,7 +71,7 @@ describe('e2e smoke command plan', () => {
 
   test('locks AI Creator video provider contract browser coverage', () => {
     expect(e2eSpec).toContain('ai-creator-video-contract-state')
-    expect(e2eSpec).toContain("toContainText('production')")
+    expect(e2eSpec).toContain("toContainText('ระบบยังไม่เปิดบริการสร้างวิดีโอจริง')")
   })
 
   test('defaults local browser smoke to an isolated backend port', () => {

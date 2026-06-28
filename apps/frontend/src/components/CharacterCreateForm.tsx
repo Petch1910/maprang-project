@@ -460,6 +460,7 @@ export function CharacterCreateForm({
                       <button
                         className="inline-flex min-h-9 items-center justify-center rounded-xl border border-[#a855f7]/30 bg-[#a855f7]/10 px-2.5 py-1 text-xs font-bold text-[#d8b4fe] transition hover:bg-[#a855f7]/20"
                         onClick={clearGeneratedAvatar}
+                        data-testid="creator-use-manual-avatar-url"
                         type="button"
                       >
                         ใช้ลิงก์แทน

@@ -1,6 +1,6 @@
 # Maprang Phase 0-11 Local-First Execution Plan
 
-Last updated: 2026-06-18
+Last updated: 2026-06-28
 
 ## Goal
 
@@ -22,11 +22,11 @@ Make Maprang a real local-server product before any cloud production work:
 - `bun run frontend:static:audit`: pass
 - `bun run frontend:route:audit`: 20 routes pass
 - `bun run api:audit`: 80 backend routes / 56 frontend helper calls pass
-- Browser smoke on `http://127.0.0.1:5173/chat`: local chat runtime can send with token balance 0, returns `local/mock-roleplay`, and shows response quality `100/100 · 1,106 ตัวอักษร` in the chat right rail.
+- Browser smoke on `http://127.0.0.1:5173/chat`: local chat runtime can send with usage credit balance 0, returns `local/mock-roleplay`, and shows response quality evidence in the chat right rail.
 - `bun run smoke:local`: pass against `http://127.0.0.1:3001`; normal/stream chat both returned `local/mock-roleplay`, reply lengths 1134/1089 chars, pending events 2, and saved chat/world-state/upload checks passed.
 - `bun run e2e:smoke`: pass, 4/4 Chromium desktop/mobile route/menu/render checks.
 - Phase 2 UI slice: `/chats` uses portrait-style character fallback images instead of letter-only avatar tiles when saved chats have no real avatar URL; shell/Explore local-runtime copy is Thai-first. Evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx`, `bun run frontend:check`, and `bun run e2e:smoke` 4/4.
-- Phase 9 text/UI slice: Explore marketplace filters, search, empty/error states, tooltips, token copy, and rails are Thai-first while preserving route/action behavior. Evidence: `bun run frontend:check` and `bun run e2e:smoke` 4/4.
+- Phase 9 text/UI slice: Explore marketplace filters, search, empty/error states, tooltips, usage-credit copy, and rails are Thai-first while preserving route/action behavior. Evidence: `bun run frontend:check` and `bun run e2e:smoke` 4/4.
 - Phase 3/4 copy slice: Creator Studio image source badges, image style choices, generated-image alt text, and AI Creator gallery reuse metadata now use Thai product-facing wording instead of `provider/fallback/manual/Remote` style labels. Evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx`, `bun run frontend:check`, and `bun run e2e:smoke` 4/4.
 - Phase 4 route cleanup slice: `/ai-creator` character-option loading, local history persistence, upload reference validation, manual/template generation, download handling, library item actions, reference-to-Creator bridge, save-to-studio, clipboard copy actions, and gallery history view state moved into focused hooks, with source contract coverage. `AICreatorPage.tsx` is now 395 lines. Evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (29 pass / 330 expects) and `bun run frontend:check`.
 - Phase 4 Creator Studio cleanup slice: `CharacterCreateForm.tsx` draft status type, avatar source labels, local draft storage wrappers, readiness summary, UI timeout, empty form seed, and character-create payload builder moved into `creatorFormState.ts`. `CharacterCreateForm.tsx` is now 912 lines. Evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (29 pass / 340 expects) and `bun run frontend:check`.
@@ -109,7 +109,7 @@ Tasks:
 3. Keep message actions real or disabled with readable reasons.
 4. Keep `/chats` menu actions complete: rename, pin/unpin, archive/restore, select, delete.
 5. Ensure chat avatars use character images where available, not letter-only fallback for real character cards.
-6. Keep scene notice, relationship bar, report flow, wallet warning, and world-state panel visually aligned with the MissAI-style shell.
+6. Keep scene notice, relationship bar, report flow, credit warning, and world-state panel visually aligned with the MissAI-style shell.
 
 Current local status:
 
@@ -188,13 +188,13 @@ QA:
 - `bun run api:audit`
 - `bun run e2e:smoke`
 
-## Phase 5 - Persona, Wallet, BYOK, And Content Mode
+## Phase 5 - Persona, Usage Credits, BYOK, And Content Mode
 
 Tasks:
 
 1. Keep persona editable and injected into chat context.
 2. Keep content mode and age gate server-aware.
-3. Keep wallet balance, ledger, and usage breakdown readable.
+3. Keep usage credit balance, ledger, and usage breakdown readable.
 4. Keep BYOK/server-side vault safe: no raw key in persistent frontend storage.
 5. Add clear product copy for managed provider vs BYOK vs local mode.
 

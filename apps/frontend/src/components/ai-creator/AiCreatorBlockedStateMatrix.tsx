@@ -17,7 +17,7 @@ export function AiCreatorBlockedStateMatrix({ states }: AiCreatorBlockedStateMat
             <div className="min-w-0">
               <h2 className="text-sm font-black text-white">ตารางตรวจ Generate Blocked States</h2>
               <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                ใช้ตรวจว่าแต่ละกรณีถูกบล็อกพร้อมเหตุผลและไม่หักโทเคนก่อน backend รับงาน
+                ใช้ตรวจว่าแต่ละกรณีถูกบล็อกพร้อมเหตุผลและไม่หักเครดิตก่อน backend รับงาน
               </p>
             </div>
           </div>
@@ -34,7 +34,7 @@ export function AiCreatorBlockedStateMatrix({ states }: AiCreatorBlockedStateMat
                 <th className="px-3 py-2">ข้อความผู้ใช้</th>
                 <th className="px-3 py-2">สาเหตุ</th>
                 <th className="px-3 py-2">ทางแก้ถัดไป</th>
-                <th className="px-3 py-2 text-right">หักโทเคน</th>
+                <th className="px-3 py-2 text-right">หักเครดิต</th>
               </tr>
             </thead>
             <tbody>

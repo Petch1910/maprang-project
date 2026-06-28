@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart3, Coins, Gauge, KeyRound, RefreshCw, ReceiptText, TrendingDown, X } from 'lucide-react'
+import { BarChart3, Gauge, KeyRound, RefreshCw, ReceiptText, TrendingDown, X } from 'lucide-react'
 import {
   adjustAdminUserTokens,
   ApiError,
@@ -39,22 +39,22 @@ function formatShortDate(value: string) {
 
 function errorMessage(error: unknown) {
   if (error instanceof ApiError && error.status === 404) return 'ไม่พบข้อมูลการใช้งานของบัญชีนี้'
-  if (error instanceof ApiError && error.status === 401) return 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อดูข้อมูลโทเคน'
-  return 'โหลดข้อมูลกระเป๋าโทเคนไม่สำเร็จ'
+  if (error instanceof ApiError && error.status === 401) return 'กรุณาเข้าสู่ระบบอีกครั้งเพื่อดูข้อมูลเครดิตการใช้งาน'
+  return 'โหลดข้อมูลเครดิตการใช้งานไม่สำเร็จ'
 }
 
 function transactionLabel(type: WalletTransaction['type']) {
   const labels: Record<WalletTransaction['type'], string> = {
-    CHAT_USAGE: 'ใช้แชท AI',
-    IMAGE_GENERATION: 'สร้างรูป AI',
-    ADMIN_ADJUSTMENT: 'ผู้ดูแลปรับยอด',
-    PROMOTION: 'โปรโมชัน',
-    PURCHASE: 'เติมโทเคน',
-    REFUND: 'คืนโทเคน',
+    CHAT_USAGE: 'ใช้เครดิตแชท AI',
+    IMAGE_GENERATION: 'ใช้เครดิตสร้างรูป AI',
+    ADMIN_ADJUSTMENT: 'ผู้ดูแลปรับเครดิต',
+    PROMOTION: 'เครดิตโปรโมชันทดสอบ',
+    PURCHASE: 'เครดิตจากระบบภายนอก',
+    REFUND: 'คืนเครดิต',
     DAILY_LOGIN: 'รางวัลเข้าใช้งานประจำวัน',
     ACHIEVEMENT: 'รางวัลความสำเร็จ',
-    PENALTY: 'หักโทเคน',
-    EXPIRY: 'โทเคนหมดอายุ',
+    PENALTY: 'หักเครดิต',
+    EXPIRY: 'เครดิตหมดอายุ',
   }
   return labels[type] || type
 }
@@ -68,7 +68,7 @@ export function WalletPage() {
   const [adminKeyInput, setAdminKeyInput] = useState(() =>
     typeof window === 'undefined' ? '' : safeGetStorageItem(window.localStorage, 'maprang:adminKey') || '',
   )
-  const [note, setNote] = useState('กำลังโหลดกระเป๋าโทเคน...')
+  const [note, setNote] = useState('กำลังโหลดเครดิตการใช้งาน...')
 
   const maxDailyTokens = useMemo(
     () => Math.max(...(summary?.usage.daily.map((item) => item.tokens) ?? [0]), 1),
@@ -81,13 +81,13 @@ export function WalletPage() {
   }, [adjustAmount])
   const hasAdminKey = adminKeyInput.trim().length > 0
   const adjustTokenDisabledReason = !summary
-    ? 'โหลดข้อมูลกระเป๋าก่อนปรับยอด'
+    ? 'โหลดข้อมูลเครดิตก่อนปรับยอด'
     : isAdjusting
-      ? 'กำลังปรับยอดโทเคน'
+      ? 'กำลังปรับเครดิต'
       : normalizedAdjustAmount <= 0
-        ? 'ใส่จำนวนโทเคนมากกว่า 0'
+        ? 'ใส่จำนวนเครดิตมากกว่า 0'
         : !hasAdminKey
-          ? 'บันทึก ADMIN_API_KEY ก่อนปรับโทเคน'
+          ? 'บันทึก ADMIN_API_KEY ก่อนปรับเครดิต'
           : ''
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export function WalletPage() {
     })
   }, [])
 
-  const balanceLabel = summary ? `${summary.user.tokenBalance.toLocaleString()} โทเคน` : isLoading ? 'กำลังโหลด...' : '0 โทเคน'
+  const balanceLabel = summary ? `${summary.user.tokenBalance.toLocaleString()} เครดิต` : isLoading ? 'กำลังโหลด...' : '0 เครดิต'
   const totalTokensLabel = summary ? summary.usage.totalTokens.toLocaleString() : isLoading ? '...' : '0'
   const requestCountLabel = summary ? summary.usage.requestCount.toLocaleString() : isLoading ? '...' : '0'
   const totalCostLabel = summary ? formatCost(summary.usage.totalCost) : isLoading ? '...' : '$0.000000'
@@ -117,9 +117,9 @@ export function WalletPage() {
       const data = await fetchUsageSummary()
       setSummary(data)
       dispatch(setTokenBalance(data.user.tokenBalance))
-      setNote('ข้อมูลโทเคนอัปเดตแล้ว')
+      setNote('ข้อมูลเครดิตอัปเดตแล้ว')
     } catch (error) {
-      logUnexpectedError('โหลดกระเป๋าโทเคนไม่สำเร็จ:', error)
+      logUnexpectedError('โหลดเครดิตการใช้งานไม่สำเร็จ:', error)
       setNote(errorMessage(error))
     } finally {
       setIsLoading(false)
@@ -130,7 +130,7 @@ export function WalletPage() {
     if (!summary || isAdjusting || adjustTokenDisabledReason) return
     setIsAdjusting(true)
     try {
-      const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'ผู้ดูแลเพิ่มโทเคน' : 'ผู้ดูแลหักโทเคน')
+      const data = await adjustAdminUserTokens(summary.user.id, amount, amount > 0 ? 'ผู้ดูแลเพิ่มเครดิตการใช้งาน' : 'ผู้ดูแลหักเครดิตการใช้งาน')
       setSummary((prev) =>
         prev
           ? {
@@ -145,15 +145,15 @@ export function WalletPage() {
           : prev,
       )
       dispatch(setTokenBalance(data.user.tokenBalance))
-      setNote(`${amount > 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(amount).toLocaleString()} โทเคนแล้ว`)
+      setNote(`${amount > 0 ? 'เพิ่ม' : 'หัก'} ${Math.abs(amount).toLocaleString()} เครดิตแล้ว`)
     } catch (error) {
-      logUnexpectedError('ปรับโทเคนไม่สำเร็จ:', error)
+      logUnexpectedError('ปรับเครดิตไม่สำเร็จ:', error)
       setNote(
         error instanceof ApiError && error.status === 401
           ? 'ADMIN_API_KEY ไม่ถูกต้องหรือยังไม่ได้บันทึกในเบราว์เซอร์นี้'
           : error instanceof ApiError && error.status === 403
-            ? 'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลสำหรับปรับโทเคน'
-            : 'ปรับโทเคนไม่สำเร็จ',
+            ? 'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลสำหรับปรับเครดิต'
+            : 'ปรับเครดิตไม่สำเร็จ',
       )
     } finally {
       setIsAdjusting(false)
@@ -189,14 +189,14 @@ export function WalletPage() {
         <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_260px] lg:p-6">
           <div className="min-w-0">
             <p className="m-0 flex items-center gap-2 text-xs font-black tracking-widest text-[#ac4bff] uppercase">
-              <Coins size={16} />
-              กระเป๋าโทเคน
+              <Gauge size={16} />
+              เครดิตการใช้งาน
             </p>
             <h1 className="font-display m-0 mt-2 break-words text-3xl font-black tracking-normal text-[#f9c86d]">
               {balanceLabel}
             </h1>
             <p className="m-0 mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#9ca3af]">
-              ดูยอดโทเคน การใช้งานล่าสุด ต้นทุนตามโมเดล และประเมินจำนวนรอบแชทที่ยังใช้ได้
+              ดูเครดิตที่ใช้ไป ประวัติการเรียก AI ต้นทุนตามโมเดล และประเมินจำนวนรอบแชทที่ยังใช้ได้ใน local v1
             </p>
             {note && (
               <p className="missai-empty m-0 mt-4 border-[#ac4bff]/20 bg-[#ac4bff]/10 p-3 text-sm text-[#d9b3ff]" data-testid="wallet-note">
@@ -212,7 +212,7 @@ export function WalletPage() {
               data-testid="wallet-refresh"
               disabled={isLoading}
               onClick={loadWallet}
-              title={isLoading ? 'กำลังโหลดกระเป๋าโทเคน' : 'รีเฟรชข้อมูลกระเป๋าโทเคน'}
+              title={isLoading ? 'กำลังโหลดเครดิตการใช้งาน' : 'รีเฟรชข้อมูลเครดิตการใช้งาน'}
               type="button"
             >
               <RefreshCw size={16} />
@@ -245,7 +245,7 @@ export function WalletPage() {
           </p>
           <p className="font-display m-0 mt-2 text-2xl font-black text-[#f9c86d]">{estimatedRemainingLabel}</p>
           <p className="m-0 mt-1 text-xs font-bold text-white/35">
-            เฉลี่ย {summary?.usage.estimate.averageTokensPerRequest.toLocaleString() ?? 0} โทเคน/รอบ
+            เฉลี่ย {summary?.usage.estimate.averageTokensPerRequest.toLocaleString() ?? 0} เครดิต/รอบ
           </p>
         </div>
       </section>
@@ -257,7 +257,7 @@ export function WalletPage() {
               <BarChart3 size={17} className="text-[#ac4bff]" />
               ต้นทุนแยกตามโมเดล
             </p>
-            <p className="m-0 mt-1 text-xs font-bold text-white/45">ดูว่าโมเดลไหนใช้โทเคนและต้นทุนมากที่สุด</p>
+            <p className="m-0 mt-1 text-xs font-bold text-white/45">ดูว่าโมเดลไหนใช้เครดิตและต้นทุนมากที่สุด</p>
           </div>
 
           {isLoading ? (
@@ -282,7 +282,7 @@ export function WalletPage() {
                       <div className="h-full rounded-full bg-gradient-to-r from-[#ac4bff] to-[#8b5cf6]" style={{ width: `${Math.max(tokenShare, 4)}%` }} />
                     </div>
                     <p className="m-0 mt-2 text-xs font-bold text-white/45">
-                      {item.tokens.toLocaleString()} โทเคน / {item.requestCount.toLocaleString()} คำขอ / {tokenShare}%
+                      {item.tokens.toLocaleString()} เครดิต / {item.requestCount.toLocaleString()} คำขอ / {tokenShare}%
                     </p>
                   </article>
                 )
@@ -296,12 +296,12 @@ export function WalletPage() {
             <TrendingDown size={17} className="text-[#ac4bff]" />
             การใช้ 7 วันล่าสุด
           </p>
-          <p className="m-0 mt-1 text-xs font-bold text-white/45">ใช้ดูจังหวะการกินโทเคนเพื่อประเมินงบและโปรโมชัน</p>
+          <p className="m-0 mt-1 text-xs font-bold text-white/45">ใช้ดูจังหวะการใช้เครดิตเพื่อประเมินทรัพยากร local/provider</p>
 
           {isLoading ? (
             <div className="py-5 text-sm font-bold text-white/55">กำลังโหลดกราฟการใช้งาน...</div>
           ) : !summary || summary.usage.daily.every((item) => item.tokens === 0) ? (
-            <div className="py-5 text-sm font-bold text-white/55">ยังไม่มีการใช้โทเคนใน 7 วันล่าสุด</div>
+            <div className="py-5 text-sm font-bold text-white/55">ยังไม่มีการใช้เครดิตใน 7 วันล่าสุด</div>
           ) : (
             <div className="mt-4 grid gap-3">
               {summary.usage.daily.map((item) => {
@@ -329,7 +329,7 @@ export function WalletPage() {
               สิทธิ์ผู้ดูแลสำหรับเครื่องนี้
             </p>
             <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/55">
-              ใช้เฉพาะ local/dev เพื่อเรียก endpoint ผู้ดูแล เช่น เพิ่มหรือหักโทเคน คีย์เก็บใน localStorage ของเบราว์เซอร์นี้
+              ใช้เฉพาะ local/dev เพื่อเรียก endpoint ผู้ดูแล เช่น เพิ่มหรือหักเครดิต คีย์เก็บใน localStorage ของเบราว์เซอร์นี้
             </p>
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
@@ -355,9 +355,9 @@ export function WalletPage() {
       <section className="missai-card rounded-2xl p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
           <div>
-            <p className="m-0 text-sm font-black text-white">ปรับโทเคนโดยผู้ดูแล</p>
+            <p className="m-0 text-sm font-black text-white">ปรับเครดิตโดยผู้ดูแล</p>
             <p className="m-0 mt-1 text-sm font-bold leading-6 text-white/55">
-              ใช้ดูแลยอดโทเคนของบัญชีปัจจุบันสำหรับแคมเปญ เครดิตช่วยเหลือ หรือการแก้ไขรายการ
+              ใช้ดูแลเครดิตของบัญชีปัจจุบันสำหรับทดสอบ local เครดิตช่วยเหลือ หรือการแก้ไขรายการ
             </p>
           </div>
           <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
@@ -374,7 +374,7 @@ export function WalletPage() {
               data-testid="wallet-adjust-add"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(normalizedAdjustAmount)}
-              title={adjustTokenDisabledReason || 'เพิ่มโทเคนให้ผู้ใช้ปัจจุบัน'}
+              title={adjustTokenDisabledReason || 'เพิ่มเครดิตให้ผู้ใช้ปัจจุบัน'}
               type="button"
             >
               เพิ่ม
@@ -385,7 +385,7 @@ export function WalletPage() {
               data-testid="wallet-adjust-debit"
               disabled={Boolean(adjustTokenDisabledReason)}
               onClick={() => adjustTokens(-normalizedAdjustAmount)}
-              title={adjustTokenDisabledReason || 'หักโทเคนจากผู้ใช้ปัจจุบัน'}
+              title={adjustTokenDisabledReason || 'หักเครดิตจากผู้ใช้ปัจจุบัน'}
               type="button"
             >
               หัก
@@ -394,7 +394,7 @@ export function WalletPage() {
         </div>
         {!hasAdminKey && (
           <p className="missai-empty m-0 mt-3 border-yellow-500/20 bg-yellow-500/10 p-3 text-sm text-yellow-300">
-            ใส่และบันทึก ADMIN_API_KEY ก่อน จึงจะใช้ปุ่มเพิ่ม/หักโทเคนได้
+            ใส่และบันทึก ADMIN_API_KEY ก่อน จึงจะใช้ปุ่มเพิ่ม/หักเครดิตได้
           </p>
         )}
       </section>
@@ -403,14 +403,14 @@ export function WalletPage() {
         <div className="border-b border-white/10 p-4">
           <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
             <ReceiptText size={17} className="text-[#ac4bff]" />
-            ประวัติธุรกรรมโทเคน
+            ประวัติธุรกรรมเครดิต
           </p>
           <p className="m-0 mt-1 text-xs font-bold text-white/45">รายการเพิ่ม/หักยอดที่ตรวจสอบย้อนหลังได้</p>
         </div>
         {isLoading ? (
           <div className="p-5 text-sm font-bold text-white/55">กำลังโหลดธุรกรรม...</div>
         ) : !summary || !summary.wallet?.transactions.length ? (
-          <div className="p-5 text-sm font-bold text-white/55">ยังไม่มีธุรกรรมโทเคน</div>
+          <div className="p-5 text-sm font-bold text-white/55">ยังไม่มีธุรกรรมเครดิต</div>
         ) : (
           <div className="divide-y divide-white/10">
             {summary.wallet.transactions.map((item) => (
@@ -418,7 +418,7 @@ export function WalletPage() {
                 <div className="min-w-0">
                   <p className="m-0 truncate text-sm font-black text-white">{transactionLabel(item.type)}</p>
                   <p className="m-0 mt-1 truncate text-xs font-bold text-white/45">
-                    {formatDate(item.createdAt)} / คงเหลือ {item.balanceAfter.toLocaleString()} โทเคน
+                    {formatDate(item.createdAt)} / คงเหลือ {item.balanceAfter.toLocaleString()} เครดิต
                   </p>
                 </div>
                 <span
@@ -448,7 +448,7 @@ export function WalletPage() {
         {isLoading ? (
           <div className="p-5 text-sm font-bold text-white/55">กำลังโหลดการใช้งาน...</div>
         ) : !summary || summary.usage.recent.length === 0 ? (
-          <div className="p-5 text-sm font-bold text-white/55">ยังไม่มีการใช้โทเคน</div>
+          <div className="p-5 text-sm font-bold text-white/55">ยังไม่มีการใช้เครดิต</div>
         ) : (
           <div className="divide-y divide-white/10">
             {summary.usage.recent.map((item) => (
@@ -460,7 +460,7 @@ export function WalletPage() {
                 <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                   <span className="inline-flex items-center gap-1 rounded-full border border-rose-300/25 bg-rose-400/12 px-2.5 py-1 text-xs font-black text-rose-100">
                     <TrendingDown size={14} />
-                    {item.tokens.toLocaleString()} โทเคน
+                    {item.tokens.toLocaleString()} เครดิต
                   </span>
                   <span className="missai-badge text-white/65">{formatCost(item.cost)}</span>
                 </div>

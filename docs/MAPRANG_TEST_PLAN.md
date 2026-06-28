@@ -1,6 +1,6 @@
 # Maprang AI Test Plan
 
-Last updated: 2026-06-17
+Last updated: 2026-06-28
 
 เอกสารนี้แทน test plan เก่าที่ไม่ตรงกับ repo ปัจจุบัน ให้ใช้เป็น source of truth สำหรับ QA gate ก่อน staging/production โดยยึดระบบจริงใน repo ไม่ยึดเอกสารภายนอกหรือ docx รุ่นเก่า
 
@@ -13,7 +13,7 @@ Last updated: 2026-06-17
 - AI chat: `local/mock-roleplay` ใน local QA, OpenRouter/live provider สำหรับ staging/production
 - AI image: system draft image ใน local เมื่อไม่มี provider, live image provider ต้อง verified ก่อน production
 - UI template direction: MissAI/Khuiai-like marketplace shell plus Maprang relationship/scene/memory systems
-- Core product direction: `docs/MAPRANG_CORE_PLAY_CREATE_PLAN.md` โฟกัส Chat play loop, Creator Studio, Character Lobby, My Chats, Wallet usage state และ AI Creator image workflow ก่อนระบบรอง
+- Core product direction: `docs/MAPRANG_CORE_PLAY_CREATE_PLAN.md` โฟกัส Chat play loop, Creator Studio, Character Lobby, My Chats, Credit usage state และ AI Creator image workflow ก่อนระบบรอง
 
 ## Status Taxonomy
 
@@ -45,7 +45,7 @@ Compatibility snippet: Route source: App.tsx declares 15 routes; test plan group
 | `/ai-creator` | AI Creator | สร้างภาพ/ร่างภาพ, permission/cost/provider state | local ready |
 | `/events` | Events Inbox | pending scene/event inbox | local ready |
 | `/profile` | Profile/Persona | persona, content mode, account state, BYOK settings | local ready |
-| `/wallet` | Wallet | token balance, usage ledger, admin adjustment guard | local ready |
+| `/wallet` | Credit Usage | credit balance, usage ledger, admin adjustment guard | local ready |
 | `/announcements` | Announcements | ข่าวสาร/อัปเดตระบบ | local ready |
 | `/creators` | Creators | อันดับ/ค้นหานักสร้าง | local ready |
 | `/favorites` | Favorites | ตัวละครโปรด | local ready |
@@ -111,7 +111,7 @@ bun run backend:check:db:test
 - Creator AI draft ต้องมี system draft image/fallback status เมื่อยังไม่มี live image provider
 - AI Creator ต้องมี template/cost state, upload validation, blocked reason, generation job/library state และไม่หัก token ก่อน backend รับ job ผ่าน validation
 - Creator Preview simulator ต้องตอบ local preview โดยไม่สร้าง chat จริง
-- Token ledger ต้องบันทึก balance/usage ถูกต้อง
+- Credit ledger ต้องบันทึก balance/usage ถูกต้อง
 - Report/admin actions ต้องสร้าง audit log
 - Upload/storage ต้องแยก local fallback ออกจาก Supabase signed production path
 

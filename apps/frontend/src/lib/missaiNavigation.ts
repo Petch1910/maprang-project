@@ -1,9 +1,9 @@
 import {
   Bell,
-  Coins,
   Compass,
   Download,
   Folder,
+  Gauge,
   Heart,
   HelpCircle,
   Image,
@@ -30,7 +30,7 @@ export type MissAiNavSection = {
 
 export const missAiPrimaryNav: MissAiNavItem[] = [
   { to: '/', label: 'สำรวจ', icon: Compass },
-  { to: '/wallet', label: 'เติมโทเคน', icon: Coins },
+  { to: '/wallet', label: 'เครดิตใช้งาน', icon: Gauge },
   { to: '/create', label: 'สร้าง', icon: PlusCircle },
   { to: '/works', label: 'พลาซ่านักสร้าง', icon: Palette },
   { to: '/ai-creator', label: 'แกลเลอรี AI', icon: Image },
@@ -50,7 +50,7 @@ export const missAiAccountNav: MissAiNavItem[] = [
 
 export const missAiMobileNav: MissAiNavItem[] = [
   { to: '/', label: 'สำรวจ', icon: Compass },
-  { to: '/wallet', label: 'โทเคน', icon: Coins },
+  { to: '/wallet', label: 'เครดิต', icon: Gauge },
   { to: '/create', label: 'สร้าง', icon: PlusCircle },
   { to: '/ai-creator', label: 'AI', icon: Image },
   { to: '/chats', label: 'แชท', icon: MessageCircle },

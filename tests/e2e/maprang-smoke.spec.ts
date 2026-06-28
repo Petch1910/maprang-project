@@ -29,7 +29,7 @@ const routeSmokeTargets: RouteSmokeTarget[] = [
   { path: '/ai-creator', testId: 'ai-creator-page' },
   { path: '/events', text: 'อีเวนต์' },
   { path: '/profile', text: 'โปรไฟล์ผู้เล่น' },
-  { path: '/wallet', text: 'โทเคน' },
+  { path: '/wallet', text: 'เครดิตใช้งาน' },
   { path: '/moderation', text: adminKey ? 'คิวรายงาน' : 'ADMIN_API_KEY' },
   { path: '/admin/health', text: 'ตรวจเส้นทาง/เมนู' },
   { path: '/admin/prompt-inspector', text: adminKey ? 'ตรวจพรอมป์ก่อนยิงโมเดล' : 'ADMIN_API_KEY' },
@@ -151,6 +151,14 @@ async function ensureCreatorFormOpen(page: Parameters<typeof test>[0]['page']) {
   await expect(nameInput).toBeVisible()
 }
 
+async function ensureCreatorAvatarUrlInput(page: Parameters<typeof test>[0]['page']) {
+  const manualUrlButton = page.getByTestId('creator-use-manual-avatar-url')
+  if (await manualUrlButton.isVisible().catch(() => false)) {
+    await manualUrlButton.click()
+  }
+  await expect(page.getByTestId('creator-avatar-url')).toBeVisible()
+}
+
 test('core route and menu smoke', async ({ page, request }, testInfo) => {
   const isMobile = testInfo.project.name.includes('mobile')
   const menuArchiveChatId = isMobile ? seededMenuArchiveMobileChatId : seededMenuArchiveDesktopChatId
@@ -237,6 +245,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.getByTestId('creator-tagline')).toHaveValue('ตัวละครทดสอบ e2e ก่อนดีพลอย')
   await expect(page.getByTestId('creator-image-style')).toHaveValue('anime')
 
+  await ensureCreatorAvatarUrlInput(page)
   await page.getByTestId('creator-avatar-url').fill('/src/assets/hero.png')
   await page.getByTestId('creator-description').fill('ใช้ตรวจว่า Creator Studio สร้าง draft ได้จริงและไม่ติดปุ่มหลอก')
   await page.getByTestId('creator-greeting').fill('พร้อมทดสอบระบบหรือยัง')
@@ -299,6 +308,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await ensureCreatorFormOpen(page)
   await page.getByTestId('creator-name').fill(coverFlowName)
   await page.getByTestId('creator-tagline').fill('coverUrl smoke')
+  await ensureCreatorAvatarUrlInput(page)
   await page.getByTestId('creator-avatar-url').fill('/src/assets/hero.png')
   await page.getByTestId('creator-description').fill('coverUrl persistence smoke')
   await page.getByTestId('creator-greeting').fill('coverUrl ready')
@@ -367,6 +377,8 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.getByTestId('ai-creator-brief').fill('AI Creator smoke validation and blocked state check')
   await page.getByTestId('ai-creator-image-prompt').fill('qa portrait, clean lighting, maprang smoke test')
   await expect(page.getByTestId('ai-creator-image-generate')).toBeEnabled()
+  await page.getByTestId('ai-creator-tab-template').click()
+  await expect(page.getByTestId('ai-creator-image-upload')).toBeAttached()
   await page.getByTestId('ai-creator-image-upload').setInputFiles({
     name: 'invalid-reference.gif',
     mimeType: 'image/gif',
@@ -377,7 +389,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await page.getByTestId('ai-creator-tab-video').click()
   await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
   await expect(page.getByTestId('ai-creator-video-contract-state')).toBeVisible()
-  await expect(page.getByTestId('ai-creator-video-contract-state')).toContainText('production')
+  await expect(page.getByTestId('ai-creator-video-contract-state')).toContainText('ระบบยังไม่เปิดบริการสร้างวิดีโอจริง')
   await page.getByTestId('ai-creator-video-prompt').fill('slow camera push in with subtle motion')
   await expect(page.getByTestId('ai-creator-video-generate')).toBeDisabled()
   await expect(page.getByTestId('ai-creator-video-contract-state')).toBeVisible()
@@ -707,7 +719,7 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.getByTestId('profile-content-mode-restricted_18')).toHaveAttribute('aria-pressed', 'true')
 
   await page.goto('/wallet')
-  await expect(page.locator('body')).toContainText('โทเคน')
+  await expect(page.locator('body')).toContainText('เครดิตใช้งาน')
   await expect(page.locator('body')).toContainText('ธุรกรรม')
   await expect(page.getByTestId('wallet-cost-by-model')).toContainText('ต้นทุนแยกตามโมเดล')
   await expect(page.getByTestId('wallet-usage-trend')).toContainText('การใช้ 7 วันล่าสุด')
@@ -753,8 +765,8 @@ test('core route and menu smoke', async ({ page, request }, testInfo) => {
   await expect(page.locator('body')).toContainText('เซิร์ฟเวอร์ในเครื่อง')
   // Contract markers for predeploy route/menu audit: สรุปด่านค้างก่อนโปรดักชัน, แถบแชท.
   if (expectsLocalChatRuntime) {
-    await expect(page.locator('body')).toContainText('โหมดในเครื่องพร้อมเล่น')
-    await expect(page.locator('body')).toContainText('แชทในเครื่องพร้อมใช้')
+    await expect(page.locator('body')).toContainText('เซิร์ฟเวอร์ในเครื่องพร้อมเล่น')
+    await expect(page.locator('body')).toContainText('แชทในเครื่องพร้อมใช้งาน')
     await expect(page.locator('body')).not.toContainText('โหมด local QA พร้อมเล่น')
     await expect(page.locator('body')).not.toContainText('แชท local สำหรับ QA')
     await expect(page.locator('body')).not.toContainText('local/mock-roleplay')

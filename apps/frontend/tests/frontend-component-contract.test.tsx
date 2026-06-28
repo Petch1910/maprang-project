@@ -154,6 +154,17 @@ describe('frontend component contracts', () => {
     expect(workspaceSource).toContain('isLocalChatRuntime={isLocalChatRuntime}')
   })
 
+  test('chat opening uses a structured intro card instead of duplicating the greeting bubble', () => {
+    const source = readFileSync(new URL('../src/components/ChatPanel.tsx', import.meta.url), 'utf8')
+
+    expect(source).toContain('data-testid="chat-opening-scene-card"')
+    expect(source).toContain('OpeningSceneCard')
+    expect(source).toContain('const openingMessage = showIntro')
+    expect(source).toContain('const timelineMessages = showIntro && openingMessage')
+    expect(source).toContain("visibleMessages.filter((chat) => chat.id !== openingMessage.id)")
+    expect(source).toContain('เลือกจังหวะเริ่มบทสนทนา')
+  })
+
   test('chat composer routes button and enter submit through a local duplicate-send guard', () => {
     const source = readFileSync(new URL('../src/components/Composer.tsx', import.meta.url), 'utf8')
 
@@ -632,8 +643,8 @@ describe('frontend component contracts', () => {
   test('wallet admin token adjustments keep production-facing ledger reasons', async () => {
     const walletSource = await Bun.file('apps/frontend/src/pages/WalletPage.tsx').text()
 
-    expect(walletSource).toContain('ผู้ดูแลเพิ่มโทเคน')
-    expect(walletSource).toContain('ผู้ดูแลหักโทเคน')
+    expect(walletSource).toContain('ผู้ดูแลเพิ่มเครดิตการใช้งาน')
+    expect(walletSource).toContain('ผู้ดูแลหักเครดิตการใช้งาน')
     expect(walletSource).toContain('IMAGE_GENERATION')
     expect(walletSource).toContain('สร้างรูป AI')
     expect(walletSource).not.toContain('manual_beta_grant')

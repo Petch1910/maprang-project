@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Coins, KeyRound, ShieldCheck, UserRound } from 'lucide-react'
+import { Gauge, KeyRound, ShieldCheck, UserRound } from 'lucide-react'
 import { AuthPanel } from '../components/AuthPanel'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadContentSettings, saveContentSettings, selectContentSettings } from '../store/slices/contentSlice'
@@ -476,25 +476,25 @@ export function ProfilePage() {
           <p className="m-0 mt-3 text-[11px] font-bold text-white/38">บันทึกล่าสุด: {formatSavedAt(savedAt)}</p>
         </div>
 
-        <p className="mt-5 text-sm font-black text-white/48">ยอดโทเคน</p>
+        <p className="mt-5 text-sm font-black text-white/48">เครดิตใช้งาน</p>
         <p className="font-display mt-2 text-4xl font-black text-[#f9c86d]">{tokenBalance.toLocaleString()}</p>
         {isLowToken && (
           <p className="mt-3 rounded-lg border border-amber-300/25 bg-amber-400/10 p-3 text-sm font-bold text-amber-100">
-            โทเคนใกล้หมดแล้ว
+            เครดิตใกล้หมดแล้ว
           </p>
         )}
 
         <div className="mt-5 space-y-2 text-sm font-bold text-white/55">
           <p className="m-0 font-black text-white">หมายเหตุการใช้งาน</p>
-          <p className="m-0">ระหว่าง AI กำลังตอบ ระบบจะกันการกดส่งซ้ำเพื่อลดการใช้โทเคนซ้ำ</p>
-          <p className="m-0">ตัวตนที่ยาวเกินไปจะใช้โทเคนมากขึ้น ควรเขียนให้ตรงประเด็น</p>
+          <p className="m-0">ระหว่าง AI กำลังตอบ ระบบจะกันการกดส่งซ้ำเพื่อลดการใช้เครดิตซ้ำ</p>
+          <p className="m-0">ตัวตนที่ยาวเกินไปจะใช้เครดิตมากขึ้น ควรเขียนให้ตรงประเด็น</p>
         </div>
 
         <div className="mt-5 border-t border-white/10 pt-5">
           <p className="m-0 text-sm font-black text-white">เครื่องมือบัญชี</p>
           <Link className="missai-button-primary mt-3 w-full bg-gradient-to-r from-[#f9c86d] to-[#f99c00] text-[#1a1206]" to="/wallet">
-            <Coins size={17} />
-            การใช้โทเคน
+            <Gauge size={17} />
+            เครดิตใช้งาน
           </Link>
           <Link className="missai-button-secondary mt-3 w-full" to="/moderation">
             <ShieldCheck size={17} />

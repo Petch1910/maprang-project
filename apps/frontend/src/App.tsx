@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
-import { Bell, Coins, Menu, SearchX, X } from 'lucide-react'
+import { Bell, Gauge, Menu, SearchX, X } from 'lucide-react'
 import { AgeGate } from './components/AgeGate'
 import { ToastContainer } from './components/Toast'
 import { missAiMobileNav, missAiNavSections, type MissAiNavItem } from './lib/missaiNavigation'
@@ -171,8 +171,8 @@ function MissAiSidebar({
           className="flex min-h-10 items-center gap-2 rounded-xl border border-[#f99c00]/25 bg-[#f99c00]/10 px-3 text-sm font-black text-[#f9c86d]"
           to="/wallet"
         >
-          <Coins className="size-4" />
-          <span className="min-w-0 flex-1 truncate">{tokenBalance.toLocaleString()} coins</span>
+          <Gauge className="size-4" />
+          <span className="min-w-0 flex-1 truncate">{tokenBalance.toLocaleString()} เครดิต</span>
         </NavLink>
         <div className="grid grid-cols-2 gap-2 text-xs font-black">
           <button className="rounded-xl border border-white/10 bg-white/5 px-2 py-2 text-white/65" type="button">
@@ -274,7 +274,7 @@ function App() {
                 <span className="min-w-0 truncate font-display text-base font-black tracking-wide">Maprang</span>
               </NavLink>
               <NavLink className="flex items-center gap-1 rounded-full bg-[#f99c00]/14 px-3 py-2 text-xs font-black text-[#f9c86d]" to="/wallet">
-                <Coins className="size-4" />
+                <Gauge className="size-4" />
                 {isWalletLoading ? '...' : tokenBalance.toLocaleString()}
               </NavLink>
               <NavLink className="relative rounded-xl border border-white/10 bg-white/5 p-2 text-white/65" to="/events">

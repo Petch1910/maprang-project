@@ -5,8 +5,8 @@ import {
   ChevronDown,
   ChevronRight,
   Clock3,
-  Coins,
   Flag,
+  Gauge,
   Heart,
   Image,
   MapPin,
@@ -65,9 +65,9 @@ type ChatPanelProps = {
 }
 
 function usageLabel(usage: ChatUsage | null) {
-  if (!usage) return 'ยังไม่มีการใช้โทเคนในรอบนี้'
+  if (!usage) return 'ยังไม่มีการใช้เครดิตในรอบนี้'
   const balance = typeof usage.tokenBalance === 'number' ? ` เหลือ ${usage.tokenBalance.toLocaleString()}` : ''
-  return `ใช้ ${usage.totalTokens.toLocaleString()} โทเคน${balance}`
+  return `ใช้ ${usage.totalTokens.toLocaleString()} เครดิต${balance}`
 }
 
 function providerFailureLabel(failure?: ChatUsage['providerFailure']) {
@@ -146,6 +146,195 @@ function CharacterStage({
             <span className="block text-white/35">จังหวะ</span>
             <span className="mt-0.5 block truncate text-white">{relationshipTierLabel(relationship?.tier)}</span>
           </span>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function compactDisplayText(value?: string | null, fallback = '') {
+  return displayMessageContent(value?.trim() || fallback).trim()
+}
+
+function openingParagraphs(character: Character, greeting?: string) {
+  const intro = compactDisplayText(
+    greeting || character.greeting,
+    'เธอเงยหน้าขึ้นมองคุณช้า ๆ เหมือนบทสนทนานี้เริ่มต้นก่อนที่ใครสักคนจะพูดออกมา',
+  )
+  const detail = compactDisplayText(character.description || character.tagline)
+  const scenario = compactDisplayText(character.scenario)
+  const biography = compactDisplayText(character.biography)
+
+  return [intro, scenario, detail, biography]
+    .filter(Boolean)
+    .filter((item, index, all) => all.findIndex((candidate) => candidate === item) === index)
+    .slice(0, 4)
+}
+
+function OpeningInfoRow({
+  title,
+  detail,
+  icon: Icon,
+  defaultOpen = false,
+}: {
+  title: string
+  detail: string
+  icon: typeof BookOpen
+  defaultOpen?: boolean
+}) {
+  return (
+    <details
+      className="group rounded-xl border border-[#f3a0c2]/30 bg-[#30131f]/62 text-rose-50 shadow-[0_12px_34px_rgba(0,0,0,0.2)]"
+      data-testid={`chat-opening-section-${title}`}
+      open={defaultOpen}
+    >
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 text-sm font-black">
+        <span className="flex min-w-0 items-center gap-2">
+          <Icon className="flex-none text-[#ff9ec2]" size={16} />
+          <span className="truncate">{title}</span>
+        </span>
+        <ChevronRight className="flex-none text-rose-100/55 transition group-open:rotate-90" size={16} />
+      </summary>
+      <p className="m-0 border-t border-[#f3a0c2]/16 px-3 pb-3 pt-2 text-sm font-semibold leading-7 text-rose-50/78">
+        {detail}
+      </p>
+    </details>
+  )
+}
+
+function OpeningSceneCard({
+  character,
+  disabled,
+  greeting,
+  runtimeState,
+  onPick,
+}: {
+  character: Character
+  disabled: boolean
+  greeting?: string
+  runtimeState: ChatRuntimeState | null
+  onPick: (message: string) => void
+}) {
+  const paragraphs = openingParagraphs(character, greeting)
+  const relationship = runtimeState?.relationshipState
+  const visibleTags = character.tags.slice(0, 5)
+  const infoRows = [
+    {
+      title: 'บทบาท',
+      detail: compactDisplayText(character.description || character.characterAnchor, displayCharacterSummary(character)),
+      icon: UserRound,
+      defaultOpen: true,
+    },
+    {
+      title: 'ฉากเริ่ม',
+      detail: compactDisplayText(
+        character.scenario,
+        'เริ่มจากจังหวะเงียบที่เปิดพื้นที่ให้ผู้เล่นเลือกว่าจะเข้าใกล้ ถอยห่าง หรือทดสอบน้ำเสียงของตัวละคร',
+      ),
+      icon: MapPin,
+    },
+    {
+      title: 'พื้นหลัง',
+      detail: compactDisplayText(character.biography, displayCharacterDetail(character)),
+      icon: BookOpen,
+    },
+    {
+      title: 'ความสัมพันธ์',
+      detail: `${relationshipStatusLabel(relationship?.status)} · ${relationshipTierLabel(relationship?.tier)} · ${relationship?.tone || 'เริ่มต้นแบบค่อยเป็นค่อยไป'}`,
+      icon: Heart,
+    },
+  ].filter((row) => row.detail)
+
+  const openingChoices = [
+    {
+      label: 'เดินเข้าไปทัก',
+      value: 'ฉันเดินเข้าไปใกล้ขึ้นเล็กน้อย แล้วเริ่มทักด้วยน้ำเสียงที่ไม่เร่งรัด',
+    },
+    {
+      label: 'ถามเรื่องสถานที่',
+      value: 'ที่นี่ดูมีเรื่องราวมากกว่าที่เห็นนะ... เธอมาที่นี่บ่อยเหรอ?',
+    },
+    {
+      label: 'สังเกตท่าที',
+      value: 'ฉันยังไม่พูดทันที แค่สังเกตสีหน้าและบรรยากาศรอบตัวเธอก่อน',
+    },
+    {
+      label: 'ให้เธอเริ่มก่อน',
+      value: 'ฉันรอให้เธอเป็นฝ่ายพูดก่อน เพื่อดูว่าเธออยากเปิดบทสนทนายังไง',
+    },
+  ]
+
+  return (
+    <section
+      className="mx-auto w-full max-w-[760px] overflow-hidden rounded-2xl border border-[#f3a0c2]/40 bg-[#fff1f5] text-[#35111d] shadow-[0_28px_95px_rgba(0,0,0,0.38)]"
+      data-testid="chat-opening-scene-card"
+    >
+      <div className="border-b border-[#f3a0c2]/36 bg-[#ffe4ec] px-4 py-3 sm:px-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-[#f3a0c2]/55 bg-white/72 px-2.5 py-1 text-[11px] font-black text-[#b3245b]">
+            {character.name}
+          </span>
+          <span className="rounded-full border border-[#f3a0c2]/55 bg-white/72 px-2.5 py-1 text-[11px] font-black text-[#7d2448]">
+            {relationshipStatusLabel(relationship?.status)}
+          </span>
+          <span className="rounded-full border border-[#f3a0c2]/55 bg-white/72 px-2.5 py-1 text-[11px] font-black text-[#7d2448]">
+            {compactSceneLabel(runtimeState)}
+          </span>
+          {visibleTags.map((tag) => (
+            <span
+              className="rounded-full border border-[#f3a0c2]/38 bg-[#fff8fb] px-2.5 py-1 text-[11px] font-black text-[#8f3157]"
+              key={tag}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-4 px-4 py-4 sm:px-5">
+        <div className="space-y-3 text-sm font-semibold leading-7 text-[#451424]">
+          {paragraphs.map((paragraph) => (
+            <p className="m-0 whitespace-pre-wrap" key={paragraph}>
+              {paragraph}
+            </p>
+          ))}
+        </div>
+
+        <div className="grid gap-2">
+          {infoRows.map((row) => (
+            <OpeningInfoRow
+              defaultOpen={row.defaultOpen}
+              detail={row.detail}
+              icon={row.icon}
+              key={row.title}
+              title={row.title}
+            />
+          ))}
+        </div>
+
+        <div className="rounded-xl border border-[#f3a0c2]/32 bg-white/64 p-2.5">
+          <p className="m-0 px-1 pb-2 text-xs font-black text-[#9f2c59]">เลือกจังหวะเริ่มบทสนทนา</p>
+          <div className="grid gap-2">
+            {openingChoices.map((choice, index) => (
+              <button
+                aria-disabled={disabled}
+                className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-[#f3a0c2]/30 bg-[#fff7fa] px-3 text-left text-sm font-black text-[#5a1930] transition hover:border-[#ff7eb0] hover:bg-white disabled:cursor-not-allowed disabled:opacity-55"
+                disabled={disabled}
+                key={choice.label}
+                onClick={() => onPick(choice.value)}
+                title={disabled ? 'รอคำตอบปัจจุบันให้เสร็จก่อน' : choice.label}
+                type="button"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="grid size-6 flex-none place-items-center rounded-full bg-[#ef5f9b]/14 text-xs text-[#b3245b]">
+                    {index + 1}
+                  </span>
+                  <span className="truncate">{choice.label}</span>
+                </span>
+                <ChevronRight className="flex-none text-[#b3245b]/62" size={16} />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -289,8 +478,8 @@ function MobileQuickActions({
         onClick={onOpenWallet}
       >
         <span className="flex items-center gap-1 text-white/42">
-          <Coins size={13} />
-          โทเคน
+          <Gauge size={13} />
+          เครดิต
         </span>
         <span className="mt-0.5 block truncate">{tokenBalance.toLocaleString()}</span>
       </button>
@@ -323,7 +512,7 @@ function QuickStartPrompts({
   disabled: boolean
   onPick: (message: string) => void
 }) {
-  const disabledReason = disabled ? 'กำลังตอบอยู่หรือโทเคนไม่พอ จึงยังใช้คำชวนคุยไม่ได้' : ''
+  const disabledReason = disabled ? 'กำลังตอบอยู่หรือเครดิตไม่พอ จึงยังใช้คำชวนคุยไม่ได้' : ''
 
   return (
     <div className="mx-auto w-full max-w-3xl rounded-xl border border-white/10 bg-black/24 p-2.5 text-white shadow-[0_18px_52px_rgba(0,0,0,0.24)] backdrop-blur-xl">
@@ -752,7 +941,7 @@ function RightRail({
               : 'ยังไม่มีข้อมูล'
           }
         />
-        <InfoLine label="โทเคนรอบล่าสุด" value={usage ? usage.totalTokens.toLocaleString() : '0'} />
+        <InfoLine label="เครดิตรอบล่าสุด" value={usage ? usage.totalTokens.toLocaleString() : '0'} />
         <InfoLine label="คลังความรู้ที่ดึงมาใช้" value={String(usage?.contextLoreCount ?? 0)} />
         <InfoLine
           label="งบพรอมป์"
@@ -945,6 +1134,10 @@ export function ChatPanel({
   )
   const hasUserTurn = visibleMessages.some((chat) => chat.role === 'user')
   const showIntro = !hasUserTurn && visibleMessages.length <= 2
+  const openingMessage = showIntro ? visibleMessages.find((chat) => chat.role === 'assistant') : undefined
+  const timelineMessages = showIntro && openingMessage
+    ? visibleMessages.filter((chat) => chat.id !== openingMessage.id)
+    : visibleMessages
   const readingWidthClass = isReadMode ? 'max-w-[700px]' : 'max-w-[820px]'
   const relationshipLabel = relationshipStatusLabel(runtimeState?.relationshipState.status)
   const relationshipTier = relationshipTierLabel(runtimeState?.relationshipState.tier)
@@ -1104,8 +1297,8 @@ export function ChatPanel({
                     }}
                     type="button"
                   >
-                    <Coins size={16} />
-                    กระเป๋าโทเคน
+                    <Gauge size={16} />
+                    เครดิตใช้งาน
                   </button>
                   <div className="my-1 h-px bg-white/8" />
                   <p className="m-0 px-3 py-1 text-[11px] font-black text-white/42">คุณภาพคำตอบ</p>
@@ -1154,11 +1347,20 @@ export function ChatPanel({
                 โหมดอ่านเปิดอยู่ พื้นที่ข้อความถูกบีบให้พอดีสายตา
               </div>
             )}
-            {showIntro && !isReadMode && <CharacterStage character={character} chatId={chatId} runtimeState={runtimeState} />}
+            {showIntro && !isReadMode && (
+              <OpeningSceneCard
+                character={character}
+                disabled={isLoading || isOutOfTokens}
+                greeting={openingMessage?.content}
+                onPick={(value) => onSendMessage(value)}
+                runtimeState={runtimeState}
+              />
+            )}
+            {showIntro && isReadMode && <CharacterStage character={character} chatId={chatId} runtimeState={runtimeState} />}
             <SceneBar isLoading={isLoading} onSceneAction={onSceneAction} runtimeState={runtimeState} />
 
             <div className="flex flex-col gap-3.5">
-              {visibleMessages.map((chat) => (
+              {timelineMessages.map((chat) => (
                 <MessageBubble
                   assistantAvatarUrl={character.avatarUrl}
                   assistantName={character.name}
@@ -1168,13 +1370,13 @@ export function ChatPanel({
                   onReport={onReportMessage}
                 />
               ))}
-              {isLoading && visibleMessages.at(-1)?.role !== 'assistant' && (
+              {isLoading && timelineMessages.at(-1)?.role !== 'assistant' && (
                 <p className="self-start rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-sm text-white/55 backdrop-blur-md">
                   กำลังพิมพ์...
                 </p>
               )}
             </div>
-            {showIntro && (
+            {showIntro && isReadMode && (
               <QuickStartPrompts disabled={isLoading || isOutOfTokens} onPick={(value) => onSendMessage(value)} />
             )}
             <div ref={chatEndRef} />
@@ -1198,12 +1400,12 @@ export function ChatPanel({
                   : 'border-amber-300/30 bg-amber-400/12 text-amber-100'
               }`}
             >
-              <span>{isOutOfTokens ? 'โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อใช้งานแชท AI' : `โทเคนเหลือน้อย: ${tokenBalance.toLocaleString()} ควรเพิ่มโทเคนหากเล่นฉากยาว`}</span>
+              <span>{isOutOfTokens ? 'เครดิตหมดแล้ว กรุณาให้ผู้ดูแลเพิ่มเครดิตสำหรับใช้งานแชท AI' : `เครดิตเหลือน้อย: ${tokenBalance.toLocaleString()} ควรลดความยาวฉากหรือให้ผู้ดูแลเพิ่มเครดิต`}</span>
               <button type="button"
                 className="missai-button-secondary min-h-8 rounded-lg px-3 text-[11px]"
                 onClick={onOpenWallet}
               >
-                กระเป๋าโทเคน
+                เครดิตใช้งาน
               </button>
             </div>
           )}
@@ -1214,7 +1416,7 @@ export function ChatPanel({
               message={message}
               onMessageChange={onMessageChange}
               onSubmit={() => onSendMessage()}
-              sendDisabledReason={isLocalChatRuntime ? 'กำลังตอบอยู่ กรุณารอคำตอบก่อนส่งต่อ' : 'โทเคนหมดแล้ว กรุณาเพิ่มโทเคนเพื่อส่งข้อความ'}
+              sendDisabledReason={isLocalChatRuntime ? 'กำลังตอบอยู่ กรุณารอคำตอบก่อนส่งต่อ' : 'เครดิตหมดแล้ว กรุณาให้ผู้ดูแลเพิ่มเครดิตเพื่อส่งข้อความ'}
             />
           </div>
           <p className="m-0 pb-2 text-center text-[11px] font-bold text-white/30">อย่าลืม: ทุกสิ่งที่ตัวละครพูดเป็นการแต่งเรื่อง</p>

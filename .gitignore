@@ -23,6 +23,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 /backups/
 *.dump
 *.backup
+apps/backend/uploads/avatars/*.webp
 
 # dotenv environment variable files
 .env

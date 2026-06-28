@@ -30,7 +30,7 @@ const mockCreators: Creator[] = [
     name: 'สไลม์นักโรลเพลย์',
     avatarLetter: 'ส',
     badge: 'gold',
-    badgeLabel: 'นักเขียนเหรียญทอง',
+    badgeLabel: 'นักสร้างยอดนิยม',
     creationsCount: 18,
     totalChats: '840k',
     popularCharacter: 'อาจารย์เซน (Mentor)',

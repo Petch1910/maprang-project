@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Bell, ChevronLeft, ChevronRight, Coins, Dice5, Search, Sparkles, WandSparkles, X } from 'lucide-react'
+import { Bell, ChevronLeft, ChevronRight, Dice5, Gauge, Search, Sparkles, WandSparkles, X } from 'lucide-react'
 import type { Character, CharacterListFilters } from '../lib/api'
 import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 import { displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
@@ -527,10 +527,10 @@ export function ExplorePage() {
               />
             </label>
             <div className="hidden items-center gap-2 rounded-full border border-[#f99c00]/30 bg-[#f99c00]/10 px-3 py-2 text-sm font-black text-[#f9c86d] xl:flex">
-              <Coins size={16} />
-               <span>{tokenBalance.toLocaleString()} โทเคน</span>
+              <Gauge size={16} />
+               <span>{tokenBalance.toLocaleString()} เครดิต</span>
               <Link className="ml-2 rounded-full bg-gradient-to-r from-[#f9c86d] to-[#f99c00] px-4 py-1 text-xs font-black text-[#1a1206]" to="/wallet">
-                เติมโทเคน
+                ดูการใช้
               </Link>
             </div>
             <button

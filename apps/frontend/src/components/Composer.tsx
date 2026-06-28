@@ -40,7 +40,7 @@ export function Composer({
   const busyDisabledReason = disabled ? 'ระบบกำลังตอบอยู่ รอให้จบก่อนใช้งาน' : ''
   const sendButtonTitle = canSend
     ? 'ส่งข้อความ'
-    : busyDisabledReason || (!canSubmit ? sendDisabledReason || 'โทเคนไม่พอสำหรับส่งข้อความ' : 'พิมพ์ข้อความก่อนส่ง')
+    : busyDisabledReason || (!canSubmit ? sendDisabledReason || 'เครดิตไม่พอสำหรับส่งข้อความ' : 'พิมพ์ข้อความก่อนส่ง')
 
   const handleSubmitRequest = () => {
     if (!canSend || submitLockRef.current) return

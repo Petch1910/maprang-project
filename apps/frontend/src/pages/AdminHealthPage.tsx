@@ -220,7 +220,7 @@ function routeAuditRows() {
     { area: 'แชท', route: '/chat', status: 'พร้อมในเครื่อง', detail: 'ส่งข้อความ local, scene notice, report, และเมนูแชทมี action หรือ confirm' },
     { area: 'สร้างตัวละคร', route: '/create', status: 'พร้อมในเครื่อง', detail: 'สร้างร่าง อัปโหลด ลิงก์รูป ตรวจความพร้อม และเผยแพร่ผ่านหลังบ้าน' },
     { area: 'ผู้ช่วยสร้างภาพ', route: '/ai-creator', status: 'พร้อมในเครื่อง', detail: 'มีสถานะกำลังโหลด ถูกจำกัด ภาพสำรอง คลังผลงาน แกลเลอรี และนำงานกลับมาใช้ต่อ' },
-    { area: 'กระเป๋าโทเคน', route: '/wallet', status: 'พร้อม', detail: 'ดูยอด ใช้งานล่าสุด และโหมด developer key โดยไม่เก็บ raw key ถาวร' },
+    { area: 'เครดิตใช้งาน', route: '/wallet', status: 'พร้อม', detail: 'ดูยอดเครดิต ใช้งานล่าสุด และโหมด developer key โดยไม่เก็บ raw key ถาวร' },
     { area: 'อีเวนต์', route: '/events', status: 'พร้อม', detail: 'รวม pending scene และพากลับเข้าแชทได้' },
     { area: 'ผู้ดูแลรายงาน', route: '/moderation', status: 'มีสิทธิ์เท่านั้น', detail: 'ต้องมี ADMIN_API_KEY ก่อนเรียก action ผู้ดูแล' },
     { area: 'ตัวตรวจพรอมป์', route: '/admin/prompt-inspector', status: 'มีสิทธิ์เท่านั้น', detail: 'ตรวจพรอมป์และส่วนต่างได้ด้วย ADMIN_API_KEY' },

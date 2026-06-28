@@ -119,7 +119,7 @@ function auditActionLabel(action: AdminAuditLog['action']) {
     HIDE_CHARACTER: 'ซ่อนตัวละคร',
     ARCHIVE_MESSAGE: 'จัดเก็บข้อความ',
     HIDE_GENERATION_OUTPUT: 'ซ่อนผลงานสร้าง',
-    TOKEN_ADJUSTMENT: 'ปรับโทเคน',
+    TOKEN_ADJUSTMENT: 'ปรับเครดิต',
   }
   return labels[action] ?? action
 }

@@ -218,7 +218,7 @@ export function useAiCreatorLibraryActions({
         await retryGenerationJob(item.backendJobId)
         await reloadBackendHistory()
         setCurrentPage(1)
-        setStatusMessage('บันทึกงานสร้างซ้ำแล้ว ระบบยังไม่หักโทเคนจนกว่างานจริงจะถูกเข้าคิว')
+        setStatusMessage('บันทึกงานสร้างซ้ำแล้ว ระบบยังไม่หักเครดิตจนกว่างานจริงจะถูกเข้าคิว')
       } catch (err) {
         logUnexpectedError('สร้างงาน AI Creator ซ้ำไม่สำเร็จ', err)
         setStatusMessage(err instanceof ApiError ? err.message : 'สร้างงานซ้ำไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')
@@ -251,7 +251,7 @@ export function useAiCreatorLibraryActions({
           setDetailItem({ ...item, backendJobStatus: result.job.status, brief: result.job.message })
         }
         await reloadBackendHistory()
-        setStatusMessage('ยกเลิกงานสร้างแล้ว ระบบไม่หักโทเคนเพิ่มจากคำสั่งนี้')
+        setStatusMessage('ยกเลิกงานสร้างแล้ว ระบบไม่หักเครดิตเพิ่มจากคำสั่งนี้')
       } catch (err) {
         logUnexpectedError('ยกเลิกงาน AI Creator ไม่สำเร็จ', err)
         setStatusMessage(err instanceof ApiError ? err.message : 'ยกเลิกงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')

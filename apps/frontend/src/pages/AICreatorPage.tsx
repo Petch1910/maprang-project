@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { AiCreatorBlockedStateMatrix } from '../components/ai-creator/AiCreatorBlockedStateMatrix'
 import { AiCreatorControlPanel } from '../components/ai-creator/AiCreatorControlPanel'
-import { AiCreatorHistoryGallery } from '../components/ai-creator/AiCreatorHistoryGallery'
 import { AiCreatorHistoryDetailDialog } from '../components/ai-creator/AiCreatorHistoryDetailDialog'
+import { AiCreatorHistoryGallery } from '../components/ai-creator/AiCreatorHistoryGallery'
 import { AiCreatorPublicGalleryPanel } from '../components/ai-creator/AiCreatorPublicGalleryPanel'
 import { AiCreatorResultPreview } from '../components/ai-creator/AiCreatorResultPreview'
 import { ReportDialog } from '../components/ReportDialog'
-import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 import { useAiCreatorCharacterOptions } from '../hooks/useAiCreatorCharacterOptions'
 import { useAiCreatorDownloads } from '../hooks/useAiCreatorDownloads'
 import { useAiCreatorGeneration } from '../hooks/useAiCreatorGeneration'
@@ -30,31 +29,25 @@ import {
   type AiCreatorGeneratedItem,
   type AiCreatorMode,
 } from '../lib/aiCreator'
+import { currentRoutePath, trackFrontendEventSafe } from '../lib/analytics'
 
 const aiCreatorBlockedStateMatrix = buildAiCreatorBlockedStateMatrix()
 
 export function AICreatorPage() {
-  // Navigation & Character States
   const characters = useAiCreatorCharacterOptions(40)
   const [selectedCharacterId, setSelectedCharacterId] = useState('')
   const [activeTab, setActiveTab] = useState<AiCreatorMode>('image')
-
-  // Form Inputs
   const [brief, setBrief] = useState('')
   const [imagePrompt, setImagePrompt] = useState('')
   const [imageStyle, setImageStyle] = useState('realistic')
-
-  // Video Inputs
   const [videoPrompt, setVideoPrompt] = useState('')
   const [videoDuration, setVideoDuration] = useState<number>(5)
   const [videoTemplate, setVideoTemplate] = useState(AI_CREATOR_VIDEO_DEFAULT_TEMPLATE)
-
-  // App States
   const [statusMessage, setStatusMessage] = useState('')
   const [lastResult, setLastResult] = useState<AiCreatorGeneratedItem | null>(null)
   const [detailItem, setDetailItem] = useState<AiCreatorGeneratedItem | null>(null)
+  const [reportTarget, setReportTarget] = useState<AiCreatorGeneratedItem | null>(null)
 
-  // History stored in LocalStorage
   const {
     history,
     prependHistoryItem,
@@ -70,7 +63,6 @@ export function AICreatorPage() {
     reloadBackendHistory,
     reloadPublicGallery,
   } = useAiCreatorRemoteGalleries({ onStatusMessage: setStatusMessage })
-  const [reportTarget, setReportTarget] = useState<AiCreatorGeneratedItem | null>(null)
   const {
     combinedHistory,
     currentPage,
@@ -81,16 +73,6 @@ export function AICreatorPage() {
     setCurrentPage,
     handleFilterChange,
   } = useAiCreatorHistoryView(backendHistory, history)
-
-  useEffect(() => {
-    trackFrontendEventSafe({
-      eventName: 'ai_creator_opened',
-      route: currentRoutePath(),
-      entityType: 'surface',
-      entityId: 'ai-creator',
-    })
-  }, [])
-
   const {
     downloadingItemId,
     downloadLinks,
@@ -114,7 +96,17 @@ export function AICreatorPage() {
     setReferenceVideo,
     setReferenceVideoMeta,
   } = useAiCreatorUploadReferences(videoDuration, setStatusMessage)
-  const { isGenerating, handleGenerate, handleTemplateClick } = useAiCreatorGeneration({
+
+  useEffect(() => {
+    trackFrontendEventSafe({
+      eventName: 'ai_creator_opened',
+      route: currentRoutePath(),
+      entityType: 'surface',
+      entityId: 'ai-creator',
+    })
+  }, [])
+
+  const { isGenerating, handleGenerate } = useAiCreatorGeneration({
     activeTab,
     brief,
     characters,
@@ -184,12 +176,13 @@ export function AICreatorPage() {
     setLastResult(item)
     setDetailItem(null)
     setBrief(item.brief)
+
     if (item.type === 'video') {
       setActiveTab('video')
       setVideoPrompt(item.prompt)
       setVideoDuration(item.duration || 5)
       setVideoTemplate(item.motionTemplate || AI_CREATOR_VIDEO_DEFAULT_TEMPLATE)
-      
+
       if (item.librarySource === 'backend' && item.url) {
         setReferenceVideo(item.url)
         setReferenceVideoMeta({
@@ -198,19 +191,20 @@ export function AICreatorPage() {
           sizeLabel: 'ไฟล์ระยะไกล',
         })
       }
-    } else {
-      setActiveTab('image')
-      setImagePrompt(item.prompt)
-      setImageStyle(item.style)
-      
-      if (item.librarySource === 'backend' && item.url) {
-        setReferenceImage(item.url)
-        setReferenceImageMeta({
-          name: 'แกลเลอรีสาธารณะ (รูปภาพ)',
-          typeLabel: 'รูปอ้างอิง',
-          sizeLabel: 'ไฟล์ระยะไกล',
-        })
-      }
+      return
+    }
+
+    setActiveTab('image')
+    setImagePrompt(item.prompt)
+    setImageStyle(item.style)
+
+    if (item.librarySource === 'backend' && item.url) {
+      setReferenceImage(item.url)
+      setReferenceImageMeta({
+        name: 'แกลเลอรีสาธารณะ (รูปภาพ)',
+        typeLabel: 'รูปอ้างอิง',
+        sizeLabel: 'ไฟล์ระยะไกล',
+      })
     }
   }
 
@@ -227,6 +221,8 @@ export function AICreatorPage() {
     brief,
     prompt: imagePrompt,
     isGenerating,
+    requiredUploadCount: activeTab === 'template' ? AI_CREATOR_UPLOAD_SLOT_RULES.imageToImage.length : 0,
+    uploadedCount: activeTab === 'template' && referenceImage ? 1 : 0,
     inputError: imageInputError,
   })
   const videoGenerateBlockReason = getAiCreatorGenerateBlockReason({
@@ -243,136 +239,127 @@ export function AICreatorPage() {
 
   return (
     <div className="missai-page text-white" data-testid="ai-creator-page">
-      <div className="missai-shell max-w-7xl">
-        {/* Upper bar */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
-          <Link
-            to="/create"
-            className="missai-button-secondary min-h-10 rounded-xl px-4 text-xs"
-          >
+      <div className="missai-shell max-w-[86rem]">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+          <Link className="missai-button-secondary min-h-10 rounded-xl px-4 text-xs" to="/create">
             <ArrowLeft size={14} />
-            กลับสู่ห้องควบคุมหลัก
+            กลับไปหน้าสร้างตัวละคร
           </Link>
 
           <div className="text-right">
-            <div className="flex items-center gap-2 justify-end">
-              <span className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider shadow-[0_2px_12px_rgba(168,85,247,0.3)]">
-                CG造物主
+            <div className="flex items-center justify-end gap-2">
+              <span className="rounded-xl bg-[#ac4bff] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-[0_2px_12px_rgba(172,75,255,0.3)]">
+                ผู้ช่วยสร้างรูป
               </span>
-              <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-300 to-cyan-400">
-                หน้าออกแบบภาพร่างและโมเดลเคลื่อนไหว
-              </h1>
+              <h1 className="text-2xl font-black text-white">ห้องสร้างรูปและสื่อของมะปราง</h1>
             </div>
-            <p className="text-xs font-medium text-[#6b7280] mt-1">
-              ระบบควบคุมภาพและวิดีโออัจฉริยะผ่านสิทธิ์ผู้ให้บริการคีย์ตรง (Enterprise Direct Key Creator Surface)
+            <p className="mt-1 text-xs font-bold text-slate-500">
+              เลือกแม่แบบ ใส่คำสั่ง สร้างรูป เก็บเข้าคลัง และส่งต่อไปยังหน้าสตูดิโอสร้างตัวละครได้ในหน้าเดียว
             </p>
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-12">
-          {/* Left Side: Dynamic Multi-Tab Controls */}
-          <section className="lg:col-span-5 space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,36rem)_minmax(0,1fr)]">
+          <section className="space-y-6">
             <AiCreatorControlPanel
               activeTab={activeTab}
-              characters={characters}
-              selectedCharacterId={selectedCharacterId}
               brief={brief}
+              characters={characters}
+              imageGenerateBlockReason={imageGenerateBlockReason}
               imagePrompt={imagePrompt}
               imageStyle={imageStyle}
-              referenceImage={referenceImage}
-              referenceImageMeta={referenceImageMeta}
-              videoPrompt={videoPrompt}
-              videoDuration={videoDuration}
-              videoDurationFillPercent={videoDurationFillPercent}
-              videoTemplate={videoTemplate}
-              referenceVideo={referenceVideo}
-              referenceVideoMeta={referenceVideoMeta}
               isGenerating={isGenerating}
-              statusMessage={statusMessage}
-              imageGenerateBlockReason={imageGenerateBlockReason}
-              videoGenerateBlockReason={videoGenerateBlockReason}
-              videoProviderNotice={AI_CREATOR_VIDEO_PROVIDER_NOTICE}
+              onBriefChange={setBrief}
+              onClearImageReference={clearImageReference}
+              onClearVideoReference={clearVideoReference}
+              onGenerate={handleGenerate}
+              onImagePromptChange={setImagePrompt}
+              onImageReferenceFile={handleImageReferenceFile}
+              onImageStyleChange={setImageStyle}
+              onSelectedCharacterIdChange={setSelectedCharacterId}
               onTabChange={(tab) => {
                 setActiveTab(tab)
                 setStatusMessage('')
               }}
-              onSelectedCharacterIdChange={setSelectedCharacterId}
-              onBriefChange={setBrief}
-              onImagePromptChange={setImagePrompt}
-              onImageStyleChange={setImageStyle}
-              onImageReferenceFile={handleImageReferenceFile}
-              onClearImageReference={clearImageReference}
-              onVideoPromptChange={setVideoPrompt}
               onVideoDurationChange={setVideoDuration}
-              onVideoTemplateChange={setVideoTemplate}
+              onVideoPromptChange={setVideoPrompt}
               onVideoReferenceFile={handleVideoReferenceFile}
-              onClearVideoReference={clearVideoReference}
-              onGenerate={handleGenerate}
-              onTemplateClick={(template) => void handleTemplateClick(template)}
+              onVideoTemplateChange={setVideoTemplate}
+              referenceImage={referenceImage}
+              referenceImageMeta={referenceImageMeta}
+              referenceVideo={referenceVideo}
+              referenceVideoMeta={referenceVideoMeta}
+              selectedCharacterId={selectedCharacterId}
+              statusMessage={statusMessage}
+              videoDuration={videoDuration}
+              videoDurationFillPercent={videoDurationFillPercent}
+              videoGenerateBlockReason={videoGenerateBlockReason}
+              videoPrompt={videoPrompt}
+              videoProviderNotice={AI_CREATOR_VIDEO_PROVIDER_NOTICE}
+              videoTemplate={videoTemplate}
             />
           </section>
 
-          {/* Right Side: Interactive Preview surface */}
-          <section className="lg:col-span-7">
+          <section>
             <AiCreatorResultPreview
-              result={lastResult}
               copiedPrompt={copiedPrompt}
-              onSaveToStudio={(response) => void handleSaveToStudio(response)}
               onCopySystemPrompt={() => handleCopySystemPrompt(lastResult)}
+              onSaveToStudio={(response) => void handleSaveToStudio(response)}
+              result={lastResult}
             />
           </section>
         </div>
 
         <AiCreatorHistoryGallery
-          historyCount={history.length}
-          filteredCount={filteredHistory.length}
-          items={paginatedHistory}
-          galleryFilter={galleryFilter}
           currentPage={currentPage}
-          totalPages={totalPages}
-          onFilterChange={handleFilterChange}
-          onPageChange={setCurrentPage}
-          onOpenItem={handleOpenHistoryDetail}
-          onReuseItem={handleReuseFromHistory}
-          onUseAsCharacterImage={(item) => void handleUseAsCharacterImage(item)}
-          onToggleFavorite={toggleHistoryFavorite}
-          onDeleteItem={deleteHistoryItem}
+          filteredCount={filteredHistory.length}
+          galleryFilter={galleryFilter}
+          historyCount={history.length}
+          items={paginatedHistory}
           onClearHistory={clearHistory}
+          onDeleteItem={deleteHistoryItem}
+          onFilterChange={handleFilterChange}
+          onOpenItem={handleOpenHistoryDetail}
+          onPageChange={setCurrentPage}
+          onReuseItem={handleReuseFromHistory}
+          onToggleFavorite={toggleHistoryFavorite}
+          onUseAsCharacterImage={(item) => void handleUseAsCharacterImage(item)}
+          totalPages={totalPages}
         />
 
         <AiCreatorPublicGalleryPanel
           privateItemCount={combinedHistory.length}
           publicItems={publicHistory}
-          onOpenItem={handleOpenHistoryDetail}
-          onReuseItem={handleReuseFromHistory}
           onCreateFocus={() => {
             setActiveTab('image')
             setStatusMessage('สร้างชิ้นงานใหม่ได้จากแผงด้านบน')
           }}
+          onOpenItem={handleOpenHistoryDetail}
+          onReuseItem={handleReuseFromHistory}
         />
 
         <AiCreatorBlockedStateMatrix states={aiCreatorBlockedStateMatrix} />
 
         <AiCreatorHistoryDetailDialog
-          item={detailItem}
-          onClose={() => setDetailItem(null)}
-          onReuse={handleReuseFromHistory}
-          onDelete={deleteHistoryItem}
-          onToggleFavorite={toggleHistoryFavorite}
-          onUseAsCharacterImage={(item) => void handleUseAsCharacterImage(item)}
-          onUseAsCover={(item) => void handleUseAsCover(item)}
-          onCopySystemPrompt={handleCopyHistorySystemPrompt}
-          onDownload={(item) => void handleDownloadHistoryItem(item)}
-          onRetry={(item) => void handleRetryHistoryItem(item)}
-          onCancel={(item) => void handleCancelHistoryItem(item)}
-          onTogglePublish={toggleHistoryPublish}
-          onReport={(item) => setReportTarget(item)}
-          downloadLink={detailItem ? downloadLinks[detailItem.id] ?? null : null}
-          downloadingItemId={downloadingItemId}
-          retryingItemId={retryingItemId}
           cancellingItemId={cancellingItemId}
           creatorReferenceAction={creatorReferenceAction}
+          downloadLink={detailItem ? downloadLinks[detailItem.id] ?? null : null}
+          downloadingItemId={downloadingItemId}
           isPublishing={isPublishing}
+          item={detailItem}
+          onCancel={(item) => void handleCancelHistoryItem(item)}
+          onClose={() => setDetailItem(null)}
+          onCopySystemPrompt={handleCopyHistorySystemPrompt}
+          onDelete={deleteHistoryItem}
+          onDownload={(item) => void handleDownloadHistoryItem(item)}
+          onReport={(item) => setReportTarget(item)}
+          onRetry={(item) => void handleRetryHistoryItem(item)}
+          onReuse={handleReuseFromHistory}
+          onToggleFavorite={toggleHistoryFavorite}
+          onTogglePublish={toggleHistoryPublish}
+          onUseAsCharacterImage={(item) => void handleUseAsCharacterImage(item)}
+          onUseAsCover={(item) => void handleUseAsCover(item)}
+          retryingItemId={retryingItemId}
         />
 
         <ReportDialog
@@ -383,7 +370,7 @@ export function AICreatorPage() {
               ? {
                   targetType: 'GENERATION_OUTPUT',
                   title: reportTarget.response.draft.name,
-                  preview: `Prompt: ${reportTarget.prompt}\nBrief: ${reportTarget.brief}`,
+                  preview: `คำสั่ง: ${reportTarget.prompt}\nบริบท: ${reportTarget.brief}`,
                 }
               : null
           }

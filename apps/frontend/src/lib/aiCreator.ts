@@ -143,7 +143,7 @@ export const AI_CREATOR_VIDEO_MAX_SECONDS = 10
 export const AI_CREATOR_VIDEO_DEFAULT_TEMPLATE = 'gentle-breeze'
 export const AI_CREATOR_VIDEO_PROVIDER_STATUS: AiCreatorProviderStatus = 'missing'
 export const AI_CREATOR_VIDEO_PROVIDER_NOTICE =
-  'โหมดวิดีโอ/Advanced Video ยังเป็นสัญญาหน้าจอสำหรับเตรียมงาน ยังไม่เปิด provider สร้างวิดีโอจริงใน production'
+  'โหมดวิดีโอและวิดีโอขั้นสูงยังเป็นหน้าจอเตรียมงานในเวอร์ชันเครื่องนี้ ระบบยังไม่เปิดบริการสร้างวิดีโอจริง'
 export const AI_CREATOR_UPLOAD_SLOT_RULES = {
   textToImage: [] as AiCreatorUploadSlotRule[],
   imageToImage: [
@@ -383,7 +383,7 @@ export function getAiCreatorCancelActionState(item: AiCreatorGeneratedItem): AiC
       canCancel: true,
       mode: 'backend',
       label: 'ยกเลิกงาน',
-      title: 'ยกเลิกงานสร้างนี้โดยไม่หักโทเคนเพิ่ม',
+      title: 'ยกเลิกงานสร้างนี้โดยไม่หักเครดิตเพิ่ม',
     }
   }
 
@@ -927,7 +927,7 @@ export function getAiCreatorGenerateBlockState({
     return {
       code: 'running_job',
       title: 'ระบบกำลังประมวลผลอยู่',
-      cause: 'มีงาน Generate ที่ยังไม่จบ ระบบจึงกันการยิงซ้ำเพื่อไม่ให้เสียโทเคนซ้อน',
+      cause: 'มีงาน Generate ที่ยังไม่จบ ระบบจึงกันการยิงซ้ำเพื่อไม่ให้เสียเครดิตซ้อน',
       nextAction: 'รอให้งานปัจจุบันจบ หรือยกเลิกงานที่ยังไม่จบผ่านเมนูรายละเอียด',
       debitAllowed: false,
     }
@@ -965,7 +965,7 @@ export function getAiCreatorGenerateBlockState({
       code: 'provider_rate_limited',
       title: 'ผู้ให้บริการสร้างรูปติดข้อจำกัดชั่วคราว ลองใหม่ภายหลัง',
       cause: 'ผู้ให้บริการตอบกลับว่าเกินขีดจำกัดการเรียกใช้งานหรือโควตาชั่วคราว',
-      nextAction: 'รอสักครู่แล้วลองใหม่ ระบบต้องไม่หักโทเคนถ้างานยังไม่ถูก accepted',
+      nextAction: 'รอสักครู่แล้วลองใหม่ ระบบต้องไม่หักเครดิตถ้างานยังไม่ถูก accepted',
       debitAllowed: false,
     }
   }
@@ -981,9 +981,9 @@ export function getAiCreatorGenerateBlockState({
   if (typeof tokenBalance === 'number' && typeof creditCost === 'number' && tokenBalance < creditCost) {
     return {
       code: 'insufficient_credit',
-      title: `โทเคนไม่พอ ต้องใช้ ${creditCost} โทเคน`,
+      title: `เครดิตไม่พอ ต้องใช้ ${creditCost} เครดิต`,
       cause: `ยอดคงเหลือ ${tokenBalance} ต่ำกว่าค่าใช้จ่าย ${creditCost}`,
-      nextAction: 'ลดแม่แบบที่แพงกว่า หรือไปหน้ากระเป๋าโทเคนเมื่อ top-up flow พร้อม',
+      nextAction: 'ลดแม่แบบที่แพงกว่า หรือขอผู้ดูแลเพิ่มเครดิตในหน้าเครดิตใช้งาน',
       debitAllowed: false,
     }
   }
