@@ -24,6 +24,11 @@ Last updated: 2026-06-28
 | `/create` | pass 2026-06-28 follow-up | Creator Studio rendered AI image/content controls, manual image URL mode, relationship presets, greeting/system/scenario fields, and preview simulator. Clicking `ทดสอบ 5 เทิร์น` completed without error and the assistant panel reported `จำลอง 5 เทิร์นแล้ว`. |
 | `/ai-creator` | pass 2026-06-28 follow-up | AI Creator rendered credit cost, missing-input disabled reason, My Library, Public Gallery, and no coin/top-up wording. Video tab showed disabled Generate with the local contract text that real video generation is not open yet. |
 | `/chats` | pass 2026-06-28 follow-up | Chat cards render portrait images/backgrounds instead of letter-only tiles. The latest chat three-dot menu exposes `แก้ไขแชท`, `ปักหมุดแชท`, `จัดเก็บแชท`, `เลือก`, and `ลบแชท`. Browser console errors: 0. |
+| `/profile` | pass 2026-06-28 follow-up 2 | Clicked the persona template button. The persona textarea filled successfully, character count updated to `92/2,000 ตัวอักษร`, developer API/BYOK area remained visible, credit copy remained present, and no coin/top-up wording appeared. |
+| `/support` | pass 2026-06-28 follow-up 2 | Filled the local support title/detail fields and clicked `ส่งรายงาน`. The form cleared, success/ticket copy appeared, and no browser console error appeared. |
+| `/events` | pass 2026-06-28 follow-up 2 | Scene rows render as real links with `เปิดแชท`. Clicking the first scene row navigated to `/chat/61aaecf2-a85b-4e01-a7ee-0973eef62699` and the chat composer loaded. |
+| `/moderation` | pass 2026-06-28 follow-up 2 | Refresh worked without admin key. The page kept the ADMIN_API_KEY guard visible, report/moderation copy visible, and no error/coin leak appeared. |
+| `/admin/health` | pass 2026-06-28 follow-up 2 | Admin Health showed local server ready, DB ready, local chat ready, route/menu readiness, and production/external blockers separately. Browser console errors after the route set: 0. |
 | `/wallet` | pass | Refresh works. Admin key save/clear works. Credit adjustment buttons return to disabled after clearing admin key. |
 | `/profile` | pass | Persona template fills textarea. Content mode controls render 3 states. BYOK vault panel remains visible without storing a raw key. |
 | `/support` | pass | Local support ticket form accepts title/detail and submits to local state. |
