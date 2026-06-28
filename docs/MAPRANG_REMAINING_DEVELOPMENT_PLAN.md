@@ -1,22 +1,16 @@
 # แผนงานที่เหลือของ Maprang AI
 
-Last updated: 2026-06-28
+Last updated: 2026-06-29
 
 Current target split: Local Server, Ngrok Preview, and Production. Version 1 target is Local Server first because the team has not finalized hosting yet. The local server baseline passed `bun run qa:full`; Ngrok is optional preview for other testers; production/cloud requires external HTTPS/domain/provider evidence and is not a blocker for the first local versions. Use `docs/LOCAL_SERVER_RUNBOOK.md` for local startup and operator checks.
 
-Latest local runtime checkpoint: Docker Desktop/PostgreSQL/backend/frontend were started successfully and `bun run qa:full` passed on 2026-06-18. This closes the current local-server runtime gate. `scripts/local-server-up.ts` startup/error logs were cleaned from mojibake into readable Thai and locked by `scripts/local-server-up.test.ts`. Passing evidence: `bun run qa:full`, `bun test scripts/local-server-up.test.ts`, `bun run local:doctor:test`, and `bun run docs:commands`.
+Latest local-first completion audit: 2026-06-29 local v1 is green against the current repo-owned scope. Branch `main` is synced with `origin/main`; frontend/backend local services are available on `http://127.0.0.1:5173` and `http://127.0.0.1:3001`; QA seed data was restored after browser smoke. Passing evidence from this audit: `bun run api:audit` (80 backend routes / 56 frontend helpers), `bun run route-menu:audit` (20 areas), `bun run backend:check:db:test`, `bun run docs:commands`, `bun run memory:audit`, `bun run backend:check` (343 tests / 1496 expects), `bun run frontend:check`, `bun run smoke:doctor`, `bun run smoke:local`, `bun run api:smoke` (34 pass / 0 fail / 2 live skips), `bun run e2e:smoke` (4/4 desktop/mobile), and final `bun run qa:seed`.
 
-Latest product-copy checkpoint: 2026-06-28 local v1 no longer treats coin/top-up/payment as an active player flow. `/wallet` is a Credit Usage dashboard for balance, usage ledger, admin local adjustments, model/function cost visibility, and BYOK/local-provider state. Real payment/top-up remains future/external until provider and policy decisions exist. Chat local fallback replies also now use intent-aware roleplay beats to reduce shallow local responses. Browser click-through QA passed for `/wallet`, `/ai-creator`, `/profile`, `/create`, and `/chat`; the chat reply reached 1103 characters and the composer recovered after reply.
+Latest product-copy checkpoint: local v1 no longer treats coin/top-up/payment as an active player flow. `/wallet` is a Credit Usage dashboard for balance, usage ledger, admin local adjustments, model/function cost visibility, and BYOK/local-provider state. Real payment/top-up remains future/external until provider and policy decisions exist. Chat local fallback replies use intent-aware roleplay beats to reduce shallow local responses.
 
-Latest cleanup checkpoint: `CharacterCreateForm.tsx` now delegates reset-form, clear generated avatar, clear cover draft, and use-cover-as-main actions to `useCreatorFormActions`. The form is down to 692 lines and the focused contract/type/API/docs/memory/diff gates pass. Next local cleanup target is `WorkspacePage.tsx`, followed by browser click-through verification.
+Latest browser click-through checkpoint: real in-app browser QA passed for `/wallet`, `/ai-creator`, `/profile`, `/create`, `/chat`, `/chats`, `/support`, `/events`, `/moderation`, and `/admin/health`. Verified actions include chat send/composer recovery, Creator preview `จำลอง 5 เทิร์นแล้ว`, AI Creator video disabled contract, `/chats` portrait cards and three-dot actions, profile persona template, support ticket submit, event row navigation to chat, moderation refresh/ADMIN guard, and Admin Health local readiness with external blockers separated. Browser console errors after these route sets were 0.
 
-Latest cleanup checkpoint: `WorkspacePage.tsx` now delegates runtime/error helper logic to `workspaceRuntime.ts`. The page is down to 760 lines and focused frontend/API/docs/memory/diff gates pass. Next local cleanup target is extracting chat send orchestration or world/report actions from `WorkspacePage.tsx`, then browser click-through verification.
-
-Latest cleanup checkpoint: `WorkspacePage.tsx` now delegates report target state and report submission to `useWorkspaceReports`. The page is down to 707 lines and focused frontend/API/docs/memory/diff gates pass. Next local cleanup target is extracting chat send orchestration or world-state actions, then browser click-through verification.
-
-Latest cleanup checkpoint: `WorkspacePage.tsx` now delegates world-state saving to `useWorkspaceWorldState`. The page is down to 683 lines and focused frontend/API/docs/memory/diff gates pass. Next local cleanup target is extracting chat send orchestration or boot/history loading into hooks, then browser click-through verification.
-
-Latest cleanup checkpoint: `WorkspacePage.tsx` now delegates saved-chat history loading to `useWorkspaceChatHistory` and saved-chat runtime state composition to `savedChatRuntimeState` in `workspaceRuntime.ts`. The page is down to 648 lines, and focused component/frontend gates pass. Next local cleanup target is extracting chat send orchestration or further route boot orchestration, then browser click-through verification.
+Latest cleanup checkpoint: the local v1 cleanup baseline is complete for current large pages. `AICreatorPage.tsx` delegates character options, local history persistence, upload references, generation, downloads, library actions, Creator handoff, studio actions, and history view. `CharacterCreateForm` delegates form state, persistence, generation/upload, reset, and cover-image actions. `WorkspacePage` delegates runtime helpers, report flow, world-state save, stream-success cleanup, saved-chat history loading, and saved-chat runtime state composition. Further refactor is enhancement work, not a blocker for local v1.
 
 ## สถานะงานล่าสุด 2026-06-18 Repo-Owned Remaining Work
 
@@ -33,10 +27,9 @@ Latest cleanup checkpoint: `WorkspacePage.tsx` now delegates saved-chat history 
 
 ลำดับทำต่อที่เหมาะสม:
 
-1. ใช้ browser click-through สร้าง ticket/support, ปรับ persona/BYOK, refresh wallet, เปิด moderation/admin health, เข้า events, ส่ง chat จริง.
-2. บันทึกผลใน `memory/qa-status.md` และถ้ามี bug ให้แก้ก่อน commit.
-3. Refactor หน้าหนักทีละหน้า โดยต้องรักษา `frontend:check`, `api:audit`, และ `e2e:smoke` ให้ผ่าน.
-4. Commit/checkpoint ชุด UI/docs/test ที่ผ่าน gate แล้ว.
+1. ถ้าจะทำต่อในเครื่อง ให้ทำเป็น product polish/enhancement รายรอบ เช่น ปรับ chat tone, density, หรือ creator workflow เฉพาะจุด โดยต้องรักษา `frontend:check`, `api:audit`, และ `e2e:smoke` ให้ผ่าน.
+2. ถ้าจะให้คนอื่นลองผ่านอินเทอร์เน็ต ให้ใช้ Ngrok preview แล้วรัน `smoke:doctor`, `api:smoke`, และ `e2e:smoke` กับ URL นั้น.
+3. ถ้าจะปล่อยจริง ให้ทำเฉพาะ Future/external blockers: hosted HTTPS backend/frontend, production/staging CORS/domain, production DB, Supabase signed storage verification on that environment, live deployed chat/image smoke, and release handoff evidence.
 
 Latest local gate: 2026-06-18 `bun run qa:full` ผ่านครบแล้วหลังเปิด Docker/PostgreSQL และ backend/frontend local services. Gate นี้รวม `qa:repo`, `qa:seed`, `smoke:doctor`, `smoke:local`, `api:smoke`, `e2e:smoke`, และ reseed หลัง browser smoke จึงยืนยันว่า local runtime ใช้งานได้ครบตาม baseline ปัจจุบัน. เป้าหมายหลักปัจจุบันคือ local server ก่อนตาม `docs/LOCAL_SERVER_RUNBOOK.md`; Ngrok ใช้เป็น public preview/staging ชั่วคราวเท่านั้น. สิ่งที่ยังไม่จบเฉพาะเมื่อจะทำ cloud production คือ phase 10 external deployment: backend/frontend HTTPS origins ถาวร, CORS จริง, production/staging database URL จริง, Supabase signed storage verification บน environment นั้น, live smoke บน deployed URL, และ release handoff evidence จริงก่อนถือว่า production-ready.
 
