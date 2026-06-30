@@ -734,6 +734,55 @@ export function shouldExtendShortRoleplayReply({
   )
 }
 
+export function shouldImproveRoleplayReply({
+  activeScene,
+  character,
+  maxChars = Math.max(modelMinRoleplayReplyChars * 3, 1200),
+  minChars = modelMinRoleplayReplyChars,
+  reply,
+  replyProfile,
+  responseDepth,
+  userMessage,
+}: {
+  activeScene?: boolean
+  character: unknown
+  maxChars?: number
+  minChars?: number
+  reply: string
+  replyProfile?: string | null
+  responseDepth?: string | null
+  userMessage: string
+}) {
+  const normalizedReply = reply.replace(/\s+/g, ' ').trim()
+  if (
+    !character ||
+    minChars <= 0 ||
+    normalizedReply.length === 0 ||
+    userAskedForBriefReply(userMessage) ||
+    isOperationalReply(normalizedReply)
+  ) {
+    return false
+  }
+
+  if (normalizedReply.length < minChars) return true
+  if (normalizedReply.length > maxChars) return false
+
+  const quality = analyzeNarrativeQuality({
+    reply: normalizedReply,
+    userMessage,
+    responseDepth,
+    replyProfile,
+    activeScene,
+  })
+
+  return (
+    quality.score < 62 ||
+    quality.dimensions.playerAgency < 60 ||
+    quality.dimensions.sceneProgression < 60 ||
+    quality.dimensions.emotionalDepth < 60
+  )
+}
+
 export function buildRoleplayContinuationInstruction(reply: string, minChars = modelMinRoleplayReplyChars) {
   const remainingChars = Math.max(160, minChars - reply.replace(/\s+/g, ' ').trim().length)
   return [
@@ -742,6 +791,38 @@ export function buildRoleplayContinuationInstruction(reply: string, minChars = m
     `เพิ่มเนื้อหาอย่างน้อย ${remainingChars} ตัวอักษรภาษาไทยใน 3-5 ย่อหน้าสั้น`,
     'ใส่การกระทำ บรรยากาศ subtext และ hook ที่ชัดเจนให้ผู้เล่นตอบสนองได้',
     'ห้ามเล่าการกระทำหรือความรู้สึกของผู้เล่นแทนแบบยืนยันว่าเป็นจริง',
+  ].join('\n')
+}
+
+export function buildRoleplayImprovementInstruction({
+  activeScene,
+  reply,
+  replyProfile,
+  responseDepth,
+  userMessage,
+}: {
+  activeScene?: boolean
+  reply: string
+  replyProfile?: string | null
+  responseDepth?: string | null
+  userMessage: string
+}) {
+  const quality = analyzeNarrativeQuality({
+    reply,
+    userMessage,
+    responseDepth,
+    replyProfile,
+    activeScene,
+  })
+  const missing = quality.notes.slice(0, 4)
+  return [
+    'Improve the previous Maprang roleplay answer without repeating it.',
+    'Continue in Thai, in character, and keep the same emotional direction.',
+    'Add only new continuation text that can be appended after the previous answer.',
+    `Narrative quality score: ${quality.score}/100.`,
+    missing.length ? `Fix these gaps: ${missing.join(' | ')}` : 'Fix any flat or generic parts before final text.',
+    'Add concrete action, subtext, relationship or scene continuity, sensory grounding, and a playable hook.',
+    'Do not narrate the player feelings, choices, or actions as confirmed facts.',
   ].join('\n')
 }
 
@@ -1022,32 +1103,42 @@ async function buildMessages(
   }
 }
 
-async function extendShortRoleplayReply({
+async function improveRoleplayReplyIfNeeded({
+  activeScene,
   character,
   messages,
   reply,
+  replyProfile,
+  responseDepth,
   userMessage,
   userApiKey,
   userApiProvider,
 }: {
+  activeScene?: boolean
   character: CharacterWithTags | null
   messages: ChatMessage[]
   reply: string
+  replyProfile?: string | null
+  responseDepth?: string | null
   userMessage: string
   userApiKey?: string
   userApiProvider?: string
 }) {
-  if (!shouldExtendShortRoleplayReply({ character, reply, userMessage })) {
+  if (!shouldImproveRoleplayReply({ activeScene, character, reply, replyProfile, responseDepth, userMessage })) {
     return { reply, usage: fallbackUsage(), extended: false }
   }
 
+  const isShortReply = shouldExtendShortRoleplayReply({ character, reply, userMessage })
+  const improvementInstruction = isShortReply
+    ? buildRoleplayContinuationInstruction(reply)
+    : buildRoleplayImprovementInstruction({ activeScene, reply, replyProfile, responseDepth, userMessage })
   const activeModelName = getModelForProvider(userApiProvider, modelName)
   const completion = await generateChatCompletion({
     model: activeModelName,
     messages: [
       ...messages,
       { role: 'assistant', content: reply },
-      { role: 'user', content: buildRoleplayContinuationInstruction(reply) },
+      { role: 'user', content: improvementInstruction },
     ],
     max_tokens: Math.min(modelMaxOutputTokens, 1100),
     temperature: Math.min(modelTemperature + 0.1, 2),
@@ -1947,10 +2038,13 @@ export async function sendChat(input: SendChatInput) {
 
   let reply = completion.content.trim() || chatReplyMessages.emptyProviderReply
   let usage = completion.usage
-  const extension = await extendShortRoleplayReply({
+  const extension = await improveRoleplayReplyIfNeeded({
+    activeScene: contextSnapshot.modelRoute === 'chat.scene.cinematic',
     character,
     messages,
     reply,
+    replyProfile: contextSnapshot.replyProfile,
+    responseDepth: contextSnapshot.responseDepth,
     userMessage: input.message,
     userApiKey: input.userApiKey,
     userApiProvider: input.userApiProvider,
@@ -2192,10 +2286,13 @@ export function streamChat(input: SendChatInput) {
         }
 
         let trimmedReply = reply.trim() || chatReplyMessages.emptyProviderReply
-        const extension = await extendShortRoleplayReply({
+        const extension = await improveRoleplayReplyIfNeeded({
+          activeScene: contextSnapshot.modelRoute === 'chat.scene.cinematic',
           character,
           messages,
           reply: trimmedReply,
+          replyProfile: contextSnapshot.replyProfile,
+          responseDepth: contextSnapshot.responseDepth,
           userMessage: input.message,
           userApiKey: input.userApiKey,
           userApiProvider: input.userApiProvider,

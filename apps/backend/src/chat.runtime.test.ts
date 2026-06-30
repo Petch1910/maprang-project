@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import {
   applyPromptBudget,
   buildLocalRoleplayReply,
+  buildRoleplayImprovementInstruction,
   buildRoleplayContinuationInstruction,
   chatReplyMessages,
   classifyChatProviderError,
@@ -13,6 +14,7 @@ import {
   preferLocalChatProvider,
   sendChat,
   shouldExtendShortRoleplayReply,
+  shouldImproveRoleplayReply,
   streamChat,
   updateRuntimeState,
 } from './chat.service'
@@ -299,6 +301,39 @@ describe('roleplay reply quality guard', () => {
     ).toBe(false)
   })
 
+  test('improves narratively weak roleplay replies even when they are not short', () => {
+    const flatReply = Array.from({ length: 16 }, () => 'Okay. I understand. Tell me more.').join(' ')
+
+    expect(
+      shouldImproveRoleplayReply({
+        character: { id: 'character' },
+        userMessage: 'I miss you but I am not ready to explain why.',
+        reply: flatReply,
+        minChars: 120,
+        responseDepth: 'deep',
+      }),
+    ).toBe(true)
+  })
+
+  test('does not improve rich roleplay replies that already meet the narrative guard', () => {
+    const richReply = [
+      '*She remembers the last conversation and lowers her voice beside the window.*',
+      'The rain keeps tapping against the glass while she lets the silence stay for a moment, not rushing your answer and not deciding what you feel.',
+      'Her hand stops near the cup between you, close enough to show hesitation but far enough to leave the choice with you.',
+      '"I missed you too," she says, carrying the old argument in her voice instead of pretending it disappeared. "Do you want to start from what hurt, or from what we can still save?"',
+    ].join(' ')
+
+    expect(
+      shouldImproveRoleplayReply({
+        character: { id: 'character' },
+        userMessage: 'I miss you but I am not ready to explain why.',
+        reply: richReply,
+        minChars: 120,
+        responseDepth: 'deep',
+      }),
+    ).toBe(false)
+  })
+
   test('does not extend Thai-first operational replies', () => {
     for (const reply of [
       chatReplyMessages.invalidCharacterId,
@@ -325,6 +360,17 @@ describe('roleplay reply quality guard', () => {
     expect(instruction).toContain('ห้ามเขียนซ้ำ')
     expect(instruction).toContain('3-5 ย่อหน้าสั้น')
     expect(instruction).toContain('ภาษาไทย')
+  })
+  test('builds improvement instruction for weak non-short replies', () => {
+    const instruction = buildRoleplayImprovementInstruction({
+      userMessage: 'I miss you but I am not ready to explain why.',
+      reply: 'Okay. I understand. Tell me more.',
+      responseDepth: 'deep',
+    })
+
+    expect(instruction).toContain('Improve the previous Maprang roleplay answer')
+    expect(instruction).toContain('Narrative quality score:')
+    expect(instruction).toContain('Do not narrate the player feelings')
   })
 })
 

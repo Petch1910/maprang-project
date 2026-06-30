@@ -26,6 +26,7 @@ The first local implementation is intentionally small and repo-owned:
 - The chat right rail shows the latest narrative quality score, intent, checkpoint, and first improvement note when usage metadata exists.
 - `/admin/prompt-inspector` renders a narrative planning panel with intent, checkpoint, context strategy, minimum paragraphs, revision triggers, and the exact workflow block.
 - `/health` reports Narrative Engine readiness metadata, and `/admin/health` renders the same local-ready capability for operators.
+- Provider-backed normal and streamed chat now run the same Narrative Engine quality guard before accepting roleplay output. Short replies still trigger continuation; non-short but narratively weak replies can trigger an append-only improvement instruction that adds Thai in-character continuation text without rewriting the original answer.
 
 ## Why This Helps Maprang
 
@@ -71,3 +72,4 @@ Expected behavior:
 - Chat responses keep existing `responseQuality` fields and add optional `narrativeQuality`.
 - Chat UI exposes narrative quality evidence in the right rail without new API calls.
 - Prompt Inspector exposes the deterministic narrative plan and prompt block without adding a new route.
+- Provider-backed chat improves flat non-short roleplay replies when narrative score/dimensions fall below the guard threshold.
