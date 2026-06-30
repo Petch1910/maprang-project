@@ -2,6 +2,8 @@
 
 Last updated: 2026-07-01
 
+- 2026-07-01 AI Creator conversation-starter checkpoint: `buildDraftConversationStarters(...)` in `apps/frontend/src/lib/characterDraft.ts` derives four starter prompts from draft name, scenario, greeting, tagline, and tags. `AiCreatorResultPreview` and `AiCreatorHistoryDetailDialog` now render those options, giving creators a richer first-turn test surface than one greeting line before sending the draft to Creator Studio. Passing evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (33 pass / 455 expects) and `bun run frontend:check`.
+
 - 2026-07-01 chat bundle split checkpoint: `MessageBubble` now lazy-loads `MessageMarkdown`, keeping `react-markdown` and `remark-gfm` out of the primary `WorkspacePage` route chunk until an assistant message needs markdown. A plain text Suspense fallback preserves readable chat content while the async renderer loads. Result: `WorkspacePage` production chunk is now 104.2KB and the markdown renderer is isolated in a 149.7KB async chunk. Passing evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (32 pass / 448 expects) and `bun run frontend:check`.
 
 - 2026-07-01 relationship-aware opening choices checkpoint: `ChatPanel` now delegates opening-card choices to `buildOpeningChoices(...)` in `apps/frontend/src/lib/chat.ts`. The helper produces different first-response options for hostile/rival, warm/friend/lover, and neutral starts, preserving the selected Relationship Contract in the first playable user turn instead of always showing the same four choices. Passing evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (32 pass / 446 expects), `bun run frontend:check`, `bun run route-menu:audit`, and `git diff --check`.

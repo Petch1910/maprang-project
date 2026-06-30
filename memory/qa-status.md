@@ -2,6 +2,8 @@
 
 Last updated: 2026-07-01
 
+- 2026-07-01 AI Creator conversation-starter QA pass: generated character drafts now expose four conversation starter options derived from draft tags/tone/scenario/greeting, so AI Creator preview and detail dialogs no longer show only one first greeting. Hostile/rival drafts get friction-first starters, warm/friend/romance drafts get softer starters, and neutral drafts get scene/observation starters. Passing evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (33 pass / 455 expects) and `bun run frontend:check`.
+
 - 2026-07-01 Chat bundle split QA pass: assistant markdown rendering moved out of the main chat route chunk into lazy `MessageMarkdown`, while `MessageBubble` keeps a plain-text Suspense fallback and the same message action/report affordances. This reduces the `WorkspacePage` production chunk from the previous near-limit ~253.7KB to 104.2KB, with markdown isolated as a 149.7KB async chunk. Passing evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (32 pass / 448 expects) and `bun run frontend:check` (frontend route/static audit, build, and bundle budget pass).
 
 - 2026-07-01 Relationship-aware opening choices QA pass: the chat opening card now uses `buildOpeningChoices(...)` from `apps/frontend/src/lib/chat.ts` so first-response choices change for hostile/rival, warm/friend/lover, and neutral relationship starts. `ChatPanel` no longer owns the static choice list inline. Passing evidence: `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (32 pass / 446 expects), `bun run frontend:check`, `bun run route-menu:audit`, and `git diff --check`.

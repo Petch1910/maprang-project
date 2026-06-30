@@ -53,6 +53,11 @@ type DraftArchetype = {
   tags: string[]
 }
 
+export type DraftConversationStarter = {
+  label: string
+  value: string
+}
+
 const archetypes: DraftArchetype[] = [
   {
     name: 'ไอริส | IRIS',
@@ -114,6 +119,90 @@ function pickArchetype(source: CharacterDraftSource) {
     [source.imageName, source.imagePrompt, source.imageUrl].filter(Boolean).join('|') ||
     'original-thai-roleplay-character-slow-burn'
   return archetypes[hashText(signal) % archetypes.length] ?? archetypes[0]
+}
+
+function shortCharacterName(name: string) {
+  return name.split('|')[0]?.trim() || name.trim() || 'ตัวละคร'
+}
+
+function normalizedDraftTags(tags: string) {
+  return tags
+    .split(',')
+    .map((tag) => tag.trim().toLowerCase())
+    .filter(Boolean)
+}
+
+export function buildDraftConversationStarters(
+  draft: Pick<CharacterDraftFields, 'name' | 'tagline' | 'scenario' | 'greeting' | 'tags'>,
+): DraftConversationStarter[] {
+  const name = shortCharacterName(draft.name)
+  const tags = normalizedDraftTags(draft.tags)
+  const isHostile = tags.some((tag) => ['rival', 'enemy', 'red-flag', 'toxic', 'drama', 'hard-to-get'].includes(tag))
+  const isWarm = tags.some((tag) => ['green-flag', 'comfort', 'close-friend', 'trust-building', 'romance'].includes(tag))
+  const scene = draft.scenario.trim()
+  const tagline = draft.tagline.trim()
+  const greeting = draft.greeting.trim()
+
+  if (isHostile) {
+    return [
+      {
+        label: 'เปิดด้วยแรงปะทะ',
+        value: `ฉันมอง${name}ตรง ๆ แล้วพูดให้ชัดว่า “เราคงต้องคุยกันให้รู้เรื่อง”`,
+      },
+      {
+        label: 'จับพิรุธ',
+        value: `ฉันสังเกตน้ำเสียงของ${name} ก่อนถามว่า “เธอกำลังซ่อนอะไรจากฉันอยู่หรือเปล่า”`,
+      },
+      {
+        label: 'เว้นระยะ',
+        value: scene ? `ฉันถอยไปครึ่งก้าวในฉากนี้ แล้วปล่อยให้${name}เป็นฝ่ายเลือกว่าจะเริ่มยังไง` : `ฉันถอยไปครึ่งก้าว แล้วรอดูว่า${name}จะเปิดเกมก่อนหรือไม่`,
+      },
+      {
+        label: 'ย้อนคำทัก',
+        value: greeting ? `ฉันฟังคำพูดแรกของ${name}แล้วตอบกลับอย่างใจเย็นว่า “ทำไมถึงพูดแบบนั้น”` : `ฉันไม่รีบตอบรับหรือปฏิเสธ แค่รอให้${name}เผยท่าทีจริงออกมา`,
+      },
+    ]
+  }
+
+  if (isWarm) {
+    return [
+      {
+        label: 'เริ่มแบบอ่อนโยน',
+        value: `ฉันยิ้มบาง ๆ ให้${name} แล้วถามว่า “วันนี้อยากให้ฉันฟังเรื่องอะไรก่อนดี”`,
+      },
+      {
+        label: 'ชวนเล่า',
+        value: tagline ? `ฉันนั่งลงใกล้พอประมาณ แล้วชวน${name}เล่าเรื่องที่ซ่อนอยู่หลัง “${tagline}”` : `ฉันชวน${name}เล่าเรื่องที่ไม่จำเป็นต้องรีบพูดให้จบในครั้งเดียว`,
+      },
+      {
+        label: 'ค่อย ๆ เข้าใกล้',
+        value: scene ? `ฉันปล่อยให้บรรยากาศของฉากนำไปก่อน แล้วค่อยถาม${name}ด้วยน้ำเสียงที่ไม่เร่งรัด` : `ฉันค่อย ๆ เข้าใกล้ด้วยคำถามง่าย ๆ ที่เปิดพื้นที่ให้${name}ตอบตามจังหวะของตัวเอง`,
+      },
+      {
+        label: 'ให้เธอนำจังหวะ',
+        value: `ฉันบอก${name}ว่า “ไม่ต้องรีบก็ได้ ฉันอยากรู้ว่าเธออยากเริ่มจากตรงไหน”`,
+      },
+    ]
+  }
+
+  return [
+    {
+      label: 'เริ่มจากฉาก',
+      value: scene ? `ฉันมองไปรอบ ๆ แล้วเริ่มบทสนทนาจากสิ่งที่เกิดขึ้นในฉากนี้` : `ฉันมองบรรยากาศรอบตัว แล้วเริ่มคุยด้วยคำถามที่ไม่กดดัน`,
+    },
+    {
+      label: 'ถามตรงประเด็น',
+      value: `ฉันถาม${name}อย่างสุภาพว่า “มีเรื่องอะไรที่เธออยากให้ฉันรู้ก่อนหรือเปล่า”`,
+    },
+    {
+      label: 'สังเกตท่าที',
+      value: `ฉันสังเกตสีหน้าและท่าทีของ${name}ก่อนเลือกคำพูดแรกอย่างระวัง`,
+    },
+    {
+      label: 'ต่อจากคำทัก',
+      value: greeting ? `ฉันรับคำทักของ${name} แล้วถามต่อในจังหวะที่ยังเปิดพื้นที่ให้เธอเลือกทาง` : `ฉันรอให้${name}เริ่มก่อน แล้วค่อยตอบรับตามบรรยากาศที่เกิดขึ้น`,
+    },
+  ]
 }
 
 export function buildGeneratedAvatarDataUrl(source: CharacterDraftSource) {

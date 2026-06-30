@@ -13,6 +13,7 @@ import { RelationshipPresetPicker } from '../src/components/RelationshipPresetPi
 import { ReportDialog } from '../src/components/ReportDialog'
 import { buildDeployPhaseSteps, type DeployCheck } from '../src/lib/adminHealthDeploy'
 import type { Character, ChatMessage, ChatSummary } from '../src/lib/api'
+import { buildDraftConversationStarters } from '../src/lib/characterDraft'
 import type { TagAnalysis } from '../src/lib/tagAnalysis'
 import { selectPendingSceneCount, selectPendingSceneSummaries } from '../src/store/slices/chatsSlice'
 import type { RootState } from '../src/store/types'
@@ -565,6 +566,34 @@ describe('frontend component contracts', () => {
     for (const staleLabel of ['>Status<', '>Type<', '>Cost<', '>Prompt<', '>Brief<', '>Character Draft<', '>System Prompt<', 'Video Preview', 'Image Draft', 'local-safe']) {
       expect(source).not.toContain(staleLabel)
     }
+  })
+
+  test('ai creator exposes draft conversation starters beyond the first greeting', async () => {
+    const previewSource = await Bun.file('apps/frontend/src/components/ai-creator/AiCreatorResultPreview.tsx').text()
+    const detailSource = await Bun.file('apps/frontend/src/components/ai-creator/AiCreatorHistoryDetailDialog.tsx').text()
+    const characterDraftSource = await Bun.file('apps/frontend/src/lib/characterDraft.ts').text()
+    const hostileStarters = buildDraftConversationStarters({
+      name: 'RENA',
+      tagline: 'คู่ปรับที่ท้าทายทุกคำตอบ',
+      scenario: 'ห้องรับรองกลางคืน',
+      greeting: 'อย่าตอบแบบปลอดภัยเกินไป',
+      tags: 'rival, drama, hard-to-get',
+    })
+    const warmStarters = buildDraftConversationStarters({
+      name: 'MIKA',
+      tagline: 'เพื่อนสนิทที่ค่อย ๆ เปิดใจ',
+      scenario: 'คาเฟ่เงียบช่วงบ่าย',
+      greeting: 'ฉันฟังอยู่',
+      tags: 'green-flag, comfort, trust-building',
+    })
+
+    expect(hostileStarters).toHaveLength(4)
+    expect(warmStarters).toHaveLength(4)
+    expect(hostileStarters[0]?.label).toBe('เปิดด้วยแรงปะทะ')
+    expect(warmStarters[0]?.label).toBe('เริ่มแบบอ่อนโยน')
+    expect(previewSource).toContain('data-testid="ai-creator-conversation-starters"')
+    expect(detailSource).toContain('data-testid="ai-creator-detail-conversation-starters"')
+    expect(characterDraftSource).toContain('export function buildDraftConversationStarters')
   })
 
   test('ai creator page keeps character loading and local history in focused hooks', async () => {

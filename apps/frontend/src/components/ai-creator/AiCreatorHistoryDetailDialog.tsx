@@ -8,6 +8,7 @@ import {
   type AiCreatorDownloadLinkSnapshot,
   type AiCreatorGeneratedItem,
 } from '../../lib/aiCreator'
+import { buildDraftConversationStarters } from '../../lib/characterDraft'
 
 type AiCreatorHistoryDetailDialogProps = {
   item: AiCreatorGeneratedItem | null
@@ -82,6 +83,7 @@ export function AiCreatorHistoryDetailDialog({
   const downloadNotice = getAiCreatorDownloadLinkNotice(downloadLink)
   const retryState = getAiCreatorRetryActionState(item)
   const cancelState = getAiCreatorCancelActionState(item)
+  const conversationStarters = buildDraftConversationStarters(item.response.draft)
   const isPublicGalleryItem = item.id.startsWith('public-')
   const isDownloading = downloadingItemId === item.id
   const isRetrying = retryingItemId === item.id
@@ -358,6 +360,22 @@ export function AiCreatorHistoryDetailDialog({
                 <div>
                   <dt className="text-white/35">คำทักทาย</dt>
                   <dd className="mt-1 leading-5">{item.response.draft.greeting}</dd>
+                </div>
+                <div data-testid="ai-creator-detail-conversation-starters">
+                  <dt className="text-white/35">ตัวเลือกเปิดบทสนทนา</dt>
+                  <dd className="mt-2 grid gap-2">
+                    {conversationStarters.map((starter, index) => (
+                      <span
+                        className="rounded-xl border border-white/10 bg-white/[0.03] p-3 leading-5 text-white/70"
+                        key={starter.label}
+                      >
+                        <span className="block font-black text-[#d9b3ff]">
+                          {index + 1}. {starter.label}
+                        </span>
+                        <span className="mt-1 block">{starter.value}</span>
+                      </span>
+                    ))}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-white/35">แท็ก</dt>

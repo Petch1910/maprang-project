@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { BookOpen, Check, CheckCircle2, Copy, Image as ImageIcon, Pause, Play } from 'lucide-react'
 import type { CreatorAiDraftResponse } from '../../lib/api'
 import type { AiCreatorGeneratedItem } from '../../lib/aiCreator'
+import { buildDraftConversationStarters } from '../../lib/characterDraft'
 
 type AiCreatorResultPreviewProps = {
   result: AiCreatorGeneratedItem | null
@@ -61,6 +62,8 @@ export function AiCreatorResultPreview({
       </div>
     )
   }
+
+  const conversationStarters = buildDraftConversationStarters(result.response.draft)
 
   return (
     <div className="missai-card rounded-3xl p-6 shadow-2xl">
@@ -146,6 +149,23 @@ export function AiCreatorResultPreview({
             <p className="mt-2 rounded-xl border-l-2 border-[#ac4bff] bg-[#ac4bff]/10 p-3 text-sm font-bold leading-6 text-[#d9b3ff]">
               “{result.response.draft.greeting}”
             </p>
+          </section>
+
+          <section data-testid="ai-creator-conversation-starters">
+            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">ตัวเลือกเปิดบทสนทนา</p>
+            <div className="mt-2 grid gap-2">
+              {conversationStarters.map((starter, index) => (
+                <div
+                  className="rounded-xl border border-white/10 bg-[#080a1a]/70 p-3 text-sm font-bold leading-6 text-slate-300"
+                  key={starter.label}
+                >
+                  <p className="m-0 text-xs font-black text-[#d9b3ff]">
+                    {index + 1}. {starter.label}
+                  </p>
+                  <p className="m-0 mt-1 text-slate-400">{starter.value}</p>
+                </div>
+              ))}
+            </div>
           </section>
 
           <section className="space-y-2">
