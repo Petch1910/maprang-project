@@ -1,6 +1,8 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
+
+- 2026-07-01 Narrative Engine health checkpoint: `/health` now includes `model.narrativeEngine` readiness metadata from `narrativeEngineHealth()`, frontend API types accept it, and `/admin/health` renders a Narrative Engine local-readiness check plus side card. This links the chat rail and Prompt Inspector narrative work into the operator health page without adding a new route or external dependency.
 
 - 2026-06-30 narrative-engine checkpoint: adapted `voocel/ainovel-cli` as an architecture reference only, not vendored code. Added `apps/backend/src/narrative-engine.service.ts` with Coordinator -> Architect -> Writer -> Editor planning, deterministic runtime prompt block generation, and seven-dimension narrative quality scoring. `chat.service.ts` now injects the narrative workflow into runtime context and attaches `responseQuality.narrativeQuality` for local, normal, and streamed chat paths; frontend API types accept the optional metadata. Source-of-truth doc: `docs/MAPRANG_NARRATIVE_ENGINE.md`. Passing checks: `bun test apps/backend/src/narrative-engine.service.test.ts`, `bun test apps/backend/src/response-quality.service.test.ts apps/backend/src/chat.runtime.test.ts`, `bun run backend:check`, and `bun run frontend:check`.
 

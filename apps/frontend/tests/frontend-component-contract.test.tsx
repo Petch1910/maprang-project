@@ -379,9 +379,15 @@ describe('frontend component contracts', () => {
 
   test('admin health presents local runtime without old component dependency', async () => {
     const source = await Bun.file('apps/frontend/src/pages/AdminHealthPage.tsx').text()
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
 
     expect(source).toContain('โหมดจำลองในเครื่องพร้อมเล่นโดยไม่ใช้เครดิตผู้ให้บริการ')
     expect(source).toContain('แชทในเครื่องพร้อมใช้')
+    expect(source).toContain('data-testid="admin-health-narrative-engine"')
+    expect(source).toContain('Narrative Engine')
+    expect(source).toContain('narrativeEngine?.enabled')
+    expect(apiSource).toContain('narrativeEngine?: {')
+    expect(apiSource).toContain("source: 'ainovel-inspired'")
     expect(source).not.toContain('SystemStatus')
     expect(source).not.toContain('local QA')
     expect(source).not.toContain('local mock')

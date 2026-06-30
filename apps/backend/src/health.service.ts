@@ -23,6 +23,7 @@ import {
 } from './config'
 import { validateRuntimeEnv } from './env'
 import { structuredKnowledgeHealth } from './knowledge.service'
+import { narrativeEngineHealth } from './narrative-engine.service'
 import { redactSensitiveText, redactUnknownDiagnosticText } from './redaction'
 import { supabaseSignedUrlExpiresInSeconds, supabaseStorageAccess } from './storage.service'
 
@@ -181,6 +182,7 @@ export async function loadHealthStatus() {
         model: imageGenerationModel,
         liveSmokeCommand: 'bun run smoke:image:live',
       },
+      narrativeEngine: narrativeEngineHealth(),
     },
     security: {
       corsOrigins: configuredCorsOrigins,

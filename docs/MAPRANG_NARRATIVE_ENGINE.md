@@ -1,6 +1,6 @@
 # Maprang Narrative Engine
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
 
 ## Purpose
 
@@ -25,6 +25,7 @@ The first local implementation is intentionally small and repo-owned:
 - `apps/frontend/src/lib/api.ts` knows both chat `narrativeQuality` metadata and Prompt Inspector narrative-plan metadata.
 - The chat right rail shows the latest narrative quality score, intent, checkpoint, and first improvement note when usage metadata exists.
 - `/admin/prompt-inspector` renders a narrative planning panel with intent, checkpoint, context strategy, minimum paragraphs, revision triggers, and the exact workflow block.
+- `/health` reports Narrative Engine readiness metadata, and `/admin/health` renders the same local-ready capability for operators.
 
 ## Why This Helps Maprang
 
@@ -48,13 +49,14 @@ For v1 local server:
 - No new database migration is required.
 - The implementation runs inside the existing Bun/Elysia backend.
 - Local/mock-roleplay remains playable.
-- Prompt Inspector visibility is implemented. Admin Health can later show a high-level "Narrative Engine active" status if useful, but that is product polish, not a local blocker.
+- Prompt Inspector and Admin Health visibility are implemented.
 
 ## QA Evidence
 
 Latest focused checks:
 
 - `bun test apps/backend/src/narrative-engine.service.test.ts`
+- `bun test apps/backend/src/health.service.test.ts`
 - `bun test apps/backend/src/prompt-inspector.service.test.ts`
 - `bun test apps/frontend/tests/frontend-component-contract.test.tsx`
 - `bun test apps/backend/src/response-quality.service.test.ts apps/backend/src/chat.runtime.test.ts`

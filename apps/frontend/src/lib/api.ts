@@ -567,6 +567,14 @@ export type HealthStatus = {
       model: string
       liveSmokeCommand?: string
     }
+    narrativeEngine?: {
+      enabled: boolean
+      source: 'ainovel-inspired'
+      workflow: string
+      promptInspectorVisible: boolean
+      chatQualityMetadata: boolean
+      dimensions: string[]
+    }
   }
 }
 

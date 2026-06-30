@@ -1,6 +1,8 @@
 # สถานะ QA (QA Status)
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
+
+- 2026-07-01 Narrative Engine health QA pass: `/health` now reports `model.narrativeEngine`, `/admin/health` renders a Narrative Engine readiness card/check, and frontend API contracts include the metadata. Passing evidence: `bun test apps/backend/src/health.service.test.ts` (10 pass / 17 expects), `bun test apps/frontend/tests/frontend-component-contract.test.tsx` (31 pass / 430 expects), `bun run backend:check` (347 pass / 1305 expects, DB-only cases skipped when local Postgres is unavailable), `bun run frontend:check`, `bun run docs:commands`, `bun run memory:audit`, `bun run api:audit`, and `git diff --check`.
 
 - 2026-06-30 Narrative Engine adaptation QA pass: `voocel/ainovel-cli` concepts were adapted into repo-owned backend code without vendoring the Go CLI. New `narrative-engine.service.ts` builds Coordinator -> Architect -> Writer -> Editor plans, injects narrative prompt guidance, and scores replies across seven dimensions through `responseQuality.narrativeQuality`. Passing evidence: `bun test apps/backend/src/narrative-engine.service.test.ts` (3 pass), `bun test apps/backend/src/response-quality.service.test.ts apps/backend/src/chat.runtime.test.ts` (26 pass), `bun run backend:check` (346 pass / 1296 expects, DB-only cases skipped when local Postgres is unavailable), and `bun run frontend:check`.
 

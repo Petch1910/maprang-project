@@ -53,6 +53,27 @@ export type NarrativeQualityMetadata = {
   notes: string[]
 }
 
+export const narrativeQualityDimensions: NarrativeQualityDimension[] = [
+  'continuity',
+  'characterVoice',
+  'sceneProgression',
+  'relationshipAwareness',
+  'emotionalDepth',
+  'sensoryGrounding',
+  'playerAgency',
+]
+
+export function narrativeEngineHealth() {
+  return {
+    enabled: true,
+    source: 'ainovel-inspired' as const,
+    workflow: 'Coordinator -> Architect -> Writer -> Editor',
+    promptInspectorVisible: true,
+    chatQualityMetadata: true,
+    dimensions: narrativeQualityDimensions,
+  }
+}
+
 export type NarrativePlanInput = {
   userMessage: string
   characterName?: string | null

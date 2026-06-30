@@ -58,6 +58,22 @@ function health(overrides: HealthOverrides = {}): HealthStatus {
         model: 'gpt-image-1.5',
         liveSmokeCommand: 'bun run smoke:image:live',
       },
+      narrativeEngine: {
+        enabled: true,
+        source: 'ainovel-inspired',
+        workflow: 'Coordinator -> Architect -> Writer -> Editor',
+        promptInspectorVisible: true,
+        chatQualityMetadata: true,
+        dimensions: [
+          'continuity',
+          'characterVoice',
+          'sceneProgression',
+          'relationshipAwareness',
+          'emotionalDepth',
+          'sensoryGrounding',
+          'playerAgency',
+        ],
+      },
     },
     security: {
       corsOrigins: ['https://app.example.com'],
@@ -152,6 +168,15 @@ describe('readiness gate', () => {
 
   test('accepts a complete production health status', () => {
     expect(readinessFailures(health())).toEqual([])
+  })
+
+  test('includes narrative engine readiness metadata in health model contract', () => {
+    const status = health()
+
+    expect(status.model.narrativeEngine.enabled).toBe(true)
+    expect(status.model.narrativeEngine.source).toBe('ainovel-inspired')
+    expect(status.model.narrativeEngine.workflow).toBe('Coordinator -> Architect -> Writer -> Editor')
+    expect(status.model.narrativeEngine.dimensions).toContain('playerAgency')
   })
 
   test('requires database and OpenRouter readiness', () => {

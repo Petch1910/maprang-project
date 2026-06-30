@@ -1,10 +1,12 @@
 # แผนงานที่เหลือของ Maprang AI
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
 
 Current target split: Local Server, Ngrok Preview, and Production. Version 1 target is Local Server first because the team has not finalized hosting yet. The local server baseline passed `bun run qa:full`; Ngrok is optional preview for other testers; production/cloud requires external HTTPS/domain/provider evidence and is not a blocker for the first local versions. Use `docs/LOCAL_SERVER_RUNBOOK.md` for local startup and operator checks.
 
 Latest narrative-engine checkpoint: 2026-06-30 `voocel/ainovel-cli` was adapted as a reference pattern, not vendored code. Maprang now has `apps/backend/src/narrative-engine.service.ts` with Coordinator -> Architect -> Writer -> Editor planning, deterministic narrative prompt injection, seven-dimension `narrativeQuality` metadata attached under `responseQuality` for local/normal/streamed chat paths, and `/admin/prompt-inspector` visibility for the same narrative plan/prompt block. See `docs/MAPRANG_NARRATIVE_ENGINE.md`. Passing evidence: `bun test apps/backend/src/narrative-engine.service.test.ts`, `bun test apps/backend/src/prompt-inspector.service.test.ts`, focused response-quality/chat-runtime tests, `bun test apps/frontend/tests/frontend-component-contract.test.tsx`, `bun run backend:check`, and `bun run frontend:check`.
+
+Latest narrative-engine health checkpoint: 2026-07-01 `/health` now reports Narrative Engine readiness metadata, and `/admin/health` shows the capability as a local readiness item. This keeps chat quality, Prompt Inspector, and operator health checks aligned without adding a route or cloud dependency.
 
 Latest local-first completion audit: 2026-06-29 local v1 is green against the current repo-owned scope. Branch `main` is synced with `origin/main`; frontend/backend local services are available on `http://127.0.0.1:5173` and `http://127.0.0.1:3001`; QA seed data was restored after browser smoke. Passing evidence from this audit: `bun run api:audit` (80 backend routes / 56 frontend helpers), `bun run route-menu:audit` (20 areas), `bun run backend:check:db:test`, `bun run docs:commands`, `bun run memory:audit`, `bun run backend:check` (343 tests / 1496 expects), `bun run frontend:check`, `bun run smoke:doctor`, `bun run smoke:local`, `bun run api:smoke` (34 pass / 0 fail / 2 live skips), `bun run e2e:smoke` (4/4 desktop/mobile), and final `bun run qa:seed`.
 

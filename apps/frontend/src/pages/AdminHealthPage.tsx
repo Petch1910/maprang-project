@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Activity,
   BarChart3,
+  BrainCircuit,
   CheckCircle2,
   CircleAlert,
   Database,
@@ -106,6 +107,7 @@ function buildChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const model = healthStatus?.model
   const chatProvider = model?.chatProvider
   const imageGeneration = model?.imageGeneration
+  const narrativeEngine = model?.narrativeEngine
   const structuredKnowledge = healthStatus?.knowledge?.structured
   const chatRuntimeIsLocal = chatProvider?.activeRuntimeProvider === 'local' || chatProvider?.forcedLocal === true
   const chatProductionReady = Boolean(chatProvider?.productionReady ?? chatProvider?.liveVerified)
@@ -115,8 +117,26 @@ function buildChecks(healthStatus: HealthStatus | null): DeployCheck[] {
   const maxOutputTokens = model?.maxOutputTokens ?? 0
   const minRoleplayReplyChars = model?.minRoleplayReplyChars ?? 0
   const replyBudgetOk = Boolean(model && maxOutputTokens >= 1200 && minRoleplayReplyChars >= 320)
+  const narrativeEngineReady = Boolean(
+    narrativeEngine?.enabled &&
+      narrativeEngine.promptInspectorVisible &&
+      narrativeEngine.chatQualityMetadata &&
+      narrativeEngine.dimensions.length >= 7,
+  )
+  const narrativeEngineCheck: DeployCheck = {
+    label: 'Narrative Engine',
+    ok: narrativeEngineReady,
+    detail: narrativeEngine?.enabled
+      ? `${narrativeEngine.workflow} / ${narrativeEngine.dimensions.length} quality dimensions`
+      : 'narrative planning and quality metadata are not reported by backend health',
+    action: narrativeEngineReady
+      ? 'ตรวจคุณภาพบทได้จาก Chat rail และ /admin/prompt-inspector'
+      : 'เปิด narrative-engine.service ใน backend แล้วรัน backend check',
+    scope: 'local',
+  }
 
   return [
+    narrativeEngineCheck,
     {
       label: 'ฐานข้อมูลเชื่อมต่อ',
       ok: Boolean(checks?.databaseConfigured && checks.databaseConnected),
@@ -626,6 +646,17 @@ export function AdminHealthPage() {
             <p className="mt-2 text-xs font-bold leading-5 text-white/52">
               คลังรูป: {storageLabel(healthStatus?.security?.avatarStorage)} / สิทธิ์เข้าถึง: {storageAccessLabel(healthStatus?.security?.avatarStorageAccess)} / รูปภาพ:{' '}
               {providerStatusLabel(healthStatus?.model?.imageGeneration?.status)}
+            </p>
+          </section>
+          <section className="missai-card rounded-2xl p-4" data-testid="admin-health-narrative-engine">
+            <h3 className="m-0 flex items-center gap-2 text-sm font-black text-white">
+              <BrainCircuit size={17} className="text-[#ac4bff]" />
+              Narrative Engine
+            </h3>
+            <p className="mt-2 text-xs font-bold leading-5 text-white/52">
+              {healthStatus?.model?.narrativeEngine?.enabled
+                ? `${healthStatus.model.narrativeEngine.workflow} / ${healthStatus.model.narrativeEngine.dimensions.length} มิติคุณภาพ`
+                : 'รอสถานะ Narrative Engine จาก backend'}
             </p>
           </section>
           <section className="missai-card rounded-2xl p-4">
