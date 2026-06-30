@@ -756,6 +756,15 @@ export type EvalScenarioResult = {
   id: string
   title: string
   estimatedTokens: number
+  localReplyChars: number
+  localReplyQuality: {
+    source: 'ainovel-inspired'
+    score: number
+    intent: string
+    checkpoint: 'turn' | 'scene' | 'relationship'
+    dimensions: Record<string, number>
+    notes: string[]
+  }
   passed: boolean
   failures: string[]
   checks: EvalCheck[]

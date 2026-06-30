@@ -75,6 +75,12 @@ function ScenarioCard({ result }: { result: EvalScenarioResult }) {
               <span className="missai-badge text-white/65">
                 {result.estimatedTokens.toLocaleString()} โทเคน
               </span>
+              <span className="missai-badge border-violet-300/25 bg-violet-400/10 text-violet-100">
+                {result.localReplyQuality.score}/100 คะแนนเนื้อเรื่อง
+              </span>
+              <span className="missai-badge text-white/65">
+                {result.localReplyChars.toLocaleString()} ตัวอักษรคำตอบในเครื่อง
+              </span>
             </div>
             <p className="m-0 mt-3 text-base font-black text-white">{result.title}</p>
             <p className="m-0 mt-1 font-mono text-xs font-bold text-white/42">{result.id}</p>

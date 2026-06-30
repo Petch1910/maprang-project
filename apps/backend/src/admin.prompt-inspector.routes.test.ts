@@ -66,7 +66,7 @@ describe('admin prompt inspector route', () => {
     const payload = (await response.json()) as {
       passed?: boolean
       scenarioCount?: number
-      results?: Array<{ id?: string; passed?: boolean; estimatedTokens?: number }>
+      results?: Array<{ id?: string; passed?: boolean; estimatedTokens?: number; localReplyChars?: number; localReplyQuality?: { score?: number } }>
     }
 
     expect(response.status).toBe(200)
@@ -74,6 +74,8 @@ describe('admin prompt inspector route', () => {
     expect(payload.scenarioCount).toBeGreaterThan(0)
     expect(payload.results?.some((result) => result.id === 'prompt-injection-defense' && result.passed)).toBe(true)
     expect(payload.results?.every((result) => typeof result.estimatedTokens === 'number')).toBe(true)
+    expect(payload.results?.every((result) => typeof result.localReplyChars === 'number')).toBe(true)
+    expect(payload.results?.every((result) => typeof result.localReplyQuality?.score === 'number')).toBe(true)
   })
 
   test('protects process mining summaries behind the admin guard', async () => {

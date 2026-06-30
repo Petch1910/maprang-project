@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { buildLocalRoleplayReply } from './chat.service'
 import { buildContextPrompt } from './context.service'
+import { analyzeNarrativeQuality, type NarrativeQualityMetadata } from './narrative-engine.service'
 import { estimatePromptTokens } from './prompt-inspector.service'
 
 export type EvalSuite = {
@@ -41,6 +43,8 @@ export type EvalScenarioResult = {
   id: string
   title: string
   estimatedTokens: number
+  localReplyChars: number
+  localReplyQuality: NarrativeQualityMetadata
   passed: boolean
   failures: string[]
   checks: EvalCheck[]
@@ -134,6 +138,17 @@ export async function loadLocalEvalSuite(path = defaultSuitePath) {
 export function evaluateScenario(scenario: EvalScenario): EvalScenarioResult {
   const prompt = scenarioPrompt(scenario)
   const estimatedTokens = estimatePromptTokens(prompt)
+  const localReply = buildLocalRoleplayReply({
+    character: fixtureCharacter() as any,
+    userMessage: scenario.userMessage,
+    relationshipSeed: 'friend-crush',
+  })
+  const localReplyQuality = analyzeNarrativeQuality({
+    reply: localReply,
+    userMessage: scenario.userMessage,
+    responseDepth: 'balanced',
+  })
+  const localReplyChars = localReply.length
   const checks: EvalCheck[] = []
   const failures: string[] = []
 
@@ -179,10 +194,33 @@ export function evaluateScenario(scenario: EvalScenario): EvalScenarioResult {
     )
   }
 
+  const localReplyLengthOk = localReplyChars >= 420
+  checks.push(check('local roleplay reply length', localReplyLengthOk, `${localReplyChars} chars`))
+  if (!localReplyLengthOk) failures.push(`${scenario.id}: local roleplay reply too short (${localReplyChars} chars)`)
+
+  const localReplyQualityOk =
+    localReplyQuality.score >= 70 &&
+    localReplyQuality.dimensions.sceneProgression >= 60 &&
+    localReplyQuality.dimensions.playerAgency >= 60
+  checks.push(
+    check(
+      'local roleplay narrative quality',
+      localReplyQualityOk,
+      `score=${localReplyQuality.score}, scene=${localReplyQuality.dimensions.sceneProgression}, agency=${localReplyQuality.dimensions.playerAgency}`,
+    ),
+  )
+  if (!localReplyQualityOk) {
+    failures.push(
+      `${scenario.id}: local roleplay narrative quality below guard (score=${localReplyQuality.score}, scene=${localReplyQuality.dimensions.sceneProgression}, agency=${localReplyQuality.dimensions.playerAgency})`,
+    )
+  }
+
   return {
     id: scenario.id,
     title: scenario.title,
     estimatedTokens,
+    localReplyChars,
+    localReplyQuality,
     passed: failures.length === 0,
     failures,
     checks,

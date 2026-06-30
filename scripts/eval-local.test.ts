@@ -1,6 +1,23 @@
 import { describe, expect, test } from 'bun:test'
 import { formatLocalEvalRun } from './eval-local'
 
+const sampleNarrativeQuality = {
+  source: 'ainovel-inspired' as const,
+  score: 90,
+  dimensions: {
+    continuity: 90,
+    characterVoice: 90,
+    sceneProgression: 90,
+    relationshipAwareness: 90,
+    emotionalDepth: 90,
+    sensoryGrounding: 90,
+    playerAgency: 90,
+  },
+  intent: 'conversation' as const,
+  checkpoint: 'turn' as const,
+  notes: [],
+}
+
 describe('local eval output formatting', () => {
   test('prints scenario token lines and pass summary', () => {
     const output = formatLocalEvalRun({
@@ -8,8 +25,8 @@ describe('local eval output formatting', () => {
       scenarioCount: 2,
       failures: [],
       results: [
-        { id: 'roleplay-depth', estimatedTokens: 1200 },
-        { id: 'prompt-injection', estimatedTokens: 900 },
+        { id: 'roleplay-depth', estimatedTokens: 1200, localReplyChars: 900, localReplyQuality: sampleNarrativeQuality },
+        { id: 'prompt-injection', estimatedTokens: 900, localReplyChars: 880, localReplyQuality: sampleNarrativeQuality },
       ],
     })
 
@@ -29,7 +46,7 @@ describe('local eval output formatting', () => {
       passed: false,
       scenarioCount: 1,
       failures: ['scenario-a: ไม่พบข้อความที่ต้องมี "เป้าหมายของฉาก"'],
-      results: [{ id: 'scenario-a', estimatedTokens: 777 }],
+      results: [{ id: 'scenario-a', estimatedTokens: 777, localReplyChars: 700, localReplyQuality: sampleNarrativeQuality }],
     })
 
     expect(output.exitCode).toBe(1)
