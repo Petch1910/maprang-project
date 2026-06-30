@@ -338,6 +338,9 @@ export function WorkspacePage() {
                 ]
               : [],
           )
+          if (firstCharacter && relationshipSeed) {
+            setChatLog([createGreeting(firstCharacter, { relationshipSeedName })])
+          }
           if (!firstCharacter) {
             setConnectionNote('ยังไม่มีตัวละครสำหรับเริ่มแชท สร้างตัวละครใหม่หรือกลับไปเลือกจากหน้าสำรวจก่อน')
           }

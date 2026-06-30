@@ -19,7 +19,6 @@ import {
   Sparkles,
   UserRound,
 } from 'lucide-react'
-import heroImage from '../assets/hero.png'
 import type { Character, ChatMessage, ChatResponse, ChatRuntimeState, WorldStateInput } from '../lib/api'
 import { displayCharacterDetail, displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { characterStatusLabel, characterVisibilityLabel } from '../lib/characterLabels'
@@ -29,6 +28,8 @@ import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
 import { characterShareUrl } from '../lib/shareUrl'
 import { Composer } from './Composer'
 import { MessageBubble } from './MessageBubble'
+
+const heroImage = new URL('../assets/hero.png', import.meta.url).href
 
 type ChatUsage = NonNullable<ChatResponse['usage']>
 

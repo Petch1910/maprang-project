@@ -14,7 +14,6 @@ import {
   WandSparkles,
   X,
 } from 'lucide-react'
-import heroImage from '../../assets/hero.png'
 import type { Character } from '../../lib/api'
 import {
   AI_CREATOR_IMAGE_ACCEPT_LABEL,
@@ -26,6 +25,8 @@ import {
   type AiCreatorMode,
   type AiCreatorUploadPreview,
 } from '../../lib/aiCreator'
+
+const heroImage = new URL('../../assets/hero.png', import.meta.url).href
 
 type AiCreatorControlPanelProps = {
   activeTab: AiCreatorMode

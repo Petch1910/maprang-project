@@ -158,12 +158,17 @@ describe('frontend component contracts', () => {
 
   test('chat opening uses a structured intro card instead of duplicating the greeting bubble', () => {
     const source = readFileSync(new URL('../src/components/ChatPanel.tsx', import.meta.url), 'utf8')
+    const chatSource = readFileSync(new URL('../src/lib/chat.ts', import.meta.url), 'utf8')
+    const workspaceSource = readFileSync(new URL('../src/pages/WorkspacePage.tsx', import.meta.url), 'utf8')
 
     expect(source).toContain('data-testid="chat-opening-scene-card"')
     expect(source).toContain('OpeningSceneCard')
     expect(source).toContain('const openingMessage = showIntro')
     expect(source).toContain('const timelineMessages = showIntro && openingMessage')
     expect(source).toContain("visibleMessages.filter((chat) => chat.id !== openingMessage.id)")
+    expect(chatSource).toContain('function openingSceneContent')
+    expect(chatSource).toContain('relationshipSeedName?: string | null')
+    expect(workspaceSource).toContain('createGreeting(firstCharacter, { relationshipSeedName })')
     expect(source).toContain('เลือกจังหวะเริ่มบทสนทนา')
   })
 

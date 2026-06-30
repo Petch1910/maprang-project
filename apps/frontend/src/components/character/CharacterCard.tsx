@@ -1,9 +1,10 @@
 import { Eye, Heart, MessageCircle } from 'lucide-react'
 import { useEffect, useState, type MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import fallbackAvatarUrl from '../../assets/hero.png'
 import { setCharacterFavorite, type Character } from '../../lib/api'
 import { characterRating } from '../../lib/contentRating'
+
+const fallbackAvatarUrl = new URL('../../assets/hero.png', import.meta.url).href
 
 interface CharacterCardProps {
   character: Character
