@@ -23,6 +23,7 @@ The first local implementation is intentionally small and repo-owned:
 - `chat.service.ts` now attaches `responseQuality.narrativeQuality` for local, normal, and streamed chat paths.
 - `buildPromptInspectorSnapshot(...)` includes the same Narrative Engine prompt block so `/admin/prompt-inspector` mirrors the chat runtime.
 - `apps/frontend/src/lib/api.ts` knows both chat `narrativeQuality` metadata and Prompt Inspector narrative-plan metadata.
+- The chat right rail shows the latest narrative quality score, intent, checkpoint, and first improvement note when usage metadata exists.
 - `/admin/prompt-inspector` renders a narrative planning panel with intent, checkpoint, context strategy, minimum paragraphs, revision triggers, and the exact workflow block.
 
 ## Why This Helps Maprang
@@ -66,4 +67,5 @@ Expected behavior:
 - Prompt block includes the Coordinator -> Architect -> Writer -> Editor workflow.
 - Rich scene-aware replies score higher than flat replies.
 - Chat responses keep existing `responseQuality` fields and add optional `narrativeQuality`.
+- Chat UI exposes narrative quality evidence in the right rail without new API calls.
 - Prompt Inspector exposes the deterministic narrative plan and prompt block without adding a new route.

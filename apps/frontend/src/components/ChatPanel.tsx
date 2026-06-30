@@ -941,6 +941,19 @@ function RightRail({
               : 'ยังไม่มีข้อมูล'
           }
         />
+        <InfoLine
+          label="คุณภาพเนื้อเรื่อง"
+          value={
+            usage?.responseQuality?.narrativeQuality
+              ? `${usage.responseQuality.narrativeQuality.score}/100 / ${usage.responseQuality.narrativeQuality.intent} / ${usage.responseQuality.narrativeQuality.checkpoint}`
+              : 'ยังไม่มีข้อมูล'
+          }
+        />
+        {usage?.responseQuality?.narrativeQuality?.notes?.[0] && (
+          <p className="m-0 rounded-lg border border-amber-300/20 bg-amber-300/10 p-2 text-xs font-bold leading-5 text-amber-100">
+            {usage.responseQuality.narrativeQuality.notes[0]}
+          </p>
+        )}
         <InfoLine label="เครดิตรอบล่าสุด" value={usage ? usage.totalTokens.toLocaleString() : '0'} />
         <InfoLine label="คลังความรู้ที่ดึงมาใช้" value={String(usage?.contextLoreCount ?? 0)} />
         <InfoLine

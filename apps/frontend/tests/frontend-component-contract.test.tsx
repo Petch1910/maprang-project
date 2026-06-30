@@ -149,6 +149,8 @@ describe('frontend component contracts', () => {
     expect(source).toContain('isLocalChatRuntime?: boolean')
     expect(source).toContain('const isTokenGated = !isLocalChatRuntime')
     expect(source).toContain('canSubmit={!isOutOfTokens}')
+    expect(source).toContain('คุณภาพเนื้อเรื่อง')
+    expect(source).toContain('usage?.responseQuality?.narrativeQuality')
     expect(source).toContain('กำลังตอบอยู่ กรุณารอคำตอบก่อนส่งต่อ')
     expect(workspaceSource).toContain("activeRuntimeProvider === 'local'")
     expect(workspaceSource).toContain('isLocalChatRuntime={isLocalChatRuntime}')
