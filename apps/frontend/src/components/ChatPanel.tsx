@@ -20,6 +20,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import type { Character, ChatMessage, ChatResponse, ChatRuntimeState, WorldStateInput } from '../lib/api'
+import { buildOpeningChoices } from '../lib/chat'
 import { displayCharacterDetail, displayCharacterSummary, displayMessageContent } from '../lib/characterDisplay'
 import { characterStatusLabel, characterVisibilityLabel } from '../lib/characterLabels'
 import { chatReplyPresetLabel, chatReplyPresets, type ChatReplySettings } from '../lib/chatReplySettings'
@@ -246,24 +247,7 @@ function OpeningSceneCard({
     },
   ].filter((row) => row.detail)
 
-  const openingChoices = [
-    {
-      label: 'เดินเข้าไปทัก',
-      value: 'ฉันเดินเข้าไปใกล้ขึ้นเล็กน้อย แล้วเริ่มทักด้วยน้ำเสียงที่ไม่เร่งรัด',
-    },
-    {
-      label: 'ถามเรื่องสถานที่',
-      value: 'ที่นี่ดูมีเรื่องราวมากกว่าที่เห็นนะ... เธอมาที่นี่บ่อยเหรอ?',
-    },
-    {
-      label: 'สังเกตท่าที',
-      value: 'ฉันยังไม่พูดทันที แค่สังเกตสีหน้าและบรรยากาศรอบตัวเธอก่อน',
-    },
-    {
-      label: 'ให้เธอเริ่มก่อน',
-      value: 'ฉันรอให้เธอเป็นฝ่ายพูดก่อน เพื่อดูว่าเธออยากเปิดบทสนทนายังไง',
-    },
-  ]
+  const openingChoices = buildOpeningChoices(character, runtimeState)
 
   return (
     <section
