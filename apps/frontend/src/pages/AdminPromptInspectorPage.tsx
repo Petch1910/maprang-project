@@ -168,6 +168,61 @@ function DiffPanel({ diff }: { diff?: PromptInspectorDiff }) {
   )
 }
 
+function NarrativePlanPanel({ narrative }: { narrative: PromptInspectorResponse['snapshot']['narrative'] }) {
+  const plan = narrative.plan
+
+  return (
+    <section
+      className="missai-card rounded-2xl p-4 text-white"
+      data-testid="prompt-inspector-narrative-plan"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="m-0 flex items-center gap-2 text-sm font-black text-white">
+            <ShieldCheck size={17} />
+            แผนเล่าเรื่อง
+          </p>
+          <p className="m-0 mt-1 text-xs font-bold leading-5 text-white/52">
+            ใช้แนวคิด Coordinator -&gt; Architect -&gt; Writer -&gt; Editor เพื่อกันคำตอบตื้นและคุมจังหวะ roleplay
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <span className="missai-badge text-white/70">intent: {plan.intent}</span>
+          <span className="missai-badge text-white/70">checkpoint: {plan.coordinator.checkpoint}</span>
+          <span className="missai-badge text-white/70">{narrative.estimatedTokens.toLocaleString()} โทเคน</span>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        <article className="rounded-xl border border-sky-300/20 bg-sky-400/10 p-3">
+          <p className="m-0 text-xs font-black tracking-widest text-sky-100/75 uppercase">Architect</p>
+          <p className="m-0 mt-2 text-sm font-black text-white">{plan.architect.focus}</p>
+          <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/55">{plan.architect.continuity}</p>
+        </article>
+        <article className="rounded-xl border border-emerald-300/20 bg-emerald-400/10 p-3">
+          <p className="m-0 text-xs font-black tracking-widest text-emerald-100/75 uppercase">Writer</p>
+          <p className="m-0 mt-2 text-sm font-black text-white">อย่างน้อย {plan.writer.minimumParagraphs} ย่อหน้า</p>
+          <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/55">
+            recent {plan.contextStrategy.recentTurns} turns / timeline {plan.contextStrategy.timelineItems} / {plan.contextStrategy.summaryMode}
+          </p>
+        </article>
+        <article className="rounded-xl border border-amber-300/20 bg-amber-400/10 p-3">
+          <p className="m-0 text-xs font-black tracking-widest text-amber-100/75 uppercase">Editor</p>
+          <p className="m-0 mt-2 text-sm font-black text-white">แก้ก่อนตอบถ้าเจอ trigger</p>
+          <p className="m-0 mt-2 text-xs font-bold leading-5 text-white/55">{plan.editor.revisionTriggers.slice(0, 2).join(' / ')}</p>
+        </article>
+      </div>
+
+      <details className="mt-4 rounded-xl border border-white/10 bg-black/18 p-3">
+        <summary className="cursor-pointer text-sm font-black text-white">ดู workflow block ที่จะเข้าพรอมป์</summary>
+        <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-white/10 bg-black/35 p-3 text-xs leading-5 text-white/72">
+          {narrative.promptBlock}
+        </pre>
+      </details>
+    </section>
+  )
+}
+
 export function AdminPromptInspectorPage() {
   const [adminKeyInput, setAdminKeyInput] = useState(getStoredAdminKey)
   const [characters, setCharacters] = useState<Character[]>([])
@@ -494,6 +549,7 @@ export function AdminPromptInspectorPage() {
               )}
 
               <DiffPanel diff={result.diff} />
+              <NarrativePlanPanel narrative={result.snapshot.narrative} />
 
                 <section className="missai-card rounded-2xl p-4 text-white">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

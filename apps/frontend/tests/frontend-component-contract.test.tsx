@@ -385,6 +385,18 @@ describe('frontend component contracts', () => {
     expect(source).not.toContain('local mock')
   })
 
+  test('prompt inspector exposes narrative-engine planning evidence', async () => {
+    const pageSource = await Bun.file('apps/frontend/src/pages/AdminPromptInspectorPage.tsx').text()
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
+
+    expect(pageSource).toContain('data-testid="prompt-inspector-narrative-plan"')
+    expect(pageSource).toContain('NarrativePlanPanel narrative={result.snapshot.narrative}')
+    expect(pageSource).toContain('Coordinator -&gt; Architect -&gt; Writer -&gt; Editor')
+    expect(pageSource).toContain('narrative.promptBlock')
+    expect(apiSource).toContain('export type PromptInspectorNarrativePlan')
+    expect(apiSource).toContain('narrative: {')
+  })
+
   test('admin health deploy phases keep local, staging, live provider, and production gates separate', () => {
     const checks: DeployCheck[] = [
       {

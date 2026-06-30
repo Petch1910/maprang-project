@@ -1,3 +1,5 @@
+import type { NarrativeQualityMetadata } from './narrative-engine.service'
+
 export type ResponseDepth = 'quick' | 'balanced' | 'deep' | 'cinematic'
 
 export type ResponseQualityInput = {
@@ -20,6 +22,7 @@ export type ResponseQualityMetadata = {
   likelyTooShort: boolean
   score: number
   notes: string[]
+  narrativeQuality?: NarrativeQualityMetadata
 }
 
 const depthMinChars: Record<ResponseDepth, number> = {

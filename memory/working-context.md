@@ -1,6 +1,10 @@
 # บริบทงานปัจจุบัน (Working Context)
 
-Last updated: 2026-06-29
+Last updated: 2026-06-30
+
+- 2026-06-30 narrative-engine checkpoint: adapted `voocel/ainovel-cli` as an architecture reference only, not vendored code. Added `apps/backend/src/narrative-engine.service.ts` with Coordinator -> Architect -> Writer -> Editor planning, deterministic runtime prompt block generation, and seven-dimension narrative quality scoring. `chat.service.ts` now injects the narrative workflow into runtime context and attaches `responseQuality.narrativeQuality` for local, normal, and streamed chat paths; frontend API types accept the optional metadata. Source-of-truth doc: `docs/MAPRANG_NARRATIVE_ENGINE.md`. Passing checks: `bun test apps/backend/src/narrative-engine.service.test.ts`, `bun test apps/backend/src/response-quality.service.test.ts apps/backend/src/chat.runtime.test.ts`, `bun run backend:check`, and `bun run frontend:check`.
+
+- 2026-06-30 Prompt Inspector narrative visibility checkpoint: `buildPromptInspectorSnapshot` now includes the same Narrative Engine prompt block used by chat runtime, returns `snapshot.narrative.plan/promptBlock/estimatedTokens`, and `/admin/prompt-inspector` renders a Narrative Plan panel with intent, checkpoint, context strategy, minimum paragraphs, revision triggers, and workflow block. Frontend API types and component contracts were updated. Passing checks: `bun test apps/backend/src/prompt-inspector.service.test.ts apps/backend/src/narrative-engine.service.test.ts`, `bun test apps/frontend/tests/frontend-component-contract.test.tsx`, `bun run backend:check`, and `bun run frontend:check`.
 
 - 2026-06-29 completion audit: repo is clean and `main` is synced with `origin/main`. Local services are active on `http://127.0.0.1:5173` and `http://127.0.0.1:3001`. Current gate evidence passed: `api:audit` (80 backend routes / 56 frontend helpers), `route-menu:audit` (20 areas), `backend:check:db:test`, `docs:commands`, `memory:audit`, `backend:check` (343 tests / 1496 expects), `frontend:check`, `smoke:doctor`, `smoke:local`, `api:smoke` (34 pass / 0 fail / 2 live skips), `e2e:smoke` (4/4 desktop/mobile), then `qa:seed` restored local QA data. Local v1 is ready under the repo-owned local-first scope. Remaining work is product polish or external/cloud production verification only.
 

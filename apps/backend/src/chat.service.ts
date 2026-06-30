@@ -45,6 +45,11 @@ import {
   type ResponseQualityMetadata,
 } from './response-quality.service'
 import {
+  analyzeNarrativeQuality,
+  buildNarrativePlan,
+  buildNarrativePromptBlock,
+} from './narrative-engine.service'
+import {
   applyRelationshipDelta,
   buildRelationshipPrompt,
   buildRelationshipSeedFromTags,
@@ -807,6 +812,37 @@ async function safeLoadTokenBalance(prisma: Prisma | null, userId: string) {
   return prisma && isUuid(userId) ? loadTokenBalance(prisma, userId) : null
 }
 
+function buildChatResponseQuality({
+  reply,
+  userMessage,
+  responseDepth,
+  replyProfile,
+  activeScene,
+}: {
+  reply: string
+  userMessage: string
+  responseDepth?: string | null
+  replyProfile?: string | null
+  activeScene?: boolean
+}): ResponseQualityMetadata {
+  return {
+    ...analyzeResponseQuality({
+      reply,
+      userMessage,
+      responseDepth,
+      replyProfile,
+      activeScene,
+    }),
+    narrativeQuality: analyzeNarrativeQuality({
+      reply,
+      userMessage,
+      responseDepth,
+      replyProfile,
+      activeScene,
+    }),
+  }
+}
+
 export async function debitUserTokensWithoutOverdraft(prisma: Prisma, userId: string, requestedTokens: number) {
   if (requestedTokens <= 0) {
     return {
@@ -852,7 +888,17 @@ async function loadRuntimeContext(
   const prisma = getPrisma()
   if (!prisma || !chatId) {
     const relationship = relationshipFromSeed(character, relationshipSeed)
-    return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(defaultSceneState(relationship, userMessage, 0))]
+    const scene = defaultSceneState(relationship, userMessage, 0)
+    const narrativePlan = buildNarrativePlan({
+      userMessage,
+      characterName: character?.name,
+      scenario: character?.scenario || character?.description || character?.tagline,
+      relationshipStatus: relationship.status,
+      sceneMode: scene.mode,
+      activeSceneTitle: scene.activeScene?.title,
+      pendingEventCount: scene.pendingEvents.length,
+    })
+    return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(scene), buildNarrativePromptBlock(narrativePlan)]
       .filter(Boolean)
       .join('\n\n')
   }
@@ -871,7 +917,17 @@ async function loadRuntimeContext(
 
   if (!chat) {
     const relationship = relationshipFromSeed(character, relationshipSeed)
-    return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(defaultSceneState(relationship, userMessage, 0))]
+    const scene = defaultSceneState(relationship, userMessage, 0)
+    const narrativePlan = buildNarrativePlan({
+      userMessage,
+      characterName: character?.name,
+      scenario: character?.scenario || character?.description || character?.tagline,
+      relationshipStatus: relationship.status,
+      sceneMode: scene.mode,
+      activeSceneTitle: scene.activeScene?.title,
+      pendingEventCount: scene.pendingEvents.length,
+    })
+    return [buildRelationshipPrompt(relationship), runtimeBuildScenePrompt(scene), buildNarrativePromptBlock(narrativePlan)]
       .filter(Boolean)
       .join('\n\n')
   }
@@ -892,6 +948,16 @@ async function loadRuntimeContext(
   const timeline = (Array.isArray(memory.relationshipTimeline) ? memory.relationshipTimeline : [])
     .filter((entry): entry is RelationshipTimelineEntry => entry && typeof entry === 'object')
     .slice(-4)
+  const narrativePlan = buildNarrativePlan({
+    userMessage,
+    characterName: character?.name,
+    scenario: character?.scenario || character?.description || character?.tagline,
+    relationshipStatus: relationshipState.status,
+    sceneMode: projectedScene.mode,
+    activeSceneTitle: projectedScene.activeScene?.title,
+    pendingEventCount: projectedScene.pendingEvents.length,
+    timelineSummaries: timeline.map((entry) => entry.summary),
+  })
   const lines = [
     typeof memory.summary === 'string' && memory.summary ? `สรุปความจำ: ${memory.summary}` : '',
     facts.length > 0 ? `ข้อเท็จจริงผู้ใช้ที่รู้แล้ว: ${facts.join(' | ')}` : '',
@@ -899,6 +965,7 @@ async function loadRuntimeContext(
     typeof momentum.direction === 'string' ? `โมเมนตัมอารมณ์: ${momentum.direction}` : '',
     timeline.length > 0 ? `ไทม์ไลน์ความสัมพันธ์: ${timeline.map((entry) => entry.summary).join(' | ')}` : '',
     typeof sceneState.lastUserIntent === 'string' ? `เจตนาก่อนหน้า: ${sceneState.lastUserIntent}` : '',
+    buildNarrativePromptBlock(narrativePlan),
     buildRelationshipPrompt(relationshipState),
     runtimeBuildScenePrompt(projectedScene),
   ].filter(Boolean)
@@ -1645,7 +1712,7 @@ async function completeLocalChatTurn({
   const reply = buildLocalRoleplayReply({ character, userMessage, relationshipSeed })
   const usage = fallbackUsage()
   const modelLabel = localChatModelName()
-  const responseQuality = analyzeResponseQuality({
+  const responseQuality = buildChatResponseQuality({
     reply,
     userMessage,
     responseDepth: contextSnapshot?.responseDepth,
@@ -1895,7 +1962,7 @@ export async function sendChat(input: SendChatInput) {
     reply = extension.reply
     usage = addUsage(usage, extension.usage)
   }
-  const responseQuality = analyzeResponseQuality({
+  const responseQuality = buildChatResponseQuality({
     reply,
     userMessage: input.message,
     responseDepth: contextSnapshot.responseDepth,
@@ -2142,7 +2209,7 @@ export function streamChat(input: SendChatInput) {
           trimmedReply = extension.reply
           usage = addUsage(usage, extension.usage)
         }
-        const responseQuality = analyzeResponseQuality({
+        const responseQuality = buildChatResponseQuality({
           reply: trimmedReply,
           userMessage: input.message,
           responseDepth: contextSnapshot.responseDepth,

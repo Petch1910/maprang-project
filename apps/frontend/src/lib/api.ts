@@ -305,6 +305,14 @@ export type ChatResponse = {
       likelyTooShort: boolean
       score: number
       notes: string[]
+      narrativeQuality?: {
+        source: 'ainovel-inspired'
+        score: number
+        intent: string
+        checkpoint: 'turn' | 'scene' | 'relationship'
+        dimensions: Record<string, number>
+        notes: string[]
+      }
     }
     providerFailure?: {
       code: 'rate_limited' | 'quota_exhausted' | 'invalid_credentials' | 'timeout' | 'provider_unavailable' | 'unknown'
@@ -651,6 +659,34 @@ export type PromptInspectorSection = {
   content: string
 }
 
+export type PromptInspectorNarrativePlan = {
+  source: 'ainovel-inspired'
+  intent: string
+  coordinator: {
+    route: 'roleplay_turn'
+    checkpoint: 'turn' | 'scene' | 'relationship'
+  }
+  architect: {
+    focus: string
+    tension: string
+    continuity: string
+  }
+  writer: {
+    beats: string[]
+    minimumParagraphs: number
+    preserveUserAgency: boolean
+  }
+  editor: {
+    rubric: string[]
+    revisionTriggers: string[]
+  }
+  contextStrategy: {
+    recentTurns: number
+    timelineItems: number
+    summaryMode: 'none' | 'light' | 'rolling'
+  }
+}
+
 export type PromptInspectorSnapshot = {
   generatedAt: string
   character: {
@@ -673,6 +709,11 @@ export type PromptInspectorSnapshot = {
       priority: number
       preview: string
     }>
+  }
+  narrative: {
+    plan: PromptInspectorNarrativePlan
+    promptBlock: string
+    estimatedTokens: number
   }
   warnings: string[]
 }

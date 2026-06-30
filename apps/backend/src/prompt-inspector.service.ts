@@ -1,4 +1,10 @@
 import { buildContextPromptBlocks, type ContextCharacter, type LoreForContext } from './context.service'
+import {
+  buildNarrativePlan,
+  buildNarrativePromptBlock,
+  type NarrativePlan,
+  type NarrativePlanInput,
+} from './narrative-engine.service'
 import { redactSensitiveText } from './redaction'
 
 export type PromptInspectorRuntimeMemory = string | string[] | Record<string, unknown>
@@ -43,6 +49,11 @@ export type PromptInspectorSnapshot = {
       priority: number
       preview: string
     }>
+  }
+  narrative: {
+    plan: NarrativePlan
+    promptBlock: string
+    estimatedTokens: number
   }
   warnings: string[]
 }
@@ -150,6 +161,39 @@ function runtimeMemoryBlock(runtimeMemory?: PromptInspectorRuntimeMemory | null)
   return lines.length > 0 ? ['ความจำขณะรัน:', ...lines].join('\n') : ''
 }
 
+function runtimeMemoryRecord(runtimeMemory?: PromptInspectorRuntimeMemory | null) {
+  return runtimeMemory && typeof runtimeMemory === 'object' && !Array.isArray(runtimeMemory)
+    ? (runtimeMemory as Record<string, unknown>)
+    : {}
+}
+
+function stringValue(value: unknown) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+function numberValue(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function stringArrayValue(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0) : []
+}
+
+function buildNarrativeInspectorInput(input: PromptInspectorInput): NarrativePlanInput {
+  const memory = runtimeMemoryRecord(input.runtimeMemory)
+
+  return {
+    userMessage: input.userMessage,
+    characterName: input.character.name,
+    scenario: input.character.scenario,
+    relationshipStatus: stringValue(memory.relationshipStatus),
+    sceneMode: stringValue(memory.sceneMode),
+    activeSceneTitle: stringValue(memory.activeSceneObjective),
+    pendingEventCount: numberValue(memory.pendingEvents),
+    timelineSummaries: stringArrayValue(memory.relationshipTimeline),
+  }
+}
+
 function toSection(content: string, index: number): PromptInspectorSection {
   const redacted = redactSensitiveText(content).text
   return {
@@ -195,8 +239,11 @@ function promptWarnings({
 
 export function buildPromptInspectorSnapshot(input: PromptInspectorInput): PromptInspectorSnapshot {
   const loreEntries = input.loreEntries ?? []
+  const narrativePlan = buildNarrativePlan(buildNarrativeInspectorInput(input))
+  const narrativePromptBlock = buildNarrativePromptBlock(narrativePlan)
   const blocks = [
     ...buildContextPromptBlocks(input.character, loreEntries),
+    narrativePromptBlock,
     userPersonaBlock(input.userPersona),
     runtimeMemoryBlock(input.runtimeMemory),
     input.userMessage.trim() ? `ข้อความผู้ใช้:\n${input.userMessage.trim()}` : '',
@@ -224,6 +271,11 @@ export function buildPromptInspectorSnapshot(input: PromptInspectorInput): Promp
     retrieval: {
       loreCount: loreEntries.length,
       lore: redactedLore.map((entry) => entry.lore),
+    },
+    narrative: {
+      plan: narrativePlan,
+      promptBlock: narrativePromptBlock,
+      estimatedTokens: estimatePromptTokens(narrativePromptBlock),
     },
     warnings: promptWarnings({
       prompt,
