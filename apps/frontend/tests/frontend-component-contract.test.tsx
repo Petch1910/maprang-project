@@ -831,6 +831,19 @@ describe('frontend component contracts', () => {
     expect(studioBridgeHookSource).toContain('saveAiCreatorItemToCreatorCoverDraft(window.localStorage, resolved.item)')
   })
 
+  test('admin eval UI keeps local narrative metrics wired to API result', async () => {
+    const apiSource = await Bun.file('apps/frontend/src/lib/api.ts').text()
+    const evalPageSource = await Bun.file('apps/frontend/src/pages/AdminEvalsPage.tsx').text()
+
+    expect(apiSource).toContain('localReplyChars: number')
+    expect(apiSource).toContain('localReplyQuality: {')
+    expect(apiSource).toContain("source: 'ainovel-inspired'")
+    expect(evalPageSource).toContain('fetchAdminLocalEvals()')
+    expect(evalPageSource).toContain('data-testid="admin-evals-scenario"')
+    expect(evalPageSource).toContain('result.localReplyQuality.score')
+    expect(evalPageSource).toContain('result.localReplyChars.toLocaleString()')
+  })
+
   test('events inbox selector exposes only playable pending scene summaries', () => {
     const visibleChat = chatSummaryWithPendingScene()
     const heldOnlyChat = chatSummaryWithPendingScene({
