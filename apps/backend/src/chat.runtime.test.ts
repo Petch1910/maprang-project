@@ -19,6 +19,7 @@ import {
   updateRuntimeState,
 } from './chat.service'
 import { contentRatingFromTags, ratingAllowed } from './content-rating'
+import { analyzeNarrativeQuality } from './narrative-engine.service'
 import { buildWorldStatePrompt, coerceWorldState, mergeWorldState } from './world-state.service'
 
 async function readStreamEvents(stream: ReadableStream<Uint8Array>) {
@@ -412,6 +413,14 @@ describe('chat provider retry guard', () => {
     expect(reply).toContain('ฉันไม่ได้ตั้งใจให้เธอต้องรอนาน')
     expect(reply).toContain('ทั้งสองยืนอยู่หน้าร้านสะดวกซื้อ')
     expect(reply).not.toContain('OPENROUTER_API_KEY')
+    const quality = analyzeNarrativeQuality({
+      reply,
+      userMessage: 'apology local quality guard',
+      responseDepth: 'balanced',
+    })
+    expect(quality.score).toBeGreaterThanOrEqual(70)
+    expect(quality.dimensions.sceneProgression).toBeGreaterThanOrEqual(60)
+    expect(quality.dimensions.playerAgency).toBeGreaterThanOrEqual(60)
     expect(reply).not.toContain('บริการ AI ยังไม่พร้อม')
   })
 
