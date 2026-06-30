@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import type { CharacterWithTags } from './character.types'
 import { buildLocalRoleplayReply } from './chat.service'
 import { buildContextPrompt } from './context.service'
 import { analyzeNarrativeQuality, type NarrativeQualityMetadata } from './narrative-engine.service'
@@ -139,7 +140,7 @@ export function evaluateScenario(scenario: EvalScenario): EvalScenarioResult {
   const prompt = scenarioPrompt(scenario)
   const estimatedTokens = estimatePromptTokens(prompt)
   const localReply = buildLocalRoleplayReply({
-    character: fixtureCharacter() as any,
+    character: fixtureCharacter() as CharacterWithTags,
     userMessage: scenario.userMessage,
     relationshipSeed: 'friend-crush',
   })
