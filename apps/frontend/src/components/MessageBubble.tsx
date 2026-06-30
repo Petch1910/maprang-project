@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Copy, Edit3, Flag, MoreHorizontal, RotateCcw, Trash2 } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import type { ChatMessage } from '../lib/api'
 import { getSafeClipboard, safeWriteClipboardText } from '../lib/safeClipboard'
+
+const MessageMarkdown = lazy(() =>
+  import('./MessageMarkdown').then((module) => ({ default: module.MessageMarkdown })),
+)
 
 type MessageBubbleProps = {
   assistantAvatarUrl?: string | null
@@ -15,6 +17,10 @@ type MessageBubbleProps = {
 
 function avatarInitial(name: string) {
   return name.trim().slice(0, 1).toUpperCase() || 'M'
+}
+
+function PlainMessageFallback({ content }: { content: string }) {
+  return <p className="m-0 whitespace-pre-wrap break-words">{content}</p>
 }
 
 export function MessageBubble({
@@ -86,7 +92,9 @@ export function MessageBubble({
           {isUser ? (
             <p className="m-0 whitespace-pre-wrap break-words">{chat.content}</p>
           ) : chat.content.trim() ? (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{chat.content}</ReactMarkdown>
+            <Suspense fallback={<PlainMessageFallback content={chat.content} />}>
+              <MessageMarkdown content={chat.content} />
+            </Suspense>
           ) : (
             <p className="m-0 text-white/55">กำลังพิมพ์...</p>
           )}

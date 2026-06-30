@@ -8,6 +8,7 @@ import { CharacterCreateForm } from '../src/components/CharacterCreateForm'
 import { Composer } from '../src/components/Composer'
 import { CreatorReadinessPanel } from '../src/components/CreatorReadinessPanel'
 import { MessageBubble } from '../src/components/MessageBubble'
+import { MessageMarkdown } from '../src/components/MessageMarkdown'
 import { RelationshipPresetPicker } from '../src/components/RelationshipPresetPicker'
 import { ReportDialog } from '../src/components/ReportDialog'
 import { buildDeployPhaseSteps, type DeployCheck } from '../src/lib/adminHealthDeploy'
@@ -197,9 +198,13 @@ describe('frontend component contracts', () => {
       }),
     )
 
-    expect(html).toContain('<strong>Mika</strong>')
+    const markdownHtml = render(createElement(MessageMarkdown, { content: assistantMessage.content }))
+
+    expect(markdownHtml).toContain('<strong>Mika</strong>')
+    expect(html).toContain('Mika')
     expect(html).toContain('data-testid="message-actions-msg-assistant"')
     const source = readFileSync(new URL('../src/components/MessageBubble.tsx', import.meta.url), 'utf8')
+    expect(source).toContain("import('./MessageMarkdown')")
     expect(source).toContain('data-testid={`message-copy-${chat.id}`}')
     expect(source).toContain('data-testid={`message-report-${chat.id}`}')
     expect(source).toContain('data-testid={`message-edit-disabled-${chat.id}`}')
